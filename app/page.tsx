@@ -1,3 +1,17 @@
+{/* Header / Navbar Logo Alanı */}
+<div className="flex items-center space-x-3">
+  <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+    <img 
+      src="/logo.png" 
+      alt="PANOVA GROUP Logo" 
+      className="max-w-full max-h-full object-contain"
+    />
+  </div>
+  <div>
+    <span className="text-xl font-extrabold tracking-wider text-[#2e7d32]">PANOVA</span>
+    <span className="text-xl font-light text-[#7cb342] ml-1.5 uppercase tracking-widest">GROUP</span>
+  </div>
+</div>
 'use client';
 
 export const dynamic = 'force-dynamic';
