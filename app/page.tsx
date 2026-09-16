@@ -1,3 +1,59 @@
+export const dynamic = 'force-dynamic';
+
+import Image from 'next/image';
+import { Mail, Phone, MapPin, Send } from 'lucide-react';
+
+export default function Home() {
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-800">
+      {/* Header / Navbar */}
+      <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-emerald-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            {/* Logo */}
+            <div className="relative w-12 h-12">
+              <Image 
+                src="/logo.png" 
+                alt="PANOVA TARIM DOO Logo" 
+                width={48} 
+                height={48} 
+                className="object-contain"
+                priority
+              />
+            </div>
+            <div>
+              <span className="text-xl font-bold tracking-wide text-[#2e7d32]">PANOVA</span>
+              <span className="text-xl font-light text-[#7cb342] ml-1">TARIM DOO</span>
+            </div>
+          </div>
+          <a 
+            href="#apply" 
+            className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-5 py-2.5 rounded-lg font-medium transition duration-200 shadow-md flex items-center gap-2"
+          >
+            Başvuru Yap
+          </a>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="bg-gradient-to-b from-emerald-900 to-[#2e7d32] text-white py-20 px-4 text-center relative overflow-hidden">
+        <div className="max-w-4xl mx-auto relative z-10">
+          <span className="inline-block bg-[#fbc02d] text-slate-900 font-semibold px-4 py-1.5 rounded-full text-sm mb-4 shadow">
+            Uluslararası Tarımsal İstihdam & Danışmanlık
+          </span>
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
+            PANOVA TARIM DOO ile Geleceğe Yatırım
+          </h1>
+          <p className="text-lg md:text-xl text-emerald-100 mb-8 max-w-2xl mx-auto">
+            Tarım ve tarımsal iş gücü yönetiminde güvenilir partneriniz.
+          </p>
+        </div>
+      </section>
+
+      {/* Form & Başvuru Alanı (Mevcut Supabase formunuz bu alanda yer alacak) */}
+    </div>
+  );
+}
 'use client';
 export const dynamic = 'force-dynamic';
 
