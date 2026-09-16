@@ -24,3 +24,12 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --panova-green: #7cb342;
+  --panova-dark-green: #2e7d32;
+  --panova-yellow: #fbc02d;
+}
