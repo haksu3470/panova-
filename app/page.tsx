@@ -67,6 +67,21 @@ export default function Home() {
   return (
     <div className={`min-h-screen bg-slate-50 text-slate-800 font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Header */}
+      {/* Header Sağ Taraf */}
+<div className="flex items-center space-x-3 rtl:space-x-reverse">
+  <Link 
+    href="/register" 
+    className="bg-[#7cb342] hover:bg-[#689f38] text-white px-3.5 py-2 rounded-lg text-sm font-semibold transition"
+  >
+    Candidate Registration
+  </Link>
+  <Link 
+    href="/portal" 
+    className="bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-lg text-sm font-semibold transition"
+  >
+    Portal Login
+  </Link>
+</div>
       <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-emerald-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
