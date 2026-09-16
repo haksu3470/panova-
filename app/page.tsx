@@ -10,13 +10,17 @@ import { Language, languages, translations } from '@/lib/dictionary';
 type CompanyId = 'hr' | 'trade' | 'agriculture' | 'construction';
 
 export default function Home() {
-  const [currentLang, setCurrentLang] = useState<Language>('tr');
+  // Varsayılan dil varsayılan olarak İngilizce (en)
+  const [currentLang, setCurrentLang] = useState<Language>('en');
   const [selectedCompany, setSelectedCompany] = useState<CompanyId>('hr');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const t = translations[currentLang] || translations.tr;
+  const t = translations[currentLang] || translations.en;
   const isRtl = currentLang === 'ar';
+
+  // Dil listesinden varsayılan dil olan İngilizceyi (en) gizliyoruz
+  const selectableLanguages = languages.filter((lang) => lang.code !== 'en');
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -80,15 +84,21 @@ export default function Home() {
           </div>
 
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            {/* Dil Seçici Dropdown */}
-            <div className="relative flex items-center bg-slate-100 rounded-lg px-2 py-1">
+            {/* Dil Seçici Dropdown (İngilizce hariç diğer diller) */}
+            <div className="relative flex items-center bg-slate-100 rounded-lg px-2.5 py-1.5 border border-slate-200">
               <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
               <select
                 value={currentLang}
                 onChange={(e) => setCurrentLang(e.target.value as Language)}
                 className="bg-transparent text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer"
               >
-                {languages.map((lang) => (
+                {/* Seçili dil English ise placeholder olarak gösterir */}
+                {currentLang === 'en' && (
+                  <option value="en" disabled>
+                    🌐 Language
+                  </option>
+                )}
+                {selectableLanguages.map((lang) => (
                   <option key={lang.code} value={lang.code}>
                     {lang.flag} {lang.name}
                   </option>
@@ -262,9 +272,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Footer (Sadece PANOVA GROUP) */}
       <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 text-center text-sm">
-        <p>© 2026 PANOVA GROUP (PANOVA TARIM DOO). Tüm hakları saklıdır.</p>
+        <p>© 2026 PANOVA GROUP. All rights reserved.</p>
       </footer>
     </div>
   );
