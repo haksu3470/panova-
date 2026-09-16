@@ -3,14 +3,14 @@
 export const dynamic = 'force-dynamic';
 
 import { useState } from 'react';
-import { Users, Globe, Sprout, HardHat, Send, CheckCircle2, Building2, Languages } from 'lucide-react';
+import Link from 'next/link';
+import { Users, Globe, Sprout, HardHat, Send, CheckCircle2, Building2, Languages, UserCheck, Lock } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 type CompanyId = 'hr' | 'trade' | 'agriculture' | 'construction';
 
 export default function Home() {
-  // Varsayılan dil varsayılan olarak İngilizce (en)
   const [currentLang, setCurrentLang] = useState<Language>('en');
   const [selectedCompany, setSelectedCompany] = useState<CompanyId>('hr');
   const [loading, setLoading] = useState(false);
@@ -19,7 +19,6 @@ export default function Home() {
   const t = translations[currentLang] || translations.en;
   const isRtl = currentLang === 'ar';
 
-  // Dil listesinden varsayılan dil olan İngilizceyi (en) gizliyoruz
   const selectableLanguages = languages.filter((lang) => lang.code !== 'en');
 
   const [formData, setFormData] = useState({
@@ -66,63 +65,10 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen bg-slate-50 text-slate-800 font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Header */}  
-      import Link from 'next/link';
-      {/* Header Sağ Taraf */}
-<div className="flex items-center space-x-3 rtl:space-x-reverse">
-  <div className="flex items-center space-x-3 rtl:space-x-reverse">
-  {/* Dil Seçici Dropdown */}
-  <div className="relative flex items-center bg-slate-100 rounded-lg px-2.5 py-1.5 border border-slate-200">
-    <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
-    <select
-      value={currentLang}
-      onChange={(e) => setCurrentLang(e.target.value as Language)}
-      className="bg-transparent text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer"
-    >
-      {currentLang === 'en' && (
-        <option value="en" disabled>
-          🌐 Language
-        </option>
-      )}
-      {selectableLanguages.map((lang) => (
-        <option key={lang.code} value={lang.code}>
-          {lang.flag} {lang.name}
-        </option>
-      ))}
-    </select>
-  </div>
-
-  {/* Aday Kayıt Butonu */}
-  <Link
-    href="/register"
-    className="bg-[#7cb342] hover:bg-[#689f38] text-white px-3.5 py-2 rounded-lg text-sm font-semibold transition shadow-sm hidden sm:inline-block"
-  >
-    Candidate Register
-  </Link>
-
-  {/* Portal / Admin Giriş Butonu */}
-  <Link
-    href="/portal"
-    className="bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-lg text-sm font-semibold transition shadow-sm"
-  >
-    Portal Login
-  </Link>
-</div>
-  <Link 
-    href="/register" 
-    className="bg-[#7cb342] hover:bg-[#689f38] text-white px-3.5 py-2 rounded-lg text-sm font-semibold transition"
-  >
-    Candidate Registration
-  </Link>
-  <Link 
-    href="/portal" 
-    className="bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-lg text-sm font-semibold transition"
-  >
-    Portal Login
-  </Link>
-</div>
+      {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-emerald-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          {/* Logo & Brand Name */}
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
               <img 
@@ -137,16 +83,16 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            {/* Dil Seçici Dropdown (İngilizce hariç diğer diller) */}
-            <div className="relative flex items-center bg-slate-100 rounded-lg px-2.5 py-1.5 border border-slate-200">
-              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
+          {/* Header Buttons & Controls */}
+          <div className="flex items-center space-x-2 sm:space-x-3 rtl:space-x-reverse">
+            {/* Dil Seçici Dropdown */}
+            <div className="relative flex items-center bg-slate-100 rounded-lg px-2 sm:px-2.5 py-1.5 border border-slate-200">
+              <Languages className="w-4 h-4 text-slate-600 mr-1 rtl:ml-1" />
               <select
                 value={currentLang}
                 onChange={(e) => setCurrentLang(e.target.value as Language)}
-                className="bg-transparent text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer"
+                className="bg-transparent text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer"
               >
-                {/* Seçili dil English ise placeholder olarak gösterir */}
                 {currentLang === 'en' && (
                   <option value="en" disabled>
                     🌐 Language
@@ -160,9 +106,28 @@ export default function Home() {
               </select>
             </div>
 
+            {/* Candidate Register Button */}
+            <Link
+              href="/register"
+              className="bg-[#7cb342] hover:bg-[#689f38] text-white px-3 py-2 sm:px-3.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition shadow-sm flex items-center gap-1"
+            >
+              <UserCheck className="w-3.5 h-3.5" />
+              <span>Candidate Register</span>
+            </Link>
+
+            {/* Portal Login Button */}
+            <Link
+              href="/portal"
+              className="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 sm:px-3.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition shadow-sm flex items-center gap-1"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              <span>Portal Login</span>
+            </Link>
+
+            {/* Contact Us Anchor Link */}
             <a 
               href="#apply" 
-              className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium transition shadow-md"
+              className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition shadow-md hidden lg:inline-block"
             >
               {t.contactUs}
             </a>
@@ -326,7 +291,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer (Sadece PANOVA GROUP) */}
+      {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 text-center text-sm">
         <p>© 2026 PANOVA GROUP. All rights reserved.</p>
       </footer>
