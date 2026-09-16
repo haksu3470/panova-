@@ -1,10 +1,10 @@
 {/* Header / Navbar Logo Alanı */}
 <div className="flex items-center space-x-3">
-  <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+  <div className="relative w-12 h-12 flex items-center justify-center">
     <img 
       src="/logo.png" 
       alt="PANOVA GROUP Logo" 
-      className="max-w-full max-h-full object-contain"
+      className="w-full h-full object-contain"
     />
   </div>
   <div>
