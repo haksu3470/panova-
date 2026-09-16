@@ -68,7 +68,6 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-emerald-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          {/* Logo & Brand Name */}
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
               <img 
@@ -83,7 +82,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Header Buttons & Controls */}
           <div className="flex items-center space-x-2 sm:space-x-3 rtl:space-x-reverse">
             {/* Dil Seçici Dropdown */}
             <div className="relative flex items-center bg-slate-100 rounded-lg px-2 sm:px-2.5 py-1.5 border border-slate-200">
@@ -106,22 +104,22 @@ export default function Home() {
               </select>
             </div>
 
-            {/* Candidate Register Button */}
+            {/* Candidate Register Button (Seçili Dile Göre Dinamik) */}
             <Link
               href="/register"
               className="bg-[#7cb342] hover:bg-[#689f38] text-white px-3 py-2 sm:px-3.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition shadow-sm flex items-center gap-1"
             >
               <UserCheck className="w-3.5 h-3.5" />
-              <span>Candidate Register</span>
+              <span>{t.candidateRegister}</span>
             </Link>
 
-            {/* Portal Login Button */}
+            {/* Portal Login Button (Seçili Dile Göre Dinamik) */}
             <Link
               href="/portal"
               className="bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 sm:px-3.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition shadow-sm flex items-center gap-1"
             >
               <Lock className="w-3.5 h-3.5" />
-              <span>Portal Login</span>
+              <span>{t.portalLogin}</span>
             </Link>
 
             {/* Contact Us Anchor Link */}
