@@ -72,13 +72,12 @@ export default function RegisterPage() {
   return (
     <div className={`min-h-screen bg-slate-50 text-slate-800 py-12 px-4 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-3xl mx-auto">
-        {/* Üst Navigasyon ve Sağ Üst Dil Seçici */}
+        {/* Navigation & Language Picker */}
         <div className="flex items-center justify-between mb-6">
           <Link href="/" className="inline-flex items-center gap-2 text-[#2e7d32] font-semibold hover:underline">
             <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
           </Link>
 
-          {/* Dil Seçici Dropdown */}
           <div className="relative flex items-center bg-white rounded-lg px-2.5 py-1.5 border border-slate-200 shadow-sm">
             <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
             <select
@@ -115,7 +114,7 @@ export default function RegisterPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Kişisel Bilgiler (Tek Dilli Dinamik Etiketler) */}
+              {/* Personal Details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">{t.nameLabel}</label>
@@ -176,7 +175,7 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* Mesleki Detaylar */}
+              {/* Profession Details */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">{t.sectorLabel}</label>
@@ -214,7 +213,7 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* Sertifika & Belge Doğrulama Alanları */}
+              {/* Certificate Verification Fields */}
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
                 <div className="flex items-center gap-2 font-bold text-slate-800 text-sm">
                   <Award className="w-4 h-4 text-[#2e7d32]" /> Qualification & Certificate Verification
@@ -256,7 +255,7 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* Ücret Beklentisi ve Vardiya */}
+              {/* Salary & Additional Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">{t.expectedSalaryLabel}</label>
