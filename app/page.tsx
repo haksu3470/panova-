@@ -1,20 +1,138 @@
+'use client';
+
 export const dynamic = 'force-dynamic';
 
+import { useState } from 'react';
 import Image from 'next/image';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Users, Globe, Sprout, HardHat, Send, CheckCircle2, Building2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+
+type CompanyId = 'hr' | 'trade' | 'agriculture' | 'construction';
+
+interface CompanyInfo {
+  id: CompanyId;
+  name: string;
+  tagline: string;
+  desc: string;
+  icon: any;
+  color: string;
+  accentBg: string;
+  services: string[];
+}
 
 export default function Home() {
+  const [selectedCompany, setSelectedCompany] = useState<CompanyId>('hr');
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  // Form State
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    notes: '',
+  });
+
+  const companies: Record<CompanyId, CompanyInfo> = {
+    hr: {
+      id: 'hr',
+      name: 'PANOVA İnsan Kaynakları',
+      tagline: 'Sınır Ötesi İstihdam ve Uluslararası İş Gücü',
+      desc: 'Küresel pazarda doğru yeteneği doğru projeyle buluşturan uluslararası seçme, yerleştirme ve danışmanlık hizmetleri.',
+      icon: Users,
+      color: '#2e7d32',
+      accentBg: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+      services: [
+        'Uluslararası Personel Tedariki',
+        'Mavi & Beyaz Yaka Seçme Yerleştirme',
+        'Çalışma İzni ve Vize Danışmanlığı',
+        'Sektörel İş Gücü Planlaması'
+      ]
+    },
+    trade: {
+      id: 'trade',
+      name: 'PANOVA Dış Ticaret',
+      tagline: 'Küresel Tedarik Zinciri ve Ticaret Köprüsü',
+      desc: 'Bölgesel ve uluslararası pazarlarda güvenilir ithalat, ihracat, lojistik ve pazar geliştirme operasyonları.',
+      icon: Globe,
+      color: '#1b5e20',
+      accentBg: 'bg-green-50 border-green-200 text-green-800',
+      services: [
+        'Uluslararası Ürün İthalat & İhracatı',
+        'Tedarik Zinciri Yönetimi',
+        'Pazar Araştırması ve B2B Eşleştirme',
+        'Gümrük ve Lojistik Danışmanlığı'
+      ]
+    },
+    agriculture: {
+      id: 'agriculture',
+      name: 'PANOVA Tarım',
+      tagline: 'Endüstriyel Üretim ve Tarımsal Danışmanlık',
+      desc: 'Balkanlar ve Doğu Avrupa genelinde modern meyvecilik, ceviz ve meyve bahçesi kurulumu, sürdürülebilir tarım projeleri.',
+      icon: Sprout,
+      color: '#7cb342',
+      accentBg: 'bg-[#f1f8e9] border-[#c5e1a5] text-[#33691e]',
+      services: [
+        'Arazide Modern Bahçe Kurulumu',
+        'Ceviz ve Meyve Yetiştiriciliği Danışmanlığı',
+        'Sulama ve Gübreleme Altyapısı',
+        'Tarımsal Teşvik ve Devlet Desteği Takibi'
+      ]
+    },
+    construction: {
+      id: 'construction',
+      name: 'PANOVA İnşaat',
+      tagline: 'Endüstriyel Tesis ve Altyapı Çözümleri',
+      desc: 'Tarımsal depolar, endüstriyel soğuk hava depoları, arazi alt/üst yapı projeleri ve mühendislik çözümleri.',
+      icon: HardHat,
+      color: '#00695c',
+      accentBg: 'bg-teal-50 border-teal-200 text-teal-800',
+      services: [
+        'Endüstriyel & Tarımsal Depo İnşaatı',
+        'Arazi Düzenleme ve Altyapı Projeleri',
+        'Mühendislik ve Proje Taahhüt',
+        'Saha Süreç Yönetimi'
+      ]
+    }
+  };
+
+  const current = companies[selectedCompany];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.from('applicants').insert([
+        {
+          full_name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          notes: `[Şirket: ${current.name}] - ${formData.notes}`,
+          sector: selectedCompany,
+        },
+      ]);
+
+      if (error) throw error;
+      setSubmitted(true);
+      setFormData({ fullName: '', email: '', phone: '', notes: '' });
+    } catch (err: any) {
+      alert('Başvuru gönderilirken bir hata oluştu: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800">
-      {/* Header / Navbar */}
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+      {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-emerald-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            {/* Logo */}
-            <div className="relative w-12 h-12">
+            <div className="relative w-10 h-10 sm:w-12 sm:h-12">
               <Image 
                 src="/logo.png" 
-                alt="PANOVA TARIM DOO Logo" 
+                alt="PANOVA GROUP Logo" 
                 width={48} 
                 height={48} 
                 className="object-contain"
@@ -22,540 +140,182 @@ export default function Home() {
               />
             </div>
             <div>
-              <span className="text-xl font-bold tracking-wide text-[#2e7d32]">PANOVA</span>
-              <span className="text-xl font-light text-[#7cb342] ml-1">TARIM DOO</span>
+              <span className="text-xl font-extrabold tracking-wider text-[#2e7d32]">PANOVA</span>
+              <span className="text-xl font-light text-[#7cb342] ml-1.5 uppercase tracking-widest">GROUP</span>
             </div>
           </div>
           <a 
             href="#apply" 
-            className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-5 py-2.5 rounded-lg font-medium transition duration-200 shadow-md flex items-center gap-2"
+            className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium transition shadow-md"
           >
-            Başvuru Yap
+            İletişime Geç
           </a>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-emerald-900 to-[#2e7d32] text-white py-20 px-4 text-center relative overflow-hidden">
-        <div className="max-w-4xl mx-auto relative z-10">
-          <span className="inline-block bg-[#fbc02d] text-slate-900 font-semibold px-4 py-1.5 rounded-full text-sm mb-4 shadow">
-            Uluslararası Tarımsal İstihdam & Danışmanlık
+      <section className="bg-gradient-to-br from-[#1b5e20] via-[#2e7d32] to-[#388e3c] text-white py-16 px-4 text-center">
+        <div className="max-w-4xl mx-auto">
+          <span className="inline-block bg-[#fbc02d] text-slate-900 font-bold px-4 py-1.5 rounded-full text-xs sm:text-sm mb-4 shadow-lg uppercase tracking-wider">
+            Uluslararası Şirketler Topluluğu
           </span>
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
-            PANOVA TARIM DOO ile Geleceğe Yatırım
+          <h1 className="text-3xl sm:text-5xl font-extrabold mb-4 leading-tight">
+            PANOVA GROUP
           </h1>
-          <p className="text-lg md:text-xl text-emerald-100 mb-8 max-w-2xl mx-auto">
-            Tarım ve tarımsal iş gücü yönetiminde güvenilir partneriniz.
+          <p className="text-base sm:text-xl text-emerald-100 max-w-2xl mx-auto leading-relaxed">
+            İnsan Kaynakları, Dış Ticaret, Tarım ve İnşaat sektörlerinde uluslararası standartlarda kurumsal çözümler.
           </p>
         </div>
       </section>
 
-      {/* Form & Başvuru Alanı (Mevcut Supabase formunuz bu alanda yer alacak) */}
-    </div>
-  );
-}
-'use client';
-export const dynamic = 'force-dynamic';
+      {/* Şirket Seçim Tabları (Group Companies Selector) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+        <div className="bg-white p-2 sm:p-3 rounded-2xl shadow-xl border border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-2">
+          {(Object.keys(companies) as CompanyId[]).map((key) => {
+            const comp = companies[key];
+            const Icon = comp.icon;
+            const isSelected = selectedCompany === key;
 
-import React, { useState, useEffect } from 'react';
-import { 
-  LayoutDashboard, 
-  Users, 
-  FileText, 
-  Clock, 
-  UserPlus, 
-  Search, 
-  Edit3, 
-  Trash2, 
-  X, 
-  CheckCircle, 
-  FileCheck 
-} from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-
-interface Applicant {
-  id: string;
-  name: string;
-  role: string;
-  country: string;
-  visaType: string;
-  status: string;
-  notes: string;
-  updatedAt: string;
-}
-
-export default function Dashboard() {
-  const [currentTab, setCurrentTab] = useState<'dashboard' | 'applicants' | 'visas' | 'approvals'>('dashboard');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const [formData, setFormData] = useState({
-    name: '',
-    role: '',
-    country: '',
-    visaType: 'Çalışma İzni (Type D)',
-    status: 'Başvuru Alındı',
-    notes: ''
-  });
-
-  const [applicants, setApplicants] = useState<Applicant[]>([]);
-
-  // Supabase'den Verileri Çekme (Read from DB)
-  const fetchApplicants = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('applicants')
-      .select('*')
-      .order('updated_at', { ascending: false });
-
-    if (error) {
-      console.error('Veri çekme hatası:', error.message || error);
-    } else if (data) {
-      const formattedData: Applicant[] = data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        role: item.role,
-        country: item.country,
-        visaType: item.visa_type,
-        status: item.status,
-        notes: item.notes || '',
-        updatedAt: item.updated_at
-      }));
-      setApplicants(formattedData);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchApplicants();
-  }, []);
-
-  const totalCount = applicants.length;
-  const visaCount = applicants.filter(a => a.status.includes('Vize')).length;
-  const pendingCount = applicants.filter(a => a.status === 'Evrak Hazırlığı' || a.status === 'Vize Randevusu Bekliyor').length;
-  const completedCount = applicants.filter(a => a.status === 'Vize Onaylandı').length;
-
-  const filteredApplicants = applicants.filter(a => {
-    const matchesSearch = a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          a.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          a.country.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'ALL' || a.status === statusFilter;
-
-    if (currentTab === 'visas') return matchesSearch && matchesStatus && a.status.includes('Vize');
-    if (currentTab === 'approvals') return matchesSearch && matchesStatus && (a.status === 'Evrak Hazırlığı' || a.status === 'Vize Randevusu Bekliyor');
-
-    return matchesSearch && matchesStatus;
-  });
-
-  const handleOpenModal = (applicant?: Applicant) => {
-    if (applicant) {
-      setEditingId(applicant.id);
-      setFormData({
-        name: applicant.name,
-        role: applicant.role,
-        country: applicant.country,
-        visaType: applicant.visaType,
-        status: applicant.status,
-        notes: applicant.notes
-      });
-    } else {
-      setEditingId(null);
-      setFormData({
-        name: '',
-        role: '',
-        country: '',
-        visaType: 'Çalışma İzni (Type D)',
-        status: 'Başvuru Alındı',
-        notes: ''
-      });
-    }
-    setIsModalOpen(true);
-  };
-
-  // Supabase'e Veri Ekleme / Güncelleme (Write / Update to DB)
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const today = new Date().toISOString().split('T')[0];
-
-    const dbPayload = {
-      name: formData.name,
-      role: formData.role,
-      country: formData.country,
-      visa_type: formData.visaType,
-      status: formData.status,
-      notes: formData.notes,
-      updated_at: today
-    };
-
-    if (editingId) {
-      const { error } = await supabase
-        .from('applicants')
-        .update(dbPayload)
-        .eq('id', editingId);
-
-      if (error) alert('Güncelleme hatası: ' + error.message);
-    } else {
-      const { error } = await supabase
-        .from('applicants')
-        .insert([dbPayload]);
-
-      if (error) alert('Ekleme hatası: ' + error.message);
-    }
-
-    setIsModalOpen(false);
-    fetchApplicants();
-  };
-
-  // Supabase'den Veri Silme (Delete from DB)
-  const handleDelete = async (id: string) => {
-    if (confirm('Bu kaydı silmek istediğinize emin misiniz?')) {
-      const { error } = await supabase
-        .from('applicants')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        alert('Silme hatası: ' + error.message);
-      } else {
-        fetchApplicants();
-      }
-    }
-  };
-
-  const getBadgeStyle = (status: string) => {
-    switch (status) {
-      case 'Mülakat Aşaması': return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'Evrak Hazırlığı': return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'Vize Randevusu Bekliyor': return 'bg-purple-50 text-purple-700 border-purple-200';
-      case 'Vize Onaylandı': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'Reddedildi': return 'bg-rose-50 text-rose-700 border-rose-200';
-      default: return 'bg-slate-100 text-slate-700 border-slate-200';
-    }
-  };
-
-  return (
-    <div className="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col md:flex-row font-sans">
-      
-      {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between border-r border-slate-800">
-        <div>
-          <div className="p-5 border-b border-slate-800 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/30">
-                P
-              </div>
-              <div>
-                <h1 className="text-white font-bold tracking-wide text-lg leading-tight">PANOVA</h1>
-                <p className="text-xs text-slate-400">Takip & Yönetim</p>
-              </div>
-            </div>
-          </div>
-
-          <nav className="p-4 space-y-1">
-            <button 
-              onClick={() => setCurrentTab('dashboard')} 
-              className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${currentTab === 'dashboard' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
-            >
-              <LayoutDashboard className="w-5 h-5" />
-              <span>Genel Bakış</span>
-            </button>
-            <button 
-              onClick={() => setCurrentTab('applicants')} 
-              className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${currentTab === 'applicants' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
-            >
-              <Users className="w-5 h-5" />
-              <span>Adaylar & Başvurular</span>
-            </button>
-            <button 
-              onClick={() => setCurrentTab('visas')} 
-              className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${currentTab === 'visas' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
-            >
-              <FileText className="w-5 h-5" />
-              <span>Vize Süreçleri</span>
-            </button>
-            <button 
-              onClick={() => setCurrentTab('approvals')} 
-              className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${currentTab === 'approvals' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
-            >
-              <Clock className="w-5 h-5" />
-              <span>Bekleyen Onaylar</span>
-              {pendingCount > 0 && (
-                <span className="ml-auto bg-amber-500/20 text-amber-400 text-xs px-2 py-0.5 rounded-full font-semibold border border-amber-500/30">
-                  {pendingCount}
-                </span>
-              )}
-            </button>
-          </nav>
-        </div>
-
-        <div className="p-4 border-t border-slate-800 flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center font-semibold text-slate-200">
-            HA
-          </div>
-          <div className="overflow-hidden">
-            <p className="text-sm font-medium text-white truncate">Hüseyin AKSU</p>
-            <p className="text-xs text-slate-500 truncate">Yönetici</p>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Area */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        <header className="bg-white border-b border-slate-200 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-0 z-10">
-          <div>
-            <h2 className="text-xl font-bold text-slate-900">
-              {currentTab === 'dashboard' && 'Genel Bakış'}
-              {currentTab === 'applicants' && 'Adaylar & Başvurular'}
-              {currentTab === 'visas' && 'Vize Süreçleri'}
-              {currentTab === 'approvals' && 'Bekleyen Onaylar'}
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">İş başvuruları ve vize süreçlerinin anlık durumu</p>
-          </div>
-          <button 
-            onClick={() => handleOpenModal()} 
-            className="inline-flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>Yeni Başvuru Ekle</span>
-          </button>
-        </header>
-
-        <div className="p-6 space-y-6">
-          {/* Metric Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
-              <div className="p-3 bg-blue-50 text-blue-600 rounded-lg"><Users className="w-6 h-6" /></div>
-              <div>
-                <p className="text-xs font-medium text-slate-500">Toplam Başvuru</p>
-                <h3 className="text-2xl font-bold text-slate-900 mt-0.5">{totalCount}</h3>
-              </div>
-            </div>
-
-            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
-              <div className="p-3 bg-amber-50 text-amber-600 rounded-lg"><Clock className="w-6 h-6" /></div>
-              <div>
-                <p className="text-xs font-medium text-slate-500">Vize Sürecinde</p>
-                <h3 className="text-2xl font-bold text-slate-900 mt-0.5">{visaCount}</h3>
-              </div>
-            </div>
-
-            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
-              <div className="p-3 bg-purple-50 text-purple-600 rounded-lg"><FileCheck className="w-6 h-6" /></div>
-              <div>
-                <p className="text-xs font-medium text-slate-500">Onay Bekleyenler</p>
-                <h3 className="text-2xl font-bold text-slate-900 mt-0.5">{pendingCount}</h3>
-              </div>
-            </div>
-
-            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
-              <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg"><CheckCircle className="w-6 h-6" /></div>
-              <div>
-                <p className="text-xs font-medium text-slate-500">Tamamlananlar</p>
-                <h3 className="text-2xl font-bold text-slate-900 mt-0.5">{completedCount}</h3>
-              </div>
-            </div>
-          </div>
-
-          {/* Data Table */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/50">
-              <div className="relative w-full sm:w-80">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input 
-                  type="text" 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="İsim, pozisyon veya ülke ara..." 
-                  className="w-full pl-9 pr-4 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-              <select 
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="text-sm bg-white border border-slate-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-auto"
+            return (
+              <button
+                key={key}
+                onClick={() => {
+                  setSelectedCompany(key);
+                  setSubmitted(false);
+                }}
+                className={`p-4 rounded-xl flex flex-col items-center justify-center text-center transition-all duration-200 ${
+                  isSelected 
+                    ? 'bg-[#2e7d32] text-white shadow-md scale-[1.02]' 
+                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                }`}
               >
-                <option value="ALL">Tüm Durumlar</option>
-                <option value="Başvuru Alındı">Başvuru Alındı</option>
-                <option value="Mülakat Aşaması">Mülakat Aşaması</option>
-                <option value="Evrak Hazırlığı">Evrak Hazırlığı</option>
-                <option value="Vize Randevusu Bekliyor">Vize Randevusu Bekliyor</option>
-                <option value="Vize Onaylandı">Vize Onaylandı</option>
-                <option value="Reddedildi">Reddedildi</option>
-              </select>
-            </div>
+                <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-[#fbc02d]' : 'text-[#2e7d32]'}`} />
+                <span className="font-bold text-sm sm:text-base">{comp.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-600">
-                <thead className="bg-slate-100/70 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-3.5">Aday</th>
-                    <th className="px-6 py-3.5">Pozisyon / Ülke</th>
-                    <th className="px-6 py-3.5">Süreç Durumu</th>
-                    <th className="px-6 py-3.5">Vize Tipi</th>
-                    <th className="px-6 py-3.5">Son Güncelleme</th>
-                    <th className="px-6 py-3.5 text-right">İşlemler</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 bg-white">
-                  {loading ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-8 text-slate-400 font-medium">
-                        Veriler yükleniyor...
-                      </td>
-                    </tr>
-                  ) : filteredApplicants.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-8 text-slate-400 font-medium">
-                        Kayıt bulunamadı.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredApplicants.map((item) => (
-                      <tr key={item.id} className="hover:bg-slate-50 transition">
-                        <td className="px-6 py-4 font-semibold text-slate-900">{item.name}</td>
-                        <td className="px-6 py-4">
-                          <div className="font-medium text-slate-800">{item.role}</div>
-                          <div className="text-xs text-slate-400">{item.country}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getBadgeStyle(item.status)}`}>
-                            {item.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-xs font-medium text-slate-600">{item.visaType}</td>
-                        <td className="px-6 py-4 text-xs text-slate-400">{item.updatedAt}</td>
-                        <td className="px-6 py-4 text-right space-x-2">
-                          <button onClick={() => handleOpenModal(item)} className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-indigo-600 transition">
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                          <button onClick={() => handleDelete(item.id)} className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-rose-600 transition">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+      {/* Seçili Şirket Detay & Hizmet Alanı */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-100">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 pb-6 border-b border-slate-100">
+            <div>
+              <span className={`inline-block px-3 py-1 rounded-md text-xs font-semibold mb-2 border ${current.accentBg}`}>
+                Seçili Grup Şirketi
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">{current.name}</h2>
+              <p className="text-slate-500 font-medium mt-1">{current.tagline}</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 max-w-md">
+              <p className="text-slate-600 text-sm leading-relaxed">{current.desc}</p>
             </div>
           </div>
+
+          <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-[#2e7d32]" />
+            Faaliyet ve Hizmet Kapsamı
+          </h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {current.services.map((service, index) => (
+              <div key={index} className="flex items-start gap-3 p-4 rounded-xl bg-slate-50/70 border border-slate-100">
+                <CheckCircle2 className="w-5 h-5 text-[#7cb342] shrink-0 mt-0.5" />
+                <span className="text-slate-700 font-medium text-sm sm:text-base">{service}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </main>
+      </section>
 
-      {/* Modal Dialog */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-              <h3 className="font-bold text-slate-800">{editingId ? 'Aday Kaydını Düzenle' : 'Yeni Aday / Vize Kaydı'}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
-                <X className="w-5 h-5" />
-              </button>
+      {/* Dinamik Başvuru / İletişim Formu */}
+      <section id="apply" className="max-w-3xl mx-auto px-4 pb-20">
+        <div className="bg-white p-6 sm:p-10 rounded-3xl shadow-lg border border-slate-100">
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-bold text-slate-900">
+              {current.name} İletişim / Başvuru
+            </h3>
+            <p className="text-slate-600 text-sm mt-1">
+              Talebiniz doğrudan ilgili grup şirketimizin operasyon ekibine iletilecektir.
+            </p>
+          </div>
+
+          {submitted ? (
+            <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center text-emerald-800">
+              <CheckCircle2 className="w-12 h-12 mx-auto mb-3 text-emerald-600" />
+              <h4 className="text-lg font-bold">Başvurunuz Alındı!</h4>
+              <p className="text-sm mt-1">
+                {current.name} ekibimiz sizinle en kısa sürede iletişime geçecektir.
+              </p>
             </div>
-
-            <form onSubmit={handleSave} className="p-6 space-y-4">
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Ad Soyad</label>
-                <input 
-                  type="text" 
-                  required 
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Örn: Ahmet Yılmaz" 
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Ad Soyad / Firma Adı *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2e7d32] transition"
+                  placeholder="Ahmet Yılmaz veya Örnek A.Ş."
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Pozisyon</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    placeholder="Örn: Elektrik Mühendisi" 
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">E-posta *</label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2e7d32] transition"
+                    placeholder="ornek@email.com"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Hedef Ülke</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={formData.country}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    placeholder="Örn: Kuzey Makedonya" 
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Telefon *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2e7d32] transition"
+                    placeholder="+389 / +90 ..."
                   />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Vize Tipi</label>
-                  <select 
-                    value={formData.visaType}
-                    onChange={(e) => setFormData({ ...formData, visaType: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                  >
-                    <option value="Çalışma İzni (Type D)">Çalışma İzni (Type D)</option>
-                    <option value="Ticari Vize">Ticari Vize</option>
-                    <option value="Oturum İzni">Oturum İzni</option>
-                    <option value="Turistik">Turistik</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Durum</label>
-                  <select 
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                  >
-                    <option value="Başvuru Alındı">Başvuru Alındı</option>
-                    <option value="Mülakat Aşaması">Mülakat Aşaması</option>
-                    <option value="Evrak Hazırlığı">Evrak Hazırlığı</option>
-                    <option value="Vize Randevusu Bekliyor">Vize Randevusu Bekliyor</option>
-                    <option value="Vize Onaylandı">Vize Onaylandı</option>
-                    <option value="Reddedildi">Reddedildi</option>
-                  </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Notlar / Açıklama</label>
-                <textarea 
-                  rows={3} 
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Talep / Notunuz</label>
+                <textarea
+                  rows={4}
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  placeholder="Evrak durumu veya notlar..." 
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2e7d32] transition"
+                  placeholder={`${current.name} ile ilgili talebinizi açıklayabilirsiniz...`}
                 />
               </div>
 
-              <div className="pt-3 border-t border-slate-200 flex justify-end space-x-2">
-                <button 
-                  type="button" 
-                  onClick={() => setIsModalOpen(false)} 
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
-                >
-                  İptal
-                </button>
-                <button 
-                  type="submit" 
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition shadow-sm"
-                >
-                  Kaydet
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-md flex items-center justify-center gap-2"
+              >
+                {loading ? 'Gönderiliyor...' : 'Talebi Gönder'}
+                <Send className="w-4 h-4" />
+              </button>
             </form>
-          </div>
+          )}
         </div>
-      )}
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 text-center text-sm">
+        <p>© 2026 PANOVA GROUP (PANOVA TARIM DOO). Tüm hakları saklıdır.</p>
+      </footer>
     </div>
   );
 }
