@@ -66,9 +66,48 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen bg-slate-50 text-slate-800 font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Header */}
+      {/* Header */}  
+      import Link from 'next/link';
       {/* Header Sağ Taraf */}
 <div className="flex items-center space-x-3 rtl:space-x-reverse">
+  <div className="flex items-center space-x-3 rtl:space-x-reverse">
+  {/* Dil Seçici Dropdown */}
+  <div className="relative flex items-center bg-slate-100 rounded-lg px-2.5 py-1.5 border border-slate-200">
+    <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
+    <select
+      value={currentLang}
+      onChange={(e) => setCurrentLang(e.target.value as Language)}
+      className="bg-transparent text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer"
+    >
+      {currentLang === 'en' && (
+        <option value="en" disabled>
+          🌐 Language
+        </option>
+      )}
+      {selectableLanguages.map((lang) => (
+        <option key={lang.code} value={lang.code}>
+          {lang.flag} {lang.name}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  {/* Aday Kayıt Butonu */}
+  <Link
+    href="/register"
+    className="bg-[#7cb342] hover:bg-[#689f38] text-white px-3.5 py-2 rounded-lg text-sm font-semibold transition shadow-sm hidden sm:inline-block"
+  >
+    Candidate Register
+  </Link>
+
+  {/* Portal / Admin Giriş Butonu */}
+  <Link
+    href="/portal"
+    className="bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-lg text-sm font-semibold transition shadow-sm"
+  >
+    Portal Login
+  </Link>
+</div>
   <Link 
     href="/register" 
     className="bg-[#7cb342] hover:bg-[#689f38] text-white px-3.5 py-2 rounded-lg text-sm font-semibold transition"
