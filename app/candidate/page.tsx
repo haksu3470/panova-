@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   User, CheckCircle2, LogOut, Lock, KeyRound, Camera, Save, Phone, Mail, 
   FileText, FileCheck, Award, Video, Upload, Eye, X, Briefcase, Calendar, 
-  FileSignature, Plane, LifeBuoy, CheckSquare 
+  FileSignature, Plane, LifeBuoy, CheckSquare, Languages, ArrowLeft 
 } from 'lucide-react';
 import Link from 'next/link';
+import { Language, languages, translations } from '@/lib/dictionary';
 
 interface CandidateDocument {
   id: string;
@@ -18,6 +19,12 @@ interface CandidateDocument {
 }
 
 export default function CandidateDashboard() {
+  // Sayfa açıldığında otomatik en üste kaydır
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const [currentLang, setCurrentLang] = useState<Language>('tr');
   const [authenticated, setAuthenticated] = useState(false);
   const [loginInput, setLoginInput] = useState('');
   const [password, setPassword] = useState('');
@@ -38,13 +45,16 @@ export default function CandidateDashboard() {
 
   // Şifremi unuttum modal
   const [forgotModal, setForgotModal] = useState(false);
-  const [forgotInput, setForgotInput] = useState('');
-  const [forgotSent, setForgotSent] = useState(false);
 
   // Destek Talebi State
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMsg, setSupportMsg] = useState('');
   const [supportSent, setSupportSent] = useState(false);
+
+  const t = translations[currentLang] || translations.tr;
+  const isRtl = currentLang === 'ar';
+  const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
+  const activeLangObj = languages.find((l) => l.code === currentLang);
 
   const handleCandidateLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,10 +81,10 @@ export default function CandidateDashboard() {
         setNewVideoUrl(data.video_url || '');
         setAuthenticated(true);
       } else {
-        alert('Hatalı şifre! (Varsayılan şifreniz: 123456)');
+        alert(currentLang === 'tr' ? 'Hatalı şifre! (Varsayılan şifreniz: 123456)' : 'Incorrect password!');
       }
     } else {
-      alert('Girdiğiniz bilgilerle eşleşen aday kaydı bulunamadı!');
+      alert(currentLang === 'tr' ? 'Girdiğiniz bilgilerle eşleşen aday kaydı bulunamadı!' : 'Candidate record not found!');
     }
   };
 
@@ -111,9 +121,9 @@ export default function CandidateDashboard() {
 
       if (!error) {
         setCandidate({ ...candidate, documents_json: JSON.stringify(updatedDocs) });
-        alert('Belgeniz başarıyla yüklendi!');
+        alert(currentLang === 'tr' ? 'Belgeniz başarıyla yüklendi!' : 'Document uploaded successfully!');
       } else {
-        alert('Yükleme hatası: ' + error.message);
+        alert('Hata: ' + error.message);
       }
     };
     reader.readAsDataURL(file);
@@ -145,9 +155,9 @@ export default function CandidateDashboard() {
         photo_url: newPhoto,
         video_url: newVideoUrl,
       });
-      alert('Profiliniz ve şifreniz başarıyla güncellendi!');
+      alert(currentLang === 'tr' ? 'Profiliniz ve şifreniz başarıyla güncellendi!' : 'Profile updated successfully!');
     } else {
-      alert('Güncelleme Hatası: ' + error.message);
+      alert('Hata: ' + error.message);
     }
   };
 
@@ -161,7 +171,18 @@ export default function CandidateDashboard() {
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
+      <div className={`min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+        {/* Dil Seçici (Giriş Ekranı) */}
+        <div className="absolute top-6 right-6 flex items-center bg-slate-800 rounded-lg px-2.5 py-1.5 border border-slate-700 shadow-sm">
+          <Languages className="w-4 h-4 text-slate-300 mr-1.5 rtl:ml-1.5" />
+          <select value={currentLang} onChange={(e) => setCurrentLang(e.target.value as Language)} className="bg-transparent text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer">
+            <option value={currentLang} className="text-slate-900 font-bold">{activeLangObj?.flag} {activeLangObj?.name}</option>
+            {selectableLanguages.map((lang) => (
+              <option key={lang.code} value={lang.code} className="text-slate-900">{lang.flag} {lang.name}</option>
+            ))}
+          </select>
+        </div>
+
         <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
           <div className="w-14 h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Lock className="w-7 h-7" />
@@ -171,7 +192,7 @@ export default function CandidateDashboard() {
             E-posta, Telefon (GSM) veya Pasaport numaranız ve şifreniz ile giriş yapabilirsiniz.
           </p>
 
-          <form onSubmit={handleCandidateLogin} className="space-y-4 text-left">
+          <form onSubmit={handleCandidateLogin} className="space-y-4 text-left rtl:text-right">
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase mb-1">E-Posta / Telefon (GSM) / Pasaport No *</label>
               <input type="text" required value={loginInput} onChange={(e) => setLoginInput(e.target.value)} placeholder="Örn: omer@gmail.com veya +90555..." className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm" />
@@ -192,8 +213,8 @@ export default function CandidateDashboard() {
             </button>
           </form>
 
-          <Link href="/" className="inline-block mt-6 text-sm text-slate-500 hover:underline">
-            ← Ana Sayfaya Dön
+          <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-sm text-slate-500 hover:underline">
+            <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
           </Link>
         </div>
 
@@ -201,10 +222,10 @@ export default function CandidateDashboard() {
           <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-3xl p-6 max-w-sm w-full text-left space-y-4 shadow-2xl">
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <KeyRound className="w-5 h-5 text-[#2e7d32]" /> Şifre Sıfırlama
+                <KeyRound className="w-5 h-5 text-[#2e7d32]" /> Şifre Bilgisi
               </h3>
               <div className="p-4 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold text-center">
-                Varsayılan şifreniz: <code className="bg-emerald-100 px-1 rounded">123456</code>. Bu şifre ile giriş yapıp profilinizden değiştirebilirsiniz.
+                Varsayılan şifreniz: <code className="bg-emerald-100 px-1 rounded">123456</code>
               </div>
               <button onClick={() => setForgotModal(false)} className="w-full bg-slate-900 text-white py-2 rounded-xl text-xs font-bold">Kapat</button>
             </div>
@@ -222,10 +243,10 @@ export default function CandidateDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
+    <div className={`min-h-screen bg-slate-50 p-4 sm:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto space-y-6">
         
-        {/* Top Header */}
+        {/* Top Header (Dil Seçici, Ana Sayfa Dönüş ve Çıkış Butonu ile Eksiksiz) */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border shadow-sm">
           <div className="flex items-center gap-4">
             {newPhoto ? (
@@ -237,15 +258,35 @@ export default function CandidateDashboard() {
             )}
             <div>
               <h1 className="text-xl font-extrabold text-slate-900">{candidate.full_name}</h1>
-              <span className="text-xs text-slate-500">Pasaport: {candidate.passport_number || 'Belirtilmedi'} | Uzmanlık: {candidate.profession}</span>
+              <span className="text-xs text-slate-500">Pasaport: {candidate.passport_number || 'N/A'} | Uzmanlık: {candidate.profession}</span>
             </div>
           </div>
-          <button onClick={() => setAuthenticated(false)} className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer">
-            <LogOut className="w-4 h-4" /> Çıkış Yap
-          </button>
+
+          <div className="flex items-center gap-3">
+            {/* Dil Seçici */}
+            <div className="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200">
+              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
+              <select value={currentLang} onChange={(e) => setCurrentLang(e.target.value as Language)} className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer">
+                <option value={currentLang} className="text-slate-900 font-bold">{activeLangObj?.flag} {activeLangObj?.name}</option>
+                {selectableLanguages.map((lang) => (
+                  <option key={lang.code} value={lang.code} className="text-slate-900">{lang.flag} {lang.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Ana Sayfaya Dön */}
+            <Link href="/" className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition border">
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
+            </Link>
+
+            {/* Çıkış Yap */}
+            <button onClick={() => setAuthenticated(false)} className="inline-flex items-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer">
+              <LogOut className="w-4 h-4" /> Çıkış Yap
+            </button>
+          </div>
         </div>
 
-        {/* Sekme Menüsü (Tüm Not Başlıkları) */}
+        {/* Sekme Menüsü */}
         <div className="flex flex-wrap gap-2 border-b pb-2 overflow-x-auto">
           <button onClick={() => setActiveTab('overview')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>Ana Sayfa</button>
           <button onClick={() => setActiveTab('profile')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>Profilim</button>
@@ -260,16 +301,14 @@ export default function CandidateDashboard() {
 
         {/* Tab 1: Ana Sayfa */}
         {activeTab === 'overview' && (
-          <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Başvuru Durumu ve Özet</h3>
-              <div className="p-5 bg-emerald-50 rounded-2xl border border-emerald-200 flex justify-between items-center">
-                <div>
-                  <div className="text-xs font-bold text-emerald-800 uppercase">Güncel Süreç Aşaması</div>
-                  <div className="text-xl font-black text-emerald-900 uppercase mt-1">{candidate.status || 'Beklemede (Pending)'}</div>
-                </div>
-                <CheckCircle2 className="w-10 h-10 text-[#2e7d32]" />
+          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Başvuru Durumu ve Özet</h3>
+            <div className="p-5 bg-emerald-50 rounded-2xl border border-emerald-200 flex justify-between items-center">
+              <div>
+                <div className="text-xs font-bold text-emerald-800 uppercase">Güncel Süreç Aşaması</div>
+                <div className="text-xl font-black text-emerald-900 uppercase mt-1">{candidate.status || 'Beklemede (Pending)'}</div>
               </div>
+              <CheckCircle2 className="w-10 h-10 text-[#2e7d32]" />
             </div>
           </div>
         )}
@@ -278,7 +317,7 @@ export default function CandidateDashboard() {
         {activeTab === 'profile' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm max-w-3xl space-y-6">
             <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-              <User className="w-5 h-5 text-[#2e7d32]" /> Kimlik, İletişim, Meslek ve Şifre Yönetimi
+              <User className="w-5 h-5 text-[#2e7d32]" /> Kimlik, İletişim, Çalışma Videosu ve Şifre Yönetimi
             </h3>
 
             <form onSubmit={handleUpdateProfile} className="space-y-4">
@@ -374,13 +413,12 @@ export default function CandidateDashboard() {
             </h3>
             <div className="p-5 bg-slate-50 rounded-2xl border space-y-3">
               <div className="flex justify-between items-center">
-                <span className="font-extrabold text-slate-900 text-base">{candidate.profession || 'Elektrik/İnşaat'} Pozisyonu</span>
+                <span className="font-extrabold text-slate-900 text-base">{candidate.profession || 'Pozisyon'}</span>
                 <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Aktif Eşleşme</span>
               </div>
               <p className="text-xs text-slate-600 leading-relaxed">
                 Sektör: <strong>{candidate.sector || 'Construction'}</strong> | Ücret Beklentisi: <strong className="text-emerald-700">€{candidate.expected_salary || '850'} / ay</strong>
               </p>
-              <div className="text-xs text-slate-500 pt-2 border-t">Temel Çalışma Şartları: Konaklama ve yemek işverene aittir, vize süreçleri PANOVA tarafından yürütülmektedir.</div>
             </div>
           </div>
         )}
@@ -394,7 +432,6 @@ export default function CandidateDashboard() {
             <div className="p-5 bg-slate-50 rounded-2xl border text-center space-y-2">
               <Calendar className="w-10 h-10 text-slate-400 mx-auto" />
               <h4 className="font-bold text-slate-800 text-sm">Aktif Görüşme Planı Bulunmuyor</h4>
-              <p className="text-xs text-slate-500">İşveren ön elemesi tamamlandığında mülakat tarihi burada görünecektir.</p>
             </div>
           </div>
         )}
@@ -408,7 +445,6 @@ export default function CandidateDashboard() {
             <div className="p-5 bg-slate-50 rounded-2xl border text-center space-y-2">
               <FileSignature className="w-10 h-10 text-slate-400 mx-auto" />
               <h4 className="font-bold text-slate-800 text-sm">Henüz İletilmiş Resmi Teklif Yok</h4>
-              <p className="text-xs text-slate-500">Seçim aşamasından sonra iş teklifi ve sözleşme detayları buraya yansıyacaktır.</p>
             </div>
           </div>
         )}
@@ -428,10 +464,6 @@ export default function CandidateDashboard() {
                 <span className="font-bold text-slate-700">2. İşveren Onayı & Ön Görüşme</span>
                 <span className="font-bold text-amber-600">Beklemede</span>
               </div>
-              <div className="p-4 bg-slate-50 rounded-xl border flex justify-between items-center">
-                <span className="font-bold text-slate-700">3. Vize ve Çalışma İzni Başvurusu</span>
-                <span className="font-bold text-slate-400">Sırada</span>
-              </div>
             </div>
           </div>
         )}
@@ -445,7 +477,6 @@ export default function CandidateDashboard() {
             <div className="p-5 bg-slate-50 rounded-2xl border text-center space-y-2">
               <Plane className="w-10 h-10 text-slate-400 mx-auto" />
               <h4 className="font-bold text-slate-800 text-sm">Seyahat Planlaması Henüz Yapılmadı</h4>
-              <p className="text-xs text-slate-500">Resmî vize onayınız alındıktan sonra uçuş ve karşılama detayları burada paylaşılacaktır.</p>
             </div>
           </div>
         )}
@@ -458,17 +489,17 @@ export default function CandidateDashboard() {
             </h3>
             {supportSent && (
               <div className="p-4 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold text-center">
-                Destek talebiniz başarıyla PANOVA yönetim ekibine iletildi! En kısa sürede size dönüş yapılacaktır.
+                Destek talebiniz başarıyla iletildi!
               </div>
             )}
             <form onSubmit={handleSendSupport} className="space-y-3">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Konu</label>
-                <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Örn: Belge Yükleme Hk." className="w-full px-3 py-2 text-xs rounded-xl border outline-none text-slate-900" />
+                <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Konu" className="w-full px-3 py-2 text-xs rounded-xl border outline-none text-slate-900" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Mesajınız</label>
-                <textarea rows={4} required value={supportMsg} onChange={(e) => setSupportMsg(e.target.value)} placeholder="Sorununuzu veya talebinizi detaylı yazın..." className="w-full px-3 py-2 text-xs rounded-xl border outline-none text-slate-900" />
+                <textarea rows={4} required value={supportMsg} onChange={(e) => setSupportMsg(e.target.value)} placeholder="Mesajınız..." className="w-full px-3 py-2 text-xs rounded-xl border outline-none text-slate-900" />
               </div>
               <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold text-xs transition cursor-pointer">
                 Destek Talebi Gönder
