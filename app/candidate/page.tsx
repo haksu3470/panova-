@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { User, CheckCircle2, LogOut, Lock, KeyRound, Camera, Save, Phone, Mail, FileText, FileCheck, Award, Video, Upload, Eye, X } from 'lucide-react';
+import { User, CheckCircle2, LogOut, Lock, KeyRound, Camera, Save, Phone, Mail, FileText, FileCheck, Award, Video, Upload, Eye, X, Link as LinkIcon } from 'lucide-react';
 import Link from 'next/link';
 
 interface CandidateDocument {
@@ -25,6 +25,7 @@ export default function CandidateDashboard() {
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newPhoto, setNewPhoto] = useState('');
+  const [newVideoUrl, setNewVideoUrl] = useState('');
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
   // Belge Önizleme Modal
@@ -57,6 +58,7 @@ export default function CandidateDashboard() {
         setNewEmail(data.email || '');
         setNewPassword(data.password || '123456');
         setNewPhoto(data.photo_url || '');
+        setNewVideoUrl(data.video_url || '');
         setAuthenticated(true);
       } else {
         alert('Hatalı şifre! (Varsayılan şifreniz: 123456)');
@@ -92,7 +94,6 @@ export default function CandidateDashboard() {
         return doc;
       });
 
-      // Supabase'e kaydet
       const { error } = await supabase
         .from('job_candidates')
         .update({ documents_json: JSON.stringify(updatedDocs) })
@@ -119,6 +120,7 @@ export default function CandidateDashboard() {
         email: newEmail,
         password: newPassword,
         photo_url: newPhoto,
+        video_url: newVideoUrl,
       })
       .eq('id', candidate.id);
 
@@ -131,8 +133,9 @@ export default function CandidateDashboard() {
         email: newEmail,
         password: newPassword,
         photo_url: newPhoto,
+        video_url: newVideoUrl,
       });
-      alert('Profiliniz ve şifreniz başarıyla güncellendi!');
+      alert('Profiliniz, çalışma video linkiniz ve şifreniz başarıyla güncellendi!');
     } else {
       alert('Güncelleme Hatası: ' + error.message);
     }
@@ -259,10 +262,10 @@ export default function CandidateDashboard() {
           </div>
         </div>
 
-        {/* Profil Fotoğrafı, İletişim ve Şifre Düzenleme */}
+        {/* Profil Fotoğrafı, İletişim, Video ve Şifre Düzenleme */}
         <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6">
           <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-            <User className="w-5 h-5 text-[#2e7d32]" /> Profil Fotoğrafı, İletişim ve Şifre Düzenleme
+            <User className="w-5 h-5 text-[#2e7d32]" /> Profil, İletişim, Çalışma Videosu ve Şifre Düzenleme
           </h3>
 
           <form onSubmit={handleUpdateProfile} className="space-y-4">
@@ -299,12 +302,20 @@ export default function CandidateDashboard() {
             </div>
 
             <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1 flex items-center gap-1">
+                <Video className="w-4 h-4 text-emerald-600" /> Çalışma Videosu Linki (YouTube / Google Drive vb.)
+              </label>
+              <input type="url" value={newVideoUrl} onChange={(e) => setNewVideoUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
+              <p className="text-[11px] text-slate-400 mt-1">Mesleki becerilerinizi gösteren video bağlantınızı buraya ekleyebilir veya güncelleyebilirsiniz.</p>
+            </div>
+
+            <div>
               <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Portal Giriş Şifresi</label>
               <input type="text" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Yeni şifreniz" className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
             </div>
 
             <button type="submit" disabled={updatingProfile} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold text-sm transition shadow-md cursor-pointer flex items-center justify-center gap-2">
-              <Save className="w-4 h-4" /> {updatingProfile ? 'Güncelleniyor...' : 'Değişiklikleri Kaydet'}
+              <Save className="w-4 h-4" /> {updatingProfile ? 'Güncelleniyor...' : 'Değişiklikleri ve Video Linkini Kaydet'}
             </button>
           </form>
         </div>
@@ -347,30 +358,6 @@ export default function CandidateDashboard() {
             ))}
           </div>
         </div>
-
-        {/* Sertifika ve Video Bilgileri */}
-        {(candidate.certificate_no || candidate.video_url) && (
-          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-              <Award className="w-5 h-5 text-amber-500" /> Mesleki Sertifika & Çalışma Videosu
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="p-4 bg-slate-50 rounded-xl border space-y-1">
-                <span className="font-bold text-slate-500 uppercase block">Sertifika No / Kurum</span>
-                <span className="text-slate-900 font-extrabold text-sm">{candidate.certificate_no || 'Belirtilmedi'}</span>
-                <span className="block text-slate-600">{candidate.issuing_body}</span>
-              </div>
-              <div className="p-4 bg-slate-50 rounded-xl border space-y-1">
-                <span className="font-bold text-slate-500 uppercase block">Çalışma Videosu</span>
-                {candidate.video_url ? (
-                  <a href={candidate.video_url} target="_blank" rel="noreferrer" className="text-emerald-700 font-bold hover:underline inline-flex items-center gap-1">
-                    <Video className="w-4 h-4" /> Videoyu Görüntüle ↗
-                  </a>
-                ) : <span className="text-slate-400 italic">Video eklenmemiş</span>}
-              </div>
-            </div>
-          </div>
-        )}
 
       </div>
 
