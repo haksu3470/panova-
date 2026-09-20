@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { User, FileCheck, Briefcase, LifeBuoy, Languages, ArrowLeft, CheckCircle2, Clock, Send, LogOut, FileText, Lock, KeyRound, Camera, Save, Phone, Mail } from 'lucide-react';
+import { User, CheckCircle2, LogOut, Lock, KeyRound, Camera, Save, Phone, Mail, FileText, FileCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
@@ -13,8 +13,7 @@ export default function CandidateDashboard() {
   const [password, setPassword] = useState('');
   const [candidate, setCandidate] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'documents' | 'support'>('overview');
-  
+
   // Profil Güncelleme State
   const [newPhone, setNewPhone] = useState('');
   const [newEmail, setNewEmail] = useState('');
@@ -28,9 +27,6 @@ export default function CandidateDashboard() {
   const [forgotSent, setForgotSent] = useState(false);
 
   const t = translations[currentLang] || translations.tr;
-  const isRtl = currentLang === 'ar';
-  const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
-  const activeLangObj = languages.find((l) => l.code === currentLang);
 
   const handleCandidateLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,10 +52,10 @@ export default function CandidateDashboard() {
         setNewPhoto(data.photo_url || '');
         setAuthenticated(true);
       } else {
-        alert(currentLang === 'tr' ? 'Hatalı şifre! (Varsayılan şifreniz: 123456)' : 'Incorrect password!');
+        alert('Hatalı şifre! (Varsayılan şifreniz: 123456)');
       }
     } else {
-      alert(currentLang === 'tr' ? 'Girdiğiniz bilgilerle eşleşen aday kaydı bulunamadı!' : 'Candidate record not found!');
+      alert('Girdiğiniz bilgilerle eşleşen aday kaydı bulunamadı!');
     }
   };
 
@@ -97,7 +93,7 @@ export default function CandidateDashboard() {
         password: newPassword,
         photo_url: newPhoto,
       });
-      alert(currentLang === 'tr' ? 'Profiliniz, iletişim bilgileriniz ve şifreniz başarıyla güncellendi!' : 'Profile updated successfully!');
+      alert('Profiliniz, iletişim bilgileriniz ve şifreniz başarıyla güncellendi!');
     } else {
       alert('Güncelleme Hatası: ' + error.message);
     }
@@ -110,17 +106,7 @@ export default function CandidateDashboard() {
 
   if (!authenticated) {
     return (
-      <div className={`min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-        <div className="absolute top-6 right-6 flex items-center bg-slate-800 rounded-lg px-2.5 py-1.5 border border-slate-700 shadow-sm">
-          <Languages className="w-4 h-4 text-slate-300 mr-1.5 rtl:ml-1.5" />
-          <select value={currentLang} onChange={(e) => setCurrentLang(e.target.value as Language)} className="bg-transparent text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer">
-            <option value={currentLang} className="text-slate-900 font-bold">{activeLangObj?.flag} {activeLangObj?.name}</option>
-            {selectableLanguages.map((lang) => (
-              <option key={lang.code} value={lang.code} className="text-slate-900">{lang.flag} {lang.name}</option>
-            ))}
-          </select>
-        </div>
-
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
         <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
           <div className="w-14 h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Lock className="w-7 h-7" />
@@ -130,7 +116,7 @@ export default function CandidateDashboard() {
             E-posta, Telefon (GSM) veya Pasaport numaranız ve şifreniz ile giriş yapabilirsiniz.
           </p>
 
-          <form onSubmit={handleCandidateLogin} className="space-y-4 text-left rtl:text-right">
+          <form onSubmit={handleCandidateLogin} className="space-y-4 text-left">
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase mb-1">E-Posta / Telefon (GSM) / Pasaport No *</label>
               <input type="text" required value={loginInput} onChange={(e) => setLoginInput(e.target.value)} placeholder="Örn: omer@gmail.com veya +90555..." className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm" />
@@ -151,8 +137,8 @@ export default function CandidateDashboard() {
             </button>
           </form>
 
-          <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-sm text-slate-500 hover:underline">
-            <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
+          <Link href="/" className="inline-block mt-6 text-sm text-slate-500 hover:underline">
+            ← Ana Sayfaya Dön
           </Link>
         </div>
 
@@ -188,7 +174,7 @@ export default function CandidateDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border shadow-sm">
@@ -210,55 +196,46 @@ export default function CandidateDashboard() {
           </button>
         </div>
 
-        {/* Tab Menü */}
-        <div className="flex gap-2 border-b pb-2">
-          <button onClick={() => setActiveTab('overview')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>Genel Durum</button>
-          <button onClick={() => setActiveTab('profile')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>Profilim & Şifre Güncelle</button>
-          <button onClick={() => setActiveTab('documents')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'documents' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>Belgelerim</button>
+        {/* Başvuru Durumu */}
+        <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+          <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Başvuru Durumu</h3>
+          <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 flex justify-between items-center">
+            <div>
+              <div className="text-xs font-bold text-emerald-800 uppercase">Güncel Aşama</div>
+              <div className="text-lg font-black text-emerald-900 uppercase">{candidate.status || 'Beklemede'}</div>
+            </div>
+            <CheckCircle2 className="w-8 h-8 text-[#2e7d32]" />
+          </div>
         </div>
 
-        {/* Tab 1: Genel Durum */}
-        {activeTab === 'overview' && (
-          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Başvuru Durumu</h3>
-            <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 flex justify-between items-center">
+        {/* Profil Fotoğrafı, İletişim ve Şifre Düzenleme (Doğrudan Görünür) */}
+        <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6">
+          <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+            <User className="w-5 h-5 text-[#2e7d32]" /> Profil Fotoğrafı, İletişim ve Şifre Düzenleme
+          </h3>
+
+          <form onSubmit={handleUpdateProfile} className="space-y-4">
+            <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-2xl border">
+              <div className="relative">
+                {newPhoto ? (
+                  <img src={newPhoto} alt="Foto" className="w-20 h-20 rounded-2xl object-cover border shadow" />
+                ) : (
+                  <div className="w-20 h-20 bg-slate-200 rounded-2xl flex items-center justify-center text-slate-400 font-bold text-xl">
+                    {candidate.full_name?.charAt(0)}
+                  </div>
+                )}
+                <label className="absolute -bottom-2 -right-2 bg-[#2e7d32] text-white p-2 rounded-xl cursor-pointer shadow hover:bg-[#1b5e20] transition" title="Fotoğraf Değiştir">
+                  <Camera className="w-4 h-4" />
+                  <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                </label>
+              </div>
               <div>
-                <div className="text-xs font-bold text-emerald-800 uppercase">Güncel Aşama</div>
-                <div className="text-lg font-black text-emerald-900 uppercase">{candidate.status || 'Beklemede'}</div>
+                <h4 className="font-extrabold text-slate-800 text-sm">{candidate.full_name}</h4>
+                <p className="text-xs text-slate-500">Profil fotoğrafınızı güncellemek için kamera ikonuna tıklayın.</p>
               </div>
-              <CheckCircle2 className="w-8 h-8 text-[#2e7d32]" />
             </div>
-          </div>
-        )}
 
-        {/* Tab 2: Profil & Şifre Güncelleme */}
-        {activeTab === 'profile' && (
-          <div className="bg-white p-6 rounded-2xl border shadow-sm max-w-2xl space-y-6">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-              <User className="w-5 h-5 text-[#2e7d32]" /> Profil Fotoğrafı, İletişim ve Şifre Düzenleme
-            </h3>
-
-            <form onSubmit={handleUpdateProfile} className="space-y-4">
-              <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-2xl border">
-                <div className="relative">
-                  {newPhoto ? (
-                    <img src={newPhoto} alt="Foto" className="w-20 h-20 rounded-2xl object-cover border shadow" />
-                  ) : (
-                    <div className="w-20 h-20 bg-slate-200 rounded-2xl flex items-center justify-center text-slate-400 font-bold text-xl">
-                      {candidate.full_name?.charAt(0)}
-                    </div>
-                  )}
-                  <label className="absolute -bottom-2 -right-2 bg-[#2e7d32] text-white p-2 rounded-xl cursor-pointer shadow hover:bg-[#1b5e20] transition" title="Fotoğraf Değiştir">
-                    <Camera className="w-4 h-4" />
-                    <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-                  </label>
-                </div>
-                <div>
-                  <h4 className="font-extrabold text-slate-800 text-sm">{candidate.full_name}</h4>
-                  <p className="text-xs text-slate-500">Profil fotoğrafınızı güncellemek için kamera ikonuna tıklayın.</p>
-                </div>
-              </div>
-
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Telefon Numarası (GSM)</label>
                 <div className="relative">
@@ -274,38 +251,36 @@ export default function CandidateDashboard() {
                   <input type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="w-full pl-9 pr-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
                 </div>
               </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Portal Giriş Şifresi</label>
-                <div className="relative">
-                  <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
-                  <input type="text" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Yeni şifreniz" className="w-full pl-9 pr-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
-                </div>
-              </div>
-
-              <button type="submit" disabled={updatingProfile} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold text-sm transition shadow-md cursor-pointer flex items-center justify-center gap-2">
-                <Save className="w-4 h-4" /> {updatingProfile ? 'Güncelleniyor...' : 'Değişiklikleri Kaydet'}
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* Tab 3: Belgelerim */}
-        {activeTab === 'documents' && (
-          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Belgelerim</h3>
-            <div className="space-y-3">
-              {candidateDocs.map((doc: any) => (
-                <div key={doc.id} className="p-4 bg-slate-50 rounded-xl border flex justify-between items-center text-xs">
-                  <span className="font-bold text-slate-800">{doc.name}</span>
-                  <span className={`px-3 py-1 rounded font-bold uppercase text-[10px] ${doc.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                    {doc.status === 'approved' ? 'Onaylandı' : 'Beklemede'}
-                  </span>
-                </div>
-              ))}
             </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Portal Giriş Şifresi</label>
+              <div className="relative">
+                <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
+                <input type="text" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Yeni şifreniz" className="w-full pl-9 pr-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
+              </div>
+            </div>
+
+            <button type="submit" disabled={updatingProfile} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold text-sm transition shadow-md cursor-pointer flex items-center justify-center gap-2">
+              <Save className="w-4 h-4" /> {updatingProfile ? 'Güncelleniyor...' : 'Değişiklikleri Kaydet'}
+            </button>
+          </form>
+        </div>
+
+        {/* Belgelerim */}
+        <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+          <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Belgelerim</h3>
+          <div className="space-y-3">
+            {candidateDocs.map((doc: any) => (
+              <div key={doc.id} className="p-4 bg-slate-50 rounded-xl border flex justify-between items-center text-xs">
+                <span className="font-bold text-slate-800">{doc.name}</span>
+                <span className={`px-3 py-1 rounded font-bold uppercase text-[10px] ${doc.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                  {doc.status === 'approved' ? 'Onaylandı' : 'Beklemede'}
+                </span>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
 
       </div>
     </div>
