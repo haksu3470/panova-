@@ -11,18 +11,23 @@ import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function CandidateDashboard() {
+  // 1. Önce State'leri tanımlıyoruz
+  const [currentLang, setCurrentLang] = useState<Language>('tr');
+
+  // 2. Sonra useEffect'i koyuyoruz ki currentLang'i güvenle kullanabilsin
   useEffect(() => {
     window.scrollTo(0, 0);
+    const savedLang = localStorage.getItem('panova_candidate_lang') as Language;
+    if (savedLang && translations[savedLang]) {
+      setCurrentLang(savedLang);
+    }
   }, []);
-
-  const [currentLang, setCurrentLang] = useState<Language>('tr');
   const [authenticated, setAuthenticated] = useState(false);
   const [loginInput, setLoginInput] = useState('');
   const [password, setPassword] = useState('');
   const [candidate, setCandidate] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'documents' | 'jobs' | 'interviews' | 'offers' | 'process' | 'travel' | 'support'>('overview');
-
   const [newPhone, setNewPhone] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -173,9 +178,14 @@ export default function CandidateDashboard() {
           <Languages className="w-4 h-4 text-slate-300 mr-1.5 rtl:ml-1.5" />
           <select 
             value={currentLang} 
-            onChange={(e) => setCurrentLang(e.target.value as Language)} 
-            className="bg-transparent text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer"
-          >
+            onChange={(e) => {
+    const newLang = e.target.value as Language;
+    setCurrentLang(newLang);
+    localStorage.setItem('panova_candidate_lang', newLang);
+  }} 
+  className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
+>
+          
             {languages.map((lang) => (
               <option key={lang.code} value={lang.code} className="text-slate-900">
                 {lang.flag} {lang.name}
@@ -248,8 +258,12 @@ export default function CandidateDashboard() {
             <div className="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200">
               <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
               <select 
-                value={currentLang} 
-                onChange={(e) => setCurrentLang(e.target.value as Language)} 
+                value={currentLang}
+                onChange={(e) => {
+                  const newLang = e.target.value as Language;
+                  setCurrentLang(newLang);
+                  localStorage.setItem('panova_candidate_lang', newLang);
+                }}
                 className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
               >
                 {languages.map((lang) => (
