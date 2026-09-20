@@ -201,19 +201,51 @@ export default function CandidateDashboard() {
           <h1 className="text-2xl font-extrabold text-slate-900 mb-1">{t.candidatePortal}</h1>
           <p className="text-slate-500 text-xs mb-6 leading-relaxed">{t.loginDesc}</p>
 
-          <form onSubmit={handleCandidateLogin} className="space-y-4 text-left rtl:text-right">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.emailOrPhone}</label>
-              <input type="text" required value={loginInput} onChange={(e) => setLoginInput(e.target.value)} placeholder="Örn: omer@gmail.com" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm" />
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                {t.emailOrPhone}
+              </label>
+              <input 
+                type="text" 
+                value={loginInput} 
+                onChange={(e) => setLoginInput(e.target.value)} 
+                placeholder="Örn: omer@gmail.com" 
+                required 
+                className="w-full px-4 py-2.5 rounded-xl border text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm" 
+              />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.password}</label>
-              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm" />
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                {t.password}
+              </label>
+              <input 
+                type="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                placeholder="••••••" 
+                required 
+                className="w-full px-4 py-2.5 rounded-xl border text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm" 
+              />
             </div>
 
-            <button type="submit" disabled={loading} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 cursor-pointer text-sm">
-              {loading ? 'Giriş Yapılıyor...' : t.loginBtn}
+            <div className="flex items-center justify-between text-xs text-slate-500">
+              <span>Varsayılan: 123456</span>
+              <button 
+                type="button" 
+                onClick={() => setForgotModal(true)} 
+                className="text-emerald-700 font-bold hover:underline cursor-pointer"
+              >
+                {currentLang === 'tr' ? 'Şifre?' : (currentLang === 'sq' ? 'Fjalëkalimi?' : 'Password?')}
+              </button>
+            </div>
+
+            <button 
+              type="submit" 
+              className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl transition shadow-lg cursor-pointer text-sm"
+            >
+              {t.loginBtn}
             </button>
           </form>
 
