@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft, User, FileText, CheckCircle, Award, Video, ShieldCheck, Clock, Calendar, Save, Languages, FileCheck, AlertCircle, Plus, Trash2, Upload, ExternalLink } from 'lucide-react';
+import { ArrowLeft, User, FileText, CheckCircle, Award, Video, ShieldCheck, Clock, Calendar, Save, Languages, FileCheck, AlertCircle, Plus, Trash2, Upload, Eye, X } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
@@ -32,8 +32,14 @@ export default function CandidateDetailPage() {
   const [status, setStatus] = useState('pending');
   const [isVerified, setIsVerified] = useState(false);
 
-  // Yeni Belge Ekleme State
+  // Sertifika & Video Düzenleme State
+  const [certificateNo, setCertificateNo] = useState('');
+  const [issuingBody, setIssuingBody] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+
+  // Yeni Belge Ekleme & Önizleme Modal State
   const [newDocName, setNewDocName] = useState('');
+  const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
 
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
@@ -58,8 +64,10 @@ export default function CandidateDetailPage() {
       setInternalNotes(data.notes || '');
       setStatus(data.status || 'pending');
       setIsVerified(data.is_verified || false);
+      setCertificateNo(data.certificate_no || '');
+      setIssuingBody(data.issuing_body || '');
+      setVideoUrl(data.video_url || '');
       
-      // Varsayılan evrak listesi
       const defaultDocs: CandidateDocument[] = [
         { id: '1', name: 'Pasaport Taraması', status: data.passport_number ? 'approved' : 'pending' },
         { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: data.certificate_no ? 'approved' : 'pending' },
@@ -80,7 +88,6 @@ export default function CandidateDetailPage() {
     setDocuments(documents.map(doc => doc.id === docId ? { ...doc, status: newStatus } : doc));
   };
 
-  // Bilgisayardan Dosya Yükleme İşlemi
   const handleFileUpload = (docId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -126,6 +133,9 @@ export default function CandidateDetailPage() {
         notes: internalNotes,
         status: status,
         is_verified: isVerified,
+        certificate_no: certificateNo,
+        issuing_body: issuingBody,
+        video_url: videoUrl,
         documents_json: JSON.stringify(documents),
       })
       .eq('id', candidateId);
@@ -133,7 +143,7 @@ export default function CandidateDetailPage() {
     setSaving(false);
 
     if (!error) {
-      alert(currentLang === 'tr' ? 'Aday dosyası ve evraklar başarıyla kaydedildi!' : 'Candidate dossier saved successfully!');
+      alert(currentLang === 'tr' ? 'Aday dosyası, sertifika ve evraklar başarıyla kaydedildi!' : 'Candidate dossier saved successfully!');
     } else {
       alert('Hata: ' + error.message);
     }
@@ -193,7 +203,7 @@ export default function CandidateDetailPage() {
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* Sol Kolon: Aday Bilgileri & Belge Takip */}
+          {/* Sol Kolon */}
           <div className="lg:col-span-8 space-y-6">
             
             {/* Kimlik & Mesleki Özet */}
@@ -284,23 +294,22 @@ export default function CandidateDetailPage() {
                       </div>
                     </div>
 
-                    {/* Bilgisayardan Dosya Yükleme / İnceleme Alanı */}
+                    {/* Önizleme & Yükleme Butonları */}
                     <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
                       {doc.file_url ? (
-                        <a
-                          href={doc.file_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 text-emerald-700 hover:underline font-bold"
+                        <button
+                          type="button"
+                          onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url! })}
+                          className="inline-flex items-center gap-1.5 text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition cursor-pointer"
                         >
-                          <ExternalLink className="w-3.5 h-3.5" /> Yüklenen Belgeyi Aç / İncele
-                        </a>
+                          <Eye className="w-3.5 h-3.5" /> Belgeyi Ekranda İncele / Önizle
+                        </button>
                       ) : (
-                        <span className="text-slate-400 italic">Henüz dosya seçilmedi</span>
+                        <span className="text-slate-400 italic">Henüz dosya yüklenmedi</span>
                       )}
 
                       <label className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg border border-slate-300 font-bold cursor-pointer transition shadow-sm">
-                        <Upload className="w-3.5 h-3.5 text-indigo-600" /> Bilgisayardan Dosya Seç
+                        <Upload className="w-3.5 h-3.5 text-indigo-600" /> Bilgisayardan Dosya Yükle
                         <input
                           type="file"
                           accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
@@ -331,38 +340,58 @@ export default function CandidateDetailPage() {
               </div>
             </div>
 
-            {/* Sertifika ve Değerlendirme Videosu */}
+            {/* Sertifika ve Değerlendirme Videosu (Düzenlenebilir Hale Getirildi) */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-                <Award className="w-5 h-5 text-amber-500" /> Sertifika & Çalışma Videosu
+                <Award className="w-5 h-5 text-amber-500" /> Sertifika & Çalışma Videosu Yönetimi
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                  <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Sertifika Bilgisi</span>
-                  {candidate.certificate_no ? (
-                    <div>
-                      <div className="font-bold text-slate-800">{candidate.certificate_no}</div>
-                      <div className="text-xs text-slate-500">Veren Kurum: {candidate.issuing_body || 'N/A'}</div>
-                    </div>
-                  ) : (
-                    <span className="text-slate-400 text-xs">Sertifika yüklenmemiş.</span>
-                  )}
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <span className="text-xs font-bold text-slate-500 uppercase block">Sertifika Bilgileri</span>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">Sertifika No</label>
+                    <input
+                      type="text"
+                      value={certificateNo}
+                      onChange={(e) => setCertificateNo(e.target.value)}
+                      placeholder="Örn: MYK-123456"
+                      className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 bg-white font-bold text-slate-800 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">Veren Kurum</label>
+                    <input
+                      type="text"
+                      value={issuingBody}
+                      onChange={(e) => setIssuingBody(e.target.value)}
+                      placeholder="Örn: Milli Eğitim Bakanlığı"
+                      className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 bg-white font-bold text-slate-800 outline-none"
+                    />
+                  </div>
                 </div>
 
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                  <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Çalışma Örneği Video</span>
-                  {candidate.video_url ? (
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <span className="text-xs font-bold text-slate-500 uppercase block">Çalışma Videosu Linki</span>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">Video URL (YouTube / Drive)</label>
+                    <input
+                      type="url"
+                      value={videoUrl}
+                      onChange={(e) => setVideoUrl(e.target.value)}
+                      placeholder="https://youtube.com/..."
+                      className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 bg-white font-bold text-slate-800 outline-none"
+                    />
+                  </div>
+                  {videoUrl && (
                     <a
-                      href={candidate.video_url}
+                      href={videoUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 text-emerald-700 hover:underline font-bold"
+                      className="inline-flex items-center gap-1.5 text-emerald-700 hover:underline font-bold text-xs pt-1"
                     >
-                      <Video className="w-4 h-4" /> Videoyu İncele (Yeni Sekme)
+                      <Video className="w-3.5 h-3.5" /> Videoyu Test Et ↗
                     </a>
-                  ) : (
-                    <span className="text-slate-400 text-xs">Video bağlantısı eklenmemiş.</span>
                   )}
                 </div>
               </div>
@@ -384,10 +413,8 @@ export default function CandidateDetailPage() {
             </div>
           </div>
 
-          {/* Sağ Kolon: Durum & Belge Doğrulama Paneli */}
+          {/* Sağ Kolon */}
           <div className="lg:col-span-4 space-y-6">
-            
-            {/* Süreç Durumu */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-2">Aday Süreç Durumu</h3>
 
@@ -418,10 +445,8 @@ export default function CandidateDetailPage() {
               </div>
             </div>
 
-            {/* Kayıt Geçmişi */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
               <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-2">Kayıt Geçmişi</h3>
-
               <div className="space-y-2 text-xs text-slate-600">
                 <div className="flex items-center justify-between">
                   <span>Başvuru Tarihi:</span>
@@ -433,10 +458,35 @@ export default function CandidateDetailPage() {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
+
+      {/* BELGE EKRANDA ÖNİZLEME PENCERESİ (MODAL) */}
+      {previewDoc && (
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-slate-200">
+            <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
+              <h3 className="font-bold text-sm flex items-center gap-2">
+                <FileCheck className="w-4 h-4 text-emerald-400" /> {previewDoc.name} - Belge Önizleme
+              </h3>
+              <button
+                onClick={() => setPreviewDoc(null)}
+                className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-full transition text-slate-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 flex-1 overflow-auto flex items-center justify-center bg-slate-100">
+              {previewDoc.url.startsWith('data:image/') || previewDoc.url.match(/\.(jpeg|jpg|gif|png)$/) ? (
+                <img src={previewDoc.url} alt={previewDoc.name} className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-md" />
+              ) : (
+                <iframe src={previewDoc.url} className="w-full h-[70vh] rounded-xl border border-slate-200" title="PDF Önizleme" />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
