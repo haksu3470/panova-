@@ -1,7 +1,6 @@
 export type Language = 'tr' | 'en' | 'sq' | 'ar';
 
 export interface Translation {
-  // Temel Ortak Alanlar
   returnHome: string;
   candidatePortal: string;
   loginDesc: string;
@@ -30,8 +29,6 @@ export interface Translation {
   foodAllowance?: string;
   localTransport?: string;
   flightTicket?: string;
-
-  // İşveren Portalı Alanları
   empPortalTitle?: string;
   empPortalSub?: string;
   empPortalLabel?: string;
@@ -40,8 +37,6 @@ export interface Translation {
   signInBtn?: string;
   colSalary?: string;
   colDemandStatus?: string;
-
-  // Aday Kayıt & Detay Alanları
   regFormTitle?: string;
   regFormSub?: string;
   regSuccessTitle?: string;
@@ -90,6 +85,29 @@ export const translations: Record<Language, Translation> = {
     tagline: 'Uluslararası İstihdam ve Vize Yönetimi',
     heroTitle: 'Profesyonel İş Gücü Çözümleri',
     completeReg: 'Kayıt Ol',
+    empPortalTitle: 'İşveren Portalı',
+    empPortalSub: 'Personel talepleri ve yönetimi',
+    empPortalLabel: 'Firma / Yetkili E-posta',
+    passwordLabel: 'Şifre',
+    submitting: 'Gönderiliyor...',
+    signInBtn: 'Giriş Yap',
+    colSalary: 'Maaş',
+    colDemandStatus: 'Talep Durumu',
+    regFormTitle: 'Aday Kayıt Formu',
+    regFormSub: 'Bilgilerinizi eksiksiz doldurun',
+    regSuccessTitle: 'Kayıt Başarılı',
+    regSuccessDesc: 'Başvurunuz alınmıştır.',
+    nameLabel: 'Ad Soyad',
+    passportLabel: 'Pasaport No',
+    sectorLabel: 'Sektör',
+    professionLabel: 'Meslek',
+    certNoLabel: 'Sertifika No',
+    issuingBodyLabel: 'Veren Kurum',
+    videoUrlLabel: 'Video Linki',
+    expectedSalaryLabel: 'Beklenen Maaş',
+    shiftSuitableLabel: 'Vardiyaya Uygunluk',
+    emailLabel: 'E-posta',
+    phoneLabel: 'Telefon',
   },
   en: {
     returnHome: 'Return to Home',
@@ -114,6 +132,29 @@ export const translations: Record<Language, Translation> = {
     tagline: 'International Employment & Visa Management',
     heroTitle: 'Professional Workforce Solutions',
     completeReg: 'Register',
+    empPortalTitle: 'Employer Portal',
+    empPortalSub: 'Personnel requests and management',
+    empPortalLabel: 'Company / Authorized Email',
+    passwordLabel: 'Password',
+    submitting: 'Submitting...',
+    signInBtn: 'Sign In',
+    colSalary: 'Salary',
+    colDemandStatus: 'Demand Status',
+    regFormTitle: 'Candidate Registration Form',
+    regFormSub: 'Fill in your details completely',
+    regSuccessTitle: 'Registration Successful',
+    regSuccessDesc: 'Your application has been received.',
+    nameLabel: 'Full Name',
+    passportLabel: 'Passport No',
+    sectorLabel: 'Sector',
+    professionLabel: 'Profession',
+    certNoLabel: 'Certificate No',
+    issuingBodyLabel: 'Issuing Body',
+    videoUrlLabel: 'Video Link',
+    expectedSalaryLabel: 'Expected Salary',
+    shiftSuitableLabel: 'Shift Suitable',
+    emailLabel: 'Email',
+    phoneLabel: 'Phone',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -138,6 +179,29 @@ export const translations: Record<Language, Translation> = {
     tagline: 'Punësim Ndërkombëtar dhe Menaxhim Vizash',
     heroTitle: 'Zgjidhje Profesionale të Fuqisë Punëtore',
     completeReg: 'Regjistrohuni',
+    empPortalTitle: 'Portali i Punëdhënësit',
+    empPortalSub: 'Kërkesat dhe menaxhimi i personelit',
+    empPortalLabel: 'Email i Kompanisë',
+    passwordLabel: 'Fjalëkalimi',
+    submitting: 'Duke dërguar...',
+    signInBtn: 'Hyni',
+    colSalary: 'Pagë',
+    colDemandStatus: 'Statusi i Kërkesës',
+    regFormTitle: 'Formulari i Regjistrimit',
+    regFormSub: 'Plotësoni të dhënat tuaja',
+    regSuccessTitle: 'Regjistrimi u Krye',
+    regSuccessDesc: 'Aplikimi juaj u mor.',
+    nameLabel: 'Emri Mbiemri',
+    passportLabel: 'Nr. Pasaportës',
+    sectorLabel: 'Sektori',
+    professionLabel: 'Profesioni',
+    certNoLabel: 'Nr. Certifikatës',
+    issuingBodyLabel: 'Institucioni Lëshues',
+    videoUrlLabel: 'Linku i Videos',
+    expectedSalaryLabel: 'Paga e Pritur',
+    shiftSuitableLabel: 'I përshtatshëm për turne',
+    emailLabel: 'Email',
+    phoneLabel: 'Telefon',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -162,5 +226,28 @@ export const translations: Record<Language, Translation> = {
     tagline: 'التوظيف الدولي وإدارة التأشيرات',
     heroTitle: 'حلول القوى العاملة المهنية',
     completeReg: 'التسجيل',
+    empPortalTitle: 'بوابة أصحاب العمل',
+    empPortalSub: 'طلبات وإدارة الموظفين',
+    empPortalLabel: 'البريد الإلكتروني للشركة',
+    passwordLabel: 'كلمة المرور',
+    submitting: 'جاري الإرسال...',
+    signInBtn: 'تسجيل الدخول',
+    colSalary: 'الراتب',
+    colDemandStatus: 'حالة الطلب',
+    regFormTitle: 'استمارة تسجيل المرشح',
+    regFormSub: 'املأ بياناتك بالكامل',
+    regSuccessTitle: 'تم التسجيل بنجاح',
+    regSuccessDesc: 'تم استلام طلبك.',
+    nameLabel: 'الاسم الكامل',
+    passportLabel: 'رقم جواز السفر',
+    sectorLabel: 'القطاع',
+    professionLabel: 'المهنة',
+    certNoLabel: 'رقم الشهادة',
+    issuingBodyLabel: 'جهة الإصدار',
+    videoUrlLabel: 'رابط الفيديو',
+    expectedSalaryLabel: 'الراتب المتوقع',
+    shiftSuitableLabel: 'مناسب للعمل بنظام الورديات',
+    emailLabel: 'البريد الإلكتروني',
+    phoneLabel: 'الهاتف',
   },
 };
