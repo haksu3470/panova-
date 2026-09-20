@@ -11,7 +11,6 @@ import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function CandidateDashboard() {
-  // Sayfa açıldığında otomatik en üste kaydır
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -40,6 +39,17 @@ export default function CandidateDashboard() {
 
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
+
+  // Dile göre belge isimlerini dinamik çevirme fonksiyonu
+  const getLocalizedDocName = (index: number) => {
+    const names: Record<Language, string[]> = {
+      tr: ['Pasaport Taraması', 'Mesleki Sertifika / İzin Belgesi', 'Adli Sicil Kaydı (Sabıka Kaydı)', 'Sağlık Raporu / Akciğer Grafisi'],
+      en: ['Passport Scan', 'Professional Certificate / Permit', 'Criminal Record', 'Health Report / X-Ray'],
+      sq: ['Skanimi i Pasaportës', 'Certifikata Profesionale / Leja', 'Dëshmi Penaliteti', 'Raporti Shëndetësor / Rrezet X'],
+      ar: ['مسح جواز السفر', 'الشهادة المهنية / التصريح', 'السجل الجنائي', 'التقرير الطبي / الأشعة']
+    };
+    return (names[currentLang] || names.tr)[index] || `Document ${index + 1}`;
+  };
 
   const handleCandidateLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,7 +100,12 @@ export default function CandidateDashboard() {
     const reader = new FileReader();
     reader.onload = async (e) => {
       const fileUrl = e.target?.result as string;
-      const currentDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : [];
+      const currentDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : [
+        { id: '1', name: 'Pasaport Taraması', status: 'pending' },
+        { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
+        { id: '3', name: 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
+        { id: '4', name: 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
+      ];
       
       const updatedDocs = currentDocs.map((doc: any) => {
         if (doc.id === docId) {
@@ -106,7 +121,9 @@ export default function CandidateDashboard() {
 
       if (!error) {
         setCandidate({ ...candidate, documents_json: JSON.stringify(updatedDocs) });
-        alert(currentLang === 'tr' ? 'Belge yüklendi!' : 'Document uploaded!');
+        alert(currentLang === 'tr' ? 'Belge başarıyla yüklendi!' : 'Document uploaded successfully!');
+      } else {
+        alert('Hata: ' + error.message);
       }
     };
     reader.readAsDataURL(file);
@@ -330,31 +347,38 @@ export default function CandidateDashboard() {
           </div>
         )}
 
-        {/* Tab 3: Documents */}
+        {/* Tab 3: Documents (Dinamik İsim ve Garanti Önizleme) */}
         {activeTab === 'documents' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Belgelerim</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.documents}</h3>
             <div className="space-y-3">
-              {candidateDocs.map((doc: any) => (
-                <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <div className="font-extrabold text-slate-900 text-sm">{doc.name}</div>
-                    {doc.file_name && <div className="text-xs text-slate-500">Yüklenen: {doc.file_name}</div>}
+              {candidateDocs.map((doc: any, index: number) => {
+                const localizedName = getLocalizedDocName(index);
+                return (
+                  <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <div className="font-extrabold text-slate-900 text-sm">{localizedName}</div>
+                      {doc.file_name && <div className="text-xs text-slate-500">Yüklenen: {doc.file_name}</div>}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="px-3 py-1 rounded bg-amber-100 text-amber-800 text-[10px] font-bold uppercase">{doc.status}</span>
+                      {doc.file_url && (
+                        <button 
+                          type="button"
+                          onClick={() => setPreviewDoc({ name: localizedName, url: doc.file_url })} 
+                          className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1 cursor-pointer hover:bg-emerald-100 transition"
+                        >
+                          <Eye className="w-3.5 h-3.5" /> Önizle
+                        </button>
+                      )}
+                      <label className="bg-white text-slate-700 px-3 py-1.5 rounded-lg border font-bold cursor-pointer text-xs shadow-sm hover:bg-slate-100 transition">
+                        Yükle
+                        <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleDocUpload(doc.id, e)} className="hidden" />
+                      </label>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="px-3 py-1 rounded bg-amber-100 text-amber-800 text-[10px] font-bold uppercase">{doc.status}</span>
-                    {doc.file_url && (
-                      <button onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url })} className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1 cursor-pointer">
-                        <Eye className="w-3.5 h-3.5" /> Önizle
-                      </button>
-                    )}
-                    <label className="bg-white text-slate-700 px-3 py-1.5 rounded-lg border font-bold cursor-pointer text-xs shadow-sm">
-                      Yükle
-                      <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleDocUpload(doc.id, e)} className="hidden" />
-                    </label>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
