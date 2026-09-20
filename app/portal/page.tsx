@@ -23,7 +23,6 @@ export default function PortalPage() {
   const t = translations[currentLang] || translations.en;
   const isRtl = currentLang === 'ar';
   
-  // Seçili dil hariç diğer diller
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
   const activeLangObj = languages.find((l) => l.code === currentLang);
 
@@ -284,7 +283,12 @@ export default function PortalPage() {
                       <tr key={candidate.id} className="hover:bg-slate-50/50">
                         <td className="p-4 font-bold text-slate-900">
                           <div className="flex items-center gap-2">
-                            {candidate.full_name}
+                            <Link 
+                              href={`/portal/candidates/${candidate.id}`} 
+                              className="hover:text-[#2e7d32] hover:underline transition"
+                            >
+                              {candidate.full_name}
+                            </Link>
                             <button
                               onClick={() => toggleVerification(candidate.id, candidate.is_verified)}
                               className={`p-1 rounded-full transition cursor-pointer ${candidate.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400 hover:text-emerald-600'}`}
