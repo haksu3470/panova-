@@ -2,8 +2,16 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { User, CheckCircle2, LogOut, Lock, KeyRound, Camera, Save, Phone, Mail, FileText, FileCheck } from 'lucide-react';
+import { User, CheckCircle2, LogOut, Lock, KeyRound, Camera, Save, Phone, Mail, FileText, FileCheck, Award, Video, Upload, Eye, X } from 'lucide-react';
 import Link from 'next/link';
+
+interface CandidateDocument {
+  id: string;
+  name: string;
+  status: 'pending' | 'uploaded' | 'reviewing' | 'approved' | 'rejected' | 're_requested';
+  file_url?: string;
+  file_name?: string;
+}
 
 export default function CandidateDashboard() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -18,6 +26,9 @@ export default function CandidateDashboard() {
   const [newPassword, setNewPassword] = useState('');
   const [newPhoto, setNewPhoto] = useState('');
   const [updatingProfile, setUpdatingProfile] = useState(false);
+
+  // Belge Önizleme Modal
+  const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
 
   // Şifremi unuttum modal
   const [forgotModal, setForgotModal] = useState(false);
@@ -65,6 +76,38 @@ export default function CandidateDashboard() {
     reader.readAsDataURL(file);
   };
 
+  const handleDocUpload = async (docId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const fileUrl = e.target?.result as string;
+      const currentDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : [];
+      
+      const updatedDocs = currentDocs.map((doc: any) => {
+        if (doc.id === docId) {
+          return { ...doc, file_url: fileUrl, file_name: file.name, status: 'uploaded' };
+        }
+        return doc;
+      });
+
+      // Supabase'e kaydet
+      const { error } = await supabase
+        .from('job_candidates')
+        .update({ documents_json: JSON.stringify(updatedDocs) })
+        .eq('id', candidate.id);
+
+      if (!error) {
+        setCandidate({ ...candidate, documents_json: JSON.stringify(updatedDocs) });
+        alert('Belgeniz başarıyla yüklendi!');
+      } else {
+        alert('Yükleme hatası: ' + error.message);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setUpdatingProfile(true);
@@ -89,7 +132,7 @@ export default function CandidateDashboard() {
         password: newPassword,
         photo_url: newPhoto,
       });
-      alert('Profiliniz, iletişim bilgileriniz ve şifreniz başarıyla güncellendi!');
+      alert('Profiliniz ve şifreniz başarıyla güncellendi!');
     } else {
       alert('Güncelleme Hatası: ' + error.message);
     }
@@ -166,7 +209,12 @@ export default function CandidateDashboard() {
     );
   }
 
-  const candidateDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : [];
+  const candidateDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : [
+    { id: '1', name: 'Pasaport Taraması', status: 'pending' },
+    { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
+    { id: '3', name: 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
+    { id: '4', name: 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
@@ -184,7 +232,7 @@ export default function CandidateDashboard() {
             )}
             <div>
               <h1 className="text-xl font-extrabold text-slate-900">{candidate.full_name}</h1>
-              <span className="text-xs text-slate-500">GSM: {candidate.phone} | E-posta: {candidate.email}</span>
+              <span className="text-xs text-slate-500">Pasaport: {candidate.passport_number || 'Belirtilmedi'} | Sektör: {candidate.sector}</span>
             </div>
           </div>
           <button onClick={() => setAuthenticated(false)} className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer">
@@ -192,15 +240,22 @@ export default function CandidateDashboard() {
           </button>
         </div>
 
-        {/* Başvuru Durumu */}
+        {/* Başvuru ve Süreç Durumu */}
         <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-          <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Başvuru Durumu</h3>
-          <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 flex justify-between items-center">
-            <div>
-              <div className="text-xs font-bold text-emerald-800 uppercase">Güncel Aşama</div>
-              <div className="text-lg font-black text-emerald-900 uppercase">{candidate.status || 'Beklemede'}</div>
+          <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Başvuru Bilgilerim & Süreç Durumu</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200">
+              <div className="text-[10px] font-bold text-emerald-800 uppercase">Güncel Aşama</div>
+              <div className="text-base font-black text-emerald-900 uppercase mt-1">{candidate.status || 'Beklemede'}</div>
             </div>
-            <CheckCircle2 className="w-8 h-8 text-[#2e7d32]" />
+            <div className="p-4 bg-slate-50 rounded-2xl border">
+              <div className="text-[10px] font-bold text-slate-500 uppercase">Meslek / Uzmanlık</div>
+              <div className="text-sm font-bold text-slate-800 mt-1">{candidate.profession || 'Belirtilmedi'}</div>
+            </div>
+            <div className="p-4 bg-slate-50 rounded-2xl border">
+              <div className="text-[10px] font-bold text-slate-500 uppercase">Ücret Beklentisi</div>
+              <div className="text-sm font-bold text-emerald-700 mt-1">€{candidate.expected_salary || '0'} / ay</div>
+            </div>
           </div>
         </div>
 
@@ -234,27 +289,18 @@ export default function CandidateDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Telefon Numarası (GSM)</label>
-                <div className="relative">
-                  <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
-                  <input type="tel" required value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="w-full pl-9 pr-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
-                </div>
+                <input type="tel" required value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">E-posta Adresi</label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
-                  <input type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="w-full pl-9 pr-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
-                </div>
+                <input type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
               </div>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Portal Giriş Şifresi</label>
-              <div className="relative">
-                <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
-                <input type="text" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Yeni şifreniz" className="w-full pl-9 pr-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
-              </div>
+              <input type="text" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Yeni şifreniz" className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
             </div>
 
             <button type="submit" disabled={updatingProfile} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold text-sm transition shadow-md cursor-pointer flex items-center justify-center gap-2">
@@ -263,22 +309,85 @@ export default function CandidateDashboard() {
           </form>
         </div>
 
-        {/* Belgelerim */}
+        {/* Belgelerim ve Sertifikalarım */}
         <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-          <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Belgelerim</h3>
+          <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+            <FileCheck className="w-5 h-5 text-indigo-600" /> Belgelerim & Sertifikalarım
+          </h3>
+
           <div className="space-y-3">
             {candidateDocs.map((doc: any) => (
-              <div key={doc.id} className="p-4 bg-slate-50 rounded-xl border flex justify-between items-center text-xs">
-                <span className="font-bold text-slate-800">{doc.name}</span>
-                <span className={`px-3 py-1 rounded font-bold uppercase text-[10px] ${doc.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                  {doc.status === 'approved' ? 'Onaylandı' : 'Beklemede'}
-                </span>
+              <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div className="font-extrabold text-slate-900 text-sm">{doc.name}</div>
+                  {doc.file_name && <div className="text-xs text-slate-500">Yüklenen: {doc.file_name}</div>}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className={`px-3 py-1 rounded-lg font-bold uppercase text-[10px] ${
+                    doc.status === 'approved' ? 'bg-emerald-100 text-emerald-800' :
+                    doc.status === 'uploaded' ? 'bg-blue-100 text-blue-800' :
+                    'bg-amber-100 text-amber-800'
+                  }`}>
+                    {doc.status === 'approved' ? '🟢 Onaylandı' : doc.status === 'uploaded' ? '🔵 Yüklendi (İnceleniyor)' : '🟡 Bekleniyor'}
+                  </span>
+
+                  {doc.file_url && (
+                    <button type="button" onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url })} className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition text-xs flex items-center gap-1 cursor-pointer">
+                      <Eye className="w-3.5 h-3.5" /> Önizle
+                    </button>
+                  )}
+
+                  <label className="bg-white hover:bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition shadow-sm text-xs flex items-center gap-1">
+                    <Upload className="w-3.5 h-3.5 text-indigo-600" /> Dosya Yükle
+                    <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleDocUpload(doc.id, e)} className="hidden" />
+                  </label>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
+        {/* Sertifika ve Video Bilgileri */}
+        {(candidate.certificate_no || candidate.video_url) && (
+          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+              <Award className="w-5 h-5 text-amber-500" /> Mesleki Sertifika & Çalışma Videosu
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="p-4 bg-slate-50 rounded-xl border space-y-1">
+                <span className="font-bold text-slate-500 uppercase block">Sertifika No / Kurum</span>
+                <span className="text-slate-900 font-extrabold text-sm">{candidate.certificate_no || 'Belirtilmedi'}</span>
+                <span className="block text-slate-600">{candidate.issuing_body}</span>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-xl border space-y-1">
+                <span className="font-bold text-slate-500 uppercase block">Çalışma Videosu</span>
+                {candidate.video_url ? (
+                  <a href={candidate.video_url} target="_blank" rel="noreferrer" className="text-emerald-700 font-bold hover:underline inline-flex items-center gap-1">
+                    <Video className="w-4 h-4" /> Videoyu Görüntüle ↗
+                  </a>
+                ) : <span className="text-slate-400 italic">Video eklenmemiş</span>}
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
+
+      {/* Önizleme Modalı */}
+      {previewDoc && (
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
+              <h3 className="font-bold text-sm">{previewDoc.name}</h3>
+              <button onClick={() => setPreviewDoc(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-4 flex-1 overflow-auto flex justify-center bg-slate-100">
+              <iframe src={previewDoc.url} className="w-full h-[70vh] rounded-xl border" title="Önizleme" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
