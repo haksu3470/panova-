@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function CandidateDashboard() {
+  // Sayfa açıldığında otomatik en üste kaydır
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -39,7 +40,6 @@ export default function CandidateDashboard() {
 
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
-  const activeLangObj = languages.find((l) => l.code === currentLang);
 
   const handleCandidateLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -252,7 +252,7 @@ export default function CandidateDashboard() {
           </div>
         </div>
 
-        {/* Sekmeler (Tıklama Garantili ve Doğrudan Çevirili) */}
+        {/* Sekmeler */}
         <div className="flex flex-wrap gap-2 border-b pb-2 overflow-x-auto">
           <button onClick={() => setActiveTab('overview')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.overview}</button>
           <button onClick={() => setActiveTab('profile')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.profile}</button>
@@ -336,13 +336,21 @@ export default function CandidateDashboard() {
             <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Belgelerim</h3>
             <div className="space-y-3">
               {candidateDocs.map((doc: any) => (
-                <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border flex items-center justify-between">
-                  <span className="font-extrabold text-slate-900 text-sm">{doc.name}</span>
+                <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="font-extrabold text-slate-900 text-sm">{doc.name}</div>
+                    {doc.file_name && <div className="text-xs text-slate-500">Yüklenen: {doc.file_name}</div>}
+                  </div>
                   <div className="flex items-center gap-3">
                     <span className="px-3 py-1 rounded bg-amber-100 text-amber-800 text-[10px] font-bold uppercase">{doc.status}</span>
+                    {doc.file_url && (
+                      <button onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url })} className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1 cursor-pointer">
+                        <Eye className="w-3.5 h-3.5" /> Önizle
+                      </button>
+                    )}
                     <label className="bg-white text-slate-700 px-3 py-1.5 rounded-lg border font-bold cursor-pointer text-xs shadow-sm">
                       Yükle
-                      <input type="file" onChange={(e) => handleDocUpload(doc.id, e)} className="hidden" />
+                      <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleDocUpload(doc.id, e)} className="hidden" />
                     </label>
                   </div>
                 </div>
@@ -438,6 +446,37 @@ export default function CandidateDashboard() {
         )}
 
       </div>
+
+      {/* Gelişmiş Önizleme Modalı */}
+      {previewDoc && (
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
+              <h3 className="font-bold text-sm truncate max-w-md">{previewDoc.name}</h3>
+              <div className="flex items-center gap-2">
+                <a 
+                  href={previewDoc.url} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition"
+                >
+                  Yeni Sekmede Aç ↗
+                </a>
+                <button onClick={() => setPreviewDoc(null)} className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition cursor-pointer">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-4 flex-1 overflow-auto flex justify-center items-center bg-slate-100 min-h-[60vh]">
+              {previewDoc.url.startsWith('data:image/') ? (
+                <img src={previewDoc.url} alt="Belge Önizleme" className="max-w-full max-h-[70vh] rounded-xl object-contain shadow-md" />
+              ) : (
+                <iframe src={previewDoc.url} className="w-full h-[70vh] rounded-xl border bg-white" title="Belge Önizleme" />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
