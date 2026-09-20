@@ -179,12 +179,12 @@ export default function CandidateDashboard() {
           <select 
             value={currentLang} 
             onChange={(e) => {
-    const newLang = e.target.value as Language;
-    setCurrentLang(newLang);
-    localStorage.setItem('panova_candidate_lang', newLang);
-  }} 
-  className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
->
+              const newLang = e.target.value as Language;
+              setCurrentLang(newLang);
+              localStorage.setItem('panova_candidate_lang', newLang);
+            }} 
+            className="bg-transparent text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer"
+          >
           
             {languages.map((lang) => (
               <option key={lang.code} value={lang.code} className="text-slate-900">
@@ -367,35 +367,38 @@ export default function CandidateDashboard() {
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.documents}</h3>
             <div className="space-y-3">
-              {candidateDocs.map((doc: any, index: number) => {
-                const localizedTitle = currentLangTitles[index] || doc.name;
-                return (
-                  <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                      <div className="font-extrabold text-slate-900 text-sm">{localizedTitle}</div>
-                      {doc.file_name && <div className="text-xs text-slate-500">Yüklenen: {doc.file_name}</div>}
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`px-3 py-1 rounded font-bold uppercase text-[10px] ${doc.file_url ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                        {doc.file_url ? (currentLang === 'tr' ? 'Yüklendi' : 'Uploaded') : (currentLang === 'tr' ? 'Bekleniyor' : 'Pending')}
-                      </span>
-                      {doc.file_url && (
-                        <button 
-                          type="button"
-                          onClick={() => setPreviewDoc({ name: localizedTitle, url: doc.file_url })} 
-                          className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1 cursor-pointer hover:bg-emerald-100 transition shadow-sm"
-                        >
-                          <Eye className="w-3.5 h-3.5" /> {currentLang === 'tr' ? 'Önizle' : 'Preview'}
-                        </button>
-                      )}
-                      <label className="bg-white text-slate-700 px-3 py-1.5 rounded-lg border font-bold cursor-pointer text-xs shadow-sm hover:bg-slate-100 transition">
-                        {currentLang === 'tr' ? 'Yükle' : 'Upload'}
-                        <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleDocUpload(index, e)} className="hidden" />
-                      </label>
-                    </div>
+             {candidateDocs.map((doc: any, index: number) => {
+              const localizedTitle = currentLangTitles[index] || doc.name;
+              return (
+                <div key={doc.id || index} className="p-4 bg-slate-50 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="font-extrabold text-slate-900 text-sm">{localizedTitle}</div>
+                    {doc.file_name && <div className="text-xs text-slate-500">Yüklenen: {doc.file_name}</div>}
                   </div>
-                );
-              })}
+                  <div className="flex items-center gap-3">
+                    <span className={`px-3 py-1 rounded font-bold uppercase text-[10px] ${doc.file_url ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                      {doc.file_url ? (currentLang === 'tr' ? 'Yüklendi' : 'Uploaded') : (currentLang === 'tr' ? 'Bekleniyor' : 'Pending')}
+                    </span>
+                    
+                    {/* Önizle Butonu - Güvenli Kontrol */}
+                    {doc.file_url && doc.file_url.trim() !== '' && (
+                      <button 
+                        type="button"
+                        onClick={() => setPreviewDoc({ name: localizedTitle, url: doc.file_url })} 
+                        className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1 cursor-pointer hover:bg-emerald-100 transition shadow-sm"
+                      >
+                        <Eye className="w-3.5 h-3.5" /> {currentLang === 'tr' ? 'Önizle' : 'Preview'}
+                      </button>
+                    )}
+
+                    <label className="bg-white text-slate-700 px-3 py-1.5 rounded-lg border font-bold cursor-pointer text-xs shadow-sm hover:bg-slate-100 transition">
+                      {currentLang === 'tr' ? 'Yükle' : 'Upload'}
+                      <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleDocUpload(index, e)} className="hidden" />
+                    </label>
+                  </div>
+                </div>
+              );
+            })} 
             </div>
           </div>
         )}
