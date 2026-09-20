@@ -209,7 +209,7 @@ export default function CandidateDashboard() {
           <form onSubmit={handleLogin} className="space-y-4">
   <div>
     <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-      {t.emailOrPhone}
+      {currentLang === 'tr' ? 'E-POSTA / TELEFON / PASAPORT *' : (currentLang === 'sq' ? 'EMAIL / TELEFON / PASAPORTË *' : 'EMAIL / PHONE / PASSPORT *')}
     </label>
     <input 
       type="text" 
@@ -223,7 +223,7 @@ export default function CandidateDashboard() {
 
   <div>
     <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-      {t.password}
+      {currentLang === 'tr' ? 'ŞİFRE *' : (currentLang === 'sq' ? 'FJALËKALIMI *' : 'PASSWORD *')}
     </label>
     <input 
       type="password" 
@@ -250,9 +250,9 @@ export default function CandidateDashboard() {
     type="submit" 
     className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl transition shadow-lg cursor-pointer text-sm"
   >
-    {t.loginBtn}
+    {currentLang === 'tr' ? 'Sisteme Giriş Yap' : (currentLang === 'sq' ? 'Hyni në Sistem' : 'Sign In')}
   </button>
-</form>           
+</form>    
 
           <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-sm text-slate-500 hover:underline">
             <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
