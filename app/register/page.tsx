@@ -42,32 +42,18 @@ export default function RegisterPage() {
     setErrorMessage('');
 
     try {
-      // 1. Mükerrer Kayıt Kontrolü (Tek Kayıt Kuralı: Telefon, E-posta veya Pasaport)
-      const { data: existingCandidates, error: checkError } = await supabase
-        .from('job_candidates')
-        .select('id, full_name, email, phone, passport_number')
-        .or(`email.eq.${formData.email},phone.eq.${formData.phone}${formData.passportNumber ? `,passport_number.eq.${formData.passportNumber}` : ''}`);
+      const cleanEmail = formData.email.trim().toLowerCase();
+      const cleanPhone = formData.phone.trim();
+      const cleanPassport = formData.passportNumber.trim();
 
-      if (checkError) throw checkError;
-
-      if (existingCandidates && existingCandidates.length > 0) {
-        setErrorMessage(
-          currentLang === 'tr'
-            ? 'Bu telefon numarası, e-posta veya pasaport bilgisiyle kayıtlı bir aday halihazırda sistemde bulunmaktadır! Lütfen bilgilerinizi kontrol ediniz.'
-            : 'A candidate with this phone, email, or passport number already exists in the system!'
-        );
-        setLoading(false);
-        return;
-      }
-
-      // 2. Yeni Aday Kaydı
+      // 1. Aday Kaydı
       const { error: insertError } = await supabase.from('job_candidates').insert([
         {
           full_name: formData.fullName,
-          passport_number: formData.passportNumber,
+          passport_number: cleanPassport || null,
           nationality: formData.nationality,
-          phone: formData.phone,
-          email: formData.email,
+          phone: cleanPhone,
+          email: cleanEmail,
           sector: formData.sector,
           profession: formData.profession,
           experience_years: parseInt(formData.experienceYears) || 0,
@@ -82,11 +68,23 @@ export default function RegisterPage() {
         },
       ]);
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        // Unique Constraint Hatası (23505 = Mükerrer Kayıt)
+        if (insertError.code === '23505' || insertError.message.includes('unique')) {
+          setErrorMessage(
+            currentLang === 'tr'
+              ? 'Bu e-posta adresi, telefon numarası veya pasaport numarası ile daha önce başvuru yapılmıştır!'
+              : 'A candidate with this email, phone, or passport number already exists in the system!'
+          );
+          setLoading(false);
+          return;
+        }
+        throw insertError;
+      }
 
       setSubmitted(true);
     } catch (err: any) {
-      setErrorMessage('Hata: ' + err.message);
+      setErrorMessage('Kayıt Hatası: ' + err.message);
     } finally {
       setLoading(false);
     }
