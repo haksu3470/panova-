@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { User, CheckCircle2, LogOut, Lock, KeyRound, Camera, Save, Phone, Mail, FileText, FileCheck, Award, Video, Upload, Eye, X, Link as LinkIcon } from 'lucide-react';
+import { 
+  User, CheckCircle2, LogOut, Lock, KeyRound, Camera, Save, Phone, Mail, 
+  FileText, FileCheck, Award, Video, Upload, Eye, X, Briefcase, Calendar, 
+  FileSignature, Plane, LifeBuoy, CheckSquare 
+} from 'lucide-react';
 import Link from 'next/link';
 
 interface CandidateDocument {
@@ -19,6 +23,7 @@ export default function CandidateDashboard() {
   const [password, setPassword] = useState('');
   const [candidate, setCandidate] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'documents' | 'jobs' | 'interviews' | 'offers' | 'process' | 'travel' | 'support'>('overview');
 
   // Güncelleme State'leri
   const [newPhone, setNewPhone] = useState('');
@@ -35,6 +40,11 @@ export default function CandidateDashboard() {
   const [forgotModal, setForgotModal] = useState(false);
   const [forgotInput, setForgotInput] = useState('');
   const [forgotSent, setForgotSent] = useState(false);
+
+  // Destek Talebi State
+  const [supportSubject, setSupportSubject] = useState('');
+  const [supportMsg, setSupportMsg] = useState('');
+  const [supportSent, setSupportSent] = useState(false);
 
   const handleCandidateLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,15 +145,18 @@ export default function CandidateDashboard() {
         photo_url: newPhoto,
         video_url: newVideoUrl,
       });
-      alert('Profiliniz, çalışma video linkiniz ve şifreniz başarıyla güncellendi!');
+      alert('Profiliniz ve şifreniz başarıyla güncellendi!');
     } else {
       alert('Güncelleme Hatası: ' + error.message);
     }
   };
 
-  const handleForgotPassword = (e: React.FormEvent) => {
+  const handleSendSupport = (e: React.FormEvent) => {
     e.preventDefault();
-    setForgotSent(true);
+    setSupportSent(true);
+    setSupportSubject('');
+    setSupportMsg('');
+    setTimeout(() => setSupportSent(false), 4000);
   };
 
   if (!authenticated) {
@@ -190,21 +203,10 @@ export default function CandidateDashboard() {
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <KeyRound className="w-5 h-5 text-[#2e7d32]" /> Şifre Sıfırlama
               </h3>
-              {forgotSent ? (
-                <div className="p-4 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold text-center">
-                  Geçici şifreniz kayıtlı iletişim bilgilerinize gönderilmiştir (Varsayılan şifreniz: <code className="bg-emerald-100 px-1 rounded">123456</code>).
-                </div>
-              ) : (
-                <form onSubmit={handleForgotPassword} className="space-y-3">
-                  <p className="text-xs text-slate-500">Kayıtlı E-posta veya GSM numaranızı girin, geçici şifrenizi iletelim.</p>
-                  <input type="text" required value={forgotInput} onChange={(e) => setForgotInput(e.target.value)} placeholder="E-posta veya Telefon" className="w-full px-3 py-2 text-xs rounded-xl border outline-none text-slate-900" />
-                  <div className="flex gap-2">
-                    <button type="submit" className="flex-1 bg-[#2e7d32] text-white py-2 rounded-xl text-xs font-bold">Gönder</button>
-                    <button type="button" onClick={() => setForgotModal(false)} className="px-4 bg-slate-100 text-slate-700 py-2 rounded-xl text-xs font-bold">İptal</button>
-                  </div>
-                </form>
-              )}
-              {forgotSent && <button onClick={() => setForgotModal(false)} className="w-full bg-slate-900 text-white py-2 rounded-xl text-xs font-bold">Kapat</button>}
+              <div className="p-4 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold text-center">
+                Varsayılan şifreniz: <code className="bg-emerald-100 px-1 rounded">123456</code>. Bu şifre ile giriş yapıp profilinizden değiştirebilirsiniz.
+              </div>
+              <button onClick={() => setForgotModal(false)} className="w-full bg-slate-900 text-white py-2 rounded-xl text-xs font-bold">Kapat</button>
             </div>
           </div>
         )}
@@ -221,7 +223,7 @@ export default function CandidateDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border shadow-sm">
@@ -235,7 +237,7 @@ export default function CandidateDashboard() {
             )}
             <div>
               <h1 className="text-xl font-extrabold text-slate-900">{candidate.full_name}</h1>
-              <span className="text-xs text-slate-500">Pasaport: {candidate.passport_number || 'Belirtilmedi'} | Sektör: {candidate.sector}</span>
+              <span className="text-xs text-slate-500">Pasaport: {candidate.passport_number || 'Belirtilmedi'} | Uzmanlık: {candidate.profession}</span>
             </div>
           </div>
           <button onClick={() => setAuthenticated(false)} className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer">
@@ -243,125 +245,240 @@ export default function CandidateDashboard() {
           </button>
         </div>
 
-        {/* Başvuru ve Süreç Durumu */}
-        <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-          <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Başvuru Bilgilerim & Süreç Durumu</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200">
-              <div className="text-[10px] font-bold text-emerald-800 uppercase">Güncel Aşama</div>
-              <div className="text-base font-black text-emerald-900 uppercase mt-1">{candidate.status || 'Beklemede'}</div>
-            </div>
-            <div className="p-4 bg-slate-50 rounded-2xl border">
-              <div className="text-[10px] font-bold text-slate-500 uppercase">Meslek / Uzmanlık</div>
-              <div className="text-sm font-bold text-slate-800 mt-1">{candidate.profession || 'Belirtilmedi'}</div>
-            </div>
-            <div className="p-4 bg-slate-50 rounded-2xl border">
-              <div className="text-[10px] font-bold text-slate-500 uppercase">Ücret Beklentisi</div>
-              <div className="text-sm font-bold text-emerald-700 mt-1">€{candidate.expected_salary || '0'} / ay</div>
+        {/* Sekme Menüsü (Tüm Not Başlıkları) */}
+        <div className="flex flex-wrap gap-2 border-b pb-2 overflow-x-auto">
+          <button onClick={() => setActiveTab('overview')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>Ana Sayfa</button>
+          <button onClick={() => setActiveTab('profile')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>Profilim</button>
+          <button onClick={() => setActiveTab('documents')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'documents' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>Belgelerim</button>
+          <button onClick={() => setActiveTab('jobs')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'jobs' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>İş Fırsatlarım</button>
+          <button onClick={() => setActiveTab('interviews')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'interviews' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>Görüşmelerim</button>
+          <button onClick={() => setActiveTab('offers')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'offers' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>İş Tekliflerim</button>
+          <button onClick={() => setActiveTab('process')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'process' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>İşlem Durumu</button>
+          <button onClick={() => setActiveTab('travel')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>Seyahat Bilgilerim</button>
+          <button onClick={() => setActiveTab('support')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'support' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>Destek</button>
+        </div>
+
+        {/* Tab 1: Ana Sayfa */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Başvuru Durumu ve Özet</h3>
+              <div className="p-5 bg-emerald-50 rounded-2xl border border-emerald-200 flex justify-between items-center">
+                <div>
+                  <div className="text-xs font-bold text-emerald-800 uppercase">Güncel Süreç Aşaması</div>
+                  <div className="text-xl font-black text-emerald-900 uppercase mt-1">{candidate.status || 'Beklemede (Pending)'}</div>
+                </div>
+                <CheckCircle2 className="w-10 h-10 text-[#2e7d32]" />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Profil Fotoğrafı, İletişim, Video ve Şifre Düzenleme */}
-        <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6">
-          <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-            <User className="w-5 h-5 text-[#2e7d32]" /> Profil, İletişim, Çalışma Videosu ve Şifre Düzenleme
-          </h3>
+        {/* Tab 2: Profilim */}
+        {activeTab === 'profile' && (
+          <div className="bg-white p-6 rounded-2xl border shadow-sm max-w-3xl space-y-6">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+              <User className="w-5 h-5 text-[#2e7d32]" /> Kimlik, İletişim, Meslek ve Şifre Yönetimi
+            </h3>
 
-          <form onSubmit={handleUpdateProfile} className="space-y-4">
-            <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-2xl border">
-              <div className="relative">
-                {newPhoto ? (
-                  <img src={newPhoto} alt="Foto" className="w-20 h-20 rounded-2xl object-cover border shadow" />
-                ) : (
-                  <div className="w-20 h-20 bg-slate-200 rounded-2xl flex items-center justify-center text-slate-400 font-bold text-xl">
-                    {candidate.full_name?.charAt(0)}
-                  </div>
-                )}
-                <label className="absolute -bottom-2 -right-2 bg-[#2e7d32] text-white p-2 rounded-xl cursor-pointer shadow hover:bg-[#1b5e20] transition" title="Fotoğraf Değiştir">
-                  <Camera className="w-4 h-4" />
-                  <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-                </label>
-              </div>
-              <div>
-                <h4 className="font-extrabold text-slate-800 text-sm">{candidate.full_name}</h4>
-                <p className="text-xs text-slate-500">Profil fotoğrafınızı güncellemek için kamera ikonuna tıklayın.</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Telefon Numarası (GSM)</label>
-                <input type="tel" required value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">E-posta Adresi</label>
-                <input type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1 flex items-center gap-1">
-                <Video className="w-4 h-4 text-emerald-600" /> Çalışma Videosu Linki (YouTube / Google Drive vb.)
-              </label>
-              <input type="url" value={newVideoUrl} onChange={(e) => setNewVideoUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
-              <p className="text-[11px] text-slate-400 mt-1">Mesleki becerilerinizi gösteren video bağlantınızı buraya ekleyebilir veya güncelleyebilirsiniz.</p>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Portal Giriş Şifresi</label>
-              <input type="text" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Yeni şifreniz" className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
-            </div>
-
-            <button type="submit" disabled={updatingProfile} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold text-sm transition shadow-md cursor-pointer flex items-center justify-center gap-2">
-              <Save className="w-4 h-4" /> {updatingProfile ? 'Güncelleniyor...' : 'Değişiklikleri ve Video Linkini Kaydet'}
-            </button>
-          </form>
-        </div>
-
-        {/* Belgelerim ve Sertifikalarım */}
-        <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-          <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-            <FileCheck className="w-5 h-5 text-indigo-600" /> Belgelerim & Sertifikalarım
-          </h3>
-
-          <div className="space-y-3">
-            {candidateDocs.map((doc: any) => (
-              <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <div className="font-extrabold text-slate-900 text-sm">{doc.name}</div>
-                  {doc.file_name && <div className="text-xs text-slate-500">Yüklenen: {doc.file_name}</div>}
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className={`px-3 py-1 rounded-lg font-bold uppercase text-[10px] ${
-                    doc.status === 'approved' ? 'bg-emerald-100 text-emerald-800' :
-                    doc.status === 'uploaded' ? 'bg-blue-100 text-blue-800' :
-                    'bg-amber-100 text-amber-800'
-                  }`}>
-                    {doc.status === 'approved' ? '🟢 Onaylandı' : doc.status === 'uploaded' ? '🔵 Yüklendi (İnceleniyor)' : '🟡 Bekleniyor'}
-                  </span>
-
-                  {doc.file_url && (
-                    <button type="button" onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url })} className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition text-xs flex items-center gap-1 cursor-pointer">
-                      <Eye className="w-3.5 h-3.5" /> Önizle
-                    </button>
+            <form onSubmit={handleUpdateProfile} className="space-y-4">
+              <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-2xl border">
+                <div className="relative">
+                  {newPhoto ? (
+                    <img src={newPhoto} alt="Foto" className="w-20 h-20 rounded-2xl object-cover border shadow" />
+                  ) : (
+                    <div className="w-20 h-20 bg-slate-200 rounded-2xl flex items-center justify-center text-slate-400 font-bold text-xl">
+                      {candidate.full_name?.charAt(0)}
+                    </div>
                   )}
-
-                  <label className="bg-white hover:bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition shadow-sm text-xs flex items-center gap-1">
-                    <Upload className="w-3.5 h-3.5 text-indigo-600" /> Dosya Yükle
-                    <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleDocUpload(doc.id, e)} className="hidden" />
+                  <label className="absolute -bottom-2 -right-2 bg-[#2e7d32] text-white p-2 rounded-xl cursor-pointer shadow hover:bg-[#1b5e20] transition" title="Fotoğraf Değiştir">
+                    <Camera className="w-4 h-4" />
+                    <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                   </label>
                 </div>
+                <div>
+                  <h4 className="font-extrabold text-slate-800 text-sm">{candidate.full_name}</h4>
+                  <p className="text-xs text-slate-500">Pasaport: {candidate.passport_number} | Ülke: {candidate.nationality}</p>
+                </div>
               </div>
-            ))}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Telefon Numarası (GSM)</label>
+                  <input type="tel" required value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">E-posta Adresi</label>
+                  <input type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Çalışma Videosu Linki</label>
+                <input type="url" value={newVideoUrl} onChange={(e) => setNewVideoUrl(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Portal Giriş Şifresi</label>
+                <input type="text" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none" />
+              </div>
+
+              <button type="submit" disabled={updatingProfile} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold text-sm transition shadow-md cursor-pointer flex items-center justify-center gap-2">
+                <Save className="w-4 h-4" /> {updatingProfile ? 'Güncelleniyor...' : 'Değişiklikleri Kaydet'}
+              </button>
+            </form>
           </div>
-        </div>
+        )}
+
+        {/* Tab 3: Belgelerim */}
+        {activeTab === 'documents' && (
+          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+              <FileCheck className="w-5 h-5 text-indigo-600" /> Belgelerim ve Kontrol Durumları
+            </h3>
+            <div className="space-y-3">
+              {candidateDocs.map((doc: any) => (
+                <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="font-extrabold text-slate-900 text-sm">{doc.name}</div>
+                    {doc.file_name && <div className="text-xs text-slate-500">Yüklenen: {doc.file_name}</div>}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`px-3 py-1 rounded-lg font-bold uppercase text-[10px] ${
+                      doc.status === 'approved' ? 'bg-emerald-100 text-emerald-800' :
+                      doc.status === 'uploaded' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'
+                    }`}>
+                      {doc.status === 'approved' ? 'Onaylandı' : doc.status === 'uploaded' ? 'Yüklendi (İnceleniyor)' : 'Bekleniyor'}
+                    </span>
+                    {doc.file_url && (
+                      <button onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url })} className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1 cursor-pointer">
+                        <Eye className="w-3.5 h-3.5" /> Önizle
+                      </button>
+                    )}
+                    <label className="bg-white hover:bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg border font-bold cursor-pointer text-xs flex items-center gap-1 shadow-sm">
+                      <Upload className="w-3.5 h-3.5 text-indigo-600" /> Yükle
+                      <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleDocUpload(doc.id, e)} className="hidden" />
+                    </label>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 4: İş Fırsatlarım */}
+        {activeTab === 'jobs' && (
+          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-emerald-600" /> Uygun İş Fırsatları & Çalışma Şartları
+            </h3>
+            <div className="p-5 bg-slate-50 rounded-2xl border space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="font-extrabold text-slate-900 text-base">{candidate.profession || 'Elektrik/İnşaat'} Pozisyonu</span>
+                <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Aktif Eşleşme</span>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Sektör: <strong>{candidate.sector || 'Construction'}</strong> | Ücret Beklentisi: <strong className="text-emerald-700">€{candidate.expected_salary || '850'} / ay</strong>
+              </p>
+              <div className="text-xs text-slate-500 pt-2 border-t">Temel Çalışma Şartları: Konaklama ve yemek işverene aittir, vize süreçleri PANOVA tarafından yürütülmektedir.</div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 5: Görüşmelerim */}
+        {activeTab === 'interviews' && (
+          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-blue-600" /> Planlanan İşveren Görüşmeleri
+            </h3>
+            <div className="p-5 bg-slate-50 rounded-2xl border text-center space-y-2">
+              <Calendar className="w-10 h-10 text-slate-400 mx-auto" />
+              <h4 className="font-bold text-slate-800 text-sm">Aktif Görüşme Planı Bulunmuyor</h4>
+              <p className="text-xs text-slate-500">İşveren ön elemesi tamamlandığında mülakat tarihi burada görünecektir.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 6: İş Tekliflerim */}
+        {activeTab === 'offers' && (
+          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+              <FileSignature className="w-5 h-5 text-indigo-600" /> İş Teklifleri ve Sözleşme Süreci
+            </h3>
+            <div className="p-5 bg-slate-50 rounded-2xl border text-center space-y-2">
+              <FileSignature className="w-10 h-10 text-slate-400 mx-auto" />
+              <h4 className="font-bold text-slate-800 text-sm">Henüz İletilmiş Resmi Teklif Yok</h4>
+              <p className="text-xs text-slate-500">Seçim aşamasından sonra iş teklifi ve sözleşme detayları buraya yansıyacaktır.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 7: İşlem Durumu */}
+        {activeTab === 'process' && (
+          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+              <CheckSquare className="w-5 h-5 text-amber-600" /> Resmî Süreç ve Oturum Durumu
+            </h3>
+            <div className="space-y-3 text-xs">
+              <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200 flex justify-between items-center">
+                <span className="font-bold text-emerald-900">1. Evrak Doğrulama</span>
+                <span className="font-extrabold text-emerald-700">Tamamlandı</span>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-xl border flex justify-between items-center">
+                <span className="font-bold text-slate-700">2. İşveren Onayı & Ön Görüşme</span>
+                <span className="font-bold text-amber-600">Beklemede</span>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-xl border flex justify-between items-center">
+                <span className="font-bold text-slate-700">3. Vize ve Çalışma İzni Başvurusu</span>
+                <span className="font-bold text-slate-400">Sırada</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 8: Seyahat Bilgilerim */}
+        {activeTab === 'travel' && (
+          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+              <Plane className="w-5 h-5 text-sky-600" /> Uçuş, Varış ve Konaklama Bilgileri
+            </h3>
+            <div className="p-5 bg-slate-50 rounded-2xl border text-center space-y-2">
+              <Plane className="w-10 h-10 text-slate-400 mx-auto" />
+              <h4 className="font-bold text-slate-800 text-sm">Seyahat Planlaması Henüz Yapılmadı</h4>
+              <p className="text-xs text-slate-500">Resmî vize onayınız alındıktan sonra uçuş ve karşılama detayları burada paylaşılacaktır.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 9: Destek */}
+        {activeTab === 'support' && (
+          <div className="bg-white p-6 rounded-2xl border shadow-sm max-w-2xl space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+              <LifeBuoy className="w-5 h-5 text-red-600" /> Destek Talebi Oluştur
+            </h3>
+            {supportSent && (
+              <div className="p-4 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold text-center">
+                Destek talebiniz başarıyla PANOVA yönetim ekibine iletildi! En kısa sürede size dönüş yapılacaktır.
+              </div>
+            )}
+            <form onSubmit={handleSendSupport} className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Konu</label>
+                <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Örn: Belge Yükleme Hk." className="w-full px-3 py-2 text-xs rounded-xl border outline-none text-slate-900" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Mesajınız</label>
+                <textarea rows={4} required value={supportMsg} onChange={(e) => setSupportMsg(e.target.value)} placeholder="Sorununuzu veya talebinizi detaylı yazın..." className="w-full px-3 py-2 text-xs rounded-xl border outline-none text-slate-900" />
+              </div>
+              <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold text-xs transition cursor-pointer">
+                Destek Talebi Gönder
+              </button>
+            </form>
+          </div>
+        )}
 
       </div>
 
-      {/* Önizleme Modalı */}
       {previewDoc && (
         <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
