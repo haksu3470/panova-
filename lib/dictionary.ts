@@ -114,8 +114,8 @@ export const translations: Record<Language, Translation> = {
   ar: {
     returnHome: 'العودة إلى الرئيسية',
     candidatePortal: 'بوابة تسجيل دخول المرشحين',
-    loginDesc: 'قم تسجيل الدخول بريدك الإلكتروني أو هاتفك أو رقم جواز السفر.',
-    emailOrPhone: 'البريد / الهاتف / جواز السفر *',
+    loginDesc: 'قم بتسجيل الدخول بريدك الإلكتروني أو هاتفك أو رقم جواز السفر.',
+    emailOrPhone: 'البريد الإلكتروني / الهاتف / جواز السفر *',
     password: 'كلمة المرور *',
     loginBtn: 'تسجيل الدخول',
     overview: 'نظرة عامة',
