@@ -40,15 +40,12 @@ export default function CandidateDashboard() {
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
 
-  // Dile göre belge isimlerini dinamik çevirme fonksiyonu
-  const getLocalizedDocName = (index: number) => {
-    const names: Record<Language, string[]> = {
-      tr: ['Pasaport Taraması', 'Mesleki Sertifika / İzin Belgesi', 'Adli Sicil Kaydı (Sabıka Kaydı)', 'Sağlık Raporu / Akciğer Grafisi'],
-      en: ['Passport Scan', 'Professional Certificate / Permit', 'Criminal Record', 'Health Report / X-Ray'],
-      sq: ['Skanimi i Pasaportës', 'Certifikata Profesionale / Leja', 'Dëshmi Penaliteti', 'Raporti Shëndetësor / Rrezet X'],
-      ar: ['مسح جواز السفر', 'الشهادة المهنية / التصريح', 'السجل الجنائي', 'التقرير الطبي / الأشعة']
-    };
-    return (names[currentLang] || names.tr)[index] || `Document ${index + 1}`;
+  // Dile göre güncellenen standart belge isimleri sözlüğü
+  const docTitlesByLang: Record<Language, string[]> = {
+    tr: ['Pasaport Taraması', 'Mesleki Sertifika / İzin Belgesi', 'Adli Sicil Kaydı (Sabıka Kaydı)', 'Sağlık Raporu / Akciğer Grafisi'],
+    en: ['Passport Scan', 'Professional Certificate / Permit', 'Criminal Record', 'Health Report / X-Ray'],
+    sq: ['Skanimi i Pasaportës', 'Certifikata Profesionale / Leja', 'Dëshmi Penaliteti', 'Raporti Shëndetësor / Rrezet X'],
+    ar: ['مسح جواز السفر', 'الشهادة المهنية / التصريح', 'السجل الجنائي', 'التقرير الطبي / الأشعة']
   };
 
   const handleCandidateLogin = async (e: React.FormEvent) => {
@@ -93,22 +90,24 @@ export default function CandidateDashboard() {
     reader.readAsDataURL(file);
   };
 
-  const handleDocUpload = async (docId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDocUpload = async (docIndex: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = async (e) => {
       const fileUrl = e.target?.result as string;
-      const currentDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : [
+      const defaultDocs = [
         { id: '1', name: 'Pasaport Taraması', status: 'pending' },
         { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
         { id: '3', name: 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
         { id: '4', name: 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
       ];
+
+      const currentDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : defaultDocs;
       
-      const updatedDocs = currentDocs.map((doc: any) => {
-        if (doc.id === docId) {
+      const updatedDocs = currentDocs.map((doc: any, idx: number) => {
+        if (idx === docIndex) {
           return { ...doc, file_url: fileUrl, file_name: file.name, status: 'uploaded' };
         }
         return doc;
@@ -121,7 +120,7 @@ export default function CandidateDashboard() {
 
       if (!error) {
         setCandidate({ ...candidate, documents_json: JSON.stringify(updatedDocs) });
-        alert(currentLang === 'tr' ? 'Belge başarıyla yüklendi!' : 'Document uploaded successfully!');
+        alert(currentLang === 'tr' ? 'Belge yüklendi!' : 'Document uploaded!');
       } else {
         alert('Hata: ' + error.message);
       }
@@ -155,7 +154,7 @@ export default function CandidateDashboard() {
         photo_url: newPhoto,
         video_url: newVideoUrl,
       });
-      alert(currentLang === 'tr' ? 'Profiliniz güncellendi!' : 'Profile updated!');
+      alert(currentLang === 'tr' ? 'Profil güncellendi!' : 'Profile updated!');
     }
   };
 
@@ -216,12 +215,14 @@ export default function CandidateDashboard() {
     );
   }
 
-  const candidateDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : [
+  const defaultDocs = [
     { id: '1', name: 'Pasaport Taraması', status: 'pending' },
     { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
     { id: '3', name: 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
     { id: '4', name: 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
   ];
+  const candidateDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : defaultDocs;
+  const currentLangTitles = docTitlesByLang[currentLang] || docTitlesByLang.tr;
 
   return (
     <div className={`min-h-screen bg-slate-50 p-4 sm:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -347,33 +348,35 @@ export default function CandidateDashboard() {
           </div>
         )}
 
-        {/* Tab 3: Documents (Dinamik İsim ve Garanti Önizleme) */}
+        {/* Tab 3: Documents (Dile göre isim ve garanti önizleme) */}
         {activeTab === 'documents' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.documents}</h3>
             <div className="space-y-3">
               {candidateDocs.map((doc: any, index: number) => {
-                const localizedName = getLocalizedDocName(index);
+                const localizedTitle = currentLangTitles[index] || doc.name;
                 return (
                   <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                      <div className="font-extrabold text-slate-900 text-sm">{localizedName}</div>
+                      <div className="font-extrabold text-slate-900 text-sm">{localizedTitle}</div>
                       {doc.file_name && <div className="text-xs text-slate-500">Yüklenen: {doc.file_name}</div>}
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="px-3 py-1 rounded bg-amber-100 text-amber-800 text-[10px] font-bold uppercase">{doc.status}</span>
+                      <span className={`px-3 py-1 rounded font-bold uppercase text-[10px] ${doc.file_url ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                        {doc.file_url ? (currentLang === 'tr' ? 'Yüklendi' : 'Uploaded') : (currentLang === 'tr' ? 'Bekleniyor' : 'Pending')}
+                      </span>
                       {doc.file_url && (
                         <button 
                           type="button"
-                          onClick={() => setPreviewDoc({ name: localizedName, url: doc.file_url })} 
-                          className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1 cursor-pointer hover:bg-emerald-100 transition"
+                          onClick={() => setPreviewDoc({ name: localizedTitle, url: doc.file_url })} 
+                          className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1 cursor-pointer hover:bg-emerald-100 transition shadow-sm"
                         >
-                          <Eye className="w-3.5 h-3.5" /> Önizle
+                          <Eye className="w-3.5 h-3.5" /> {currentLang === 'tr' ? 'Önizle' : 'Preview'}
                         </button>
                       )}
                       <label className="bg-white text-slate-700 px-3 py-1.5 rounded-lg border font-bold cursor-pointer text-xs shadow-sm hover:bg-slate-100 transition">
-                        Yükle
-                        <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleDocUpload(doc.id, e)} className="hidden" />
+                        {currentLang === 'tr' ? 'Yükle' : 'Upload'}
+                        <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleDocUpload(index, e)} className="hidden" />
                       </label>
                     </div>
                   </div>
