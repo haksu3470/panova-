@@ -4,17 +4,15 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { User, CheckCircle2, LogOut, Lock, KeyRound, Camera, Save, Phone, Mail, FileText, FileCheck } from 'lucide-react';
 import Link from 'next/link';
-import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function CandidateDashboard() {
-  const [currentLang, setCurrentLang] = useState<Language>('tr');
   const [authenticated, setAuthenticated] = useState(false);
   const [loginInput, setLoginInput] = useState('');
   const [password, setPassword] = useState('');
   const [candidate, setCandidate] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Profil Güncelleme State
+  // Güncelleme Form State'leri
   const [newPhone, setNewPhone] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -25,8 +23,6 @@ export default function CandidateDashboard() {
   const [forgotModal, setForgotModal] = useState(false);
   const [forgotInput, setForgotInput] = useState('');
   const [forgotSent, setForgotSent] = useState(false);
-
-  const t = translations[currentLang] || translations.tr;
 
   const handleCandidateLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,11 +146,11 @@ export default function CandidateDashboard() {
               </h3>
               {forgotSent ? (
                 <div className="p-4 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold text-center">
-                  Şifre sıfırlama talimatı gönderildi (Varsayılan şifreniz: <code className="bg-emerald-100 px-1 rounded">123456</code>).
+                  Geçici şifreniz kayıtlı iletişim bilgilerinize gönderilmiştir (Varsayılan şifreniz: <code className="bg-emerald-100 px-1 rounded">123456</code>).
                 </div>
               ) : (
                 <form onSubmit={handleForgotPassword} className="space-y-3">
-                  <p className="text-xs text-slate-500">Kayıtlı E-posta veya GSM numaranızı girin.</p>
+                  <p className="text-xs text-slate-500">Kayıtlı E-posta veya GSM numaranızı girin, geçici şifrenizi iletelim.</p>
                   <input type="text" required value={forgotInput} onChange={(e) => setForgotInput(e.target.value)} placeholder="E-posta veya Telefon" className="w-full px-3 py-2 text-xs rounded-xl border outline-none text-slate-900" />
                   <div className="flex gap-2">
                     <button type="submit" className="flex-1 bg-[#2e7d32] text-white py-2 rounded-xl text-xs font-bold">Gönder</button>
