@@ -239,7 +239,7 @@ export default function PortalPage() {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="px-3 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 outline-none cursor-pointer bg-white"
             >
-              <option value="all">{t.allStatuses}</option>
+              <option value="all">{t.allstatuses}</option>
               {activeTab === 'candidates' ? (
                 <>
                   <option value="pending">{t.pendingStatus}</option>
