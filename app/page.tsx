@@ -197,7 +197,7 @@ export default function HomePage() {
 
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">{t.scopeTitle}</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {company.services.map((srv, idx) => (
+                {company.services.map((srv: string, idx: number) => (
                   <div key={idx} className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
                     <CheckCircle2 className="w-4 h-4 text-[#2e7d32] flex-shrink-0" />
                     <span>{srv}</span>

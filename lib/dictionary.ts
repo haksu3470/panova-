@@ -17,59 +17,77 @@ export interface Translation {
   travel: string;
   support: string;
   logout: string;
-  contactUs: string;
-  candidateRegister: string;
-  portalLogin: string;
-  tagline: string;
-  heroTitle: string;
-  completeReg: string;
-  colTargetStart: string;
-  colBenefits: string;
-  accommodation: string;
-  foodAllowance: string;
-  localTransport: string;
-  flightTicket: string;
-  empPortalTitle: string;
-  empPortalSub: string;
-  empPortalLabel: string;
-  passwordLabel: string;
-  submitting: string;
-  signInBtn: string;
-  colSalary: string;
-  colDemandStatus: string;
-  regFormTitle: string;
-  regFormSub: string;
-  regSuccessTitle: string;
-  regSuccessDesc: string;
-  nameLabel: string;
-  passportLabel: string;
-  sectorLabel: string;
-  professionLabel: string;
-  certNoLabel: string;
-  issuingBodyLabel: string;
-  videoUrlLabel: string;
-  expectedSalaryLabel: string;
-  shiftSuitableLabel: string;
-  emailLabel: string;
-  phoneLabel: string;
-  pendingStatus: string;
-  reviewingStatus: string;
-  visaProcessingStatus: string;
-  approvedStatus: string;
-  colPosSec: string;
-  colHeadcount: string;
-  newDemandBtn: string;
-  modalDemandTitle: string;
-  specifyCustomPos: string;
-  specialReqs: string;
-  creatingDossier: string;
-  submitDossierBtn: string;
-  companies: string;
-  employerPortal: string;
-  selectedCompany: string;
-  candidatePortalLogin: string;
-  registerTitle: string;
-  saveBtn: string;
+  contactUs?: string;
+  candidateRegister?: string;
+  portalLogin?: string;
+  tagline?: string;
+  heroTitle?: string;
+  completeReg?: string;
+  colTargetStart?: string;
+  colBenefits?: string;
+  accommodation?: string;
+  foodAllowance?: string;
+  localTransport?: string;
+  flightTicket?: string;
+  empPortalTitle?: string;
+  empPortalSub?: string;
+  empPortalLabel?: string;
+  passwordLabel?: string;
+  submitting?: string;
+  signInBtn?: string;
+  colSalary?: string;
+  colDemandStatus?: string;
+  regFormTitle?: string;
+  regFormSub?: string;
+  regSuccessTitle?: string;
+  regSuccessDesc?: string;
+  nameLabel?: string;
+  passportLabel?: string;
+  sectorLabel?: string;
+  professionLabel?: string;
+  certNoLabel?: string;
+  issuingBodyLabel?: string;
+  videoUrlLabel?: string;
+  expectedSalaryLabel?: string;
+  shiftSuitableLabel?: string;
+  emailLabel?: string;
+  phoneLabel?: string;
+  pendingStatus?: string;
+  reviewingStatus?: string;
+  visaProcessingStatus?: string;
+  approvedStatus?: string;
+  colPosSec?: string;
+  colHeadcount?: string;
+  newDemandBtn?: string;
+  modalDemandTitle?: string;
+  specifyCustomPos?: string;
+  specialReqs?: string;
+  creatingDossier?: string;
+  submitDossierBtn?: string;
+  companies?: any; // Nesne ve index yapıları için esnek tip
+  employerPortal?: string;
+  selectedCompany?: string;
+  candidatePortalLogin?: string;
+  registerTitle?: string;
+  saveBtn?: string;
+  colProfSector?: string;
+  dossierTitle?: string;
+  searchPlaceholder?: string;
+  allstatuses?: string;
+  colCandidate?: string;
+  colPassportNat?: string;
+  colVisaStatus?: string;
+  portalTitle?: string;
+  portalSub?: string;
+  usernameLabel?: string;
+  authSystem?: string;
+  mgmtTitle?: string;
+  submitBtn?: string;
+  scopeTitle?: string;
+  logoutBtn?: string;
+  totalDemands?: string;
+  requestedHeadcount?: string;
+  activeProcesses?: string;
 }
 
 export const languages = [
@@ -144,12 +162,35 @@ export const translations: Record<Language, Translation> = {
     specialReqs: 'Özel Şartlar',
     creatingDossier: 'Dosya Oluşturuluyor...',
     submitDossierBtn: 'Talebi Gönder',
-    companies: 'Firmalar',
     employerPortal: 'İşveren Girişi',
     selectedCompany: 'Seçilen Firma',
     candidatePortalLogin: 'Aday Girişi',
     registerTitle: 'Kayıt Ol',
     saveBtn: 'Kaydet',
+    colProfSector: 'Meslek / Sektör',
+    dossierTitle: 'Dosya Yönetimi',
+    searchPlaceholder: 'Arama yapın...',
+    allstatuses: 'Tüm Durumlar',
+    colCandidate: 'Aday',
+    colPassportNat: 'Pasaport / Uyruk',
+    colVisaStatus: 'Vize Durumu',
+    portalTitle: 'Yönetim Portalı',
+    portalSub: 'Sistem operasyonlarını yönetin',
+    usernameLabel: 'Kullanıcı Adı',
+    authSystem: 'Yetkilendirme Sistemi',
+    mgmtTitle: 'Yönetim Paneli',
+    submitBtn: 'Gönder',
+    scopeTitle: 'Faaliyet Alanı',
+    logoutBtn: 'Çıkış Yap',
+    totalDemands: 'Toplam Talep',
+    requestedHeadcount: 'Talep Edilen Kişi',
+    activeProcesses: 'Aktif Süreçler',
+    companies: {
+      hr: { name: 'Panova HR', tagline: 'İnsan Kaynakları ve İstihdam' },
+      trade: { name: 'Panova Trade', tagline: 'Dış Ticaret ve Lojistik' },
+      agriculture: { name: 'Panova Tarım', tagline: 'Tarımsal Üretim ve Bahçe' },
+      construction: { name: 'Panova Construction', tagline: 'İnşaat ve Yapı' }
+    }
   },
   en: {
     returnHome: 'Return to Home',
@@ -215,12 +256,35 @@ export const translations: Record<Language, Translation> = {
     specialReqs: 'Special Requirements',
     creatingDossier: 'Creating Dossier...',
     submitDossierBtn: 'Submit Demand',
-    companies: 'Companies',
     employerPortal: 'Employer Portal',
     selectedCompany: 'Selected Company',
     candidatePortalLogin: 'Candidate Login',
     registerTitle: 'Register',
     saveBtn: 'Save',
+    colProfSector: 'Profession / Sector',
+    dossierTitle: 'Dossier Management',
+    searchPlaceholder: 'Search...',
+    allstatuses: 'All Statuses',
+    colCandidate: 'Candidate',
+    colPassportNat: 'Passport / Nationality',
+    colVisaStatus: 'Visa Status',
+    portalTitle: 'Management Portal',
+    portalSub: 'Manage system operations',
+    usernameLabel: 'Username',
+    authSystem: 'Authorization System',
+    mgmtTitle: 'Management Panel',
+    submitBtn: 'Submit',
+    scopeTitle: 'Scope of Activity',
+    logoutBtn: 'Logout',
+    totalDemands: 'Total Demands',
+    requestedHeadcount: 'Requested Headcount',
+    activeProcesses: 'Active Processes',
+    companies: {
+      hr: { name: 'Panova HR', tagline: 'Human Resources & Employment' },
+      trade: { name: 'Panova Trade', tagline: 'Foreign Trade & Logistics' },
+      agriculture: { name: 'Panova Agriculture', tagline: 'Agricultural Production' },
+      construction: { name: 'Panova Construction', tagline: 'Construction & Building' }
+    }
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -286,12 +350,35 @@ export const translations: Record<Language, Translation> = {
     specialReqs: 'Kërkesa Speciale',
     creatingDossier: 'Duke krijuar dosjen...',
     submitDossierBtn: 'Dërgo Kërkesën',
-    companies: 'Kompanitë',
     employerPortal: 'Hyrja e Punëdhënësit',
     selectedCompany: 'Kompania e Zgjedhur',
     candidatePortalLogin: 'Hyrja e Kandidatit',
     registerTitle: 'Regjistrohuni',
     saveBtn: 'Ruaj',
+    colProfSector: 'Profesioni / Sektori',
+    dossierTitle: 'Menaxhimi i Dosjeve',
+    searchPlaceholder: 'Kërko...',
+    allstatuses: 'Të gjitha statuset',
+    colCandidate: 'Kandidati',
+    colPassportNat: 'Pasaporta / Kombësia',
+    colVisaStatus: 'Statusi i Vizës',
+    portalTitle: 'Portali i Menaxhimit',
+    portalSub: 'Menaxhoni operacionet e sistemit',
+    usernameLabel: 'Emri i Përdoruesit',
+    authSystem: 'Sistemi i Autorizimit',
+    mgmtTitle: 'Paneli i Menaxhimit',
+    submitBtn: 'Dërgo',
+    scopeTitle: 'Fusha e Veprimtarisë',
+    logoutBtn: 'Dilni',
+    totalDemands: 'Kërkesat Totale',
+    requestedHeadcount: 'Personeli i Kërkuar',
+    activeProcesses: 'Proceset Aktive',
+    companies: {
+      hr: { name: 'Panova HR', tagline: 'Burimet Njerëzore dhe Punësimi' },
+      trade: { name: 'Panova Trade', tagline: 'Tregti e Jashtme dhe Logjistikë' },
+      agriculture: { name: 'Panova Bujqësi', tagline: 'Prodhimi Bujqësor' },
+      construction: { name: 'Panova Ndërtim', tagline: 'Ndërtim dhe Objekte' }
+    }
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -357,11 +444,34 @@ export const translations: Record<Language, Translation> = {
     specialReqs: 'متطلبات خاصة',
     creatingDossier: 'جاري إنشاء الملف...',
     submitDossierBtn: 'إرسال الطلب',
-    companies: 'الشركات',
     employerPortal: 'بوابة أصحاب العمل',
     selectedCompany: 'الشركة المختارة',
     candidatePortalLogin: 'تسجيل دخول المرشح',
     registerTitle: 'التسجيل',
     saveBtn: 'حفظ',
+    colProfSector: 'المهنة / القطاع',
+    dossierTitle: 'إدارة الملفات',
+    searchPlaceholder: 'بحث...',
+    allstatuses: 'جميع الحالات',
+    colCandidate: 'المرشح',
+    colPassportNat: 'جواز السفر / الجنسية',
+    colVisaStatus: 'حالة التأشيرة',
+    portalTitle: 'بوابة الإدارة',
+    portalSub: 'إدارة عمليات النظام',
+    usernameLabel: 'اسم المستخدم',
+    authSystem: 'نظام المصادقة',
+    mgmtTitle: 'لوحة الإدارة',
+    submitBtn: 'إرسال',
+    scopeTitle: 'نطاق النشاط',
+    logoutBtn: 'تسجيل الخروج',
+    totalDemands: 'إجمالي الطلبات',
+    requestedHeadcount: 'الأفراد المطلوبين',
+    activeProcesses: 'العمليات النشطة',
+    companies: {
+      hr: { name: 'Panova HR', tagline: 'الموارد البشرية والتوظيف' },
+      trade: { name: 'Panova Trade', tagline: 'التجارة الخارجية والخدمات اللوجستية' },
+      agriculture: { name: 'Panova Agriculture', tagline: 'الإنتاج الزراعي' },
+      construction: { name: 'Panova Construction', tagline: 'البناء والتشييد' }
+    }
   },
 };
