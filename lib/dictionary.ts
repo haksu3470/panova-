@@ -58,7 +58,6 @@ export interface Translation {
   approvedStatus?: string;
   colPosSec?: string;
   colHeadcount?: string;
-  // Eklenen diğer sayfa özellikleri:
   newDemandBtn?: string;
   modalDemandTitle?: string;
   specifyCustomPos?: string;
