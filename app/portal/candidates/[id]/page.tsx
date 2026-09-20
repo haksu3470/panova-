@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft, User, FileText, CheckCircle, Award, Video, ShieldCheck, Clock, Calendar, Save, Languages, FileCheck, AlertCircle, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, User, FileText, CheckCircle, Award, Video, ShieldCheck, Clock, Calendar, Save, Languages, FileCheck, AlertCircle, Plus, Trash2, Upload, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
@@ -12,6 +12,7 @@ interface CandidateDocument {
   name: string;
   status: 'pending' | 'uploaded' | 'reviewing' | 'approved' | 'rejected' | 're_requested' | 'expired';
   file_url?: string;
+  file_name?: string;
   expiry_date?: string;
   notes?: string;
 }
@@ -33,7 +34,6 @@ export default function CandidateDetailPage() {
 
   // Yeni Belge Ekleme State
   const [newDocName, setNewDocName] = useState('');
-  const [newDocUrl, setNewDocUrl] = useState('');
 
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
@@ -59,7 +59,7 @@ export default function CandidateDetailPage() {
       setStatus(data.status || 'pending');
       setIsVerified(data.is_verified || false);
       
-      // Varsayılan evrak listesini yükle veya oluştur
+      // Varsayılan evrak listesi
       const defaultDocs: CandidateDocument[] = [
         { id: '1', name: 'Pasaport Taraması', status: data.passport_number ? 'approved' : 'pending' },
         { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: data.certificate_no ? 'approved' : 'pending' },
@@ -67,7 +67,11 @@ export default function CandidateDetailPage() {
         { id: '4', name: 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
       ];
       
-      setDocuments(data.documents_json ? JSON.parse(data.documents_json) : defaultDocs);
+      try {
+        setDocuments(data.documents_json ? JSON.parse(data.documents_json) : defaultDocs);
+      } catch {
+        setDocuments(defaultDocs);
+      }
     }
     setLoading(false);
   };
@@ -76,17 +80,38 @@ export default function CandidateDetailPage() {
     setDocuments(documents.map(doc => doc.id === docId ? { ...doc, status: newStatus } : doc));
   };
 
+  // Bilgisayardan Dosya Yükleme İşlemi
+  const handleFileUpload = (docId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const fileUrl = e.target?.result as string;
+      setDocuments(documents.map(doc => {
+        if (doc.id === docId) {
+          return {
+            ...doc,
+            file_url: fileUrl,
+            file_name: file.name,
+            status: 'uploaded',
+          };
+        }
+        return doc;
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleAddDocument = () => {
     if (!newDocName.trim()) return;
     const newDoc: CandidateDocument = {
       id: Date.now().toString(),
       name: newDocName,
-      file_url: newDocUrl || undefined,
-      status: newDocUrl ? 'uploaded' : 'pending',
+      status: 'pending',
     };
     setDocuments([...documents, newDoc]);
     setNewDocName('');
-    setNewDocUrl('');
   };
 
   const handleDeleteDocument = (docId: string) => {
@@ -108,7 +133,7 @@ export default function CandidateDetailPage() {
     setSaving(false);
 
     if (!error) {
-      alert(currentLang === 'tr' ? 'Aday dosyası ve evrak durumları başarıyla güncellendi!' : 'Candidate dossier updated successfully!');
+      alert(currentLang === 'tr' ? 'Aday dosyası ve evraklar başarıyla kaydedildi!' : 'Candidate dossier saved successfully!');
     } else {
       alert('Hata: ' + error.message);
     }
@@ -204,11 +229,11 @@ export default function CandidateDetailPage() {
               </div>
             </div>
 
-            {/* MODÜL 1.4: Evrak & Belge Kontrol Mekanizması */}
+            {/* MODÜL 1.4: Evrak & Belge Kontrol / Yükleme Mekanizması */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <FileCheck className="w-5 h-5 text-indigo-600" /> Aday Evrak & Belge Takip Mekanizması
+                  <FileCheck className="w-5 h-5 text-indigo-600" /> Aday Evrak & Belge Yükleme Mekanizması
                 </h3>
                 <span className="text-xs bg-indigo-50 text-indigo-700 font-bold px-2.5 py-1 rounded-lg">
                   {documents.filter(d => d.status === 'approved').length} / {documents.length} Onaylı
@@ -218,73 +243,90 @@ export default function CandidateDetailPage() {
               {/* Belge Listesi */}
               <div className="space-y-3">
                 {documents.map((doc) => (
-                  <div key={doc.id} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-slate-400 flex-shrink-0" />
-                      <div>
-                        <div className="font-bold text-slate-800">{doc.name}</div>
-                        {doc.file_url ? (
-                          <a href={doc.file_url} target="_blank" rel="noreferrer" className="text-xs text-emerald-700 hover:underline font-semibold">
-                            Belgeyi İncele / Bağlantı ↗
-                          </a>
-                        ) : (
-                          <span className="text-xs text-slate-400">Dosya yüklenmedi</span>
-                        )}
+                  <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+                        <div>
+                          <div className="font-extrabold text-slate-900">{doc.name}</div>
+                          {doc.file_name && (
+                            <div className="text-xs text-slate-500 font-medium">Yüklenen Dosya: {doc.file_name}</div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={doc.status}
+                          onChange={(e) => handleDocStatusChange(doc.id, e.target.value as any)}
+                          className={`px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer outline-none ${
+                            doc.status === 'approved' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
+                            doc.status === 'rejected' ? 'bg-red-100 text-red-800 border-red-300' :
+                            doc.status === 'reviewing' ? 'bg-blue-100 text-blue-800 border-blue-300' :
+                            'bg-amber-100 text-amber-800 border-amber-300'
+                          }`}
+                        >
+                          <option value="pending">🟡 Bekleniyor</option>
+                          <option value="uploaded">📤 Yüklendi</option>
+                          <option value="reviewing">🔵 İnceleniyor</option>
+                          <option value="approved">🟢 Onaylandı</option>
+                          <option value="rejected">🔴 Reddedildi</option>
+                          <option value="re_requested">⚠️ Yeniden İstendi</option>
+                        </select>
+
+                        <button
+                          onClick={() => handleDeleteDocument(doc.id)}
+                          className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg transition cursor-pointer"
+                          title="Belgeyi Kaldır"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <select
-                        value={doc.status}
-                        onChange={(e) => handleDocStatusChange(doc.id, e.target.value as any)}
-                        className={`px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer outline-none ${
-                          doc.status === 'approved' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
-                          doc.status === 'rejected' ? 'bg-red-100 text-red-800 border-red-300' :
-                          doc.status === 'reviewing' ? 'bg-blue-100 text-blue-800 border-blue-300' :
-                          'bg-amber-100 text-amber-800 border-amber-300'
-                        }`}
-                      >
-                        <option value="pending">🟡 Bekleniyor</option>
-                        <option value="uploaded">📤 Yüklendi</option>
-                        <option value="reviewing">🔵 İnceleniyor</option>
-                        <option value="approved">🟢 Onaylandı</option>
-                        <option value="rejected">🔴 Reddedildi</option>
-                        <option value="re_requested">⚠️ Yeniden İstendi</option>
-                      </select>
+                    {/* Bilgisayardan Dosya Yükleme / İnceleme Alanı */}
+                    <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
+                      {doc.file_url ? (
+                        <a
+                          href={doc.file_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 text-emerald-700 hover:underline font-bold"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" /> Yüklenen Belgeyi Aç / İncele
+                        </a>
+                      ) : (
+                        <span className="text-slate-400 italic">Henüz dosya seçilmedi</span>
+                      )}
 
-                      <button
-                        onClick={() => handleDeleteDocument(doc.id)}
-                        className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg transition cursor-pointer"
-                        title="Belgeyi Kaldır"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <label className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg border border-slate-300 font-bold cursor-pointer transition shadow-sm">
+                        <Upload className="w-3.5 h-3.5 text-indigo-600" /> Bilgisayardan Dosya Seç
+                        <input
+                          type="file"
+                          accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                          onChange={(e) => handleFileUpload(doc.id, e)}
+                          className="hidden"
+                        />
+                      </label>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Yeni Evrak / Belge Ekleme Formu */}
-              <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row gap-2">
+              {/* Yeni Evrak Ekleme Alanı */}
+              <div className="pt-3 border-t border-slate-100 flex gap-2">
                 <input
                   type="text"
-                  placeholder="Yeni Evrak Adı (Örn: Ehliyet Taraması)"
+                  placeholder="Yeni Evrak Adı (Örn: Ehliyet Taraması, İkametgah)"
                   value={newDocName}
                   onChange={(e) => setNewDocName(e.target.value)}
-                  className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-200 text-slate-900 bg-white outline-none focus:ring-2 focus:ring-[#2e7d32]"
-                />
-                <input
-                  type="url"
-                  placeholder="Dosya Bağlantı URL (Opsiyonel)"
-                  value={newDocUrl}
-                  onChange={(e) => setNewDocUrl(e.target.value)}
-                  className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-200 text-slate-900 bg-white outline-none focus:ring-2 focus:ring-[#2e7d32]"
+                  className="flex-1 px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 text-slate-900 bg-white outline-none focus:ring-2 focus:ring-[#2e7d32]"
                 />
                 <button
                   onClick={handleAddDocument}
-                  className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                  className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer"
                 >
-                  <Plus className="w-4 h-4" /> Belge Ekle
+                  <Plus className="w-4 h-4" /> Yeni Belge Tipi Ekle
                 </button>
               </div>
             </div>
