@@ -11,22 +11,32 @@ import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function CandidateDashboard() {
-  // 1. Dil state'ini localStorage'dan güvenli şekilde başlatıyoruz
+  // 1. Dili her render anında localStorage'dan dinamik olarak okuyoruz
   const [currentLang, setCurrentLang] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('panova_candidate_lang') as Language;
-      if (saved && translations[saved]) return saved;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
     }
     return 'tr';
   });
 
-  // 2. useEffect ile her değişiklikte localStorage'a kaydediyoruz
+  // 2. Sayfada dil değiştiğinde (storage event veya focus olduğunda) anlık yakalaması için
   useEffect(() => {
-    window.scrollTo(0, 0);
-    const savedLang = localStorage.getItem('panova_candidate_lang') as Language;
-    if (savedLang && translations[savedLang]) {
-      setCurrentLang(savedLang);
-    }
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('panova_candidate_lang') as Language;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
+        setCurrentLang(saved);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    // Periyodik kontrol ile anlık senkronizasyon sağlıyoruz
+    const timer = setInterval(handleStorageChange, 200);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(timer);
+    };
   }, []);
 
   const [authenticated, setAuthenticated] = useState(false);
