@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Lock, ShieldCheck, Search, Filter, Languages, ArrowLeft, Award, Video, CheckCircle, Clock, Star, Calendar, Building2, Users } from 'lucide-react';
 import Link from 'next/link';
@@ -13,7 +13,6 @@ export default function PortalPage() {
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState<'candidates' | 'requests'>('candidates');
   
-  // Data States
   const [candidates, setCandidates] = useState<any[]>([]);
   const [jobRequests, setJobRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -23,7 +22,10 @@ export default function PortalPage() {
 
   const t = translations[currentLang] || translations.en;
   const isRtl = currentLang === 'ar';
-  const selectableLanguages = languages.filter((lang) => lang.code !== 'en');
+  
+  // Seçili dil hariç diğer diller
+  const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
+  const activeLangObj = languages.find((l) => l.code === currentLang);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,9 +45,7 @@ export default function PortalPage() {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (!error && data) {
-      setCandidates(data);
-    }
+    if (!error && data) setCandidates(data);
     setLoading(false);
   };
 
@@ -56,47 +56,23 @@ export default function PortalPage() {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (!error && data) {
-      setJobRequests(data);
-    }
+    if (!error && data) setJobRequests(data);
     setLoading(false);
   };
 
   const updateCandidateStatus = async (id: string, newStatus: string) => {
-    const { error } = await supabase
-      .from('job_candidates')
-      .update({ status: newStatus })
-      .eq('id', id);
-
-    if (!error) {
-      setCandidates(candidates.map(c => c.id === id ? { ...c, status: newStatus } : c));
-    } else {
-      alert('Update Error: ' + error.message);
-    }
+    const { error } = await supabase.from('job_candidates').update({ status: newStatus }).eq('id', id);
+    if (!error) setCandidates(candidates.map(c => c.id === id ? { ...c, status: newStatus } : c));
   };
 
   const updateRequestStatus = async (id: string, newStatus: string) => {
-    const { error } = await supabase
-      .from('job_requests')
-      .update({ status: newStatus })
-      .eq('id', id);
-
-    if (!error) {
-      setJobRequests(jobRequests.map(r => r.id === id ? { ...r, status: newStatus } : r));
-    } else {
-      alert('Update Error: ' + error.message);
-    }
+    const { error } = await supabase.from('job_requests').update({ status: newStatus }).eq('id', id);
+    if (!error) setJobRequests(jobRequests.map(r => r.id === id ? { ...r, status: newStatus } : r));
   };
 
   const toggleVerification = async (id: string, currentVerified: boolean) => {
-    const { error } = await supabase
-      .from('job_candidates')
-      .update({ is_verified: !currentVerified })
-      .eq('id', id);
-
-    if (!error) {
-      setCandidates(candidates.map(c => c.id === id ? { ...c, is_verified: !currentVerified } : c));
-    }
+    const { error } = await supabase.from('job_candidates').update({ is_verified: !currentVerified }).eq('id', id);
+    if (!error) setCandidates(candidates.map(c => c.id === id ? { ...c, is_verified: !currentVerified } : c));
   };
 
   const filteredCandidates = candidates.filter(c => {
@@ -125,7 +101,9 @@ export default function PortalPage() {
             onChange={(e) => setCurrentLang(e.target.value as Language)}
             className="bg-transparent text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer"
           >
-            {currentLang === 'en' && <option value="en" disabled>🌐 Language</option>}
+            <option value={currentLang} className="text-slate-900 font-bold">
+              {activeLangObj?.flag} {activeLangObj?.name}
+            </option>
             {selectableLanguages.map((lang) => (
               <option key={lang.code} value={lang.code} className="text-slate-900">{lang.flag} {lang.name}</option>
             ))}
@@ -182,11 +160,14 @@ export default function PortalPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-          <div>
-            <div className="flex items-center gap-2 text-emerald-700 font-bold text-sm mb-1">
-              <ShieldCheck className="w-4 h-4" /> {t.authSystem}
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="PANOVA" className="h-10 w-auto object-contain" />
+            <div>
+              <div className="flex items-center gap-2 text-emerald-700 font-bold text-xs mb-0.5">
+                <ShieldCheck className="w-3.5 h-3.5" /> {t.authSystem}
+              </div>
+              <h1 className="text-xl font-extrabold text-slate-900">{t.mgmtTitle}</h1>
             </div>
-            <h1 className="text-2xl font-extrabold text-slate-900">{t.mgmtTitle}</h1>
           </div>
 
           <div className="flex items-center gap-3">
@@ -197,7 +178,9 @@ export default function PortalPage() {
                 onChange={(e) => setCurrentLang(e.target.value as Language)}
                 className="bg-transparent text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer"
               >
-                {currentLang === 'en' && <option value="en" disabled>🌐 Language</option>}
+                <option value={currentLang} className="font-bold">
+                  {activeLangObj?.flag} {activeLangObj?.name}
+                </option>
                 {selectableLanguages.map((lang) => (
                   <option key={lang.code} value={lang.code}>{lang.flag} {lang.name}</option>
                 ))}
@@ -244,7 +227,7 @@ export default function PortalPage() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3 rtl:right-3 rtl:left-auto top-3.5" />
             <input
               type="text"
-              placeholder={activeTab === 'candidates' ? t.searchPlaceholder : (currentLang === 'tr' ? "İşveren, pozisyon veya sektor ara..." : "Search employer, position or sector...")}
+              placeholder={activeTab === 'candidates' ? t.searchPlaceholder : (currentLang === 'tr' ? "İşveren, pozisyon veya sektör ara..." : "Search employer, position or sector...")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 rtl:pr-9 rtl:pl-4 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-[#2e7d32] text-slate-900 font-medium"
@@ -277,7 +260,7 @@ export default function PortalPage() {
           </div>
         </div>
 
-        {/* TAB 1: Candidates Table */}
+        {/* Candidates Table */}
         {activeTab === 'candidates' && (
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
             {loading ? (
@@ -304,7 +287,6 @@ export default function PortalPage() {
                             {candidate.full_name}
                             <button
                               onClick={() => toggleVerification(candidate.id, candidate.is_verified)}
-                              title={candidate.is_verified ? 'Verified Certificate' : 'Click to Verify'}
                               className={`p-1 rounded-full transition cursor-pointer ${candidate.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400 hover:text-emerald-600'}`}
                             >
                               <CheckCircle className="w-4 h-4" />
@@ -369,13 +351,6 @@ export default function PortalPage() {
                         </td>
                       </tr>
                     ))}
-                    {filteredCandidates.length === 0 && (
-                      <tr>
-                        <td colSpan={7} className="p-8 text-center text-slate-400">
-                          {t.noRecords}
-                        </td>
-                      </tr>
-                    )}
                   </tbody>
                 </table>
               </div>
@@ -383,7 +358,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* TAB 2: Employer Job Requests Table */}
+        {/* Requests Table */}
         {activeTab === 'requests' && (
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
             {loading ? (
@@ -433,81 +408,10 @@ export default function PortalPage() {
                         </td>
                       </tr>
                     ))}
-                    {filteredRequests.length === 0 && (
-                      <tr>
-                        <td colSpan={6} className="p-8 text-center text-slate-400">
-                          {currentLang === 'tr' ? 'İşveren talebi bulunamadı.' : 'No employer demand dossiers found.'}
-                        </td>
-                      </tr>
-                    )}
                   </tbody>
                 </table>
               </div>
             )}
-          </div>
-        )}
-
-        {/* 30-60-90 Tracking Modal */}
-        {selectedCandidateForFollowup && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
-                <div>
-                  <h3 className="text-lg font-extrabold text-slate-900">{currentLang === 'tr' ? 'Yerleştirme Takip Sistemi' : 'Placement Follow-up Tracking'}</h3>
-                  <p className="text-xs text-slate-500">{currentLang === 'tr' ? 'Aday' : 'Candidate'}: {selectedCandidateForFollowup.full_name}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedCandidateForFollowup(null)}
-                  className="text-[#2e7d32] font-bold text-sm cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-amber-500" />
-                    <div>
-                      <div className="font-bold text-sm text-slate-800">{currentLang === 'tr' ? '1. Hafta Kontrolü' : 'Week 1 Check'}</div>
-                      <div className="text-xs text-slate-500">{currentLang === 'tr' ? 'Varış & Konaklama Denetimi' : 'Arrival & Accommodation Audit'}</div>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-md text-xs font-bold">{currentLang === 'tr' ? 'Tamamlandı' : 'Completed'}</span>
-                </div>
-
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Star className="w-5 h-5 text-blue-500" />
-                    <div>
-                      <div className="font-bold text-sm text-slate-800">{currentLang === 'tr' ? '30. Gün Değerlendirmesi' : 'Day 30 Review'}</div>
-                      <div className="text-xs text-slate-500">{currentLang === 'tr' ? 'İş Uyum Durumu & Maaş Kontrolü' : 'Workforce Adaptation & Salary Status'}</div>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-md text-xs font-bold">{currentLang === 'tr' ? 'Devam Ediyor' : 'In Progress'}</span>
-                </div>
-
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between opacity-60">
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-5 h-5 text-slate-400" />
-                    <div>
-                      <div className="font-bold text-sm text-slate-800">{currentLang === 'tr' ? '60. ve 90. Gün Takibi' : 'Day 60 & 90 Assessment'}</div>
-                      <div className="text-xs text-slate-500">{currentLang === 'tr' ? 'Uzun Dönem Performans Değerlendirmesi' : 'Long-term Performance & Compliance'}</div>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-1 bg-slate-200 text-slate-600 rounded-md text-xs font-bold">{currentLang === 'tr' ? 'Bekliyor' : 'Upcoming'}</span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setSelectedCandidateForFollowup(null)}
-                className="w-full mt-6 bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold text-sm transition cursor-pointer"
-              >
-                {currentLang === 'tr' ? 'Kapat' : 'Close Tracking View'}
-              </button>
-            </div>
           </div>
         )}
       </div>

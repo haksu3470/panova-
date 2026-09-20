@@ -23,6 +23,7 @@ export default function HomePage() {
   const company = t.companies[selectedCompanyKey];
   const isRtl = currentLang === 'ar';
   
+  // O an seçili olan dil HARİÇ diğer diller
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
   const activeLangObj = languages.find((l) => l.code === currentLang);
 
@@ -55,10 +56,18 @@ export default function HomePage() {
       {/* Top Navbar */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          
+          {/* Logo Alanı (public/logo.png görseli eklendi) */}
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <div className="w-10 h-10 bg-[#2e7d32] rounded-xl flex items-center justify-center text-white font-extrabold text-xl shadow-md">
-              P
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="PANOVA Group" 
+              className="h-10 w-auto object-contain"
+              onError={(e) => {
+                // Logo dosyası bulunamazsa varsayılan yeşil P kutucuğu görünür
+                e.currentTarget.style.display = 'none';
+              }}
+            />
             <div>
               <span className="text-xl font-extrabold tracking-tight text-slate-900 block leading-none">PANOVA</span>
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t.tagline}</span>
