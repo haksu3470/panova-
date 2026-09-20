@@ -67,7 +67,6 @@ export interface Translation {
   companies?: string;
   employerPortal?: string;
   selectedCompany?: string;
-  // Diğer sayfalardaki eksik olabilecek ek alanlar:
   candidatePortalLogin?: string;
   registerTitle?: string;
   saveBtn?: string;
