@@ -12,7 +12,7 @@ export default function CandidateDashboard() {
   const [candidate, setCandidate] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Güncelleme Form State'leri
+  // Güncelleme State'leri
   const [newPhone, setNewPhone] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -204,7 +204,7 @@ export default function CandidateDashboard() {
           </div>
         </div>
 
-        {/* Profil Fotoğrafı, İletişim ve Şifre Düzenleme (Doğrudan Görünür) */}
+        {/* Profil Fotoğrafı, İletişim ve Şifre Düzenleme */}
         <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6">
           <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
             <User className="w-5 h-5 text-[#2e7d32]" /> Profil Fotoğrafı, İletişim ve Şifre Düzenleme
