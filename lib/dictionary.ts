@@ -17,6 +17,17 @@ export interface Translation {
   travel: string;
   support: string;
   logout: string;
+  contactUs?: string;
+  candidateRegister?: string;
+  portalLogin?: string;
+  tagline?: string;
+  heroTitle?: string;
+  colTargetStart?: string;
+  colBenefits?: string;
+  accommodation?: string;
+  foodAllowance?: string;
+  localTransport?: string;
+  flightTicket?: string;
 }
 
 export const languages = [
@@ -44,6 +55,11 @@ export const translations: Record<Language, Translation> = {
     travel: 'Seyahat Bilgilerim',
     support: 'Destek',
     logout: 'Çıkış Yap',
+    contactUs: 'İletişim',
+    candidateRegister: 'Aday Kayıt',
+    portalLogin: 'Portal Giriş',
+    tagline: 'Uluslararası İstihdam ve Vize Yönetimi',
+    heroTitle: 'Profesyonel İş Gücü Çözümleri',
   },
   en: {
     returnHome: 'Return to Home',
@@ -62,6 +78,11 @@ export const translations: Record<Language, Translation> = {
     travel: 'Travel Info',
     support: 'Support',
     logout: 'Logout',
+    contactUs: 'Contact Us',
+    candidateRegister: 'Candidate Register',
+    portalLogin: 'Portal Login',
+    tagline: 'International Employment & Visa Management',
+    heroTitle: 'Professional Workforce Solutions',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -80,6 +101,11 @@ export const translations: Record<Language, Translation> = {
     travel: 'Informacioni i Udhëtimit',
     support: 'Mbështetje',
     logout: 'Dilni',
+    contactUs: 'Na Kontaktoni',
+    candidateRegister: 'Regjistrimi i Kandidatëve',
+    portalLogin: 'Hyrja në Portal',
+    tagline: 'Punësim Ndërkombëtar dhe Menaxhim Vizash',
+    heroTitle: 'Zgjidhje Profesionale të Fuqisë Punëtore',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -98,5 +124,10 @@ export const translations: Record<Language, Translation> = {
     travel: 'معلومات السفر',
     support: 'الدعم',
     logout: 'تسجيل الخروج',
+    contactUs: 'اتصل بنا',
+    candidateRegister: 'تسجيل المرشحين',
+    portalLogin: 'تسجيل الدخول للبوابة',
+    tagline: 'التوظيف الدولي وإدارة التأشيرات',
+    heroTitle: 'حلول القوى العاملة المهنية',
   },
 };
