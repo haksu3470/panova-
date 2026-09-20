@@ -9,7 +9,7 @@ import { Language, languages, translations } from '@/lib/dictionary';
 export default function CandidateDashboard() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
   const [authenticated, setAuthenticated] = useState(false);
-  const [phone, setPhone] = useState('');
+  const [loginInput, setLoginInput] = useState('');
   const [password, setPassword] = useState('');
   const [candidate, setCandidate] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
@@ -17,7 +17,7 @@ export default function CandidateDashboard() {
   
   // Şifremi unuttum modal
   const [forgotModal, setForgotModal] = useState(false);
-  const [forgotPhone, setForgotPhone] = useState('');
+  const [forgotInput, setForgotInput] = useState('');
   const [forgotSent, setForgotSent] = useState(false);
 
   const t = translations[currentLang] || translations.tr;
@@ -29,13 +29,14 @@ export default function CandidateDashboard() {
     e.preventDefault();
     setLoading(true);
 
-    const cleanPhone = phone.trim();
+    const cleanInput = loginInput.trim().toLowerCase();
     const cleanPass = password.trim();
 
+    // E-posta, Telefon veya Pasaport No ile arama yapıyoruz
     const { data, error } = await supabase
       .from('job_candidates')
       .select('*')
-      .eq('phone', cleanPhone)
+      .or(`email.eq.${cleanInput},phone.eq.${cleanInput},passport_number.eq.${cleanInput}`)
       .single();
 
     setLoading(false);
@@ -45,10 +46,10 @@ export default function CandidateDashboard() {
         setCandidate(data);
         setAuthenticated(true);
       } else {
-        alert(currentLang === 'tr' ? 'Hatalı şifre! Varsayılan şifre: 123456' : 'Incorrect password!');
+        alert(currentLang === 'tr' ? 'Hatalı şifre! (Varsayılan şifreniz: 123456)' : 'Incorrect password! (Default: 123456)');
       }
     } else {
-      alert(currentLang === 'tr' ? 'Bu telefon numarasına ait aday kaydı bulunamadı!' : 'Candidate record not found!');
+      alert(currentLang === 'tr' ? 'Girdiğiniz bilgilerle eşleşen aday kaydı bulunamadı!' : 'Candidate record not found!');
     }
   };
 
@@ -75,20 +76,37 @@ export default function CandidateDashboard() {
             <Lock className="w-7 h-7" />
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 mb-1">Aday Giriş Portalı</h1>
-          <p className="text-slate-500 text-xs mb-6">Lütfen GSM (Telefon Numarası) ve şifreniz ile giriş yapınız.</p>
+          <p className="text-slate-500 text-xs mb-6 leading-relaxed">
+            Kayıtlı <strong className="text-slate-800">E-posta adresiniz</strong>, <strong className="text-slate-800">Telefon numaranız (GSM)</strong> veya <strong className="text-slate-800">Pasaport numaranız</strong> ve şifreniz ile giriş yapabilirsiniz.
+          </p>
 
           <form onSubmit={handleCandidateLogin} className="space-y-4 text-left rtl:text-right">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Telefon Numarası (GSM) *</label>
-              <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+90555..." className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm" />
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">E-Posta / Telefon (GSM) / Pasaport No *</label>
+              <input 
+                type="text" 
+                required 
+                value={loginInput} 
+                onChange={(e) => setLoginInput(e.target.value)} 
+                placeholder="Örn: omer@gmail.com veya +90555..." 
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm" 
+              />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Şifre *</label>
-              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm" />
+              <input 
+                type="password" 
+                required 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                placeholder="••••••••" 
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm" 
+              />
             </div>
 
             <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-400">Varsayılan Şifre: 123456</span>
               <button type="button" onClick={() => setForgotModal(true)} className="text-[#2e7d32] font-bold hover:underline">
                 Şifremi Unuttum?
               </button>
@@ -113,12 +131,12 @@ export default function CandidateDashboard() {
               </h3>
               {forgotSent ? (
                 <div className="p-4 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold text-center">
-                  Geçici şifreniz kayıtlı telefon numaranıza SMS olarak gönderilmiştir (Varsayılan: 123456).
+                  Geçici şifreniz kayıtlı iletişim bilgilerinize gönderilmiştir (Varsayılan şifreniz: <code className="text-emerald-900 bg-emerald-100 px-1 py-0.5 rounded">123456</code>).
                 </div>
               ) : (
                 <form onSubmit={handleForgotPassword} className="space-y-3">
-                  <p className="text-xs text-slate-500">Kayıtlı GSM numaranızı girin, geçici şifrenizi iletelim.</p>
-                  <input type="tel" required value={forgotPhone} onChange={(e) => setForgotPhone(e.target.value)} placeholder="+90555..." className="w-full px-3 py-2 text-xs rounded-xl border outline-none" />
+                  <p className="text-xs text-slate-500">Kayıtlı E-posta veya GSM numaranızı girin, geçici şifrenizi iletelim.</p>
+                  <input type="text" required value={forgotInput} onChange={(e) => setForgotInput(e.target.value)} placeholder="E-posta veya Telefon" className="w-full px-3 py-2 text-xs rounded-xl border outline-none text-slate-900 font-medium" />
                   <div className="flex gap-2">
                     <button type="submit" className="flex-1 bg-[#2e7d32] text-white py-2 rounded-xl text-xs font-bold">Gönder</button>
                     <button type="button" onClick={() => setForgotModal(false)} className="px-4 bg-slate-100 text-slate-700 py-2 rounded-xl text-xs font-bold">İptal</button>
@@ -149,7 +167,7 @@ export default function CandidateDashboard() {
             )}
             <div>
               <h1 className="text-xl font-extrabold text-slate-900">{candidate.full_name}</h1>
-              <span className="text-xs text-slate-500">GSM: {candidate.phone}</span>
+              <span className="text-xs text-slate-500">GSM: {candidate.phone} | E-posta: {candidate.email}</span>
             </div>
           </div>
           <button onClick={() => setAuthenticated(false)} className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold">
