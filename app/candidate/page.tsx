@@ -11,10 +11,16 @@ import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function CandidateDashboard() {
-  // 1. Önce State'leri tanımlıyoruz
-  const [currentLang, setCurrentLang] = useState<Language>('tr');
+  // 1. Dil state'ini localStorage'dan güvenli şekilde başlatıyoruz
+  const [currentLang, setCurrentLang] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('panova_candidate_lang') as Language;
+      if (saved && translations[saved]) return saved;
+    }
+    return 'tr';
+  });
 
-  // 2. Sonra useEffect'i koyuyoruz ki currentLang'i güvenle kullanabilsin
+  // 2. useEffect ile her değişiklikte localStorage'a kaydediyoruz
   useEffect(() => {
     window.scrollTo(0, 0);
     const savedLang = localStorage.getItem('panova_candidate_lang') as Language;
@@ -22,6 +28,7 @@ export default function CandidateDashboard() {
       setCurrentLang(savedLang);
     }
   }, []);
+
   const [authenticated, setAuthenticated] = useState(false);
   const [loginInput, setLoginInput] = useState('');
   const [password, setPassword] = useState('');
@@ -30,14 +37,12 @@ export default function CandidateDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'documents' | 'jobs' | 'interviews' | 'offers' | 'process' | 'travel' | 'support'>('overview');
   const [newPhone, setNewPhone] = useState('');
   const [newEmail, setNewEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
   const [newPhoto, setNewPhoto] = useState('');
   const [newVideoUrl, setNewVideoUrl] = useState('');
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
   const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
   const [forgotModal, setForgotModal] = useState(false);
-
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMsg, setSupportMsg] = useState('');
   const [supportSent, setSupportSent] = useState(false);

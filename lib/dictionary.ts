@@ -52,6 +52,12 @@ export interface Translation {
   shiftSuitableLabel?: string;
   emailLabel?: string;
   phoneLabel?: string;
+  pendingStatus?: string;
+  reviewingStatus?: string;
+  visaProcessingStatus?: string;
+  approvedStatus?: string;
+  colPosSec?: string;
+  colHeadcount?: string;
 }
 
 export const languages = [
