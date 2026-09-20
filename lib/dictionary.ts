@@ -92,7 +92,6 @@ export interface Translation {
   successTitle?: string;
   successDesc?: string;
   notesLabel?: string;
-  allstatuses?: string;
 }
 
 export const languages = [
