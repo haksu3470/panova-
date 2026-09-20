@@ -42,6 +42,7 @@ export default function CandidateDashboard() {
   const [authenticated, setAuthenticated] = useState(false);
   const [loginInput, setLoginInput] = useState('');
   const [password, setPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [candidate, setCandidate] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'documents' | 'jobs' | 'interviews' | 'offers' | 'process' | 'travel' | 'support'>('overview');

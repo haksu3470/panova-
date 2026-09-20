@@ -88,6 +88,11 @@ export interface Translation {
   totalDemands?: string;
   requestedHeadcount?: string;
   activeProcesses?: string;
+  formTitle?: string;
+  successTitle?: string;
+  successDesc?: string;
+  notesLabel?: string;
+  allstatuses?: string;
 }
 
 export const languages = [
