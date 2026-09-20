@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft, Home, User, FileText, CheckCircle, Award, Video, ShieldCheck, Clock, Calendar, Save, Languages, FileCheck, AlertCircle, Plus, Trash2, Upload, Eye, X, Camera } from 'lucide-react';
+import { ArrowLeft, Home, User, FileText, CheckCircle, Award, Video, ShieldCheck, Clock, Calendar, Save, Languages, FileCheck, AlertCircle, Plus, Trash2, Upload, Eye, X, Camera, KeyRound } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
@@ -157,7 +157,7 @@ export default function CandidateDetailPage() {
     setSaving(false);
 
     if (!error) {
-      alert(currentLang === 'tr' ? 'Aday dosyası, şifresi ve fotoğrafı başarıyla kaydedildi!' : 'Candidate dossier saved successfully!');
+      alert(currentLang === 'tr' ? 'Aday dosyası, fotoğraf ve şifre başarıyla kaydedildi!' : 'Candidate dossier saved successfully!');
     } else {
       alert('Hata: ' + error.message);
     }
@@ -223,7 +223,7 @@ export default function CandidateDetailPage() {
             {/* Fotoğraf ve Kimlik Bilgileri */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-                <User className="w-5 h-5 text-[#2e7d32]" /> Kimlik, Fotoğraf & Giriş Bilgileri
+                <User className="w-5 h-5 text-[#2e7d32]" /> Kimlik, Fotoğraf & Portal Şifresi
               </h3>
 
               <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-200">
@@ -235,7 +235,7 @@ export default function CandidateDetailPage() {
                       {candidate.full_name?.charAt(0)}
                     </div>
                   )}
-                  <label className="absolute bottom-0 right-0 bg-[#2e7d32] text-white p-1.5 rounded-xl cursor-pointer shadow-lg hover:bg-[#1b5e20] transition" title="Fotoğraf Yükle">
+                  <label className="absolute bottom-0 right-0 bg-[#2e7d32] text-white p-2 rounded-xl cursor-pointer shadow-lg hover:bg-[#1b5e20] transition" title="Fotoğraf Yükle">
                     <Camera className="w-4 h-4" />
                     <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                   </label>
@@ -244,11 +244,14 @@ export default function CandidateDetailPage() {
                 <div className="flex-1 space-y-3 w-full">
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase block">Giriş Telefonu (GSM - Kullanıcı Adı)</label>
-                    <input type="text" value={candidate.phone || ''} readclassName className="w-full px-3 py-2 text-xs rounded-lg border bg-slate-100 font-bold text-slate-700" />
+                    <input type="text" value={candidate.phone || ''} readOnly className="w-full px-3 py-2 text-xs rounded-lg border bg-slate-100 font-bold text-slate-700" />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase block">Aday Portalı Şifresi</label>
-                    <input type="text" value={candidatePassword} onChange={(e) => setCandidatePassword(e.target.value)} placeholder="Şifre belirleyin" className="w-full px-3 py-2 text-xs rounded-lg border bg-white font-bold text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
+                    <div className="relative">
+                      <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                      <input type="text" value={candidatePassword} onChange={(e) => setCandidatePassword(e.target.value)} placeholder="Şifre belirleyin" className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border bg-white font-bold text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -318,6 +321,20 @@ export default function CandidateDetailPage() {
           </div>
         </div>
       </div>
+
+      {previewDoc && (
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border">
+            <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
+              <h3 className="font-bold text-sm">{previewDoc.name}</h3>
+              <button onClick={() => setPreviewDoc(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-4 flex-1 overflow-auto flex justify-center bg-slate-100">
+              <img src={previewDoc.url} alt="Önizleme" className="max-w-full max-h-[70vh] object-contain rounded-xl" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
