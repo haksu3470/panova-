@@ -22,6 +22,7 @@ export interface Translation {
   portalLogin?: string;
   tagline?: string;
   heroTitle?: string;
+  completeReg?: string;
   colTargetStart?: string;
   colBenefits?: string;
   accommodation?: string;
@@ -60,6 +61,7 @@ export const translations: Record<Language, Translation> = {
     portalLogin: 'Portal Giriş',
     tagline: 'Uluslararası İstihdam ve Vize Yönetimi',
     heroTitle: 'Profesyonel İş Gücü Çözümleri',
+    completeReg: 'Kayıt Ol',
   },
   en: {
     returnHome: 'Return to Home',
@@ -83,6 +85,7 @@ export const translations: Record<Language, Translation> = {
     portalLogin: 'Portal Login',
     tagline: 'International Employment & Visa Management',
     heroTitle: 'Professional Workforce Solutions',
+    completeReg: 'Register',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -106,6 +109,7 @@ export const translations: Record<Language, Translation> = {
     portalLogin: 'Hyrja në Portal',
     tagline: 'Punësim Ndërkombëtar dhe Menaxhim Vizash',
     heroTitle: 'Zgjidhje Profesionale të Fuqisë Punëtore',
+    completeReg: 'Regjistrohuni',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -129,5 +133,6 @@ export const translations: Record<Language, Translation> = {
     portalLogin: 'تسجيل الدخول للبوابة',
     tagline: 'التوظيف الدولي وإدارة التأشيرات',
     heroTitle: 'حلول القوى العاملة المهنية',
+    completeReg: 'التسجيل',
   },
 };
