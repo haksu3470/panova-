@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft, User, FileText, CheckCircle, Award, Video, ShieldCheck, Clock, Calendar, Save, Languages, FileCheck, AlertCircle, Plus, Trash2, Upload, Eye, X } from 'lucide-react';
+import { ArrowLeft, Home, User, FileText, CheckCircle, Award, Video, ShieldCheck, Clock, Calendar, Save, Languages, FileCheck, AlertCircle, Plus, Trash2, Upload, Eye, X } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
@@ -32,12 +32,12 @@ export default function CandidateDetailPage() {
   const [status, setStatus] = useState('pending');
   const [isVerified, setIsVerified] = useState(false);
 
-  // Sertifika & Video Düzenleme State
+  // Sertifika & Video
   const [certificateNo, setCertificateNo] = useState('');
   const [issuingBody, setIssuingBody] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
 
-  // Yeni Belge Ekleme & Önizleme Modal State
+  // Yeni Belge & Modal
   const [newDocName, setNewDocName] = useState('');
   const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
 
@@ -143,7 +143,7 @@ export default function CandidateDetailPage() {
     setSaving(false);
 
     if (!error) {
-      alert(currentLang === 'tr' ? 'Aday dosyası, sertifika ve evraklar başarıyla kaydedildi!' : 'Candidate dossier saved successfully!');
+      alert(currentLang === 'tr' ? 'Aday dosyası başarıyla kaydedildi!' : 'Candidate dossier saved successfully!');
     } else {
       alert('Hata: ' + error.message);
     }
@@ -161,17 +161,32 @@ export default function CandidateDetailPage() {
     <div className={`min-h-screen bg-slate-50 p-4 sm:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto space-y-6">
         
-        {/* Top Header */}
+        {/* Navigasyonu Güçlendirilmiş Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <Link href="/portal" className="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-700 transition">
-              <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Yönetim Paneline Dönüş */}
+            <Link 
+              href="/portal" 
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-700 font-bold text-xs transition border border-slate-200"
+            >
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180 text-slate-600" />
+              <span>Yönetim Paneline Dön</span>
             </Link>
-            <div>
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 uppercase bg-emerald-50 px-2.5 py-0.5 rounded-full w-fit mb-1">
+
+            {/* Ana Sayfaya Dönüş */}
+            <Link 
+              href="/" 
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-700 font-bold text-xs transition border border-slate-200"
+            >
+              <Home className="w-4 h-4 text-slate-600" />
+              <span>Ana Sayfa</span>
+            </Link>
+
+            <div className="border-l border-slate-200 pl-3 ml-1 rtl:border-r rtl:border-l-0 rtl:pr-3 rtl:mr-1">
+              <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-800 uppercase bg-emerald-50 px-2 py-0.5 rounded-full w-fit mb-0.5">
                 Aday Dosyası ID: #{candidate.id.substring(0, 8)}
               </div>
-              <h1 className="text-2xl font-extrabold text-slate-900">{candidate.full_name}</h1>
+              <h1 className="text-xl font-extrabold text-slate-900">{candidate.full_name}</h1>
             </div>
           </div>
 
@@ -200,13 +215,11 @@ export default function CandidateDetailPage() {
           </div>
         </div>
 
-        {/* Main Content Grid */}
+        {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
-          {/* Sol Kolon */}
           <div className="lg:col-span-8 space-y-6">
             
-            {/* Kimlik & Mesleki Özet */}
+            {/* Kimlik & Mesleki Profil */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
                 <User className="w-5 h-5 text-[#2e7d32]" /> Kimlik & Mesleki Profil
@@ -239,7 +252,7 @@ export default function CandidateDetailPage() {
               </div>
             </div>
 
-            {/* MODÜL 1.4: Evrak & Belge Kontrol / Yükleme Mekanizması */}
+            {/* Evrak & Belge Kontrol Mekanizması */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -250,7 +263,6 @@ export default function CandidateDetailPage() {
                 </span>
               </div>
 
-              {/* Belge Listesi */}
               <div className="space-y-3">
                 {documents.map((doc) => (
                   <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
@@ -287,14 +299,12 @@ export default function CandidateDetailPage() {
                         <button
                           onClick={() => handleDeleteDocument(doc.id)}
                           className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg transition cursor-pointer"
-                          title="Belgeyi Kaldır"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
 
-                    {/* Önizleme & Yükleme Butonları */}
                     <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
                       {doc.file_url ? (
                         <button
@@ -322,7 +332,6 @@ export default function CandidateDetailPage() {
                 ))}
               </div>
 
-              {/* Yeni Evrak Ekleme Alanı */}
               <div className="pt-3 border-t border-slate-100 flex gap-2">
                 <input
                   type="text"
@@ -340,7 +349,7 @@ export default function CandidateDetailPage() {
               </div>
             </div>
 
-            {/* Sertifika ve Değerlendirme Videosu (Düzenlenebilir Hale Getirildi) */}
+            {/* Sertifika ve Değerlendirme Videosu */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
                 <Award className="w-5 h-5 text-amber-500" /> Sertifika & Çalışma Videosu Yönetimi
@@ -462,18 +471,15 @@ export default function CandidateDetailPage() {
         </div>
       </div>
 
-      {/* BELGE EKRANDA ÖNİZLEME PENCERESİ (MODAL) */}
+      {/* Modal Belge Önizleme */}
       {previewDoc && (
         <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-slate-200">
             <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
               <h3 className="font-bold text-sm flex items-center gap-2">
-                <FileCheck className="w-4 h-4 text-emerald-400" /> {previewDoc.name} - Belge Önizleme
+                <FileCheck className="w-4 h-4 text-emerald-400" /> {previewDoc.name} - Önizleme
               </h3>
-              <button
-                onClick={() => setPreviewDoc(null)}
-                className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-full transition text-slate-300"
-              >
+              <button onClick={() => setPreviewDoc(null)} className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-full transition text-slate-300">
                 <X className="w-5 h-5" />
               </button>
             </div>
