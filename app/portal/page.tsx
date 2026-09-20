@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Lock, ShieldCheck, Search, Filter, Languages, ArrowLeft, Award, Video, CheckCircle, Clock, Star, Calendar, Building2, Users, FileText } from 'lucide-react';
+import { Lock, ShieldCheck, Search, Filter, Languages, ArrowLeft, Award, Video, CheckCircle, Clock, Star, Calendar, Building2, Users } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
@@ -147,7 +147,7 @@ export default function PortalPage() {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#2e7d32] outline-none"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none"
                 placeholder="admin"
               />
             </div>
@@ -158,13 +158,13 @@ export default function PortalPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#2e7d32] outline-none"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none"
                 placeholder="••••••••"
               />
             </div>
             <button
               type="submit"
-              className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2"
+              className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 cursor-pointer"
             >
               {t.signInBtn}
             </button>
@@ -180,7 +180,7 @@ export default function PortalPage() {
   return (
     <div className={`min-h-screen bg-slate-50 p-4 sm:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto">
-        {/* Top Header */}
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
           <div>
             <div className="flex items-center gap-2 text-emerald-700 font-bold text-sm mb-1">
@@ -206,7 +206,7 @@ export default function PortalPage() {
 
             <button
               onClick={() => setAuthenticated(false)}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition"
+              className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition cursor-pointer"
             >
               {t.logoutBtn}
             </button>
@@ -217,24 +217,24 @@ export default function PortalPage() {
         <div className="flex items-center gap-3 mb-6">
           <button
             onClick={() => { setActiveTab('candidates'); fetchCandidates(); }}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition ${
+            className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition cursor-pointer ${
               activeTab === 'candidates'
                 ? 'bg-[#2e7d32] text-white shadow-md'
                 : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
             }`}
           >
-            <Users className="w-4 h-4" /> Candidate Pool ({candidates.length})
+            <Users className="w-4 h-4" /> {currentLang === 'tr' ? 'Aday Havuzu' : 'Candidate Pool'} ({candidates.length})
           </button>
 
           <button
             onClick={() => { setActiveTab('requests'); fetchJobRequests(); }}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition ${
+            className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition cursor-pointer ${
               activeTab === 'requests'
                 ? 'bg-[#2e7d32] text-white shadow-md'
                 : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
             }`}
           >
-            <Building2 className="w-4 h-4" /> Employer Demand Dossiers ({jobRequests.length})
+            <Building2 className="w-4 h-4" /> {t.dossierTitle} ({jobRequests.length})
           </button>
         </div>
 
@@ -244,7 +244,7 @@ export default function PortalPage() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3 rtl:right-3 rtl:left-auto top-3.5" />
             <input
               type="text"
-              placeholder={activeTab === 'candidates' ? t.searchPlaceholder : "Search employer, position or sector..."}
+              placeholder={activeTab === 'candidates' ? t.searchPlaceholder : (currentLang === 'tr' ? "İşveren, pozisyon veya sektor ara..." : "Search employer, position or sector...")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 rtl:pr-9 rtl:pl-4 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-[#2e7d32] text-slate-900 font-medium"
@@ -267,10 +267,10 @@ export default function PortalPage() {
                 </>
               ) : (
                 <>
-                  <option value="new_request">New Request</option>
-                  <option value="searching_candidates">Searching Candidates</option>
-                  <option value="candidates_submitted">Candidates Submitted</option>
-                  <option value="completed">Completed</option>
+                  <option value="new_request">{currentLang === 'tr' ? 'Yeni Talep' : 'New Request'}</option>
+                  <option value="searching_candidates">{currentLang === 'tr' ? 'Aday Aranıyor' : 'Searching Candidates'}</option>
+                  <option value="candidates_submitted">{currentLang === 'tr' ? 'Adaylar Sunuldu' : 'Candidates Submitted'}</option>
+                  <option value="completed">{currentLang === 'tr' ? 'Tamamlandı' : 'Completed'}</option>
                 </>
               )}
             </select>
@@ -290,10 +290,10 @@ export default function PortalPage() {
                       <th className="p-4">{t.colCandidate}</th>
                       <th className="p-4">{t.colPassportNat}</th>
                       <th className="p-4">{t.colProfSector}</th>
-                      <th className="p-4">Certificate & Video</th>
-                      <th className="p-4">Salary & Shift</th>
+                      <th className="p-4">{currentLang === 'tr' ? 'Sertifika & Video' : 'Certificate & Video'}</th>
+                      <th className="p-4">{currentLang === 'tr' ? 'Ücret & Vardiya' : 'Salary & Shift'}</th>
                       <th className="p-4">{t.colVisaStatus}</th>
-                      <th className="p-4">30-60-90 Tracking</th>
+                      <th className="p-4">{currentLang === 'tr' ? '30-60-90 Gün Takip' : '30-60-90 Tracking'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -305,7 +305,7 @@ export default function PortalPage() {
                             <button
                               onClick={() => toggleVerification(candidate.id, candidate.is_verified)}
                               title={candidate.is_verified ? 'Verified Certificate' : 'Click to Verify'}
-                              className={`p-1 rounded-full transition ${candidate.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400 hover:text-emerald-600'}`}
+                              className={`p-1 rounded-full transition cursor-pointer ${candidate.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400 hover:text-emerald-600'}`}
                             >
                               <CheckCircle className="w-4 h-4" />
                             </button>
@@ -327,7 +327,7 @@ export default function PortalPage() {
                                 {candidate.certificate_no} ({candidate.issuing_body || 'N/A'})
                               </div>
                             ) : (
-                              <span className="text-slate-400">No Cert</span>
+                              <span className="text-slate-400">{currentLang === 'tr' ? 'Sertifika Yok' : 'No Cert'}</span>
                             )}
                             {candidate.video_url && (
                               <a
@@ -336,15 +336,15 @@ export default function PortalPage() {
                                 rel="noreferrer"
                                 className="inline-flex items-center gap-1 text-emerald-700 hover:underline font-semibold"
                               >
-                                <Video className="w-3.5 h-3.5" /> Watch Video
+                                <Video className="w-3.5 h-3.5" /> {currentLang === 'tr' ? 'Videoyu İzle' : 'Watch Video'}
                               </a>
                             )}
                           </div>
                         </td>
                         <td className="p-4 text-xs font-semibold">
-                          <div>{candidate.expected_salary ? `€${candidate.expected_salary} / month` : 'N/A'}</div>
+                          <div>{candidate.expected_salary ? `€${candidate.expected_salary} / ${currentLang === 'tr' ? 'ay' : 'month'}` : 'N/A'}</div>
                           <div className="text-slate-400 font-normal">
-                            {candidate.shift_suitable ? 'Shift Suitable' : 'Standard Shift'}
+                            {candidate.shift_suitable ? (currentLang === 'tr' ? 'Vardiyaya Uygun' : 'Shift Suitable') : (currentLang === 'tr' ? 'Standart Vardiya' : 'Standard Shift')}
                           </div>
                         </td>
                         <td className="p-4">
@@ -364,7 +364,7 @@ export default function PortalPage() {
                             onClick={() => setSelectedCandidateForFollowup(candidate)}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-[#2e7d32] border border-emerald-200 rounded-lg text-xs font-bold hover:bg-emerald-100 transition cursor-pointer"
                           >
-                            <Calendar className="w-3.5 h-3.5" /> Track Period
+                            <Calendar className="w-3.5 h-3.5" /> {currentLang === 'tr' ? 'Süreci Takip Et' : 'Track Period'}
                           </button>
                         </td>
                       </tr>
@@ -393,12 +393,12 @@ export default function PortalPage() {
                 <table className="w-full text-left rtl:text-right text-sm text-slate-600">
                   <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-100">
                     <tr>
-                      <th className="p-4">Employer Company</th>
-                      <th className="p-4">Position & Sector</th>
-                      <th className="p-4">Headcount</th>
-                      <th className="p-4">Monthly Salary</th>
-                      <th className="p-4">Benefits</th>
-                      <th className="p-4">Demand Status</th>
+                      <th className="p-4">{currentLang === 'tr' ? 'İşveren Şirket' : 'Employer Company'}</th>
+                      <th className="p-4">{t.colPosSec}</th>
+                      <th className="p-4">{t.colHeadcount}</th>
+                      <th className="p-4">{t.colSalary}</th>
+                      <th className="p-4">{t.colBenefits}</th>
+                      <th className="p-4">{t.colDemandStatus}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -406,17 +406,17 @@ export default function PortalPage() {
                       <tr key={req.id} className="hover:bg-slate-50/50">
                         <td className="p-4 font-bold text-slate-900">
                           {req.employer_name}
-                          <div className="text-xs text-slate-400 font-normal">Created: {new Date(req.created_at).toLocaleDateString()}</div>
+                          <div className="text-xs text-slate-400 font-normal">{currentLang === 'tr' ? 'Tarih' : 'Created'}: {new Date(req.created_at).toLocaleDateString()}</div>
                         </td>
                         <td className="p-4 font-bold text-slate-800">
                           {req.position_title}
                           <div className="text-xs text-slate-400 font-normal uppercase">{req.sector}</div>
                         </td>
-                        <td className="p-4 font-bold text-slate-800">{req.headcount} Person(s)</td>
-                        <td className="p-4 font-semibold text-emerald-700">€{req.monthly_net_salary} / mo</td>
+                        <td className="p-4 font-bold text-slate-800">{req.headcount} {currentLang === 'tr' ? 'Kişi' : 'Person(s)'}</td>
+                        <td className="p-4 font-semibold text-emerald-700">€{req.monthly_net_salary} / {currentLang === 'tr' ? 'ay' : 'mo'}</td>
                         <td className="p-4 text-xs space-y-1 text-slate-500">
-                          <div>Accommodation: {req.accommodation_provided ? '✅ Covered' : '❌ No'}</div>
-                          <div>Food / Flight: {req.food_provided ? '✅ Food' : '❌'} | {req.flight_covered ? '✅ Flight' : '❌'}</div>
+                          <div>{t.accommodation}: {req.accommodation_provided ? (currentLang === 'tr' ? '✅ Karşılanıyor' : '✅ Covered') : '❌'}</div>
+                          <div>{t.foodAllowance} / {t.flightTicket}: {req.food_provided ? '✅' : '❌'} | {req.flight_covered ? '✅' : '❌'}</div>
                         </td>
                         <td className="p-4">
                           <select
@@ -424,11 +424,11 @@ export default function PortalPage() {
                             onChange={(e) => updateRequestStatus(req.id, e.target.value)}
                             className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer outline-none bg-slate-50 text-slate-900"
                           >
-                            <option value="new_request">🟡 New Request</option>
-                            <option value="searching_candidates">🔵 Searching Candidates</option>
-                            <option value="candidates_submitted">🟣 Candidates Submitted</option>
-                            <option value="completed">🟢 Completed</option>
-                            <option value="cancelled">🔴 Cancelled</option>
+                            <option value="new_request">🟡 {currentLang === 'tr' ? 'Yeni Talep' : 'New Request'}</option>
+                            <option value="searching_candidates">🔵 {currentLang === 'tr' ? 'Aday Aranıyor' : 'Searching Candidates'}</option>
+                            <option value="candidates_submitted">🟣 {currentLang === 'tr' ? 'Adaylar Sunuldu' : 'Candidates Submitted'}</option>
+                            <option value="completed">🟢 {currentLang === 'tr' ? 'Tamamlandı' : 'Completed'}</option>
+                            <option value="cancelled">🔴 {currentLang === 'tr' ? 'İptal Edildi' : 'Cancelled'}</option>
                           </select>
                         </td>
                       </tr>
@@ -436,7 +436,7 @@ export default function PortalPage() {
                     {filteredRequests.length === 0 && (
                       <tr>
                         <td colSpan={6} className="p-8 text-center text-slate-400">
-                          No employer demand dossiers found.
+                          {currentLang === 'tr' ? 'İşveren talebi bulunamadı.' : 'No employer demand dossiers found.'}
                         </td>
                       </tr>
                     )}
@@ -453,8 +453,8 @@ export default function PortalPage() {
             <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100">
               <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
                 <div>
-                  <h3 className="text-lg font-extrabold text-slate-900">Placement Follow-up Tracking</h3>
-                  <p className="text-xs text-slate-500">Candidate: {selectedCandidateForFollowup.full_name}</p>
+                  <h3 className="text-lg font-extrabold text-slate-900">{currentLang === 'tr' ? 'Yerleştirme Takip Sistemi' : 'Placement Follow-up Tracking'}</h3>
+                  <p className="text-xs text-slate-500">{currentLang === 'tr' ? 'Aday' : 'Candidate'}: {selectedCandidateForFollowup.full_name}</p>
                 </div>
                 <button
                   type="button"
@@ -470,33 +470,33 @@ export default function PortalPage() {
                   <div className="flex items-center gap-3">
                     <Clock className="w-5 h-5 text-amber-500" />
                     <div>
-                      <div className="font-bold text-sm text-slate-800">Week 1 Check</div>
-                      <div className="text-xs text-slate-500">Arrival & Accommodation Audit</div>
+                      <div className="font-bold text-sm text-slate-800">{currentLang === 'tr' ? '1. Hafta Kontrolü' : 'Week 1 Check'}</div>
+                      <div className="text-xs text-slate-500">{currentLang === 'tr' ? 'Varış & Konaklama Denetimi' : 'Arrival & Accommodation Audit'}</div>
                     </div>
                   </div>
-                  <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-md text-xs font-bold">Completed</span>
+                  <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-md text-xs font-bold">{currentLang === 'tr' ? 'Tamamlandı' : 'Completed'}</span>
                 </div>
 
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Star className="w-5 h-5 text-blue-500" />
                     <div>
-                      <div className="font-bold text-sm text-slate-800">Day 30 Review</div>
-                      <div className="text-xs text-slate-500">Workforce Adaptation & Salary Status</div>
+                      <div className="font-bold text-sm text-slate-800">{currentLang === 'tr' ? '30. Gün Değerlendirmesi' : 'Day 30 Review'}</div>
+                      <div className="text-xs text-slate-500">{currentLang === 'tr' ? 'İş Uyum Durumu & Maaş Kontrolü' : 'Workforce Adaptation & Salary Status'}</div>
                     </div>
                   </div>
-                  <span className="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-md text-xs font-bold">In Progress</span>
+                  <span className="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-md text-xs font-bold">{currentLang === 'tr' ? 'Devam Ediyor' : 'In Progress'}</span>
                 </div>
 
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between opacity-60">
                   <div className="flex items-center gap-3">
                     <Calendar className="w-5 h-5 text-slate-400" />
                     <div>
-                      <div className="font-bold text-sm text-slate-800">Day 60 & 90 Assessment</div>
-                      <div className="text-xs text-slate-500">Long-term Performance & Compliance</div>
+                      <div className="font-bold text-sm text-slate-800">{currentLang === 'tr' ? '60. ve 90. Gün Takibi' : 'Day 60 & 90 Assessment'}</div>
+                      <div className="text-xs text-slate-500">{currentLang === 'tr' ? 'Uzun Dönem Performans Değerlendirmesi' : 'Long-term Performance & Compliance'}</div>
                     </div>
                   </div>
-                  <span className="px-2.5 py-1 bg-slate-200 text-slate-600 rounded-md text-xs font-bold">Upcoming</span>
+                  <span className="px-2.5 py-1 bg-slate-200 text-slate-600 rounded-md text-xs font-bold">{currentLang === 'tr' ? 'Bekliyor' : 'Upcoming'}</span>
                 </div>
               </div>
 
@@ -505,7 +505,7 @@ export default function PortalPage() {
                 onClick={() => setSelectedCandidateForFollowup(null)}
                 className="w-full mt-6 bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold text-sm transition cursor-pointer"
               >
-                Close Tracking View
+                {currentLang === 'tr' ? 'Kapat' : 'Close Tracking View'}
               </button>
             </div>
           </div>
