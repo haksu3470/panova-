@@ -3,23 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft, Home, User, Save, Camera, FileCheck } from 'lucide-react';
+import { ArrowLeft, Home, User, Save, Camera, Mail, Phone, KeyRound } from 'lucide-react';
 import Link from 'next/link';
-
-interface CandidateDocument {
-  id: string;
-  name: string;
-  status: 'pending' | 'uploaded' | 'reviewing' | 'approved' | 'rejected' | 're_requested' | 'expired';
-  file_url?: string;
-  file_name?: string;
-}
 
 export default function CandidateDetailPage() {
   const params = useParams();
   const candidateId = params.id as string;
 
   const [candidate, setCandidate] = useState<any | null>(null);
-  const [documents, setDocuments] = useState<CandidateDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -48,19 +39,6 @@ export default function CandidateDetailPage() {
       setCandidatePhoto(data.photo_url || '');
       setCandidatePhone(data.phone || '');
       setCandidateEmail(data.email || '');
-      
-      const defaultDocs: CandidateDocument[] = [
-        { id: '1', name: 'Pasaport Taraması', status: data.passport_number ? 'approved' : 'pending' },
-        { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
-        { id: '3', name: 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
-        { id: '4', name: 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
-      ];
-      
-      try {
-        setDocuments(data.documents_json ? JSON.parse(data.documents_json) : defaultDocs);
-      } catch {
-        setDocuments(defaultDocs);
-      }
     }
     setLoading(false);
   };
@@ -85,14 +63,13 @@ export default function CandidateDetailPage() {
         photo_url: candidatePhoto,
         phone: candidatePhone,
         email: candidateEmail,
-        documents_json: JSON.stringify(documents),
       })
       .eq('id', candidateId);
 
     setSaving(false);
 
     if (!error) {
-      alert('Aday bilgileri, şifre ve fotoğraf başarıyla kaydedildi!');
+      alert('Aday bilgileri, GSM, E-posta, şifre ve fotoğraf başarıyla kaydedildi!');
     } else {
       alert('Hata: ' + error.message);
     }
@@ -136,10 +113,10 @@ export default function CandidateDetailPage() {
           </button>
         </div>
 
-        {/* Fotoğraf, İletişim ve Şifre Yönetimi */}
+        {/* Fotoğraf, GSM, E-Posta ve Şifre Güncelleme Paneli */}
         <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
           <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-            <User className="w-5 h-5 text-[#2e7d32]" /> Admin: Fotoğraf, İletişim ve Şifre Yönetimi
+            <User className="w-5 h-5 text-[#2e7d32]" /> Aday Fotoğraf, GSM, E-Posta ve Şifre Yönetimi
           </h3>
 
           <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-slate-50 rounded-2xl border">
@@ -159,16 +136,24 @@ export default function CandidateDetailPage() {
 
             <div className="flex-1 space-y-3 w-full">
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block">Telefon Numarası (GSM)</label>
-                <input type="tel" value={candidatePhone} onChange={(e) => setCandidatePhone(e.target.value)} className="w-full px-3 py-2 text-xs rounded-lg border bg-white font-bold text-slate-900 outline-none" />
+                <label className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1 mb-1">
+                  <Phone className="w-3 h-3" /> Telefon Numarası (GSM)
+                </label>
+                <input type="tel" value={candidatePhone} onChange={(e) => setCandidatePhone(e.target.value)} className="w-full px-3 py-2 text-xs rounded-lg border bg-white font-bold text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
               </div>
+
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block">E-Posta</label>
-                <input type="email" value={candidateEmail} onChange={(e) => setCandidateEmail(e.target.value)} className="w-full px-3 py-2 text-xs rounded-lg border bg-white font-bold text-slate-900 outline-none" />
+                <label className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1 mb-1">
+                  <Mail className="w-3 h-3" /> E-Posta Adresi
+                </label>
+                <input type="email" value={candidateEmail} onChange={(e) => setCandidateEmail(e.target.value)} className="w-full px-3 py-2 text-xs rounded-lg border bg-white font-bold text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
               </div>
+
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block">Aday Portalı Şifresi</label>
-                <input type="text" value={candidatePassword} onChange={(e) => setCandidatePassword(e.target.value)} className="w-full px-3 py-2 text-xs rounded-lg border bg-white font-bold text-slate-900 outline-none" />
+                <label className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1 mb-1">
+                  <KeyRound className="w-3 h-3" /> Aday Portalı Şifresi
+                </label>
+                <input type="text" value={candidatePassword} onChange={(e) => setCandidatePassword(e.target.value)} className="w-full px-3 py-2 text-xs rounded-lg border bg-white font-bold text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
               </div>
             </div>
           </div>
