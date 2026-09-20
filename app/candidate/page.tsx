@@ -217,7 +217,7 @@ export default function CandidateDashboard() {
           <h1 className="text-2xl font-extrabold text-slate-900 mb-1">{t.candidatePortal}</h1>
           <p className="text-slate-500 text-xs mb-6 leading-relaxed">{t.loginDesc}</p>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleCandidateLogin} className="space-y-4">
   <div>
     <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
       {currentLang === 'tr' ? 'E-POSTA / TELEFON / PASAPORT *' : (currentLang === 'sq' ? 'EMAIL / TELEFON / PASAPORTË *' : 'EMAIL / PHONE / PASSPORT *')}
