@@ -23,7 +23,6 @@ export default function HomePage() {
   const company = t.companies[selectedCompanyKey];
   const isRtl = currentLang === 'ar';
   
-  // O an seçili olan dil HARİÇ diğer diller
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
   const activeLangObj = languages.find((l) => l.code === currentLang);
 
@@ -57,20 +56,16 @@ export default function HomePage() {
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           
-          {/* Logo Alanı (public/logo.png görseli eklendi) */}
+          {/* Logo */}
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             <img 
               src="/logo.png" 
               alt="PANOVA Group" 
               className="h-10 w-auto object-contain"
-              onError={(e) => {
-                // Logo dosyası bulunamazsa varsayılan yeşil P kutucuğu görünür
-                e.currentTarget.style.display = 'none';
-              }}
             />
             <div>
               <span className="text-xl font-extrabold tracking-tight text-slate-900 block leading-none">PANOVA</span>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t.tagline}</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{company.name}</span>
             </div>
           </div>
 
@@ -92,23 +87,35 @@ export default function HomePage() {
               </select>
             </div>
 
-            <Link
-              href="/register"
-              className="hidden sm:inline-flex items-center gap-1.5 bg-[#2e7d32] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#1b5e20] transition shadow-md"
-            >
-              <Users className="w-3.5 h-3.5" /> {t.candidateRegister}
-            </Link>
+            {/* Şirket Seçimine Göre Dinamik Butonlar */}
+            {selectedCompanyKey === 'hr' ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-1.5 bg-[#2e7d32] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#1b5e20] transition shadow-md z-10 cursor-pointer"
+                >
+                  <Users className="w-3.5 h-3.5" /> {t.candidateRegister}
+                </Link>
 
-            <Link
-              href="/employer"
-              className="hidden sm:inline-flex items-center gap-1.5 bg-slate-100 text-slate-800 px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition border border-slate-200"
-            >
-              <Building2 className="w-3.5 h-3.5" /> {t.employerPortal}
-            </Link>
+                <Link
+                  href="/employer"
+                  className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-800 px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition border border-slate-200 z-10 cursor-pointer"
+                >
+                  <Building2 className="w-3.5 h-3.5" /> {t.employerPortal}
+                </Link>
+              </div>
+            ) : (
+              <a
+                href="#contact-form"
+                className="inline-flex items-center gap-1.5 bg-[#2e7d32] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#1b5e20] transition shadow-md z-10 cursor-pointer"
+              >
+                <Send className="w-3.5 h-3.5" /> Kurumsal Teklif Al
+              </a>
+            )}
 
             <Link
               href="/portal"
-              className="inline-flex items-center gap-1.5 bg-slate-900 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition shadow-sm"
+              className="inline-flex items-center gap-1.5 bg-slate-900 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition shadow-sm z-10 cursor-pointer"
             >
               <Lock className="w-3.5 h-3.5" /> {t.portalLogin}
             </Link>
@@ -120,10 +127,10 @@ export default function HomePage() {
       <section className="bg-slate-900 text-white py-20 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
         <div className="max-w-4xl mx-auto relative z-10">
           <span className="text-emerald-400 font-bold text-xs uppercase tracking-widest bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-800/50 inline-block mb-4">
-            {t.tagline}
+            {company.name}
           </span>
-          <h1 className="text-4xl sm:text-6xl font-black mb-6 tracking-tight leading-tight">{t.heroTitle}</h1>
-          <p className="text-slate-300 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">{t.heroDesc}</p>
+          <h1 className="text-4xl sm:text-6xl font-black mb-6 tracking-tight leading-tight">{company.tagline}</h1>
+          <p className="text-slate-300 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">{company.desc}</p>
         </div>
       </section>
 
@@ -136,8 +143,9 @@ export default function HomePage() {
             
             <div className="grid grid-cols-2 gap-4">
               <button
+                type="button"
                 onClick={() => setSelectedCompanyKey('hr')}
-                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition ${selectedCompanyKey === 'hr' ? 'border-[#2e7d32] bg-emerald-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition cursor-pointer ${selectedCompanyKey === 'hr' ? 'border-[#2e7d32] bg-emerald-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
               >
                 <Users className="w-8 h-8 text-[#2e7d32] mb-3" />
                 <div className="font-bold text-slate-900 text-base">{t.companies.hr.name}</div>
@@ -145,8 +153,9 @@ export default function HomePage() {
               </button>
 
               <button
+                type="button"
                 onClick={() => setSelectedCompanyKey('trade')}
-                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition ${selectedCompanyKey === 'trade' ? 'border-[#2e7d32] bg-emerald-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition cursor-pointer ${selectedCompanyKey === 'trade' ? 'border-[#2e7d32] bg-emerald-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
               >
                 <Globe2 className="w-8 h-8 text-blue-600 mb-3" />
                 <div className="font-bold text-slate-900 text-base">{t.companies.trade.name}</div>
@@ -154,8 +163,9 @@ export default function HomePage() {
               </button>
 
               <button
+                type="button"
                 onClick={() => setSelectedCompanyKey('agriculture')}
-                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition ${selectedCompanyKey === 'agriculture' ? 'border-[#2e7d32] bg-emerald-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition cursor-pointer ${selectedCompanyKey === 'agriculture' ? 'border-[#2e7d32] bg-emerald-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
               >
                 <Sprout className="w-8 h-8 text-amber-600 mb-3" />
                 <div className="font-bold text-slate-900 text-base">{t.companies.agriculture.name}</div>
@@ -163,8 +173,9 @@ export default function HomePage() {
               </button>
 
               <button
+                type="button"
                 onClick={() => setSelectedCompanyKey('construction')}
-                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition ${selectedCompanyKey === 'construction' ? 'border-[#2e7d32] bg-emerald-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition cursor-pointer ${selectedCompanyKey === 'construction' ? 'border-[#2e7d32] bg-emerald-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
               >
                 <HardHat className="w-8 h-8 text-orange-600 mb-3" />
                 <div className="font-bold text-slate-900 text-base">{t.companies.construction.name}</div>
@@ -190,10 +201,10 @@ export default function HomePage() {
           </div>
 
           {/* Contact Form */}
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-5" id="contact-form">
             <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl sticky top-28">
               <h3 className="text-2xl font-extrabold text-slate-900 mb-1">{t.formTitle}</h3>
-              <p className="text-slate-500 text-xs mb-6">{t.formDesc}</p>
+              <p className="text-slate-500 text-xs mb-6">{company.name} ile doğrudan iletişime geçin.</p>
 
               {submitted ? (
                 <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center">

@@ -2,274 +2,348 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Users, Globe2, Sprout, HardHat, Building2, Languages, CheckCircle2, Lock, Send } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, UserPlus, Languages, Send, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
-export default function HomePage() {
+export default function RegisterPage() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
-  const [selectedCompanyKey, setSelectedCompanyKey] = useState<'hr' | 'trade' | 'agriculture' | 'construction'>('hr');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    notes: '',
-  });
+  const [errorMessage, setErrorMessage] = useState('');
 
   const t = translations[currentLang] || translations.tr;
-  const company = t.companies[selectedCompanyKey];
   const isRtl = currentLang === 'ar';
   
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
   const activeLangObj = languages.find((l) => l.code === currentLang);
 
+  const [formData, setFormData] = useState({
+    fullName: '',
+    passportNumber: '',
+    nationality: 'Turkey',
+    phone: '',
+    email: '',
+    sector: 'construction',
+    profession: 'Electrician / Elektrikçi',
+    customProfession: '',
+    experienceYears: '0',
+    certificateNo: '',
+    issuingBody: '',
+    videoUrl: '',
+    expectedSalary: '',
+    shiftSuitable: true,
+    languageSkills: '',
+    notes: '',
+  });
+
+  const professionOptions: Record<string, string[]> = {
+    construction: [
+      'Electrician / Elektrikçi',
+      'Mason & Plasterer / Duvarcı & Sıvacı',
+      'Welder / Kaynakçı',
+      'Plumber / Tesisatçı',
+      'Formwork Carpenter / Kalıpçı Usta',
+      'Heavy Machinery Operator / İş Makinesi Operatörü',
+      'General Construction Worker / İnşaat İşçisi',
+      'Other / Diğer'
+    ],
+    agriculture: [
+      'Fruit & Crop Picker / Meyve & Hasat Toplayıcı',
+      'Tractor & Farm Operator / Traktör & Çiftlik Operatörü',
+      'Greenhouse Worker / Sera İşçisi',
+      'Irrigation Specialist / Sulama Uzmanı',
+      'Agricultural Laborer / Tarım İşçisi',
+      'Other / Diğer'
+    ],
+    hr: [
+      'HR Specialist / İK Uzmanı',
+      'Recruiter / İşe Alım Danışmanı',
+      'Translator & Interpreter / Mütercim Tercüman',
+      'Administrative Assistant / Büro Elemanı',
+      'Other / Diğer'
+    ],
+    trade: [
+      'Logistics Specialist / Lojistik Elemanı',
+      'Warehouse Worker / Depo Görevlisi',
+      'Forklift Driver / Forklift Operatörü',
+      'Foreign Trade Specialist / Dış Ticaret Uzmanı',
+      'Other / Diğer'
+    ],
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage('');
 
-    const { error } = await supabase.from('contact_submissions').insert([
-      {
-        company_key: selectedCompanyKey,
-        company_name: company.name,
-        full_name: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        notes: formData.notes,
-      },
-    ]);
+    try {
+      const cleanEmail = formData.email.trim().toLowerCase();
+      const cleanPhone = formData.phone.trim();
+      const cleanPassport = formData.passportNumber.trim();
+      
+      const finalProfession = formData.profession === 'Other / Diğer'
+        ? formData.customProfession
+        : formData.profession;
 
-    setLoading(false);
+      const { error: insertError } = await supabase.from('job_candidates').insert([
+        {
+          full_name: formData.fullName,
+          passport_number: cleanPassport || null,
+          nationality: formData.nationality,
+          phone: cleanPhone,
+          email: cleanEmail,
+          sector: formData.sector,
+          profession: finalProfession || 'General Worker',
+          experience_years: parseInt(formData.experienceYears) || 0,
+          certificate_no: formData.certificateNo,
+          issuing_body: formData.issuingBody,
+          video_url: formData.videoUrl,
+          expected_salary: parseFloat(formData.expectedSalary) || null,
+          shift_suitable: formData.shiftSuitable,
+          language_skills: formData.languageSkills,
+          notes: formData.notes,
+          status: 'pending',
+        },
+      ]);
 
-    if (!error) {
+      if (insertError) {
+        if (insertError.code === '23505' || insertError.message.includes('unique')) {
+          setErrorMessage(
+            currentLang === 'tr'
+              ? 'Bu e-posta adresi, telefon numarası veya pasaport numarası ile daha önce başvuru yapılmıştır!'
+              : 'A candidate with this email, phone, or passport number already exists in the system!'
+          );
+          setLoading(false);
+          return;
+        }
+        throw insertError;
+      }
+
       setSubmitted(true);
-    } else {
-      alert('Error submitting form: ' + error.message);
+    } catch (err: any) {
+      setErrorMessage('Kayıt Hatası: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className={`min-h-screen bg-slate-50 text-slate-900 font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Top Navbar */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          
-          {/* Logo */}
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <img 
-              src="/logo.png" 
-              alt="PANOVA Group" 
-              className="h-10 w-auto object-contain"
-            />
-            <div>
-              <span className="text-xl font-extrabold tracking-tight text-slate-900 block leading-none">PANOVA</span>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{company.name}</span>
-            </div>
-          </div>
+    <div className={`min-h-screen bg-slate-900 text-slate-100 py-12 px-4 sm:px-6 lg:px-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className="max-w-2xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-white transition">
+            <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
+          </Link>
 
-          <div className="flex items-center gap-3">
-            {/* Multi-Language Selector */}
-            <div className="relative flex items-center bg-slate-100 rounded-lg px-2.5 py-1.5 border border-slate-200 shadow-sm">
-              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
-              <select
-                value={currentLang}
-                onChange={(e) => setCurrentLang(e.target.value as Language)}
-                className="bg-transparent text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer"
-              >
-                <option value={currentLang} className="font-bold">
-                  {activeLangObj?.flag} {activeLangObj?.name}
-                </option>
-                {selectableLanguages.map((lang) => (
-                  <option key={lang.code} value={lang.code} className="text-slate-900">{lang.flag} {lang.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Şirket Seçimine Göre Dinamik Butonlar */}
-            {selectedCompanyKey === 'hr' ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/register"
-                  className="inline-flex items-center gap-1.5 bg-[#2e7d32] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#1b5e20] transition shadow-md z-10 cursor-pointer"
-                >
-                  <Users className="w-3.5 h-3.5" /> {t.candidateRegister}
-                </Link>
-
-                <Link
-                  href="/employer"
-                  className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-800 px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition border border-slate-200 z-10 cursor-pointer"
-                >
-                  <Building2 className="w-3.5 h-3.5" /> {t.employerPortal}
-                </Link>
-              </div>
-            ) : (
-              <a
-                href="#contact-form"
-                className="inline-flex items-center gap-1.5 bg-[#2e7d32] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#1b5e20] transition shadow-md z-10 cursor-pointer"
-              >
-                <Send className="w-3.5 h-3.5" /> Kurumsal Teklif Al
-              </a>
-            )}
-
-            <Link
-              href="/portal"
-              className="inline-flex items-center gap-1.5 bg-slate-900 text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition shadow-sm z-10 cursor-pointer"
+          <div className="flex items-center bg-slate-800 rounded-lg px-2.5 py-1.5 border border-slate-700 shadow-sm">
+            <Languages className="w-4 h-4 text-slate-300 mr-1.5 rtl:ml-1.5" />
+            <select
+              value={currentLang}
+              onChange={(e) => setCurrentLang(e.target.value as Language)}
+              className="bg-transparent text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer"
             >
-              <Lock className="w-3.5 h-3.5" /> {t.portalLogin}
-            </Link>
+              <option value={currentLang} className="text-slate-900 font-bold">
+                {activeLangObj?.flag} {activeLangObj?.name}
+              </option>
+              {selectableLanguages.map((lang) => (
+                <option key={lang.code} value={lang.code} className="text-slate-900">{lang.flag} {lang.name}</option>
+              ))}
+            </select>
           </div>
         </div>
-      </header>
 
-      {/* Hero Section */}
-      <section className="bg-slate-900 text-white py-20 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
-        <div className="max-w-4xl mx-auto relative z-10">
-          <span className="text-emerald-400 font-bold text-xs uppercase tracking-widest bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-800/50 inline-block mb-4">
-            {company.name}
-          </span>
-          <h1 className="text-4xl sm:text-6xl font-black mb-6 tracking-tight leading-tight">{company.tagline}</h1>
-          <p className="text-slate-300 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">{company.desc}</p>
-        </div>
-      </section>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Company Selector Cards */}
-          <div className="lg:col-span-7 space-y-6">
-            <h2 className="text-2xl font-extrabold text-slate-900">{t.selectedCompany}</h2>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => setSelectedCompanyKey('hr')}
-                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition cursor-pointer ${selectedCompanyKey === 'hr' ? 'border-[#2e7d32] bg-emerald-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
-              >
-                <Users className="w-8 h-8 text-[#2e7d32] mb-3" />
-                <div className="font-bold text-slate-900 text-base">{t.companies.hr.name}</div>
-                <div className="text-xs text-slate-500 mt-1 line-clamp-2">{t.companies.hr.tagline}</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSelectedCompanyKey('trade')}
-                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition cursor-pointer ${selectedCompanyKey === 'trade' ? 'border-[#2e7d32] bg-emerald-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
-              >
-                <Globe2 className="w-8 h-8 text-blue-600 mb-3" />
-                <div className="font-bold text-slate-900 text-base">{t.companies.trade.name}</div>
-                <div className="text-xs text-slate-500 mt-1 line-clamp-2">{t.companies.trade.tagline}</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSelectedCompanyKey('agriculture')}
-                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition cursor-pointer ${selectedCompanyKey === 'agriculture' ? 'border-[#2e7d32] bg-emerald-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
-              >
-                <Sprout className="w-8 h-8 text-amber-600 mb-3" />
-                <div className="font-bold text-slate-900 text-base">{t.companies.agriculture.name}</div>
-                <div className="text-xs text-slate-500 mt-1 line-clamp-2">{t.companies.agriculture.tagline}</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSelectedCompanyKey('construction')}
-                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition cursor-pointer ${selectedCompanyKey === 'construction' ? 'border-[#2e7d32] bg-emerald-50/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
-              >
-                <HardHat className="w-8 h-8 text-orange-600 mb-3" />
-                <div className="font-bold text-slate-900 text-base">{t.companies.construction.name}</div>
-                <div className="text-xs text-slate-500 mt-1 line-clamp-2">{t.companies.construction.tagline}</div>
-              </button>
+        <div className="bg-slate-800 border border-slate-700 rounded-3xl p-6 sm:p-10 shadow-2xl">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-[#2e7d32] rounded-2xl flex items-center justify-center text-white">
+              <UserPlus className="w-6 h-6" />
             </div>
-
-            {/* Scope Box */}
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mt-8">
-              <h3 className="text-xl font-extrabold text-slate-900 mb-2">{company.name}</h3>
-              <p className="text-slate-600 text-sm mb-6">{company.desc}</p>
-
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">{t.scopeTitle}</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {company.services.map((srv, idx) => (
-                  <div key={idx} className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <CheckCircle2 className="w-4 h-4 text-[#2e7d32] flex-shrink-0" />
-                    <span>{srv}</span>
-                  </div>
-                ))}
-              </div>
+            <div>
+              <h1 className="text-2xl font-black text-white">{t.regFormTitle}</h1>
+              <p className="text-slate-400 text-xs mt-0.5">{t.regFormSub}</p>
             </div>
           </div>
 
-          {/* Contact Form */}
-          <div className="lg:col-span-5" id="contact-form">
-            <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl sticky top-28">
-              <h3 className="text-2xl font-extrabold text-slate-900 mb-1">{t.formTitle}</h3>
-              <p className="text-slate-500 text-xs mb-6">{company.name} ile doğrudan iletişime geçin.</p>
+          {errorMessage && (
+            <div className="mb-6 p-4 bg-red-950/80 border border-red-800 rounded-2xl flex items-center gap-3 text-red-200 text-sm font-medium">
+              <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
 
-              {submitted ? (
-                <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center">
-                  <CheckCircle2 className="w-12 h-12 text-[#2e7d32] mx-auto mb-3" />
-                  <h4 className="font-extrabold text-emerald-900 text-lg mb-1">{t.successTitle}</h4>
-                  <p className="text-xs text-emerald-700">{company.name} {t.successDesc}</p>
+          {submitted ? (
+            <div className="bg-emerald-950/60 border border-emerald-800 p-8 rounded-2xl text-center">
+              <CheckCircle2 className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
+              <h2 className="text-xl font-bold text-white mb-2">{t.regSuccessTitle}</h2>
+              <p className="text-sm text-slate-300 leading-relaxed max-w-md mx-auto">{t.regSuccessDesc}</p>
+              <Link href="/" className="inline-block mt-6 bg-[#2e7d32] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#1b5e20] transition">
+                {t.returnHome}
+              </Link>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">{t.nameLabel} *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
+                  />
                 </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.nameLabel}</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.fullName}
-                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
-                    />
-                  </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.emailLabel}</label>
-                    <input
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">{t.passportLabel}</label>
+                  <input
+                    type="text"
+                    value={formData.passportNumber}
+                    onChange={(e) => setFormData({ ...formData, passportNumber: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
+                  />
+                </div>
+              </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.phoneLabel}</label>
-                    <input
-                      type="tel"
-                      required
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.notesLabel}</label>
-                    <textarea
-                      rows={3}
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg flex items-center justify-center gap-2 text-sm cursor-pointer"
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">{t.sectorLabel}</label>
+                  <select
+                    value={formData.sector}
+                    onChange={(e) => {
+                      const sec = e.target.value;
+                      const defaultProf = professionOptions[sec]?.[0] || 'Other / Diğer';
+                      setFormData({ ...formData, sector: sec, profession: defaultProf });
+                    }}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
                   >
-                    <Send className="w-4 h-4" /> {loading ? t.submitting : t.submitBtn}
-                  </button>
-                </form>
+                    <option value="construction">Construction / İnşaat</option>
+                    <option value="agriculture">Agriculture / Tarım</option>
+                    <option value="hr">General HR / İK</option>
+                    <option value="trade">Foreign Trade / Dış Ticaret</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">{t.professionLabel} *</label>
+                  <select
+                    value={formData.profession}
+                    onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm cursor-pointer"
+                  >
+                    {(professionOptions[formData.sector] || ['Other / Diğer']).map((prof) => (
+                      <option key={prof} value={prof}>{prof}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {formData.profession === 'Other / Diğer' && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Mesleğinizi Belirtiniz *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Örn: CNC Operatörü, İskele Kurulum Ustası"
+                    value={formData.customProfession}
+                    onChange={(e) => setFormData({ ...formData, customProfession: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
+                  />
+                </div>
               )}
-            </div>
-          </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">{t.certNoLabel}</label>
+                  <input
+                    type="text"
+                    value={formData.certificateNo}
+                    onChange={(e) => setFormData({ ...formData, certificateNo: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">{t.issuingBodyLabel}</label>
+                  <input
+                    type="text"
+                    value={formData.issuingBody}
+                    onChange={(e) => setFormData({ ...formData, issuingBody: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">{t.videoUrlLabel}</label>
+                <input
+                  type="url"
+                  placeholder="https://youtube.com/..."
+                  value={formData.videoUrl}
+                  onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">{t.expectedSalaryLabel}</label>
+                  <input
+                    type="number"
+                    value={formData.expectedSalary}
+                    onChange={(e) => setFormData({ ...formData, expectedSalary: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
+                  />
+                </div>
+
+                <div className="flex items-center pt-6">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-slate-300">
+                    <input
+                      type="checkbox"
+                      checked={formData.shiftSuitable}
+                      onChange={(e) => setFormData({ ...formData, shiftSuitable: e.target.checked })}
+                      className="w-4 h-4 rounded text-[#2e7d32]"
+                    />
+                    {t.shiftSuitableLabel}
+                  </label>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">{t.emailLabel} *</label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">{t.phoneLabel} *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-4 rounded-xl font-bold transition shadow-lg flex items-center justify-center gap-2 text-sm mt-4 cursor-pointer"
+              >
+                <Send className="w-4 h-4" /> {loading ? t.submitting : t.completeReg}
+              </button>
+            </form>
+          )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
