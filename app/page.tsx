@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Users, Globe2, Sprout, HardHat, Building2, Languages, CheckCircle2, Lock, Send } from 'lucide-react';
+import { Users, Globe2, Sprout, HardHat, Building2, Languages, CheckCircle2, Lock, Send, User } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
@@ -90,6 +90,13 @@ export default function HomePage() {
             {/* Şirket Seçimine Göre Dinamik Butonlar */}
             {selectedCompanyKey === 'hr' ? (
               <div className="flex items-center gap-2">
+                <Link
+                  href="/candidate"
+                  className="inline-flex items-center gap-1.5 bg-emerald-100 text-[#2e7d32] px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-emerald-200 transition border border-emerald-200 z-10 cursor-pointer"
+                >
+                  <User className="w-3.5 h-3.5" /> Aday Portalı
+                </Link>
+
                 <Link
                   href="/register"
                   className="inline-flex items-center gap-1.5 bg-[#2e7d32] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#1b5e20] transition shadow-md z-10 cursor-pointer"
