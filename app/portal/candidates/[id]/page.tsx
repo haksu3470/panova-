@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft, Home, User, FileText, CheckCircle, Award, Video, ShieldCheck, Clock, Calendar, Save, Languages, FileCheck, AlertCircle, Plus, Trash2, Upload, Eye, X, Camera, KeyRound } from 'lucide-react';
+import { ArrowLeft, Home, User, FileText, Award, Video, Save, Languages, FileCheck, Plus, Trash2, Upload, Eye, X, Camera, KeyRound, Phone, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
@@ -25,25 +25,23 @@ export default function CandidateDetailPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Form State
   const [internalNotes, setInternalNotes] = useState('');
   const [status, setStatus] = useState('pending');
   const [isVerified, setIsVerified] = useState(false);
   const [candidatePassword, setCandidatePassword] = useState('123456');
-  const [candidatePhoto, setCandidatePhoto] = useState<string>('');
+  const [candidatePhoto, setCandidatePhoto] = useState('');
+  const [candidatePhone, setCandidatePhone] = useState('');
+  const [candidateEmail, setCandidateEmail] = useState('');
 
-  // Sertifika & Video
   const [certificateNo, setCertificateNo] = useState('');
   const [issuingBody, setIssuingBody] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
 
-  // Yeni Belge & Modal
   const [newDocName, setNewDocName] = useState('');
   const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
 
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
-
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
   const activeLangObj = languages.find((l) => l.code === currentLang);
 
@@ -69,6 +67,8 @@ export default function CandidateDetailPage() {
       setVideoUrl(data.video_url || '');
       setCandidatePassword(data.password || '123456');
       setCandidatePhoto(data.photo_url || '');
+      setCandidatePhone(data.phone || '');
+      setCandidateEmail(data.email || '');
       
       const defaultDocs: CandidateDocument[] = [
         { id: '1', name: 'Pasaport Taraması', status: data.passport_number ? 'approved' : 'pending' },
@@ -150,6 +150,8 @@ export default function CandidateDetailPage() {
         video_url: videoUrl,
         password: candidatePassword,
         photo_url: candidatePhoto,
+        phone: candidatePhone,
+        email: candidateEmail,
         documents_json: JSON.stringify(documents),
       })
       .eq('id', candidateId);
@@ -157,7 +159,7 @@ export default function CandidateDetailPage() {
     setSaving(false);
 
     if (!error) {
-      alert(currentLang === 'tr' ? 'Aday dosyası, fotoğraf ve şifre başarıyla kaydedildi!' : 'Candidate dossier saved successfully!');
+      alert('Aday dosyası, fotoğraf, şifre ve iletişim bilgileri başarıyla kaydedildi!');
     } else {
       alert('Hata: ' + error.message);
     }
@@ -220,10 +222,10 @@ export default function CandidateDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8 space-y-6">
             
-            {/* Fotoğraf ve Kimlik Bilgileri */}
+            {/* Fotoğraf, İletişim & Şifre Yönetimi */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-                <User className="w-5 h-5 text-[#2e7d32]" /> Kimlik, Fotoğraf & Portal Şifresi
+                <User className="w-5 h-5 text-[#2e7d32]" /> Fotoğraf, İletişim & Portal Şifresi
               </h3>
 
               <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-200">
@@ -243,35 +245,17 @@ export default function CandidateDetailPage() {
 
                 <div className="flex-1 space-y-3 w-full">
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase block">Giriş Telefonu (GSM - Kullanıcı Adı)</label>
-                    <input type="text" value={candidate.phone || ''} readOnly className="w-full px-3 py-2 text-xs rounded-lg border bg-slate-100 font-bold text-slate-700" />
+                    <label className="text-[10px] font-bold text-slate-400 uppercase block">Telefon Numarası (GSM)</label>
+                    <input type="tel" value={candidatePhone} onChange={(e) => setCandidatePhone(e.target.value)} className="w-full px-3 py-2 text-xs rounded-lg border bg-white font-bold text-slate-900 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase block">E-Posta</label>
+                    <input type="email" value={candidateEmail} onChange={(e) => setCandidateEmail(e.target.value)} className="w-full px-3 py-2 text-xs rounded-lg border bg-white font-bold text-slate-900 outline-none" />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase block">Aday Portalı Şifresi</label>
-                    <div className="relative">
-                      <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                      <input type="text" value={candidatePassword} onChange={(e) => setCandidatePassword(e.target.value)} placeholder="Şifre belirleyin" className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border bg-white font-bold text-slate-900 outline-none focus:ring-2 focus:ring-[#2e7d32]" />
-                    </div>
+                    <input type="text" value={candidatePassword} onChange={(e) => setCandidatePassword(e.target.value)} className="w-full px-3 py-2 text-xs rounded-lg border bg-white font-bold text-slate-900 outline-none" />
                   </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm pt-2">
-                <div>
-                  <span className="text-xs font-bold text-slate-400 uppercase block">E-Posta</span>
-                  <span className="font-bold text-slate-800">{candidate.email}</span>
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-400 uppercase block">Pasaport No</span>
-                  <span className="font-bold text-slate-800">{candidate.passport_number || 'Belirtilmedi'}</span>
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-400 uppercase block">Sektör & Meslek</span>
-                  <span className="font-bold text-slate-800">{candidate.profession} ({candidate.sector})</span>
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-400 uppercase block">Ücret Beklentisi</span>
-                  <span className="font-bold text-emerald-700">€{candidate.expected_salary || '0'} / ay</span>
                 </div>
               </div>
             </div>
@@ -321,20 +305,6 @@ export default function CandidateDetailPage() {
           </div>
         </div>
       </div>
-
-      {previewDoc && (
-        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border">
-            <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
-              <h3 className="font-bold text-sm">{previewDoc.name}</h3>
-              <button onClick={() => setPreviewDoc(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300"><X className="w-5 h-5" /></button>
-            </div>
-            <div className="p-4 flex-1 overflow-auto flex justify-center bg-slate-100">
-              <img src={previewDoc.url} alt="Önizleme" className="max-w-full max-h-[70vh] object-contain rounded-xl" />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
