@@ -1,0 +1,28 @@
+name: Supabase Automatic Backup
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Her gece saat 03:00'te otomatik çalışır
+  workflow_dispatch: # GitHub panelinden dilediğiniz an manuel çalıştırabilirsiniz
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Run backup
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          TIMESTAMP=$(date +'%Y-%m-%d_%H-%M-%S')
+          BACKUP_FILE="panova_db_backup_$TIMESTAMP.dump"
+          
+          # Supabase veritabanından güvenli yedek alma
+          pg_dump "$SUPABASE_DB_URL" --schema=public -F c -f "$BACKUP_FILE"
+          
+          echo "Database backup completed successfully: $BACKUP_FILE"
