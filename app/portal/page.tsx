@@ -37,7 +37,14 @@ export default function PortalPage() {
     }
   };
 
-  const [authenticated, setAuthenticated] = useState(false);
+  // Oturum kalıcılığı için localStorage kontrolü
+  const [authenticated, setAuthenticated] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('panova_admin_auth') === 'true';
+    }
+    return false;
+  });
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState<'candidates' | 'requests'>('candidates');
@@ -55,14 +62,32 @@ export default function PortalPage() {
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
   const activeLangObj = languages.find((l) => l.code === currentLang);
 
+  // Giriş yapıldığında verileri otomatik çek
+  useEffect(() => {
+    if (authenticated) {
+      fetchCandidates();
+      fetchJobRequests();
+    }
+  }, [authenticated]);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (username === 'admin' && password === 'panova2026') {
       setAuthenticated(true);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('panova_admin_auth', 'true');
+      }
       fetchCandidates();
       fetchJobRequests();
     } else {
       alert('Invalid username or password!');
+    }
+  };
+
+  const handleLogout = () => {
+    setAuthenticated(false);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('panova_admin_auth');
     }
   };
 
@@ -236,7 +261,7 @@ export default function PortalPage() {
             </div>
 
             <button
-              onClick={() => setAuthenticated(false)}
+              onClick={handleLogout}
               className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition cursor-pointer"
             >
               {t.logoutBtn}

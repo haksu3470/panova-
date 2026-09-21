@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft, User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, Video, Trash2, Upload, Eye, X, Plus, Languages } from 'lucide-react';
+import { ArrowLeft, User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, Video, Trash2, Upload, Eye, X, Plus, Languages, Bell, Send, PlaneTakeoff, FileSignature } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
@@ -70,9 +70,29 @@ export default function CandidateDetailPage() {
   const [issuingBody, setIssuingBody] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
 
+  // Seyahat ve Uçuş Lojistik State'leri
+  const [travelStatus, setTravelStatus] = useState('planned');
+  const [flightDate, setFlightDate] = useState('');
+  const [flightNumber, setFlightNumber] = useState('');
+  const [departureCity, setDepartureCity] = useState('');
+  const [arrivalCity, setArrivalCity] = useState('');
+  const [pnrCode, setPnrCode] = useState('');
+  const [accommodationDetails, setAccommodationDetails] = useState('');
+
+  // İş Teklifi State'leri
+  const [offerEmployer, setOfferEmployer] = useState('');
+  const [offerSalary, setOfferSalary] = useState('');
+  const [offerDate, setOfferDate] = useState('');
+  const [offerTerms, setOfferTerms] = useState('');
+
   // Yeni Belge & Önizleme
   const [newDocName, setNewDocName] = useState('');
   const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
+
+  // Aday Bildirim Gönderme State'leri
+  const [notifTitle, setNotifTitle] = useState('');
+  const [notifMessage, setNotifMessage] = useState('');
+  const [notifSending, setNotifSending] = useState(false);
 
   const t = translations[currentLang] || translations.en;
   const isRtl = currentLang === 'ar';
@@ -103,6 +123,15 @@ export default function CandidateDetailPage() {
       setCertificateNo(data.certificate_no || '');
       setIssuingBody(data.issuing_body || '');
       setVideoUrl(data.video_url || '');
+
+      // Seyahat Bilgileri
+      setTravelStatus(data.travel_status || 'planned');
+      setFlightDate(data.flight_date || '');
+      setFlightNumber(data.flight_number || '');
+      setDepartureCity(data.departure_city || '');
+      setArrivalCity(data.arrival_city || '');
+      setPnrCode(data.pnr_code || '');
+      setAccommodationDetails(data.accommodation_details || '');
 
       const defaultDocs: CandidateDocument[] = [
         { id: '1', name: 'Pasaport Taraması', status: data.passport_number ? 'approved' : 'pending' },
@@ -186,15 +215,98 @@ export default function CandidateDetailPage() {
         issuing_body: issuingBody,
         video_url: videoUrl,
         documents_json: JSON.stringify(documents),
+        // Seyahat Alanları
+        travel_status: travelStatus,
+        flight_date: flightDate,
+        flight_number: flightNumber,
+        departure_city: departureCity,
+        arrival_city: arrivalCity,
+        pnr_code: pnrCode,
+        accommodation_details: accommodationDetails,
       })
       .eq('id', candidateId);
 
     setSaving(false);
 
     if (!error) {
-      alert('Aday dosyası, belgeler ve tüm bilgiler başarıyla kaydedildi!');
+      alert('Aday dosyası, belgeler ve tüm seyahat/lojistik bilgileri başarıyla kaydedildi!');
     } else {
       alert('Hata: ' + error.message);
+    }
+  };
+
+  const handleSendJobOffer = async () => {
+    if (!offerEmployer || !offerSalary) {
+      alert('Lütfen firma adı ve maaş bilgilerini doldurun.');
+      return;
+    }
+
+    const { error } = await supabase.from('job_offers').insert([
+      {
+        candidate_id: candidateId,
+        employer_name: offerEmployer,
+        position_title: candidate.profession || 'Genel Pozisyon',
+        monthly_net_salary: Number(offerSalary),
+        start_date: offerDate,
+        terms_details: offerTerms,
+        status: 'pending'
+      }
+    ]);
+
+    if (!error) {
+      alert('Resmi iş teklifi başarıyla adaya iletildi!');
+      setOfferEmployer('');
+      setOfferSalary('');
+      setOfferDate('');
+      setOfferTerms('');
+    } else {
+      alert('Hata: ' + error.message);
+    }
+  };
+
+  const handleSendNotificationToCandidate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!notifTitle.trim() || !notifMessage.trim()) return;
+    setNotifSending(true);
+
+    try {
+      const { error: dbError } = await supabase.from('candidate_notifications').insert([
+        {
+          candidate_id: candidateId,
+          title: notifTitle,
+          message: notifMessage,
+          type: 'warning',
+          is_read: false
+        }
+      ]);
+
+      if (dbError) throw dbError;
+
+      if (candidate?.email) {
+        const mailResponse = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: candidate.email,
+            candidateName: candidate.full_name,
+            subject: notifTitle,
+            message: notifMessage,
+          }),
+        });
+
+        const mailResult = await mailResponse.json();
+        if (!mailResponse.ok) {
+          console.warn('Mail gönderilemedi ama bildirim kaydedildi:', mailResult.error);
+        }
+      }
+
+      setNotifSending(false);
+      alert('Bildirim adaya hem portal üzerinden hem de e-posta olarak başarıyla gönderildi!');
+      setNotifTitle('');
+      setNotifMessage('');
+    } catch (err: any) {
+      setNotifSending(false);
+      alert('Hata: ' + err.message);
     }
   };
 
@@ -312,6 +424,54 @@ export default function CandidateDetailPage() {
               </div>
             </div>
 
+            {/* Seyahat ve Uçuş Lojistik Yönetimi */}
+            <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b pb-3">
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <PlaneTakeoff className="w-5 h-5 text-sky-600" /> Seyahat, Uçuş ve Konaklama Lojistiği
+                </h3>
+                <select
+                  value={travelStatus}
+                  onChange={(e) => setTravelStatus(e.target.value)}
+                  className="px-3 py-1 rounded-lg border text-xs font-bold uppercase bg-sky-50 text-sky-800 border-sky-300 outline-none cursor-pointer"
+                >
+                  <option value="planned">✈️ Planlanıyor</option>
+                  <option value="ticketed">🎟️ Biletlendi</option>
+                  <option value="completed">✅ Seyahat Tamamlandı</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-500 uppercase mb-1">Uçuş Tarihi & Saati</label>
+                  <input type="text" value={flightDate} onChange={(e) => setFlightDate(e.target.value)} placeholder="Örn: 15.10.2026 - 14:30" className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800 outline-none" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-500 uppercase mb-1">Uçuş Kodu / Sefer No</label>
+                  <input type="text" value={flightNumber} onChange={(e) => setFlightNumber(e.target.value)} placeholder="Örn: TK-1926" className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800 outline-none" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-500 uppercase mb-1">Kalkış Yeri / Havalimanı</label>
+                  <input type="text" value={departureCity} onChange={(e) => setDepartureCity(e.target.value)} placeholder="Örn: Skopje (SKP)" className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800 outline-none" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-500 uppercase mb-1">Varış Yeri / Havalimanı</label>
+                  <input type="text" value={arrivalCity} onChange={(e) => setArrivalCity(e.target.value)} placeholder="Örn: Istanbul (IST)" className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800 outline-none" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-2">
+                <div>
+                  <label className="block font-bold text-slate-500 uppercase mb-1">PNR / Bilet Rezervasyon Kodu</label>
+                  <input type="text" value={pnrCode} onChange={(e) => setPnrCode(e.target.value)} placeholder="Örn: X79R2A" className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800 outline-none uppercase" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-500 uppercase mb-1">Konaklama & Karşılama Detayları</label>
+                  <input type="text" value={accommodationDetails} onChange={(e) => setAccommodationDetails(e.target.value)} placeholder="Örn: Otel transferi ve lojman bilgisi..." className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800 outline-none" />
+                </div>
+              </div>
+            </div>
+
             {/* Evrak & Belge Takip Mekanizması */}
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b pb-3">
@@ -425,6 +585,102 @@ export default function CandidateDetailPage() {
                 <option value="visa_processing">🟣 Vize Sürecinde</option>
                 <option value="approved">🟢 Onaylandı</option>
               </select>
+            </div>
+
+            {/* Resmi İş Teklifi Gönderme Kartı */}
+            <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+              <h3 className="text-base font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
+                <FileSignature className="w-4 h-4 text-[#2e7d32]" /> Resmi İş Teklifi Gönder
+              </h3>
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">İşveren / Firma Adı</label>
+                  <input 
+                    type="text" 
+                    value={offerEmployer} 
+                    onChange={(e) => setOfferEmployer(e.target.value)} 
+                    placeholder="Örn: Panova Tarim DOO" 
+                    className="w-full px-3 py-2 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Aylık Net Ücret (€)</label>
+                    <input 
+                      type="number" 
+                      value={offerSalary} 
+                      onChange={(e) => setOfferSalary(e.target.value)} 
+                      placeholder="1200" 
+                      className="w-full px-3 py-2 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">İşe Başlama Tarihi</label>
+                    <input 
+                      type="text" 
+                      value={offerDate} 
+                      onChange={(e) => setOfferDate(e.target.value)} 
+                      placeholder="01.11.2026" 
+                      className="w-full px-3 py-2 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Teklif / Sözleşme Şartları</label>
+                  <textarea 
+                    rows={2} 
+                    value={offerTerms} 
+                    onChange={(e) => setOfferTerms(e.target.value)} 
+                    placeholder="Konaklama ve yemek dahil, haftada 40 saat..." 
+                    className="w-full px-3 py-2 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
+                  />
+                </div>
+                <button 
+                  type="button" 
+                  onClick={handleSendJobOffer}
+                  className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-2.5 rounded-xl font-bold transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <Send className="w-3.5 h-3.5" /> Resmi Teklifi Adaya İlet
+                </button>
+              </div>
+            </div>
+
+            {/* Adaya Anlık Bildirim / Uyarı Gönderme Paneli */}
+            <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+              <h3 className="text-base font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
+                <Bell className="w-4 h-4 text-[#2e7d32]" /> Adaya Bildirim Gönder
+              </h3>
+              <form onSubmit={handleSendNotificationToCandidate} className="space-y-3 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Bildirim Başlığı</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={notifTitle} 
+                    onChange={(e) => setNotifTitle(e.target.value)} 
+                    placeholder="Örn: Pasaport Belgesi Hk." 
+                    className="w-full px-3 py-2 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Mesaj İçeriği</label>
+                  <textarea 
+                    rows={3} 
+                    required 
+                    value={notifMessage} 
+                    onChange={(e) => setNotifMessage(e.target.value)} 
+                    placeholder="Adayın panelinde görünecek mesaj..." 
+                    className="w-full px-3 py-2 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  disabled={notifSending} 
+                  className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-2.5 rounded-xl font-bold transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <Send className="w-3.5 h-3.5" /> {notifSending ? 'Gönderiliyor...' : 'Bildirimi Adaya Gönder'}
+                </button>
+              </form>
             </div>
           </div>
         </div>

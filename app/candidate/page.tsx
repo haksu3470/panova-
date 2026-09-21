@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { 
   User, CheckCircle2, LogOut, Lock, KeyRound, Camera, Save, Phone, Mail, 
   FileText, FileCheck, Award, Video, Upload, Eye, X, Briefcase, Calendar, 
-  FileSignature, Plane, LifeBuoy, CheckSquare, Languages, ArrowLeft 
+  FileSignature, Plane, LifeBuoy, CheckSquare, Languages, ArrowLeft, Bell, MessageSquare, Send, Check, PlaneTakeoff, Ticket, MapPin, Building
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
@@ -20,7 +21,7 @@ export default function CandidateDashboard() {
     return 'tr';
   });
 
-  // 2. Sayfada dil değiştiğinde (storage event veya focus olduğunda) anlık yakalaması için
+  // 2. Sayfada dil değiştiğinde anlık yakalaması için
   useEffect(() => {
     const handleStorageChange = () => {
       const saved = localStorage.getItem('panova_candidate_lang') as Language;
@@ -30,7 +31,6 @@ export default function CandidateDashboard() {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    // Periyodik kontrol ile anlık senkronizasyon sağlıyoruz
     const timer = setInterval(handleStorageChange, 200);
 
     return () => {
@@ -42,21 +42,27 @@ export default function CandidateDashboard() {
   const [authenticated, setAuthenticated] = useState(false);
   const [loginInput, setLoginInput] = useState('');
   const [password, setPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
   const [candidate, setCandidate] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'documents' | 'jobs' | 'interviews' | 'offers' | 'process' | 'travel' | 'support'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'documents' | 'jobs' | 'interviews' | 'offers' | 'process' | 'travel' | 'notifications' | 'support'>('overview');
+  
   const [newPhone, setNewPhone] = useState('');
   const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [newPhoto, setNewPhoto] = useState('');
   const [newVideoUrl, setNewVideoUrl] = useState('');
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
-  const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
-  const [forgotModal, setForgotModal] = useState(false);
+  // Bildirim, Destek ve İş Teklifleri State'leri
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [supportTickets, setSupportTickets] = useState<any[]>([]);
+  const [jobOffers, setJobOffers] = useState<any[]>([]);
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMsg, setSupportMsg] = useState('');
-  const [supportSent, setSupportSent] = useState(false);
+  const [supportSending, setSupportSending] = useState(false);
+
+  const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
+  const [forgotModal, setForgotModal] = useState(false);
 
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
@@ -93,11 +99,96 @@ export default function CandidateDashboard() {
         setNewPhoto(data.photo_url || '');
         setNewVideoUrl(data.video_url || '');
         setAuthenticated(true);
+        // Giriş yapınca bildirim, destek ve iş tekliflerini çek
+        fetchCandidateData(data.id);
       } else {
         alert(currentLang === 'tr' ? 'Hatalı şifre!' : 'Incorrect password!');
       }
     } else {
       alert(currentLang === 'tr' ? 'Kayıt bulunamadı!' : 'Candidate not found!');
+    }
+  };
+
+  const fetchCandidateData = async (candId: string) => {
+    // Bildirimleri çek
+    const { data: notifs } = await supabase
+      .from('candidate_notifications')
+      .select('*')
+      .eq('candidate_id', candId)
+      .order('created_at', { ascending: false });
+
+    if (notifs) setNotifications(notifs);
+
+    // Destek taleplerini çek
+    const { data: tickets } = await supabase
+      .from('candidate_support_tickets')
+      .select('*')
+      .eq('candidate_id', candId)
+      .order('created_at', { ascending: false });
+
+    if (tickets) setSupportTickets(tickets);
+
+    // İş Tekliflerini Çek
+    const { data: offers } = await supabase
+      .from('job_offers')
+      .select('*')
+      .eq('candidate_id', candId)
+      .order('created_at', { ascending: false });
+
+    if (offers) setJobOffers(offers);
+  };
+
+  const handleUpdateOfferStatus = async (offerId: string, newStatus: 'accepted' | 'rejected') => {
+    const { error } = await supabase
+      .from('job_offers')
+      .update({ status: newStatus })
+      .eq('id', offerId);
+
+    if (!error) {
+      setJobOffers(jobOffers.map(o => o.id === offerId ? { ...o, status: newStatus } : o));
+      alert(newStatus === 'accepted' ? 'İş teklifini başarıyla kabul ettiniz!' : 'İş teklifi reddedildi.');
+    } else {
+      alert('Hata: ' + error.message);
+    }
+  };
+
+  const markNotificationAsRead = async (notifId: string) => {
+    await supabase
+      .from('candidate_notifications')
+      .update({ is_read: true })
+      .eq('id', notifId);
+
+    setNotifications(notifications.map(n => n.id === notifId ? { ...n, is_read: true } : n));
+  };
+
+  const handleSendSupport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supportSubject.trim() || !supportMsg.trim()) return;
+    setSupportSending(true);
+
+    const { data, error } = await supabase
+      .from('candidate_support_tickets')
+      .insert([
+        {
+          candidate_id: candidate.id,
+          candidate_name: candidate.full_name,
+          subject: supportSubject,
+          message: supportMsg,
+          status: 'open'
+        }
+      ])
+      .select()
+      .single();
+
+    setSupportSending(false);
+
+    if (!error && data) {
+      setSupportTickets([data, ...supportTickets]);
+      setSupportSubject('');
+      setSupportMsg('');
+      alert(currentLang === 'tr' ? 'Destek talebiniz başarıyla oluşturuldu!' : 'Support ticket created successfully!');
+    } else {
+      alert('Hata: ' + (error?.message || 'Bilinmeyen hata'));
     }
   };
 
@@ -179,14 +270,6 @@ export default function CandidateDashboard() {
     }
   };
 
-  const handleSendSupport = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSupportSent(true);
-    setSupportSubject('');
-    setSupportMsg('');
-    setTimeout(() => setSupportSent(false), 4000);
-  };
-
   if (!authenticated) {
     return (
       <div className={`min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -201,7 +284,6 @@ export default function CandidateDashboard() {
             }} 
             className="bg-transparent text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer"
           >
-          
             {languages.map((lang) => (
               <option key={lang.code} value={lang.code} className="text-slate-900">
                 {lang.flag} {lang.name}
@@ -217,53 +299,46 @@ export default function CandidateDashboard() {
           <h1 className="text-2xl font-extrabold text-slate-900 mb-1">{t.candidatePortal}</h1>
           <p className="text-slate-500 text-xs mb-6 leading-relaxed">{t.loginDesc}</p>
 
-          <form onSubmit={handleCandidateLogin} className="space-y-4">
-  <div>
-    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-      {currentLang === 'tr' ? 'E-POSTA / TELEFON / PASAPORT *' : (currentLang === 'sq' ? 'EMAIL / TELEFON / PASAPORTË *' : 'EMAIL / PHONE / PASSPORT *')}
-    </label>
-    <input 
-      type="text" 
-      value={loginInput} 
-      onChange={(e) => setLoginInput(e.target.value)} 
-      placeholder="Örn: omer@gmail.com" 
-      required 
-      className="w-full px-4 py-2.5 rounded-xl border text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm" 
-    />
-  </div>
+          <form onSubmit={handleCandidateLogin} className="space-y-4 text-left rtl:text-right">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                {currentLang === 'tr' ? 'E-POSTA / TELEFON / PASAPORT *' : (currentLang === 'sq' ? 'EMAIL / TELEFON / PASAPORTË *' : 'EMAIL / PHONE / PASSPORT *')}
+              </label>
+              <input 
+                type="text" 
+                value={loginInput} 
+                onChange={(e) => setLoginInput(e.target.value)} 
+                placeholder="Örn: omer@gmail.com" 
+                required 
+                className="w-full px-4 py-2.5 rounded-xl border text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm font-medium" 
+              />
+            </div>
 
-  <div>
-    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-      {currentLang === 'tr' ? 'ŞİFRE *' : (currentLang === 'sq' ? 'FJALËKALIMI *' : 'PASSWORD *')}
-    </label>
-    <input 
-      type="password" 
-      value={password} 
-      onChange={(e) => setPassword(e.target.value)} 
-      placeholder="••••••" 
-      required 
-      className="w-full px-4 py-2.5 rounded-xl border text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm" 
-    />
-  </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                {currentLang === 'tr' ? 'ŞİFRE *' : (currentLang === 'sq' ? 'FJALËKALIMI *' : 'PASSWORD *')}
+              </label>
+              <input 
+                type="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                placeholder="••••••" 
+                required 
+                className="w-full px-4 py-2.5 rounded-xl border text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm font-medium" 
+              />
+            </div>
 
-  <div className="flex items-center justify-between text-xs text-slate-500">
-    <span>{currentLang === 'tr' ? 'Varsayılan: 123456' : (currentLang === 'sq' ? 'Parazgjedhur: 123456' : 'Default: 123456')}</span>
-    <button 
-      type="button" 
-      onClick={() => setForgotModal(true)} 
-      className="text-emerald-700 font-bold hover:underline cursor-pointer"
-    >
-      {currentLang === 'tr' ? 'Şifre?' : (currentLang === 'sq' ? 'Fjalëkalimi?' : 'Password?')}
-    </button>
-  </div>
+            <div className="flex items-center justify-between text-xs text-slate-500">
+              <span>{currentLang === 'tr' ? 'Varsayılan: 123456' : (currentLang === 'sq' ? 'Parazgjedhur: 123456' : 'Default: 123456')}</span>
+            </div>
 
-  <button 
-    type="submit" 
-    className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl transition shadow-lg cursor-pointer text-sm"
-  >
-    {currentLang === 'tr' ? 'Sisteme Giriş Yap' : (currentLang === 'sq' ? 'Hyni në Sistem' : 'Sign In')}
-  </button>
-</form>    
+            <button 
+              type="submit" 
+              className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl transition shadow-lg cursor-pointer text-sm"
+            >
+              {currentLang === 'tr' ? 'Sisteme Giriş Yap' : (currentLang === 'sq' ? 'Hyni në Sistem' : 'Sign In')}
+            </button>
+          </form>
 
           <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-sm text-slate-500 hover:underline">
             <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
@@ -281,6 +356,8 @@ export default function CandidateDashboard() {
   ];
   const candidateDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : defaultDocs;
   const currentLangTitles = docTitlesByLang[currentLang] || docTitlesByLang.tr;
+  const unreadNotifsCount = notifications.filter(n => !n.is_read).length;
+  const pendingOffersCount = jobOffers.filter(o => o.status === 'pending').length;
 
   return (
     <div className={`min-h-screen bg-slate-50 p-4 sm:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -339,9 +416,25 @@ export default function CandidateDashboard() {
           <button onClick={() => setActiveTab('documents')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'documents' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.documents}</button>
           <button onClick={() => setActiveTab('jobs')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'jobs' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.jobs}</button>
           <button onClick={() => setActiveTab('interviews')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'interviews' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.interviews}</button>
-          <button onClick={() => setActiveTab('offers')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'offers' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.offers}</button>
+          
+          <button onClick={() => setActiveTab('offers')} className={`relative px-4 py-2 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 ${activeTab === 'offers' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>
+            {t.offers}
+            {pendingOffersCount > 0 && (
+              <span className="bg-red-500 text-white rounded-full px-1.5 py-0.2 text-[10px] font-extrabold">{pendingOffersCount}</span>
+            )}
+          </button>
+
           <button onClick={() => setActiveTab('process')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'process' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.process}</button>
           <button onClick={() => setActiveTab('travel')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.travel}</button>
+          
+          <button onClick={() => setActiveTab('notifications')} className={`relative px-4 py-2 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 ${activeTab === 'notifications' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>
+            <Bell className="w-3.5 h-3.5" /> 
+            {currentLang === 'tr' ? 'Bildirimler' : 'Notifications'}
+            {unreadNotifsCount > 0 && (
+              <span className="bg-red-500 text-white rounded-full px-1.5 py-0.2 text-[10px] font-extrabold">{unreadNotifsCount}</span>
+            )}
+          </button>
+
           <button onClick={() => setActiveTab('support')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'support' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.support}</button>
         </div>
 
@@ -356,6 +449,19 @@ export default function CandidateDashboard() {
               </div>
               <CheckCircle2 className="w-10 h-10 text-[#2e7d32]" />
             </div>
+
+            {unreadNotifsCount > 0 && (
+              <div onClick={() => setActiveTab('notifications')} className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-amber-100 transition">
+                <div className="flex items-center gap-3">
+                  <Bell className="w-5 h-5 text-amber-600" />
+                  <div>
+                    <div className="font-bold text-amber-900 text-xs">Okunmamış {unreadNotifsCount} yeni bildiriminiz var!</div>
+                    <div className="text-[11px] text-amber-700">Yönetimden gelen mesajları ve güncellemeleri görmek için tıklayın.</div>
+                  </div>
+                </div>
+                <span className="text-xs font-bold text-amber-800 underline">İncele →</span>
+              </div>
+            )}
           </div>
         )}
 
@@ -410,7 +516,7 @@ export default function CandidateDashboard() {
           </div>
         )}
 
-        {/* Tab 3: Documents (Dile göre isim ve garanti önizleme) */}
+        {/* Tab 3: Documents */}
         {activeTab === 'documents' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.documents}</h3>
@@ -428,7 +534,6 @@ export default function CandidateDashboard() {
                       {doc.file_url ? (currentLang === 'tr' ? 'Yüklendi' : 'Uploaded') : (currentLang === 'tr' ? 'Bekleniyor' : 'Pending')}
                     </span>
                     
-                    {/* Önizle Butonu - Güvenli Kontrol */}
                     {doc.file_url && doc.file_url.trim() !== '' && (
                       <button 
                         type="button"
@@ -475,13 +580,69 @@ export default function CandidateDashboard() {
           </div>
         )}
 
-        {/* Tab 6: Job Offers */}
+        {/* Tab 6: Job Offers (İŞ TEKLİFLERİ VE SÖZLEŞME SÜRECİ) */}
         {activeTab === 'offers' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">İş Teklifleri ve Sözleşme Süreci</h3>
-            <div className="p-6 bg-slate-50 rounded-2xl border text-center text-slate-500 font-bold text-xs">
-              Henüz iletilmiş resmi bir iş teklifi bulunmuyor.
-            </div>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center justify-between">
+              <span>İş Teklifleri ve Sözleşme Süreci</span>
+              <span className="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-semibold">{jobOffers.length} Teklif</span>
+            </h3>
+
+            {jobOffers.length === 0 ? (
+              <div className="p-12 text-center text-slate-400 font-bold text-xs">
+                Henüz tarafınıza iletilmiş resmi bir iş teklifi bulunmuyor.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {jobOffers.map((offer) => (
+                  <div key={offer.id} className="p-5 bg-slate-50 rounded-2xl border space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3">
+                      <div>
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full uppercase">Resmi Teklif</span>
+                        <h4 className="font-extrabold text-slate-900 text-base mt-1">{offer.employer_name}</h4>
+                        <p className="text-xs text-slate-500">Pozisyon: <strong>{offer.position_title}</strong></p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-lg text-xs font-black uppercase ${
+                        offer.status === 'accepted' ? 'bg-emerald-100 text-emerald-800' :
+                        offer.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                        'bg-amber-100 text-amber-800'
+                      }`}>
+                        {offer.status === 'accepted' ? '✅ Kabul Edildi' :
+                         offer.status === 'rejected' ? '❌ Reddedildi' : '⏳ Yanıt Bekleniyor'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                      <div>Aylık Net Ücret: <strong className="text-emerald-700 text-sm">€{offer.monthly_net_salary} / ay</strong></div>
+                      <div>İşe Başlama Tarihi: <strong className="text-slate-800">{offer.start_date || 'Belirtilmedi'}</strong></div>
+                    </div>
+
+                    {offer.terms_details && (
+                      <div className="text-xs text-slate-600 bg-white p-3 rounded-xl border">
+                        <strong>Sözleşme / Teklif Şartları:</strong> {offer.terms_details}
+                      </div>
+                    )}
+
+                    {offer.status === 'pending' && (
+                      <div className="flex gap-3 pt-2">
+                        <button
+                          onClick={() => handleUpdateOfferStatus(offer.id, 'accepted')}
+                          className="flex-1 bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-2.5 rounded-xl font-bold text-xs transition cursor-pointer shadow-sm"
+                        >
+                          Teklifi Kabul Et
+                        </button>
+                        <button
+                          onClick={() => handleUpdateOfferStatus(offer.id, 'rejected')}
+                          className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 py-2.5 rounded-xl font-bold text-xs transition cursor-pointer"
+                        >
+                          Teklifi Reddet
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -504,36 +665,156 @@ export default function CandidateDashboard() {
 
         {/* Tab 8: Travel Info */}
         {activeTab === 'travel' && (
-          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Uçuş, Varış ve Konaklama Bilgileri</h3>
-            <div className="p-6 bg-slate-50 rounded-2xl border text-center text-slate-500 font-bold text-xs">
-              Seyahat planlaması vize onayından sonra yapılacaktır.
+          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-5">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <PlaneTakeoff className="w-5 h-5 text-sky-600" /> Uçuş, Varış ve Konaklama Bilgilerim
+              </h3>
+              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase ${
+                candidate.travel_status === 'ticketed' ? 'bg-sky-100 text-sky-800' :
+                candidate.travel_status === 'completed' ? 'bg-emerald-100 text-emerald-800' :
+                'bg-amber-100 text-amber-800'
+              }`}>
+                {candidate.travel_status === 'ticketed' ? '🎟️ Biletlendi' :
+                 candidate.travel_status === 'completed' ? '✅ Tamamlandı' : '✈️ Planlanıyor'}
+              </span>
             </div>
+
+            {!candidate.flight_date && !candidate.pnr_code ? (
+              <div className="p-10 bg-slate-50 rounded-2xl border text-center text-slate-400 font-bold text-xs">
+                Seyahat planlamanız vize onayından sonra operasyon ekibimiz tarafından hazırlanacaktır.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div className="p-4 bg-sky-50 rounded-2xl border border-sky-200 space-y-2">
+                  <span className="text-[10px] font-bold text-sky-700 uppercase flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5" /> Uçuş Tarihi & Saati
+                  </span>
+                  <div className="text-sm font-extrabold text-slate-900">{candidate.flight_date || 'Belirtilmedi'}</div>
+                </div>
+
+                <div className="p-4 bg-sky-50 rounded-2xl border border-sky-200 space-y-2">
+                  <span className="text-[10px] font-bold text-sky-700 uppercase flex items-center gap-1">
+                    <Plane className="w-3.5 h-3.5" /> Uçuş Kodu / Sefer No
+                  </span>
+                  <div className="text-sm font-extrabold text-slate-900">{candidate.flight_number || 'Belirtilmedi'}</div>
+                </div>
+
+                <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5" /> Güzergah (Kalkış → Varış)
+                  </span>
+                  <div className="text-sm font-extrabold text-slate-900">
+                    {candidate.departureCity || candidate.departure_city || '---'} ➔ {candidate.arrivalCity || candidate.arrival_city || '---'}
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                    <Ticket className="w-3.5 h-3.5" /> PNR / Rezervasyon Kodu
+                  </span>
+                  <div className="text-sm font-black tracking-widest text-emerald-700 uppercase">{candidate.pnrCode || candidate.pnr_code || 'Belirtilmedi'}</div>
+                </div>
+
+                <div className="md:col-span-2 p-4 bg-slate-50 rounded-2xl border space-y-2">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                    <Building className="w-3.5 h-3.5" /> Konaklama & Karşılama Detayları
+                  </span>
+                  <div className="text-xs font-medium text-slate-800 leading-relaxed">{candidate.accommodationDetails || candidate.accommodation_details || 'Henüz eklenmedi.'}</div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Tab 9: Support */}
-        {activeTab === 'support' && (
-          <div className="bg-white p-6 rounded-2xl border shadow-sm max-w-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Destek Talebi Oluştur</h3>
-            {supportSent && (
-              <div className="p-4 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold text-center">
-                Destek talebiniz başarıyla iletildi!
+        {/* Tab 9: Notifications */}
+        {activeTab === 'notifications' && (
+          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center justify-between">
+              <span>Yönetim Bildirimleri & Duyurular</span>
+              <span className="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-semibold">{notifications.length} Toplam</span>
+            </h3>
+
+            {notifications.length === 0 ? (
+              <div className="p-10 text-center text-slate-400 text-xs font-bold">
+                Henüz tarafınıza iletilen bir bildirim bulunmuyor.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {notifications.map((notif) => (
+                  <div key={notif.id} className={`p-4 rounded-2xl border transition ${notif.is_read ? 'bg-slate-50 border-slate-200' : 'bg-emerald-50/50 border-emerald-300 shadow-sm'}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-slate-900 text-sm">{notif.title}</span>
+                          {!notif.is_read && <span className="bg-[#2e7d32] text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">Yeni</span>}
+                        </div>
+                        <p className="text-xs text-slate-600 mt-1 leading-relaxed">{notif.message}</p>
+                        <span className="text-[10px] text-slate-400 mt-2 block">{new Date(notif.created_at).toLocaleString()}</span>
+                      </div>
+
+                      {!notif.is_read && (
+                        <button 
+                          onClick={() => markNotificationAsRead(notif.id)}
+                          className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                        >
+                          <Check className="w-3.5 h-3.5 text-emerald-600" /> Okundu İşaretle
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
-            <form onSubmit={handleSendSupport} className="space-y-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Konu</label>
-                <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Konu" className="w-full px-3 py-2 text-xs rounded-xl border outline-none text-slate-900" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Mesajınız</label>
-                <textarea rows={4} required value={supportMsg} onChange={(e) => setSupportMsg(e.target.value)} placeholder="Mesajınız..." className="w-full px-3 py-2 text-xs rounded-xl border outline-none text-slate-900" />
-              </div>
-              <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold text-xs transition cursor-pointer">
-                Destek Talebi Gönder
-              </button>
-            </form>
+          </div>
+        )}
+
+        {/* Tab 10: Support */}
+        {activeTab === 'support' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Destek Talebi Oluştur</h3>
+              <form onSubmit={handleSendSupport} className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Konu</label>
+                  <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Örn: Evrak Güncellemesi Hakkında" className="w-full px-3 py-2.5 text-xs rounded-xl border outline-none text-slate-900 font-medium bg-white" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Mesajınız</label>
+                  <textarea rows={4} required value={supportMsg} onChange={(e) => setSupportMsg(e.target.value)} placeholder="Sorununuzu veya talebinizi detaylı yazın..." className="w-full px-3 py-2.5 text-xs rounded-xl border outline-none text-slate-900 font-medium bg-white" />
+                </div>
+                <button type="submit" disabled={supportSending} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold text-xs transition cursor-pointer shadow-md">
+                  {supportSending ? 'Gönderiliyor...' : 'Destek Talebi Gönder'}
+                </button>
+              </form>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Destek Taleplerim ve Geçmiş</h3>
+              {supportTickets.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs">Açık destek kaydınız bulunmuyor.</div>
+              ) : (
+                <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+                  {supportTickets.map((ticket) => (
+                    <div key={ticket.id} className="p-4 bg-slate-50 rounded-2xl border space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900 text-xs">{ticket.subject}</span>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${ticket.status === 'resolved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                          {ticket.status === 'resolved' ? 'Çözüldü' : 'İşlemde'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600">{ticket.message}</p>
+                      {ticket.admin_reply && (
+                        <div className="mt-2 p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900">
+                          <strong>PANOVA Destek Ekibi:</strong> {ticket.admin_reply}
+                        </div>
+                      )}
+                      <div className="text-[10px] text-slate-400">{new Date(ticket.created_at).toLocaleString()}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
