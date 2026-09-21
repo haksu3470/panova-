@@ -1,18 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { 
   User, CheckCircle2, LogOut, Lock, KeyRound, Camera, Save, Phone, Mail, 
   FileText, FileCheck, Award, Video, Upload, Eye, X, Briefcase, Calendar, 
-  FileSignature, Plane, LifeBuoy, CheckSquare, Languages, ArrowLeft, Bell, MessageSquare, Send, Check, PlaneTakeoff, Ticket, MapPin, Building
+  FileSignature, Plane, LifeBuoy, CheckSquare, Languages, ArrowLeft, Bell, MessageSquare, Send, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function CandidateDashboard() {
-  // 1. Dili her render anında localStorage'dan dinamik olarak okuyoruz
   const [currentLang, setCurrentLang] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('panova_candidate_lang') as Language;
@@ -21,7 +19,6 @@ export default function CandidateDashboard() {
     return 'tr';
   });
 
-  // 2. Sayfada dil değiştiğinde anlık yakalaması için
   useEffect(() => {
     const handleStorageChange = () => {
       const saved = localStorage.getItem('panova_candidate_lang') as Language;
@@ -40,8 +37,20 @@ export default function CandidateDashboard() {
   }, []);
 
   const [authenticated, setAuthenticated] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login'); // Giriş mi Kayıt mı?
+  
+  // Login State'leri
   const [loginInput, setLoginInput] = useState('');
   const [password, setPassword] = useState('');
+
+  // Sign Up (Kayıt) State'leri
+  const [regFullName, setRegFullName] = useState('');
+  const [regPassport, setRegPassport] = useState('');
+  const [regPhone, setRegPhone] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regProfession, setRegProfession] = useState('Elektrik Mühendisi / Teknisyeni');
+  const [regSector, setRegSector] = useState('construction');
+
   const [candidate, setCandidate] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'documents' | 'jobs' | 'interviews' | 'offers' | 'process' | 'travel' | 'notifications' | 'support'>('overview');
@@ -62,12 +71,10 @@ export default function CandidateDashboard() {
   const [supportSending, setSupportSending] = useState(false);
 
   const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
-  const [forgotModal, setForgotModal] = useState(false);
 
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
 
-  // Dile göre güncellenen standart belge isimleri sözlüğü
   const docTitlesByLang: Record<Language, string[]> = {
     tr: ['Pasaport Taraması', 'Mesleki Sertifika / İzin Belgesi', 'Adli Sicil Kaydı (Sabıka Kaydı)', 'Sağlık Raporu / Akciğer Grafisi'],
     en: ['Passport Scan', 'Professional Certificate / Permit', 'Criminal Record', 'Health Report / X-Ray'],
@@ -99,7 +106,6 @@ export default function CandidateDashboard() {
         setNewPhoto(data.photo_url || '');
         setNewVideoUrl(data.video_url || '');
         setAuthenticated(true);
-        // Giriş yapınca bildirim, destek ve iş tekliflerini çek
         fetchCandidateData(data.id);
       } else {
         alert(currentLang === 'tr' ? 'Hatalı şifre!' : 'Incorrect password!');
@@ -109,8 +115,49 @@ export default function CandidateDashboard() {
     }
   };
 
+  const handleCandidateSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!regFullName || !regPassport || !regEmail) {
+      alert(currentLang === 'tr' ? 'Lütfen zorunlu alanları doldurun.' : 'Please fill in required fields.');
+      return;
+    }
+
+    setLoading(true);
+    const defaultPassword = '123456';
+
+    const { data, error } = await supabase
+      .from('job_candidates')
+      .insert([
+        {
+          full_name: regFullName,
+          passport_number: regPassport.toUpperCase(),
+          phone: regPhone,
+          email: regEmail.toLowerCase(),
+          profession: regProfession,
+          sector: regSector,
+          password: defaultPassword,
+          status: 'pending'
+        }
+      ])
+      .select()
+      .single();
+
+    setLoading(false);
+
+    if (!error && data) {
+      alert(currentLang === 'tr' ? 'Başvurunuz ve kaydınız başarıyla oluşturuldu! Geçici şifreniz: 123456' : 'Registration successful! Default password: 123456');
+      setCandidate(data);
+      setNewPhone(data.phone || '');
+      setNewEmail(data.email || '');
+      setNewPassword(defaultPassword);
+      setAuthenticated(true);
+      fetchCandidateData(data.id);
+    } else {
+      alert('Hata: ' + (error?.message || 'Kayıt oluşturulamadı.'));
+    }
+  };
+
   const fetchCandidateData = async (candId: string) => {
-    // Bildirimleri çek
     const { data: notifs } = await supabase
       .from('candidate_notifications')
       .select('*')
@@ -119,7 +166,6 @@ export default function CandidateDashboard() {
 
     if (notifs) setNotifications(notifs);
 
-    // Destek taleplerini çek
     const { data: tickets } = await supabase
       .from('candidate_support_tickets')
       .select('*')
@@ -128,7 +174,6 @@ export default function CandidateDashboard() {
 
     if (tickets) setSupportTickets(tickets);
 
-    // İş Tekliflerini Çek
     const { data: offers } = await supabase
       .from('job_offers')
       .select('*')
@@ -292,57 +337,172 @@ export default function CandidateDashboard() {
           </select>
         </div>
 
-        <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
-          <div className="w-14 h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-7 h-7" />
-          </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 mb-1">{t.candidatePortal}</h1>
-          <p className="text-slate-500 text-xs mb-6 leading-relaxed">{t.loginDesc}</p>
-
-          <form onSubmit={handleCandidateLogin} className="space-y-4 text-left rtl:text-right">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                {currentLang === 'tr' ? 'E-POSTA / TELEFON / PASAPORT *' : (currentLang === 'sq' ? 'EMAIL / TELEFON / PASAPORTË *' : 'EMAIL / PHONE / PASSPORT *')}
-              </label>
-              <input 
-                type="text" 
-                value={loginInput} 
-                onChange={(e) => setLoginInput(e.target.value)} 
-                placeholder="Örn: omer@gmail.com" 
-                required 
-                className="w-full px-4 py-2.5 rounded-xl border text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm font-medium" 
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                {currentLang === 'tr' ? 'ŞİFRE *' : (currentLang === 'sq' ? 'FJALËKALIMI *' : 'PASSWORD *')}
-              </label>
-              <input 
-                type="password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                placeholder="••••••" 
-                required 
-                className="w-full px-4 py-2.5 rounded-xl border text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm font-medium" 
-              />
-            </div>
-
-            <div className="flex items-center justify-between text-xs text-slate-500">
-              <span>{currentLang === 'tr' ? 'Varsayılan: 123456' : (currentLang === 'sq' ? 'Parazgjedhur: 123456' : 'Default: 123456')}</span>
-            </div>
-
-            <button 
-              type="submit" 
-              className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl transition shadow-lg cursor-pointer text-sm"
+        <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full">
+          
+          {/* Sekme Seçici: Giriş Yap / Kayıt Ol */}
+          <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border">
+            <button
+              type="button"
+              onClick={() => setAuthMode('login')}
+              className={`flex-1 py-2.5 text-xs font-extrabold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                authMode === 'login' ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              {currentLang === 'tr' ? 'Sisteme Giriş Yap' : (currentLang === 'sq' ? 'Hyni në Sistem' : 'Sign In')}
+              <LogIn className="w-3.5 h-3.5" /> {currentLang === 'tr' ? 'Giriş Yap' : 'Sign In'}
             </button>
-          </form>
+            <button
+              type="button"
+              onClick={() => setAuthMode('signup')}
+              className={`flex-1 py-2.5 text-xs font-extrabold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                authMode === 'signup' ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <UserPlus className="w-3.5 h-3.5" /> {currentLang === 'tr' ? 'Hemen Başvur / Kayıt Ol' : 'Sign Up'}
+            </button>
+          </div>
 
-          <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-sm text-slate-500 hover:underline">
-            <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
-          </Link>
+          <div className="text-center mb-6">
+            <div className="w-12 h-12 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-3">
+              {authMode === 'login' ? <Lock className="w-6 h-6" /> : <UserPlus className="w-6 h-6" />}
+            </div>
+            <h1 className="text-xl font-extrabold text-slate-900">
+              {authMode === 'login' ? (currentLang === 'tr' ? 'Aday Portalı Girişi' : 'Candidate Portal') : (currentLang === 'tr' ? 'Yeni Aday Başvuru & Kaydı' : 'Candidate Registration')}
+            </h1>
+            <p className="text-slate-500 text-xs mt-1">
+              {authMode === 'login' ? (currentLang === 'tr' ? 'Bilgilerinizle giriş yaparak süreci takip edin.' : 'Sign in to track your status.') : (currentLang === 'tr' ? 'Formu doldurarak anında aday havuzuna katılın.' : 'Fill out the form to join our pool.')}
+            </p>
+          </div>
+
+          {authMode === 'login' ? (
+            <form onSubmit={handleCandidateLogin} className="space-y-4 text-left rtl:text-right">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  {currentLang === 'tr' ? 'E-POSTA / TELEFON / PASAPORT *' : 'EMAIL / PHONE / PASSPORT *'}
+                </label>
+                <input 
+                  type="text" 
+                  value={loginInput} 
+                  onChange={(e) => setLoginInput(e.target.value)} 
+                  placeholder="Örn: omer@gmail.com" 
+                  required 
+                  className="w-full px-4 py-2.5 rounded-xl border text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm font-medium" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  {currentLang === 'tr' ? 'ŞİFRE *' : 'PASSWORD *'}
+                </label>
+                <input 
+                  type="password" 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  placeholder="••••••" 
+                  required 
+                  className="w-full px-4 py-2.5 rounded-xl border text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm font-medium" 
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-slate-500">
+                <span>{currentLang === 'tr' ? 'Varsayılan Şifre: 123456' : 'Default Password: 123456'}</span>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white font-bold py-3 rounded-xl transition shadow-lg cursor-pointer text-sm"
+              >
+                {loading ? 'Giriş yapılıyor...' : (currentLang === 'tr' ? 'Sisteme Giriş Yap' : 'Sign In')}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleCandidateSignup} className="space-y-3 text-left rtl:text-right text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Ad Soyad *</label>
+                <input 
+                  type="text" 
+                  required
+                  value={regFullName}
+                  onChange={(e) => setRegFullName(e.target.value)}
+                  placeholder="Örn: Hüseyin Aksu"
+                  className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium outline-none"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Pasaport No *</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={regPassport}
+                    onChange={(e) => setRegPassport(e.target.value)}
+                    placeholder="Örn: U1234567"
+                    className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium uppercase outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Telefon (GSM)</label>
+                  <input 
+                    type="tel"
+                    value={regPhone}
+                    onChange={(e) => setRegPhone(e.target.value)}
+                    placeholder="+389..."
+                    className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium outline-none"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">E-Posta Adresi *</label>
+                <input 
+                  type="email" 
+                  required
+                  value={regEmail}
+                  onChange={(e) => setRegEmail(e.target.value)}
+                  placeholder="ornek@mail.com"
+                  className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium outline-none"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Uzmanlık / Meslek</label>
+                  <input 
+                    type="text"
+                    value={regProfession}
+                    onChange={(e) => setRegProfession(e.target.value)}
+                    placeholder="Elektrik Mühendisi"
+                    className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Sektör</label>
+                  <select
+                    value={regSector}
+                    onChange={(e) => setRegSector(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium outline-none cursor-pointer"
+                  >
+                    <option value="construction">İnşaat & Yapı</option>
+                    <option value="agriculture">Tarım & Hayvancılık</option>
+                    <option value="manufacturing">Üretim & Sanayi</option>
+                    <option value="hospitality">Turizm & Otelcilik</option>
+                  </select>
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white font-bold py-3 rounded-xl transition shadow-lg cursor-pointer text-sm mt-2"
+              >
+                {loading ? 'Kayıt oluşturuluyor...' : 'Hemen Kayıt Ol ve Başvur'}
+              </button>
+            </form>
+          )}
+
+          <div className="text-center mt-6">
+            <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:underline">
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -580,7 +740,7 @@ export default function CandidateDashboard() {
           </div>
         )}
 
-        {/* Tab 6: Job Offers (İŞ TEKLİFLERİ VE SÖZLEŞME SÜRECİ) */}
+        {/* Tab 6: Job Offers */}
         {activeTab === 'offers' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center justify-between">
