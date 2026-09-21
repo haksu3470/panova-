@@ -1,13 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Users, Globe2, Sprout, HardHat, Building2, Languages, CheckCircle2, Lock, Send, User } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function HomePage() {
-  const [currentLang, setCurrentLang] = useState<Language>('tr');
+  // İlk girişte 'en' (İngilizce) başlar, daha önce seçildiyse localStorage'dan okur
+  const [currentLang, setCurrentLang] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('panova_portal_lang') as Language;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
+    }
+    return 'en';
+  });
+
+  // Diğer sayfalardan veya sekmelerden gelen dil değişikliklerini reaktif olarak dinler ve senkronize eder
+  useEffect(() => {
+    const handleStorage = () => {
+      const saved = localStorage.getItem('panova_portal_lang') as Language;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
+        setCurrentLang(saved);
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    const interval = setInterval(handleStorage, 150);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const changeLanguage = (lang: Language) => {
+    setCurrentLang(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('panova_portal_lang', lang);
+    }
+  };
+
   const [selectedCompanyKey, setSelectedCompanyKey] = useState<'hr' | 'trade' | 'agriculture' | 'construction'>('hr');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -19,7 +50,7 @@ export default function HomePage() {
     notes: '',
   });
 
-  const t = translations[currentLang] || translations.tr;
+  const t = translations[currentLang] || translations.en;
   const company = t.companies[selectedCompanyKey];
   const isRtl = currentLang === 'ar';
   
@@ -75,7 +106,7 @@ export default function HomePage() {
               <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
               <select
                 value={currentLang}
-                onChange={(e) => setCurrentLang(e.target.value as Language)}
+                onChange={(e) => changeLanguage(e.target.value as Language)}
                 className="bg-transparent text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer"
               >
                 <option value={currentLang} className="font-bold">

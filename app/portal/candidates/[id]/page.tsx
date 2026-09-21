@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft, User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, Video, Trash2, Upload, Eye, X, Plus } from 'lucide-react';
+import { ArrowLeft, User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, Video, Trash2, Upload, Eye, X, Plus, Languages } from 'lucide-react';
 import Link from 'next/link';
+import { Language, languages, translations } from '@/lib/dictionary';
 
 interface CandidateDocument {
   id: string;
@@ -17,6 +18,40 @@ interface CandidateDocument {
 export default function CandidateDetailPage() {
   const params = useParams();
   const candidateId = params.id as string;
+
+  // İlk girişte 'en' (İngilizce) başlar, daha önce seçildiyse localStorage'dan okur (Tüm sayfalarla ortak: panova_portal_lang)
+  const [currentLang, setCurrentLang] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('panova_portal_lang') as Language;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
+    }
+    return 'en';
+  });
+
+  // Diğer sayfalardan veya sekmelerden gelen dil değişikliklerini reaktif olarak dinler ve senkronize eder
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('panova_portal_lang') as Language;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
+        setCurrentLang(saved);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    const timer = setInterval(handleStorageChange, 150);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(timer);
+    };
+  }, []);
+
+  const changeLanguage = (lang: Language) => {
+    setCurrentLang(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('panova_portal_lang', lang);
+    }
+  };
 
   const [candidate, setCandidate] = useState<any | null>(null);
   const [documents, setDocuments] = useState<CandidateDocument[]>([]);
@@ -38,6 +73,12 @@ export default function CandidateDetailPage() {
   // Yeni Belge & Önizleme
   const [newDocName, setNewDocName] = useState('');
   const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
+
+  const t = translations[currentLang] || translations.en;
+  const isRtl = currentLang === 'ar';
+  
+  const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
+  const activeLangObj = languages.find((l) => l.code === currentLang);
 
   useEffect(() => {
     fetchCandidateDetail();
@@ -166,11 +207,11 @@ export default function CandidateDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
+    <div className={`min-h-screen bg-slate-50 p-4 sm:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Üst Bar */}
-        <div className="flex items-center justify-between bg-white p-6 rounded-2xl border shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border shadow-sm">
           <div className="flex items-center gap-4">
             <Link href="/portal" className="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-700 font-bold text-xs">
               ← Yönetim Paneline Dön
@@ -190,9 +231,29 @@ export default function CandidateDetailPage() {
             </div>
           </div>
 
-          <button onClick={handleSaveDetail} disabled={saving} className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow flex items-center gap-2 cursor-pointer">
-            <Save className="w-4 h-4" /> {saving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200">
+              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
+              <select 
+                value={currentLang}
+                onChange={(e) => changeLanguage(e.target.value as Language)}
+                className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
+              >
+                <option value={currentLang} className="font-bold">
+                  {activeLangObj?.flag} {activeLangObj?.name}
+                </option>
+                {selectableLanguages.map((lang) => (
+                  <option key={lang.code} value={lang.code} className="text-slate-900">
+                    {lang.flag} {lang.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button onClick={handleSaveDetail} disabled={saving} className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow flex items-center gap-2 cursor-pointer">
+              <Save className="w-4 h-4" /> {saving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -299,7 +360,7 @@ export default function CandidateDetailPage() {
 
                     <div className="pt-2 border-t flex items-center justify-between text-xs">
                       {doc.file_url ? (
-                        <button type="button" onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url! })} className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition flex items-center gap-1">
+                        <button type="button" onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url! })} className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition flex items-center gap-1 cursor-pointer">
                           <Eye className="w-3.5 h-3.5" /> Önizle
                         </button>
                       ) : <span className="text-slate-400 italic">Dosya yüklenmedi</span>}
@@ -350,7 +411,7 @@ export default function CandidateDetailPage() {
               <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-600" /> İç Değerlendirme Notları
               </h3>
-              <textarea rows={3} value={internalNotes} onChange={(e) => setInternalNotes(e.target.value)} className="w-full p-4 rounded-xl border text-xs outline-none" />
+              <textarea rows={3} value={internalNotes} onChange={(e) => setInternalNotes(e.target.value)} className="w-full p-4 rounded-xl border text-xs outline-none text-slate-900" />
             </div>
           </div>
 
@@ -374,7 +435,7 @@ export default function CandidateDetailPage() {
           <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
             <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
               <h3 className="font-bold text-sm">{previewDoc.name}</h3>
-              <button onClick={() => setPreviewDoc(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300"><X className="w-5 h-5" /></button>
+              <button onClick={() => setPreviewDoc(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300 cursor-pointer"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-4 flex-1 overflow-auto flex justify-center bg-slate-100">
               <iframe src={previewDoc.url} className="w-full h-[70vh] rounded-xl border" title="Önizleme" />

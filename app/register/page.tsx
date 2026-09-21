@@ -1,13 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ArrowLeft, CheckCircle2, UserPlus, Languages, Send, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function RegisterPage() {
-  const [currentLang, setCurrentLang] = useState<Language>('tr');
+  const [currentLang, setCurrentLang] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('panova_portal_lang') as Language;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
+    }
+    return 'tr';
+  });
+
+  useEffect(() => {
+    const handleStorage = () => {
+      const saved = localStorage.getItem('panova_portal_lang') as Language;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
+        setCurrentLang(saved);
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    const interval = setInterval(handleStorage, 150);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const changeLanguage = (lang: Language) => {
+    setCurrentLang(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('panova_portal_lang', lang);
+    }
+  };
+
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -140,7 +169,7 @@ export default function RegisterPage() {
             <Languages className="w-4 h-4 text-slate-300 mr-1.5 rtl:ml-1.5" />
             <select
               value={currentLang}
-              onChange={(e) => setCurrentLang(e.target.value as Language)}
+              onChange={(e) => changeLanguage(e.target.value as Language)}
               className="bg-transparent text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer"
             >
               <option value={currentLang} className="text-slate-900 font-bold">
@@ -215,7 +244,7 @@ export default function RegisterPage() {
                       const defaultProf = professionOptions[sec]?.[0] || 'Other / Diğer';
                       setFormData({ ...formData, sector: sec, profession: defaultProf });
                     }}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm cursor-pointer"
                   >
                     <option value="construction">Construction / İnşaat</option>
                     <option value="agriculture">Agriculture / Tarım</option>

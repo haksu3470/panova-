@@ -1,13 +1,46 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Lock, Building2, PlusCircle, FileText, Clock, Users, ArrowLeft, Languages, Send } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function EmployerPortalPage() {
-  const [currentLang, setCurrentLang] = useState<Language>('en');
+  // İlk girişte 'en' (İngilizce) başlar, daha önce seçildiyse localStorage'dan okur (Tüm sayfalarla ortak: panova_portal_lang)
+  const [currentLang, setCurrentLang] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('panova_portal_lang') as Language;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
+    }
+    return 'en';
+  });
+
+  // Diğer sayfalardan veya sekmelerden gelen dil değişikliklerini reaktif olarak dinler ve senkronize eder
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('panova_portal_lang') as Language;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
+        setCurrentLang(saved);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    const timer = setInterval(handleStorageChange, 150);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(timer);
+    };
+  }, []);
+
+  const changeLanguage = (lang: Language) => {
+    setCurrentLang(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('panova_portal_lang', lang);
+    }
+  };
+
   const [authenticated, setAuthenticated] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,7 +52,9 @@ export default function EmployerPortalPage() {
 
   const t = translations[currentLang] || translations.en;
   const isRtl = currentLang === 'ar';
-  const selectableLanguages = languages.filter((lang) => lang.code !== 'en');
+  
+  const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
+  const activeLangObj = languages.find((l) => l.code === currentLang);
 
   const [newRequest, setNewRequest] = useState({
     sector: 'construction',
@@ -196,10 +231,12 @@ export default function EmployerPortalPage() {
           <Languages className="w-4 h-4 text-slate-300 mr-1.5 rtl:ml-1.5" />
           <select
             value={currentLang}
-            onChange={(e) => setCurrentLang(e.target.value as Language)}
+            onChange={(e) => changeLanguage(e.target.value as Language)}
             className="bg-transparent text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer"
           >
-            {currentLang === 'en' && <option value="en" disabled>🌐 Language</option>}
+            <option value={currentLang} className="font-bold">
+              {activeLangObj?.flag} {activeLangObj?.name}
+            </option>
             {selectableLanguages.map((lang) => (
               <option key={lang.code} value={lang.code} className="text-slate-900">{lang.flag} {lang.name}</option>
             ))}
@@ -239,7 +276,7 @@ export default function EmployerPortalPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 text-sm"
+              className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 text-sm cursor-pointer"
             >
               {loading ? t.submitting : t.signInBtn}
             </button>
@@ -267,16 +304,32 @@ export default function EmployerPortalPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <div className="relative flex items-center bg-slate-100 rounded-lg px-2.5 py-1.5 border border-slate-200 shadow-sm">
+              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
+              <select
+                value={currentLang}
+                onChange={(e) => changeLanguage(e.target.value as Language)}
+                className="bg-transparent text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer"
+              >
+                <option value={currentLang} className="font-bold">
+                  {activeLangObj?.flag} {activeLangObj?.name}
+                </option>
+                {selectableLanguages.map((lang) => (
+                  <option key={lang.code} value={lang.code} className="text-slate-900">{lang.flag} {lang.name}</option>
+                ))}
+              </select>
+            </div>
+
             <button
               onClick={() => setShowNewRequestModal(true)}
-              className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl text-sm font-bold transition shadow-md inline-flex items-center gap-2"
+              className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl text-sm font-bold transition shadow-md inline-flex items-center gap-2 cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" /> {t.newDemandBtn}
             </button>
 
             <button
               onClick={() => setAuthenticated(false)}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition"
+              className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer"
             >
               {t.logoutBtn}
             </button>
@@ -375,7 +428,7 @@ export default function EmployerPortalPage() {
                 <button
                   type="button"
                   onClick={() => setShowNewRequestModal(false)}
-                  className="text-slate-400 hover:text-slate-600 font-bold text-lg"
+                  className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer"
                 >
                   ✕
                 </button>
@@ -392,7 +445,7 @@ export default function EmployerPortalPage() {
                         const defaultPos = positionOptions[sec]?.[0] || 'Other';
                         setNewRequest({ ...newRequest, sector: sec, positionTitle: defaultPos });
                       }}
-                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white text-sm outline-none focus:ring-2 focus:ring-[#2e7d32]"
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white text-sm outline-none focus:ring-2 focus:ring-[#2e7d32] cursor-pointer"
                     >
                       <option value="construction">Construction</option>
                       <option value="agriculture">Agriculture</option>
@@ -406,7 +459,7 @@ export default function EmployerPortalPage() {
                     <select
                       value={newRequest.positionTitle}
                       onChange={(e) => setNewRequest({ ...newRequest, positionTitle: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white text-sm outline-none focus:ring-2 focus:ring-[#2e7d32]"
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white text-sm outline-none focus:ring-2 focus:ring-[#2e7d32] cursor-pointer"
                     >
                       {(positionOptions[newRequest.sector] || ['Other']).map((pos) => (
                         <option key={pos} value={pos}>{pos}</option>
