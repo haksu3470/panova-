@@ -1,13 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Lock, ShieldCheck, Search, Filter, Languages, ArrowLeft, Award, Video, CheckCircle, Clock, Star, Calendar, Building2, Users } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function PortalPage() {
-  const [currentLang, setCurrentLang] = useState<Language>('en');
+  const [currentLang, setCurrentLang] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('panova_portal_lang') as Language;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
+    }
+    return 'en';
+  });
+
+  useEffect(() => {
+    const handleStorage = () => {
+      const saved = localStorage.getItem('panova_portal_lang') as Language;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
+        setCurrentLang(saved);
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    const interval = setInterval(handleStorage, 150);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const changeLanguage = (lang: Language) => {
+    setCurrentLang(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('panova_portal_lang', lang);
+    }
+  };
+
   const [authenticated, setAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -60,13 +89,33 @@ export default function PortalPage() {
   };
 
   const updateCandidateStatus = async (id: string, newStatus: string) => {
-    const { error } = await supabase.from('job_candidates').update({ status: newStatus }).eq('id', id);
-    if (!error) setCandidates(candidates.map(c => c.id === id ? { ...c, status: newStatus } : c));
+    const { error } = await supabase
+      .from('job_candidates')
+      .update({ status: newStatus })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Candidate status update error:', error.message);
+      alert('Durum güncellenemedi: ' + error.message);
+      return;
+    }
+
+    setCandidates(candidates.map(c => c.id === id ? { ...c, status: newStatus } : c));
   };
 
   const updateRequestStatus = async (id: string, newStatus: string) => {
-    const { error } = await supabase.from('job_requests').update({ status: newStatus }).eq('id', id);
-    if (!error) setJobRequests(jobRequests.map(r => r.id === id ? { ...r, status: newStatus } : r));
+    const { error } = await supabase
+      .from('job_requests')
+      .update({ status: newStatus })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Request status update error:', error.message);
+      alert('Talep durumu güncellenemedi: ' + error.message);
+      return;
+    }
+
+    setJobRequests(jobRequests.map(r => r.id === id ? { ...r, status: newStatus } : r));
   };
 
   const toggleVerification = async (id: string, currentVerified: boolean) => {
@@ -97,7 +146,7 @@ export default function PortalPage() {
           <Languages className="w-4 h-4 text-slate-300 mr-1.5 rtl:ml-1.5" />
           <select
             value={currentLang}
-            onChange={(e) => setCurrentLang(e.target.value as Language)}
+            onChange={(e) => changeLanguage(e.target.value as Language)}
             className="bg-transparent text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer"
           >
             <option value={currentLang} className="text-slate-900 font-bold">
@@ -174,7 +223,7 @@ export default function PortalPage() {
               <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
               <select
                 value={currentLang}
-                onChange={(e) => setCurrentLang(e.target.value as Language)}
+                onChange={(e) => changeLanguage(e.target.value as Language)}
                 className="bg-transparent text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer"
               >
                 <option value={currentLang} className="font-bold">
@@ -272,10 +321,10 @@ export default function PortalPage() {
                       <th className="p-4">{t.colCandidate}</th>
                       <th className="p-4">{t.colPassportNat}</th>
                       <th className="p-4">{t.colProfSector}</th>
-                      <th className="p-4">{currentLang === 'tr' ? 'Sertifika & Video' : 'Certificate & Video'}</th>
-                      <th className="p-4">{currentLang === 'tr' ? 'Ücret & Vardiya' : 'Salary & Shift'}</th>
+                      <th className="p-4">{t.certAndVideo}</th>
+                      <th className="p-4">{t.salaryAndShift}</th>
                       <th className="p-4">{t.colVisaStatus}</th>
-                      <th className="p-4">{currentLang === 'tr' ? '30-60-90 Gün Takip' : '30-60-90 Tracking'}</th>
+                      <th className="p-4">{t.trackingPeriod}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -313,7 +362,7 @@ export default function PortalPage() {
                                 {candidate.certificate_no} ({candidate.issuing_body || 'N/A'})
                               </div>
                             ) : (
-                              <span className="text-slate-400">{currentLang === 'tr' ? 'Sertifika Yok' : 'No Cert'}</span>
+                              <span className="text-slate-400">{t.noCertificate}</span>
                             )}
                             {candidate.video_url && (
                               <a
@@ -322,15 +371,15 @@ export default function PortalPage() {
                                 rel="noreferrer"
                                 className="inline-flex items-center gap-1 text-emerald-700 hover:underline font-semibold"
                               >
-                                <Video className="w-3.5 h-3.5" /> {currentLang === 'tr' ? 'Videoyu İzle' : 'Watch Video'}
+                                <Video className="w-3.5 h-3.5" /> {t.watchVideo}
                               </a>
                             )}
                           </div>
                         </td>
                         <td className="p-4 text-xs font-semibold">
-                          <div>{candidate.expected_salary ? `€${candidate.expected_salary} / ${currentLang === 'tr' ? 'ay' : 'month'}` : 'N/A'}</div>
+                          <div>{candidate.expected_salary ? `€${candidate.expected_salary} / ${t.monthText}` : 'N/A'}</div>
                           <div className="text-slate-400 font-normal">
-                            {candidate.shift_suitable ? (currentLang === 'tr' ? 'Vardiyaya Uygun' : 'Shift Suitable') : (currentLang === 'tr' ? 'Standart Vardiya' : 'Standard Shift')}
+                            {candidate.shift_suitable ? t.shiftSuitableText : t.standardShiftText}
                           </div>
                         </td>
                         <td className="p-4">
@@ -350,7 +399,7 @@ export default function PortalPage() {
                             onClick={() => setSelectedCandidateForFollowup(candidate)}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-[#2e7d32] border border-emerald-200 rounded-lg text-xs font-bold hover:bg-emerald-100 transition cursor-pointer"
                           >
-                            <Calendar className="w-3.5 h-3.5" /> {currentLang === 'tr' ? 'Süreci Takip Et' : 'Track Period'}
+                            <Calendar className="w-3.5 h-3.5" /> {t.trackingPeriod}
                           </button>
                         </td>
                       </tr>
@@ -372,7 +421,7 @@ export default function PortalPage() {
                 <table className="w-full text-left rtl:text-right text-sm text-slate-600">
                   <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-100">
                     <tr>
-                      <th className="p-4">{currentLang === 'tr' ? 'İşveren Şirket' : 'Employer Company'}</th>
+                      <th className="p-4">{t.employerCompany}</th>
                       <th className="p-4">{t.colPosSec}</th>
                       <th className="p-4">{t.colHeadcount}</th>
                       <th className="p-4">{t.colSalary}</th>
@@ -385,16 +434,16 @@ export default function PortalPage() {
                       <tr key={req.id} className="hover:bg-slate-50/50">
                         <td className="p-4 font-bold text-slate-900">
                           {req.employer_name}
-                          <div className="text-xs text-slate-400 font-normal">{currentLang === 'tr' ? 'Tarih' : 'Created'}: {new Date(req.created_at).toLocaleDateString()}</div>
+                          <div className="text-xs text-slate-400 font-normal">{t.createdDate}: {new Date(req.created_at).toLocaleDateString()}</div>
                         </td>
                         <td className="p-4 font-bold text-slate-800">
                           {req.position_title}
                           <div className="text-xs text-slate-400 font-normal uppercase">{req.sector}</div>
                         </td>
-                        <td className="p-4 font-bold text-slate-800">{req.headcount} {currentLang === 'tr' ? 'Kişi' : 'Person(s)'}</td>
-                        <td className="p-4 font-semibold text-emerald-700">€{req.monthly_net_salary} / {currentLang === 'tr' ? 'ay' : 'mo'}</td>
+                        <td className="p-4 font-bold text-slate-800">{req.headcount} {t.personCount}</td>
+                        <td className="p-4 font-semibold text-emerald-700">€{req.monthly_net_salary} / {t.monthText}</td>
                         <td className="p-4 text-xs space-y-1 text-slate-500">
-                          <div>{t.accommodation}: {req.accommodation_provided ? (currentLang === 'tr' ? '✅ Karşılanıyor' : '✅ Covered') : '❌'}</div>
+                          <div>{t.accommodation}: {req.accommodation_provided ? '✅' : '❌'}</div>
                           <div>{t.foodAllowance} / {t.flightTicket}: {req.food_provided ? '✅' : '❌'} | {req.flight_covered ? '✅' : '❌'}</div>
                         </td>
                         <td className="p-4">

@@ -64,7 +64,7 @@ export interface Translation {
   specialReqs?: string;
   creatingDossier?: string;
   submitDossierBtn?: string;
-  companies?: any; // Nesne ve index yapıları için esnek tip
+  companies?: any;
   employerPortal?: string;
   selectedCompany?: string;
   candidatePortalLogin?: string;
@@ -92,6 +92,18 @@ export interface Translation {
   successTitle?: string;
   successDesc?: string;
   notesLabel?: string;
+  // --- YENİ EKLENEN PORTAL TABLO VE ETİKET ANAHTARLARI ---
+  certAndVideo: string;
+  salaryAndShift: string;
+  trackingPeriod: string;
+  noCertificate: string;
+  watchVideo: string;
+  monthText: string;
+  shiftSuitableText: string;
+  standardShiftText: string;
+  employerCompany: string;
+  createdDate: string;
+  personCount: string;
 }
 
 export const languages = [
@@ -194,7 +206,18 @@ export const translations: Record<Language, Translation> = {
       trade: { name: 'Panova Trade', tagline: 'Dış Ticaret ve Lojistik' },
       agriculture: { name: 'Panova Tarım', tagline: 'Tarımsal Üretim ve Bahçe' },
       construction: { name: 'Panova Construction', tagline: 'İnşaat ve Yapı' }
-    }
+    },
+    certAndVideo: 'Sertifika & Video',
+    salaryAndShift: 'Ücret & Vardiya',
+    trackingPeriod: '30-60-90 Gün Takip',
+    noCertificate: 'Sertifika Yok',
+    watchVideo: 'Videoyu İzle',
+    monthText: 'ay',
+    shiftSuitableText: 'Vardiyaya Uygun',
+    standardShiftText: 'Standart Vardiya',
+    employerCompany: 'İşveren Şirket',
+    createdDate: 'Tarih',
+    personCount: 'Kişi',
   },
   en: {
     returnHome: 'Return to Home',
@@ -288,7 +311,18 @@ export const translations: Record<Language, Translation> = {
       trade: { name: 'Panova Trade', tagline: 'Foreign Trade & Logistics' },
       agriculture: { name: 'Panova Agriculture', tagline: 'Agricultural Production' },
       construction: { name: 'Panova Construction', tagline: 'Construction & Building' }
-    }
+    },
+    certAndVideo: 'Certificate & Video',
+    salaryAndShift: 'Salary & Shift',
+    trackingPeriod: '30-60-90 Tracking',
+    noCertificate: 'No Cert',
+    watchVideo: 'Watch Video',
+    monthText: 'mo',
+    shiftSuitableText: 'Shift Suitable',
+    standardShiftText: 'Standard Shift',
+    employerCompany: 'Employer Company',
+    createdDate: 'Created',
+    personCount: 'Person(s)',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -382,7 +416,18 @@ export const translations: Record<Language, Translation> = {
       trade: { name: 'Panova Trade', tagline: 'Tregti e Jashtme dhe Logjistikë' },
       agriculture: { name: 'Panova Bujqësi', tagline: 'Prodhimi Bujqësor' },
       construction: { name: 'Panova Ndërtim', tagline: 'Ndërtim dhe Objekte' }
-    }
+    },
+    certAndVideo: 'Certifikata & Video',
+    salaryAndShift: 'Paga & Turni',
+    trackingPeriod: 'Gjurmimi 30-60-90',
+    noCertificate: 'Pa Certifikatë',
+    watchVideo: 'Shiko Videon',
+    monthText: 'muaj',
+    shiftSuitableText: 'I përshtatshëm për turne',
+    standardShiftText: 'Turni Standard',
+    employerCompany: 'Kompania Punëdhënëse',
+    createdDate: 'Krijuar',
+    personCount: 'Person(a)',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -476,6 +521,17 @@ export const translations: Record<Language, Translation> = {
       trade: { name: 'Panova Trade', tagline: 'التجارة الخارجية والخدمات اللوجستية' },
       agriculture: { name: 'Panova Agriculture', tagline: 'الإنتاج الزراعي' },
       construction: { name: 'Panova Construction', tagline: 'البناء والتشييد' }
-    }
+    },
+    certAndVideo: 'الشهادة والفيديو',
+    salaryAndShift: 'الراتب ونظام العمل',
+    trackingPeriod: 'متابعة 30-60-90',
+    noCertificate: 'لا توجد شهادة',
+    watchVideo: 'مشاهدة الفيديو',
+    monthText: 'شهر',
+    shiftSuitableText: 'مناسب للنوبات',
+    standardShiftText: 'نوبة قياسية',
+    employerCompany: 'الشركة المصدرة للطلب',
+    createdDate: 'التاريخ',
+    personCount: 'أشخاص',
   },
 };
