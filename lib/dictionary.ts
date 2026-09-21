@@ -68,6 +68,7 @@ export interface Translation {
   employerPortal?: string;
   selectedCompany?: string;
   candidatePortalLogin?: string;
+  candidatePortalBtn?: string; // <-- EKLENDİ
   registerTitle?: string;
   saveBtn?: string;
   colProfSector?: string;
@@ -181,6 +182,7 @@ export const translations: Record<Language, Translation> = {
     employerPortal: 'İşveren Girişi',
     selectedCompany: 'Seçilen Firma',
     candidatePortalLogin: 'Aday Girişi',
+    candidatePortalBtn: 'Aday Portalı & Giriş',
     registerTitle: 'Kayıt Ol',
     saveBtn: 'Kaydet',
     colProfSector: 'Meslek / Sektör',
@@ -286,6 +288,7 @@ export const translations: Record<Language, Translation> = {
     employerPortal: 'Employer Portal',
     selectedCompany: 'Selected Company',
     candidatePortalLogin: 'Candidate Login',
+    candidatePortalBtn: 'Candidate Portal & Sign In',
     registerTitle: 'Register',
     saveBtn: 'Save',
     colProfSector: 'Profession / Sector',
@@ -391,6 +394,7 @@ export const translations: Record<Language, Translation> = {
     employerPortal: 'Hyrja e Punëdhënësit',
     selectedCompany: 'Kompania e Zgjedhur',
     candidatePortalLogin: 'Hyrja e Kandidatit',
+    candidatePortalBtn: 'Portali i Kandidatëve & Hyrja',
     registerTitle: 'Regjistrohuni',
     saveBtn: 'Ruaj',
     colProfSector: 'Profesioni / Sektori',
@@ -496,6 +500,7 @@ export const translations: Record<Language, Translation> = {
     employerPortal: 'بوابة أصحاب العمل',
     selectedCompany: 'الشركة المختارة',
     candidatePortalLogin: 'تسجيل دخول المرشح',
+    candidatePortalBtn: 'بوابة المرشحين وتسجيل الدخول',
     registerTitle: 'التسجيل',
     saveBtn: 'حفظ',
     colProfSector: 'المهنة / القطاع',

@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function HomePage() {
-  // İlk girişte 'en' (İngilizce) başlar, daha önce seçildiyse localStorage'dan okur
   const [currentLang, setCurrentLang] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('panova_portal_lang') as Language;
@@ -16,7 +15,6 @@ export default function HomePage() {
     return 'en';
   });
 
-  // Diğer sayfalardan veya sekmelerden gelen dil değişikliklerini reaktif olarak dinler ve senkronize eder
   useEffect(() => {
     const handleStorage = () => {
       const saved = localStorage.getItem('panova_portal_lang') as Language;
@@ -125,7 +123,7 @@ export default function HomePage() {
                   href="/candidate"
                   className="inline-flex items-center gap-1.5 bg-[#2e7d32] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#1b5e20] transition shadow-md z-10 cursor-pointer"
                 >
-                  <LogIn className="w-3.5 h-3.5" /> Aday Portalı & Giriş
+                  <LogIn className="w-3.5 h-3.5" /> {t.candidatePortalBtn || 'Aday Portalı & Giriş'}
                 </Link>
 
                 <Link
