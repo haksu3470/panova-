@@ -68,7 +68,7 @@ export interface Translation {
   employerPortal?: string;
   selectedCompany?: string;
   candidatePortalLogin?: string;
-  candidatePortalBtn?: string; // <-- EKLENDİ
+  candidatePortalBtn?: string;
   registerTitle?: string;
   saveBtn?: string;
   colProfSector?: string;
@@ -93,7 +93,7 @@ export interface Translation {
   successTitle?: string;
   successDesc?: string;
   notesLabel?: string;
-  // --- YENİ EKLENEN PORTAL TABLO VE ETİKET ANAHTARLARI ---
+  // --- PORTAL TABLO VE ETİKET ANAHTARLARI ---
   certAndVideo: string;
   salaryAndShift: string;
   trackingPeriod: string;
@@ -105,6 +105,21 @@ export interface Translation {
   employerCompany: string;
   createdDate: string;
   personCount: string;
+  // --- YÖNETİM PANELİ ÇOKLU DİL ANAHTARLARI ---
+  overviewTab: string;
+  candidatesTab: string;
+  requestsTab: string;
+  employersTab: string;
+  matchingTab: string;
+  travelTab: string;
+  employeesTab: string;
+  supportTab: string;
+  totalCandidatesCard: string;
+  activeEmployersCard: string;
+  openRequestsCard: string;
+  openSupportCard: string;
+  portalSummaryTitle: string;
+  portalSummaryDesc: string;
 }
 
 export const languages = [
@@ -220,6 +235,20 @@ export const translations: Record<Language, Translation> = {
     employerCompany: 'İşveren Şirket',
     createdDate: 'Tarih',
     personCount: 'Kişi',
+    overviewTab: 'Genel Durum',
+    candidatesTab: 'Aday Havuzu',
+    requestsTab: 'Personel Talepleri',
+    employersTab: 'İşverenler',
+    matchingTab: 'Eşleştirmeler',
+    travelTab: 'Seyahatler & Vize',
+    employeesTab: 'Aktif Çalışanlar (30/60/90)',
+    supportTab: 'Sorunlar / Bildirimler',
+    totalCandidatesCard: 'TOPLAM ADAY',
+    activeEmployersCard: 'AKTİF İŞVERENLER',
+    openRequestsCard: 'AÇIK TALEPLER',
+    openSupportCard: 'AÇIK SORUNLAR / DESTEK',
+    portalSummaryTitle: 'PANOVA Operasyon Özeti',
+    portalSummaryDesc: 'Sistem üzerinden aday başvurularını yönetebilir, işverenlerin personel taleplerine aday eşleştirmesi yapabilir, vize ve seyahat süreçlerini takip edebilirsiniz.',
   },
   en: {
     returnHome: 'Return to Home',
@@ -326,6 +355,20 @@ export const translations: Record<Language, Translation> = {
     employerCompany: 'Employer Company',
     createdDate: 'Created',
     personCount: 'Person(s)',
+    overviewTab: 'Overview',
+    candidatesTab: 'Candidate Pool',
+    requestsTab: 'Personnel Requests',
+    employersTab: 'Employers',
+    matchingTab: 'Matching',
+    travelTab: 'Travel & Visa',
+    employeesTab: 'Active Employees (30/60/90)',
+    supportTab: 'Issues / Support',
+    totalCandidatesCard: 'TOTAL CANDIDATES',
+    activeEmployersCard: 'ACTIVE EMPLOYERS',
+    openRequestsCard: 'OPEN REQUESTS',
+    openSupportCard: 'OPEN ISSUES / SUPPORT',
+    portalSummaryTitle: 'PANOVA Operations Summary',
+    portalSummaryDesc: 'You can manage candidate applications through the system, match candidates to employer workforce requests, and track visa and travel processes.',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -432,6 +475,20 @@ export const translations: Record<Language, Translation> = {
     employerCompany: 'Kompania Punëdhënëse',
     createdDate: 'Krijuar',
     personCount: 'Person(a)',
+    overviewTab: 'Përmbledhje',
+    candidatesTab: 'Grupi i Kandidatëve',
+    requestsTab: 'Kërkesat e Personelit',
+    employersTab: 'Punëdhënësit',
+    matchingTab: 'Përputhjet',
+    travelTab: 'Udhëtimet & Vizat',
+    employeesTab: 'Punonjësit Aktivë (30/60/90)',
+    supportTab: 'Problemet / Mbështetja',
+    totalCandidatesCard: 'TOTALI I KANDIDATËVE',
+    activeEmployersCard: 'PUNËDHËNËSIT AKTIVË',
+    openRequestsCard: 'KËRKESAT E HAPURA',
+    openSupportCard: 'PROBLEMET / MBËSHTETJA',
+    portalSummaryTitle: 'Përmbledhje e Operacioneve PANOVA',
+    portalSummaryDesc: 'Ju mund të menaxhoni aplikimet e kandidatëve, të përputhni kandidatët me kërkesat e punëdhënësve dhe të ndiqni vizat.',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -538,5 +595,19 @@ export const translations: Record<Language, Translation> = {
     employerCompany: 'الشركة المصدرة للطلب',
     createdDate: 'التاريخ',
     personCount: 'أشخاص',
+    overviewTab: 'نظرة عامة',
+    candidatesTab: 'قائمة المرشحين',
+    requestsTab: 'طلبات الموظفين',
+    employersTab: 'أصحاب العمل',
+    matchingTab: 'المطابقة',
+    travelTab: 'السفر والتأشيرات',
+    employeesTab: 'الموظفون النشطون (30/60/90)',
+    supportTab: 'المشكلات / الدعم',
+    totalCandidatesCard: 'إجمالي المرشحين',
+    activeEmployersCard: 'أصحاب العمل النشطون',
+    openRequestsCard: 'الطلبات المفتوحة',
+    openSupportCard: 'المشكلات / الدعم المفتوح',
+    portalSummaryTitle: 'ملخص عمليات بانوفا',
+    portalSummaryDesc: 'يمكنك إدارة طلبات المرشحين ومطابقة الكفاءات مع طلبات أصحاب العمل ومتابعة التأشيرات.',
   },
 };
