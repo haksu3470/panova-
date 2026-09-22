@@ -50,7 +50,6 @@ export default function PortalPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   
-  // Sekmeler: 'overview' | 'candidates' | 'requests' | 'staff' | 'tasks' | 'employers' | 'matching' | 'travel' | 'employees' | 'support'
   const [activeTab, setActiveTab] = useState<'overview' | 'candidates' | 'requests' | 'staff' | 'tasks' | 'employers' | 'matching' | 'travel' | 'employees' | 'support'>('overview');
   
   const [candidates, setCandidates] = useState<any[]>([]);
@@ -58,12 +57,11 @@ export default function PortalPage() {
   const [employers, setEmployers] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
   
-  // Dinamik Ekip Üyeleri Listesi (Varsayılan kurucu ve operasyon kadrosu)
   const [staffMembers, setStaffMembers] = useState<any[]>([
-    { id: '1', name: 'Hüseyin Aksu', email: 'huseyin@panova.com', role: 'Admin / Kurucu' },
-    { id: '2', name: 'Mehmet Çitil', email: 'mehmet@panova.com', role: 'Ortak / Operasyon' },
-    { id: '3', name: 'Aleksandar Petrov', email: 'aleksandar@panova.com', role: 'Bölge Sorumlusu' },
-    { id: '4', name: 'Rabia Aksu', email: 'rabia@panova.com', role: 'İnsan Kaynakları' }
+    { id: '1', name: 'Hüseyin Aksu', email: 'huseyin@panova.com', role: 'Admin / Kurucu', permissionLevel: 'admin' },
+    { id: '2', name: 'Mehmet Çitil', email: 'mehmet@panova.com', role: 'Ortak / Operasyon', permissionLevel: 'manager' },
+    { id: '3', name: 'Aleksandar Petrov', email: 'aleksandar@panova.com', role: 'Bölge Sorumlusu', permissionLevel: 'field' },
+    { id: '4', name: 'Rabia Aksu', email: 'rabia@panova.com', role: 'İnsan Kaynakları', permissionLevel: 'hr' }
   ]);
 
   const [tasks, setTasks] = useState<any[]>([
@@ -76,17 +74,16 @@ export default function PortalPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
 
-  // Toplu işlem state'leri
   const [selectedCandidateIds, setSelectedCandidateIds] = useState<string[]>([]);
   const [bulkStatus, setBulkStatus] = useState('reviewing');
   const [bulkAssignee, setBulkAssignee] = useState('Hüseyin Aksu');
 
-  // Yeni ekip üyesi ekleme state'leri
+  // Yeni ekip üyesi form state'leri
   const [newStaffName, setNewStaffName] = useState('');
   const [newStaffEmail, setNewStaffEmail] = useState('');
   const [newStaffRole, setNewStaffRole] = useState('Operasyon Uzmanı');
+  const [newStaffPermission, setNewStaffPermission] = useState('manager');
 
-  // Yeni görev ekleme state'leri
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskAssignee, setNewTaskAssignee] = useState('Hüseyin Aksu');
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
@@ -122,7 +119,6 @@ export default function PortalPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Hem genel admin hem de ekip üyeleri giriş yapabilir
     if ((username === 'admin' && password === 'panova2026') || staffMembers.some(s => s.email === username)) {
       setAuthenticated(true);
       if (typeof window !== 'undefined') {
@@ -166,7 +162,7 @@ export default function PortalPage() {
     if (!error) setCandidates(candidates.map(c => c.id === id ? { ...c, is_verified: !currentVerified } : c));
   };
 
-  // Yeni Ekip Üyesi Ekleme Fonksiyonu
+  // Yeni Ekip Üyesi ve Yetki Ekleme
   const handleAddStaff = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newStaffName.trim() || !newStaffEmail.trim()) return;
@@ -175,16 +171,18 @@ export default function PortalPage() {
       id: Date.now().toString(),
       name: newStaffName,
       email: newStaffEmail,
-      role: newStaffRole
+      role: newStaffRole,
+      permissionLevel: newStaffPermission
     };
 
     setStaffMembers([...staffMembers, newStaff]);
     setNewStaffName('');
     setNewStaffEmail('');
-    alert('Yeni ekip üyesi başarıyla eklendi!');
+    setNewStaffRole('Operasyon Uzmanı');
+    setNewStaffPermission('manager');
+    alert('Yeni ekip üyesi ve yetkisi başarıyla tanımlandı!');
   };
 
-  // Toplu İşlemler
   const handleSelectAllCandidates = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       setSelectedCandidateIds(filteredCandidates.map(c => c.id));
@@ -374,7 +372,7 @@ export default function PortalPage() {
           </div>
         </div>
 
-        {/* Tab Navigation (Ekip ve Yetkiler Sekmesi Eklendi) */}
+        {/* Tab Navigation */}
         <div className="flex flex-wrap gap-2 border-b pb-2 overflow-x-auto text-xs font-bold">
           <button onClick={() => setActiveTab('overview')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 Genel Durum
@@ -448,13 +446,13 @@ export default function PortalPage() {
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
               <h3 className="text-lg font-extrabold text-slate-900">PANOVA Operasyon Özeti</h3>
               <p className="text-xs text-slate-600">
-                Sistem üzerinden aday başvurularını yönetebilir, dinamik ekip üyelerine dosya ataması yapabilir ve tüm operasyonu takip edebilirsiniz.
+                Sistem üzerinden aday başvurularını yönetebilir, dinamik ekip üyelerine yetki düzeyine göre dosya ataması yapabilirsiniz.
               </p>
             </div>
           </div>
         )}
 
-        {/* Tab 2: Aday Havuzu (Dinamik Sorumlu Listesi ile) */}
+        {/* Tab 2: Aday Havuzu */}
         {activeTab === 'candidates' && (
           <div className="space-y-4">
             <div className="bg-white p-4 rounded-2xl border shadow-sm flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -542,7 +540,6 @@ export default function PortalPage() {
                           <span className="font-semibold text-slate-800">{candidate.profession}</span>
                           <div className="text-xs text-slate-400 uppercase">{candidate.sector}</div>
                         </td>
-                        {/* Dinamik Ekip Üyesi Listesinden Sorumlu Seçimi */}
                         <td className="p-4">
                           <select
                             value={candidate.assigned_to || staffMembers[0]?.name}
@@ -627,12 +624,12 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 4: Ekip ve Yetkiler (Staff Management) */}
+        {/* Tab 4: Ekip & Yetkiler (Rol Seçimli Yeni Form) */}
         {activeTab === 'staff' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
               <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-emerald-700" /> Yeni Ekip Üyesi Ekle
+                <UserPlus className="w-5 h-5 text-emerald-700" /> Yeni Ekip Üyesi ve Yetki Ata
               </h3>
               <form onSubmit={handleAddStaff} className="space-y-3 text-xs">
                 <div>
@@ -644,26 +641,44 @@ export default function PortalPage() {
                   <input type="email" required value={newStaffEmail} onChange={(e) => setNewStaffEmail(e.target.value)} placeholder="ahmet@panova.com" className="w-full px-3 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Rol / Unvan</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Rol / Unvan Açıklaması</label>
                   <input type="text" value={newStaffRole} onChange={(e) => setNewStaffRole(e.target.value)} placeholder="Operasyon Uzmanı" className="w-full px-3 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
                 </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Sistem Yetki Seviyesi *</label>
+                  <select 
+                    value={newStaffPermission} 
+                    onChange={(e) => setNewStaffPermission(e.target.value)} 
+                    className="w-full px-3 py-2.5 rounded-xl border font-bold bg-white cursor-pointer"
+                  >
+                    <option value="admin">👑 Admin (Tam Yetki)</option>
+                    <option value="manager">📋 Operasyon Sorumlusu (Genel Yönetim)</option>
+                    <option value="hr">👥 İK Uzmanı (Aday & Belge Takip)</option>
+                    <option value="field">✈️ Bölge Sorumlusu (Saha & Seyahat)</option>
+                  </select>
+                </div>
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold transition cursor-pointer shadow-md">
-                  Ekip Üyesini Kaydet
+                  Ekip Üyesini ve Yetkiyi Kaydet
                 </button>
               </form>
             </div>
 
             <div className="lg:col-span-2 bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">PANOVA Operasyon Kadrosu</h3>
+              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">PANOVA Operasyon Kadrosu ve Yetki Matrisi</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {staffMembers.map((staff) => (
                   <div key={staff.id} className="p-4 bg-slate-50 rounded-2xl border flex items-center justify-between">
                     <div>
                       <h4 className="font-extrabold text-slate-900 text-sm">{staff.name}</h4>
                       <p className="text-xs text-slate-500">{staff.email}</p>
-                      <span className="inline-block mt-1 px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-md text-[10px] font-bold">
-                        {staff.role}
-                      </span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md text-[10px] font-bold">
+                          {staff.role}
+                        </span>
+                        <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-md text-[10px] font-bold uppercase">
+                          Yetki: {staff.permissionLevel || 'manager'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -742,7 +757,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Diğer Tablar (Matching, Travel, Employees, Support) */}
+        {/* Diğer Tablar */}
         {activeTab === 'matching' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Eşleştirmeler</h3>
