@@ -42,7 +42,7 @@ export default function PortalPage() {
 
   const [authenticated, setAuthenticated] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('panova_admin_auth') === 'true';
+      return localStorage.getItem('panova_admin_auth'] === 'true';
     }
     return false;
   });
@@ -57,7 +57,7 @@ export default function PortalPage() {
   const [employers, setEmployers] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
   
-  // Modül 5.2: Rol Bazlı Yetkilendirme (Üst Yönetim, Kaynak Ülke, Hedef Ülke, Saha Sorumlusu)
+  // Modül 5.2: Rol Bazlı Yetkilendirme
   const [staffMembers, setStaffMembers] = useState<any[]>([
     { id: '1', name: 'Hüseyin Aksu', email: 'huseyin@panova.com', role: 'Üst Yönetim (Admin)', roleLevel: 'upper_management' },
     { id: '2', name: 'Mehmet Çitil', email: 'mehmet@panova.com', role: 'Hedef Ülke Sorumlusu', roleLevel: 'target_country' },
@@ -65,13 +65,11 @@ export default function PortalPage() {
     { id: '4', name: 'Rabia Aksu', email: 'rabia@panova.com', role: 'Saha Sorumlusu', roleLevel: 'field_officer' }
   ]);
 
-  // Modül 5.1: Sorumlu & Yedek Sorumlu ve Son Tarihli Görev Takibi
   const [tasks, setTasks] = useState<any[]>([
     { id: '1', title: 'Pasaport ve vize evraklarını kontrol et', assignee: 'Hüseyin Aksu', backup_assignee: 'Aleksandar Petrov', due_date: '2026-10-01', status: 'pending' },
     { id: '2', title: 'PANOVA Construction işveren iş görüşmesi', assignee: 'Mehmet Çitil', backup_assignee: 'Rabia Aksu', due_date: '2026-09-25', status: 'completed' }
   ]);
 
-  // Modül 5.3: İşlem Geçmişi (Audit Log)
   const [auditLogs, setAuditLogs] = useState<any[]>([
     { id: '1', action: 'Sistem Başlatıldı & Rol Matrisi Kuruldu', performer: 'Hüseyin Aksu', time: '2026-09-22 12:00' },
     { id: '2', action: 'Aday vize süreci güncellendi', performer: 'Mehmet Çitil', time: '2026-09-22 14:30' }
@@ -211,7 +209,7 @@ export default function PortalPage() {
       status: 'pending'
     };
     setTasks([newTask, ...tasks]);
-    logAudit(`Yeni Görev Atandı: ${newTaskTitle} (${newTaskAssignee} / Yedek: ${newTaskBackup})`);
+    logAudit(`Yeni Görev Atandı: ${newTaskTitle}`);
     setNewTaskTitle('');
     setNewTaskDueDate('');
     alert('Görev ve sorumlu eşleştirmesi kaydedildi!');
@@ -371,7 +369,7 @@ export default function PortalPage() {
           </button>
         </div>
 
-        {/* Tab 1: Genel Durum & Gecikme Uyarıları (Modül 5.3) */}
+        {/* Tab 1: Genel Durum */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -550,7 +548,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 4: Ekip & Rol Bazlı Yetkilendirme (Modül 5.2) */}
+        {/* Tab 4: Ekip & Rol Bazlı Yetkilendirme (Genişletilmiş Alanlar) */}
         {activeTab === 'staff' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
@@ -571,7 +569,7 @@ export default function PortalPage() {
                   <select 
                     value={newStaffRoleLevel} 
                     onChange={(e) => setNewStaffRoleLevel(e.target.value)} 
-                    className="w-full px-3 py-2.5 rounded-xl border font-bold bg-white cursor-pointer"
+                    className="w-full px-4 py-3 rounded-xl border font-bold bg-white cursor-pointer text-sm"
                   >
                     <option value="upper_management">👑 Üst Yönetim</option>
                     <option value="source_country">🌍 Kaynak Ülke Sorumlusu</option>
@@ -579,7 +577,7 @@ export default function PortalPage() {
                     <option value="field_officer">✈️ Saha Sorumlusu</option>
                   </select>
                 </div>
-                <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold transition cursor-pointer shadow-md">
+                <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-sm">
                   {t.saveStaffBtn}
                 </button>
               </form>
@@ -598,19 +596,19 @@ export default function PortalPage() {
                       <p className="text-xs text-slate-500">{staff.email}</p>
                     </div>
 
-                    <div className="pt-2 border-t flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-slate-600 flex items-center gap-1">
-                        <Settings className="w-3.5 h-3.5 text-slate-400" /> {t.permLevelText}
+                    <div className="pt-2 border-t space-y-1.5">
+                      <span className="text-[11px] font-bold text-slate-600 block">
+                        {t.permLevelText}
                       </span>
                       <select
                         value={staff.roleLevel || 'source_country'}
                         onChange={(e) => updateStaffRoleLevel(staff.id, e.target.value)}
-                        className="px-2.5 py-1 rounded-lg border text-xs font-bold bg-indigo-50 text-indigo-900 cursor-pointer outline-none"
+                        className="w-full px-3 py-2 rounded-xl border text-xs font-bold bg-indigo-50 text-indigo-900 cursor-pointer outline-none shadow-sm"
                       >
                         <option value="upper_management">👑 Üst Yönetim</option>
-                        <option value="source_country">🌍 Kaynak Ülke</option>
-                        <option value="target_country">🏢 Hedef Ülke</option>
-                        <option value="field_officer">✈️ Saha</option>
+                        <option value="source_country">🌍 Kaynak Ülke Sorumlusu</option>
+                        <option value="target_country">🏢 Hedef Ülke Sorumlusu</option>
+                        <option value="field_officer">✈️ Saha Sorumlusu</option>
                       </select>
                     </div>
                   </div>
@@ -620,7 +618,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 5: Görevler & Yedek Sorumlu (Modül 5.1) */}
+        {/* Tab 5: Görevler */}
         {activeTab === 'tasks' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
@@ -676,7 +674,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 6: İşlem Geçmişi / Audit Log (Modül 5.3) */}
+        {/* Tab 6: Audit Log */}
         {activeTab === 'audit' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
