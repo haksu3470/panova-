@@ -120,6 +120,26 @@ export interface Translation {
   openSupportCard: string;
   portalSummaryTitle: string;
   portalSummaryDesc: string;
+  // --- EKİP & GÖREVLER ÇOKLU DİL ANAHTARLARI ---
+  staffTab: string;
+  tasksTab: string;
+  addStaffTitle: string;
+  staffNameLabel: string;
+  staffEmailLabel: string;
+  staffRoleLabel: string;
+  staffPermLabel: string;
+  saveStaffBtn: string;
+  staffMatrixTitle: string;
+  staffMatrixSub: string;
+  permLevelText: string;
+  newTaskTitleHeader: string;
+  taskDescLabel: string;
+  taskAssigneeLabel: string;
+  taskDueDateLabel: string;
+  saveTaskBtn: string;
+  taskListHeader: string;
+  statusPending: string;
+  statusCompleted: string;
 }
 
 export const languages = [
@@ -249,6 +269,25 @@ export const translations: Record<Language, Translation> = {
     openSupportCard: 'AÇIK SORUNLAR / DESTEK',
     portalSummaryTitle: 'PANOVA Operasyon Özeti',
     portalSummaryDesc: 'Sistem üzerinden aday başvurularını yönetebilir, işverenlerin personel taleplerine aday eşleştirmesi yapabilir, vize ve seyahat süreçlerini takip edebilirsiniz.',
+    staffTab: 'Ekip & Yetkiler',
+    tasksTab: 'Görevler',
+    addStaffTitle: 'Yeni Ekip Üyesi ve Yetki Ata',
+    staffNameLabel: 'Ad Soyad *',
+    staffEmailLabel: 'E-Posta (Giriş için) *',
+    staffRoleLabel: 'Rol / Unvan Açıklaması',
+    staffPermLabel: 'Sistem Yetki Seviyesi *',
+    saveStaffBtn: 'Ekip Üyesini ve Yetkiyi Kaydet',
+    staffMatrixTitle: 'PANOVA Operasyon Kadrosu ve Yetki Matrisi',
+    staffMatrixSub: 'Kartlar üzerinden yetkileri anlık değiştirebilirsiniz',
+    permLevelText: 'Yetki Seviyesi:',
+    newTaskTitleHeader: 'Yeni Görev Ata',
+    taskDescLabel: 'Görev Açıklaması *',
+    taskAssigneeLabel: 'Sorumlu Kişi',
+    taskDueDateLabel: 'Son Tarih',
+    saveTaskBtn: 'Görevi Kaydet ve Ata',
+    taskListHeader: 'Ekip Görevleri ve Yapılacaklar Listesi',
+    statusPending: 'Bekliyor',
+    statusCompleted: 'Tamamlandı',
   },
   en: {
     returnHome: 'Return to Home',
@@ -369,6 +408,25 @@ export const translations: Record<Language, Translation> = {
     openSupportCard: 'OPEN ISSUES / SUPPORT',
     portalSummaryTitle: 'PANOVA Operations Summary',
     portalSummaryDesc: 'You can manage candidate applications through the system, match candidates to employer workforce requests, and track visa and travel processes.',
+    staffTab: 'Staff & Permissions',
+    tasksTab: 'Tasks',
+    addStaffTitle: 'Assign New Staff & Permission',
+    staffNameLabel: 'Full Name *',
+    staffEmailLabel: 'Email (For Login) *',
+    staffRoleLabel: 'Role / Title Description',
+    staffPermLabel: 'System Permission Level *',
+    saveStaffBtn: 'Save Staff Member & Permission',
+    staffMatrixTitle: 'PANOVA Operations Staff & Permission Matrix',
+    staffMatrixSub: 'You can instantly update permissions via cards',
+    permLevelText: 'Permission Level:',
+    newTaskTitleHeader: 'Assign New Task',
+    taskDescLabel: 'Task Description *',
+    taskAssigneeLabel: 'Assignee',
+    taskDueDateLabel: 'Due Date',
+    saveTaskBtn: 'Save & Assign Task',
+    taskListHeader: 'Team Tasks & To-Do List',
+    statusPending: 'Pending',
+    statusCompleted: 'Completed',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -489,6 +547,25 @@ export const translations: Record<Language, Translation> = {
     openSupportCard: 'PROBLEMET / MBËSHTETJA',
     portalSummaryTitle: 'Përmbledhje e Operacioneve PANOVA',
     portalSummaryDesc: 'Ju mund të menaxhoni aplikimet e kandidatëve, të përputhni kandidatët me kërkesat e punëdhënësve dhe të ndiqni vizat.',
+    staffTab: 'Stafi & Lejet',
+    tasksTab: 'Detyrat',
+    addStaffTitle: 'Cakto Staf të Ri & Leje',
+    staffNameLabel: 'Emri Mbiemri *',
+    staffEmailLabel: 'Email (Për hyrje) *',
+    staffRoleLabel: 'Roli / Përshkrimi i Titullit',
+    staffPermLabel: 'Niveli i Lejes së Sistemit *',
+    saveStaffBtn: 'Ruaj Anëtarin e Stafit',
+    staffMatrixTitle: 'Matrica e Stafit dhe Lejeve PANOVA',
+    staffMatrixSub: 'Mund të përditësoni lejet çastësisht përmes kartave',
+    permLevelText: 'Niveli i Lejes:',
+    newTaskTitleHeader: 'Cakto Detyrë të Re',
+    taskDescLabel: 'Përshkrimi i Detyrës *',
+    taskAssigneeLabel: 'Përgjegjësi',
+    taskDueDateLabel: 'Data e Afatit',
+    saveTaskBtn: 'Ruaj dhe Cakto Detyrën',
+    taskListHeader: 'Detyrat e Ekipit & Lista e Veprimeve',
+    statusPending: 'Në pritje',
+    statusCompleted: 'Përfunduar',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -609,5 +686,24 @@ export const translations: Record<Language, Translation> = {
     openSupportCard: 'المشكلات / الدعم المفتوح',
     portalSummaryTitle: 'ملخص عمليات بانوفا',
     portalSummaryDesc: 'يمكنك إدارة طلبات المرشحين ومطابقة الكفاءات مع طلبات أصحاب العمل ومتابعة التأشيرات.',
+    staffTab: 'الموظفون والصلاحيات',
+    tasksTab: 'المهام',
+    addStaffTitle: 'تعيين موظف وصلاحية جديدة',
+    staffNameLabel: 'الاسم الكامل *',
+    staffEmailLabel: 'البريد الإلكتروني (لتسجيل الدخول) *',
+    staffRoleLabel: 'الدور / المسمى الوظيفي',
+    staffPermLabel: 'مستوى صلاحية النظام *',
+    saveStaffBtn: 'حفظ الموظف والصلاحية',
+    staffMatrixTitle: 'طاقم العمل في بانوفا ومصفوفة الصلاحيات',
+    staffMatrixSub: 'يمكنك تحديث الصلاحيات فوراً من خلال البطاقات',
+    permLevelText: 'مستوى الصلاحية:',
+    newTaskTitleHeader: 'تعيين مهمة جديدة',
+    taskDescLabel: 'وصف المهمة *',
+    taskAssigneeLabel: 'المسؤول',
+    taskDueDateLabel: 'تاريخ الاستحقاق',
+    saveTaskBtn: 'حفظ وتعيين المهمة',
+    taskListHeader: 'مهام الفريق وقائمة المهام',
+    statusPending: 'قيد الانتظار',
+    statusCompleted: 'مكتمل',
   },
 };

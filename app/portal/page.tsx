@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   Lock, ShieldCheck, Search, Filter, Languages, ArrowLeft, Award, Video, 
-  CheckCircle, Clock, Star, Calendar, Building2, Users, FileText, Plane, AlertCircle, Briefcase, UserCheck, User, CheckSquare, Plus, UserPlus 
+  CheckCircle, Clock, Star, Calendar, Building2, Users, FileText, Plane, AlertCircle, Briefcase, UserCheck, User, CheckSquare, Plus, UserPlus, Settings 
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
@@ -78,7 +78,6 @@ export default function PortalPage() {
   const [bulkStatus, setBulkStatus] = useState('reviewing');
   const [bulkAssignee, setBulkAssignee] = useState('Hüseyin Aksu');
 
-  // Yeni ekip üyesi form state'leri
   const [newStaffName, setNewStaffName] = useState('');
   const [newStaffEmail, setNewStaffEmail] = useState('');
   const [newStaffRole, setNewStaffRole] = useState('Operasyon Uzmanı');
@@ -162,7 +161,10 @@ export default function PortalPage() {
     if (!error) setCandidates(candidates.map(c => c.id === id ? { ...c, is_verified: !currentVerified } : c));
   };
 
-  // Yeni Ekip Üyesi ve Yetki Ekleme
+  const updateStaffPermission = (staffId: string, newPermission: string) => {
+    setStaffMembers(staffMembers.map(s => s.id === staffId ? { ...s, permissionLevel: newPermission } : s));
+  };
+
   const handleAddStaff = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newStaffName.trim() || !newStaffEmail.trim()) return;
@@ -283,14 +285,14 @@ export default function PortalPage() {
 
           <form onSubmit={handleLogin} className="space-y-4 text-left rtl:text-right">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Kullanıcı Adı veya E-Posta</label>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.usernameLabel}</label>
               <input
                 type="text"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
-                placeholder="admin veya huseyin@panova.com"
+                placeholder="admin"
               />
             </div>
             <div>
@@ -311,10 +313,6 @@ export default function PortalPage() {
               {t.signInBtn}
             </button>
           </form>
-          <div className="mt-4 text-xs text-slate-600 bg-slate-100 p-2.5 rounded-xl">
-            Demo Admin: <strong>admin</strong> / <strong>panova2026</strong> <br />
-            Personel E-Posta ile de giriş yapabilirsiniz.
-          </div>
           <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-sm text-slate-500 hover:underline">
             <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
           </Link>
@@ -375,34 +373,34 @@ export default function PortalPage() {
         {/* Tab Navigation */}
         <div className="flex flex-wrap gap-2 border-b pb-2 overflow-x-auto text-xs font-bold">
           <button onClick={() => setActiveTab('overview')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📊 Genel Durum
+            📊 {t.overviewTab}
           </button>
           <button onClick={() => setActiveTab('candidates')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            👥 Aday Havuzu ({candidates.length})
+            👥 {t.candidatesTab} ({candidates.length})
           </button>
           <button onClick={() => setActiveTab('requests')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'requests' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📁 Personel Talepleri ({jobRequests.length})
+            📁 {t.requestsTab} ({jobRequests.length})
           </button>
           <button onClick={() => setActiveTab('staff')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'staff' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            🛡️ Ekip & Yetkiler ({staffMembers.length})
+            🛡️ {t.staffTab} ({staffMembers.length})
           </button>
           <button onClick={() => setActiveTab('tasks')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'tasks' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            ✅ Görevler ({tasks.filter(t => t.status === 'pending').length})
+            ✅ {t.tasksTab} ({tasks.filter(t => t.status === 'pending').length})
           </button>
           <button onClick={() => setActiveTab('employers')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'employers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            🏢 İşverenler ({employers.length})
+            🏢 {t.employersTab} ({employers.length})
           </button>
           <button onClick={() => setActiveTab('matching')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'matching' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            🔗 Eşleştirmeler
+            🔗 {t.matchingTab}
           </button>
           <button onClick={() => setActiveTab('travel')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            ✈️ Seyahatler & Vize
+            ✈️ {t.travelTab}
           </button>
           <button onClick={() => setActiveTab('employees')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            🛡️ Aktif Çalışanlar
+            🛡️ {t.employeesTab}
           </button>
           <button onClick={() => setActiveTab('support')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            💬 Sorunlar ({supportTickets.length})
+            💬 {t.supportTab} ({supportTickets.length})
           </button>
         </div>
 
@@ -412,7 +410,7 @@ export default function PortalPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-slate-500 text-xs font-bold uppercase">Toplam Aday</div>
+                  <div className="text-slate-500 text-xs font-bold uppercase">{t.totalCandidatesCard}</div>
                   <div className="text-3xl font-extrabold text-slate-900 mt-1">{candidates.length}</div>
                 </div>
                 <Users className="w-10 h-10 text-emerald-600 bg-emerald-50 p-2 rounded-xl" />
@@ -420,7 +418,7 @@ export default function PortalPage() {
 
               <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-slate-500 text-xs font-bold uppercase">Aktif İşverenler</div>
+                  <div className="text-slate-500 text-xs font-bold uppercase">{t.activeEmployersCard}</div>
                   <div className="text-3xl font-extrabold text-slate-900 mt-1">{employers.length}</div>
                 </div>
                 <Building2 className="w-10 h-10 text-blue-600 bg-blue-50 p-2 rounded-xl" />
@@ -428,7 +426,7 @@ export default function PortalPage() {
 
               <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-slate-500 text-xs font-bold uppercase">Ekip Kadrosu</div>
+                  <div className="text-slate-500 text-xs font-bold uppercase">{t.staffTab}</div>
                   <div className="text-3xl font-extrabold text-indigo-600 mt-1">{staffMembers.length}</div>
                 </div>
                 <UserCheck className="w-10 h-10 text-indigo-600 bg-indigo-50 p-2 rounded-xl" />
@@ -436,7 +434,7 @@ export default function PortalPage() {
 
               <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-slate-500 text-xs font-bold uppercase">Açık Görevler</div>
+                  <div className="text-slate-500 text-xs font-bold uppercase">{t.openSupportCard}</div>
                   <div className="text-3xl font-extrabold text-emerald-700 mt-1">{tasks.filter(t => t.status === 'pending').length}</div>
                 </div>
                 <CheckSquare className="w-10 h-10 text-emerald-600 bg-emerald-50 p-2 rounded-xl" />
@@ -444,10 +442,8 @@ export default function PortalPage() {
             </div>
 
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-lg font-extrabold text-slate-900">PANOVA Operasyon Özeti</h3>
-              <p className="text-xs text-slate-600">
-                Sistem üzerinden aday başvurularını yönetebilir, dinamik ekip üyelerine yetki düzeyine göre dosya ataması yapabilirsiniz.
-              </p>
+              <h3 className="text-lg font-extrabold text-slate-900">{t.portalSummaryTitle}</h3>
+              <p className="text-xs text-slate-600">{t.portalSummaryDesc}</p>
             </div>
           </div>
         )}
@@ -460,44 +456,23 @@ export default function PortalPage() {
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
                 <input
                   type="text"
-                  placeholder="Aday adı, pasaport veya meslek ara..."
+                  placeholder={t.searchPlaceholder}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm outline-none text-slate-900 font-medium bg-white"
                 />
               </div>
 
-              {selectedCandidateIds.length > 0 && (
-                <div className="flex items-center gap-2 bg-emerald-50 p-2 rounded-xl border border-emerald-200">
-                  <span className="text-xs font-bold text-emerald-900 px-2">{selectedCandidateIds.length} Seçildi</span>
-                  <select value={bulkStatus} onChange={(e) => setBulkStatus(e.target.value)} className="text-xs p-1.5 rounded-lg border bg-white font-bold">
-                    <option value="pending">Beklemede</option>
-                    <option value="reviewing">İnceleniyor</option>
-                    <option value="visa_processing">Vize İşlemde</option>
-                    <option value="approved">Onaylandı</option>
-                  </select>
-                  <button onClick={handleBulkStatusUpdate} className="bg-[#2e7d32] text-white px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer hover:bg-[#1b5e20]">
-                    Toplu Durum Değiştir
-                  </button>
-                  <select value={bulkAssignee} onChange={(e) => setBulkAssignee(e.target.value)} className="text-xs p-1.5 rounded-lg border bg-white font-bold ml-2">
-                    {staffMembers.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
-                  </select>
-                  <button onClick={handleBulkAssigneeUpdate} className="bg-slate-900 text-white px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer hover:bg-slate-800">
-                    Sorumlu Ata
-                  </button>
-                </div>
-              )}
-
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
                 className="px-3 py-2.5 rounded-xl border text-sm font-semibold text-slate-700 bg-white cursor-pointer"
               >
-                <option value="all">Tüm Durumlar</option>
-                <option value="pending">Beklemede</option>
-                <option value="reviewing">İnceleniyor</option>
-                <option value="visa_processing">Vize İşlemde</option>
-                <option value="approved">Onaylandı</option>
+                <option value="all">{t.allstatuses}</option>
+                <option value="pending">{t.pendingStatus}</option>
+                <option value="reviewing">{t.reviewingStatus}</option>
+                <option value="visa_processing">{t.visaProcessingStatus}</option>
+                <option value="approved">{t.approvedStatus}</option>
               </select>
             </div>
 
@@ -509,11 +484,11 @@ export default function PortalPage() {
                       <th className="p-4 w-10">
                         <input type="checkbox" onChange={handleSelectAllCandidates} checked={selectedCandidateIds.length === filteredCandidates.length && filteredCandidates.length > 0} className="cursor-pointer" />
                       </th>
-                      <th className="p-4">Aday</th>
-                      <th className="p-4">Pasaport / Uyruk</th>
-                      <th className="p-4">Meslek / Sektör</th>
-                      <th className="p-4">🛡️ PANOVA Sorumlusu</th>
-                      <th className="p-4">Vize Durumu</th>
+                      <th className="p-4">{t.colCandidate}</th>
+                      <th className="p-4">{t.colPassportNat}</th>
+                      <th className="p-4">{t.colProfSector}</th>
+                      <th className="p-4">🛡️ Sorumlu</th>
+                      <th className="p-4">{t.colVisaStatus}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -547,7 +522,7 @@ export default function PortalPage() {
                             className="px-3 py-1.5 rounded-lg border text-xs font-bold bg-emerald-50 text-emerald-900 cursor-pointer outline-none"
                           >
                             {staffMembers.map((staff) => (
-                              <option key={staff.id} value={staff.name}>{staff.name} ({staff.role})</option>
+                              <option key={staff.id} value={staff.name}>{staff.name}</option>
                             ))}
                           </select>
                         </td>
@@ -557,10 +532,10 @@ export default function PortalPage() {
                             onChange={(e) => updateCandidateStatus(candidate.id, e.target.value)}
                             className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer bg-slate-50 text-slate-900"
                           >
-                            <option value="pending">🟡 Beklemede</option>
-                            <option value="reviewing">🔵 İnceleniyor</option>
-                            <option value="visa_processing">🟣 Vize İşlemde</option>
-                            <option value="approved">🟢 Onaylandı</option>
+                            <option value="pending">🟡 {t.pendingStatus}</option>
+                            <option value="reviewing">🔵 {t.reviewingStatus}</option>
+                            <option value="visa_processing">🟣 {t.visaProcessingStatus}</option>
+                            <option value="approved">🟢 {t.approvedStatus}</option>
                           </select>
                         </td>
                       </tr>
@@ -579,11 +554,11 @@ export default function PortalPage() {
               <table className="w-full text-left text-sm text-slate-600">
                 <thead className="bg-slate-50 text-slate-700 font-bold border-b">
                   <tr>
-                    <th className="p-4">İşveren Şirket</th>
-                    <th className="p-4">Pozisyon / Sektör</th>
-                    <th className="p-4">Kişi Sayısı</th>
-                    <th className="p-4">🛡️ Sorumlu Yetkili</th>
-                    <th className="p-4">Talep Durumu</th>
+                    <th className="p-4">{t.employerCompany}</th>
+                    <th className="p-4">{t.colPosSec}</th>
+                    <th className="p-4">{t.colHeadcount}</th>
+                    <th className="p-4">🛡️ Sorumlu</th>
+                    <th className="p-4">{t.colDemandStatus}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -591,7 +566,7 @@ export default function PortalPage() {
                     <tr key={req.id} className="hover:bg-slate-50/50">
                       <td className="p-4 font-bold text-slate-900">{req.employer_name}</td>
                       <td className="p-4 font-bold text-slate-800">{req.position_title} <span className="text-xs text-slate-400 uppercase">({req.sector})</span></td>
-                      <td className="p-4 font-bold">{req.headcount} Kişi</td>
+                      <td className="p-4 font-bold">{req.headcount} {t.personCount}</td>
                       <td className="p-4">
                         <select
                           value={req.assigned_to || staffMembers[0]?.name}
@@ -624,61 +599,75 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 4: Ekip & Yetkiler (Rol Seçimli Yeni Form) */}
+        {/* Tab 4: Ekip & Yetkiler */}
         {activeTab === 'staff' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
               <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-emerald-700" /> Yeni Ekip Üyesi ve Yetki Ata
+                <UserPlus className="w-5 h-5 text-emerald-700" /> {t.addStaffTitle}
               </h3>
               <form onSubmit={handleAddStaff} className="space-y-3 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Ad Soyad *</label>
-                  <input type="text" required value={newStaffName} onChange={(e) => setNewStaffName(e.target.value)} placeholder="Örn: Ahmet Yılmaz" className="w-full px-3 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.staffNameLabel}</label>
+                  <input type="text" required value={newStaffName} onChange={(e) => setNewStaffName(e.target.value)} placeholder="Ahmet Yılmaz" className="w-full px-3 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">E-Posta (Giriş için) *</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.staffEmailLabel}</label>
                   <input type="email" required value={newStaffEmail} onChange={(e) => setNewStaffEmail(e.target.value)} placeholder="ahmet@panova.com" className="w-full px-3 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Rol / Unvan Açıklaması</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.staffRoleLabel}</label>
                   <input type="text" value={newStaffRole} onChange={(e) => setNewStaffRole(e.target.value)} placeholder="Operasyon Uzmanı" className="w-full px-3 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Sistem Yetki Seviyesi *</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.staffPermLabel}</label>
                   <select 
                     value={newStaffPermission} 
                     onChange={(e) => setNewStaffPermission(e.target.value)} 
                     className="w-full px-3 py-2.5 rounded-xl border font-bold bg-white cursor-pointer"
                   >
-                    <option value="admin">👑 Admin (Tam Yetki)</option>
-                    <option value="manager">📋 Operasyon Sorumlusu (Genel Yönetim)</option>
-                    <option value="hr">👥 İK Uzmanı (Aday & Belge Takip)</option>
-                    <option value="field">✈️ Bölge Sorumlusu (Saha & Seyahat)</option>
+                    <option value="admin">👑 Admin</option>
+                    <option value="manager">📋 Operasyon</option>
+                    <option value="hr">👥 İK Uzmanı</option>
+                    <option value="field">✈️ Bölge</option>
                   </select>
                 </div>
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold transition cursor-pointer shadow-md">
-                  Ekip Üyesini ve Yetkiyi Kaydet
+                  {t.saveStaffBtn}
                 </button>
               </form>
             </div>
 
             <div className="lg:col-span-2 bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">PANOVA Operasyon Kadrosu ve Yetki Matrisi</h3>
+              <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center justify-between">
+                <span>{t.staffMatrixTitle}</span>
+                <span className="text-xs font-normal text-slate-500">{t.staffMatrixSub}</span>
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {staffMembers.map((staff) => (
-                  <div key={staff.id} className="p-4 bg-slate-50 rounded-2xl border flex items-center justify-between">
+                  <div key={staff.id} className="p-4 bg-slate-50 rounded-2xl border space-y-3">
                     <div>
                       <h4 className="font-extrabold text-slate-900 text-sm">{staff.name}</h4>
                       <p className="text-xs text-slate-500">{staff.email}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md text-[10px] font-bold">
-                          {staff.role}
-                        </span>
-                        <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-md text-[10px] font-bold uppercase">
-                          Yetki: {staff.permissionLevel || 'manager'}
-                        </span>
-                      </div>
+                      <span className="inline-block mt-1 px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-md text-[10px] font-bold">
+                        {staff.role}
+                      </span>
+                    </div>
+
+                    <div className="pt-2 border-t flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+                        <Settings className="w-3.5 h-3.5 text-slate-400" /> {t.permLevelText}
+                      </span>
+                      <select
+                        value={staff.permissionLevel || 'manager'}
+                        onChange={(e) => updateStaffPermission(staff.id, e.target.value)}
+                        className="px-2.5 py-1 rounded-lg border text-xs font-bold bg-indigo-50 text-indigo-900 cursor-pointer outline-none"
+                      >
+                        <option value="admin">👑 Admin</option>
+                        <option value="manager">📋 Operasyon</option>
+                        <option value="hr">👥 İK</option>
+                        <option value="field">✈️ Bölge</option>
+                      </select>
                     </div>
                   </div>
                 ))}
@@ -692,31 +681,31 @@ export default function PortalPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
               <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-                <Plus className="w-5 h-5 text-emerald-700" /> Yeni Görev Ata
+                <Plus className="w-5 h-5 text-emerald-700" /> {t.newTaskTitleHeader}
               </h3>
               <form onSubmit={handleCreateTask} className="space-y-3 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Görev Açıklaması *</label>
-                  <input type="text" required value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} placeholder="Örn: Pasaport fotokopisini doğrula" className="w-full px-3 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskDescLabel}</label>
+                  <input type="text" required value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} placeholder="Pasaport kontrolü" className="w-full px-3 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Sorumlu Kişi</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskAssigneeLabel}</label>
                   <select value={newTaskAssignee} onChange={(e) => setNewTaskAssignee(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border font-bold bg-white cursor-pointer">
                     {staffMembers.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Son Tarih</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskDueDateLabel}</label>
                   <input type="date" value={newTaskDueDate} onChange={(e) => setNewTaskDueDate(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border font-medium bg-white" />
                 </div>
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold transition cursor-pointer shadow-md">
-                  Görevi Kaydet ve Ata
+                  {t.saveTaskBtn}
                 </button>
               </form>
             </div>
 
             <div className="lg:col-span-2 bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Ekip Görevleri ve Yapılacaklar Listesi</h3>
+              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.taskListHeader}</h3>
               <div className="space-y-3">
                 {tasks.map((task) => (
                   <div key={task.id} className={`p-4 rounded-2xl border flex items-center justify-between transition ${task.status === 'completed' ? 'bg-slate-50 opacity-60' : 'bg-white shadow-sm'}`}>
@@ -724,11 +713,11 @@ export default function PortalPage() {
                       <input type="checkbox" checked={task.status === 'completed'} onChange={() => toggleTaskStatus(task.id)} className="w-5 h-5 accent-[#2e7d32] cursor-pointer" />
                       <div>
                         <h4 className={`font-bold text-sm ${task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-900'}`}>{task.title}</h4>
-                        <p className="text-xs text-slate-500 mt-0.5">Sorumlu: <strong>{task.assignee}</strong> | Son Tarih: {task.due_date}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{t.taskAssigneeLabel}: <strong>{task.assignee}</strong> | {t.taskDueDateLabel}: {task.due_date}</p>
                       </div>
                     </div>
                     <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase ${task.status === 'completed' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>
-                      {task.status === 'completed' ? 'Tamamlandı' : 'Bekliyor'}
+                      {task.status === 'completed' ? t.statusCompleted : t.statusPending}
                     </span>
                   </div>
                 ))}
@@ -737,10 +726,10 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 6: İşverenler */}
+        {/* Diğer Tablar */}
         {activeTab === 'employers' && (
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden p-6 space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Kayıtlı İşveren Firmalar</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.employersTab}</h3>
             {employers.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-xs">Kayıtlı işveren bulunmuyor.</div>
             ) : (
@@ -756,29 +745,27 @@ export default function PortalPage() {
             )}
           </div>
         )}
-
-        {/* Diğer Tablar */}
         {activeTab === 'matching' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Eşleştirmeler</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.matchingTab}</h3>
             <div className="p-8 text-center text-slate-400 text-xs border border-dashed rounded-xl">Aktif eşleştirme kuyruğu boş.</div>
           </div>
         )}
         {activeTab === 'travel' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Seyahatler & Vize</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.travelTab}</h3>
             <div className="p-8 text-center text-slate-400 text-xs border border-dashed rounded-xl">Vize onaylanan personellerin planları burada yer alır.</div>
           </div>
         )}
         {activeTab === 'employees' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Aktif Çalışanlar (30/60/90)</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.employeesTab}</h3>
             <div className="p-8 text-center text-slate-400 text-xs border border-dashed rounded-xl">Aktif çalışan bulunmuyor.</div>
           </div>
         )}
         {activeTab === 'support' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Sorunlar / Bildirimler</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.supportTab}</h3>
             {supportTickets.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-xs">Aktif sorun bildirimi bulunmuyor.</div>
             ) : (
