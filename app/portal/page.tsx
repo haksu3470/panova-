@@ -42,7 +42,7 @@ export default function PortalPage() {
 
   const [authenticated, setAuthenticated] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('panova_admin_auth'] === 'true';
+      return localStorage.getItem('panova_admin_auth') === 'true';
     }
     return false;
   });
@@ -57,12 +57,11 @@ export default function PortalPage() {
   const [employers, setEmployers] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
   
-  // Modül 5.2: Rol Bazlı Yetkilendirme
   const [staffMembers, setStaffMembers] = useState<any[]>([
-    { id: '1', name: 'Hüseyin Aksu', email: 'huseyin@panova.com', role: 'Üst Yönetim (Admin)', roleLevel: 'upper_management' },
-    { id: '2', name: 'Mehmet Çitil', email: 'mehmet@panova.com', role: 'Hedef Ülke Sorumlusu', roleLevel: 'target_country' },
-    { id: '3', name: 'Aleksandar Petrov', email: 'aleksandar@panova.com', role: 'Kaynak Ülke Sorumlusu', roleLevel: 'source_country' },
-    { id: '4', name: 'Rabia Aksu', email: 'rabia@panova.com', role: 'Saha Sorumlusu', roleLevel: 'field_officer' }
+    { id: '1', name: 'Hüseyin Aksu', email: 'huseyin@panova.com', roleLevel: 'upper_management' },
+    { id: '2', name: 'Mehmet Çitil', email: 'mehmet@panova.com', roleLevel: 'target_country' },
+    { id: '3', name: 'Aleksandar Petrov', email: 'aleksandar@panova.com', roleLevel: 'source_country' },
+    { id: '4', name: 'Rabia Aksu', email: 'rabia@panova.com', roleLevel: 'field_officer' }
   ]);
 
   const [tasks, setTasks] = useState<any[]>([
@@ -79,17 +78,10 @@ export default function PortalPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
 
-  const [selectedCandidateIds, setSelectedCandidateIds] = useState<string[]>([]);
-  const [bulkStatus, setBulkStatus] = useState('reviewing');
-  const [bulkAssignee, setBulkAssignee] = useState('Hüseyin Aksu');
-
-  // Yeni ekip üyesi form state'leri
   const [newStaffName, setNewStaffName] = useState('');
   const [newStaffEmail, setNewStaffEmail] = useState('');
-  const [newStaffRole, setNewStaffRole] = useState('Operasyon Uzmanı');
   const [newStaffRoleLevel, setNewStaffRoleLevel] = useState('source_country');
 
-  // Yeni görev form state'leri
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskAssignee, setNewTaskAssignee] = useState('Hüseyin Aksu');
   const [newTaskBackup, setNewTaskBackup] = useState('Aleksandar Petrov');
@@ -100,6 +92,16 @@ export default function PortalPage() {
   
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
   const activeLangObj = languages.find((l) => l.code === currentLang);
+
+  const getRoleText = (level: string) => {
+    switch (level) {
+      case 'upper_management': return t.roleUpperManagement;
+      case 'source_country': return t.roleSourceCountry;
+      case 'target_country': return t.roleTargetCountry;
+      case 'field_officer': return t.roleFieldOfficer;
+      default: return level;
+    }
+  };
 
   useEffect(() => {
     if (authenticated) {
@@ -186,7 +188,6 @@ export default function PortalPage() {
       id: Date.now().toString(),
       name: newStaffName,
       email: newStaffEmail,
-      role: newStaffRole,
       roleLevel: newStaffRoleLevel
     };
 
@@ -406,7 +407,6 @@ export default function PortalPage() {
               </div>
             </div>
 
-            {/* Gecikme Uyarı Kutusu */}
             <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl shadow-sm flex items-start gap-4">
               <ShieldAlert className="w-7 h-7 text-amber-600 shrink-0 mt-0.5" />
               <div className="space-y-1">
@@ -548,7 +548,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 4: Ekip & Rol Bazlı Yetkilendirme (Genişletilmiş Alanlar) */}
+        {/* Tab 4: Ekip & Rol Bazlı Yetkilendirme (Dinamik Çoklu Dil Destekli Roller) */}
         {activeTab === 'staff' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
@@ -571,10 +571,10 @@ export default function PortalPage() {
                     onChange={(e) => setNewStaffRoleLevel(e.target.value)} 
                     className="w-full px-4 py-3 rounded-xl border font-bold bg-white cursor-pointer text-sm"
                   >
-                    <option value="upper_management">👑 Üst Yönetim</option>
-                    <option value="source_country">🌍 Kaynak Ülke Sorumlusu</option>
-                    <option value="target_country">🏢 Hedef Ülke Sorumlusu</option>
-                    <option value="field_officer">✈️ Saha Sorumlusu</option>
+                    <option value="upper_management">👑 {t.roleUpperManagement}</option>
+                    <option value="source_country">🌍 {t.roleSourceCountry}</option>
+                    <option value="target_country">🏢 {t.roleTargetCountry}</option>
+                    <option value="field_officer">✈️ {t.roleFieldOfficer}</option>
                   </select>
                 </div>
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-sm">
@@ -605,10 +605,10 @@ export default function PortalPage() {
                         onChange={(e) => updateStaffRoleLevel(staff.id, e.target.value)}
                         className="w-full px-3 py-2 rounded-xl border text-xs font-bold bg-indigo-50 text-indigo-900 cursor-pointer outline-none shadow-sm"
                       >
-                        <option value="upper_management">👑 Üst Yönetim</option>
-                        <option value="source_country">🌍 Kaynak Ülke Sorumlusu</option>
-                        <option value="target_country">🏢 Hedef Ülke Sorumlusu</option>
-                        <option value="field_officer">✈️ Saha Sorumlusu</option>
+                        <option value="upper_management">👑 {t.roleUpperManagement}</option>
+                        <option value="source_country">🌍 {t.roleSourceCountry}</option>
+                        <option value="target_country">🏢 {t.roleTargetCountry}</option>
+                        <option value="field_officer">✈️ {t.roleFieldOfficer}</option>
                       </select>
                     </div>
                   </div>

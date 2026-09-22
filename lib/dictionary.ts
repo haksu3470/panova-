@@ -93,7 +93,6 @@ export interface Translation {
   successTitle?: string;
   successDesc?: string;
   notesLabel?: string;
-  // --- PORTAL TABLO VE ETİKET ANAHTARLARI ---
   certAndVideo: string;
   salaryAndShift: string;
   trackingPeriod: string;
@@ -105,7 +104,6 @@ export interface Translation {
   employerCompany: string;
   createdDate: string;
   personCount: string;
-  // --- YÖNETİM PANELİ ÇOKLU DİL ANAHTARLARI ---
   overviewTab: string;
   candidatesTab: string;
   requestsTab: string;
@@ -120,7 +118,6 @@ export interface Translation {
   openSupportCard: string;
   portalSummaryTitle: string;
   portalSummaryDesc: string;
-  // --- MODÜL 5: EKİP, GÖREV, YETKİ VE AUDIT LOG ANAHTARLARI ---
   staffTab: string;
   tasksTab: string;
   auditTab: string;
@@ -149,6 +146,11 @@ export interface Translation {
   colTime: string;
   delayAlertsTitle: string;
   delayAlertsDesc: string;
+  // --- ROL ETİKETLERİ ---
+  roleUpperManagement: string;
+  roleSourceCountry: string;
+  roleTargetCountry: string;
+  roleFieldOfficer: string;
 }
 
 export const languages = [
@@ -306,6 +308,10 @@ export const translations: Record<Language, Translation> = {
     colTime: 'Zaman Damgası',
     delayAlertsTitle: '⚠️ Gecikme ve Süre Uyarıları',
     delayAlertsDesc: 'Vize süreci 15 günü aşan veya belgesi eksik olan dosyalar için otomatik sistem uyarıları aktif.',
+    roleUpperManagement: 'Üst Yönetim',
+    roleSourceCountry: 'Kaynak Ülke Sorumlusu',
+    roleTargetCountry: 'Hedef Ülke Sorumlusu',
+    roleFieldOfficer: 'Saha Sorumlusu',
   },
   en: {
     returnHome: 'Return to Home',
@@ -454,6 +460,10 @@ export const translations: Record<Language, Translation> = {
     colTime: 'Timestamp',
     delayAlertsTitle: '⚠️ Delay & Deadline Alerts',
     delayAlertsDesc: 'Automatic system alerts are active for files whose visa process exceeds 15 days or has missing documents.',
+    roleUpperManagement: 'Upper Management',
+    roleSourceCountry: 'Source Country Officer',
+    roleTargetCountry: 'Target Country Officer',
+    roleFieldOfficer: 'Field Officer',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -602,6 +612,10 @@ export const translations: Record<Language, Translation> = {
     colTime: 'Koha',
     delayAlertsTitle: '⚠️ Njoftimet e Vonesave & Afateve',
     delayAlertsDesc: 'Alarmet automatike të sistemit janë aktive për skedarët, procesi i vizave të të cilëve kalon 15 ditë.',
+    roleUpperManagement: 'Menaxhimi i Lartë',
+    roleSourceCountry: 'Oficeri i Vendit Burim',
+    roleTargetCountry: 'Oficeri i Vendit të Synuar',
+    roleFieldOfficer: 'Oficeri i Fushës',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -750,5 +764,9 @@ export const translations: Record<Language, Translation> = {
     colTime: 'الوقت',
     delayAlertsTitle: '⚠️ تنبيهات التأخير والمواعيد النهائية',
     delayAlertsDesc: 'تنبيهات النظام التلقائية نشطة للملفات التي تتجاوز فيها عملية التأشيرة 15 يوماً.',
+    roleUpperManagement: 'الإدارة العليا',
+    roleSourceCountry: 'مسؤول بلد المصدر',
+    roleTargetCountry: 'مسؤول البلد المستهدف',
+    roleFieldOfficer: 'مسؤول الميدان',
   },
 };
