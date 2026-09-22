@@ -146,11 +146,12 @@ export interface Translation {
   colTime: string;
   delayAlertsTitle: string;
   delayAlertsDesc: string;
-  // --- ROL ETİKETLERİ ---
   roleUpperManagement: string;
   roleSourceCountry: string;
   roleTargetCountry: string;
   roleFieldOfficer: string;
+  applicationStatusAndSummary: string;
+  currentProcessStage: string;
 }
 
 export const languages = [
@@ -312,6 +313,8 @@ export const translations: Record<Language, Translation> = {
     roleSourceCountry: 'Kaynak Ülke Sorumlusu',
     roleTargetCountry: 'Hedef Ülke Sorumlusu',
     roleFieldOfficer: 'Saha Sorumlusu',
+    applicationStatusAndSummary: 'Başvuru Durumu ve Özet',
+    currentProcessStage: 'GÜNCEL SÜREÇ AŞAMASI',
   },
   en: {
     returnHome: 'Return to Home',
@@ -464,6 +467,8 @@ export const translations: Record<Language, Translation> = {
     roleSourceCountry: 'Source Country Officer',
     roleTargetCountry: 'Target Country Officer',
     roleFieldOfficer: 'Field Officer',
+    applicationStatusAndSummary: 'Application Status and Summary',
+    currentProcessStage: 'CURRENT PROCESS STAGE',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -616,6 +621,8 @@ export const translations: Record<Language, Translation> = {
     roleSourceCountry: 'Oficeri i Vendit Burim',
     roleTargetCountry: 'Oficeri i Vendit të Synuar',
     roleFieldOfficer: 'Oficeri i Fushës',
+    applicationStatusAndSummary: 'Statusi i Aplikimit dhe Përmbledhja',
+    currentProcessStage: 'FAZA AKTUALE E PROÇESIT',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -768,5 +775,7 @@ export const translations: Record<Language, Translation> = {
     roleSourceCountry: 'مسؤول بلد المصدر',
     roleTargetCountry: 'مسؤول البلد المستهدف',
     roleFieldOfficer: 'مسؤول الميدان',
+    applicationStatusAndSummary: 'حالة الطلب وملخصه',
+    currentProcessStage: 'مرحلة العملية الحالية',
   },
 };

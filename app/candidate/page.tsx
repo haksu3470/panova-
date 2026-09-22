@@ -37,13 +37,11 @@ export default function CandidateDashboard() {
   }, []);
 
   const [authenticated, setAuthenticated] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login'); // Giriş mi Kayıt mı?
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   
-  // Login State'leri
   const [loginInput, setLoginInput] = useState('');
   const [password, setPassword] = useState('');
 
-  // Sign Up (Kayıt) State'leri
   const [regFullName, setRegFullName] = useState('');
   const [regPassport, setRegPassport] = useState('');
   const [regPhone, setRegPhone] = useState('');
@@ -62,7 +60,6 @@ export default function CandidateDashboard() {
   const [newVideoUrl, setNewVideoUrl] = useState('');
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
-  // Bildirim, Destek ve İş Teklifleri State'leri
   const [notifications, setNotifications] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
   const [jobOffers, setJobOffers] = useState<any[]>([]);
@@ -191,7 +188,7 @@ export default function CandidateDashboard() {
 
     if (!error) {
       setJobOffers(jobOffers.map(o => o.id === offerId ? { ...o, status: newStatus } : o));
-      alert(newStatus === 'accepted' ? 'İş teklifini başarıyla kabul ettiniz!' : 'İş teklifi reddedildi.');
+      alert(currentLang === 'tr' ? 'İş teklifini başarıyla kabul ettiniz!' : 'Job offer status updated.');
     } else {
       alert('Hata: ' + error.message);
     }
@@ -338,8 +335,6 @@ export default function CandidateDashboard() {
         </div>
 
         <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full">
-          
-          {/* Sekme Seçici: Giriş Yap / Kayıt Ol */}
           <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border">
             <button
               type="button"
@@ -348,7 +343,7 @@ export default function CandidateDashboard() {
                 authMode === 'login' ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <LogIn className="w-3.5 h-3.5" /> {currentLang === 'tr' ? 'Giriş Yap' : 'Sign In'}
+              <LogIn className="w-3.5 h-3.5" /> {currentLang === 'tr' ? 'Giriş Yap' : currentLang === 'sq' ? 'Hyni' : currentLang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
             </button>
             <button
               type="button"
@@ -357,7 +352,7 @@ export default function CandidateDashboard() {
                 authMode === 'signup' ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <UserPlus className="w-3.5 h-3.5" /> {currentLang === 'tr' ? 'Hemen Başvur / Kayıt Ol' : 'Sign Up'}
+              <UserPlus className="w-3.5 h-3.5" /> {currentLang === 'tr' ? 'Kayıt Ol' : currentLang === 'sq' ? 'Regjistrohu' : currentLang === 'ar' ? 'التسجيل' : 'Sign Up'}
             </button>
           </div>
 
@@ -366,33 +361,29 @@ export default function CandidateDashboard() {
               {authMode === 'login' ? <Lock className="w-6 h-6" /> : <UserPlus className="w-6 h-6" />}
             </div>
             <h1 className="text-xl font-extrabold text-slate-900">
-              {authMode === 'login' ? (currentLang === 'tr' ? 'Aday Portalı Girişi' : 'Candidate Portal') : (currentLang === 'tr' ? 'Yeni Aday Başvuru & Kaydı' : 'Candidate Registration')}
+              {authMode === 'login' ? t.candidatePortal : (currentLang === 'tr' ? 'Yeni Aday Başvuru & Kaydı' : currentLang === 'sq' ? 'Regjistrimi i Kandidatëve' : currentLang === 'ar' ? 'تسجيل المرشحين الجدد' : 'Candidate Registration')}
             </h1>
             <p className="text-slate-500 text-xs mt-1">
-              {authMode === 'login' ? (currentLang === 'tr' ? 'Bilgilerinizle giriş yaparak süreci takip edin.' : 'Sign in to track your status.') : (currentLang === 'tr' ? 'Formu doldurarak anında aday havuzuna katılın.' : 'Fill out the form to join our pool.')}
+              {authMode === 'login' ? t.loginDesc : (currentLang === 'tr' ? 'Formu doldurarak anında aday havuzuna katılın.' : currentLang === 'sq' ? 'Plotësoni formularin për t`u bashkuar.' : currentLang === 'ar' ? 'املأ النموذج للانضمام إلى القائمة.' : 'Fill out the form to join.')}
             </p>
           </div>
 
           {authMode === 'login' ? (
             <form onSubmit={handleCandidateLogin} className="space-y-4 text-left rtl:text-right">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                  {currentLang === 'tr' ? 'E-POSTA / TELEFON / PASAPORT *' : 'EMAIL / PHONE / PASSPORT *'}
-                </label>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.emailOrPhone}</label>
                 <input 
                   type="text" 
                   value={loginInput} 
                   onChange={(e) => setLoginInput(e.target.value)} 
-                  placeholder="Örn: omer@gmail.com" 
+                  placeholder="omer@gmail.com" 
                   required 
                   className="w-full px-4 py-2.5 rounded-xl border text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm font-medium" 
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                  {currentLang === 'tr' ? 'ŞİFRE *' : 'PASSWORD *'}
-                </label>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.password}</label>
                 <input 
                   type="password" 
                   value={password} 
@@ -403,8 +394,8 @@ export default function CandidateDashboard() {
                 />
               </div>
 
-              <div className="flex items-center justify-between text-xs text-slate-500">
-                <span>{currentLang === 'tr' ? 'Varsayılan Şifre: 123456' : 'Default Password: 123456'}</span>
+              <div className="text-xs text-slate-500">
+                {currentLang === 'tr' ? 'Varsayılan Şifre: 123456' : 'Default Password: 123456'}
               </div>
 
               <button 
@@ -412,36 +403,36 @@ export default function CandidateDashboard() {
                 disabled={loading}
                 className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white font-bold py-3 rounded-xl transition shadow-lg cursor-pointer text-sm"
               >
-                {loading ? 'Giriş yapılıyor...' : (currentLang === 'tr' ? 'Sisteme Giriş Yap' : 'Sign In')}
+                {loading ? '...' : t.loginBtn}
               </button>
             </form>
           ) : (
             <form onSubmit={handleCandidateSignup} className="space-y-3 text-left rtl:text-right text-xs">
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Ad Soyad *</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">{t.nameLabel} *</label>
                 <input 
                   type="text" 
                   required
                   value={regFullName}
                   onChange={(e) => setRegFullName(e.target.value)}
-                  placeholder="Örn: Hüseyin Aksu"
+                  placeholder="Hüseyin Aksu"
                   className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium outline-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Pasaport No *</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.passportLabel} *</label>
                   <input 
                     type="text" 
                     required
                     value={regPassport}
                     onChange={(e) => setRegPassport(e.target.value)}
-                    placeholder="Örn: U1234567"
+                    placeholder="U1234567"
                     className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium uppercase outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Telefon (GSM)</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.phone} *</label>
                   <input 
                     type="tel"
                     value={regPhone}
@@ -452,7 +443,7 @@ export default function CandidateDashboard() {
                 </div>
               </div>
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">E-Posta Adresi *</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">{t.emailLabel} *</label>
                 <input 
                   type="email" 
                   required
@@ -464,7 +455,7 @@ export default function CandidateDashboard() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Uzmanlık / Meslek</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.professionLabel}</label>
                   <input 
                     type="text"
                     value={regProfession}
@@ -474,7 +465,7 @@ export default function CandidateDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Sektör</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.sectorLabel}</label>
                   <select
                     value={regSector}
                     onChange={(e) => setRegSector(e.target.value)}
@@ -493,7 +484,7 @@ export default function CandidateDashboard() {
                 disabled={loading}
                 className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white font-bold py-3 rounded-xl transition shadow-lg cursor-pointer text-sm mt-2"
               >
-                {loading ? 'Kayıt oluşturuluyor...' : 'Hemen Kayıt Ol ve Başvur'}
+                {loading ? '...' : t.completeReg}
               </button>
             </form>
           )}
@@ -519,6 +510,16 @@ export default function CandidateDashboard() {
   const unreadNotifsCount = notifications.filter(n => !n.is_read).length;
   const pendingOffersCount = jobOffers.filter(o => o.status === 'pending').length;
 
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending': return t.pendingStatus;
+      case 'reviewing': return t.reviewingStatus;
+      case 'visa_processing': return t.visaProcessingStatus;
+      case 'approved': return t.approvedStatus;
+      default: return status;
+    }
+  };
+
   return (
     <div className={`min-h-screen bg-slate-50 p-4 sm:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto space-y-6">
@@ -535,7 +536,7 @@ export default function CandidateDashboard() {
             )}
             <div>
               <h1 className="text-xl font-extrabold text-slate-900">{candidate.full_name}</h1>
-              <span className="text-xs text-slate-500">Pasaport: {candidate.passport_number || 'N/A'} | Uzmanlık: {candidate.profession}</span>
+              <span className="text-xs text-slate-500">{t.passportLabel}: {candidate.passport_number || 'N/A'} | {t.professionLabel}: {candidate.profession}</span>
             </div>
           </div>
 
@@ -570,42 +571,42 @@ export default function CandidateDashboard() {
         </div>
 
         {/* Sekmeler */}
-        <div className="flex flex-wrap gap-2 border-b pb-2 overflow-x-auto">
-          <button onClick={() => setActiveTab('overview')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.overview}</button>
-          <button onClick={() => setActiveTab('profile')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.profile}</button>
-          <button onClick={() => setActiveTab('documents')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'documents' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.documents}</button>
-          <button onClick={() => setActiveTab('jobs')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'jobs' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.jobs}</button>
-          <button onClick={() => setActiveTab('interviews')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'interviews' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.interviews}</button>
+        <div className="flex flex-wrap gap-2 border-b pb-2 overflow-x-auto text-xs font-bold">
+          <button onClick={() => setActiveTab('overview')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>📊 {t.overview}</button>
+          <button onClick={() => setActiveTab('profile')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>👤 {t.profile}</button>
+          <button onClick={() => setActiveTab('documents')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'documents' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>📁 {t.documents}</button>
+          <button onClick={() => setActiveTab('jobs')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'jobs' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>💼 {t.jobs}</button>
+          <button onClick={() => setActiveTab('interviews')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'interviews' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>📅 {t.interviews}</button>
           
-          <button onClick={() => setActiveTab('offers')} className={`relative px-4 py-2 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 ${activeTab === 'offers' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>
-            {t.offers}
+          <button onClick={() => setActiveTab('offers')} className={`relative px-4 py-2.5 rounded-xl cursor-pointer transition flex items-center gap-1.5 ${activeTab === 'offers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            ✨ {t.offers}
             {pendingOffersCount > 0 && (
               <span className="bg-red-500 text-white rounded-full px-1.5 py-0.2 text-[10px] font-extrabold">{pendingOffersCount}</span>
             )}
           </button>
 
-          <button onClick={() => setActiveTab('process')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'process' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.process}</button>
-          <button onClick={() => setActiveTab('travel')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.travel}</button>
+          <button onClick={() => setActiveTab('process')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'process' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>🔄 {t.process}</button>
+          <button onClick={() => setActiveTab('travel')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>✈️ {t.travel}</button>
           
-          <button onClick={() => setActiveTab('notifications')} className={`relative px-4 py-2 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 ${activeTab === 'notifications' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>
+          <button onClick={() => setActiveTab('notifications')} className={`relative px-4 py-2.5 rounded-xl cursor-pointer transition flex items-center gap-1.5 ${activeTab === 'notifications' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             <Bell className="w-3.5 h-3.5" /> 
-            {currentLang === 'tr' ? 'Bildirimler' : 'Notifications'}
+            {currentLang === 'tr' ? 'Bildirimler' : currentLang === 'sq' ? 'Njoftimet' : currentLang === 'ar' ? 'الإشعارات' : 'Notifications'}
             {unreadNotifsCount > 0 && (
               <span className="bg-red-500 text-white rounded-full px-1.5 py-0.2 text-[10px] font-extrabold">{unreadNotifsCount}</span>
             )}
           </button>
 
-          <button onClick={() => setActiveTab('support')} className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeTab === 'support' ? 'bg-[#2e7d32] text-white' : 'bg-white border text-slate-700'}`}>{t.support}</button>
+          <button onClick={() => setActiveTab('support')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>💬 {t.support}</button>
         </div>
 
         {/* Tab 1: Overview */}
         {activeTab === 'overview' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Başvuru Durumu ve Özet</h3>
+            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">{t.applicationStatusAndSummary}</h3>
             <div className="p-5 bg-emerald-50 rounded-2xl border border-emerald-200 flex justify-between items-center">
               <div>
-                <div className="text-xs font-bold text-emerald-800 uppercase">Güncel Süreç Aşaması</div>
-                <div className="text-xl font-black text-emerald-900 uppercase mt-1">{candidate.status || 'Beklemede'}</div>
+                <div className="text-xs font-bold text-emerald-800 uppercase">{t.currentProcessStage}</div>
+                <div className="text-xl font-black text-emerald-900 uppercase mt-1">{getStatusText(candidate.status)}</div>
               </div>
               <CheckCircle2 className="w-10 h-10 text-[#2e7d32]" />
             </div>
@@ -615,11 +616,15 @@ export default function CandidateDashboard() {
                 <div className="flex items-center gap-3">
                   <Bell className="w-5 h-5 text-amber-600" />
                   <div>
-                    <div className="font-bold text-amber-900 text-xs">Okunmamış {unreadNotifsCount} yeni bildiriminiz var!</div>
-                    <div className="text-[11px] text-amber-700">Yönetimden gelen mesajları ve güncellemeleri görmek için tıklayın.</div>
+                    <div className="font-bold text-amber-900 text-xs">
+                      {currentLang === 'tr' ? `Okunmamış ${unreadNotifsCount} yeni bildiriminiz var!` : `You have ${unreadNotifsCount} unread notifications!`}
+                    </div>
+                    <div className="text-[11px] text-amber-700">
+                      {currentLang === 'tr' ? 'Yönetimden gelen mesajları görmek için tıklayın.' : 'Click to view messages.'}
+                    </div>
                   </div>
                 </div>
-                <span className="text-xs font-bold text-amber-800 underline">İncele →</span>
+                <span className="text-xs font-bold text-amber-800 underline">→</span>
               </div>
             )}
           </div>
@@ -629,9 +634,9 @@ export default function CandidateDashboard() {
         {activeTab === 'profile' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm max-w-3xl space-y-6">
             <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-              <User className="w-5 h-5 text-[#2e7d32]" /> Kimlik, İletişim ve Şifre Yönetimi
+              <User className="w-5 h-5 text-[#2e7d32]" /> {t.profile}
             </h3>
-            <form onSubmit={handleUpdateProfile} className="space-y-4">
+            <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs">
               <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-2xl border">
                 <div className="relative">
                   {newPhoto ? (
@@ -648,29 +653,29 @@ export default function CandidateDashboard() {
                 </div>
                 <div>
                   <h4 className="font-extrabold text-slate-800 text-sm">{candidate.full_name}</h4>
-                  <p className="text-xs text-slate-500">Pasaport: {candidate.passport_number}</p>
+                  <p className="text-xs text-slate-500">{t.passportLabel}: {candidate.passport_number}</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Telefon (GSM)</label>
-                  <input type="tel" required value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none" />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.phone}</label>
+                  <input type="tel" required value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none bg-white" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">E-posta</label>
-                  <input type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none" />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.emailLabel}</label>
+                  <input type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none bg-white" />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Çalışma Videosu Linki</label>
-                <input type="url" value={newVideoUrl} onChange={(e) => setNewVideoUrl(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none" />
+                <label className="block font-bold text-slate-700 uppercase mb-1">{t.videoUrlLabel}</label>
+                <input type="url" value={newVideoUrl} onChange={(e) => setNewVideoUrl(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none bg-white" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Şifre</label>
-                <input type="text" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none" />
+                <label className="block font-bold text-slate-700 uppercase mb-1">{t.password}</label>
+                <input type="text" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none bg-white" />
               </div>
-              <button type="submit" disabled={updatingProfile} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold text-sm transition cursor-pointer">
-                Değişiklikleri Kaydet
+              <button type="submit" disabled={updatingProfile} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold text-sm transition cursor-pointer shadow-md">
+                {t.saveBtn}
               </button>
             </form>
           </div>
@@ -687,7 +692,7 @@ export default function CandidateDashboard() {
                 <div key={doc.id || index} className="p-4 bg-slate-50 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <div className="font-extrabold text-slate-900 text-sm">{localizedTitle}</div>
-                    {doc.file_name && <div className="text-xs text-slate-500">Yüklenen: {doc.file_name}</div>}
+                    {doc.file_name && <div className="text-xs text-slate-500">{currentLang === 'tr' ? 'Yüklenen:' : 'File:'} {doc.file_name}</div>}
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={`px-3 py-1 rounded font-bold uppercase text-[10px] ${doc.file_url ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
@@ -719,13 +724,13 @@ export default function CandidateDashboard() {
         {/* Tab 4: Job Opportunities */}
         {activeTab === 'jobs' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Uygun İş Fırsatları & Çalışma Şartları</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.jobs}</h3>
             <div className="p-5 bg-slate-50 rounded-2xl border space-y-3">
               <div className="flex justify-between items-center">
                 <span className="font-extrabold text-slate-900 text-base">{candidate.profession || 'Pozisyon'}</span>
-                <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Aktif Eşleşme</span>
+                <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">{t.approvedStatus}</span>
               </div>
-              <p className="text-xs text-slate-600">Sektör: <strong>{candidate.sector}</strong> | Ücret Beklentisi: <strong className="text-emerald-700">€{candidate.expected_salary} / ay</strong></p>
+              <p className="text-xs text-slate-600">{t.sectorLabel}: <strong>{candidate.sector}</strong> | {t.expectedSalaryLabel}: <strong className="text-emerald-700">€{candidate.expected_salary} / {t.monthText}</strong></p>
             </div>
           </div>
         )}
@@ -733,9 +738,9 @@ export default function CandidateDashboard() {
         {/* Tab 5: Interviews */}
         {activeTab === 'interviews' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Planlanan İşveren Görüşmeleri</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.interviews}</h3>
             <div className="p-6 bg-slate-50 rounded-2xl border text-center text-slate-500 font-bold text-xs">
-              Aktif mülakat randevunuz bulunmamaktadır.
+              {currentLang === 'tr' ? 'Aktif mülakat randevunuz bulunmamaktadır.' : 'No active interviews scheduled.'}
             </div>
           </div>
         )}
@@ -744,13 +749,13 @@ export default function CandidateDashboard() {
         {activeTab === 'offers' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center justify-between">
-              <span>İş Teklifleri ve Sözleşme Süreci</span>
-              <span className="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-semibold">{jobOffers.length} Teklif</span>
+              <span>{t.offers}</span>
+              <span className="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-semibold">{jobOffers.length}</span>
             </h3>
 
             {jobOffers.length === 0 ? (
               <div className="p-12 text-center text-slate-400 font-bold text-xs">
-                Henüz tarafınıza iletilmiş resmi bir iş teklifi bulunmuyor.
+                {currentLang === 'tr' ? 'Henüz tarafınıza iletilmiş resmi bir iş teklifi bulunmuyor.' : 'No job offers received yet.'}
               </div>
             ) : (
               <div className="space-y-4">
@@ -758,9 +763,9 @@ export default function CandidateDashboard() {
                   <div key={offer.id} className="p-5 bg-slate-50 rounded-2xl border space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3">
                       <div>
-                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full uppercase">Resmi Teklif</span>
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full uppercase">{t.offers}</span>
                         <h4 className="font-extrabold text-slate-900 text-base mt-1">{offer.employer_name}</h4>
-                        <p className="text-xs text-slate-500">Pozisyon: <strong>{offer.position_title}</strong></p>
+                        <p className="text-xs text-slate-500">{t.professionLabel}: <strong>{offer.position_title}</strong></p>
                       </div>
                       <span className={`px-3 py-1 rounded-lg text-xs font-black uppercase ${
                         offer.status === 'accepted' ? 'bg-emerald-100 text-emerald-800' :
@@ -773,13 +778,13 @@ export default function CandidateDashboard() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                      <div>Aylık Net Ücret: <strong className="text-emerald-700 text-sm">€{offer.monthly_net_salary} / ay</strong></div>
-                      <div>İşe Başlama Tarihi: <strong className="text-slate-800">{offer.start_date || 'Belirtilmedi'}</strong></div>
+                      <div>{t.colSalary}: <strong className="text-emerald-700 text-sm">€{offer.monthly_net_salary} / {t.monthText}</strong></div>
+                      <div>{t.colTargetStart}: <strong className="text-slate-800">{offer.start_date || 'N/A'}</strong></div>
                     </div>
 
                     {offer.terms_details && (
                       <div className="text-xs text-slate-600 bg-white p-3 rounded-xl border">
-                        <strong>Sözleşme / Teklif Şartları:</strong> {offer.terms_details}
+                        <strong>Şartlar:</strong> {offer.terms_details}
                       </div>
                     )}
 
@@ -789,13 +794,13 @@ export default function CandidateDashboard() {
                           onClick={() => handleUpdateOfferStatus(offer.id, 'accepted')}
                           className="flex-1 bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-2.5 rounded-xl font-bold text-xs transition cursor-pointer shadow-sm"
                         >
-                          Teklifi Kabul Et
+                          {currentLang === 'tr' ? 'Teklifi Kabul Et' : 'Accept Offer'}
                         </button>
                         <button
                           onClick={() => handleUpdateOfferStatus(offer.id, 'rejected')}
                           className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 py-2.5 rounded-xl font-bold text-xs transition cursor-pointer"
                         >
-                          Teklifi Reddet
+                          {currentLang === 'tr' ? 'Teklifi Reddet' : 'Reject Offer'}
                         </button>
                       </div>
                     )}
@@ -809,15 +814,15 @@ export default function CandidateDashboard() {
         {/* Tab 7: Process Status */}
         {activeTab === 'process' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Resmî Süreç ve Oturum Durumu</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.process}</h3>
             <div className="space-y-3 text-xs">
               <div className="p-4 bg-emerald-50 rounded-xl border flex justify-between items-center">
-                <span className="font-bold text-emerald-900">1. Evrak Doğrulama</span>
-                <span className="font-extrabold text-emerald-700">Tamamlandı</span>
+                <span className="font-bold text-emerald-900">1. {currentLang === 'tr' ? 'Evrak Doğrulama' : 'Document Verification'}</span>
+                <span className="font-extrabold text-emerald-700">{t.approvedStatus}</span>
               </div>
               <div className="p-4 bg-slate-50 rounded-xl border flex justify-between items-center">
-                <span className="font-bold text-slate-700">2. İşveren Ön Görüşmesi</span>
-                <span className="font-bold text-amber-600">Beklemede</span>
+                <span className="font-bold text-slate-700">2. {currentLang === 'tr' ? 'İşveren Ön Görüşmesi' : 'Employer Interview'}</span>
+                <span className="font-bold text-amber-600">{t.pendingStatus}</span>
               </div>
             </div>
           </div>
@@ -828,59 +833,36 @@ export default function CandidateDashboard() {
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-5">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <PlaneTakeoff className="w-5 h-5 text-sky-600" /> Uçuş, Varış ve Konaklama Bilgilerim
+                <PlaneTakeoff className="w-5 h-5 text-sky-600" /> {t.travel}
               </h3>
-              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase ${
-                candidate.travel_status === 'ticketed' ? 'bg-sky-100 text-sky-800' :
-                candidate.travel_status === 'completed' ? 'bg-emerald-100 text-emerald-800' :
-                'bg-amber-100 text-amber-800'
-              }`}>
-                {candidate.travel_status === 'ticketed' ? '🎟️ Biletlendi' :
-                 candidate.travel_status === 'completed' ? '✅ Tamamlandı' : '✈️ Planlanıyor'}
-              </span>
             </div>
 
             {!candidate.flight_date && !candidate.pnr_code ? (
               <div className="p-10 bg-slate-50 rounded-2xl border text-center text-slate-400 font-bold text-xs">
-                Seyahat planlamanız vize onayından sonra operasyon ekibimiz tarafından hazırlanacaktır.
+                {currentLang === 'tr' ? 'Seyahat planlamanız vize onayından sonra hazırlanacaktır.' : 'Travel planning will be arranged after visa approval.'}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <div className="p-4 bg-sky-50 rounded-2xl border border-sky-200 space-y-2">
-                  <span className="text-[10px] font-bold text-sky-700 uppercase flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" /> Uçuş Tarihi & Saati
-                  </span>
-                  <div className="text-sm font-extrabold text-slate-900">{candidate.flight_date || 'Belirtilmedi'}</div>
+                  <span className="text-[10px] font-bold text-sky-700 uppercase">{currentLang === 'tr' ? 'Uçuş Tarihi' : 'Flight Date'}</span>
+                  <div className="text-sm font-extrabold text-slate-900">{candidate.flight_date || 'N/A'}</div>
                 </div>
 
                 <div className="p-4 bg-sky-50 rounded-2xl border border-sky-200 space-y-2">
-                  <span className="text-[10px] font-bold text-sky-700 uppercase flex items-center gap-1">
-                    <Plane className="w-3.5 h-3.5" /> Uçuş Kodu / Sefer No
-                  </span>
-                  <div className="text-sm font-extrabold text-slate-900">{candidate.flight_number || 'Belirtilmedi'}</div>
+                  <span className="text-[10px] font-bold text-sky-700 uppercase">{currentLang === 'tr' ? 'Uçuş Kodu' : 'Flight Number'}</span>
+                  <div className="text-sm font-extrabold text-slate-900">{candidate.flight_number || 'N/A'}</div>
                 </div>
 
                 <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5" /> Güzergah (Kalkış → Varış)
-                  </span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase">{currentLang === 'tr' ? 'Güzergah' : 'Route'}</span>
                   <div className="text-sm font-extrabold text-slate-900">
-                    {candidate.departureCity || candidate.departure_city || '---'} ➔ {candidate.arrivalCity || candidate.arrival_city || '---'}
+                    {candidate.departureCity || '---'} ➔ {candidate.arrivalCity || '---'}
                   </div>
                 </div>
 
                 <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
-                    <Ticket className="w-3.5 h-3.5" /> PNR / Rezervasyon Kodu
-                  </span>
-                  <div className="text-sm font-black tracking-widest text-emerald-700 uppercase">{candidate.pnrCode || candidate.pnr_code || 'Belirtilmedi'}</div>
-                </div>
-
-                <div className="md:col-span-2 p-4 bg-slate-50 rounded-2xl border space-y-2">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
-                    <Building className="w-3.5 h-3.5" /> Konaklama & Karşılama Detayları
-                  </span>
-                  <div className="text-xs font-medium text-slate-800 leading-relaxed">{candidate.accommodationDetails || candidate.accommodation_details || 'Henüz eklenmedi.'}</div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase">{currentLang === 'tr' ? 'PNR Kodu' : 'PNR Code'}</span>
+                  <div className="text-sm font-black tracking-widest text-emerald-700 uppercase">{candidate.pnrCode || 'N/A'}</div>
                 </div>
               </div>
             )}
@@ -891,13 +873,13 @@ export default function CandidateDashboard() {
         {activeTab === 'notifications' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center justify-between">
-              <span>Yönetim Bildirimleri & Duyurular</span>
-              <span className="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-semibold">{notifications.length} Toplam</span>
+              <span>{currentLang === 'tr' ? 'Bildirimler' : 'Notifications'}</span>
+              <span className="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-semibold">{notifications.length}</span>
             </h3>
 
             {notifications.length === 0 ? (
               <div className="p-10 text-center text-slate-400 text-xs font-bold">
-                Henüz tarafınıza iletilen bir bildirim bulunmuyor.
+                {currentLang === 'tr' ? 'Bildirim bulunmuyor.' : 'No notifications.'}
               </div>
             ) : (
               <div className="space-y-3">
@@ -910,15 +892,14 @@ export default function CandidateDashboard() {
                           {!notif.is_read && <span className="bg-[#2e7d32] text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">Yeni</span>}
                         </div>
                         <p className="text-xs text-slate-600 mt-1 leading-relaxed">{notif.message}</p>
-                        <span className="text-[10px] text-slate-400 mt-2 block">{new Date(notif.created_at).toLocaleString()}</span>
                       </div>
 
                       {!notif.is_read && (
                         <button 
                           onClick={() => markNotificationAsRead(notif.id)}
-                          className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                          className="px-3 py-1.5 bg-white border hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1 cursor-pointer whitespace-nowrap"
                         >
-                          <Check className="w-3.5 h-3.5 text-emerald-600" /> Okundu İşaretle
+                          <Check className="w-3.5 h-3.5 text-emerald-600" /> {currentLang === 'tr' ? 'Okundu İşaretle' : 'Mark Read'}
                         </button>
                       )}
                     </div>
@@ -933,43 +914,42 @@ export default function CandidateDashboard() {
         {activeTab === 'support' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Destek Talebi Oluştur</h3>
-              <form onSubmit={handleSendSupport} className="space-y-3">
+              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.support}</h3>
+              <form onSubmit={handleSendSupport} className="space-y-3 text-xs">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Konu</label>
-                  <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Örn: Evrak Güncellemesi Hakkında" className="w-full px-3 py-2.5 text-xs rounded-xl border outline-none text-slate-900 font-medium bg-white" />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{currentLang === 'tr' ? 'Konu' : 'Subject'}</label>
+                  <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Evrak Hakkında" className="w-full px-3 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Mesajınız</label>
-                  <textarea rows={4} required value={supportMsg} onChange={(e) => setSupportMsg(e.target.value)} placeholder="Sorununuzu veya talebinizi detaylı yazın..." className="w-full px-3 py-2.5 text-xs rounded-xl border outline-none text-slate-900 font-medium bg-white" />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{currentLang === 'tr' ? 'Mesajınız' : 'Message'}</label>
+                  <textarea rows={4} required value={supportMsg} onChange={(e) => setSupportMsg(e.target.value)} placeholder="Mesajınızı yazın..." className="w-full px-3 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white" />
                 </div>
                 <button type="submit" disabled={supportSending} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold text-xs transition cursor-pointer shadow-md">
-                  {supportSending ? 'Gönderiliyor...' : 'Destek Talebi Gönder'}
+                  {supportSending ? '...' : (currentLang === 'tr' ? 'Destek Talebi Gönder' : 'Submit Ticket')}
                 </button>
               </form>
             </div>
 
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Destek Taleplerim ve Geçmiş</h3>
+              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{currentLang === 'tr' ? 'Destek Geçmişi' : 'Support History'}</h3>
               {supportTickets.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 text-xs">Açık destek kaydınız bulunmuyor.</div>
+                <div className="p-8 text-center text-slate-400 text-xs">Kayıt bulunmuyor.</div>
               ) : (
                 <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
                   {supportTickets.map((ticket) => (
-                    <div key={ticket.id} className="p-4 bg-slate-50 rounded-2xl border space-y-2">
+                    <div key={ticket.id} className="p-4 bg-slate-50 rounded-2xl border space-y-2 text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900 text-xs">{ticket.subject}</span>
+                        <span className="font-bold text-slate-900">{ticket.subject}</span>
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${ticket.status === 'resolved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                          {ticket.status === 'resolved' ? 'Çözüldü' : 'İşlemde'}
+                          {ticket.status}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-600">{ticket.message}</p>
+                      <p className="text-slate-600">{ticket.message}</p>
                       {ticket.admin_reply && (
-                        <div className="mt-2 p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900">
-                          <strong>PANOVA Destek Ekibi:</strong> {ticket.admin_reply}
+                        <div className="mt-2 p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-900">
+                          <strong>PANOVA:</strong> {ticket.admin_reply}
                         </div>
                       )}
-                      <div className="text-[10px] text-slate-400">{new Date(ticket.created_at).toLocaleString()}</div>
                     </div>
                   ))}
                 </div>
@@ -980,19 +960,14 @@ export default function CandidateDashboard() {
 
       </div>
 
-      {/* Gelişmiş Önizleme Modalı */}
+      {/* Önizleme Modalı */}
       {previewDoc && (
         <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
             <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
               <h3 className="font-bold text-sm truncate max-w-md">{previewDoc.name}</h3>
               <div className="flex items-center gap-2">
-                <a 
-                  href={previewDoc.url} 
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition"
-                >
+                <a href={previewDoc.url} target="_blank" rel="noreferrer" className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition">
                   Yeni Sekmede Aç ↗
                 </a>
                 <button onClick={() => setPreviewDoc(null)} className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition cursor-pointer">
@@ -1002,9 +977,9 @@ export default function CandidateDashboard() {
             </div>
             <div className="p-4 flex-1 overflow-auto flex justify-center items-center bg-slate-100 min-h-[60vh]">
               {previewDoc.url.startsWith('data:image/') ? (
-                <img src={previewDoc.url} alt="Belge Önizleme" className="max-w-full max-h-[70vh] rounded-xl object-contain shadow-md" />
+                <img src={previewDoc.url} alt="Önizleme" className="max-w-full max-h-[70vh] rounded-xl object-contain shadow-md" />
               ) : (
-                <iframe src={previewDoc.url} className="w-full h-[70vh] rounded-xl border bg-white" title="Belge Önizleme" />
+                <iframe src={previewDoc.url} className="w-full h-[70vh] rounded-xl border bg-white" title="Önizleme" />
               )}
             </div>
           </div>
