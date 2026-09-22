@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Lock, ShieldCheck, Search, Filter, Languages, ArrowLeft, Award, Video, CheckCircle, Clock, Star, Calendar, Building2, Users } from 'lucide-react';
+import { 
+  Lock, ShieldCheck, Search, Filter, Languages, ArrowLeft, Award, Video, 
+  CheckCircle, Clock, Star, Calendar, Building2, Users, FileText, Plane, AlertCircle, Briefcase, UserCheck 
+} from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
@@ -37,7 +40,6 @@ export default function PortalPage() {
     }
   };
 
-  // Oturum kalıcılığı için localStorage kontrolü
   const [authenticated, setAuthenticated] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('panova_admin_auth') === 'true';
@@ -47,14 +49,18 @@ export default function PortalPage() {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [activeTab, setActiveTab] = useState<'candidates' | 'requests'>('candidates');
+  
+  // Sekmeler: 'overview' | 'candidates' | 'requests' | 'employers' | 'matching' | 'travel' | 'employees' | 'support'
+  const [activeTab, setActiveTab] = useState<'overview' | 'candidates' | 'requests' | 'employers' | 'matching' | 'travel' | 'employees' | 'support'>('overview');
   
   const [candidates, setCandidates] = useState<any[]>([]);
   const [jobRequests, setJobRequests] = useState<any[]>([]);
+  const [employers, setEmployers] = useState<any[]>([]);
+  const [supportTickets, setSupportTickets] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedCandidateForFollowup, setSelectedCandidateForFollowup] = useState<any | null>(null);
 
   const t = translations[currentLang] || translations.en;
   const isRtl = currentLang === 'ar';
@@ -62,13 +68,32 @@ export default function PortalPage() {
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
   const activeLangObj = languages.find((l) => l.code === currentLang);
 
-  // Giriş yapıldığında verileri otomatik çek
   useEffect(() => {
     if (authenticated) {
-      fetchCandidates();
-      fetchJobRequests();
+      fetchAllData();
     }
   }, [authenticated]);
+
+  const fetchAllData = async () => {
+    setLoading(true);
+    // 1. Adaylar
+    const { data: candData } = await supabase.from('job_candidates').select('*').order('created_at', { ascending: false });
+    if (candData) setCandidates(candData);
+
+    // 2. Talepler
+    const { data: reqData } = await supabase.from('job_requests').select('*').order('created_at', { ascending: false });
+    if (reqData) setJobRequests(reqData);
+
+    // 3. İşverenler
+    const { data: empData } = await supabase.from('employers').select('*').order('created_at', { ascending: false });
+    if (empData) setEmployers(empData);
+
+    // 4. Destek / Sorun Bildirimleri
+    const { data: ticketData } = await supabase.from('candidate_support_tickets').select('*').order('created_at', { ascending: false });
+    if (ticketData) setSupportTickets(ticketData);
+
+    setLoading(false);
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,10 +102,9 @@ export default function PortalPage() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('panova_admin_auth', 'true');
       }
-      fetchCandidates();
-      fetchJobRequests();
+      fetchAllData();
     } else {
-      alert('Invalid username or password!');
+      alert('Invalid username or password! (admin / panova2026)');
     }
   };
 
@@ -91,56 +115,22 @@ export default function PortalPage() {
     }
   };
 
-  const fetchCandidates = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('job_candidates')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (!error && data) setCandidates(data);
-    setLoading(false);
-  };
-
-  const fetchJobRequests = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('job_requests')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (!error && data) setJobRequests(data);
-    setLoading(false);
-  };
-
   const updateCandidateStatus = async (id: string, newStatus: string) => {
-    const { error } = await supabase
-      .from('job_candidates')
-      .update({ status: newStatus })
-      .eq('id', id);
-
-    if (error) {
-      console.error('Candidate status update error:', error.message);
-      alert('Durum güncellenemedi: ' + error.message);
-      return;
+    const { error } = await supabase.from('job_candidates').update({ status: newStatus }).eq('id', id);
+    if (!error) {
+      setCandidates(candidates.map(c => c.id === id ? { ...c, status: newStatus } : c));
+    } else {
+      alert('Hata: ' + error.message);
     }
-
-    setCandidates(candidates.map(c => c.id === id ? { ...c, status: newStatus } : c));
   };
 
   const updateRequestStatus = async (id: string, newStatus: string) => {
-    const { error } = await supabase
-      .from('job_requests')
-      .update({ status: newStatus })
-      .eq('id', id);
-
-    if (error) {
-      console.error('Request status update error:', error.message);
-      alert('Talep durumu güncellenemedi: ' + error.message);
-      return;
+    const { error } = await supabase.from('job_requests').update({ status: newStatus }).eq('id', id);
+    if (!error) {
+      setJobRequests(jobRequests.map(r => r.id === id ? { ...r, status: newStatus } : r));
+    } else {
+      alert('Hata: ' + error.message);
     }
-
-    setJobRequests(jobRequests.map(r => r.id === id ? { ...r, status: newStatus } : r));
   };
 
   const toggleVerification = async (id: string, currentVerified: boolean) => {
@@ -220,6 +210,9 @@ export default function PortalPage() {
               {t.signInBtn}
             </button>
           </form>
+          <div className="mt-4 text-xs text-slate-600 bg-slate-100 p-2 rounded-xl">
+            Demo Login: <strong>admin</strong> / <strong>panova2026</strong>
+          </div>
           <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-sm text-slate-500 hover:underline">
             <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
           </Link>
@@ -230,9 +223,10 @@ export default function PortalPage() {
 
   return (
     <div className={`min-h-screen bg-slate-50 p-4 sm:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto space-y-6">
+        
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="PANOVA" className="h-10 w-auto object-contain" />
             <div>
@@ -244,6 +238,13 @@ export default function PortalPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition border"
+            >
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
+            </Link>
+
             <div className="relative flex items-center bg-slate-100 rounded-lg px-2.5 py-1.5 border border-slate-200">
               <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
               <select
@@ -262,7 +263,7 @@ export default function PortalPage() {
 
             <button
               onClick={handleLogout}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition cursor-pointer"
+              className="bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
             >
               {t.logoutBtn}
             </button>
@@ -270,86 +271,116 @@ export default function PortalPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-3 mb-6">
-          <button
-            onClick={() => { setActiveTab('candidates'); fetchCandidates(); }}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition cursor-pointer ${
-              activeTab === 'candidates'
-                ? 'bg-[#2e7d32] text-white shadow-md'
-                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-            }`}
-          >
-            <Users className="w-4 h-4" /> {currentLang === 'tr' ? 'Aday Havuzu' : 'Candidate Pool'} ({candidates.length})
+        <div className="flex flex-wrap gap-2 border-b pb-2 overflow-x-auto text-xs font-bold">
+          <button onClick={() => setActiveTab('overview')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            📊 Genel Durum
           </button>
-
-          <button
-            onClick={() => { setActiveTab('requests'); fetchJobRequests(); }}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition cursor-pointer ${
-              activeTab === 'requests'
-                ? 'bg-[#2e7d32] text-white shadow-md'
-                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-            }`}
-          >
-            <Building2 className="w-4 h-4" /> {t.dossierTitle} ({jobRequests.length})
+          <button onClick={() => setActiveTab('candidates')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            👥 Aday Havuzu ({candidates.length})
+          </button>
+          <button onClick={() => setActiveTab('requests')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'requests' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            📁 Personel Talepleri ({jobRequests.length})
+          </button>
+          <button onClick={() => setActiveTab('employers')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'employers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            🏢 İşverenler ({employers.length})
+          </button>
+          <button onClick={() => setActiveTab('matching')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'matching' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            🔗 Eşleştirmeler
+          </button>
+          <button onClick={() => setActiveTab('travel')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            ✈️ Seyahatler & Vize
+          </button>
+          <button onClick={() => setActiveTab('employees')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            🛡️ Aktif Çalışanlar (30/60/90)
+          </button>
+          <button onClick={() => setActiveTab('support')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            💬 Sorunlar / Bildirimler ({supportTickets.length})
           </button>
         </div>
 
-        {/* Search & Filter Bar */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-6 flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 rtl:right-3 rtl:left-auto top-3.5" />
-            <input
-              type="text"
-              placeholder={activeTab === 'candidates' ? t.searchPlaceholder : (currentLang === 'tr' ? "İşveren, pozisyon veya sektör ara..." : "Search employer, position or sector...")}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 rtl:pr-9 rtl:pl-4 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-[#2e7d32] text-slate-900 font-medium"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-slate-500" />
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-3 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 outline-none cursor-pointer bg-white"
-            >
-              <option value="all">{t.allstatuses}</option>
-              {activeTab === 'candidates' ? (
-                <>
-                  <option value="pending">{t.pendingStatus}</option>
-                  <option value="reviewing">{t.reviewingStatus}</option>
-                  <option value="visa_processing">{t.visaProcessingStatus}</option>
-                  <option value="approved">{t.approvedStatus}</option>
-                </>
-              ) : (
-                <>
-                  <option value="new_request">{currentLang === 'tr' ? 'Yeni Talep' : 'New Request'}</option>
-                  <option value="searching_candidates">{currentLang === 'tr' ? 'Aday Aranıyor' : 'Searching Candidates'}</option>
-                  <option value="candidates_submitted">{currentLang === 'tr' ? 'Adaylar Sunuldu' : 'Candidates Submitted'}</option>
-                  <option value="completed">{currentLang === 'tr' ? 'Tamamlandı' : 'Completed'}</option>
-                </>
-              )}
-            </select>
-          </div>
-        </div>
+        {/* Tab 1: Genel Durum (Overview) */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
+                <div>
+                  <div className="text-slate-500 text-xs font-bold uppercase">Toplam Aday</div>
+                  <div className="text-3xl font-extrabold text-slate-900 mt-1">{candidates.length}</div>
+                </div>
+                <Users className="w-10 h-10 text-emerald-600 bg-emerald-50 p-2 rounded-xl" />
+              </div>
 
-        {/* Candidates Table */}
+              <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
+                <div>
+                  <div className="text-slate-500 text-xs font-bold uppercase">Aktif İşverenler</div>
+                  <div className="text-3xl font-extrabold text-slate-900 mt-1">{employers.length}</div>
+                </div>
+                <Building2 className="w-10 h-10 text-blue-600 bg-blue-50 p-2 rounded-xl" />
+              </div>
+
+              <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
+                <div>
+                  <div className="text-slate-500 text-xs font-bold uppercase">Açık Talepler</div>
+                  <div className="text-3xl font-extrabold text-slate-900 mt-1">{jobRequests.filter(r => r.status !== 'completed').length}</div>
+                </div>
+                <FileText className="w-10 h-10 text-amber-600 bg-amber-50 p-2 rounded-xl" />
+              </div>
+
+              <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
+                <div>
+                  <div className="text-slate-500 text-xs font-bold uppercase">Açık Sorunlar / Destek</div>
+                  <div className="text-3xl font-extrabold text-red-600 mt-1">{supportTickets.filter(t => t.status === 'open').length}</div>
+                </div>
+                <AlertCircle className="w-10 h-10 text-red-600 bg-red-50 p-2 rounded-xl" />
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+              <h3 className="text-lg font-extrabold text-slate-900">PANOVA Operasyon Özeti</h3>
+              <p className="text-xs text-slate-600">
+                Sistem üzerinden aday başvurularını yönetebilir, işverenlerin personel taleplerine aday eşleştirmesi yapabilir, vize ve seyahat süreçlerini takip edebilirsiniz.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 2: Aday Havuzu */}
         {activeTab === 'candidates' && (
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            {loading ? (
-              <div className="p-12 text-center text-slate-500">{t.submitting}</div>
-            ) : (
+          <div className="space-y-4">
+            <div className="bg-white p-4 rounded-2xl border shadow-sm flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
+                <input
+                  type="text"
+                  placeholder="Aday adı, pasaport veya meslek ara..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm outline-none text-slate-900 font-medium bg-white"
+                />
+              </div>
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="px-3 py-2.5 rounded-xl border text-sm font-semibold text-slate-700 bg-white cursor-pointer"
+              >
+                <option value="all">Tüm Durumlar</option>
+                <option value="pending">Beklemede</option>
+                <option value="reviewing">İnceleniyor</option>
+                <option value="visa_processing">Vize İşlemde</option>
+                <option value="approved">Onaylandı</option>
+              </select>
+            </div>
+
+            <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left rtl:text-right text-sm text-slate-600">
-                  <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-100">
+                <table className="w-full text-left text-sm text-slate-600">
+                  <thead className="bg-slate-50 text-slate-700 font-bold border-b">
                     <tr>
-                      <th className="p-4">{t.colCandidate}</th>
-                      <th className="p-4">{t.colPassportNat}</th>
-                      <th className="p-4">{t.colProfSector}</th>
-                      <th className="p-4">{t.certAndVideo}</th>
-                      <th className="p-4">{t.salaryAndShift}</th>
-                      <th className="p-4">{t.colVisaStatus}</th>
-                      <th className="p-4">{t.trackingPeriod}</th>
+                      <th className="p-4">Aday</th>
+                      <th className="p-4">Pasaport / Uyruk</th>
+                      <th className="p-4">Meslek / Sektör</th>
+                      <th className="p-4">Sertifika & Video</th>
+                      <th className="p-4">Vize Durumu</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -357,16 +388,10 @@ export default function PortalPage() {
                       <tr key={candidate.id} className="hover:bg-slate-50/50">
                         <td className="p-4 font-bold text-slate-900">
                           <div className="flex items-center gap-2">
-                            <Link 
-                              href={`/portal/candidates/${candidate.id}`} 
-                              className="hover:text-[#2e7d32] hover:underline transition"
-                            >
+                            <Link href={`/portal/candidates/${candidate.id}`} className="hover:text-[#2e7d32] hover:underline">
                               {candidate.full_name}
                             </Link>
-                            <button
-                              onClick={() => toggleVerification(candidate.id, candidate.is_verified)}
-                              className={`p-1 rounded-full transition cursor-pointer ${candidate.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400 hover:text-emerald-600'}`}
-                            >
+                            <button onClick={() => toggleVerification(candidate.id, candidate.is_verified)} className={`p-1 rounded-full cursor-pointer ${candidate.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>
                               <CheckCircle className="w-4 h-4" />
                             </button>
                           </div>
@@ -379,119 +404,145 @@ export default function PortalPage() {
                           <span className="font-semibold text-slate-800">{candidate.profession}</span>
                           <div className="text-xs text-slate-400 uppercase">{candidate.sector}</div>
                         </td>
-                        <td className="p-4">
-                          <div className="text-xs space-y-1">
-                            {candidate.certificate_no ? (
-                              <div className="flex items-center gap-1 text-slate-700 font-medium">
-                                <Award className="w-3.5 h-3.5 text-amber-500" />
-                                {candidate.certificate_no} ({candidate.issuing_body || 'N/A'})
-                              </div>
-                            ) : (
-                              <span className="text-slate-400">{t.noCertificate}</span>
-                            )}
-                            {candidate.video_url && (
-                              <a
-                                href={candidate.video_url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-1 text-emerald-700 hover:underline font-semibold"
-                              >
-                                <Video className="w-3.5 h-3.5" /> {t.watchVideo}
-                              </a>
-                            )}
-                          </div>
-                        </td>
-                        <td className="p-4 text-xs font-semibold">
-                          <div>{candidate.expected_salary ? `€${candidate.expected_salary} / ${t.monthText}` : 'N/A'}</div>
-                          <div className="text-slate-400 font-normal">
-                            {candidate.shift_suitable ? t.shiftSuitableText : t.standardShiftText}
-                          </div>
+                        <td className="p-4 text-xs">
+                          {candidate.certificate_no ? <span className="text-amber-700 font-bold">Sertifikalı</span> : 'Yok'} | {candidate.video_url ? <a href={candidate.video_url} target="_blank" rel="noreferrer" className="text-emerald-700 underline">Video</a> : 'Video Yok'}
                         </td>
                         <td className="p-4">
                           <select
                             value={candidate.status || 'pending'}
                             onChange={(e) => updateCandidateStatus(candidate.id, e.target.value)}
-                            className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer outline-none bg-slate-50 text-slate-900"
+                            className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer bg-slate-50 text-slate-900"
                           >
-                            <option value="pending">🟡 {t.pendingStatus}</option>
-                            <option value="reviewing">🔵 {t.reviewingStatus}</option>
-                            <option value="visa_processing">🟣 {t.visaProcessingStatus}</option>
-                            <option value="approved">🟢 {t.approvedStatus}</option>
+                            <option value="pending">🟡 Beklemede</option>
+                            <option value="reviewing">🔵 İnceleniyor</option>
+                            <option value="visa_processing">🟣 Vize İşlemde</option>
+                            <option value="approved">🟢 Onaylandı</option>
                           </select>
-                        </td>
-                        <td className="p-4">
-                          <button
-                            onClick={() => setSelectedCandidateForFollowup(candidate)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-[#2e7d32] border border-emerald-200 rounded-lg text-xs font-bold hover:bg-emerald-100 transition cursor-pointer"
-                          >
-                            <Calendar className="w-3.5 h-3.5" /> {t.trackingPeriod}
-                          </button>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Personel Talepleri */}
+        {activeTab === 'requests' && (
+          <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-600">
+                <thead className="bg-slate-50 text-slate-700 font-bold border-b">
+                  <tr>
+                    <th className="p-4">İşveren Şirket</th>
+                    <th className="p-4">Pozisyon / Sektör</th>
+                    <th className="p-4">Kişi Sayısı</th>
+                    <th className="p-4">Maaş</th>
+                    <th className="p-4">Talep Durumu</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {jobRequests.map((req) => (
+                    <tr key={req.id} className="hover:bg-slate-50/50">
+                      <td className="p-4 font-bold text-slate-900">{req.employer_name}</td>
+                      <td className="p-4 font-bold text-slate-800">{req.position_title} <span className="text-xs text-slate-400 uppercase">({req.sector})</span></td>
+                      <td className="p-4 font-bold">{req.headcount} Kişi</td>
+                      <td className="p-4 font-semibold text-emerald-700">€{req.monthly_net_salary} / mo</td>
+                      <td className="p-4">
+                        <select
+                          value={req.status || 'new_request'}
+                          onChange={(e) => updateRequestStatus(req.id, e.target.value)}
+                          className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer bg-slate-50 text-slate-900"
+                        >
+                          <option value="new_request">🟡 Yeni Talep</option>
+                          <option value="searching_candidates">🔵 Aday Aranıyor</option>
+                          <option value="candidates_submitted">🟣 Adaylar Sunuldu</option>
+                          <option value="completed">🟢 Tamamlandı</option>
+                          <option value="cancelled">🔴 İptal</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 4: İşverenler */}
+        {activeTab === 'employers' && (
+          <div className="bg-white rounded-2xl border shadow-sm overflow-hidden p-6 space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Kayıtlı İşveren Firmalar</h3>
+            {employers.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 text-xs">Kayıtlı işveren bulunmuyor.</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {employers.map((emp) => (
+                  <div key={emp.id} className="p-4 bg-slate-50 rounded-2xl border space-y-2">
+                    <h4 className="font-extrabold text-slate-900 text-sm">{emp.company_name}</h4>
+                    <p className="text-xs text-slate-500">Yetkili: <strong>{emp.contact_person}</strong> | Ülke: {emp.country}</p>
+                    <p className="text-xs text-slate-600">E-Posta: {emp.email} | Tel: {emp.phone}</p>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         )}
 
-        {/* Requests Table */}
-        {activeTab === 'requests' && (
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            {loading ? (
-              <div className="p-12 text-center text-slate-500">{t.submitting}</div>
+        {/* Tab 5: Eşleştirmeler */}
+        {activeTab === 'matching' && (
+          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Talep & Aday Eşleştirme Merkezi</h3>
+            <p className="text-xs text-slate-600">İşveren talepleri ile uygun havuzdaki adayları eşleştirip işveren paneline aktarabileceğiniz modül.</p>
+            <div className="p-8 text-center text-slate-400 text-xs border border-dashed rounded-xl">
+              Aktif eşleştirme kuyruğu boş. Talepler üzerinden aday ataması yapabilirsiniz.
+            </div>
+          </div>
+        )}
+
+        {/* Tab 6: Seyahatler & Vize */}
+        {activeTab === 'travel' && (
+          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Seyahat, Uçuş ve Karşılama Planlaması</h3>
+            <div className="p-8 text-center text-slate-400 text-xs border border-dashed rounded-xl">
+              Vize onaylanan personellerin biletleme ve karşılama planları burada listelenir.
+            </div>
+          </div>
+        )}
+
+        {/* Tab 7: Aktif Çalışanlar (30/60/90 Gün) */}
+        {activeTab === 'employees' && (
+          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">30 - 60 - 90 Günlük Uyum ve Takip Süreçleri</h3>
+            <div className="p-8 text-center text-slate-400 text-xs border border-dashed rounded-xl">
+              İşe başlayan personellerin performans ve adaptasyon takip kayıtları burada yer alır.
+            </div>
+          </div>
+        )}
+
+        {/* Tab 8: Sorunlar / Bildirimler */}
+        {activeTab === 'support' && (
+          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">İşveren ve Aday Destek / Sorun Bildirimleri</h3>
+            {supportTickets.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 text-xs">Aktif sorun bildirimi bulunmuyor.</div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left rtl:text-right text-sm text-slate-600">
-                  <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-100">
-                    <tr>
-                      <th className="p-4">{t.employerCompany}</th>
-                      <th className="p-4">{t.colPosSec}</th>
-                      <th className="p-4">{t.colHeadcount}</th>
-                      <th className="p-4">{t.colSalary}</th>
-                      <th className="p-4">{t.colBenefits}</th>
-                      <th className="p-4">{t.colDemandStatus}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredRequests.map((req) => (
-                      <tr key={req.id} className="hover:bg-slate-50/50">
-                        <td className="p-4 font-bold text-slate-900">
-                          {req.employer_name}
-                          <div className="text-xs text-slate-400 font-normal">{t.createdDate}: {new Date(req.created_at).toLocaleDateString()}</div>
-                        </td>
-                        <td className="p-4 font-bold text-slate-800">
-                          {req.position_title}
-                          <div className="text-xs text-slate-400 font-normal uppercase">{req.sector}</div>
-                        </td>
-                        <td className="p-4 font-bold text-slate-800">{req.headcount} {t.personCount}</td>
-                        <td className="p-4 font-semibold text-emerald-700">€{req.monthly_net_salary} / {t.monthText}</td>
-                        <td className="p-4 text-xs space-y-1 text-slate-500">
-                          <div>{t.accommodation}: {req.accommodation_provided ? '✅' : '❌'}</div>
-                          <div>{t.foodAllowance} / {t.flightTicket}: {req.food_provided ? '✅' : '❌'} | {req.flight_covered ? '✅' : '❌'}</div>
-                        </td>
-                        <td className="p-4">
-                          <select
-                            value={req.status || 'new_request'}
-                            onChange={(e) => updateRequestStatus(req.id, e.target.value)}
-                            className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer outline-none bg-slate-50 text-slate-900"
-                          >
-                            <option value="new_request">🟡 {currentLang === 'tr' ? 'Yeni Talep' : 'New Request'}</option>
-                            <option value="searching_candidates">🔵 {currentLang === 'tr' ? 'Aday Aranıyor' : 'Searching Candidates'}</option>
-                            <option value="candidates_submitted">🟣 {currentLang === 'tr' ? 'Adaylar Sunuldu' : 'Candidates Submitted'}</option>
-                            <option value="completed">🟢 {currentLang === 'tr' ? 'Tamamlandı' : 'Completed'}</option>
-                            <option value="cancelled">🔴 {currentLang === 'tr' ? 'İptal Edildi' : 'Cancelled'}</option>
-                          </select>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-3">
+                {supportTickets.map((tkt) => (
+                  <div key={tkt.id} className="p-4 bg-slate-50 rounded-2xl border space-y-1">
+                    <div className="flex justify-between font-bold text-xs text-slate-900">
+                      <span>{tkt.subject} ({tkt.candidate_name})</span>
+                      <span className="text-red-600 uppercase text-[10px]">{tkt.status}</span>
+                    </div>
+                    <p className="text-xs text-slate-600">{tkt.message}</p>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         )}
+
       </div>
     </div>
   );
