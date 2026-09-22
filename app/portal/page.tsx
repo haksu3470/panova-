@@ -50,7 +50,6 @@ export default function PortalPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   
-  // Sekmeler: 'overview' | 'candidates' | 'requests' | 'employers' | 'matching' | 'travel' | 'employees' | 'support'
   const [activeTab, setActiveTab] = useState<'overview' | 'candidates' | 'requests' | 'employers' | 'matching' | 'travel' | 'employees' | 'support'>('overview');
   
   const [candidates, setCandidates] = useState<any[]>([]);
@@ -76,19 +75,15 @@ export default function PortalPage() {
 
   const fetchAllData = async () => {
     setLoading(true);
-    // 1. Adaylar
     const { data: candData } = await supabase.from('job_candidates').select('*').order('created_at', { ascending: false });
     if (candData) setCandidates(candData);
 
-    // 2. Talepler
     const { data: reqData } = await supabase.from('job_requests').select('*').order('created_at', { ascending: false });
     if (reqData) setJobRequests(reqData);
 
-    // 3. İşverenler
     const { data: empData } = await supabase.from('employers').select('*').order('created_at', { ascending: false });
     if (empData) setEmployers(empData);
 
-    // 4. Destek / Sorun Bildirimleri
     const { data: ticketData } = await supabase.from('candidate_support_tickets').select('*').order('created_at', { ascending: false });
     if (ticketData) setSupportTickets(ticketData);
 
@@ -119,8 +114,6 @@ export default function PortalPage() {
     const { error } = await supabase.from('job_candidates').update({ status: newStatus }).eq('id', id);
     if (!error) {
       setCandidates(candidates.map(c => c.id === id ? { ...c, status: newStatus } : c));
-    } else {
-      alert('Hata: ' + error.message);
     }
   };
 
@@ -128,8 +121,6 @@ export default function PortalPage() {
     const { error } = await supabase.from('job_requests').update({ status: newStatus }).eq('id', id);
     if (!error) {
       setJobRequests(jobRequests.map(r => r.id === id ? { ...r, status: newStatus } : r));
-    } else {
-      alert('Hata: ' + error.message);
     }
   };
 
@@ -273,28 +264,28 @@ export default function PortalPage() {
         {/* Tab Navigation */}
         <div className="flex flex-wrap gap-2 border-b pb-2 overflow-x-auto text-xs font-bold">
           <button onClick={() => setActiveTab('overview')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📊 Genel Durum
+            📊 {t.overviewTab || 'Genel Durum'}
           </button>
           <button onClick={() => setActiveTab('candidates')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            👥 Aday Havuzu ({candidates.length})
+            👥 {t.candidatesTab || 'Aday Havuzu'} ({candidates.length})
           </button>
           <button onClick={() => setActiveTab('requests')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'requests' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📁 Personel Talepleri ({jobRequests.length})
+            📁 {t.requestsTab || 'Personel Talepleri'} ({jobRequests.length})
           </button>
           <button onClick={() => setActiveTab('employers')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'employers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            🏢 İşverenler ({employers.length})
+            🏢 {t.employersTab || 'İşverenler'} ({employers.length})
           </button>
           <button onClick={() => setActiveTab('matching')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'matching' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            🔗 Eşleştirmeler
+            🔗 {t.matchingTab || 'Eşleştirmeler'}
           </button>
           <button onClick={() => setActiveTab('travel')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            ✈️ Seyahatler & Vize
+            ✈️ {t.travelTab || 'Seyahatler & Vize'}
           </button>
           <button onClick={() => setActiveTab('employees')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            🛡️ Aktif Çalışanlar (30/60/90)
+            🛡️ {t.employeesTab || 'Aktif Çalışanlar'}
           </button>
           <button onClick={() => setActiveTab('support')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            💬 Sorunlar / Bildirimler ({supportTickets.length})
+            💬 {t.supportTab || 'Sorunlar / Bildirimler'} ({supportTickets.length})
           </button>
         </div>
 
@@ -304,7 +295,7 @@ export default function PortalPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-slate-500 text-xs font-bold uppercase">Toplam Aday</div>
+                  <div className="text-slate-500 text-xs font-bold uppercase">{t.totalCandidatesCard || 'TOPLAM ADAY'}</div>
                   <div className="text-3xl font-extrabold text-slate-900 mt-1">{candidates.length}</div>
                 </div>
                 <Users className="w-10 h-10 text-emerald-600 bg-emerald-50 p-2 rounded-xl" />
@@ -312,7 +303,7 @@ export default function PortalPage() {
 
               <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-slate-500 text-xs font-bold uppercase">Aktif İşverenler</div>
+                  <div className="text-slate-500 text-xs font-bold uppercase">{t.activeEmployersCard || 'AKTİF İŞVERENLER'}</div>
                   <div className="text-3xl font-extrabold text-slate-900 mt-1">{employers.length}</div>
                 </div>
                 <Building2 className="w-10 h-10 text-blue-600 bg-blue-50 p-2 rounded-xl" />
@@ -320,7 +311,7 @@ export default function PortalPage() {
 
               <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-slate-500 text-xs font-bold uppercase">Açık Talepler</div>
+                  <div className="text-slate-500 text-xs font-bold uppercase">{t.openRequestsCard || 'AÇIK TALEPLER'}</div>
                   <div className="text-3xl font-extrabold text-slate-900 mt-1">{jobRequests.filter(r => r.status !== 'completed').length}</div>
                 </div>
                 <FileText className="w-10 h-10 text-amber-600 bg-amber-50 p-2 rounded-xl" />
@@ -328,17 +319,17 @@ export default function PortalPage() {
 
               <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-slate-500 text-xs font-bold uppercase">Açık Sorunlar / Destek</div>
-                  <div className="text-3xl font-extrabold text-red-600 mt-1">{supportTickets.filter(t => t.status === 'open').length}</div>
+                  <div className="text-slate-500 text-xs font-bold uppercase">{t.openSupportCard || 'AÇIK SORUNLAR / DESTEK'}</div>
+                  <div className="text-3xl font-extrabold text-red-600 mt-1">{supportTickets.filter(st => st.status === 'open').length}</div>
                 </div>
                 <AlertCircle className="w-10 h-10 text-red-600 bg-red-50 p-2 rounded-xl" />
               </div>
             </div>
 
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-lg font-extrabold text-slate-900">PANOVA Operasyon Özeti</h3>
+              <h3 className="text-lg font-extrabold text-slate-900">{t.portalSummaryTitle || 'PANOVA Operasyon Özeti'}</h3>
               <p className="text-xs text-slate-600">
-                Sistem üzerinden aday başvurularını yönetebilir, işverenlerin personel taleplerine aday eşleştirmesi yapabilir, vize ve seyahat süreçlerini takip edebilirsiniz.
+                {t.portalSummaryDesc || 'Sistem üzerinden aday başvurularını yönetebilir, işverenlerin personel taleplerine aday eşleştirmesi yapabilir, vize ve seyahat süreçlerini takip edebilirsiniz.'}
               </p>
             </div>
           </div>
@@ -352,7 +343,7 @@ export default function PortalPage() {
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
                 <input
                   type="text"
-                  placeholder="Aday adı, pasaport veya meslek ara..."
+                  placeholder={t.searchPlaceholder || 'Arama yapın...'}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm outline-none text-slate-900 font-medium bg-white"
@@ -363,11 +354,11 @@ export default function PortalPage() {
                 onChange={(e) => setSelectedStatus(e.target.value)}
                 className="px-3 py-2.5 rounded-xl border text-sm font-semibold text-slate-700 bg-white cursor-pointer"
               >
-                <option value="all">Tüm Durumlar</option>
-                <option value="pending">Beklemede</option>
-                <option value="reviewing">İnceleniyor</option>
-                <option value="visa_processing">Vize İşlemde</option>
-                <option value="approved">Onaylandı</option>
+                <option value="all">{t.allstatuses}</option>
+                <option value="pending">{t.pendingStatus}</option>
+                <option value="reviewing">{t.reviewingStatus}</option>
+                <option value="visa_processing">{t.visaProcessingStatus}</option>
+                <option value="approved">{t.approvedStatus}</option>
               </select>
             </div>
 
@@ -376,11 +367,11 @@ export default function PortalPage() {
                 <table className="w-full text-left text-sm text-slate-600">
                   <thead className="bg-slate-50 text-slate-700 font-bold border-b">
                     <tr>
-                      <th className="p-4">Aday</th>
-                      <th className="p-4">Pasaport / Uyruk</th>
-                      <th className="p-4">Meslek / Sektör</th>
-                      <th className="p-4">Sertifika & Video</th>
-                      <th className="p-4">Vize Durumu</th>
+                      <th className="p-4">{t.colCandidate}</th>
+                      <th className="p-4">{t.colPassportNat}</th>
+                      <th className="p-4">{t.colProfSector}</th>
+                      <th className="p-4">{t.certAndVideo}</th>
+                      <th className="p-4">{t.colVisaStatus}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -413,10 +404,10 @@ export default function PortalPage() {
                             onChange={(e) => updateCandidateStatus(candidate.id, e.target.value)}
                             className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer bg-slate-50 text-slate-900"
                           >
-                            <option value="pending">🟡 Beklemede</option>
-                            <option value="reviewing">🔵 İnceleniyor</option>
-                            <option value="visa_processing">🟣 Vize İşlemde</option>
-                            <option value="approved">🟢 Onaylandı</option>
+                            <option value="pending">🟡 {t.pendingStatus}</option>
+                            <option value="reviewing">🔵 {t.reviewingStatus}</option>
+                            <option value="visa_processing">🟣 {t.visaProcessingStatus}</option>
+                            <option value="approved">🟢 {t.approvedStatus}</option>
                           </select>
                         </td>
                       </tr>
@@ -435,11 +426,11 @@ export default function PortalPage() {
               <table className="w-full text-left text-sm text-slate-600">
                 <thead className="bg-slate-50 text-slate-700 font-bold border-b">
                   <tr>
-                    <th className="p-4">İşveren Şirket</th>
-                    <th className="p-4">Pozisyon / Sektör</th>
-                    <th className="p-4">Kişi Sayısı</th>
-                    <th className="p-4">Maaş</th>
-                    <th className="p-4">Talep Durumu</th>
+                    <th className="p-4">{t.employerCompany}</th>
+                    <th className="p-4">{t.colPosSec}</th>
+                    <th className="p-4">{t.colHeadcount}</th>
+                    <th className="p-4">{t.colSalary}</th>
+                    <th className="p-4">{t.colDemandStatus}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -447,8 +438,8 @@ export default function PortalPage() {
                     <tr key={req.id} className="hover:bg-slate-50/50">
                       <td className="p-4 font-bold text-slate-900">{req.employer_name}</td>
                       <td className="p-4 font-bold text-slate-800">{req.position_title} <span className="text-xs text-slate-400 uppercase">({req.sector})</span></td>
-                      <td className="p-4 font-bold">{req.headcount} Kişi</td>
-                      <td className="p-4 font-semibold text-emerald-700">€{req.monthly_net_salary} / mo</td>
+                      <td className="p-4 font-bold">{req.headcount} {t.personCount}</td>
+                      <td className="p-4 font-semibold text-emerald-700">€{req.monthly_net_salary} / {t.monthText}</td>
                       <td className="p-4">
                         <select
                           value={req.status || 'new_request'}
@@ -473,7 +464,7 @@ export default function PortalPage() {
         {/* Tab 4: İşverenler */}
         {activeTab === 'employers' && (
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden p-6 space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Kayıtlı İşveren Firmalar</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.employersTab || 'Kayıtlı İşveren Firmalar'}</h3>
             {employers.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-xs">Kayıtlı işveren bulunmuyor.</div>
             ) : (
@@ -493,8 +484,7 @@ export default function PortalPage() {
         {/* Tab 5: Eşleştirmeler */}
         {activeTab === 'matching' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Talep & Aday Eşleştirme Merkezi</h3>
-            <p className="text-xs text-slate-600">İşveren talepleri ile uygun havuzdaki adayları eşleştirip işveren paneline aktarabileceğiniz modül.</p>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.matchingTab || 'Eşleştirmeler'}</h3>
             <div className="p-8 text-center text-slate-400 text-xs border border-dashed rounded-xl">
               Aktif eşleştirme kuyruğu boş. Talepler üzerinden aday ataması yapabilirsiniz.
             </div>
@@ -504,17 +494,17 @@ export default function PortalPage() {
         {/* Tab 6: Seyahatler & Vize */}
         {activeTab === 'travel' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Seyahat, Uçuş ve Karşılama Planlaması</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.travelTab || 'Seyahatler & Vize'}</h3>
             <div className="p-8 text-center text-slate-400 text-xs border border-dashed rounded-xl">
               Vize onaylanan personellerin biletleme ve karşılama planları burada listelenir.
             </div>
           </div>
         )}
 
-        {/* Tab 7: Aktif Çalışanlar (30/60/90 Gün) */}
+        {/* Tab 7: Aktif Çalışanlar */}
         {activeTab === 'employees' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">30 - 60 - 90 Günlük Uyum ve Takip Süreçleri</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.employeesTab || 'Aktif Çalışanlar (30/60/90)'}</h3>
             <div className="p-8 text-center text-slate-400 text-xs border border-dashed rounded-xl">
               İşe başlayan personellerin performans ve adaptasyon takip kayıtları burada yer alır.
             </div>
@@ -524,7 +514,7 @@ export default function PortalPage() {
         {/* Tab 8: Sorunlar / Bildirimler */}
         {activeTab === 'support' && (
           <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">İşveren ve Aday Destek / Sorun Bildirimleri</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">{t.supportTab || 'Sorunlar / Bildirimler'}</h3>
             {supportTickets.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-xs">Aktif sorun bildirimi bulunmuyor.</div>
             ) : (
