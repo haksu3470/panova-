@@ -304,6 +304,14 @@ export default function EmployerPortalPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Ana Sayfaya Dön Butonu */}
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition border"
+            >
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
+            </Link>
+
             <div className="relative flex items-center bg-slate-100 rounded-lg px-2.5 py-1.5 border border-slate-200 shadow-sm">
               <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
               <select
@@ -322,14 +330,15 @@ export default function EmployerPortalPage() {
 
             <button
               onClick={() => setShowNewRequestModal(true)}
-              className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl text-sm font-bold transition shadow-md inline-flex items-center gap-2 cursor-pointer"
+              className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-md inline-flex items-center gap-1.5 cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" /> {t.newDemandBtn}
             </button>
 
+            {/* Çıkış Yap Butonu */}
             <button
               onClick={() => setAuthenticated(false)}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer"
+              className="bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer"
             >
               {t.logoutBtn}
             </button>
