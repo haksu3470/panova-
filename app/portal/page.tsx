@@ -114,7 +114,6 @@ export default function PortalPage() {
     if (staffData && staffData.length > 0) {
       setStaffMembers(staffData);
     } else {
-      // Varsayılan personel yoksa tabloya örnek ekleyelim veya state'i koruyalım
       setStaffMembers([
         { id: '1', name: 'Hüseyin Aksu', email: 'huseyin@panova.com', password: '123', role_level: 'upper_management' },
         { id: '2', name: 'Mehmet Çitil', email: 'mehmet@panova.com', password: '123', role_level: 'target_country' }
@@ -136,7 +135,6 @@ export default function PortalPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Master admin girişi VEYA Supabase'deki personel e-posta ve şifre kontrolü
     const matchedStaff = staffMembers.find(s => s.email === username && s.password === password);
     
     if ((username === 'admin' && password === 'panova2026') || matchedStaff) {
@@ -383,7 +381,7 @@ export default function PortalPage() {
           </div>
         </div>
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation (Genişletilmiş ve Kesilmeyi Önleyen Tasarım) */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
           <button onClick={() => setActiveTab('overview')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
