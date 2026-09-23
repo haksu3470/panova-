@@ -51,6 +51,7 @@ export interface Translation {
   expectedSalaryLabel?: string;
   shiftSuitableLabel?: string;
   emailLabel?: string;
+  phone?: string; // EKLENDİ
   phoneLabel?: string;
   pendingStatus?: string;
   reviewingStatus?: string;
@@ -213,6 +214,7 @@ export const translations: Record<Language, Translation> = {
     expectedSalaryLabel: 'Beklenen Maaş',
     shiftSuitableLabel: 'Vardiyalı Çalışmaya Uygunluk',
     emailLabel: 'E-Posta',
+    phone: 'Telefon',
     phoneLabel: 'Telefon',
     pendingStatus: 'Beklemede',
     reviewingStatus: 'İnceleniyor',
@@ -367,6 +369,7 @@ export const translations: Record<Language, Translation> = {
     expectedSalaryLabel: 'Expected Salary',
     shiftSuitableLabel: 'Shift Suitable',
     emailLabel: 'Email',
+    phone: 'Phone',
     phoneLabel: 'Phone',
     pendingStatus: 'Pending',
     reviewingStatus: 'Reviewing',
@@ -521,6 +524,7 @@ export const translations: Record<Language, Translation> = {
     expectedSalaryLabel: 'Paga e Pritur',
     shiftSuitableLabel: 'I përshtatshëm për turne',
     emailLabel: 'Email',
+    phone: 'Telefon',
     phoneLabel: 'Telefon',
     pendingStatus: 'Në pritje',
     reviewingStatus: 'Duke u shqyrtuar',
@@ -675,12 +679,13 @@ export const translations: Record<Language, Translation> = {
     expectedSalaryLabel: 'الراتب المتوقع',
     shiftSuitableLabel: 'مناسب للعمل بنظام النوبات',
     emailLabel: 'البريد الإلكتروني',
+    phone: 'الهاتف',
     phoneLabel: 'الهاتف',
     pendingStatus: 'قيد الانتظار',
     reviewingStatus: 'قيد المراجعة',
     visaProcessingStatus: 'جاري استخراج التأشيرة',
     approvedStatus: 'تم الموافقة',
-    colPosSec: 'المنصب / القطاع',
+    colPosSec: ' المنصب / القطاع',
     colHeadcount: 'عدد الأفراد',
     newDemandBtn: 'إنشاء طلب جديد',
     modalDemandTitle: 'تفاصيل الطلب',
