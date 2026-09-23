@@ -158,6 +158,7 @@ export interface Translation {
   dueDateText: string;
   noEmployers: string;
   noSupport: string;
+  initialAuditLog: string;
 }
 
 export const languages = [
@@ -326,7 +327,8 @@ export const translations: Record<Language, Translation> = {
     backupText: 'Yedek',
     dueDateText: 'Son Tarih',
     noEmployers: 'Kayıtlı işveren bulunmuyor.',
-    noSupport: 'Aktif sorun bildirimi bulunmuyor.'
+    noSupport: 'Aktif sorun bildirimi bulunmuyor.',
+    initialAuditLog: 'Sistem Başlatıldı & Rol Matrisi Kuruldu'
   },
   en: {
     returnHome: 'Return to Home',
@@ -486,7 +488,8 @@ export const translations: Record<Language, Translation> = {
     backupText: 'Backup',
     dueDateText: 'Due Date',
     noEmployers: 'No registered employers found.',
-    noSupport: 'No active support tickets found.'
+    noSupport: 'No active support tickets found.',
+    initialAuditLog: 'System Initialized & Role Matrix Established'
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -646,7 +649,8 @@ export const translations: Record<Language, Translation> = {
     backupText: 'Rezervë',
     dueDateText: 'Afati',
     noEmployers: 'Nuk u gjetën punëdhënës të regjistruar.',
-    noSupport: 'Nuk u gjetën njoftime mbështetjeje aktive.'
+    noSupport: 'Nuk u gjetën njoftime mbështetjeje aktive.',
+    initialAuditLog: 'Sistemi u Iniciua & Matrica e Roleve u Krijua'
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -800,12 +804,13 @@ export const translations: Record<Language, Translation> = {
     roleSourceCountry: 'مسؤول بلد المصدر',
     roleTargetCountry: 'مسؤول البلد المستهدف',
     roleFieldOfficer: 'مسؤول الميدان',
-    applicationStatusAndSummary: 'حالة الطلب وملخصه',
-    currentProcessStage: 'مرحلة العملية الحالية',
+    applicationStatusAndSummary: 'Application Status and Summary',
+    currentProcessStage: 'CURRENT PROCESS STAGE',
     assigneeText: 'المسؤول',
     backupText: 'الاحتياطي',
     dueDateText: 'تاريخ الاستحقاق',
     noEmployers: 'لا يوجد أصحاب عمل مسجلين.',
-    noSupport: 'لا توجد تذاكر دعم نشطة.'
+    noSupport: 'لا توجد تذاكر دعم نشطة.',
+    initialAuditLog: 'تم بدء النظام وإنشاء مصفوفة الأدوار'
   },
 };
