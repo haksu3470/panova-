@@ -210,6 +210,7 @@ export default function PortalPage() {
     e.preventDefault();
     if (!editingStaff) return;
 
+    // ID değerini string veya sayı olarak esnek güncelleyelim
     const { error } = await supabase.from('staff_members').update({
       name: editingStaff.name,
       email: editingStaff.email,
@@ -381,7 +382,7 @@ export default function PortalPage() {
           </div>
         </div>
 
-        {/* Tab Navigation (Genişletilmiş ve Kesilmeyi Önleyen Tasarım) */}
+        {/* Tab Navigation */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
           <button onClick={() => setActiveTab('overview')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
