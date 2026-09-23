@@ -96,16 +96,6 @@ export default function PortalPage() {
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
   const activeLangObj = languages.find((l) => l.code === currentLang);
 
-  const getRoleText = (level: string) => {
-    switch (level) {
-      case 'upper_management': return t.roleUpperManagement;
-      case 'source_country': return t.roleSourceCountry;
-      case 'target_country': return t.roleTargetCountry;
-      case 'field_officer': return t.roleFieldOfficer;
-      default: return level;
-    }
-  };
-
   useEffect(() => {
     if (authenticated) {
       fetchAllData();
@@ -344,11 +334,11 @@ export default function PortalPage() {
                 onChange={(e) => changeLanguage(e.target.value as Language)}
                 className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
               >
-                <option value={currentLang} className="font-bold">
+                <option value={currentLang} className="font-bold text-slate-900 bg-white">
                   {activeLangObj?.flag} {activeLangObj?.name}
                 </option>
                 {selectableLanguages.map((lang) => (
-                  <option key={lang.code} value={lang.code}>{lang.flag} {lang.name}</option>
+                  <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">{lang.flag} {lang.name}</option>
                 ))}
               </select>
             </div>
@@ -460,13 +450,13 @@ export default function PortalPage() {
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full sm:w-auto px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-700 bg-white cursor-pointer"
+                className="w-full sm:w-auto px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 bg-white cursor-pointer"
               >
-                <option value="all">{t.allstatuses}</option>
-                <option value="pending">{t.pendingStatus}</option>
-                <option value="reviewing">{t.reviewingStatus}</option>
-                <option value="visa_processing">{t.visaProcessingStatus}</option>
-                <option value="approved">{t.approvedStatus}</option>
+                <option value="all" className="text-slate-900 bg-white">{t.allstatuses}</option>
+                <option value="pending" className="text-slate-900 bg-white">{t.pendingStatus}</option>
+                <option value="reviewing" className="text-slate-900 bg-white">{t.reviewingStatus}</option>
+                <option value="visa_processing" className="text-slate-900 bg-white">{t.visaProcessingStatus}</option>
+                <option value="approved" className="text-slate-900 bg-white">{t.approvedStatus}</option>
               </select>
             </div>
 
@@ -505,7 +495,7 @@ export default function PortalPage() {
                             className="px-3 py-1.5 rounded-lg border text-xs font-bold bg-emerald-50 text-emerald-900 cursor-pointer outline-none"
                           >
                             {staffMembers.map((staff) => (
-                              <option key={staff.id} value={staff.name}>{staff.name}</option>
+                              <option key={staff.id} value={staff.name} className="text-slate-900 bg-white">{staff.name}</option>
                             ))}
                           </select>
                         </td>
@@ -515,10 +505,10 @@ export default function PortalPage() {
                             onChange={(e) => updateCandidateStatus(candidate.id, e.target.value)}
                             className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer bg-slate-50 text-slate-900"
                           >
-                            <option value="pending">🟡 {t.pendingStatus}</option>
-                            <option value="reviewing">🔵 {t.reviewingStatus}</option>
-                            <option value="visa_processing">🟣 {t.visaProcessingStatus}</option>
-                            <option value="approved">🟢 {t.approvedStatus}</option>
+                            <option value="pending" className="text-slate-900 bg-white">🟡 {t.pendingStatus}</option>
+                            <option value="reviewing" className="text-slate-900 bg-white">🔵 {t.reviewingStatus}</option>
+                            <option value="visa_processing" className="text-slate-900 bg-white">🟣 {t.visaProcessingStatus}</option>
+                            <option value="approved" className="text-slate-900 bg-white">🟢 {t.approvedStatus}</option>
                           </select>
                         </td>
                       </tr>
@@ -555,9 +545,9 @@ export default function PortalPage() {
                           onChange={(e) => updateRequestStatus(req.id, e.target.value)}
                           className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer bg-slate-50 text-slate-900"
                         >
-                          <option value="new_request">🟡 Yeni Talep</option>
-                          <option value="searching_candidates">🔵 Aday Aranıyor</option>
-                          <option value="completed">🟢 Tamamlandı</option>
+                          <option value="new_request" className="text-slate-900 bg-white">🟡 Yeni Talep</option>
+                          <option value="searching_candidates" className="text-slate-900 bg-white">🔵 Aday Aranıyor</option>
+                          <option value="completed" className="text-slate-900 bg-white">🟢 Tamamlandı</option>
                         </select>
                       </td>
                     </tr>
@@ -589,12 +579,12 @@ export default function PortalPage() {
                   <select 
                     value={newStaffRoleLevel} 
                     onChange={(e) => setNewStaffRoleLevel(e.target.value)} 
-                    className="w-full px-3.5 py-3 rounded-xl border font-bold bg-white cursor-pointer text-xs sm:text-sm"
+                    className="w-full px-3.5 py-3 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm shadow-sm"
                   >
-                    <option value="upper_management">👑 {t.roleUpperManagement}</option>
-                    <option value="source_country">🌍 {t.roleSourceCountry}</option>
-                    <option value="target_country">🏢 {t.roleTargetCountry}</option>
-                    <option value="field_officer">✈️ {t.roleFieldOfficer}</option>
+                    <option value="upper_management" className="text-slate-900 bg-white">👑 {t.roleUpperManagement}</option>
+                    <option value="source_country" className="text-slate-900 bg-white">🌍 {t.roleSourceCountry}</option>
+                    <option value="target_country" className="text-slate-900 bg-white">🏢 {t.roleTargetCountry}</option>
+                    <option value="field_officer" className="text-slate-900 bg-white">✈️ {t.roleFieldOfficer}</option>
                   </select>
                 </div>
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-xs sm:text-sm">
@@ -629,12 +619,12 @@ export default function PortalPage() {
                       <select
                         value={staff.roleLevel || 'source_country'}
                         onChange={(e) => updateStaffRoleLevel(staff.id, e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl border text-xs font-bold bg-indigo-50 text-indigo-900 cursor-pointer outline-none shadow-sm"
+                        className="w-full px-3 py-2 rounded-xl border text-xs font-bold bg-white text-slate-900 cursor-pointer outline-none shadow-sm"
                       >
-                        <option value="upper_management">👑 {t.roleUpperManagement}</option>
-                        <option value="source_country">🌍 {t.roleSourceCountry}</option>
-                        <option value="target_country">🏢 {t.roleTargetCountry}</option>
-                        <option value="field_officer">✈️ {t.roleFieldOfficer}</option>
+                        <option value="upper_management" className="text-slate-900 bg-white">👑 {t.roleUpperManagement}</option>
+                        <option value="source_country" className="text-slate-900 bg-white">🌍 {t.roleSourceCountry}</option>
+                        <option value="target_country" className="text-slate-900 bg-white">🏢 {t.roleTargetCountry}</option>
+                        <option value="field_officer" className="text-slate-900 bg-white">✈️ {t.roleFieldOfficer}</option>
                       </select>
                     </div>
                   </div>
@@ -658,19 +648,19 @@ export default function PortalPage() {
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskAssigneeLabel}</label>
-                  <select value={newTaskAssignee} onChange={(e) => setNewTaskAssignee(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-bold bg-white cursor-pointer text-xs sm:text-sm">
-                    {staffMembers.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                  <select value={newTaskAssignee} onChange={(e) => setNewTaskAssignee(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm">
+                    {staffMembers.map(s => <option key={s.id} value={s.name} className="text-slate-900 bg-white">{s.name}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskBackupAssigneeLabel}</label>
-                  <select value={newTaskBackup} onChange={(e) => setNewTaskBackup(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-bold bg-white cursor-pointer text-xs sm:text-sm">
-                    {staffMembers.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                  <select value={newTaskBackup} onChange={(e) => setNewTaskBackup(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm">
+                    {staffMembers.map(s => <option key={s.id} value={s.name} className="text-slate-900 bg-white">{s.name}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskDueDateLabel}</label>
-                  <input type="date" value={newTaskDueDate} onChange={(e) => setNewTaskDueDate(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-medium bg-white text-xs sm:text-sm" />
+                  <input type="date" value={newTaskDueDate} onChange={(e) => setNewTaskDueDate(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm" />
                 </div>
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-xs sm:text-sm">
                   {t.saveTaskBtn}
@@ -792,11 +782,11 @@ export default function PortalPage() {
               </div>
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">Rol / Yetki Seviyesi</label>
-                <select value={editingStaff.roleLevel} onChange={(e) => setEditingStaff({ ...editingStaff, roleLevel: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border font-bold bg-white cursor-pointer">
-                  <option value="upper_management">👑 {t.roleUpperManagement}</option>
-                  <option value="source_country">🌍 {t.roleSourceCountry}</option>
-                  <option value="target_country">🏢 {t.roleTargetCountry}</option>
-                  <option value="field_officer">✈️ {t.roleFieldOfficer}</option>
+                <select value={editingStaff.roleLevel} onChange={(e) => setEditingStaff({ ...editingStaff, roleLevel: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer">
+                  <option value="upper_management" className="text-slate-900 bg-white">👑 {t.roleUpperManagement}</option>
+                  <option value="source_country" className="text-slate-900 bg-white">🌍 {t.roleSourceCountry}</option>
+                  <option value="target_country" className="text-slate-900 bg-white">🏢 {t.roleTargetCountry}</option>
+                  <option value="field_officer" className="text-slate-900 bg-white">✈️ {t.roleFieldOfficer}</option>
                 </select>
               </div>
               <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs">
