@@ -108,7 +108,7 @@ export default function PortalPage() {
     const { data: staffData } = await supabase.from('staff_members').select('*').order('created_at', { ascending: false });
     if (staffData && staffData.length > 0) {
       setStaffMembers(staffData);
-      if (!newTaskAssignee && staffData[0]) {
+      if (!newTaskAssignee) {
         setNewTaskAssignee(staffData[0].name);
         setNewTaskBackup(staffData[1]?.name || staffData[0].name);
       }
@@ -410,30 +410,30 @@ export default function PortalPage() {
           </div>
         </div>
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation (Sorunsuz, Kesilmeyen ve Esnek Tasarım) */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
-          <button onClick={() => setActiveTab('overview')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
           </button>
-          <button onClick={() => setActiveTab('candidates')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             👥 {t.candidatesTab} ({candidates.length})
           </button>
-          <button onClick={() => setActiveTab('requests')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'requests' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('requests')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'requests' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📁 {t.requestsTab} ({jobRequests.length})
           </button>
-          <button onClick={() => setActiveTab('staff')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'staff' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('staff')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'staff' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             🛡️ {t.staffTab} ({staffMembers.length})
           </button>
-          <button onClick={() => setActiveTab('tasks')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'tasks' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('tasks')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'tasks' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             ✅ {t.tasksTab} ({tasks.filter(t => t.status === 'pending').length})
           </button>
-          <button onClick={() => setActiveTab('audit')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'audit' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('audit')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'audit' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📜 {t.auditTab} ({auditLogs.length})
           </button>
-          <button onClick={() => setActiveTab('employers')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'employers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('employers')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'employers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             🏢 {t.employersTab} ({employers.length})
           </button>
-          <button onClick={() => setActiveTab('support')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             💬 {t.supportTab} ({supportTickets.length})
           </button>
         </div>
