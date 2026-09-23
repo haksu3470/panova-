@@ -93,11 +93,9 @@ export default function PortalPage() {
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
   const activeLangObj = languages.find((l) => l.code === currentLang);
 
-  // Kesin ve güvenli üst yönetim (admin) kontrolü
   const userRole = currentUser?.role_level?.toLowerCase() || '';
   const isUpperManagement = userRole === 'upper_management' || currentUser?.isAdmin || currentUser?.email === 'admin';
 
-  // Rolleri seçilen dile göre dinamik getirme fonksiyonu
   const getRoleDisplayName = (role: string) => {
     const r = role?.toLowerCase() || '';
     if (r === 'upper_management') return `👑 ${t.roleUpperManagement}`;
@@ -609,7 +607,7 @@ export default function PortalPage() {
                       <th className="p-4">{t.colCandidate}</th>
                       <th className="p-4">{t.colPassportNat}</th>
                       <th className="p-4">{t.colProfSector}</th>
-                      <th className="p-4">🛡️ Sorumlu</th>
+                      <th className="p-4">🛡️ {t.assigneeText}</th>
                       <th className="p-4">{t.colVisaStatus}</th>
                     </tr>
                   </thead>
@@ -827,7 +825,7 @@ export default function PortalPage() {
                       <input type="checkbox" checked={task.status === 'completed'} onChange={() => toggleTaskStatus(task.id, task.status)} className="w-5 h-5 accent-[#2e7d32] cursor-pointer mt-0.5 sm:mt-0 shrink-0" />
                       <div>
                         <h4 className={`font-bold text-xs sm:text-sm ${task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-900'}`}>{task.title}</h4>
-                        <p className="text-[11px] text-slate-500 mt-0.5">Sorumlu: <strong>{task.assignee}</strong> | Yedek: <strong>{task.backup_assignee}</strong> | Son Tarih: {task.due_date}</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">{t.assigneeText}: <strong>{task.assignee}</strong> | {t.backupText}: <strong>{task.backup_assignee}</strong> | {t.dueDateText}: {task.due_date}</p>
                       </div>
                     </div>
                     <span className={`px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold uppercase w-fit ${task.status === 'completed' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>
@@ -876,7 +874,7 @@ export default function PortalPage() {
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden p-4 sm:p-6 space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.employersTab}</h3>
             {employers.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs">Kayıtlı işveren bulunmuyor.</div>
+              <div className="p-8 text-center text-slate-400 text-xs">{t.noEmployers}</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {employers.map((emp) => (
@@ -894,7 +892,7 @@ export default function PortalPage() {
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.supportTab}</h3>
             {supportTickets.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs">Aktif sorun bildirimi bulunmuyor.</div>
+              <div className="p-8 text-center text-slate-400 text-xs">{t.noSupport}</div>
             ) : (
               <div className="space-y-3">
                 {supportTickets.map((tkt) => (

@@ -153,6 +153,11 @@ export interface Translation {
   roleFieldOfficer: string;
   applicationStatusAndSummary: string;
   currentProcessStage: string;
+  assigneeText: string;
+  backupText: string;
+  dueDateText: string;
+  noEmployers: string;
+  noSupport: string;
 }
 
 export const languages = [
@@ -317,6 +322,11 @@ export const translations: Record<Language, Translation> = {
     roleFieldOfficer: 'Saha Sorumlusu',
     applicationStatusAndSummary: 'Başvuru Durumu ve Özet',
     currentProcessStage: 'GÜNCEL SÜREÇ AŞAMASI',
+    assigneeText: 'Sorumlu',
+    backupText: 'Yedek',
+    dueDateText: 'Son Tarih',
+    noEmployers: 'Kayıtlı işveren bulunmuyor.',
+    noSupport: 'Aktif sorun bildirimi bulunmuyor.'
   },
   en: {
     returnHome: 'Return to Home',
@@ -472,6 +482,11 @@ export const translations: Record<Language, Translation> = {
     roleFieldOfficer: 'Field Officer',
     applicationStatusAndSummary: 'Application Status and Summary',
     currentProcessStage: 'CURRENT PROCESS STAGE',
+    assigneeText: 'Assignee',
+    backupText: 'Backup',
+    dueDateText: 'Due Date',
+    noEmployers: 'No registered employers found.',
+    noSupport: 'No active support tickets found.'
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -627,6 +642,11 @@ export const translations: Record<Language, Translation> = {
     roleFieldOfficer: 'Oficeri i Fushës',
     applicationStatusAndSummary: 'Statusi i Aplikimit dhe Përmbledhja',
     currentProcessStage: 'FAZA AKTUALE E PROÇESIT',
+    assigneeText: 'Përgjegjës',
+    backupText: 'Rezervë',
+    dueDateText: 'Afati',
+    noEmployers: 'Nuk u gjetën punëdhënës të regjistruar.',
+    noSupport: 'Nuk u gjetën njoftime mbështetjeje aktive.'
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -782,5 +802,10 @@ export const translations: Record<Language, Translation> = {
     roleFieldOfficer: 'مسؤول الميدان',
     applicationStatusAndSummary: 'حالة الطلب وملخصه',
     currentProcessStage: 'مرحلة العملية الحالية',
+    assigneeText: 'المسؤول',
+    backupText: 'الاحتياطي',
+    dueDateText: 'تاريخ الاستحقاق',
+    noEmployers: 'لا يوجد أصحاب عمل مسجلين.',
+    noSupport: 'لا توجد تذاكر دعم نشطة.'
   },
 };
