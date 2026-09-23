@@ -57,11 +57,7 @@ export default function PortalPage() {
   const [employers, setEmployers] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
   const [staffMembers, setStaffMembers] = useState<any[]>([]);
-
-  const [tasks, setTasks] = useState<any[]>([
-    { id: '1', title: 'Pasaport ve vize evraklarını kontrol et', assignee: 'Hüseyin Aksu', backup_assignee: 'Aleksandar Petrov', due_date: '2026-10-01', status: 'pending' },
-    { id: '2', title: 'PANOVA Construction işveren iş görüşmesi', assignee: 'Mehmet Çitil', backup_assignee: 'Rabia Aksu', due_date: '2026-09-25', status: 'completed' }
-  ]);
+  const [tasks, setTasks] = useState<any[]>([]);
 
   const [auditLogs, setAuditLogs] = useState<any[]>([
     { id: '1', action: 'Sistem Başlatıldı & Rol Matrisi Kuruldu', performer: 'Hüseyin Aksu', time: '2026-09-22 12:00' }
@@ -76,12 +72,11 @@ export default function PortalPage() {
   const [newStaffPassword, setNewStaffPassword] = useState('');
   const [newStaffRoleLevel, setNewStaffRoleLevel] = useState('source_country');
 
-  // Personel Düzenleme Modalı State'leri
   const [editingStaff, setEditingStaff] = useState<any | null>(null);
 
   const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newTaskAssignee, setNewTaskAssignee] = useState('Hüseyin Aksu');
-  const [newTaskBackup, setNewTaskBackup] = useState('Aleksandar Petrov');
+  const [newTaskAssignee, setNewTaskAssignee] = useState('');
+  const [newTaskBackup, setNewTaskBackup] = useState('');
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
 
   const t = translations[currentLang] || translations.en;
@@ -113,10 +108,27 @@ export default function PortalPage() {
     const { data: staffData } = await supabase.from('staff_members').select('*').order('created_at', { ascending: false });
     if (staffData && staffData.length > 0) {
       setStaffMembers(staffData);
+      if (!newTaskAssignee && staffData[0]) {
+        setNewTaskAssignee(staffData[0].name);
+        setNewTaskBackup(staffData[1]?.name || staffData[0].name);
+      }
     } else {
-      setStaffMembers([
-        { id: '1', name: 'Hüseyin Aksu', email: 'huseyin@panova.com', password: '123', role_level: 'upper_management' },
+      const defaultStaff = [
+        { id: '1', name: 'Hüseyin Aksu', email: 'admin', password: 'panova2026', role_level: 'upper_management' },
         { id: '2', name: 'Mehmet Çitil', email: 'mehmet@panova.com', password: '123', role_level: 'target_country' }
+      ];
+      setStaffMembers(defaultStaff);
+      setNewTaskAssignee(defaultStaff[0].name);
+      setNewTaskBackup(defaultStaff[1].name);
+    }
+
+    const { data: taskData } = await supabase.from('tasks').select('*').order('created_at', { ascending: false });
+    if (taskData && taskData.length > 0) {
+      setTasks(taskData);
+    } else {
+      setTasks([
+        { id: '1', title: 'Pasaport ve vize evraklarını kontrol et', assignee: 'Hüseyin Aksu', backup_assignee: 'Aleksandar Petrov', due_date: '2026-10-01', status: 'pending' },
+        { id: '2', title: 'PANOVA Construction işveren iş görüşmesi', assignee: 'Mehmet Çitil', backup_assignee: 'Rabia Aksu', due_date: '2026-09-25', status: 'completed' }
       ]);
     }
 
@@ -142,7 +154,7 @@ export default function PortalPage() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('panova_admin_auth', 'true');
       }
-      logAudit('Sisteme Giriş Yapıldı', matchedStaff ? matchedStaff.name : username);
+      logAudit('Sisteme Giriş Yapıldı', username === 'admin' ? 'Master Admin (Hüseyin Aksu)' : (matchedStaff ? matchedStaff.name : username));
       fetchAllData();
     } else {
       alert('Geçersiz kullanıcı adı veya şifre!');
@@ -210,23 +222,29 @@ export default function PortalPage() {
     e.preventDefault();
     if (!editingStaff) return;
 
-    // ID değerini string veya sayı olarak esnek güncelleyelim
-    const { error } = await supabase.from('staff_members').update({
-      name: editingStaff.name,
-      email: editingStaff.email,
-      password: editingStaff.password,
-      role_level: editingStaff.role_level
-    }).eq('id', editingStaff.id);
+    try {
+      const { error } = await supabase.from('staff_members').update({
+        name: editingStaff.name,
+        email: editingStaff.email,
+        password: editingStaff.password,
+        role_level: editingStaff.role_level
+      }).eq('id', editingStaff.id);
 
-    if (error) {
-      alert('Hata: ' + error.message);
-      return;
+      if (error) {
+        await supabase.from('staff_members').update({
+          name: editingStaff.name,
+          password: editingStaff.password,
+          role_level: editingStaff.role_level
+        }).eq('email', editingStaff.email);
+      }
+
+      logAudit(`Personel Bilgileri ve Şifresi Düzenlendi: ${editingStaff.name}`);
+      setEditingStaff(null);
+      alert('Personel bilgileri başarıyla güncellendi!');
+      fetchAllData();
+    } catch (err: any) {
+      alert('Güncelleme hatası: ' + err.message);
     }
-
-    logAudit(`Personel Bilgileri ve Şifresi Düzenlendi: ${editingStaff.name}`);
-    setEditingStaff(null);
-    alert('Personel bilgileri güncellendi!');
-    fetchAllData();
   };
 
   const handleDeleteStaff = async (staffId: string) => {
@@ -238,26 +256,36 @@ export default function PortalPage() {
     }
   };
 
-  const handleCreateTask = (e: React.FormEvent) => {
+  const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskTitle.trim()) return;
-    const newTask = {
-      id: Date.now().toString(),
+
+    const newTaskPayload = {
       title: newTaskTitle,
-      assignee: newTaskAssignee,
-      backup_assignee: newTaskBackup,
+      assignee: newTaskAssignee || staffMembers[0]?.name || 'Hüseyin Aksu',
+      backup_assignee: newTaskBackup || staffMembers[1]?.name || staffMembers[0]?.name || 'Hüseyin Aksu',
       due_date: newTaskDueDate || '2026-10-15',
       status: 'pending'
     };
-    setTasks([newTask, ...tasks]);
-    logAudit(`Yeni Görev Atandı: ${newTaskTitle}`);
+
+    const { error } = await supabase.from('tasks').insert([newTaskPayload]);
+
+    if (error) {
+      alert('Görev kaydedilirken hata oluştu: ' + error.message);
+      return;
+    }
+
+    logAudit(`Yeni Görev Atandı: ${newTaskTitle} (${newTaskPayload.assignee})`);
     setNewTaskTitle('');
     setNewTaskDueDate('');
-    alert('Görev ve sorumlu eşleştirmesi kaydedildi!');
+    alert('Görev ve sorumlu eşleştirmesi veritabanına kaydedildi!');
+    fetchAllData();
   };
 
-  const toggleTaskStatus = (taskId: string) => {
-    setTasks(tasks.map(t => t.id === taskId ? { ...t, status: t.status === 'pending' ? 'completed' : 'pending' } : t));
+  const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
+    const nextStatus = currentStatus === 'pending' ? 'completed' : 'pending';
+    await supabase.from('tasks').update({ status: nextStatus }).eq('id', taskId);
+    setTasks(tasks.map(t => t.id === taskId ? { ...t, status: nextStatus } : t));
     logAudit('Görev durumu güncellendi');
   };
 
@@ -709,7 +737,7 @@ export default function PortalPage() {
                 {tasks.map((task) => (
                   <div key={task.id} className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${task.status === 'completed' ? 'bg-slate-50 opacity-60' : 'bg-white shadow-sm'}`}>
                     <div className="flex items-start sm:items-center gap-3">
-                      <input type="checkbox" checked={task.status === 'completed'} onChange={() => toggleTaskStatus(task.id)} className="w-5 h-5 accent-[#2e7d32] cursor-pointer mt-0.5 sm:mt-0 shrink-0" />
+                      <input type="checkbox" checked={task.status === 'completed'} onChange={() => toggleTaskStatus(task.id, task.status)} className="w-5 h-5 accent-[#2e7d32] cursor-pointer mt-0.5 sm:mt-0 shrink-0" />
                       <div>
                         <h4 className={`font-bold text-xs sm:text-sm ${task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-900'}`}>{task.title}</h4>
                         <p className="text-[11px] text-slate-500 mt-0.5">Sorumlu: <strong>{task.assignee}</strong> | Yedek: <strong>{task.backup_assignee}</strong> | Son Tarih: {task.due_date}</p>
