@@ -410,7 +410,7 @@ export default function PortalPage() {
           </div>
         </div>
 
-        {/* Tab Navigation (Sorunsuz, Kesilmeyen ve Esnek Tasarım) */}
+        {/* Tab Navigation */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
           <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
@@ -712,13 +712,17 @@ export default function PortalPage() {
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskAssigneeLabel}</label>
                   <select value={newTaskAssignee} onChange={(e) => setNewTaskAssignee(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm">
-                    {staffMembers.map(s => <option key={s.id} value={s.name} className="text-slate-900 bg-white">{s.name}</option>)}
+                    {Array.from(new Set(staffMembers.map(s => s.name))).map((name, idx) => (
+                      <option key={idx} value={name} className="text-slate-900 bg-white">{name}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskBackupAssigneeLabel}</label>
                   <select value={newTaskBackup} onChange={(e) => setNewTaskBackup(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm">
-                    {staffMembers.map(s => <option key={s.id} value={s.name} className="text-slate-900 bg-white">{s.name}</option>)}
+                    {Array.from(new Set(staffMembers.map(s => s.name))).map((name, idx) => (
+                      <option key={idx} value={name} className="text-slate-900 bg-white">{name}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
