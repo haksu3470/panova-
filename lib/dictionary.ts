@@ -256,7 +256,7 @@ export const translations: Record<Language, Translation> = {
       hr: { name: 'Panova HR', tagline: 'İnsan Kaynakları ve İstihdam' },
       trade: { name: 'Panova Trade', tagline: 'Dış Ticaret ve Lojistik' },
       agriculture: { name: 'Panova Tarım ve Hayvancılık', tagline: 'Tarımsal Üretim ve Bahçe' },
-      construction: { name: 'Panova Construction', tagline: 'İnşaat و Yapı' }
+      construction: { name: 'Panova Construction', tagline: 'İnşaat ve Yapı' }
     },
     certAndVideo: 'Sertifika & Video',
     salaryAndShift: 'Ücret & Vardiya',
