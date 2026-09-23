@@ -18,6 +18,9 @@ export default function PortalPage() {
     return 'en';
   });
 
+  const t = translations[currentLang] || translations.en;
+  const isRtl = currentLang === 'ar';
+
   useEffect(() => {
     const handleStorage = () => {
       const saved = localStorage.getItem('panova_portal_lang') as Language;
@@ -26,11 +29,7 @@ export default function PortalPage() {
       }
     };
     window.addEventListener('storage', handleStorage);
-    const interval = setInterval(handleStorage, 150);
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-      clearInterval(interval);
-    };
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   const changeLanguage = (lang: Language) => {
@@ -68,7 +67,7 @@ export default function PortalPage() {
   const [tasks, setTasks] = useState<any[]>([]);
 
   const [auditLogs, setAuditLogs] = useState<any[]>([
-    { id: '1', action: 'Sistem Başlatıldı & Rol Matrisi Kuruldu', performer: 'Hüseyin Aksu', time: '2026-09-22 12:00' }
+    { id: '1', actionKey: 'initialAuditLog', performer: 'Hüseyin Aksu', time: '2026-09-22 12:00' }
   ]);
 
   const [loading, setLoading] = useState(false);
@@ -86,9 +85,6 @@ export default function PortalPage() {
   const [newTaskAssignee, setNewTaskAssignee] = useState('');
   const [newTaskBackup, setNewTaskBackup] = useState('');
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
-
-  const t = translations[currentLang] || translations.en;
-  const isRtl = currentLang === 'ar';
   
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
   const activeLangObj = languages.find((l) => l.code === currentLang);
@@ -442,7 +438,6 @@ export default function PortalPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            {/* Oturum Açan Kullanıcı Dinamik Rozeti */}
             <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
               <UserCheck className="w-4 h-4 text-emerald-700" />
               <div className="text-xs">
@@ -858,7 +853,9 @@ export default function PortalPage() {
                 <tbody className="divide-y divide-slate-100">
                   {auditLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50/50">
-                      <td className="p-4 font-bold text-slate-900">{log.action}</td>
+                      <td className="p-4 font-bold text-slate-900">
+                        {log.actionKey ? (t as any)[log.actionKey] || log.actionKey : log.action}
+                      </td>
                       <td className="p-4">{log.performer}</td>
                       <td className="p-4 text-[11px] text-slate-400">{log.time}</td>
                     </tr>
