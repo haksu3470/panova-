@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   Lock, ShieldCheck, Search, Filter, Languages, ArrowLeft, Award, Video, 
-  CheckCircle, Clock, Star, Calendar, Building2, Users, FileText, Plane, AlertCircle, Briefcase, UserCheck, User, CheckSquare, Plus, UserPlus, Settings, History, ShieldAlert, Trash2 
+  CheckCircle, Clock, Star, Calendar, Building2, Users, FileText, Plane, AlertCircle, Briefcase, UserCheck, User, CheckSquare, Plus, UserPlus, Settings, History, ShieldAlert, Trash2, Key 
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
@@ -56,13 +56,7 @@ export default function PortalPage() {
   const [jobRequests, setJobRequests] = useState<any[]>([]);
   const [employers, setEmployers] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
-  
-  const [staffMembers, setStaffMembers] = useState<any[]>([
-    { id: '1', name: 'Hüseyin Aksu', email: 'huseyin@panova.com', roleLevel: 'upper_management' },
-    { id: '2', name: 'Mehmet Çitil', email: 'mehmet@panova.com', roleLevel: 'target_country' },
-    { id: '3', name: 'Aleksandar Petrov', email: 'aleksandar@panova.com', roleLevel: 'source_country' },
-    { id: '4', name: 'Rabia Aksu', email: 'rabia@panova.com', roleLevel: 'field_officer' }
-  ]);
+  const [staffMembers, setStaffMembers] = useState<any[]>([]);
 
   const [tasks, setTasks] = useState<any[]>([
     { id: '1', title: 'Pasaport ve vize evraklarını kontrol et', assignee: 'Hüseyin Aksu', backup_assignee: 'Aleksandar Petrov', due_date: '2026-10-01', status: 'pending' },
@@ -70,8 +64,7 @@ export default function PortalPage() {
   ]);
 
   const [auditLogs, setAuditLogs] = useState<any[]>([
-    { id: '1', action: 'Sistem Başlatıldı & Rol Matrisi Kuruldu', performer: 'Hüseyin Aksu', time: '2026-09-22 12:00' },
-    { id: '2', action: 'Aday vize süreci güncellendi', performer: 'Mehmet Çitil', time: '2026-09-22 14:30' }
+    { id: '1', action: 'Sistem Başlatıldı & Rol Matrisi Kuruldu', performer: 'Hüseyin Aksu', time: '2026-09-22 12:00' }
   ]);
 
   const [loading, setLoading] = useState(false);
@@ -80,6 +73,7 @@ export default function PortalPage() {
 
   const [newStaffName, setNewStaffName] = useState('');
   const [newStaffEmail, setNewStaffEmail] = useState('');
+  const [newStaffPassword, setNewStaffPassword] = useState('');
   const [newStaffRoleLevel, setNewStaffRoleLevel] = useState('source_country');
 
   // Personel Düzenleme Modalı State'leri
@@ -116,6 +110,17 @@ export default function PortalPage() {
     const { data: ticketData } = await supabase.from('candidate_support_tickets').select('*').order('created_at', { ascending: false });
     if (ticketData) setSupportTickets(ticketData);
 
+    const { data: staffData } = await supabase.from('staff_members').select('*').order('created_at', { ascending: false });
+    if (staffData && staffData.length > 0) {
+      setStaffMembers(staffData);
+    } else {
+      // Varsayılan personel yoksa tabloya örnek ekleyelim veya state'i koruyalım
+      setStaffMembers([
+        { id: '1', name: 'Hüseyin Aksu', email: 'huseyin@panova.com', password: '123', role_level: 'upper_management' },
+        { id: '2', name: 'Mehmet Çitil', email: 'mehmet@panova.com', password: '123', role_level: 'target_country' }
+      ]);
+    }
+
     setLoading(false);
   };
 
@@ -131,15 +136,18 @@ export default function PortalPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if ((username === 'admin' && password === 'panova2026') || staffMembers.some(s => s.email === username)) {
+    // Master admin girişi VEYA Supabase'deki personel e-posta ve şifre kontrolü
+    const matchedStaff = staffMembers.find(s => s.email === username && s.password === password);
+    
+    if ((username === 'admin' && password === 'panova2026') || matchedStaff) {
       setAuthenticated(true);
       if (typeof window !== 'undefined') {
         localStorage.setItem('panova_admin_auth', 'true');
       }
-      logAudit('Sisteme Giriş Yapıldı', username);
+      logAudit('Sisteme Giriş Yapıldı', matchedStaff ? matchedStaff.name : username);
       fetchAllData();
     } else {
-      alert('Geçersiz kullanıcı adı veya şifre! (admin / panova2026)');
+      alert('Geçersiz kullanıcı adı veya şifre!');
     }
   };
 
@@ -168,43 +176,66 @@ export default function PortalPage() {
     logAudit(`Aday Sorumlusu Atandı -> ${assignee}`);
   };
 
-  const updateStaffRoleLevel = (staffId: string, newLevel: string) => {
-    setStaffMembers(staffMembers.map(s => s.id === staffId ? { ...s, roleLevel: newLevel } : s));
+  const updateStaffRoleLevel = async (staffId: string, newLevel: string) => {
+    await supabase.from('staff_members').update({ role_level: newLevel }).eq('id', staffId);
+    setStaffMembers(staffMembers.map(s => s.id === staffId ? { ...s, role_level: newLevel } : s));
     logAudit(`Personel Rol Seviyesi Güncellendi`);
   };
 
-  const handleAddStaff = (e: React.FormEvent) => {
+  const handleAddStaff = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newStaffName.trim() || !newStaffEmail.trim()) return;
+    if (!newStaffName.trim() || !newStaffEmail.trim() || !newStaffPassword.trim()) return;
 
-    const newStaff = {
-      id: Date.now().toString(),
-      name: newStaffName,
-      email: newStaffEmail,
-      roleLevel: newStaffRoleLevel
-    };
+    const { error } = await supabase.from('staff_members').insert([
+      {
+        name: newStaffName,
+        email: newStaffEmail,
+        password: newStaffPassword,
+        role_level: newStaffRoleLevel
+      }
+    ]);
 
-    setStaffMembers([...staffMembers, newStaff]);
+    if (error) {
+      alert('Hata: ' + error.message);
+      return;
+    }
+
     logAudit(`Yeni Ekip Üyesi Eklendi: ${newStaffName}`);
     setNewStaffName('');
     setNewStaffEmail('');
-    alert('Yeni ekip üyesi başarıyla eklendi!');
+    setNewStaffPassword('');
+    alert('Yeni ekip üyesi ve şifresi başarıyla kaydedildi!');
+    fetchAllData();
   };
 
-  const handleSaveStaffEdit = (e: React.FormEvent) => {
+  const handleSaveStaffEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingStaff) return;
 
-    setStaffMembers(staffMembers.map(s => s.id === editingStaff.id ? editingStaff : s));
-    logAudit(`Personel Bilgileri Düzenlendi: ${editingStaff.name}`);
+    const { error } = await supabase.from('staff_members').update({
+      name: editingStaff.name,
+      email: editingStaff.email,
+      password: editingStaff.password,
+      role_level: editingStaff.role_level
+    }).eq('id', editingStaff.id);
+
+    if (error) {
+      alert('Hata: ' + error.message);
+      return;
+    }
+
+    logAudit(`Personel Bilgileri ve Şifresi Düzenlendi: ${editingStaff.name}`);
     setEditingStaff(null);
     alert('Personel bilgileri güncellendi!');
+    fetchAllData();
   };
 
-  const handleDeleteStaff = (staffId: string) => {
+  const handleDeleteStaff = async (staffId: string) => {
     if (confirm('Bu personel kaydını silmek istediğinizden emin misiniz?')) {
+      await supabase.from('staff_members').delete().eq('id', staffId);
       setStaffMembers(staffMembers.filter(s => s.id !== staffId));
       logAudit('Personel Kaydı Silindi');
+      fetchAllData();
     }
   };
 
@@ -267,14 +298,14 @@ export default function PortalPage() {
 
           <form onSubmit={handleLogin} className="space-y-4 text-left rtl:text-right">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.usernameLabel}</label>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">E-Posta veya Kullanıcı Adı</label>
               <input
                 type="text"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
-                placeholder="admin"
+                placeholder="admin veya huseyin@panova.com"
               />
             </div>
             <div>
@@ -352,7 +383,7 @@ export default function PortalPage() {
           </div>
         </div>
 
-        {/* Tab Navigation (Mobilde Yatay Kaydırılabilir) */}
+        {/* Tab Navigation */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
           <button onClick={() => setActiveTab('overview')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
@@ -558,7 +589,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 4: Ekip & Yönetici Personel Düzenleme */}
+        {/* Tab 4: Ekip & Şifreli Yönetici Personel Yönetimi */}
         {activeTab === 'staff' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
@@ -573,6 +604,10 @@ export default function PortalPage() {
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.staffEmailLabel}</label>
                   <input type="email" required value={newStaffEmail} onChange={(e) => setNewStaffEmail(e.target.value)} placeholder="ahmet@panova.com" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white text-xs sm:text-sm" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Giriş Şifresi *</label>
+                  <input type="password" required value={newStaffPassword} onChange={(e) => setNewStaffPassword(e.target.value)} placeholder="••••••••" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white text-xs sm:text-sm" />
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.staffPermLabel}</label>
@@ -605,11 +640,12 @@ export default function PortalPage() {
                       <div className="flex items-center justify-between">
                         <h4 className="font-extrabold text-slate-900 text-sm">{staff.name}</h4>
                         <div className="flex items-center gap-1">
-                          <button onClick={() => setEditingStaff(staff)} className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-[11px] font-bold transition cursor-pointer">Düzenle</button>
+                          <button onClick={() => setEditingStaff(staff)} className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-[11px] font-bold transition cursor-pointer">Düzenle / Şifre</button>
                           <button onClick={() => handleDeleteStaff(staff.id)} className="p-1 text-slate-400 hover:text-red-600 transition cursor-pointer"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </div>
                       <p className="text-xs text-slate-500">{staff.email}</p>
+                      <p className="text-[11px] text-slate-400 font-mono">Şifre: ••••••••</p>
                     </div>
 
                     <div className="pt-2 border-t space-y-1.5">
@@ -617,7 +653,7 @@ export default function PortalPage() {
                         {t.permLevelText}
                       </span>
                       <select
-                        value={staff.roleLevel || 'source_country'}
+                        value={staff.role_level || 'source_country'}
                         onChange={(e) => updateStaffRoleLevel(staff.id, e.target.value)}
                         className="w-full px-3 py-2 rounded-xl border text-xs font-bold bg-white text-slate-900 cursor-pointer outline-none shadow-sm"
                       >
@@ -763,12 +799,14 @@ export default function PortalPage() {
 
       </div>
 
-      {/* Personel Düzenleme Modalı */}
+      {/* Personel ve Şifre Düzenleme Modalı */}
       {editingStaff && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 z-50">
           <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border space-y-4">
             <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="font-bold text-slate-900 text-base">Personel Bilgilerini Düzenle</h3>
+              <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                <Key className="w-4 h-4 text-emerald-700" /> Personel & Şifre Düzenle
+              </h3>
               <button onClick={() => setEditingStaff(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
             </div>
             <form onSubmit={handleSaveStaffEdit} className="space-y-3 text-xs">
@@ -777,12 +815,16 @@ export default function PortalPage() {
                 <input type="text" required value={editingStaff.name} onChange={(e) => setEditingStaff({ ...editingStaff, name: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
               </div>
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">E-Posta</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">E-Posta (Giriş için)</label>
                 <input type="email" required value={editingStaff.email} onChange={(e) => setEditingStaff({ ...editingStaff, email: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
               </div>
               <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Yeni Şifre</label>
+                <input type="text" required value={editingStaff.password || ''} onChange={(e) => setEditingStaff({ ...editingStaff, password: e.target.value })} placeholder="Yeni şifreyi girin" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
+              </div>
+              <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">Rol / Yetki Seviyesi</label>
-                <select value={editingStaff.roleLevel} onChange={(e) => setEditingStaff({ ...editingStaff, roleLevel: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer">
+                <select value={editingStaff.role_level} onChange={(e) => setEditingStaff({ ...editingStaff, role_level: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer">
                   <option value="upper_management" className="text-slate-900 bg-white">👑 {t.roleUpperManagement}</option>
                   <option value="source_country" className="text-slate-900 bg-white">🌍 {t.roleSourceCountry}</option>
                   <option value="target_country" className="text-slate-900 bg-white">🏢 {t.roleTargetCountry}</option>
@@ -790,7 +832,7 @@ export default function PortalPage() {
                 </select>
               </div>
               <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs">
-                Değişiklikleri Kaydet
+                Değişiklikleri ve Şifreyi Kaydet
               </button>
             </form>
           </div>
