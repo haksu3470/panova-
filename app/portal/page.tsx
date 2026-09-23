@@ -97,14 +97,14 @@ export default function PortalPage() {
   const userRole = currentUser?.role_level?.toLowerCase() || '';
   const isUpperManagement = userRole === 'upper_management' || currentUser?.isAdmin || currentUser?.email === 'admin';
 
-  // Rolleri Türkçe etiketlere dönüştürme fonksiyonu
+  // Rolleri seçilen dile göre dinamik getirme fonksiyonu
   const getRoleDisplayName = (role: string) => {
     const r = role?.toLowerCase() || '';
-    if (r === 'upper_management') return '👑 Üst Yönetim (Admin)';
-    if (r === 'source_country') return '🌍 Kaynak Ülke Sorumlusu';
-    if (r === 'target_country') return '🏢 Hedef Ülke Sorumlusu';
-    if (r === 'field_officer') return '✈️ Saha Sorumlusu';
-    return '🛡️ Personel';
+    if (r === 'upper_management') return `👑 ${t.roleUpperManagement}`;
+    if (r === 'source_country') return `🌍 ${t.roleSourceCountry}`;
+    if (r === 'target_country') return `🏢 ${t.roleTargetCountry}`;
+    if (r === 'field_officer') return `✈️ ${t.roleFieldOfficer}`;
+    return `🛡️ ${t.staffTab}`;
   };
 
   useEffect(() => {
@@ -444,7 +444,7 @@ export default function PortalPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            {/* Oturum Açan Kullanıcı Türkçe Rozeti */}
+            {/* Oturum Açan Kullanıcı Dinamik Rozeti */}
             <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
               <UserCheck className="w-4 h-4 text-emerald-700" />
               <div className="text-xs">
@@ -487,7 +487,7 @@ export default function PortalPage() {
           </div>
         </div>
 
-        {/* Tab Navigation (Sadece Admin Ekip & Yetkiler sekmesini görür) */}
+        {/* Tab Navigation */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
           <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
@@ -499,7 +499,6 @@ export default function PortalPage() {
             📁 {t.requestsTab} ({jobRequests.length})
           </button>
           
-          {/* Yalnızca Üst Yönetim Ekip sekmesini görebilir */}
           {isUpperManagement && (
             <button onClick={() => setActiveTab('staff')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'staff' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
               🛡️ {t.staffTab} ({staffMembers.length})
@@ -540,7 +539,6 @@ export default function PortalPage() {
                 <Building2 className="w-9 h-9 sm:w-10 sm:h-10 text-blue-600 bg-blue-50 p-2 rounded-xl" />
               </div>
 
-              {/* Ekip & Yetkiler kartı sadece Admin'e görünür */}
               {isUpperManagement && (
                 <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                   <div>
@@ -701,7 +699,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 4: Ekip & Şifreli Yönetici Personel Yönetimi (Sadece Üst Yönetim) */}
+        {/* Tab 4: Ekip & Şifreli Yönetici Personel Yönetimi */}
         {activeTab === 'staff' && isUpperManagement && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
@@ -915,7 +913,7 @@ export default function PortalPage() {
 
       </div>
 
-      {/* Personel ve Şifre Düzenleme Modalı (Sadece Admin) */}
+      {/* Personel ve Şifre Düzenleme Modalı */}
       {editingStaff && isUpperManagement && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 z-50">
           <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border space-y-4">
