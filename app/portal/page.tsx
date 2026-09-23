@@ -118,13 +118,13 @@ export default function PortalPage() {
     const { data: staffData } = await supabase.from('staff_members').select('*').order('created_at', { ascending: false });
     if (staffData && staffData.length > 0) {
       setStaffMembers(staffData);
-      if (!newTaskAssignee) {
+      if (!newTaskAssignee && staffData[0]) {
         setNewTaskAssignee(staffData[0].name);
         setNewTaskBackup(staffData[1]?.name || staffData[0].name);
       }
     } else {
       const defaultStaff = [
-        { id: '1', name: 'Hüseyin Aksu', email: 'admin', password: 'panova2026', role_level: 'upper_management' },
+        { id: '1', name: 'Hüseyin Aksu', email: 'admin@panova.com', password: 'panova2026', role_level: 'upper_management' },
         { id: '2', name: 'Mehmet Çitil', email: 'mehmet@panova.com', password: '123', role_level: 'target_country' }
       ];
       setStaffMembers(defaultStaff);
@@ -162,7 +162,7 @@ export default function PortalPage() {
     let loggedUser = null;
 
     if (username === 'admin' && password === 'panova2026') {
-      loggedUser = { name: 'Hüseyin Aksu (Master Admin)', email: 'admin', role_level: 'upper_management', isAdmin: true };
+      loggedUser = { name: 'Hüseyin Aksu (Master Admin)', email: 'admin@panova.com', role_level: 'upper_management', isAdmin: true };
     } else if (matchedStaff) {
       loggedUser = matchedStaff;
     }
@@ -294,9 +294,11 @@ export default function PortalPage() {
     e.preventDefault();
     if (!newTaskTitle.trim()) return;
 
+    const assignedStaffObj = staffMembers.find(s => s.name === (newTaskAssignee || staffMembers[0]?.name));
+
     const newTaskPayload = {
       title: newTaskTitle,
-      assignee: newTaskAssignee || staffMembers[0]?.name || 'Hüseyin Aksu',
+      assignee: assignedStaffObj?.name || 'Hüseyin Aksu',
       backup_assignee: newTaskBackup || staffMembers[1]?.name || staffMembers[0]?.name || 'Hüseyin Aksu',
       due_date: newTaskDueDate || '2026-10-15',
       status: 'pending'
@@ -309,10 +311,29 @@ export default function PortalPage() {
       return;
     }
 
-    logAudit(`Yeni Görev Atandı: ${newTaskTitle} (${newTaskPayload.assignee})`, currentUser?.name);
+    // Sorumlu personele otomatik e-posta bildirimi gönderme
+    if (assignedStaffObj?.email) {
+      try {
+        await fetch('/api/send-task-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: assignedStaffObj.email,
+            title: newTaskTitle,
+            assigneeName: assignedStaffObj.name,
+            dueDate: newTaskPayload.due_date,
+            backupAssignee: newTaskPayload.backup_assignee
+          })
+        });
+      } catch (mailErr) {
+        console.error('Mail gönderilemedi:', mailErr);
+      }
+    }
+
+    logAudit(`Yeni Görev Atandı ve Mail İletildi: ${newTaskTitle} (${newTaskPayload.assignee})`, currentUser?.name);
     setNewTaskTitle('');
     setNewTaskDueDate('');
-    alert('Görev ve sorumlu eşleştirmesi veritabanına kaydedildi!');
+    alert('Görev kaydedildi ve sorumlu personele e-posta bildirimi iletildi!');
     fetchAllData();
   };
 
@@ -412,7 +433,7 @@ export default function PortalPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            {/* Oturum Açan Kullanıcı Bilgi Rozeti */}
+            {/* Oturum Açan Kullanıcı Rozeti */}
             <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
               <UserCheck className="w-4 h-4 text-emerald-700" />
               <div className="text-xs">
@@ -455,7 +476,7 @@ export default function PortalPage() {
           </div>
         </div>
 
-        {/* Tab Navigation (Sadece Admin Ekip & Yetkiler sekmesini görür) */}
+        {/* Tab Navigation (Sadece Üst Yönetim Ekip & Yetkiler sekmesini görür) */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
           <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
@@ -467,7 +488,6 @@ export default function PortalPage() {
             📁 {t.requestsTab} ({jobRequests.length})
           </button>
           
-          {/* Yalnızca Üst Yönetim / Admin Ekip & Yetkiler sekmesini görebilir */}
           {isUpperManagement && (
             <button onClick={() => setActiveTab('staff')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'staff' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
               🛡️ {t.staffTab} ({staffMembers.length})
@@ -666,7 +686,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 4: Ekip & Şifreli Yönetici Personel Yönetimi (Sadece Üst Yönetim Görebilir) */}
+        {/* Tab 4: Ekip & Şifreli Yönetici Personel Yönetimi (Sadece Üst Yönetim) */}
         {activeTab === 'staff' && isUpperManagement && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
@@ -849,7 +869,7 @@ export default function PortalPage() {
                 {employers.map((emp) => (
                   <div key={emp.id} className="p-4 bg-slate-50 rounded-2xl border space-y-2 text-xs sm:text-sm">
                     <h4 className="font-extrabold text-slate-900">{emp.company_name}</h4>
-                    <p className="text-slate-500">Yetkilisi: <strong>{emp.contact_person}</strong> | Ülke: {emp.country}</p>
+                    <p className="text-slate-500">Yetkili: <strong>{emp.contact_person}</strong> | Ülke: {emp.country}</p>
                   </div>
                 ))}
               </div>
@@ -904,7 +924,7 @@ export default function PortalPage() {
                 <input type="text" required value={editingStaff.password || ''} onChange={(e) => setEditingStaff({ ...editingStaff, password: e.target.value })} placeholder="Yeni şifreyi girin" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
               </div>
               <div>
-                <label className="block font-bold text-slate-700 uppercase neb-1">Rol / Yetki Seviyesi</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Rol / Yetki Seviyesi</label>
                 <select value={editingStaff.role_level} onChange={(e) => setEditingStaff({ ...editingStaff, role_level: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer">
                   <option value="upper_management" className="text-slate-900 bg-white">👑 {t.roleUpperManagement}</option>
                   <option value="source_country" className="text-slate-900 bg-white">🌍 {t.roleSourceCountry}</option>
