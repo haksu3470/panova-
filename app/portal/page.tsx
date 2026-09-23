@@ -93,7 +93,19 @@ export default function PortalPage() {
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
   const activeLangObj = languages.find((l) => l.code === currentLang);
 
-  const isUpperManagement = currentUser?.role_level === 'upper_management' || currentUser?.isAdmin;
+  // Kesin ve güvenli üst yönetim (admin) kontrolü
+  const userRole = currentUser?.role_level?.toLowerCase() || '';
+  const isUpperManagement = userRole === 'upper_management' || currentUser?.isAdmin || currentUser?.email === 'admin';
+
+  // Rolleri Türkçe etiketlere dönüştürme fonksiyonu
+  const getRoleDisplayName = (role: string) => {
+    const r = role?.toLowerCase() || '';
+    if (r === 'upper_management') return '👑 Üst Yönetim (Admin)';
+    if (r === 'source_country') return '🌍 Kaynak Ülke Sorumlusu';
+    if (r === 'target_country') return '🏢 Hedef Ülke Sorumlusu';
+    if (r === 'field_officer') return '✈️ Saha Sorumlusu';
+    return '🛡️ Personel';
+  };
 
   useEffect(() => {
     if (authenticated) {
@@ -311,7 +323,6 @@ export default function PortalPage() {
       return;
     }
 
-    // Sorumlu personele otomatik e-posta bildirimi gönderme
     if (assignedStaffObj?.email) {
       try {
         await fetch('/api/send-task-email', {
@@ -433,13 +444,13 @@ export default function PortalPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            {/* Oturum Açan Kullanıcı Rozeti */}
+            {/* Oturum Açan Kullanıcı Türkçe Rozeti */}
             <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
               <UserCheck className="w-4 h-4 text-emerald-700" />
               <div className="text-xs">
                 <span className="font-bold text-slate-900 block">{currentUser?.name}</span>
                 <span className="text-[10px] text-emerald-800 uppercase font-semibold">
-                  {isUpperManagement ? '👑 Üst Yönetim (Admin)' : `🛡️ ${currentUser?.role_level || 'Personel'}`}
+                  {getRoleDisplayName(currentUser?.role_level)}
                 </span>
               </div>
             </div>
@@ -476,7 +487,7 @@ export default function PortalPage() {
           </div>
         </div>
 
-        {/* Tab Navigation (Sadece Üst Yönetim Ekip & Yetkiler sekmesini görür) */}
+        {/* Tab Navigation (Sadece Admin Ekip & Yetkiler sekmesini görür) */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
           <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
@@ -488,6 +499,7 @@ export default function PortalPage() {
             📁 {t.requestsTab} ({jobRequests.length})
           </button>
           
+          {/* Yalnızca Üst Yönetim Ekip sekmesini görebilir */}
           {isUpperManagement && (
             <button onClick={() => setActiveTab('staff')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'staff' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
               🛡️ {t.staffTab} ({staffMembers.length})
@@ -511,7 +523,7 @@ export default function PortalPage() {
         {/* Tab 1: Genel Durum */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 ${isUpperManagement ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
               <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
                   <div className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase">{t.totalCandidatesCard}</div>
@@ -528,13 +540,16 @@ export default function PortalPage() {
                 <Building2 className="w-9 h-9 sm:w-10 sm:h-10 text-blue-600 bg-blue-50 p-2 rounded-xl" />
               </div>
 
-              <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
-                <div>
-                  <div className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase">{t.staffTab}</div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-indigo-600 mt-1">{staffMembers.length}</div>
+              {/* Ekip & Yetkiler kartı sadece Admin'e görünür */}
+              {isUpperManagement && (
+                <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
+                  <div>
+                    <div className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase">{t.staffTab}</div>
+                    <div className="text-2xl sm:text-3xl font-extrabold text-indigo-600 mt-1">{staffMembers.length}</div>
+                  </div>
+                  <UserCheck className="w-9 h-9 sm:w-10 sm:h-10 text-indigo-600 bg-indigo-50 p-2 rounded-xl" />
                 </div>
-                <UserCheck className="w-9 h-9 sm:w-10 sm:h-10 text-indigo-600 bg-indigo-50 p-2 rounded-xl" />
-              </div>
+              )}
 
               <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
