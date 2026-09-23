@@ -674,7 +674,6 @@ export default function CandidateDashboard() {
                 <label className="block font-bold text-slate-700 uppercase mb-1">{t.password}</label>
                 <input type="text" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none bg-white" />
               </div>
-              {/* Mobil ve masaüstünde sabit / rahat erişilebilir kaydet butonu */}
               <button type="submit" disabled={updatingProfile} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 sm:py-4 rounded-xl font-bold text-sm transition cursor-pointer shadow-md">
                 {t.saveBtn}
               </button>

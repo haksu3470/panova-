@@ -155,7 +155,6 @@ export default function EmployerPortalPage() {
 
   const fetchEmployerData = async (employerId: string) => {
     setLoading(true);
-    // 1. Talepleri Çek
     const { data: reqs } = await supabase
       .from('job_requests')
       .select('*')
@@ -164,7 +163,6 @@ export default function EmployerPortalPage() {
 
     if (reqs) setRequests(reqs);
 
-    // 2. Aday Havuzunu Çek (Tüm adaylar veya eşleşenler)
     const { data: cands } = await supabase
       .from('job_candidates')
       .select('*')
@@ -172,7 +170,6 @@ export default function EmployerPortalPage() {
 
     if (cands) setCandidates(cands);
 
-    // 3. Destek Taleplerini Çek
     const { data: tickets } = await supabase
       .from('candidate_support_tickets')
       .select('*')
@@ -233,7 +230,7 @@ export default function EmployerPortalPage() {
 
     const { error } = await supabase.from('candidate_support_tickets').insert([
       {
-        candidate_id: employer.id, // İşveren ID
+        candidate_id: employer.id,
         candidate_name: `${employer.company_name} (İşveren)`,
         subject: supportSubject,
         message: supportMessage,
@@ -253,13 +250,13 @@ export default function EmployerPortalPage() {
 
   if (!authenticated) {
     return (
-      <div className={`min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-        <div className="absolute top-6 right-6 flex items-center bg-slate-800 rounded-lg px-2.5 py-1.5 border border-slate-700 shadow-sm">
-          <Languages className="w-4 h-4 text-slate-300 mr-1.5 rtl:ml-1.5" />
+      <div className={`min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 sm:p-6 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center bg-slate-800 rounded-xl px-3 py-2 border border-slate-700 shadow-sm">
+          <Languages className="w-4 h-4 text-slate-300 mr-2 rtl:ml-2" />
           <select
             value={currentLang}
             onChange={(e) => changeLanguage(e.target.value as Language)}
-            className="bg-transparent text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer"
+            className="bg-transparent text-xs font-bold text-slate-200 focus:outline-none cursor-pointer"
           >
             <option value={currentLang} className="font-bold">
               {activeLangObj?.flag} {activeLangObj?.name}
@@ -270,12 +267,12 @@ export default function EmployerPortalPage() {
           </select>
         </div>
 
-        <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
+        <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
           <div className="w-14 h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Building2 className="w-7 h-7" />
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 mb-1">{t.empPortalTitle}</h1>
-          <p className="text-slate-500 text-sm mb-6">{t.empPortalSub}</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1">{t.empPortalTitle}</h1>
+          <p className="text-slate-500 text-xs sm:text-sm mb-6">{t.empPortalSub}</p>
 
           <form onSubmit={handleLogin} className="space-y-4 text-left rtl:text-right">
             <div>
@@ -308,10 +305,10 @@ export default function EmployerPortalPage() {
               {loading ? t.submitting : t.signInBtn}
             </button>
           </form>
-          <div className="mt-4 text-xs text-slate-600 bg-slate-100 p-2.5 rounded-xl border border-slate-200">
+          <div className="mt-4 text-xs text-slate-600 bg-slate-100 p-3 rounded-xl border border-slate-200">
             Demo Login: <strong>demo@panova.com</strong> / <strong>employer2026</strong>
           </div>
-          <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-sm text-slate-500 hover:underline">
+          <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-xs text-slate-500 hover:underline">
             <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
           </Link>
         </div>
@@ -320,32 +317,25 @@ export default function EmployerPortalPage() {
   }
 
   return (
-    <div className={`min-h-screen bg-slate-50 p-4 sm:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         
         {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm">
           <div>
-            <span className="text-xs font-bold text-[#2e7d32] bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-wider">
+            <span className="text-[10px] sm:text-xs font-bold text-[#2e7d32] bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-wider">
               {employer?.country || 'Employer Dashboard'}
             </span>
-            <h1 className="text-2xl font-extrabold text-slate-900 mt-1">{employer?.company_name}</h1>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-1">{employer?.company_name}</h1>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition border"
-            >
-              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
-            </Link>
-
-            <div className="relative flex items-center bg-slate-100 rounded-lg px-2.5 py-1.5 border border-slate-200 shadow-sm">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <div className="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200 shadow-sm">
               <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
               <select
                 value={currentLang}
                 onChange={(e) => changeLanguage(e.target.value as Language)}
-                className="bg-transparent text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer"
+                className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
               >
                 <option value={currentLang} className="font-bold">
                   {activeLangObj?.flag} {activeLangObj?.name}
@@ -356,6 +346,13 @@ export default function EmployerPortalPage() {
               </select>
             </div>
 
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" /> {t.returnHome}
+            </Link>
+
             <button
               onClick={() => setShowNewRequestModal(true)}
               className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-md inline-flex items-center gap-1.5 cursor-pointer"
@@ -365,7 +362,7 @@ export default function EmployerPortalPage() {
 
             <button
               onClick={() => setAuthenticated(false)}
-              className="bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer"
+              className="bg-red-50 hover:bg-red-100 text-red-700 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
             >
               {t.logoutBtn}
             </button>
@@ -373,75 +370,59 @@ export default function EmployerPortalPage() {
         </div>
 
         {/* Metrik Kartları */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-              <div className="text-slate-500 text-xs font-bold uppercase">{t.totalDemands}</div>
-              <div className="text-3xl font-extrabold text-slate-900 mt-1">{requests.length}</div>
+              <div className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase">{t.totalDemands}</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">{requests.length}</div>
             </div>
-            <FileText className="w-10 h-10 text-emerald-600 bg-emerald-50 p-2 rounded-xl" />
+            <FileText className="w-9 h-9 sm:w-10 sm:h-10 text-emerald-600 bg-emerald-50 p-2 rounded-xl" />
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-              <div className="text-slate-500 text-xs font-bold uppercase">{t.requestedHeadcount}</div>
-              <div className="text-3xl font-extrabold text-slate-900 mt-1">
+              <div className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase">{t.requestedHeadcount}</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
                 {requests.reduce((acc, r) => acc + (r.headcount || 0), 0)}
               </div>
             </div>
-            <Users className="w-10 h-10 text-blue-600 bg-blue-50 p-2 rounded-xl" />
+            <Users className="w-9 h-9 sm:w-10 sm:h-10 text-blue-600 bg-blue-50 p-2 rounded-xl" />
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-              <div className="text-slate-500 text-xs font-bold uppercase">{t.activeProcesses}</div>
-              <div className="text-3xl font-extrabold text-slate-900 mt-1">
+              <div className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase">{t.activeProcesses}</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
                 {requests.filter(r => r.status !== 'completed' && r.status !== 'cancelled').length}
               </div>
             </div>
-            <Clock className="w-10 h-10 text-amber-600 bg-amber-50 p-2 rounded-xl" />
+            <Clock className="w-9 h-9 sm:w-10 sm:h-10 text-amber-600 bg-amber-50 p-2 rounded-xl" />
           </div>
         </div>
 
-        {/* Sekmeler (Tabs) */}
-        <div className="flex flex-wrap gap-2 border-b pb-2 overflow-x-auto text-xs font-bold">
-          <button onClick={() => setActiveTab('requests')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'requests' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📁 Personel Taleplerim
-          </button>
-          <button onClick={() => setActiveTab('candidates')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            👥 Adaylar / Eşleşmeler ({candidates.length})
-          </button>
-          <button onClick={() => setActiveTab('interviews')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'interviews' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📅 Görüşmeler
-          </button>
-          <button onClick={() => setActiveTab('selected')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'selected' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            ⭐ Seçtiğim Adaylar
-          </button>
-          <button onClick={() => setActiveTab('travel')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            ✈️ Seyahat ve Başlangıç
-          </button>
-          <button onClick={() => setActiveTab('employees')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            🛡️ Aktif Çalışanlar (30/60/90 Gün)
-          </button>
-          <button onClick={() => setActiveTab('support')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            💬 Destek / Bildirim
-          </button>
-          <button onClick={() => setActiveTab('profile')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            🏢 Şirket Bilgilerim
-          </button>
+        {/* Sekmeler (Mobilde Yatay Kaydırılabilir) */}
+        <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
+          <button onClick={() => setActiveTab('requests')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'requests' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>📁 Personel Taleplerim</button>
+          <button onClick={() => setActiveTab('candidates')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>👥 Adaylar / Eşleşmeler ({candidates.length})</button>
+          <button onClick={() => setActiveTab('interviews')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'interviews' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>📅 Görüşmeler</button>
+          <button onClick={() => setActiveTab('selected')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'selected' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>⭐ Seçtiğim Adaylar</button>
+          <button onClick={() => setActiveTab('travel')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>✈️ Seyahat ve Başlangıç</button>
+          <button onClick={() => setActiveTab('employees')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>🛡️ Aktif Çalışanlar</button>
+          <button onClick={() => setActiveTab('support')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>💬 Destek / Bildirim</button>
+          <button onClick={() => setActiveTab('profile')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>🏢 Şirket Bilgilerim</button>
         </div>
 
         {/* Tab 1: Personel Taleplerim */}
         {activeTab === 'requests' && (
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100 font-bold text-slate-900 text-lg">
+            <div className="p-4 sm:p-6 border-b border-slate-100 font-bold text-slate-900 text-sm sm:text-base">
               {t.dossierTitle}
             </div>
             {loading ? (
-              <div className="p-12 text-center text-slate-500">Loading dossiers...</div>
+              <div className="p-12 text-center text-slate-500 text-xs">Loading dossiers...</div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left rtl:text-right text-sm text-slate-700">
+                <table className="w-full text-left rtl:text-right text-xs sm:text-sm text-slate-700">
                   <thead className="bg-slate-50 text-slate-900 font-bold border-b border-slate-200">
                     <tr>
                       <th className="p-4">{t.colPosSec}</th>
@@ -457,17 +438,17 @@ export default function EmployerPortalPage() {
                       <tr key={req.id} className="hover:bg-slate-50/50">
                         <td className="p-4 font-bold text-slate-900">
                           {req.position_title}
-                          <div className="text-xs text-slate-500 font-normal uppercase">{req.sector}</div>
+                          <div className="text-[11px] text-slate-500 font-normal uppercase">{req.sector}</div>
                         </td>
                         <td className="p-4 font-bold text-slate-800">{req.headcount} Person(s)</td>
                         <td className="p-4 font-semibold text-emerald-700">€{req.monthly_net_salary} / mo</td>
-                        <td className="p-4 text-xs space-y-1 text-slate-600">
+                        <td className="p-4 text-[11px] sm:text-xs space-y-1 text-slate-600">
                           <div>{t.accommodation}: {req.accommodation_provided ? '✅ Covered' : '❌ No'}</div>
                           <div>{t.foodAllowance} / {t.flightTicket}: {req.food_provided ? '✅' : '❌'} | {req.flight_covered ? '✅' : '❌'}</div>
                         </td>
-                        <td className="p-4 text-xs font-medium text-slate-700">{req.target_start_date || 'Flexible'}</td>
+                        <td className="p-4 font-medium text-slate-700">{req.target_start_date || 'Flexible'}</td>
                         <td className="p-4">
-                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase bg-amber-50 text-amber-800 border border-amber-200">
+                          <span className="px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold uppercase bg-amber-50 text-amber-800 border border-amber-200">
                             {req.status || 'new_request'}
                           </span>
                         </td>
@@ -475,7 +456,7 @@ export default function EmployerPortalPage() {
                     ))}
                     {requests.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="p-8 text-center text-slate-500">
+                        <td colSpan={6} className="p-8 text-center text-slate-500 text-xs">
                           No active workforce demands found. Click "{t.newDemandBtn}" above to submit one.
                         </td>
                       </tr>
@@ -489,16 +470,16 @@ export default function EmployerPortalPage() {
 
         {/* Tab 2: Adaylar / Eşleşmeler */}
         {activeTab === 'candidates' && (
-          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Taleplerinize Sunulan Aday Havuzu</h3>
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">Taleplerinize Sunulan Aday Havuzu</h3>
             {candidates.length === 0 ? (
-              <div className="p-10 text-center text-slate-400 text-xs">Henüz eşleşen aday bulunmuyor.</div>
+              <div className="p-10 text-center text-slate-400 text-xs font-bold">Henüz eşleşen aday bulunmuyor.</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {candidates.map((cand) => (
                   <div key={cand.id} className="p-4 bg-slate-50 rounded-2xl border flex flex-col justify-between space-y-3">
                     <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center font-extrabold text-lg">
+                      <div className="w-12 h-12 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center font-extrabold text-lg shrink-0">
                         {cand.full_name?.charAt(0)}
                       </div>
                       <div>
@@ -507,11 +488,11 @@ export default function EmployerPortalPage() {
                         <p className="text-xs text-emerald-700 mt-1">Beklenti: €{cand.expected_salary || '---'} / ay</p>
                       </div>
                     </div>
-                    <div className="flex gap-2 pt-2 border-t">
-                      <button onClick={() => alert('Görüşme talebi yönetime iletildi!')} className="flex-1 bg-emerald-50 hover:bg-emerald-100 text-[#2e7d32] border border-emerald-200 py-2 rounded-xl text-xs font-bold transition cursor-pointer">
+                    <div className="flex gap-2 pt-2 border-t text-xs">
+                      <button onClick={() => alert('Görüşme talebi yönetime iletildi!')} className="flex-1 bg-emerald-50 hover:bg-emerald-100 text-[#2e7d32] border border-emerald-200 py-2.5 rounded-xl font-bold transition cursor-pointer">
                         📅 Görüşme İste
                       </button>
-                      <button onClick={() => alert('Aday kısa listeye alındı!')} className="flex-1 bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-xl text-xs font-bold transition cursor-pointer">
+                      <button onClick={() => alert('Aday kısa listeye alındı!')} className="flex-1 bg-slate-900 hover:bg-slate-800 text-white py-2.5 rounded-xl font-bold transition cursor-pointer">
                         ⭐ Kısa Listeye Al
                       </button>
                     </div>
@@ -524,8 +505,8 @@ export default function EmployerPortalPage() {
 
         {/* Tab 3: Görüşmeler */}
         {activeTab === 'interviews' && (
-          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Planlanan ve Tamamlanan Görüşmeler</h3>
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">Planlanan ve Tamamlanan Görüşmeler</h3>
             <div className="p-10 text-center text-slate-400 font-bold text-xs">
               Planlanmış aktif mülakat randevunuz bulunmamaktadır.
             </div>
@@ -534,8 +515,8 @@ export default function EmployerPortalPage() {
 
         {/* Tab 4: Seçtiğim Adaylar */}
         {activeTab === 'selected' && (
-          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Onayladığınız ve İşlemde Olan Adaylar</h3>
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">Onayladığınız ve İşlemde Olan Adaylar</h3>
             <div className="p-10 text-center text-slate-400 font-bold text-xs">
               Henüz onayladığınız bir aday bulunmuyor.
             </div>
@@ -544,8 +525,8 @@ export default function EmployerPortalPage() {
 
         {/* Tab 5: Seyahat ve Başlangıç */}
         {activeTab === 'travel' && (
-          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
               <Plane className="w-5 h-5 text-sky-600" /> Uçuş, Varış ve Karşılama Bilgileri
             </h3>
             <div className="p-10 text-center text-slate-400 font-bold text-xs">
@@ -556,8 +537,8 @@ export default function EmployerPortalPage() {
 
         {/* Tab 6: Aktif Çalışanlar */}
         {activeTab === 'employees' && (
-          <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">İşe Başlayan Personel ve 30/60/90 Gün Takibi</h3>
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">İşe Başlayan Personel ve 30/60/90 Gün Takibi</h3>
             <div className="p-10 text-center text-slate-400 font-bold text-xs">
               Şirketinizde aktif çalışan personel bulunmuyor.
             </div>
@@ -567,38 +548,38 @@ export default function EmployerPortalPage() {
         {/* Tab 7: Destek / Bildirim */}
         {activeTab === 'support' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Operasyonel Destek Talebi Aç</h3>
-              <form onSubmit={handleSendSupport} className="space-y-3">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">Operasyonel Destek Talebi Aç</h3>
+              <form onSubmit={handleSendSupport} className="space-y-3 text-xs">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Konu / Başlık</label>
-                  <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Örn: Yeni Personel İhtiyacı veya Çalışan Talebi" className="w-full px-3 py-2.5 text-xs rounded-xl border outline-none text-slate-900 font-medium bg-white" />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Konu / Başlık</label>
+                  <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Örn: Yeni Personel İhtiyacı veya Çalışan Talebi" className="w-full px-3.5 py-3 rounded-xl border outline-none text-slate-900 font-medium bg-white text-xs sm:text-sm" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Mesajınız</label>
-                  <textarea rows={4} required value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)} placeholder="Talebinizi detaylı yazın..." className="w-full px-3 py-2.5 text-xs rounded-xl border outline-none text-slate-900 font-medium bg-white" />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Mesajınız</label>
+                  <textarea rows={4} required value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)} placeholder="Talebinizi detaylı yazın..." className="w-full px-3.5 py-3 rounded-xl border outline-none text-slate-900 font-medium bg-white text-xs sm:text-sm" />
                 </div>
-                <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold text-xs transition cursor-pointer shadow-md">
+                <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold text-xs transition cursor-pointer shadow-md">
                   Destek Talebi Gönder
                 </button>
               </form>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Destek Geçmişim</h3>
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">Destek Geçmişim</h3>
               {supportTickets.length === 0 ? (
                 <div className="p-8 text-center text-slate-400 text-xs">Aktif destek kaydınız yok.</div>
               ) : (
                 <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
                   {supportTickets.map((ticket) => (
-                    <div key={ticket.id} className="p-4 bg-slate-50 rounded-2xl border space-y-1">
-                      <div className="flex justify-between font-bold text-xs text-slate-900">
+                    <div key={ticket.id} className="p-4 bg-slate-50 rounded-2xl border space-y-1 text-xs">
+                      <div className="flex justify-between font-bold text-slate-900">
                         <span>{ticket.subject}</span>
                         <span className="text-emerald-700 uppercase text-[10px]">{ticket.status}</span>
                       </div>
-                      <p className="text-xs text-slate-600">{ticket.message}</p>
+                      <p className="text-slate-600">{ticket.message}</p>
                       {ticket.admin_reply && (
-                        <div className="mt-2 p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900">
+                        <div className="mt-2 p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-900">
                           <strong>PANOVA Operasyon:</strong> {ticket.admin_reply}
                         </div>
                       )}
@@ -612,18 +593,18 @@ export default function EmployerPortalPage() {
 
         {/* Tab 8: Şirket Bilgilerim */}
         {activeTab === 'profile' && (
-          <div className="bg-white p-6 rounded-2xl border shadow-sm max-w-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 border-b pb-3">Firma ve İletişim Bilgilerim</h3>
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm max-w-2xl space-y-4">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">Firma ve İletişim Bilgilerim</h3>
             <div className="space-y-3 text-xs">
               <div className="p-4 bg-slate-50 rounded-xl border">
                 <span className="font-bold text-slate-500 uppercase block mb-1">Şirket Unvanı</span>
-                <span className="font-extrabold text-slate-900 text-sm">{employer?.company_name}</span>
+                <span className="font-extrabold text-slate-900 text-sm sm:text-base">{employer?.company_name}</span>
               </div>
               <div className="p-4 bg-slate-50 rounded-xl border">
                 <span className="font-bold text-slate-500 uppercase block mb-1">Yetkili Kişi</span>
-                <span className="font-extrabold text-slate-900 text-sm">{employer?.contact_person || 'Aleksandar Petrov'}</span>
+                <span className="font-extrabold text-slate-900 text-sm sm:text-base">{employer?.contact_person || 'Aleksandar Petrov'}</span>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="p-4 bg-slate-50 rounded-xl border">
                   <span className="font-bold text-slate-500 uppercase block mb-1">E-Posta</span>
                   <span className="font-bold text-slate-900">{employer?.email}</span>
@@ -641,17 +622,17 @@ export default function EmployerPortalPage() {
 
       {/* Yeni Talep Oluşturma Modalı */}
       {showNewRequestModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl border border-slate-200 my-8">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
-              <h3 className="text-xl font-extrabold text-slate-900">{t.modalDemandTitle}</h3>
-              <button type="button" onClick={() => setShowNewRequestModal(false)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-3xl p-4 sm:p-8 max-w-2xl w-full shadow-2xl border border-slate-200 my-8">
+            <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-100 mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-xl font-extrabold text-slate-900">{t.modalDemandTitle}</h3>
+              <button type="button" onClick={() => setShowNewRequestModal(false)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer p-1">✕</button>
             </div>
 
-            <form onSubmit={handleCreateRequest} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleCreateRequest} className="space-y-4 text-xs sm:text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1">{t.sectorLabel}</label>
+                  <label className="block font-bold text-slate-800 mb-1">{t.sectorLabel}</label>
                   <select
                     value={newRequest.sector}
                     onChange={(e) => {
@@ -659,7 +640,7 @@ export default function EmployerPortalPage() {
                       const defaultPos = positionOptions[sec]?.[0] || 'Other';
                       setNewRequest({ ...newRequest, sector: sec, positionTitle: defaultPos });
                     }}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white text-sm outline-none cursor-pointer"
+                    className="w-full px-3.5 py-3 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white outline-none cursor-pointer"
                   >
                     <option value="construction">Construction</option>
                     <option value="agriculture">Agriculture</option>
@@ -669,11 +650,11 @@ export default function EmployerPortalPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1">{t.professionLabel}</label>
+                  <label className="block font-bold text-slate-800 mb-1">{t.professionLabel}</label>
                   <select
                     value={newRequest.positionTitle}
                     onChange={(e) => setNewRequest({ ...newRequest, positionTitle: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white text-sm outline-none cursor-pointer"
+                    className="w-full px-3.5 py-3 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white outline-none cursor-pointer"
                   >
                     {(positionOptions[newRequest.sector] || ['Other']).map((pos) => (
                       <option key={pos} value={pos}>{pos}</option>
@@ -684,39 +665,39 @@ export default function EmployerPortalPage() {
 
               {newRequest.positionTitle === 'Other' && (
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1">{t.specifyCustomPos}</label>
-                  <input type="text" required value={newRequest.customPositionTitle} onChange={(e) => setNewRequest({ ...newRequest, customPositionTitle: e.target.value })} placeholder="e.g. Scaffolder" className="w-full px-3 py-2.5 rounded-xl border text-sm" />
+                  <label className="block font-bold text-slate-800 mb-1">{t.specifyCustomPos}</label>
+                  <input type="text" required value={newRequest.customPositionTitle} onChange={(e) => setNewRequest({ ...newRequest, customPositionTitle: e.target.value })} placeholder="e.g. Scaffolder" className="w-full px-3.5 py-3 rounded-xl border outline-none text-slate-900 bg-white" />
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1">{t.colHeadcount} *</label>
-                  <input type="number" min="1" required value={newRequest.headcount} onChange={(e) => setNewRequest({ ...newRequest, headcount: Number(e.target.value) })} className="w-full px-3 py-2.5 rounded-xl border text-sm" />
+                  <label className="block font-bold text-slate-800 mb-1">{t.colHeadcount} *</label>
+                  <input type="number" min="1" required value={newRequest.headcount} onChange={(e) => setNewRequest({ ...newRequest, headcount: Number(e.target.value) })} className="w-full px-3.5 py-3 rounded-xl border outline-none text-slate-900 bg-white" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1">{t.colSalary} *</label>
-                  <input type="number" required value={newRequest.monthlyNetSalary} onChange={(e) => setNewRequest({ ...newRequest, monthlyNetSalary: e.target.value })} placeholder="850" className="w-full px-3 py-2.5 rounded-xl border text-sm" />
+                  <label className="block font-bold text-slate-800 mb-1">{t.colSalary} *</label>
+                  <input type="number" required value={newRequest.monthlyNetSalary} onChange={(e) => setNewRequest({ ...newRequest, monthlyNetSalary: e.target.value })} placeholder="850" className="w-full px-3.5 py-3 rounded-xl border outline-none text-slate-900 bg-white" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1">{t.colTargetStart}</label>
-                  <input type="date" value={newRequest.targetStartDate} onChange={(e) => setNewRequest({ ...newRequest, targetStartDate: e.target.value })} className="w-full px-3 py-2.5 rounded-xl border text-sm" />
+                  <label className="block font-bold text-slate-800 mb-1">{t.colTargetStart}</label>
+                  <input type="date" value={newRequest.targetStartDate} onChange={(e) => setNewRequest({ ...newRequest, targetStartDate: e.target.value })} className="w-full px-3.5 py-3 rounded-xl border outline-none text-slate-900 bg-white" />
                 </div>
               </div>
 
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
-                <div className="text-xs font-bold text-slate-800 mb-2">{t.colBenefits}:</div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-medium text-slate-800">
-                  <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={newRequest.accommodationProvided} onChange={(e) => setNewRequest({ ...newRequest, accommodationProvided: e.target.checked })} /> {t.accommodation}</label>
-                  <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={newRequest.foodProvided} onChange={(e) => setNewRequest({ ...newRequest, foodProvided: e.target.checked })} /> {t.foodAllowance}</label>
-                  <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={newRequest.transportProvided} onChange={(e) => setNewRequest({ ...newRequest, transportProvided: e.target.checked })} /> {t.localTransport}</label>
-                  <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={newRequest.flightCovered} onChange={(e) => setNewRequest({ ...newRequest, flightCovered: e.target.checked })} /> {t.flightTicket}</label>
+                <div className="font-bold text-slate-800 mb-2">{t.colBenefits}:</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-medium text-slate-800 text-xs">
+                  <label className="flex items-center gap-2 cursor-pointer p-1"><input type="checkbox" checked={newRequest.accommodationProvided} onChange={(e) => setNewRequest({ ...newRequest, accommodationProvided: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.accommodation}</label>
+                  <label className="flex items-center gap-2 cursor-pointer p-1"><input type="checkbox" checked={newRequest.foodProvided} onChange={(e) => setNewRequest({ ...newRequest, foodProvided: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.foodAllowance}</label>
+                  <label className="flex items-center gap-2 cursor-pointer p-1"><input type="checkbox" checked={newRequest.transportProvided} onChange={(e) => setNewRequest({ ...newRequest, transportProvided: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.localTransport}</label>
+                  <label className="flex items-center gap-2 cursor-pointer p-1"><input type="checkbox" checked={newRequest.flightCovered} onChange={(e) => setNewRequest({ ...newRequest, flightCovered: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.flightTicket}</label>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1">{t.specialReqs}</label>
-                <textarea rows={2} value={newRequest.specialRequirements} onChange={(e) => setNewRequest({ ...newRequest, specialRequirements: e.target.value })} placeholder="e.g. 3+ years experience" className="w-full px-3 py-2 rounded-xl border text-sm" />
+                <label className="block font-bold text-slate-800 mb-1">{t.specialReqs}</label>
+                <textarea rows={2} value={newRequest.specialRequirements} onChange={(e) => setNewRequest({ ...newRequest, specialRequirements: e.target.value })} placeholder="e.g. 3+ years experience" className="w-full px-3.5 py-3 rounded-xl border outline-none text-slate-900 bg-white" />
               </div>
 
               <button type="submit" disabled={submitting} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg flex items-center justify-center gap-2 text-sm mt-4 cursor-pointer">

@@ -51,7 +51,7 @@ export interface Translation {
   expectedSalaryLabel?: string;
   shiftSuitableLabel?: string;
   emailLabel?: string;
-  phone?: string; // EKLENDİ
+  phone?: string;
   phoneLabel?: string;
   pendingStatus?: string;
   reviewingStatus?: string;
@@ -256,7 +256,7 @@ export const translations: Record<Language, Translation> = {
       hr: { name: 'Panova HR', tagline: 'İnsan Kaynakları ve İstihdam' },
       trade: { name: 'Panova Trade', tagline: 'Dış Ticaret ve Lojistik' },
       agriculture: { name: 'Panova Tarım ve Hayvancılık', tagline: 'Tarımsal Üretim ve Bahçe' },
-      construction: { name: 'Panova Construction', tagline: 'İnşaat ve Yapı' }
+      construction: { name: 'Panova Construction', tagline: 'İnşaat و Yapı' }
     },
     certAndVideo: 'Sertifika & Video',
     salaryAndShift: 'Ücret & Vardiya',
@@ -410,7 +410,7 @@ export const translations: Record<Language, Translation> = {
     companies: {
       hr: { name: 'Panova HR', tagline: 'Human Resources & Employment' },
       trade: { name: 'Panova Trade', tagline: 'Foreign Trade & Logistics' },
-      agriculture: { name: 'Panova Agriculture & Livestock', tagline: 'Agricultural Production' }
+      agriculture: { name: 'Panova Agriculture & Livestock', tagline: 'Agricultural Production' },
       construction: { name: 'Panova Construction', tagline: 'Construction & Building' }
     },
     certAndVideo: 'Certificate & Video',
@@ -565,7 +565,7 @@ export const translations: Record<Language, Translation> = {
     companies: {
       hr: { name: 'Panova HR', tagline: 'Burimet Njerëzore dhe Punësimi' },
       trade: { name: 'Panova Trade', tagline: 'Tregti e Jashtme dhe Logjistikë' },
-      agriculture: { name: 'Panova Bujqësi dhe Blegtori', tagline: 'Prodhimi Bujqësor' }
+      agriculture: { name: 'Panova Bujqësi dhe Blegtori', tagline: 'Prodhimi Bujqësor' },
       construction: { name: 'Panova Ndërtim', tagline: 'Ndërtim dhe Objekte' }
     },
     certAndVideo: 'Certifikata & Video',
@@ -685,7 +685,7 @@ export const translations: Record<Language, Translation> = {
     reviewingStatus: 'قيد المراجعة',
     visaProcessingStatus: 'جاري استخراج التأشيرة',
     approvedStatus: 'تم الموافقة',
-    colPosSec: ' المنصب / القطاع',
+    colPosSec: 'المنصب / القطاع',
     colHeadcount: 'عدد الأفراد',
     newDemandBtn: 'إنشاء طلب جديد',
     modalDemandTitle: 'تفاصيل الطلب',
@@ -720,7 +720,7 @@ export const translations: Record<Language, Translation> = {
     companies: {
       hr: { name: 'Panova HR', tagline: 'الموارد البشرية والتوظيف' },
       trade: { name: 'Panova Trade', tagline: 'التجارة الخارجية والخدمات اللوجستية' },
-      agriculture: { name: 'Panova للزراعة والثروة الحيوانية', tagline: 'الإنتاج الزراعي' }
+      agriculture: { name: 'Panova للزراعة والثروة الحيوانية', tagline: 'الإنتاج الزراعي' },
       construction: { name: 'Panova Construction', tagline: 'البناء والتشييد' }
     },
     certAndVideo: 'الشهادة والفيديو',
