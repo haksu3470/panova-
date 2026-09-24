@@ -161,7 +161,37 @@ export interface Translation {
   initialAuditLog: string;
   dateFormatPlaceholder: string;
   message: string;
-  
+
+  // Employer Portal Yeni Anahtarlar
+  empTabRequests?: string;
+  empTabCandidates?: string;
+  empTabSelected?: string;
+  empTabTravel?: string;
+  empTabSupport?: string;
+  empTabProfile?: string;
+  empNoRequests?: string;
+  empCandidatesPoolTitle?: string;
+  empNoCandidates?: string;
+  empInterviewRequestBtn?: string;
+  empShortlistBtn?: string;
+  empInterviewsTitle?: string;
+  empNoInterviews?: string;
+  empSelectedTitle?: string;
+  empNoSelected?: string;
+  empTravelTitle?: string;
+  empNoTravel?: string;
+  empEmployeesTitle?: string;
+  empNoEmployees?: string;
+  empSupportFormTitle?: string;
+  empSupportSubjectLabel?: string;
+  empSupportMessageLabel?: string;
+  empSupportSubmitBtn?: string;
+  empSupportHistoryTitle?: string;
+  empNoSupportTickets?: string;
+  empProfileTitle?: string;
+  empProfileCompanyName?: string;
+  empProfileContactPerson?: string;
+
   selectTaskPrompt?: string;
   taskGroupSource?: string;
   taskGroupTarget?: string;
@@ -354,6 +384,35 @@ export const translations: Record<Language, Translation> = {
     dateFormatPlaceholder: 'gg.aa.yyyy',
     message: 'Mesaj',
 
+    empTabRequests: 'Personel Taleplerim',
+    empTabCandidates: 'Adaylar / Eşleşmeler',
+    empTabSelected: 'Seçtiğim Adaylar',
+    empTabTravel: 'Seyahat ve Başlangıç',
+    empTabSupport: 'Destek / Bildirim',
+    empTabProfile: 'Şirket Bilgilerim',
+    empNoRequests: 'Kayıtlı personel talebiniz bulunmuyor.',
+    empCandidatesPoolTitle: 'Taleplerinize Sunulan Aday Havuzu',
+    empNoCandidates: 'Henüz eşleşen aday bulunmuyor.',
+    empInterviewRequestBtn: 'Görüşme İste',
+    empShortlistBtn: 'Kısa Listeye Al',
+    empInterviewsTitle: 'Planlanan ve Tamamlanan Görüşmeler',
+    empNoInterviews: 'Planlanmış aktif mülakat randevunuz bulunmamaktadır.',
+    empSelectedTitle: 'Onayladığınız ve İşlemde Olan Adaylar',
+    empNoSelected: 'Henüz onayladığınız bir aday bulunmuyor.',
+    empTravelTitle: 'Uçuş, Varış ve Karşılama Bilgileri',
+    empNoTravel: 'Vize ve biletleme işlemleri tamamlanan personellerin seyahat detayları burada listelenecektir.',
+    empEmployeesTitle: 'İşe Başlayan Personel ve 30/60/90 Gün Takibi',
+    empNoEmployees: 'Şirketinizde aktif çalışan personel bulunmuyor.',
+    empSupportFormTitle: 'Operasyonel Destek Talebi Aç',
+    empSupportSubjectLabel: 'Konu / Başlık',
+    empSupportMessageLabel: 'Mesajınız',
+    empSupportSubmitBtn: 'Destek Talebi Gönder',
+    empSupportHistoryTitle: 'Destek Geçmişim',
+    empNoSupportTickets: 'Aktif destek kaydınız yok.',
+    empProfileTitle: 'Firma ve İletişim Bilgilerim',
+    empProfileCompanyName: 'Şirket Unvanı',
+    empProfileContactPerson: 'Yetkili Kişi',
+
     selectTaskPrompt: 'Görev Seçin...',
     taskGroupSource: '🌍 Kaynak Ülke Sorumlusu',
     taskGroupTarget: '🏢 Hedef Ülke Sorumlusu',
@@ -536,6 +595,35 @@ export const translations: Record<Language, Translation> = {
     initialAuditLog: 'System Initialized & Role Matrix Established',
     dateFormatPlaceholder: 'dd.mm.yyyy',
     message: 'Message',
+
+    empTabRequests: 'Personnel Requests',
+    empTabCandidates: 'Candidates / Matching',
+    empTabSelected: 'Selected Candidates',
+    empTabTravel: 'Travel & Start',
+    empTabSupport: 'Support / Notices',
+    empTabProfile: 'Company Info',
+    empNoRequests: 'No active workforce requests found.',
+    empCandidatesPoolTitle: 'Candidate Pool Offered for Your Demands',
+    empNoCandidates: 'No matching candidates found yet.',
+    empInterviewRequestBtn: 'Request Interview',
+    empShortlistBtn: 'Shortlist',
+    empInterviewsTitle: 'Scheduled and Completed Interviews',
+    empNoInterviews: 'No active interview appointments scheduled.',
+    empSelectedTitle: 'Approved and Processing Candidates',
+    empNoSelected: 'No approved candidates yet.',
+    empTravelTitle: 'Flight, Arrival and Pickup Info',
+    empNoTravel: 'Travel details of personnel whose visa and ticketing are completed will be listed here.',
+    empEmployeesTitle: 'Hired Personnel & 30/60/90 Day Tracking',
+    empNoEmployees: 'No active employees in your company.',
+    empSupportFormTitle: 'Open Operational Support Ticket',
+    empSupportSubjectLabel: 'Subject / Title',
+    empSupportMessageLabel: 'Your Message',
+    empSupportSubmitBtn: 'Send Support Ticket',
+    empSupportHistoryTitle: 'Support History',
+    empNoSupportTickets: 'No active support records.',
+    empProfileTitle: 'Company & Contact Information',
+    empProfileCompanyName: 'Company Name',
+    empProfileContactPerson: 'Contact Person',
 
     selectTaskPrompt: 'Select Task...',
     taskGroupSource: '🌍 Source Country Officer',
@@ -720,6 +808,35 @@ export const translations: Record<Language, Translation> = {
     dateFormatPlaceholder: 'dd.mm.vvvv',
     message: 'Mesazhi',
 
+    empTabRequests: 'Kërkesat e Personelit',
+    empTabCandidates: 'Kandidatët / Përputhjet',
+    empTabSelected: 'Kandidatët e Zgjedhur',
+    empTabTravel: 'Udhëtimi dhe Fillimi',
+    empTabSupport: 'Mbështetje / Njoftim',
+    empTabProfile: 'Të Dhënat e Kompanisë',
+    empNoRequests: 'Nuk u gjet asnjë kërkesë aktive për personel.',
+    empCandidatesPoolTitle: 'Grupi i Kandidatëve për Kërkesat Tuaja',
+    empNoCandidates: 'Ende nuk ka kandidatë përputhës.',
+    empInterviewRequestBtn: 'Kërko Intervistë',
+    empShortlistBtn: 'Shto në Listë të Shkurtër',
+    empInterviewsTitle: 'Intervistat e Planifikuara dhe të Përfunduara',
+    empNoInterviews: 'Nuk keni asnjë takim interviste aktiv.',
+    empSelectedTitle: 'Kandidatët e Miratuar dhe në Proçes',
+    empNoSelected: 'Ende nuk keni ndonjë kandidat të miratuar.',
+    empTravelTitle: 'Informacioni i Fluturimit, Mbërritjes dhe Pritjes',
+    empNoTravel: 'Detajet e udhëtimit të personelit do të listohen këtu.',
+    empEmployeesTitle: 'Personeli i Punësuar & Gjurmimi 30/60/90 Ditë',
+    empNoEmployees: 'Nuk ka punonjës aktivë në kompaninë tuaj.',
+    empSupportFormTitle: 'Hap Ticket Mbështetjeje Operacionale',
+    empSupportSubjectLabel: 'Subjekti / Titulli',
+    empSupportMessageLabel: 'Mesazhi Juaj',
+    empSupportSubmitBtn: 'Dërgo Kërkesën e Mbështetjes',
+    empSupportHistoryTitle: 'Historiku i Mbështetjes',
+    empNoSupportTickets: 'Nuk keni regjistrime mbështetjeje aktive.',
+    empProfileTitle: 'Informacioni i Kompanisë dhe Kontaktit',
+    empProfileCompanyName: 'Emri i Kompanisë',
+    empProfileContactPerson: 'Personi i Kontaktit',
+
     selectTaskPrompt: 'Zgjidh Detyrën...',
     taskGroupSource: '🌍 Oficeri i Vendit Burim',
     taskGroupTarget: '🏢 Oficeri i Vendit të Synuar',
@@ -902,6 +1019,35 @@ export const translations: Record<Language, Translation> = {
     initialAuditLog: 'تم بدء النظام وإنشاء مصفوفة الأدوار',
     dateFormatPlaceholder: 'dd.mm.yyyy',
     message: 'الرسالة',
+
+    empTabRequests: 'طلبات الموظفين',
+    empTabCandidates: 'المرشحون / المطابقة',
+    empTabSelected: 'المرشحون المختارون',
+    empTabTravel: 'السفر والبداية',
+    empTabSupport: 'الدعم / الإشعارات',
+    empTabProfile: 'معلومات الشركة',
+    empNoRequests: 'لا توجد طلبات قوى عاملة نشطة.',
+    empCandidatesPoolTitle: 'قائمة المرشحين المقدمة لطلباتك',
+    empNoCandidates: 'لا يوجد مرشحون مطابقون حتى الآن.',
+    empInterviewRequestBtn: 'طلب مقابلة',
+    empShortlistBtn: 'إضافة للقائمة المختصرة',
+    empInterviewsTitle: 'المقابلات المجدولة والمكتملة',
+    empNoInterviews: 'ليس لديك مواعيد مقابلات نشطة مجدولة.',
+    empSelectedTitle: 'المرشحون الموافق عليهم وتحت الإجراء',
+    empNoSelected: 'لا يوجد مرشحون موافق عليهم حتى الآن.',
+    empTravelTitle: 'معلومات الرحلة والوصول والاستقبال',
+    empNoTravel: 'سيتم سرد تفاصيل السفر للموظفين هنا.',
+    empEmployeesTitle: 'الموظفون المعينون ومتابعة 30/60/90 يوم',
+    empNoEmployees: 'لا توجد موظفون نشطون في شركتك.',
+    empSupportFormTitle: 'فتح تذكرة دعم تشغيلي',
+    empSupportSubjectLabel: 'الموضوع / العنوان',
+    empSupportMessageLabel: 'رسالتك',
+    empSupportSubmitBtn: 'إرسال تذكرة الدعم',
+    empSupportHistoryTitle: 'سجل الدعم',
+    empNoSupportTickets: 'لا توجد سجلات دعم نشطة.',
+    empProfileTitle: 'معلومات الشركة والاتصال',
+    empProfileCompanyName: 'اسم الشركة',
+    empProfileContactPerson: 'الشخص المسؤول',
 
     selectTaskPrompt: 'اختر المهمة...',
     taskGroupSource: '🌍 مسؤول بلد المصدر',
