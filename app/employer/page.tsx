@@ -8,18 +8,16 @@ export default function EmployerPage() {
   const [lang, setLang] = useState<Language>('tr');
   const t = translations[lang] || translations['tr'];
 
-  // Auth Modu: 'signin' veya 'signup'
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Form State'leri (Başlangıçta tamamen boş ve temiz)
+  // Form State'leri
   const [companyName, setCompanyName] = useState('');
   const [contactPerson, setContactPerson] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Dashboard Sekme ve Form State'leri
   const [activeTab, setActiveTab] = useState<'requests' | 'candidates' | 'selected' | 'travel' | 'employees' | 'support' | 'profile'>('requests');
   const [position, setPosition] = useState('');
   const [headcount, setHeadcount] = useState(1);
@@ -88,7 +86,6 @@ export default function EmployerPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* Üst Header / Dil Seçimi */}
       <header className="absolute top-4 right-4 z-50 flex items-center space-x-3">
         <select
           value={lang}
@@ -103,12 +100,9 @@ export default function EmployerPage() {
         </select>
       </header>
 
-      {/* Ana İçerik Alanı */}
       <main className="flex-1 flex flex-col items-center justify-center p-4">
         {!isLoggedIn ? (
-          /* Giriş / Kayıt Kartı */
           <div className="max-w-xl w-full bg-white text-slate-900 rounded-3xl shadow-2xl p-8 my-8 border border-slate-800">
-            {/* Sign In / Sign Up Sekme Butonları */}
             <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-8">
               <button
                 type="button"
@@ -144,7 +138,7 @@ export default function EmployerPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmitAuth} className="space-y-4">
+            <form onSubmit={handleSubmitAuth} className="space-y-4" autoComplete="off">
               {authMode === 'signup' && (
                 <>
                   <div>
@@ -157,6 +151,7 @@ export default function EmployerPage() {
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       placeholder="PANOVA TARIM DOO"
+                      name="no-autofill-company-name"
                       autoComplete="off"
                       className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
                     />
@@ -173,6 +168,7 @@ export default function EmployerPage() {
                         value={contactPerson}
                         onChange={(e) => setContactPerson(e.target.value)}
                         placeholder="Hüseyin Aksu"
+                        name="no-autofill-contact-person"
                         autoComplete="off"
                         className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
                       />
@@ -187,6 +183,7 @@ export default function EmployerPage() {
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+389..."
+                        name="no-autofill-phone"
                         autoComplete="off"
                         className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
                       />
@@ -205,6 +202,7 @@ export default function EmployerPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="info@panovatarim.com"
+                  name="no-autofill-email"
                   autoComplete="off"
                   className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
                 />
@@ -220,6 +218,7 @@ export default function EmployerPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
+                  name="no-autofill-password"
                   autoComplete="new-password"
                   className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
                 />
@@ -240,9 +239,7 @@ export default function EmployerPage() {
             </div>
           </div>
         ) : (
-          /* İşveren Yönetim Paneli (Dashboard) */
           <div className="max-w-7xl w-full mx-auto space-y-6 text-slate-900 p-4">
-            {/* Karşılama Barı */}
             <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-center font-black text-lg">
@@ -272,7 +269,6 @@ export default function EmployerPage() {
               </button>
             </div>
 
-            {/* Navigasyon Sekmeleri */}
             <div className="flex overflow-x-auto space-x-2 border-b border-slate-800 pb-2">
               <button
                 onClick={() => setActiveTab('requests')}
@@ -332,7 +328,6 @@ export default function EmployerPage() {
               </button>
             </div>
 
-            {/* İçerik Sekmeleri */}
             {activeTab === 'requests' && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl lg:col-span-1">
@@ -656,7 +651,6 @@ export default function EmployerPage() {
         )}
       </main>
 
-      {/* Alt Footer */}
       <footer className="bg-slate-950 text-slate-500 py-6 text-center text-xs border-t border-slate-900">
         <p>PANOVA TARIM DOO &bull; International Workforce Management System &copy; 2026</p>
       </footer>
