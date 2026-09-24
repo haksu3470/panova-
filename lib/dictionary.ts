@@ -46,7 +46,10 @@ export interface Translation {
   sectorLabel?: string;
   professionLabel?: string;
   certNoLabel?: string;
+  certNo?: string;
+  certificateNo?: string;
   issuingBodyLabel?: string;
+  issuingBody?: string;
   videoUrlLabel?: string;
   expectedSalaryLabel?: string;
   shiftSuitableLabel?: string;
@@ -162,7 +165,6 @@ export interface Translation {
   dateFormatPlaceholder: string;
   message: string;
 
-  // Employer Portal Yeni Anahtarlar
   empTabRequests?: string;
   empTabCandidates?: string;
   empTabSelected?: string;
@@ -231,7 +233,6 @@ export interface Translation {
   yesBtn?: string;
   noBtn?: string;
 
-  // Personel Talebi Yaşam Döngüsü ve Dosya Anahtarları
   demandFilesTitle?: string;
   demandFilesSub?: string;
   openDemandFilesBtn?: string;
@@ -247,7 +248,13 @@ export interface Translation {
   stageCompleted?: string;
   stageCancelled?: string;
 
-  // Admin Aday Detay Ekranı Yeni Anahtarları
+  completed?: string;
+  approved?: string;
+  pending?: string;
+  reviewing?: string;
+  sencing?: string;
+  sending?: string;
+  sendNotification?: string;
   saveChanges?: string;
   saving?: string;
   dossierClosedNotice?: string;
@@ -358,7 +365,10 @@ export const translations: Record<Language, Translation> = {
     sectorLabel: 'Sektör',
     professionLabel: 'Meslek',
     certNoLabel: 'Sertifika No',
+    certNo: 'Sertifika No',
+    certificateNo: 'Sertifika No',
     issuingBodyLabel: 'Veren Kurum',
+    issuingBody: 'Veren Kurum',
     videoUrlLabel: 'Video URL',
     expectedSalaryLabel: 'Beklenen Maaş',
     shiftSuitableLabel: 'Vardiyalı Çalışmaya Uygunluk',
@@ -558,7 +568,13 @@ export const translations: Record<Language, Translation> = {
     stageCompleted: 'Tamamlandı (Talep kapanmıştır)',
     stageCancelled: 'İptal edildi (Gerekçe kayıtlı)',
 
-    // Admin Aday Detay Çevirileri
+    completed: 'Tamamlandı',
+    approved: 'Onaylandı',
+    pending: 'Beklemede',
+    reviewing: 'İnceleniyor',
+    sencing: 'Gönderiliyor',
+    sending: 'Gönderiliyor',
+    sendNotification: 'Bildirim Gönder',
     saveChanges: 'Değişiklikleri Kaydet',
     saving: 'Kaydediliyor...',
     dossierClosedNotice: 'Bu aday dosyası kapatılmıştır / süreçten çıkılmıştır.',
@@ -571,7 +587,6 @@ export const translations: Record<Language, Translation> = {
     travelFlightLogistics: 'Seyahat, Uçuş ve Konaklama Lojistiği',
     planned: 'Planlanıyor',
     ticketed: 'Biletlendi',
-    completed: 'Seyahat Tamamlandı',
     flightDateTime: 'Uçuş Tarihi & Saati',
     flightNumber: 'Uçuş Kodu / Sefer No',
     departureCityAirport: 'Kalkış Yeri / Havalimanı',
@@ -605,7 +620,6 @@ export const translations: Record<Language, Translation> = {
     startDate: 'İşe Başlama Tarihi',
     termsConditions: 'Teklif / Sözleşme Şartları',
     sendOfferToCandidate: 'Resmi Teklifi Adaya İlet',
-    sendNotification: 'Adaya Bildirim Gönder',
     notificationTitle: 'Bildirim Başlığı',
     messageBody: 'Mesaj İçeriği',
     sendNotificationBtn: 'Bildirimi Adaya Gönder',
@@ -662,7 +676,10 @@ export const translations: Record<Language, Translation> = {
     sectorLabel: 'Sector',
     professionLabel: 'Profession',
     certNoLabel: 'Certificate No',
+    certNo: 'Cert No',
+    certificateNo: 'Cert No',
     issuingBodyLabel: 'Issuing Body',
+    issuingBody: 'Issuing Body',
     videoUrlLabel: 'Video URL',
     expectedSalaryLabel: 'Expected Salary',
     shiftSuitableLabel: 'Shift Suitable',
@@ -862,7 +879,13 @@ export const translations: Record<Language, Translation> = {
     stageCompleted: 'Completed (Demand closed)',
     stageCancelled: 'Cancelled (Reason recorded)',
 
-    // Admin Candidate Detail En
+    completed: 'Completed',
+    approved: 'Approved',
+    pending: 'Pending',
+    reviewing: 'Reviewing',
+    sencing: 'Sending',
+    sending: 'Sending',
+    sendNotification: 'Send Notification',
     saveChanges: 'Save Changes',
     saving: 'Saving...',
     dossierClosedNotice: 'This candidate dossier is closed.',
@@ -908,7 +931,6 @@ export const translations: Record<Language, Translation> = {
     startDate: 'Start Date',
     termsConditions: 'Terms & Conditions',
     sendOfferToCandidate: 'Send Offer to Candidate',
-    sendNotification: 'Send Notification',
     notificationTitle: 'Notification Title',
     messageBody: 'Message Body',
     sendNotificationBtn: 'Send Notification',
@@ -965,7 +987,10 @@ export const translations: Record<Language, Translation> = {
     sectorLabel: 'Sektori',
     professionLabel: 'Profesioni',
     certNoLabel: 'Nr. Certifikatës',
+    certNo: 'Nr. Certifikatës',
+    certificateNo: 'Nr. Certifikatës',
     issuingBodyLabel: 'Institucioni Lëshues',
+    issuingBody: 'Institucioni Lëshues',
     videoUrlLabel: 'URL e Videos',
     expectedSalaryLabel: 'Paga e Pritur',
     shiftSuitableLabel: 'I përshtatshëm për turne',
@@ -1165,7 +1190,13 @@ export const translations: Record<Language, Translation> = {
     stageCompleted: 'Përfunduar (Kërkesa është mbyllur)',
     stageCancelled: 'Anuluar (Arsyeja e regjistruar)',
 
-    // Admin Aday Detay Sq
+    completed: 'Përfunduar',
+    approved: 'Miratuar',
+    pending: 'Në pritje',
+    reviewing: 'Duke shqyrtuar',
+    sencing: 'Duke dërguar',
+    sending: 'Duke dërguar',
+    sendNotification: 'Dërgo Njoftim',
     saveChanges: 'Ruaj Ndryshimet',
     saving: 'Duke ruajtur...',
     dossierClosedNotice: 'Dosja e këtij kandidati është mbyllur.',
@@ -1211,9 +1242,6 @@ export const translations: Record<Language, Translation> = {
     startDate: 'Data e Fillimit',
     termsConditions: 'Kushtet e Ofertave',
     sendOfferToCandidate: 'Dërgo Ofertën te Kandidati',
-    sendNotification: 'Dërgo Njoftim',
-    notificationTitle: 'Titulli i Njoftimit',
-    messageBody: 'Përmbajtja e Mesazhit',
     sendNotificationBtn: 'Dërgo Njoftimin',
     workVideoPreview: 'Pamja Paraprake e Videos',
     savedSuccess: 'U ruajt me sukses!',
@@ -1268,7 +1296,10 @@ export const translations: Record<Language, Translation> = {
     sectorLabel: 'القطاع',
     professionLabel: 'المهنة',
     certNoLabel: 'رقم الشهادة',
+    certNo: 'رقم الشهادة',
+    certificateNo: 'رقم الشهادة',
     issuingBodyLabel: 'جهة الإصدار',
+    issuingBody: 'جهة الإصدار',
     videoUrlLabel: 'رابط الفيديو',
     expectedSalaryLabel: 'الراتب المتوقع',
     shiftSuitableLabel: 'مناسب للعمل بنظام النوبات',
@@ -1468,7 +1499,13 @@ export const translations: Record<Language, Translation> = {
     stageCompleted: 'مكتمل (تم إغلاق الطلب)',
     stageCancelled: 'ملغى (تم تسجيل السبب)',
 
-    // Admin Aday Detay Ar
+    completed: 'مكتمل',
+    approved: 'تم الموافقة',
+    pending: 'قيد الانتظار',
+    reviewing: 'قيد المراجعة',
+    sencing: 'جاري الإرسال',
+    sending: 'جاري الإرسال',
+    sendNotification: 'إرسال إشعار',
     saveChanges: 'حفظ التغييرات',
     saving: 'جاري الحفظ...',
     dossierClosedNotice: 'تم إغلاق ملف هذا المرشح.',
@@ -1514,7 +1551,6 @@ export const translations: Record<Language, Translation> = {
     startDate: 'تاريخ البدء',
     termsConditions: 'شروط العقد',
     sendOfferToCandidate: 'إرسال العرض إلى المرشح',
-    sendNotification: 'إرسال إشعار',
     notificationTitle: 'عنوان الإشعار',
     messageBody: 'نص الرسالة',
     sendNotificationBtn: 'إرسال الإشعار للمرشح',
