@@ -230,7 +230,16 @@ export interface Translation {
   reviewing?: string;
   certificateno?: string;
   issuingbody?: string;
+
+  // TypeScript Build Hatalarını Çözen Yeni Eklenen Anahtarlar
+  certificateInfo?: string;
+  candidateStatus?: string;
+  employerCompanyName?: string;
+  sendNotification?: string;
   sendnotification?: string;
+  sending?: string;
+  sendNotificationBtn?: string;
+  taskEnterTravelDate?: string;
 
   planned?: string;
   ticketed?: string;
@@ -320,15 +329,6 @@ export interface Translation {
   taskGroupManagement?: string;
   taskAuditSystem?: string;
   taskApproveStrategic?: string;
-
-    // ... (diğer mevcut tanımlarınız)
-  certificateInfo?: string;
-  candidateStatus?: string;
-  employerCompanyName?: string;
-  sendNotification?: string;
-  sending?: string;
-  sendNotificationBtn?: string;
-}
 }
 
 export const languages = [
@@ -569,7 +569,15 @@ export const translations: Record<Language, Translation> = {
     reviewing: 'İnceleniyor',
     certificateno: 'Sertifika No',
     issuingbody: 'Veren Kurum',
+
+    certificateInfo: 'Sertifika Bilgisi',
+    candidateStatus: 'Aday Durumu',
+    employerCompanyName: 'İşveren Şirket Adı',
+    sendNotification: 'Bildirim Gönder',
     sendnotification: 'Bildirim Gönder',
+    sending: 'Gönderiliyor...',
+    sendNotificationBtn: 'Bildirim Gönder',
+    taskEnterTravelDate: 'Seyahat Tarihini Gir',
 
     planned: 'Planlandı',
     ticketed: 'Biletlendi',
@@ -890,7 +898,15 @@ export const translations: Record<Language, Translation> = {
     reviewing: 'Reviewing',
     certificateno: 'Certificate No',
     issuingbody: 'Issuing Body',
+
+    certificateInfo: 'Certificate Info',
+    candidateStatus: 'Candidate Status',
+    employerCompanyName: 'Employer Company Name',
+    sendNotification: 'Send Notification',
     sendnotification: 'Send Notification',
+    sending: 'Sending...',
+    sendNotificationBtn: 'Send Notification',
+    taskEnterTravelDate: 'Enter Travel Date',
 
     planned: 'Planned',
     ticketed: 'Ticketed',
@@ -1211,7 +1227,15 @@ export const translations: Record<Language, Translation> = {
     reviewing: 'Duke shqyrtuar',
     certificateno: 'Nr. Certifikatës',
     issuingbody: 'Institucioni Lëshues',
+
+    certificateInfo: 'Informacioni i Certifikatës',
+    candidateStatus: 'Statusi i Kandidatit',
+    employerCompanyName: 'Emri i Kompanisë Punëdhënëse',
+    sendNotification: 'Dërgo Njoftim',
     sendnotification: 'Dërgo Njoftim',
+    sending: 'Duke dërguar...',
+    sendNotificationBtn: 'Dërgo Njoftim',
+    taskEnterTravelDate: 'Fut Datën e Udhëtimit',
 
     planned: 'E planifikuar',
     ticketed: 'E prerë (Biletë)',
@@ -1399,7 +1423,7 @@ export const translations: Record<Language, Translation> = {
     companies: {
       hr: { name: 'Panova HR', tagline: 'الموارد البشرية والتوظيف' },
       trade: { name: 'Panova Trade', tagline: 'التجارة الخارجية والخدمات اللوجستية' },
-      agriculture: { name: 'Panova للزراعة والثروة الحيوانية', tagline: 'الإنتاج الزراعي' },
+      agriculture: { name: 'Panova للزراعة وثروة حيوانية', tagline: 'الإنتاج الزراعي' },
       construction: { name: 'Panova Construction', tagline: 'البناء والتشييد' }
     },
     certAndVideo: 'الشهادة والفيديو',
@@ -1532,7 +1556,15 @@ export const translations: Record<Language, Translation> = {
     reviewing: 'قيد المراجعة',
     certificateno: 'رقم الشهادة',
     issuingbody: 'جهة الإصدار',
+
+    certificateInfo: 'معلومات الشهادة',
+    candidateStatus: 'حالة المرشح',
+    employerCompanyName: 'اسم شركة صاحب العمل',
+    sendNotification: 'إرسال إشعار',
     sendnotification: 'إرسال إشعار',
+    sending: 'جاري الإرسال...',
+    sendNotificationBtn: 'إرسال إشعار',
+    taskEnterTravelDate: 'إدخال تاريخ السفر',
 
     planned: 'مخطط',
     ticketed: 'تم اصدار التذكرة',
