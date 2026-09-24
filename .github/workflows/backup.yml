@@ -12,17 +12,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up PostgreSQL client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-      - name: Run backup
+      - name: Run Supabase Backup Script
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
-          TIMESTAMP=$(date +'%Y-%m-%d_%H-%M-%S')
-          BACKUP_FILE="panova_db_backup_$TIMESTAMP.dump"
-          
-          # SSL bağlantı parametresi ile yedekleme
-          pg_dump "$SUPABASE_DB_URL?sslmode=require" --schema=public -F c -f "$BACKUP_FILE"
-          
-          echo "Database backup completed successfully: $BACKUP_FILE"
+          npm install postgres
+          node -e '
+            const postgres = require("postgres");
+            const fs = require("fs");
+            async function run() {
+              const sql = postgres(process.env.SUPABASE_DB_URL, { ssl: "require" });
+              const tables = ["job_candidates", "job_requests", "employers", "staff_members", "tasks", "candidate_support_tickets"];
+              let backup = {};
+              for (let t of tables) {
+                try {
+                  backup[t] = await sql`SELECT * FROM ${sql(t)}`;
+                } catch (err) {
+                  console.log("Tablo okunamadı:", t, err.message);
+                }
+              }
+              const filename = `panova_backup_${new Date().toISOString().slice(0,10)}.json`;
+              fs.writeFileSync(filename, JSON.stringify(backup, null, 2));
+              console.log("Yedek başarıyla alındı:", filename);
+              await sql.end();
+            }
+            run().catch(console.log);
+          '
