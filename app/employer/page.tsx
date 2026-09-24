@@ -251,14 +251,14 @@ export default function EmployerPortalPage() {
           password: editProfile.password
         })
         .eq('id', employer.id)
-        .select()
-        .single();
+        .select();
 
       if (error) throw error;
 
-      if (data) {
-        setEmployer(data);
-        localStorage.setItem('panova_employer_data', JSON.stringify(data));
+      if (data && data.length > 0) {
+        const updatedEmp = data[0];
+        setEmployer(updatedEmp);
+        localStorage.setItem('panova_employer_data', JSON.stringify(updatedEmp));
         alert('Şirket profili başarıyla güncellendi!');
       }
     } catch (err: any) {
