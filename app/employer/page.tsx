@@ -436,16 +436,16 @@ export default function EmployerPortalPage() {
           </div>
         </div>
 
-        {/* Sekmeler (Mobilde Yatay Kaydırılabilir) */}
-        <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
-          <button onClick={() => setActiveTab('requests')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'requests' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>📁 {t.empTabRequests}</button>
-          <button onClick={() => setActiveTab('candidates')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>👥 {t.empTabCandidates} ({candidates.length})</button>
-          <button onClick={() => setActiveTab('interviews')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'interviews' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>📅 {t.interviews}</button>
-          <button onClick={() => setActiveTab('selected')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'selected' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>⭐ {t.empTabSelected}</button>
-          <button onClick={() => setActiveTab('travel')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>✈️ {t.empTabTravel}</button>
-          <button onClick={() => setActiveTab('employees')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>🛡️ {t.employeesTab}</button>
-          <button onClick={() => setActiveTab('support')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>💬 {t.empTabSupport}</button>
-          <button onClick={() => setActiveTab('profile')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>🏢 {t.empTabProfile}</button>
+        {/* Sekmeler */}
+        <div className="flex flex-wrap items-center gap-2 border-b pb-3 text-xs font-bold">
+          <button onClick={() => setActiveTab('requests')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'requests' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>📁 {t.empTabRequests}</button>
+          <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>👥 {t.empTabCandidates} ({candidates.length})</button>
+          <button onClick={() => setActiveTab('interviews')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'interviews' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>📅 {t.interviews}</button>
+          <button onClick={() => setActiveTab('selected')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'selected' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>⭐ {t.empTabSelected}</button>
+          <button onClick={() => setActiveTab('travel')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>✈️ {t.empTabTravel}</button>
+          <button onClick={() => setActiveTab('employees')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>🛡️ {t.employeesTab}</button>
+          <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>💬 {t.empTabSupport}</button>
+          <button onClick={() => setActiveTab('profile')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>🏢 {t.empTabProfile}</button>
         </div>
 
         {/* Tab 1: Personel Taleplerim */}
@@ -724,10 +724,18 @@ export default function EmployerPortalPage() {
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
                 <div className="font-bold text-slate-800 mb-2">{t.colBenefits}:</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-medium text-slate-800 text-xs">
-                  <label className="flex items-center gap-2 cursor-pointer p-1"><input type="checkbox" checked={newRequest.accommodationProvided} onChange={(e) => setNewRequest({ ...newRequest, accommodationProvided: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.accommodation}</label>
-                  <label className="flex items-center gap-2 cursor-pointer p-1"><input type="checkbox" checked={newRequest.foodProvided} onChange={(e) => setNewRequest({ ...newRequest, foodProvided: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.foodAllowance}</label>
-                  <label className="flex items-center gap-2 cursor-pointer p-1"><input type="checkbox" checked={newRequest.transportProvided} onChange={(e) => setNewRequest({ ...newRequest, transportProvided: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.localTransport}</label>
-                  <label className="flex items-center gap-2 cursor-pointer p-1"><input type="checkbox" checked={newRequest.flightCovered} onChange={(e) => setNewRequest({ ...newRequest, flightCovered: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.flightTicket}</label>
+                  <label className="flex items-center gap-2 cursor-pointer p-1">
+                    <input type="checkbox" checked={newRequest.accommodationProvided} onChange={(e) => setNewRequest({ ...newRequest, accommodationProvided: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.accommodation}
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer p-1">
+                    <input type="checkbox" checked={newRequest.foodProvided} onChange={(e) => setNewRequest({ ...newRequest, foodProvided: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.foodAllowance}
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer p-1">
+                    <input type="checkbox" checked={newRequest.transportProvided} onChange={(e) => setNewRequest({ ...newRequest, transportProvided: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.localTransport}
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer p-1">
+                    <input type="checkbox" checked={newRequest.flightCovered} onChange={(e) => setNewRequest({ ...newRequest, flightCovered: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.flightTicket}
+                  </label>
                 </div>
               </div>
 
