@@ -844,7 +844,13 @@ export default function PortalPage() {
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskDueDateLabel}</label>
-                  <input type="date" value={newTaskDueDate} onChange={(e) => setNewTaskDueDate(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm" />
+                  <input 
+                    type="date" 
+                    value={newTaskDueDate} 
+                    onChange={(e) => setNewTaskDueDate(e.target.value)} 
+                    placeholder={t.dateFormatPlaceholder || 'gg.aa.yyyy'}
+                    className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm" 
+                  />
                 </div>
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-xs sm:text-sm">
                   {t.saveTaskBtn}
@@ -939,7 +945,7 @@ export default function PortalPage() {
                       <span>{tkt.subject} ({tkt.candidate_name})</span>
                       <span className="text-red-600 uppercase text-[10px]">{tkt.status}</span>
                     </div>
-                    <p className="text-slate-600">{tkt.message}</p>
+                    <p className="text-slate-600">{t.message}</p>
                   </div>
                 ))}
               </div>

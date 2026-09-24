@@ -159,8 +159,8 @@ export interface Translation {
   noEmployers: string;
   noSupport: string;
   initialAuditLog: string;
+  dateFormatPlaceholder: string;
   
-  // Rol bazlı görev etiketleri ve placeholderlar
   selectTaskPrompt?: string;
   taskGroupSource?: string;
   taskGroupTarget?: string;
@@ -350,6 +350,7 @@ export const translations: Record<Language, Translation> = {
     noEmployers: 'Kayıtlı işveren bulunmuyor.',
     noSupport: 'Aktif sorun bildirimi bulunmuyor.',
     initialAuditLog: 'Sistem Başlatıldı & Rol Matrisi Kuruldu',
+    dateFormatPlaceholder: 'gg.aa.yyyy',
 
     selectTaskPrompt: 'Görev Seçin...',
     taskGroupSource: '🌍 Kaynak Ülke Sorumlusu',
@@ -531,6 +532,7 @@ export const translations: Record<Language, Translation> = {
     noEmployers: 'No registered employers found.',
     noSupport: 'No active support tickets found.',
     initialAuditLog: 'System Initialized & Role Matrix Established',
+    dateFormatPlaceholder: 'dd.mm.yyyy',
 
     selectTaskPrompt: 'Select Task...',
     taskGroupSource: '🌍 Source Country Officer',
@@ -712,6 +714,7 @@ export const translations: Record<Language, Translation> = {
     noEmployers: 'Nuk u gjetën punëdhënës të regjistruar.',
     noSupport: 'Nuk u gjetën njoftime mbështetjeje aktive.',
     initialAuditLog: 'Sistemi u Iniciua & Matrica e Roleve u Krijua',
+    dateFormatPlaceholder: 'dd.mm.vvvv',
 
     selectTaskPrompt: 'Zgjidh Detyrën...',
     taskGroupSource: '🌍 Oficeri i Vendit Burim',
@@ -893,6 +896,7 @@ export const translations: Record<Language, Translation> = {
     noEmployers: 'لا يوجد أصحاب عمل مسجلين.',
     noSupport: 'لا توجد تذاكر دعم نشطة.',
     initialAuditLog: 'تم بدء النظام وإنشاء مصفوفة الأدوار',
+    dateFormatPlaceholder: 'dd.mm.yyyy',
 
     selectTaskPrompt: 'اختر المهمة...',
     taskGroupSource: '🌍 مسؤول بلد المصدر',
