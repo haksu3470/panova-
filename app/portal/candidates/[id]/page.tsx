@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft, User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, Video, Trash2, Upload, Eye, X, Plus, Languages, Bell, Send, PlaneTakeoff, FileSignature } from 'lucide-react';
+import { ArrowLeft, User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, Video, Trash2, Upload, Eye, X, Plus, Languages, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert, CheckCircle2, History } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
@@ -77,6 +77,10 @@ export default function CandidateDetailPage() {
   const [pnrCode, setPnrCode] = useState('');
   const [accommodationDetails, setAccommodationDetails] = useState('');
 
+  // 6.3 Vazgeçme ve Süreç Kapatma State'leri
+  const [closureReason, setClosureReason] = useState('');
+  const [isClosed, setIsClosed] = useState(false);
+
   // İş Teklifi State'leri
   const [offerEmployer, setOfferEmployer] = useState('');
   const [offerSalary, setOfferSalary] = useState('');
@@ -122,7 +126,6 @@ export default function CandidateDetailPage() {
       setIssuingBody(data.issuing_body || '');
       setVideoUrl(data.video_url || '');
 
-      // Seyahat Bilgileri
       setTravelStatus(data.travel_status || 'planned');
       setFlightDate(data.flight_date || '');
       setFlightNumber(data.flight_number || '');
@@ -130,6 +133,9 @@ export default function CandidateDetailPage() {
       setArrivalCity(data.arrival_city || '');
       setPnrCode(data.pnr_code || '');
       setAccommodationDetails(data.accommodation_details || '');
+
+      setIsClosed(data.is_closed || false);
+      setClosureReason(data.closure_reason || '');
 
       const defaultDocs: CandidateDocument[] = [
         { id: '1', name: 'Pasaport Taraması', status: data.passport_number ? 'approved' : 'pending' },
@@ -220,13 +226,15 @@ export default function CandidateDetailPage() {
         arrival_city: arrivalCity,
         pnr_code: pnrCode,
         accommodation_details: accommodationDetails,
+        is_closed: isClosed,
+        closure_reason: closureReason,
       })
       .eq('id', candidateId);
 
     setSaving(false);
 
     if (!error) {
-      alert('Aday dosyası, belgeler ve tüm seyahat/lojistik bilgileri başarıyla kaydedildi!');
+      alert('Aday dosyası ve tüm süreç detayları başarıyla kaydedildi!');
     } else {
       alert('Hata: ' + error.message);
     }
@@ -280,7 +288,7 @@ export default function CandidateDetailPage() {
       if (dbError) throw dbError;
 
       if (candidate?.email) {
-        const mailResponse = await fetch('/api/send-email', {
+        await fetch('/api/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -290,15 +298,10 @@ export default function CandidateDetailPage() {
             message: notifMessage,
           }),
         });
-
-        const mailResult = await mailResponse.json();
-        if (!mailResponse.ok) {
-          console.warn('Mail gönderilemedi ama bildirim kaydedildi:', mailResult.error);
-        }
       }
 
       setNotifSending(false);
-      alert('Bildirim adaya hem portal üzerinden hem de e-posta olarak başarıyla gönderildi!');
+      alert('Bildirim adaya başarıyla gönderildi!');
       setNotifTitle('');
       setNotifMessage('');
     } catch (err: any) {
@@ -319,7 +322,7 @@ export default function CandidateDetailPage() {
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         
-        {/* Üst Bar */}
+        {/* Üst Bar ve Aday Özet Kartı (6. Madde) */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             <Link href="/portal" className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-700 font-bold text-xs w-fit">
@@ -335,7 +338,11 @@ export default function CandidateDetailPage() {
               )}
               <div>
                 <h1 className="text-base sm:text-xl font-extrabold text-slate-900 truncate max-w-[200px] sm:max-w-none">{candidate.full_name}</h1>
-                <span className="text-[11px] text-slate-500">ID: #{candidate.id.substring(0, 8)}</span>
+                <div className="flex items-center gap-2 text-[11px] text-slate-500">
+                  <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">PNV-CAND-{candidate.id.substring(0, 6)}</span>
+                  <span>📍 {candidate.country || 'N/A'}, {candidate.city || 'N/A'}</span>
+                  <span>💼 {candidate.profession || 'Genel'}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -364,6 +371,21 @@ export default function CandidateDetailPage() {
             </button>
           </div>
         </div>
+
+        {/* 6.3 Vazgeçme ve Süreç Kapanış Durumu Uyarısı */}
+        {isClosed && (
+          <div className="bg-red-50 border border-red-200 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm text-red-900">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
+              <div>
+                <strong>Bu aday dosyası kapatılmıştır / süreçten çıkılmıştır.</strong> Sebep: {closureReason || Belirtilmemiş}
+              </div>
+            </div>
+            <button onClick={() => { setIsClosed(false); setClosureReason(''); }} className="bg-white px-3 py-1.5 rounded-lg border border-red-300 font-bold hover:bg-red-100 transition cursor-pointer">
+              Süreci Tekrar Aç / Havuza Al
+            </button>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
           
@@ -413,11 +435,6 @@ export default function CandidateDetailPage() {
                     <input type="text" value={candidatePassword} onChange={(e) => setCandidatePassword(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white font-bold text-slate-900 outline-none text-xs sm:text-sm" />
                   </div>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-2">
-                <div>Pasaport: <strong className="text-slate-800">{candidate.passport_number || 'N/A'}</strong></div>
-                <div>Meslek: <strong className="text-slate-800">{candidate.profession}</strong></div>
               </div>
             </div>
 
@@ -469,11 +486,11 @@ export default function CandidateDetailPage() {
               </div>
             </div>
 
-            {/* Evrak & Belge Takip Mekanizması */}
+            {/* Evrak & Belge Takip Mekanizması (6.1) */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b pb-3">
                 <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <FileCheck className="w-5 h-5 text-indigo-600" /> Aday Evrak & Belge Yükleme Mekanizması
+                  <FileCheck className="w-5 h-5 text-indigo-600" /> 6.1 Aday Evrak & Belge Takip Mekanizması
                 </h3>
                 <span className="text-xs bg-indigo-50 text-indigo-700 font-bold px-2.5 py-1 rounded-lg">
                   {documents.filter(d => d.status === 'approved').length} / {documents.length} Onaylı
@@ -499,6 +516,7 @@ export default function CandidateDetailPage() {
                           className={`px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer outline-none ${
                             doc.status === 'approved' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
                             doc.status === 'rejected' ? 'bg-red-100 text-red-800 border-red-300' :
+                            doc.status === 're_requested' ? 'bg-purple-100 text-purple-800 border-purple-300' :
                             'bg-amber-100 text-amber-800 border-amber-300'
                           }`}
                         >
@@ -507,6 +525,7 @@ export default function CandidateDetailPage() {
                           <option value="reviewing">🔵 İnceleniyor</option>
                           <option value="approved">🟢 Onaylandı</option>
                           <option value="rejected">🔴 Reddedildi</option>
+                          <option value="re_requested">🔄 Yeniden istendi</option>
                         </select>
 
                         <button onClick={() => handleDeleteDocument(doc.id)} className="p-1.5 text-slate-400 hover:text-red-600 transition cursor-pointer">
@@ -545,10 +564,10 @@ export default function CandidateDetailPage() {
               </div>
             </div>
 
-            {/* Sertifika ve Video */}
+            {/* Sertifika, Video ve Değerlendirme */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
               <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-                <Award className="w-5 h-5 text-amber-500" /> Sertifika & Video Yönetimi
+                <Award className="w-5 h-5 text-amber-500" /> Mesleki Değerlendirme & Sertifika
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div className="p-4 bg-slate-50 rounded-xl border space-y-2">
@@ -563,10 +582,10 @@ export default function CandidateDetailPage() {
               </div>
             </div>
 
-            {/* Notlar */}
+            {/* İç Notlar */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3">
               <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-blue-600" /> İç Değerlendirme Notları
+                <FileText className="w-5 h-5 text-blue-600" /> İç Değerlendirme Notları (Sadece PANOVA)
               </h3>
               <textarea rows={3} value={internalNotes} onChange={(e) => setInternalNotes(e.target.value)} className="w-full p-4 rounded-xl border text-xs outline-none text-slate-900" />
             </div>
@@ -582,6 +601,28 @@ export default function CandidateDetailPage() {
                 <option value="visa_processing">🟣 Vize Sürecinde</option>
                 <option value="approved">🟢 Onaylandı</option>
               </select>
+            </div>
+
+            {/* 6.3 Vazgeçme ve Süreçten Çıkış Paneli */}
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3 border-amber-200">
+              <h3 className="text-sm sm:text-base font-bold text-amber-900 border-b pb-2 flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-amber-600" /> 6.3 Vazgeçme ve Süreçten Çıkış
+              </h3>
+              <p className="text-[11px] text-slate-500">Aday iş teklifini reddederse veya süreç olumsuz sonuçlanırsa kaydı silmeden kapatabilirsiniz.</p>
+              <textarea 
+                rows={2} 
+                value={closureReason} 
+                onChange={(e) => setClosureReason(e.target.value)} 
+                placeholder="Kapanış / Vazgeçme sebebi..." 
+                className="w-full p-3 rounded-xl border text-xs outline-none bg-slate-50 text-slate-900" 
+              />
+              <button 
+                type="button" 
+                onClick={() => { setIsClosed(true); handleSaveDetail(); }}
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-xl font-bold text-xs transition cursor-pointer shadow-sm"
+              >
+                Aday Sürecini Kapat / Arşivle
+              </button>
             </div>
 
             {/* Resmi İş Teklifi Gönderme Kartı */}
@@ -628,7 +669,7 @@ export default function CandidateDetailPage() {
                     rows={2} 
                     value={offerTerms} 
                     onChange={(e) => setOfferTerms(e.target.value)} 
-                    placeholder="Konaklama ve yemek dahil, haftada 40 saat..." 
+                    placeholder="Konaklama ve yemek dahil..." 
                     className="w-full px-3 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
                   />
                 </div>
@@ -642,10 +683,10 @@ export default function CandidateDetailPage() {
               </div>
             </div>
 
-            {/* Adaya Anlık Bildirim / Uyarı Gönderme Paneli */}
+            {/* Adaya Anlık Bildirim Gönderme Paneli (6.2) */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
               <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
-                <Bell className="w-4 h-4 text-[#2e7d32]" /> Adaya Bildirim Gönder
+                <Bell className="w-4 h-4 text-[#2e7d32]" /> 6.2 Adaya Bildirim Gönder
               </h3>
               <form onSubmit={handleSendNotificationToCandidate} className="space-y-3 text-xs">
                 <div>
