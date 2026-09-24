@@ -789,39 +789,39 @@ export default function PortalPage() {
                     onChange={(e) => setNewTaskTitle(e.target.value)} 
                     className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm"
                   >
-                    <option value="" disabled>Görev Seçin...</option>
+                    <option value="" disabled>{t.selectTaskPrompt || 'Görev Seçin...'}</option>
                     
                     {(isUpperManagement || userRole === 'source_country') && (
-                      <optgroup label="🌍 Kaynak Ülke Sorumlusu">
-                        <option value="Pasaportu kontrol et">Pasaportu Kontrol Et</option>
-                        <option value="Aday ön görüşmesi planla">Aday Ön Görüşmesi Planla</option>
-                        <option value="Aday bilgilerini güncelle">Aday Bilgilerini Güncelle</option>
-                        <option value="Eksik evrak talep et">Eksik Evrak Talep Et</option>
+                      <optgroup label={t.taskGroupSource}>
+                        <option value="Pasaportu kontrol et">{t.taskPassportCheck}</option>
+                        <option value="Aday ön görüşmesi planla">{t.taskInterviewPlan}</option>
+                        <option value="Aday bilgilerini güncelle">{t.taskUpdateCandidate}</option>
+                        <option value="Eksik evrak talep et">{t.taskRequestDocs}</option>
                       </optgroup>
                     )}
 
                     {(isUpperManagement || userRole === 'target_country') && (
-                      <optgroup label="🏢 Hedef Ülke Sorumlusu">
-                        <option value="İşveren talebini kaydet">İşveren Talebini Kaydet</option>
-                        <option value="Aday eşleştirme yap">Aday Eşleştirme Yap</option>
-                        <option value="İş teklifi hazırla">İş Teklifi Hazırla (Job Offer)</option>
-                        <option value="Performans ve uyum takibi yap">Performans ve Uyum Takibi Yap</option>
+                      <optgroup label={t.taskGroupTarget}>
+                        <option value="İşveren talebini kaydet">{t.taskSaveDemand}</option>
+                        <option value="Aday eşleştirme yap">{t.taskMatchCandidate}</option>
+                        <option value="İş teklifi hazırla">{t.taskPrepareOffer}</option>
+                        <option value="Performans ve uyum takibi yap">{t.taskTrackPerformance}</option>
                       </optgroup>
                     )}
 
                     {(isUpperManagement || userRole === 'field_officer') && (
-                      <optgroup label="✈️ Saha Sorumlusu">
-                        <option value="Seyahat tarihini gir">Seyahat Tarihini Gir</option>
-                        <option value="Konaklama ve karşılama planla">Konaklama ve Karşılama Planla</option>
-                        <option value="Destek taleplerini yönet">Destek Taleplerini Yönet</option>
-                        <option value="Saha görev durumunu güncelle">Saha Görev Durumunu Güncelle</option>
+                      <optgroup label={t.taskGroupField}>
+                        <option value="Seyahat tarihini gir">{t.taskEnterTravelDate}</option>
+                        <option value="Konaklama ve karşılama planla">{t.taskPlanAccommodation}</option>
+                        <option value="Destek taleplerini yönet">{t.taskManageSupport}</option>
+                        <option value="Saha görev durumunu güncelle">{t.taskUpdateFieldStatus}</option>
                       </optgroup>
                     )}
 
                     {isUpperManagement && (
-                      <optgroup label="👑 Üst Yönetim">
-                        <option value="Sistem ve logları denetle">Sistem ve Logları Denetle</option>
-                        <option value="Mali ve stratejik kararları onayla">Mali ve Stratejik Kararları Onayla</option>
+                      <optgroup label={t.taskGroupManagement}>
+                        <option value="Sistem ve logları denetle">{t.taskAuditSystem}</option>
+                        <option value="Mali ve stratejik kararları onayla">{t.taskApproveStrategic}</option>
                       </optgroup>
                     )}
                   </select>

@@ -160,7 +160,8 @@ export interface Translation {
   noSupport: string;
   initialAuditLog: string;
   
-  // Rol bazlı görev etiketleri
+  // Rol bazlı görev etiketleri ve placeholderlar
+  selectTaskPrompt?: string;
   taskGroupSource?: string;
   taskGroupTarget?: string;
   taskGroupField?: string;
@@ -350,6 +351,7 @@ export const translations: Record<Language, Translation> = {
     noSupport: 'Aktif sorun bildirimi bulunmuyor.',
     initialAuditLog: 'Sistem Başlatıldı & Rol Matrisi Kuruldu',
 
+    selectTaskPrompt: 'Görev Seçin...',
     taskGroupSource: '🌍 Kaynak Ülke Sorumlusu',
     taskGroupTarget: '🏢 Hedef Ülke Sorumlusu',
     taskGroupField: '✈️ Saha Sorumlusu',
@@ -530,6 +532,7 @@ export const translations: Record<Language, Translation> = {
     noSupport: 'No active support tickets found.',
     initialAuditLog: 'System Initialized & Role Matrix Established',
 
+    selectTaskPrompt: 'Select Task...',
     taskGroupSource: '🌍 Source Country Officer',
     taskGroupTarget: '🏢 Target Country Officer',
     taskGroupField: '✈️ Field Officer',
@@ -710,6 +713,7 @@ export const translations: Record<Language, Translation> = {
     noSupport: 'Nuk u gjetën njoftime mbështetjeje aktive.',
     initialAuditLog: 'Sistemi u Iniciua & Matrica e Roleve u Krijua',
 
+    selectTaskPrompt: 'Zgjidh Detyrën...',
     taskGroupSource: '🌍 Oficeri i Vendit Burim',
     taskGroupTarget: '🏢 Oficeri i Vendit të Synuar',
     taskGroupField: '✈️ Oficeri i Fushës',
@@ -721,7 +725,7 @@ export const translations: Record<Language, Translation> = {
     taskSaveDemand: 'Ruaj Kërkesën e Punëdhënësit',
     taskMatchCandidate: 'Përputh Kandidatin',
     taskPrepareOffer: 'Përgatit Ofertën e Punës (Job Offer)',
-    taskTrackPerformance: 'Niq Performancën & Pajtueshmërinë',
+    taskTrackPerformance: 'Ndiq Performancën & Pajtueshmërinë',
     taskEnterTravelDate: 'Vendos Datën e Udhëtimit',
     taskPlanAccommodation: 'Planifiko Akomodimin & Pritjen',
     taskManageSupport: 'Menaxho Tikat e Mbështetjes',
@@ -890,6 +894,7 @@ export const translations: Record<Language, Translation> = {
     noSupport: 'لا توجد تذاكر دعم نشطة.',
     initialAuditLog: 'تم بدء النظام وإنشاء مصفوفة الأدوار',
 
+    selectTaskPrompt: 'اختر المهمة...',
     taskGroupSource: '🌍 مسؤول بلد المصدر',
     taskGroupTarget: '🏢 مسؤول البلد المستهدف',
     taskGroupField: '✈️ مسؤول الميدان',
