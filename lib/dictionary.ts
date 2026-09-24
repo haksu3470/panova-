@@ -309,6 +309,12 @@ export interface Translation {
   offerSentSuccess?: string;
   notificationSentSuccess?: string;
   returnToPortal?: string;
+  
+  // Eklenen Yeni Belge Çeviri Anahtarları
+  docPassportScan?: string;
+  docProfessionalCert?: string;
+  docCriminalRecord?: string;
+  docHealthReport?: string;
 }
 
 export const languages = [
@@ -629,6 +635,10 @@ export const translations: Record<Language, Translation> = {
     offerSentSuccess: 'Resmi iş teklifi başarıyla adaya iletildi!',
     notificationSentSuccess: 'Bildirim adaya başarıyla gönderildi!',
     returnToPortal: 'Yönetim Paneline Dön',
+    docPassportScan: 'Pasaport Taraması',
+    docProfessionalCert: 'Mesleki Sertifika / İzin Belgesi',
+    docCriminalRecord: 'Adli Sicil Kaydı (Sabıka Kaydı)',
+    docHealthReport: 'Sağlık Raporu / Akciğer Grafisi',
   },
   en: {
     returnHome: 'Return to Home',
@@ -940,6 +950,10 @@ export const translations: Record<Language, Translation> = {
     offerSentSuccess: 'Official job offer sent successfully!',
     notificationSentSuccess: 'Notification sent successfully!',
     returnToPortal: 'Return to Portal',
+    docPassportScan: 'Passport Scan',
+    docProfessionalCert: 'Professional Certificate / Work Permit',
+    docCriminalRecord: 'Criminal Record Certificate',
+    docHealthReport: 'Health Report / Chest X-Ray',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -1249,6 +1263,10 @@ export const translations: Record<Language, Translation> = {
     offerSentSuccess: 'Oferta zyrtare u dërgua me sukses!',
     notificationSentSuccess: 'Njoftimi u dërgua me sukses!',
     returnToPortal: 'Kthehu te Portali',
+    docPassportScan: 'Skanimi i Pasaportës',
+    docProfessionalCert: 'Certifikata Profesionale / Leja e Punës',
+    docCriminalRecord: 'Dëshmia e Penalitetit',
+    docHealthReport: 'Raporti Shëndetësor / Radiografia e Mushkërive',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -1560,5 +1578,9 @@ export const translations: Record<Language, Translation> = {
     offerSentSuccess: 'تم إرسال عرض العمل الرسمي بنجاح!',
     notificationSentSuccess: 'تم إرسال الإشعار بنجاح!',
     returnToPortal: 'العودة إلى لوحة التحكم',
+    docPassportScan: 'مسح جواز السفر',
+    docProfessionalCert: 'الشهادة المهنية / تصريح العمل',
+    docCriminalRecord: 'سجل السوابق العدلية',
+    docHealthReport: 'التقرير الطبي / أشعة الصدر',
   },
 };

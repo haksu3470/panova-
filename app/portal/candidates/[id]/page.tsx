@@ -139,10 +139,10 @@ export default function CandidateDetailPage() {
       setClosureReason(data.closure_reason || '');
 
       const defaultDocs: CandidateDocument[] = [
-        { id: '1', name: 'Pasaport Taraması', status: data.passport_number ? 'approved' : 'pending' },
-        { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
-        { id: '3', name: 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
-        { id: '4', name: 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
+        { id: '1', name: t.docPassportScan || 'Pasaport Taraması', status: data.passport_number ? 'approved' : 'pending' },
+        { id: '2', name: t.docProfessionalCert || 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
+        { id: '3', name: t.docCriminalRecord || 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
+        { id: '4', name: t.docHealthReport || 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
       ];
       
       try {
