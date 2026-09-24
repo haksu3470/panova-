@@ -36,7 +36,14 @@ export default function CandidateDashboard() {
     };
   }, []);
 
-  const [authenticated, setAuthenticated] = useState(false);
+  // Oturum durumunu localStorage'dan başlatıyoruz (Refresh sorununu çözer)
+  const [authenticated, setAuthenticated] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('panova_candidate_auth') === 'true';
+    }
+    return false;
+  });
+
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   
   const [loginInput, setLoginInput] = useState('');
@@ -49,7 +56,14 @@ export default function CandidateDashboard() {
   const [regProfession, setRegProfession] = useState('Elektrik Mühendisi / Teknisyeni');
   const [regSector, setRegSector] = useState('construction');
 
-  const [candidate, setCandidate] = useState<any | null>(null);
+  const [candidate, setCandidate] = useState<any | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('panova_current_candidate');
+      return saved ? JSON.parse(saved) : null;
+    }
+    return null;
+  });
+
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'documents' | 'jobs' | 'interviews' | 'offers' | 'process' | 'travel' | 'notifications' | 'support'>('overview');
   
@@ -79,6 +93,17 @@ export default function CandidateDashboard() {
     ar: ['مسح جواز السفر', 'الشهادة المهنية / التصريح', 'السجل الجنائي', 'التقرير الطبي / الأشعة']
   };
 
+  useEffect(() => {
+    if (authenticated && candidate?.id) {
+      fetchCandidateData(candidate.id);
+      setNewPhone(candidate.phone || '');
+      setNewEmail(candidate.email || '');
+      setNewPassword(candidate.password || '123456');
+      setNewPhoto(candidate.photo_url || '');
+      setNewVideoUrl(candidate.video_url || '');
+    }
+  }, [authenticated]);
+
   const handleCandidateLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -103,6 +128,12 @@ export default function CandidateDashboard() {
         setNewPhoto(data.photo_url || '');
         setNewVideoUrl(data.video_url || '');
         setAuthenticated(true);
+        
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('panova_candidate_auth', 'true');
+          localStorage.setItem('panova_current_candidate', JSON.stringify(data));
+        }
+
         fetchCandidateData(data.id);
       } else {
         alert(currentLang === 'tr' ? 'Hatalı şifre!' : 'Incorrect password!');
@@ -148,9 +179,24 @@ export default function CandidateDashboard() {
       setNewEmail(data.email || '');
       setNewPassword(defaultPassword);
       setAuthenticated(true);
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('panova_candidate_auth', 'true');
+        localStorage.setItem('panova_current_candidate', JSON.stringify(data));
+      }
+
       fetchCandidateData(data.id);
     } else {
       alert('Hata: ' + (error?.message || 'Kayıt oluşturulamadı.'));
+    }
+  };
+
+  const handleLogout = () => {
+    setAuthenticated(false);
+    setCandidate(null);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('panova_candidate_auth');
+      localStorage.removeItem('panova_current_candidate');
     }
   };
 
@@ -273,7 +319,11 @@ export default function CandidateDashboard() {
         .eq('id', candidate.id);
 
       if (!error) {
-        setCandidate({ ...candidate, documents_json: JSON.stringify(updatedDocs) });
+        const updatedCandidate = { ...candidate, documents_json: JSON.stringify(updatedDocs) };
+        setCandidate(updatedCandidate);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('panova_current_candidate', JSON.stringify(updatedCandidate));
+        }
         alert(currentLang === 'tr' ? 'Belge yüklendi!' : 'Document uploaded!');
       } else {
         alert('Hata: ' + error.message);
@@ -300,19 +350,23 @@ export default function CandidateDashboard() {
     setUpdatingProfile(false);
 
     if (!error) {
-      setCandidate({
+      const updatedCandidate = {
         ...candidate,
         phone: newPhone,
         email: newEmail,
         password: newPassword,
         photo_url: newPhoto,
         video_url: newVideoUrl,
-      });
+      };
+      setCandidate(updatedCandidate);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('panova_current_candidate', JSON.stringify(updatedCandidate));
+      }
       alert(currentLang === 'tr' ? 'Profil güncellendi!' : 'Profile updated!');
     }
   };
 
-  if (!authenticated) {
+  if (!authenticated || !candidate) {
     return (
       <div className={`min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 sm:p-6 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center bg-slate-800 rounded-xl px-3 py-2 border border-slate-700 shadow-sm">
@@ -524,7 +578,7 @@ export default function CandidateDashboard() {
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         
-        {/* Top Header (Mobil Duyarlı) */}
+        {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm">
           <div className="flex items-center gap-3 sm:gap-4">
             {newPhoto ? (
@@ -564,13 +618,13 @@ export default function CandidateDashboard() {
               <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" /> {t.returnHome}
             </Link>
 
-            <button onClick={() => setAuthenticated(false)} className="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-700 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer">
+            <button onClick={handleLogout} className="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-700 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer">
               <LogOut className="w-3.5 h-3.5" /> {t.logout}
             </button>
           </div>
         </div>
 
-        {/* Sekmeler (Mobilde Yatay Kaydırılabilir - Overflow-x-auto) */}
+        {/* Tab Navigation */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
           <button onClick={() => setActiveTab('overview')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>📊 {t.overview}</button>
           <button onClick={() => setActiveTab('profile')} className={`px-4 py-2.5 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>👤 {t.profile}</button>
@@ -960,7 +1014,7 @@ export default function CandidateDashboard() {
 
       </div>
 
-      {/* Önizleme Modalı (Mobilde Tam Ekran / Tablet-Masaüstünde Orta Boy) */}
+      {/* Preview Modal */}
       {previewDoc && (
         <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
           <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] overflow-hidden flex flex-col shadow-2xl">
