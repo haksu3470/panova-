@@ -9,16 +9,18 @@ export default function EmployerPage() {
   const t = translations[lang] || translations['tr'];
 
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
-  // Form State'leri
+  // Form State'leri (Ülke alanı state'e bağlanarak kalıcı hale getirildi)
   const [companyName, setCompanyName] = useState('AKAY EĞİTİM');
   const [contactPerson, setContactPerson] = useState('Hüseyin Aksu');
   const [phone, setPhone] = useState('+38970385792');
+  const [country, setCountry] = useState('North Macedonia');
   const [email, setEmail] = useState('huseyinaksu@gmail.com');
   const [password, setPassword] = useState('');
+  const [updateMsg, setUpdateMsg] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'requests' | 'candidates' | 'interviews' | 'selected' | 'travel' | 'employees' | 'support' | 'profile'>('requests');
+  const [activeTab, setActiveTab] = useState<'requests' | 'candidates' | 'interviews' | 'selected' | 'travel' | 'employees' | 'support' | 'profile'>('profile');
   const [position, setPosition] = useState('');
   const [headcount, setHeadcount] = useState(1);
   const [sector, setSector] = useState('Tarım ve Hayvancılık');
@@ -82,6 +84,12 @@ export default function EmployerPage() {
     setTimeout(() => setSupportSuccess(false), 4000);
     setSupportSubject('');
     setSupportMessage('');
+  };
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    setUpdateMsg(true);
+    setTimeout(() => setUpdateMsg(false), 4000);
   };
 
   return (
@@ -230,7 +238,7 @@ export default function EmployerPage() {
             <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <div className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider bg-emerald-50 inline-block px-2.5 py-1 rounded-full mb-1">
-                  North Macedonia
+                  {country}
                 </div>
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight">
                   {companyName}
@@ -689,16 +697,24 @@ export default function EmployerPage() {
             {activeTab === 'profile' && (
               <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl max-w-xl">
                 <h2 className="text-sm font-black text-slate-900 mb-2">
-                  {t.empProfileTitle || 'Firma ve İletişim Bilgilerim'}
+                  {t.profileUpdateTitle || 'Şirket Profili ve Bilgi Güncelleme'}
                 </h2>
-                <p className="text-xs text-slate-500 mb-6">Şirket bilgilerinizi ve şifrenizi buradan güncelleyebilirsiniz.</p>
-                <div className="space-y-4 text-xs">
+                <p className="text-xs text-slate-500 mb-6">{t.profileUpdateDesc || 'Şirket bilgilerinizi ve şifrenizi buradan güncelleyebilirsiniz.'}</p>
+
+                {updateMsg && (
+                  <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3.5 rounded-2xl font-medium">
+                    ✅ {t.profileUpdatedSuccess || 'Şirket profili başarıyla güncellendi!'}
+                  </div>
+                )}
+
+                <form onSubmit={handleSaveProfile} className="space-y-4 text-xs">
                   <div>
                     <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
                       {t.companyNameLabel || 'ŞİRKET UNVANI'} *
                     </label>
                     <input
                       type="text"
+                      required
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 font-medium"
@@ -712,6 +728,7 @@ export default function EmployerPage() {
                       </label>
                       <input
                         type="text"
+                        required
                         value={contactPerson}
                         onChange={(e) => setContactPerson(e.target.value)}
                         className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 font-medium"
@@ -723,6 +740,7 @@ export default function EmployerPage() {
                       </label>
                       <input
                         type="tel"
+                        required
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 font-medium"
@@ -737,17 +755,21 @@ export default function EmployerPage() {
                       </label>
                       <input
                         type="text"
-                        defaultValue="North Macedonia"
+                        required
+                        value={country}
+                        onChange={(e) => setCountry(e.target.value)}
                         className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 font-medium"
                       />
                     </div>
                     <div>
                       <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                        {t.passwordLabel || 'PASSWORD'} *
+                        {t.passwordLabel || 'ŞİFRE'} *
                       </label>
                       <input
                         type="password"
-                        defaultValue="••••••"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 font-medium"
                       />
                     </div>
@@ -766,12 +788,12 @@ export default function EmployerPage() {
                   </div>
 
                   <button
-                    onClick={() => alert('Değişiklikler kaydedildi!')}
-                    className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-md cursor-pointer mt-2"
+                    type="submit"
+                    className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2"
                   >
                     {t.saveChangesBtn || 'Değişiklikleri Kaydet'}
                   </button>
-                </div>
+                </form>
               </div>
             )}
           </div>

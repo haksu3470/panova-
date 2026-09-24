@@ -35,6 +35,7 @@ export interface Translation {
   passwordLabel?: string;
   submitting?: string;
   signInBtn?: string;
+  signUpBtn?: string;
   colSalary?: string;
   colDemandStatus?: string;
   regFormTitle?: string;
@@ -174,14 +175,20 @@ export interface Translation {
   signUpPortalSub?: string;
   companyNameLabel?: string;
   contactPersonLabel?: string;
+  completeRegBtn?: string;
   completeSignUpBtn?: string;
   demoLoginText?: string;
   regSuccessHeader?: string;
   regSuccessText?: string;
   goToSignInBtn?: string;
 
+  employerRegTitle?: string;
+  employerRegSub?: string;
+  
+
   empTabRequests?: string;
   empTabCandidates?: string;
+  empTabInterviews?: string;
   empTabSelected?: string;
   empTabTravel?: string;
   empTabSupport?: string;
@@ -212,6 +219,7 @@ export interface Translation {
   profileUpdateTitle?: string;
   profileUpdateDesc?: string;
   countryLocationLabel?: string;
+  emailImmutableLabel?: string;
   emailReadonlyLabel?: string;
   updatingBtn?: string;
   saveChangesBtn?: string;
@@ -346,6 +354,7 @@ export const translations: Record<Language, Translation> = {
     tagline: 'Uluslararası İstihdam ve Vize Yönetimi',
     heroTitle: 'Profesyonel İş Gücü Çözümleri',
     completeReg: 'Kayıt Ol',
+    completeRegBtn: 'Kayıt Ol',
     colTargetStart: 'Hedef Başlangıç',
     colBenefits: 'Yan Haklar',
     accommodation: 'Konaklama',
@@ -358,6 +367,7 @@ export const translations: Record<Language, Translation> = {
     passwordLabel: 'Şifre',
     submitting: 'Gönderiliyor...',
     signInBtn: 'Giriş Yap',
+    signUpBtn: 'Kayıt Ol',
     colSalary: 'Maaş',
     colDemandStatus: 'Talep Durumu',
     regFormTitle: 'Aday Kayıt Formu',
@@ -496,6 +506,8 @@ export const translations: Record<Language, Translation> = {
     companyEmailLabel: 'Şirket E-Postası',
     signUpPortalTitle: 'İşveren Kaydı',
     signUpPortalSub: 'İş gücü talepleri sunmak için şirketinizi kaydedin.',
+    employerRegTitle: 'İşveren Kaydı',
+    employerRegSub: 'İş gücü talebi oluşturmak için şirketinizi kaydedin.',
     companyNameLabel: 'Şirket Unvanı',
     contactPersonLabel: 'Yetkili Kişi',
     completeSignUpBtn: 'Kaydı Tamamla',
@@ -506,6 +518,7 @@ export const translations: Record<Language, Translation> = {
 
     empTabRequests: 'Personel Taleplerim',
     empTabCandidates: 'Adaylar / Eşleşmeler',
+    empTabInterviews: 'Mülakatlar',
     empTabSelected: 'Seçtiğim Adaylar',
     empTabTravel: 'Seyahat ve Başlangıç',
     empTabSupport: 'Destek / Bildirim',
@@ -536,6 +549,7 @@ export const translations: Record<Language, Translation> = {
     profileUpdateTitle: 'Şirket Profili ve Bilgi Güncelleme',
     profileUpdateDesc: 'Şirket bilgilerinizi ve şifrenizi buradan güncelleyebilirsiniz.',
     countryLocationLabel: 'Ülke / Konum',
+    emailImmutableLabel: 'E-posta (Değiştirilemez)',
     emailReadonlyLabel: 'E-posta (Değiştirilemez)',
     updatingBtn: 'Güncelleniyor...',
     saveChangesBtn: 'Değişiklikleri Kaydet',
@@ -661,6 +675,7 @@ export const translations: Record<Language, Translation> = {
     tagline: 'International Employment & Visa Management',
     heroTitle: 'Professional Workforce Solutions',
     completeReg: 'Register',
+    completeRegBtn: 'Complete Registration',
     colTargetStart: 'Target Start',
     colBenefits: 'Benefits',
     accommodation: 'Accommodation',
@@ -673,6 +688,7 @@ export const translations: Record<Language, Translation> = {
     passwordLabel: 'Password',
     submitting: 'Submitting...',
     signInBtn: 'Sign In',
+    signUpBtn: 'Sign Up',
     colSalary: 'Salary',
     colDemandStatus: 'Demand Status',
     regFormTitle: 'Candidate Registration Form',
@@ -811,6 +827,8 @@ export const translations: Record<Language, Translation> = {
     companyEmailLabel: 'Company Email',
     signUpPortalTitle: 'Employer Registration',
     signUpPortalSub: 'Register your company to submit workforce demands.',
+    employerRegTitle: 'Employer Registration',
+    employerRegSub: 'Register your company to submit workforce demands.',
     companyNameLabel: 'Company Name',
     contactPersonLabel: 'Contact Person',
     completeSignUpBtn: 'Complete Registration',
@@ -821,6 +839,7 @@ export const translations: Record<Language, Translation> = {
 
     empTabRequests: 'Personnel Requests',
     empTabCandidates: 'Candidates / Matching',
+    empTabInterviews: 'Interviews',
     empTabSelected: 'Selected Candidates',
     empTabTravel: 'Travel & Start',
     empTabSupport: 'Support / Notices',
@@ -851,6 +870,7 @@ export const translations: Record<Language, Translation> = {
     profileUpdateTitle: 'Company Profile & Info Update',
     profileUpdateDesc: 'You can update your company information and password here.',
     countryLocationLabel: 'Country / Location',
+    emailImmutableLabel: 'Email (Read-only)',
     emailReadonlyLabel: 'Email (Read-only)',
     updatingBtn: 'Updating...',
     saveChangesBtn: 'Save Changes',
@@ -976,6 +996,7 @@ export const translations: Record<Language, Translation> = {
     tagline: 'Punësim Ndërkombëtar dhe Menaxhim Vizash',
     heroTitle: 'Zgjidhje Profesionale të Fuqisë Punëtore',
     completeReg: 'Regjistrohuni',
+    completeRegBtn: 'Përfundo Regjistrimin',
     colTargetStart: 'Fillimi i Synuar',
     colBenefits: 'Përfitimet',
     accommodation: 'Akomodimi',
@@ -988,6 +1009,7 @@ export const translations: Record<Language, Translation> = {
     passwordLabel: 'Fjalëkalimi',
     submitting: 'Duke dërguar...',
     signInBtn: 'Hyni',
+    signUpBtn: 'Regjistrohuni',
     colSalary: 'Paga',
     colDemandStatus: 'Statusi i Kërkesës',
     regFormTitle: 'Formulari i Regjistrimit',
@@ -1126,6 +1148,8 @@ export const translations: Record<Language, Translation> = {
     companyEmailLabel: 'Email i Kompanisë',
     signUpPortalTitle: 'Regjistrimi i Punëdhënësit',
     signUpPortalSub: 'Regjistroni kompaninë tuaj për të paraqitur kërkesa.',
+    employerRegTitle: 'Regjistrimi i Punëdhënësit',
+    employerRegSub: 'Regjistroni kompaninë tuaj për të paraqitur kërkesa për fuqi punëtore.',
     companyNameLabel: 'Emri i Kompanisë',
     contactPersonLabel: 'Personi i Kontaktit',
     completeSignUpBtn: 'Përfundo Regjistrimin',
@@ -1136,6 +1160,7 @@ export const translations: Record<Language, Translation> = {
 
     empTabRequests: 'Kërkesat e Personelit',
     empTabCandidates: 'Kandidatët / Përputhjet',
+    empTabInterviews: 'Intervistat',
     empTabSelected: 'Kandidatët e Zgjedhur',
     empTabTravel: 'Udhëtimi dhe Fillimi',
     empTabSupport: 'Mbështetje / Njoftim',
@@ -1166,6 +1191,7 @@ export const translations: Record<Language, Translation> = {
     profileUpdateTitle: 'Përditësimi i Profilit dhe Informacionit të Kompanisë',
     profileUpdateDesc: 'Ju mund të përditësoni informacionin e kompanisë suaj dhe fjalëkalimin këtu.',
     countryLocationLabel: 'Shteti / Vendndodhja',
+    emailImmutableLabel: 'Email (I pandryshueshëm)',
     emailReadonlyLabel: 'Email (I pandryshueshëm)',
     updatingBtn: 'Duke përditësuar...',
     saveChangesBtn: 'Ruaj Ndryshimet',
@@ -1291,6 +1317,7 @@ export const translations: Record<Language, Translation> = {
     tagline: 'التوظيف الدولي وإدارة التأشيرات',
     heroTitle: 'حلول القوى العاملة المهنية',
     completeReg: 'التسجيل',
+    completeRegBtn: 'إتمام التسجيل',
     colTargetStart: 'بداية المستهدف',
     colBenefits: 'المزايا',
     accommodation: 'الإقامة',
@@ -1303,6 +1330,7 @@ export const translations: Record<Language, Translation> = {
     passwordLabel: 'كلمة المرور',
     submitting: 'جاري الإرسال...',
     signInBtn: 'تسجيل الدخول',
+    signUpBtn: 'إنشاء حساب',
     colSalary: 'الراتب',
     colDemandStatus: 'حالة الطلب',
     regFormTitle: 'استمارة تسجيل المرشح',
@@ -1441,6 +1469,8 @@ export const translations: Record<Language, Translation> = {
     companyEmailLabel: 'البريد الإلكتروني للشركة',
     signUpPortalTitle: 'تسجيل صاحب العمل',
     signUpPortalSub: 'سجل شركتك لتقديم طلبات القوى العاملة.',
+    employerRegTitle: 'تسجيل صاحب العمل',
+    employerRegSub: 'سجل شركتك لتقديم طلبات القوى العاملة.',
     companyNameLabel: 'اسم الشركة',
     contactPersonLabel: 'الشخص المسؤول',
     completeSignUpBtn: 'إتمام التسجيل',
@@ -1451,6 +1481,7 @@ export const translations: Record<Language, Translation> = {
 
     empTabRequests: 'طلبات الموظفين',
     empTabCandidates: 'المرشحون / المطابقة',
+    empTabInterviews: 'المقابلات',
     empTabSelected: 'المرشحون المختارون',
     empTabTravel: 'السفر والبداية',
     empTabSupport: 'الدعم / الإشعارات',
@@ -1481,7 +1512,8 @@ export const translations: Record<Language, Translation> = {
     profileUpdateTitle: 'تحديث ملف الشركة والمعلومات',
     profileUpdateDesc: 'يمكنك تحديث معلومات شركتك وكلمة المرور من هنا.',
     countryLocationLabel: 'الدولة / الموقع',
-    emailReadonlyLabel: 'البريد الإلكتروني (غير قابل للتعديل)',
+    emailImmutableLabel: 'البريد الإلكتروني (ثابت)',
+    emailReadonlyLabel: 'البريد الإلكتروني (ثابت)',
     updatingBtn: 'جاري التحديث...',
     saveChangesBtn: 'حفظ التغييرات',
     profileUpdatedSuccess: 'تم تحديث ملف الشركة بنجاح!',
