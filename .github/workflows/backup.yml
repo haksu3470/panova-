@@ -2,8 +2,8 @@ name: Supabase Automatic Backup
 
 on:
   schedule:
-    - cron: '0 3 * * *' # Her gece saat 03:00'te otomatik çalışır
-  workflow_dispatch: # GitHub panelinden dilediğiniz an manuel çalıştırabilirsiniz
+    - cron: '0 3 * * *'
+  workflow_dispatch:
 
 jobs:
   backup:
@@ -22,7 +22,7 @@ jobs:
           TIMESTAMP=$(date +'%Y-%m-%d_%H-%M-%S')
           BACKUP_FILE="panova_db_backup_$TIMESTAMP.dump"
           
-          # Supabase veritabanından güvenli yedek alma
-          pg_dump "$SUPABASE_DB_URL" --schema=public -F c -f "$BACKUP_FILE"
+          # SSL bağlantı parametresi ile yedekleme
+          pg_dump "$SUPABASE_DB_URL?sslmode=require" --schema=public -F c -f "$BACKUP_FILE"
           
           echo "Database backup completed successfully: $BACKUP_FILE"
