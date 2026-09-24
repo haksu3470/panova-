@@ -217,7 +217,6 @@ export interface Translation {
   saveChangesBtn?: string;
   profileUpdatedSuccess?: string;
 
-  // TypeScript Hata Loglarında Belirtilen Eksik Alanlar
   completed?: string;
   approved?: string;
   pending?: string;
@@ -225,6 +224,27 @@ export interface Translation {
   certificateno?: string;
   issuingbody?: string;
   sendnotification?: string;
+
+  // Loglarda Belirtilen Tüm Eksik Seyahat, Belge ve Görev Alanları
+  planned?: string;
+  ticketed?: string;
+  flightNumber?: string;
+  flightDateTime?: string;
+  departureCityAirport?: string;
+  arrivalCityAirport?: string;
+  pnrBookingCode?: string;
+  accommodationTransferDetails?: string;
+  documentTrackingMechanism?: string;
+  selectTaskPrompt?: string;
+  taskGroupSource?: string;
+  taskPassportCheck?: string;
+  taskInterviewPlan?: string;
+  taskRequestDocs?: string;
+  taskUpdateCandidate?: string;
+  taskSaveDemand?: string;
+  taskMatchCandidate?: string;
+  taskPrepareOffer?: string;
+  taskTrackPerformance?: string;
 }
 
 export const languages = [
@@ -460,6 +480,26 @@ export const translations: Record<Language, Translation> = {
     certificateno: 'Sertifika No',
     issuingbody: 'Veren Kurum',
     sendnotification: 'Bildirim Gönder',
+
+    planned: 'Planlandı',
+    ticketed: 'Biletlendi',
+    flightNumber: 'Uçuş No',
+    flightDateTime: 'Uçuş Tarih/Saat',
+    departureCityAirport: 'Kalkış Şehri / Havalimanı',
+    arrivalCityAirport: 'Varış Şehri / Havalimanı',
+    pnrBookingCode: 'PNR / Rezervasyon Kodu',
+    accommodationTransferDetails: 'Konaklama ve Transfer Detayları',
+    documentTrackingMechanism: 'Belge Takip Mekanizması',
+    selectTaskPrompt: 'Görev Seçin',
+    taskGroupSource: 'Kaynak Ülke Ekibi',
+    taskPassportCheck: 'Pasaport ve Evrak Kontrolü',
+    taskInterviewPlan: 'Ön Mülakat Planlaması',
+    taskRequestDocs: 'Eksik Evrak Talebi',
+    taskUpdateCandidate: 'Aday Durum Güncellemesi',
+    taskSaveDemand: 'İşveren Talebini Kaydet',
+    taskMatchCandidate: 'Aday Eşleştirme',
+    taskPrepareOffer: 'İş Teklifi Hazırla',
+    taskTrackPerformance: '30/60/90 Gün Performans Takibi',
   },
   en: {
     returnHome: 'Return to Home',
@@ -686,6 +726,26 @@ export const translations: Record<Language, Translation> = {
     certificateno: 'Certificate No',
     issuingbody: 'Issuing Body',
     sendnotification: 'Send Notification',
+
+    planned: 'Planned',
+    ticketed: 'Ticketed',
+    flightNumber: 'Flight No',
+    flightDateTime: 'Flight Date/Time',
+    departureCityAirport: 'Departure City / Airport',
+    arrivalCityAirport: 'Arrival City / Airport',
+    pnrBookingCode: 'PNR / Booking Code',
+    accommodationTransferDetails: 'Accommodation and Transfer Details',
+    documentTrackingMechanism: 'Document Tracking Mechanism',
+    selectTaskPrompt: 'Select Task',
+    taskGroupSource: 'Source Country Team',
+    taskPassportCheck: 'Passport & Document Check',
+    taskInterviewPlan: 'Preliminary Interview Planning',
+    taskRequestDocs: 'Request Missing Documents',
+    taskUpdateCandidate: 'Candidate Status Update',
+    taskSaveDemand: 'Save Employer Demand',
+    taskMatchCandidate: 'Candidate Matching',
+    taskPrepareOffer: 'Prepare Job Offer',
+    taskTrackPerformance: '30/60/90 Day Performance Tracking',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -912,6 +972,26 @@ export const translations: Record<Language, Translation> = {
     certificateno: 'Nr. Certifikatës',
     issuingbody: 'Institucioni Lëshues',
     sendnotification: 'Dërgo Njoftim',
+
+    planned: 'E planifikuar',
+    ticketed: 'E prerë (Biletë)',
+    flightNumber: 'Nr. i Fluturimit',
+    flightDateTime: 'Data / Ora e Fluturimit',
+    departureCityAirport: 'Qyteti / Aeroporti i Nisjes',
+    arrivalCityAirport: 'Qyteti / Aeroporti i Mbërritjes',
+    pnrBookingCode: 'Kodi PNR / Rezervimit',
+    accommodationTransferDetails: 'Detajet e Akomodimit dhe Transfertës',
+    documentTrackingMechanism: 'Mekanizmi i Gjurmimit të Dokumenteve',
+    selectTaskPrompt: 'Zgjidh Detyrën',
+    taskGroupSource: 'Ekipi i Vendit Burim',
+    taskPassportCheck: 'Kontrolli i Pasaportës dhe Dokumenteve',
+    taskInterviewPlan: 'Planifikimi i Paraprak i Intervistës',
+    taskRequestDocs: 'Kërko Dokumente Munguese',
+    taskUpdateCandidate: 'Përditësimi i Statusit të Kandidatit',
+    taskSaveDemand: 'Ruaj Kërkesën e Punëdhënësit',
+    taskMatchCandidate: 'Përputhja e Kandidatit',
+    taskPrepareOffer: 'Përgatit Ofertën e Punës',
+    taskTrackPerformance: 'Gjurmimi i Performancës 30/60/90 Ditë',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -1138,5 +1218,25 @@ export const translations: Record<Language, Translation> = {
     certificateno: 'رقم الشهادة',
     issuingbody: 'جهة الإصدار',
     sendnotification: 'إرسال إشعار',
+
+    planned: 'مخطط',
+    ticketed: 'تم اصدار التذكرة',
+    flightNumber: 'رقم الرحلة',
+    flightDateTime: 'تاريخ/وقت الرحلة',
+    departureCityAirport: 'مدينة/مطار المغادرة',
+    arrivalCityAirport: 'مدينة/مطار الوصول',
+    pnrBookingCode: 'رمز الحجز PNR',
+    accommodationTransferDetails: 'تفاصيل الإقامة والنقل',
+    documentTrackingMechanism: 'آلية تتبع المستندات',
+    selectTaskPrompt: 'اختر المهمة',
+    taskGroupSource: 'فريق بلد المصدر',
+    taskPassportCheck: 'فحص جواز السفر والمستندات',
+    taskInterviewPlan: 'تخطيط المقابلة الأولية',
+    taskRequestDocs: 'طلب المستندات المفقودة',
+    taskUpdateCandidate: 'تحديث حالة المرشح',
+    taskSaveDemand: 'حفظ طلب صاحب العمل',
+    taskMatchCandidate: 'مطابقة المرشح',
+    taskPrepareOffer: 'إعداد عرض العمل',
+    taskTrackPerformance: 'متابعة الأداء 30/60/90 يوم',
   },
 };
