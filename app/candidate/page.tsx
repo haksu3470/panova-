@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { 
   User, CheckCircle2, LogOut, Lock, Camera, 
   FileText, Eye, X, Briefcase, Calendar, 
-  Plane, Languages, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn
+  Plane, Languages, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, Video, ShieldAlert
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
@@ -36,7 +36,6 @@ export default function CandidateDashboard() {
     };
   }, []);
 
-  // Oturum durumunu localStorage'dan başlatıyoruz (Refresh sorununu çözer)
   const [authenticated, setAuthenticated] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('panova_candidate_auth') === 'true';
@@ -82,6 +81,7 @@ export default function CandidateDashboard() {
   const [supportSending, setSupportSending] = useState(false);
 
   const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
+  const [previewVideo, setPreviewVideo] = useState<string | null>(null);
 
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
@@ -590,7 +590,11 @@ export default function CandidateDashboard() {
             )}
             <div>
               <h1 className="text-base sm:text-xl font-extrabold text-slate-900 truncate max-w-[200px] sm:max-w-none">{candidate.full_name}</h1>
-              <span className="text-[11px] sm:text-xs text-slate-500 block truncate max-w-[220px] sm:max-w-none">{t.passportLabel}: {candidate.passport_number || 'N/A'} | {t.professionLabel}: {candidate.profession}</span>
+              <div className="flex items-center gap-2 text-[11px] sm:text-xs text-slate-500">
+                <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">PNV-CAND-{candidate.id.substring(0, 6)}</span>
+                <span>{t.passportLabel}: {candidate.passport_number || 'N/A'}</span>
+                <span>{t.professionLabel}: {candidate.profession}</span>
+              </div>
             </div>
           </div>
 
@@ -623,6 +627,16 @@ export default function CandidateDashboard() {
             </button>
           </div>
         </div>
+
+        {/* Closed Status Warning */}
+        {candidate.is_closed && (
+          <div className="bg-red-50 border border-red-200 p-4 rounded-2xl flex items-center gap-2 text-xs sm:text-sm text-red-900">
+            <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
+            <div>
+              <strong>Dosyanız süreçten kapatılmıştır.</strong> Sebep: {candidate.closure_reason || 'Belirtilmemiş'}
+            </div>
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
@@ -720,9 +734,16 @@ export default function CandidateDashboard() {
                   <input type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none bg-white" />
                 </div>
               </div>
-              <div>
+              <div className="space-y-2">
                 <label className="block font-bold text-slate-700 uppercase mb-1">{t.videoUrlLabel}</label>
-                <input type="url" value={newVideoUrl} onChange={(e) => setNewVideoUrl(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none bg-white" />
+                <div className="flex gap-2">
+                  <input type="url" value={newVideoUrl} onChange={(e) => setNewVideoUrl(e.target.value)} placeholder="https://youtube.com/..." className="flex-1 px-4 py-3 rounded-xl border text-sm font-medium text-slate-900 outline-none bg-white" />
+                  {newVideoUrl && (
+                    <button type="button" onClick={() => setPreviewVideo(newVideoUrl)} className="px-4 py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs transition border border-indigo-200 cursor-pointer flex items-center gap-1">
+                      <Video className="w-4 h-4" /> {currentLang === 'tr' ? 'Oynat' : 'Play'}
+                    </button>
+                  )}
+                </div>
               </div>
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">{t.password}</label>
@@ -747,10 +768,19 @@ export default function CandidateDashboard() {
                   <div>
                     <div className="font-extrabold text-slate-900 text-xs sm:text-sm">{localizedTitle}</div>
                     {doc.file_name && <div className="text-[11px] text-slate-500 truncate max-w-[250px] sm:max-w-none">{currentLang === 'tr' ? 'Yüklenen:' : 'File:'} {doc.file_name}</div>}
+                    <div className="text-[10px] font-bold text-indigo-600 mt-1 uppercase">Durum: {doc.status || 'pending'}</div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <span className={`px-2.5 py-1 rounded font-bold uppercase text-[10px] ${doc.file_url ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                      {doc.file_url ? (currentLang === 'tr' ? 'Yüklendi' : 'Uploaded') : (currentLang === 'tr' ? 'Bekleniyor' : 'Pending')}
+                    <span className={`px-2.5 py-1 rounded font-bold uppercase text-[10px] ${
+                      doc.status === 'approved' ? 'bg-emerald-100 text-emerald-800' :
+                      doc.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                      doc.status === 're_requested' ? 'bg-purple-100 text-purple-800' :
+                      doc.file_url ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                    }`}>
+                      {doc.status === 'approved' ? 'Onaylandı' :
+                       doc.status === 'rejected' ? 'Reddedildi' :
+                       doc.status === 're_requested' ? 'Yeniden İstendi' :
+                       doc.file_url ? (currentLang === 'tr' ? 'Yüklendi' : 'Uploaded') : (currentLang === 'tr' ? 'Bekleniyor' : 'Pending')}
                     </span>
                     
                     {doc.file_url && doc.file_url.trim() !== '' && (
@@ -910,13 +940,13 @@ export default function CandidateDashboard() {
                 <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
                   <span className="text-[10px] font-bold text-slate-500 uppercase">{currentLang === 'tr' ? 'Güzergah' : 'Route'}</span>
                   <div className="text-sm font-extrabold text-slate-900">
-                    {candidate.departureCity || '---'} ➔ {candidate.arrivalCity || '---'}
+                    {candidate.departure_city || '---'} ➔ {candidate.arrival_city || '---'}
                   </div>
                 </div>
 
                 <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
                   <span className="text-[10px] font-bold text-slate-500 uppercase">{currentLang === 'tr' ? 'PNR Kodu' : 'PNR Code'}</span>
-                  <div className="text-sm font-black tracking-widest text-emerald-700 uppercase">{candidate.pnrCode || 'N/A'}</div>
+                  <div className="text-sm font-black tracking-widest text-emerald-700 uppercase">{candidate.pnr_code || 'N/A'}</div>
                 </div>
               </div>
             )}
@@ -1034,6 +1064,30 @@ export default function CandidateDashboard() {
                 <img src={previewDoc.url} alt="Önizleme" className="max-w-full max-h-[70vh] rounded-xl object-contain shadow-md" />
               ) : (
                 <iframe src={previewDoc.url} className="w-full h-[70vh] rounded-xl border bg-white" title="Önizleme" />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Preview Modal */}
+      {previewVideo && (
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
+              <h3 className="font-bold text-xs sm:text-sm">Çalışma Videosu Önizleme</h3>
+              <button onClick={() => setPreviewVideo(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300 cursor-pointer"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-4 flex-1 overflow-auto flex justify-center items-center bg-slate-100">
+              {previewVideo.includes('youtube.com') || previewVideo.includes('youtu.be') ? (
+                <iframe 
+                  src={previewVideo.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')} 
+                  className="w-full h-[70vh] rounded-xl border bg-black" 
+                  title="Video Önizleme" 
+                  allowFullScreen 
+                />
+              ) : (
+                <video src={previewVideo} controls className="w-full h-[70vh] rounded-xl border bg-black" />
               )}
             </div>
           </div>
