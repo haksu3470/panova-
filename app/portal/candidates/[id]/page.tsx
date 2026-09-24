@@ -107,6 +107,21 @@ export default function CandidateDetailPage() {
     fetchCandidateDetail();
   }, [candidateId]);
 
+  // Dil değiştiğinde ilk 4 varsayılan belgenin isimlerini güncel dile göre dinamik çevir
+  useEffect(() => {
+    if (documents.length > 0) {
+      setDocuments(prevDocs => 
+        prevDocs.map((doc, idx) => {
+          if (idx === 0) return { ...doc, name: t.docPassportScan || doc.name };
+          if (idx === 1) return { ...doc, name: t.docProfessionalCert || doc.name };
+          if (idx === 2) return { ...doc, name: t.docCriminalRecord || doc.name };
+          if (idx === 3) return { ...doc, name: t.docHealthReport || doc.name };
+          return doc;
+        })
+      );
+    }
+  }, [currentLang]);
+
   const fetchCandidateDetail = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -146,7 +161,16 @@ export default function CandidateDetailPage() {
       ];
       
       try {
-        setDocuments(data.documents_json ? JSON.parse(data.documents_json) : defaultDocs);
+        const parsedDocs = data.documents_json ? JSON.parse(data.documents_json) : defaultDocs;
+        // Eğer veritabanındaki ilk 4 belge eski Türkçe isimlerse, güncel dil sözlüğü ile map et
+        const normalizedDocs = parsedDocs.map((doc: CandidateDocument, idx: number) => {
+          if (idx === 0) return { ...doc, name: t.docPassportScan || doc.name };
+          if (idx === 1) return { ...doc, name: t.docProfessionalCert || doc.name };
+          if (idx === 2) return { ...doc, name: t.docCriminalRecord || doc.name };
+          if (idx === 3) return { ...doc, name: t.docHealthReport || doc.name };
+          return doc;
+        });
+        setDocuments(normalizedDocs);
       } catch {
         setDocuments(defaultDocs);
       }
