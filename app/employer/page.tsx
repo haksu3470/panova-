@@ -1,15 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { 
-  Lock, Building2, PlusCircle, FileText, Clock, Users, ArrowLeft, Languages, 
-  Send, Calendar, CheckCircle2, AlertCircle, Plane, Briefcase, UserCheck, Phone, Mail, MessageSquare 
+  Building2, PlusCircle, FileText, Clock, Users, ArrowLeft, Languages, 
+  Send, Plane, UserPlus, LogIn, AlertTriangle, CheckCircle2 
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function EmployerPortalPage() {
+  const router = useRouter();
   const [currentLang, setCurrentLang] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('panova_portal_lang') as Language;
@@ -49,9 +51,6 @@ export default function EmployerPortalPage() {
     return false;
   });
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  
   const [employer, setEmployer] = useState<any | null>(() => {
     if (typeof window !== 'undefined') {
       const savedEmp = localStorage.getItem('panova_employer_data');
@@ -62,12 +61,29 @@ export default function EmployerPortalPage() {
     return null;
   });
 
+  // Auth Modu: 'login' veya 'register'
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+
+  // Login State
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Register State
+  const [regCompanyName, setRegCompanyName] = useState('');
+  const [regContactPerson, setRegContactPerson] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPhone, setRegPhone] = useState('');
+  const [regCountry, setRegCountry] = useState('North Macedonia');
+  const [regSector, setRegSector] = useState('construction');
+  const [regPassword, setRegPassword] = useState('');
+  const [regLoading, setRegLoading] = useState(false);
+  const [regSuccess, setRegSuccess] = useState(false);
+
   const [requests, setRequests] = useState<any[]>([]);
   const [candidates, setCandidates] = useState<any[]>([]);
-  const [interviews, setInterviews] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
   
-  const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showNewRequestModal, setShowNewRequestModal] = useState(false);
   
@@ -178,6 +194,33 @@ export default function EmployerPortalPage() {
     }
   };
 
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRegLoading(true);
+
+    try {
+      const { error } = await supabase.from('employers').insert([
+        {
+          company_name: regCompanyName,
+          contact_person: regContactPerson,
+          email: regEmail.trim().toLowerCase(),
+          phone: regPhone,
+          country: regCountry,
+          sector: regSector,
+          password: regPassword,
+          status: 'active'
+        }
+      ]);
+
+      if (error) throw error;
+      setRegSuccess(true);
+    } catch (err: any) {
+      alert('Kayıt Hatası: ' + err.message);
+    } finally {
+      setRegLoading(false);
+    }
+  };
+
   const handleLogout = () => {
     setAuthenticated(false);
     setEmployer(null);
@@ -186,7 +229,6 @@ export default function EmployerPortalPage() {
   };
 
   const fetchEmployerData = async (employerId: string) => {
-    setLoading(true);
     const { data: reqs } = await supabase
       .from('job_requests')
       .select('*')
@@ -208,8 +250,6 @@ export default function EmployerPortalPage() {
       .order('created_at', { ascending: false });
 
     if (tickets) setSupportTickets(tickets);
-
-    setLoading(false);
   };
 
   const handleCreateRequest = async (e: React.FormEvent) => {
@@ -280,6 +320,7 @@ export default function EmployerPortalPage() {
     }
   };
 
+  // EĞER OTURUM AÇILMAMIŞSA -> ADAY SAYFASIYLA BİREBİR AYNİ SEKME TASARIMI
   if (!authenticated) {
     return (
       <div className={`min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 sm:p-6 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -299,55 +340,137 @@ export default function EmployerPortalPage() {
           </select>
         </div>
 
-        <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
-          <div className="w-14 h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Building2 className="w-7 h-7" />
-          </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1">{t.empPortalTitle}</h1>
-          <p className="text-slate-500 text-xs sm:text-sm mb-6">{t.empPortalSub}</p>
-
-          <form onSubmit={handleLogin} className="space-y-4 text-left rtl:text-right">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Company Email</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
-                placeholder="demo@panova.com"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.passwordLabel}</label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
-                placeholder="••••••••"
-              />
-            </div>
+        <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full text-center space-y-6">
+          
+          {/* Üst Sekmeler (Aday Portalındaki Gibi) */}
+          <div className="grid grid-cols-2 bg-slate-100 p-1.5 rounded-2xl font-bold text-xs">
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 text-sm cursor-pointer"
+              type="button"
+              onClick={() => { setAuthMode('login'); setRegSuccess(false); }}
+              className={`py-2.5 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 ${authMode === 'login' ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'}`}
             >
-              {loading ? t.submitting : t.signInBtn}
+              <LogIn className="w-4 h-4" /> Sign In
             </button>
-          </form>
-          <div className="mt-4 text-xs text-slate-600 bg-slate-100 p-3 rounded-xl border border-slate-200">
-            Demo Login: <strong>demo@panova.com</strong> / <strong>employer2026</strong>
+            <button
+              type="button"
+              onClick={() => setAuthMode('register')}
+              className={`py-2.5 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 ${authMode === 'register' ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'}`}
+            >
+              <UserPlus className="w-4 h-4" /> Sign Up
+            </button>
           </div>
-          <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-xs text-slate-500 hover:underline">
-            <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
+
+          <div className="w-12 h-12 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto">
+            <Building2 className="w-6 h-6" />
+          </div>
+
+          {authMode === 'login' ? (
+            <div className="space-y-4 text-left">
+              <div>
+                <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 text-center">Employer Login Portal</h1>
+                <p className="text-slate-500 text-xs text-center mt-1">Sign in with your company email and password.</p>
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-3 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Company Email *</label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-3.5 py-3 rounded-xl border border-slate-300 text-slate-900 bg-white font-medium outline-none"
+                    placeholder="demo@panova.com"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.passwordLabel || 'Password'} *</label>
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-3.5 py-3 rounded-xl border border-slate-300 text-slate-900 bg-white font-medium outline-none"
+                    placeholder="••••••••"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-md mt-2 text-xs cursor-pointer"
+                >
+                  {loading ? 'Signing in...' : 'Sign In'}
+                </button>
+              </form>
+
+              <div className="text-[11px] text-slate-600 bg-slate-50 p-3 rounded-xl border text-center">
+                Demo Login: <strong>demo@panova.com</strong> / <strong>employer2026</strong>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4 text-left">
+              <div>
+                <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 text-center">Employer Registration</h1>
+                <p className="text-slate-500 text-xs text-center mt-1">Register your company to submit workforce demands.</p>
+              </div>
+
+              {regSuccess ? (
+                <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center space-y-3">
+                  <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+                  <h3 className="font-extrabold text-slate-900 text-sm">Registration Successful!</h3>
+                  <p className="text-xs text-slate-600">Your company account has been created. You can now sign in.</p>
+                  <button
+                    onClick={() => { setAuthMode('login'); setEmail(regEmail); setRegSuccess(false); }}
+                    className="w-full bg-[#2e7d32] text-white py-2.5 rounded-xl font-bold text-xs mt-2"
+                  >
+                    Go to Sign In
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleRegister} className="space-y-3 text-xs">
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Company Name *</label>
+                    <input type="text" required value={regCompanyName} onChange={(e) => setRegCompanyName(e.target.value)} placeholder="Panova Tarim DOO" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block font-bold text-slate-700 uppercase mb-1">Contact Person *</label>
+                      <input type="text" required value={regContactPerson} onChange={(e) => setRegContactPerson(e.target.value)} placeholder="Full Name" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
+                    </div>
+                    <div>
+                      <label className="block font-bold text-slate-700 uppercase mb-1">Phone *</label>
+                      <input type="tel" required value={regPhone} onChange={(e) => setRegPhone(e.target.value)} placeholder="+389..." className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Company Email *</label>
+                    <input type="email" required value={regEmail} onChange={(e) => setRegEmail(e.target.value)} placeholder="info@company.com" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Password *</label>
+                    <input type="password" required value={regPassword} onChange={(e) => setRegPassword(e.target.value)} placeholder="••••••••" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={regLoading}
+                    className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-md mt-2 text-xs cursor-pointer"
+                  >
+                    {regLoading ? 'Registering...' : 'Complete Registration'}
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
+
+          <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:underline pt-2 border-t">
+            <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> Return to Home
           </Link>
         </div>
       </div>
     );
   }
 
+  // OTURUM AÇILDIYSA İŞVEREN PANELİ GÖSTERİLİR
   return (
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
@@ -450,53 +573,49 @@ export default function EmployerPortalPage() {
             <div className="p-4 sm:p-6 border-b border-slate-100 font-bold text-slate-900 text-sm sm:text-base">
               {t.dossierTitle}
             </div>
-            {loading ? (
-              <div className="p-12 text-center text-slate-500 text-xs">Loading dossiers...</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left rtl:text-right text-xs sm:text-sm text-slate-700">
-                  <thead className="bg-slate-50 text-slate-900 font-bold border-b border-slate-200">
-                    <tr>
-                      <th className="p-4">{t.colPosSec}</th>
-                      <th className="p-4">{t.colHeadcount}</th>
-                      <th className="p-4">{t.colSalary}</th>
-                      <th className="p-4">{t.colBenefits}</th>
-                      <th className="p-4">{t.colTargetStart}</th>
-                      <th className="p-4">{t.colDemandStatus}</th>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left rtl:text-right text-xs sm:text-sm text-slate-700">
+                <thead className="bg-slate-50 text-slate-900 font-bold border-b border-slate-200">
+                  <tr>
+                    <th className="p-4">{t.colPosSec}</th>
+                    <th className="p-4">{t.colHeadcount}</th>
+                    <th className="p-4">{t.colSalary}</th>
+                    <th className="p-4">{t.colBenefits}</th>
+                    <th className="p-4">{t.colTargetStart}</th>
+                    <th className="p-4">{t.colDemandStatus}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {requests.map((req) => (
+                    <tr key={req.id} className="hover:bg-slate-50/50">
+                      <td className="p-4 font-bold text-slate-900">
+                        {req.position_title}
+                        <div className="text-[11px] text-slate-500 font-normal uppercase">{req.sector}</div>
+                      </td>
+                      <td className="p-4 font-bold text-slate-800">{req.headcount} {t.personCount}</td>
+                      <td className="p-4 font-semibold text-emerald-700">€{req.monthly_net_salary} / {t.monthText}</td>
+                      <td className="p-4 text-[11px] sm:text-xs space-y-1 text-slate-600">
+                        <div>{t.accommodation}: {req.accommodation_provided ? '✅' : '❌'}</div>
+                        <div>{t.foodAllowance} / {t.flightTicket}: {req.food_provided ? '✅' : '❌'} | {req.flight_covered ? '✅' : '❌'}</div>
+                      </td>
+                      <td className="p-4 font-medium text-slate-700">{req.target_start_date || 'Flexible'}</td>
+                      <td className="p-4">
+                        <span className="px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold uppercase bg-amber-50 text-amber-800 border border-amber-200">
+                          {req.status || 'new_request'}
+                        </span>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {requests.map((req) => (
-                      <tr key={req.id} className="hover:bg-slate-50/50">
-                        <td className="p-4 font-bold text-slate-900">
-                          {req.position_title}
-                          <div className="text-[11px] text-slate-500 font-normal uppercase">{req.sector}</div>
-                        </td>
-                        <td className="p-4 font-bold text-slate-800">{req.headcount} {t.personCount}</td>
-                        <td className="p-4 font-semibold text-emerald-700">€{req.monthly_net_salary} / {t.monthText}</td>
-                        <td className="p-4 text-[11px] sm:text-xs space-y-1 text-slate-600">
-                          <div>{t.accommodation}: {req.accommodation_provided ? '✅ Covered' : '❌ No'}</div>
-                          <div>{t.foodAllowance} / {t.flightTicket}: {req.food_provided ? '✅' : '❌'} | {req.flight_covered ? '✅' : '❌'}</div>
-                        </td>
-                        <td className="p-4 font-medium text-slate-700">{req.target_start_date || 'Flexible'}</td>
-                        <td className="p-4">
-                          <span className="px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold uppercase bg-amber-50 text-amber-800 border border-amber-200">
-                            {req.status || 'new_request'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                    {requests.length === 0 && (
-                      <tr>
-                        <td colSpan={6} className="p-8 text-center text-slate-500 text-xs">
-                          {t.empNoRequests}
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                  ))}
+                  {requests.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="p-8 text-center text-slate-500 text-xs">
+                        {t.empNoRequests}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
@@ -539,9 +658,7 @@ export default function EmployerPortalPage() {
         {activeTab === 'interviews' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.empInterviewsTitle}</h3>
-            <div className="p-10 text-center text-slate-400 font-bold text-xs">
-              {t.empNoInterviews}
-            </div>
+            <div className="p-10 text-center text-slate-400 font-bold text-xs">{t.empNoInterviews}</div>
           </div>
         )}
 
@@ -549,9 +666,7 @@ export default function EmployerPortalPage() {
         {activeTab === 'selected' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.empSelectedTitle}</h3>
-            <div className="p-10 text-center text-slate-400 font-bold text-xs">
-              {t.empNoSelected}
-            </div>
+            <div className="p-10 text-center text-slate-400 font-bold text-xs">{t.empNoSelected}</div>
           </div>
         )}
 
@@ -561,9 +676,7 @@ export default function EmployerPortalPage() {
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
               <Plane className="w-5 h-5 text-sky-600" /> {t.empTravelTitle}
             </h3>
-            <div className="p-10 text-center text-slate-400 font-bold text-xs">
-              {t.empNoTravel}
-            </div>
+            <div className="p-10 text-center text-slate-400 font-bold text-xs">{t.empNoTravel}</div>
           </div>
         )}
 
@@ -571,13 +684,11 @@ export default function EmployerPortalPage() {
         {activeTab === 'employees' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.empEmployeesTitle}</h3>
-            <div className="p-10 text-center text-slate-400 font-bold text-xs">
-              {t.empNoEmployees}
-            </div>
+            <div className="p-10 text-center text-slate-400 font-bold text-xs">{t.empNoEmployees}</div>
           </div>
         )}
 
-        {/* Tab 7: Destek / Bildirim */}
+        {/* Tab 7: Destek */}
         {activeTab === 'support' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
@@ -585,7 +696,7 @@ export default function EmployerPortalPage() {
               <form onSubmit={handleSendSupport} className="space-y-3 text-xs">
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.empSupportSubjectLabel}</label>
-                  <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Örn: Yeni Personel İhtiyacı veya Çalışan Talebi" className="w-full px-3.5 py-3 rounded-xl border outline-none text-slate-900 font-medium bg-white text-xs sm:text-sm" />
+                  <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Örn: Yeni Personel İhtiyacı" className="w-full px-3.5 py-3 rounded-xl border outline-none text-slate-900 font-medium bg-white text-xs sm:text-sm" />
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.empSupportMessageLabel}</label>
@@ -610,11 +721,6 @@ export default function EmployerPortalPage() {
                         <span className="text-emerald-700 uppercase text-[10px]">{ticket.status}</span>
                       </div>
                       <p className="text-slate-600">{ticket.message}</p>
-                      {ticket.admin_reply && (
-                        <div className="mt-2 p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-900">
-                          <strong>PANOVA Operasyon:</strong> {ticket.admin_reply}
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -634,17 +740,7 @@ export default function EmployerPortalPage() {
               </div>
               <div className="p-4 bg-slate-50 rounded-xl border">
                 <span className="font-bold text-slate-500 uppercase block mb-1">{t.empProfileContactPerson}</span>
-                <span className="font-extrabold text-slate-900 text-sm sm:text-base">{employer?.contact_person || 'Aleksandar Petrov'}</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="p-4 bg-slate-50 rounded-xl border">
-                  <span className="font-bold text-slate-500 uppercase block mb-1">{t.emailLabel}</span>
-                  <span className="font-bold text-slate-900">{employer?.email}</span>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-xl border">
-                  <span className="font-bold text-slate-500 uppercase block mb-1">{t.phoneLabel}</span>
-                  <span className="font-bold text-slate-900">{employer?.phone || '+389...'}</span>
-                </div>
+                <span className="font-extrabold text-slate-900 text-sm sm:text-base">{employer?.contact_person}</span>
               </div>
             </div>
           </div>
