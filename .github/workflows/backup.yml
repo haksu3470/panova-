@@ -17,12 +17,29 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Run Backup Script
+      - name: Run Supabase Backup Script
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
+          npm install postgres
           node -e '
-            const http = require("http");
-            console.log("Bağlantı testi ve yedekleme hazırlığı başlatıldı...");
-            console.log("DB URL kontrolü:", process.env.SUPABASE_DB_URL ? "Mevcut" : "Bulunamadı");
+            const postgres = require("postgres");
+            const fs = require("fs");
+            async function run() {
+              const sql = postgres(process.env.SUPABASE_DB_URL, { ssl: "require" });
+              const tables = ["job_candidates", "job_requests", "employers", "staff_members", "tasks", "candidate_support_tickets"];
+              let backup = {};
+              for (let t of tables) {
+                try {
+                  backup[t] = await sql`SELECT * FROM ${sql(t)}`;
+                } catch (err) {
+                  console.log("Tablo okunamadı:", t, err.message);
+                }
+              }
+              const filename = `panova_backup_${new Date().toISOString().slice(0,10)}.json`;
+              fs.writeFileSync(filename, JSON.stringify(backup, null, 2));
+              console.log("Yedek başarıyla alındı ve dosyaya yazıldı:", filename);
+              await sql.end();
+            }
+            run().catch(err => { console.error(err); process.exit(1); });
           '
