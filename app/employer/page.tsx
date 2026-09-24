@@ -1,1101 +1,608 @@
-export type Language = 'tr' | 'en' | 'sq' | 'ar';
+'use client';
 
-export interface Translation {
-  returnHome: string;
-  candidatePortal: string;
-  loginDesc: string;
-  emailOrPhone: string;
-  password: string;
-  loginBtn: string;
-  overview: string;
-  profile: string;
-  documents: string;
-  jobs: string;
-  interviews: string;
-  offers: string;
-  process: string;
-  travel: string;
-  support: string;
-  logout: string;
-  contactUs?: string;
-  candidateRegister?: string;
-  portalLogin?: string;
-  tagline?: string;
-  heroTitle?: string;
-  completeReg?: string;
-  colTargetStart?: string;
-  colBenefits?: string;
-  accommodation?: string;
-  foodAllowance?: string;
-  localTransport?: string;
-  flightTicket?: string;
-  empPortalTitle?: string;
-  empPortalSub?: string;
-  empPortalLabel?: string;
-  passwordLabel?: string;
-  submitting?: string;
-  signInBtn?: string;
-  colSalary?: string;
-  colDemandStatus?: string;
-  regFormTitle?: string;
-  regFormSub?: string;
-  regSuccessTitle?: string;
-  regSuccessDesc?: string;
-  nameLabel?: string;
-  passportLabel?: string;
-  sectorLabel?: string;
-  professionLabel?: string;
-  certNoLabel?: string;
-  certNo?: string;
-  certificateNo?: string;
-  issuingBodyLabel?: string;
-  issuingBody?: string;
-  videoUrlLabel?: string;
-  expectedSalaryLabel?: string;
-  shiftSuitableLabel?: string;
-  emailLabel?: string;
-  phone?: string;
-  phoneLabel?: string;
-  pendingStatus?: string;
-  reviewingStatus?: string;
-  visaProcessingStatus?: string;
-  approvedStatus?: string;
-  colPosSec?: string;
-  colHeadcount?: string;
-  newDemandBtn?: string;
-  modalDemandTitle?: string;
-  specifyCustomPos?: string;
-  specialReqs?: string;
-  creatingDossier?: string;
-  submitDossierBtn?: string;
-  companies?: any;
-  employerPortal?: string;
-  selectedCompany?: string;
-  candidatePortalLogin?: string;
-  candidatePortalBtn?: string;
-  registerTitle?: string;
-  saveBtn?: string;
-  colProfSector?: string;
-  dossierTitle?: string;
-  searchPlaceholder?: string;
-  allstatuses?: string;
-  colCandidate?: string;
-  colPassportNat?: string;
-  colVisaStatus?: string;
-  portalTitle?: string;
-  portalSub?: string;
-  usernameLabel?: string;
-  authSystem?: string;
-  mgmtTitle?: string;
-  submitBtn?: string;
-  scopeTitle?: string;
-  logoutBtn?: string;
-  totalDemands?: string;
-  requestedHeadcount?: string;
-  activeProcesses?: string;
-  formTitle?: string;
-  successTitle?: string;
-  successDesc?: string;
-  notesLabel?: string;
-  certAndVideo: string;
-  salaryAndShift: string;
-  trackingPeriod: string;
-  noCertificate: string;
-  watchVideo: string;
-  monthText: string;
-  shiftSuitableText: string;
-  standardShiftText: string;
-  employerCompany: string;
-  createdDate: string;
-  personCount: string;
-  overviewTab: string;
-  candidatesTab: string;
-  requestsTab: string;
-  employersTab: string;
-  matchingTab: string;
-  travelTab: string;
-  employeesTab: string;
-  supportTab: string;
-  totalCandidatesCard: string;
-  activeEmployersCard: string;
-  openRequestsCard: string;
-  openSupportCard: string;
-  portalSummaryTitle: string;
-  portalSummaryDesc: string;
-  staffTab: string;
-  tasksTab: string;
-  auditTab: string;
-  addStaffTitle: string;
-  staffNameLabel: string;
-  staffEmailLabel: string;
-  staffRoleLabel: string;
-  staffPermLabel: string;
-  saveStaffBtn: string;
-  staffMatrixTitle: string;
-  staffMatrixSub: string;
-  permLevelText: string;
-  newTaskTitleHeader: string;
-  taskDescLabel: string;
-  taskAssigneeLabel: string;
-  taskBackupAssigneeLabel: string;
-  taskDueDateLabel: string;
-  saveTaskBtn: string;
-  taskListHeader: string;
-  statusPending: string;
-  statusCompleted: string;
-  auditLogTitle: string;
-  auditLogSub: string;
-  colAction: string;
-  colPerformer: string;
-  colTime: string;
-  delayAlertsTitle: string;
-  delayAlertsDesc: string;
-  roleUpperManagement: string;
-  roleSourceCountry: string;
-  roleTargetCountry: string;
-  roleFieldOfficer: string;
-  applicationStatusAndSummary: string;
-  currentProcessStage: string;
-  assigneeText: string;
-  backupText: string;
-  dueDateText: string;
-  noEmployers: string;
-  noSupport: string;
-  initialAuditLog: string;
-  dateFormatPlaceholder: string;
-  message: string;
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { useLanguage } from '@/components/LanguageContext';
+import { translations } from '@/lib/dictionary';
 
-  signInMenu?: string;
-  signUpMenu?: string;
-  loginPortalTitle?: string;
-  loginPortalSub?: string;
-  companyEmailLabel?: string;
-  signUpPortalTitle?: string;
-  signUpPortalSub?: string;
-  companyNameLabel?: string;
-  contactPersonLabel?: string;
-  completeSignUpBtn?: string;
-  demoLoginText?: string;
-  regSuccessHeader?: string;
-  regSuccessText?: string;
-  goToSignInBtn?: string;
+export default function EmployerPage() {
+  const { lang, setLang } = useLanguage();
+  const t = translations[lang] || translations['tr'];
 
-  empTabRequests?: string;
-  empTabCandidates?: string;
-  empTabSelected?: string;
-  empTabTravel?: string;
-  empTabSupport?: string;
-  empTabProfile?: string;
-  empNoRequests?: string;
-  empCandidatesPoolTitle?: string;
-  empNoCandidates?: string;
-  empInterviewRequestBtn?: string;
-  empShortlistBtn?: string;
-  empInterviewsTitle?: string;
-  empNoInterviews?: string;
-  empSelectedTitle?: string;
-  empNoSelected?: string;
-  empTravelTitle?: string;
-  empNoTravel?: string;
-  empEmployeesTitle?: string;
-  empNoEmployees?: string;
-  empSupportFormTitle?: string;
-  empSupportSubjectLabel?: string;
-  empSupportMessageLabel?: string;
-  empSupportSubmitBtn?: string;
-  empSupportHistoryTitle?: string;
-  empNoSupportTickets?: string;
-  empProfileTitle?: string;
-  empProfileCompanyName?: string;
-  empProfileContactPerson?: string;
+  // --- State Yönetimi ---
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [activeTab, setActiveTab] = useState<'requests' | 'candidates' | 'selected' | 'travel' | 'employees' | 'support' | 'profile'>('requests');
 
-  profileUpdateTitle?: string;
-  profileUpdateDesc?: string;
-  countryLocationLabel?: string;
-  emailReadonlyLabel?: string;
-  updatingBtn?: string;
-  saveChangesBtn?: string;
-  profileUpdatedSuccess?: string;
+  // Yeni Talep Form State'leri
+  const [position, setPosition] = useState('');
+  const [headcount, setHeadcount] = useState(1);
+  const [sector, setSector] = useState('Tarım ve Hayvancılık');
+  const [salary, setSalary] = useState('');
+  const [requirements, setRequirements] = useState('');
+  const [successMsg, setSuccessMsg] = useState(false);
+
+  // Destek Talebi State'leri
+  const [supportSubject, setSupportSubject] = useState('');
+  const [supportMessage, setSupportMessage] = useState('');
+  const [supportSuccess, setSupportSuccess] = useState(false);
+
+  // Filtreleme ve Arama State'leri
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  // Örnek Veri Listeleri (Mock Data & State)
+  const [demands, setDemands] = useState([
+    { id: 1, sector: 'Tarım ve Hayvancılık', position: 'Ziraat Mühendisi / Bahçe Şefi', headcount: 3, salary: '1.500 € + Konaklama', status: 'reviewing', date: '2026-06-12' },
+    { id: 2, sector: 'İnşaat ve Yapı', position: 'Şantiye Şefi / Kalıp Ustası', headcount: 5, salary: '2.000 €', status: 'approved', date: '2026-06-15' },
+    { id: 3, sector: 'Dış Ticaret ve Lojistik', position: 'İhracat Operasyon Uzmanı', headcount: 2, salary: '1.400 €', status: 'pending', date: '2026-06-20' },
+  ]);
+
+  const [candidatesPool] = useState([
+    { id: 101, name: 'Ahmet Yılmaz', profession: 'Ziraat Mühendisi', experience: '5 Yıl', nationality: 'Türkiye', status: 'Hazır' },
+    { id: 102, name: 'Mehmet Demir', profession: 'Bahçe Operatörü', experience: '3 Yıl', nationality: 'Türkiye', status: 'Görüşme Bekliyor' },
+    { id: 103, name: 'Emre Şahin', profession: 'Kalıp Ustası', experience: '8 Yıl', nationality: 'Türkiye', status: 'Vize İşlemde' },
+  ]);
+
+  const [activeEmployees] = useState([
+    { id: 201, name: 'Burak Kaya', position: 'Saha Mühendisi', startDate: '2026-03-01', day30: 'Tamamlandı', day60: 'Devam Ediyor', day90: 'Bekliyor', status: 'Aktif' },
+    { id: 202, name: 'Caner Çelik', position: 'Tekniker', startDate: '2026-04-15', day30: 'Tamamlandı', day60: 'Tamamlandı', day90: 'Devam Ediyor', status: 'Aktif' },
+  ]);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email) {
+      setIsLoggedIn(true);
+    }
+  };
+
+  const handleCreateDemand = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!position) return;
+    const newDemand = {
+      id: Date.now(),
+      sector,
+      position,
+      headcount,
+      salary: salary || 'Belirtilmedi',
+      status: 'pending',
+      date: new Date().toISOString().split('T')[0],
+    };
+    setDemands([newDemand, ...demands]);
+    setSuccessMsg(true);
+    setTimeout(() => setSuccessMsg(false), 4000);
+    setPosition('');
+    setSalary('');
+    setRequirements('');
+  };
+
+  const handleSupportSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supportSubject || !supportMessage) return;
+    setSupportSuccess(true);
+    setTimeout(() => setSupportSuccess(false), 4000);
+    setSupportSubject('');
+    setSupportMessage('');
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+      {/* Üst Header */}
+      <header className="bg-emerald-900 text-white shadow-lg sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
+          <div className="flex items-center space-x-3">
+            <span className="text-2xl font-black tracking-wider text-emerald-300">PANOVA</span>
+            <span className="text-xs uppercase bg-emerald-800 text-emerald-200 px-2.5 py-1 rounded font-semibold tracking-wide">
+              {t.employerPortal || 'İşveren Portalı'}
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <select
+              value={lang}
+              onChange={(e) => setLang(e.target.value as any)}
+              aria-label="Dil Seçimi / Language Selection"
+              className="bg-emerald-800 text-white text-sm rounded px-2.5 py-1.5 border border-emerald-700 focus:outline-none cursor-pointer"
+            >
+              <option value="tr">🇹🇷 Türkçe</option>
+              <option value="en">🇬🇧 English</option>
+              <option value="sq">🇦🇱 Shqip</option>
+              <option value="ar">🇸🇦 العربية</option>
+            </select>
+
+            <Link
+              href="/"
+              className="text-xs bg-emerald-800 hover:bg-emerald-700 text-emerald-100 px-3.5 py-2 rounded transition font-medium shadow-sm"
+            >
+              {t.returnHome || 'Ana Sayfaya Dön'}
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Ana İçerik Alanı */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8">
+        {!isLoggedIn ? (
+          /* Giriş Ekranı */
+          <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl border border-slate-200 p-8 mt-16">
+            <div className="text-center mb-8">
+              <div className="inline-block p-3 bg-emerald-50 text-emerald-700 rounded-full mb-3 text-xl font-bold">
+                🏢
+              </div>
+              <h1 className="text-2xl font-extrabold text-slate-800">
+                {t.loginPortalTitle || 'İşveren Giriş Portalı'}
+              </h1>
+              <p className="text-xs text-slate-500 mt-1.5">
+                {t.loginPortalSub || 'Şirket e-postanız ve şifrenizle giriş yapın.'}
+              </p>
+            </div>
+
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                  {t.companyEmailLabel || 'Şirket E-Postası'}
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="yonetim@panovatarim.com"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none text-sm bg-slate-50"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                  {t.passwordLabel || 'Şifre'}
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none text-sm bg-slate-50"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-3 rounded-xl transition text-sm shadow-md"
+              >
+                {t.signInBtn || 'Giriş Yap'}
+              </button>
+            </form>
+
+            <div className="mt-8 pt-6 border-t border-slate-100 text-center text-xs text-slate-400">
+              PANOVA TARIM DOO & HR Management System &copy; 2026
+            </div>
+          </div>
+        ) : (
+          /* İşveren Yönetim Paneli (Dashboard) */
+          <div className="space-y-6">
+            {/* Karşılama ve Durum Çubuğu */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-emerald-100 text-emerald-800 rounded-xl flex items-center justify-center font-black text-lg">
+                  PT
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-slate-800">
+                    PANOVA TARIM DOO &mdash; {email}
+                  </h1>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Struga, North Macedonia & Akhisar, Türkiye &bull; İş Gücü ve Operasyon Yönetimi
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsLoggedIn(false)}
+                className="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold px-4 py-2 rounded-xl border border-rose-200 transition shadow-sm"
+              >
+                {t.logout || 'Çıkış Yap'}
+              </button>
+            </div>
+
+            {/* Navigasyon Sekmeleri */}
+            <div className="flex overflow-x-auto space-x-2 border-b border-slate-200 pb-2 scrollbar-none">
+              <button
+                onClick={() => setActiveTab('requests')}
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                  activeTab === 'requests' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                📋 {t.empTabRequests || 'Personel Taleplerim'}
+              </button>
+              <button
+                onClick={() => setActiveTab('candidates')}
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                  activeTab === 'candidates' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                👥 {t.empTabCandidates || 'Adaylar / Eşleşmeler'}
+              </button>
+              <button
+                onClick={() => setActiveTab('selected')}
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                  activeTab === 'selected' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                ⭐ {t.empTabSelected || 'Seçtiğim Adaylar'}
+              </button>
+              <button
+                onClick={() => setActiveTab('travel')}
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                  activeTab === 'travel' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                ✈️ {t.empTabTravel || 'Seyahat ve Başlangıç'}
+              </button>
+              <button
+                onClick={() => setActiveTab('employees')}
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                  activeTab === 'employees' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                📊 {t.empEmployeesTitle || '30/60/90 Gün Takibi'}
+              </button>
+              <button
+                onClick={() => setActiveTab('support')}
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                  activeTab === 'support' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                🛠️ {t.empTabSupport || 'Destek / Bildirim'}
+              </button>
+              <button
+                onClick={() => setActiveTab('profile')}
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                  activeTab === 'profile' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                ⚙️ {t.empTabProfile || 'Şirket Profili'}
+              </button>
+            </div>
+
+            {/* 1. SEKME: Personel Taleplerim */}
+            {activeTab === 'requests' && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Talep Oluşturma Formu */}
+                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm lg:col-span-1">
+                  <h2 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <span>✨</span> {t.newDemandBtn || 'Yeni Talep Oluştur'}
+                  </h2>
+
+                  {successMsg && (
+                    <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3.5 rounded-xl font-medium animate-pulse">
+                      🎉 İş gücü talebiniz sisteme başarıyla kaydedildi!
+                    </div>
+                  )}
+
+                  <form onSubmit={handleCreateDemand} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                        {t.sectorLabel || 'Sektör'}
+                      </label>
+                      <select
+                        value={sector}
+                        onChange={(e) => setSector(e.target.value)}
+                        className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white font-medium"
+                      >
+                        <option value="Tarım ve Hayvancılık">Tarım ve Hayvancılık (Agriculture)</option>
+                        <option value="İnşaat ve Yapı">İnşaat ve Yapı (Construction)</option>
+                        <option value="Dış Ticaret ve Lojistik">Dış Ticaret ve Lojistik (Trade)</option>
+                        <option value="İnsan Kaynakları">İnsan Kaynakları (HR)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                        {t.colPosSec || 'Pozisyon'} *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={position}
+                        onChange={(e) => setPosition(e.target.value)}
+                        placeholder="Örn: Ziraat Mühendisi / Bahçe Operatörü"
+                        className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                        {t.colHeadcount || 'Kişi Sayısı'}
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={100}
+                        value={headcount}
+                        onChange={(e) => setHeadcount(Number(e.target.value))}
+                        className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                        {t.colSalary || 'Maaş Teklifi'}
+                      </label>
+                      <input
+                        type="text"
+                        value={salary}
+                        onChange={(e) => setSalary(e.target.value)}
+                        placeholder="Örn: 1.200 € + Konaklama"
+                        className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                        {t.specialReqs || 'Özel Şartlar'}
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={requirements}
+                        onChange={(e) => setRequirements(e.target.value)}
+                        placeholder="Sertifika, tecrübe veya vize durumu..."
+                        className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 rounded-xl text-xs transition shadow-md"
+                    >
+                      {t.submitDossierBtn || 'Talebi Gönder'}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Talepler Listesi Tablosu */}
+                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm lg:col-span-2">
+                  <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
+                    <h2 className="text-base font-bold text-slate-800">
+                      {t.empTabRequests || 'Personel Taleplerim'}
+                    </h2>
+                    <input
+                      type="text"
+                      placeholder="Talep ara..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="px-3 py-1.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 w-48"
+                    />
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-600 uppercase font-semibold">
+                          <th className="p-3.5 rounded-l-xl">Sektör / Pozisyon</th>
+                          <th className="p-3.5">Kişi</th>
+                          <th className="p-3.5">Maaş</th>
+                          <th className="p-3.5">Tarih</th>
+                          <th className="p-3.5 rounded-r-xl">Durum</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {demands.map((item) => (
+                          <tr key={item.id} className="hover:bg-slate-50 transition">
+                            <td className="p-3.5 font-medium text-slate-800">
+                              <div className="font-bold">{item.position}</div>
+                              <div className="text-[10px] text-slate-400">{item.sector}</div>
+                            </td>
+                            <td className="p-3.5 font-semibold text-slate-600">{item.headcount} Kişi</td>
+                            <td className="p-3.5 text-slate-600">{item.salary}</td>
+                            <td className="p-3.5 text-slate-500">{item.date}</td>
+                            <td className="p-3.5">
+                              {item.status === 'approved' ? (
+                                <span className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-semibold text-[10px]">
+                                  {t.approvedStatus || 'Onaylandı'}
+                                </span>
+                              ) : item.status === 'reviewing' ? (
+                                <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-semibold text-[10px]">
+                                  {t.reviewingStatus || 'İnceleniyor'}
+                                </span>
+                              ) : (
+                                <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full font-semibold text-[10px]">
+                                  {t.pendingStatus || 'Beklemede'}
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 2. SEKME: Adaylar / Eşleşmeler */}
+            {activeTab === 'candidates' && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h2 className="text-base font-bold text-slate-800 mb-2">
+                  {t.empCandidatesPoolTitle || 'Taleplerinize Sunulan Aday Havuzu'}
+                </h2>
+                <p className="text-xs text-slate-500 mb-6">
+                  PANOVA kaynak ülkelerden süzülerek eşleştirilen uygun aday profilleri.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {candidatesPool.map((candidate) => (
+                    <div key={candidate.id} className="border border-slate-200 rounded-2xl p-5 bg-slate-50 shadow-sm flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="font-bold text-slate-800 text-sm">{candidate.name}</span>
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold">{candidate.nationality}</span>
+                        </div>
+                        <div className="text-xs text-slate-600 font-medium">{candidate.profession}</div>
+                        <div className="text-[11px] text-slate-400 mt-1">Deneyim: {candidate.experience}</div>
+                      </div>
+                      <div className="mt-5 pt-3 border-t border-slate-200 flex gap-2">
+                        <button className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-2 rounded-xl text-xs font-semibold transition">
+                          {t.empInterviewRequestBtn || 'Görüşme İste'}
+                        </button>
+                        <button className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl text-xs font-semibold transition">
+                          {t.empShortlistBtn || 'Kısa Liste'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 3. SEKME: Seçtiğim Adaylar */}
+            {activeTab === 'selected' && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h2 className="text-base font-bold text-slate-800 mb-2">
+                  {t.empSelectedTitle || 'Onayladığınız ve İşlemde Olan Adaylar'}
+                </h2>
+                <p className="text-xs text-slate-500 mb-6">Mülakatları tamamlanan ve sözleşme/vize aşamasındaki personel adayları.</p>
+                <div className="bg-emerald-50 border border-emerald-200 p-5 rounded-2xl flex items-center justify-between">
+                  <div className="text-xs text-emerald-900 font-medium">
+                    ✨ Şu an vize işlemlerinde olan <strong className="font-bold">2 adet</strong> onaylı adayınız bulunmaktadır.
+                  </div>
+                  <span className="text-xs font-bold text-emerald-700 bg-white px-3 py-1 rounded-xl shadow-sm">Aktif Süreç</span>
+                </div>
+              </div>
+            )}
+
+            {/* 4. SEKME: Seyahat ve Başlangıç */}
+            {activeTab === 'travel' && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h2 className="text-base font-bold text-slate-800 mb-2">
+                  {t.empTravelTitle || 'Uçuş, Varış ve Karşılama Bilgileri'}
+                </h2>
+                <p className="text-xs text-slate-500 mb-6">Uçak biletleme, PNR kodları ve havalimanı transfer detayları.</p>
+                <div className="text-xs text-slate-500 bg-slate-50 border border-slate-200 p-8 rounded-2xl text-center">
+                  ✈️ {t.empNoTravel || 'Vize ve biletleme işlemleri tamamlanan personellerin seyahat detayları burada listelenecektir.'}
+                </div>
+              </div>
+            )}
+
+            {/* 5. SEKME: 30 / 60 / 90 Gün Takibi */}
+            {activeTab === 'employees' && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h2 className="text-base font-bold text-slate-800 mb-2">
+                  {t.empEmployeesTitle || 'İşe Başlayan Personel ve 30/60/90 Gün Takibi'}
+                </h2>
+                <p className="text-xs text-slate-500 mb-6">Şirketinizde göreve başlayan personellerin adaptasyon ve performans değerlendirmeleri.</p>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="bg-slate-100 text-slate-600 uppercase font-semibold">
+                        <th className="p-3.5 rounded-l-xl">Personel</th>
+                        <th className="p-3.5">Pozisyon</th>
+                        <th className="p-3.5">İşe Başlama</th>
+                        <th className="p-3.5">30. Gün</th>
+                        <th className="p-3.5">60. Gün</th>
+                        <th className="p-3.5 rounded-r-xl">90. Gün</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {activeEmployees.map((emp) => (
+                        <tr key={emp.id} className="hover:bg-slate-50 transition">
+                          <td className="p-3.5 font-bold text-slate-800">{emp.name}</td>
+                          <td className="p-3.5 text-slate-600">{emp.position}</td>
+                          <td className="p-3.5 text-slate-500">{emp.startDate}</td>
+                          <td className="p-3.5"><span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded">{emp.day30}</span></td>
+                          <td className="p-3.5"><span className="text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded">{emp.day60}</span></td>
+                          <td className="p-3.5"><span className="text-slate-500 font-semibold bg-slate-100 px-2 py-0.5 rounded">{emp.day90}</span></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* 6. SEKME: Destek / Bildirim */}
+            {activeTab === 'support' && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm max-w-2xl">
+                <h2 className="text-base font-bold text-slate-800 mb-4">
+                  {t.empSupportFormTitle || 'Operasyonel Destek Talebi Aç'}
+                </h2>
+
+                {supportSuccess && (
+                  <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3.5 rounded-xl font-medium">
+                    ✅ Destek talebiniz PANOVA operasyon ekibine iletildi. En kısa sürede dönüş yapılacaktır.
+                  </div>
+                )}
+
+                <form onSubmit={handleSupportSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                      {t.empSupportSubjectLabel || 'Konu / Başlık'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={supportSubject}
+                      onChange={(e) => setSupportSubject(e.target.value)}
+                      placeholder="Örn: Konaklama Düzenlemesi Hakkında"
+                      className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                      {t.empSupportMessageLabel || 'Mesajınız'}
+                    </label>
+                    <textarea
+                      rows={4}
+                      required
+                      value={supportMessage}
+                      onChange={(e) => setSupportMessage(e.target.value)}
+                      placeholder="Detaylı talebinizi yazın..."
+                      className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-5 py-2.5 rounded-xl text-xs transition shadow-md"
+                  >
+                    {t.empSupportSubmitBtn || 'Destek Talebi Gönder'}
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* 7. SEKME: Şirket Profili */}
+            {activeTab === 'profile' && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm max-w-xl">
+                <h2 className="text-base font-bold text-slate-800 mb-4">
+                  {t.empProfileTitle || 'Firma ve İletişim Bilgilerim'}
+                </h2>
+                <div className="space-y-4 text-xs bg-slate-50 p-5 rounded-xl border border-slate-200">
+                  <div className="flex justify-between pb-2 border-b border-slate-200">
+                    <span className="font-semibold text-slate-500">Şirket Unvanı:</span>
+                    <span className="text-slate-800 font-bold">PANOVA TARIM DOO</span>
+                  </div>
+                  <div className="flex justify-between pb-2 border-b border-slate-200">
+                    <span className="font-semibold text-slate-500">Faaliyet Alanı:</span>
+                    <span className="text-slate-800 font-medium">Tarımsal Üretim, İnşaat ve Ticaret</span>
+                  </div>
+                  <div className="flex justify-between pb-2 border-b border-slate-200">
+                    <span className="font-semibold text-slate-500">Merkez Konum:</span>
+                    <span className="text-slate-800 font-medium">Struga, North Macedonia</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-semibold text-slate-500">Yetkili E-posta:</span>
+                    <span className="text-slate-800 font-medium">{email}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* Alt Footer */}
+      <footer className="bg-slate-800 text-slate-400 py-6 mt-16 text-center text-xs">
+        <p>PANOVA TARIM DOO &bull; International Workforce Management System &copy; 2026</p>
+      </footer>
+    </div>
+  );
 }
-
-export const languages = [
-  { code: 'tr' as Language, name: 'Türkçe', flag: '🇹🇷' },
-  { code: 'en' as Language, name: 'English', flag: '🇬🇧' },
-  { code: 'sq' as Language, name: 'Shqip', flag: '🇦🇱' },
-  { code: 'ar' as Language, name: 'العربية', flag: '🇸🇦' },
-];
-
-export const translations: Record<Language, Translation> = {
-  tr: {
-    returnHome: 'Ana Sayfaya Dön',
-    candidatePortal: 'Aday Giriş Portalı',
-    loginDesc: 'E-posta, Telefon (GSM) veya Pasaport numaranız ve şifreniz ile giriş yapın.',
-    emailOrPhone: 'E-Posta / Telefon / Pasaport No *',
-    password: 'Şifre *',
-    loginBtn: 'Sisteme Giriş Yap',
-    overview: 'Ana Sayfa',
-    profile: 'Profilim',
-    documents: 'Belgelerim',
-    jobs: 'İş Fırsatlarım',
-    interviews: 'Görüşmelerim',
-    offers: 'İş Tekliflerim',
-    process: 'İşlem Durumu',
-    travel: 'Seyahat Bilgilerim',
-    support: 'Destek',
-    logout: 'Çıkış Yap',
-    contactUs: 'İletişim',
-    candidateRegister: 'Aday Kayıt',
-    portalLogin: 'Portal Giriş',
-    tagline: 'Uluslararası İstihdam ve Vize Yönetimi',
-    heroTitle: 'Profesyonel İş Gücü Çözümleri',
-    completeReg: 'Kayıt Ol',
-    colTargetStart: 'Hedef Başlangıç',
-    colBenefits: 'Yan Haklar',
-    accommodation: 'Konaklama',
-    foodAllowance: 'Yemek',
-    localTransport: 'Ulaşım',
-    flightTicket: 'Uçak Bileti',
-    empPortalTitle: 'İşveren Portalı',
-    empPortalSub: 'İş gücü taleplerinizi yönetin',
-    empPortalLabel: 'İşveren E-Posta',
-    passwordLabel: 'Şifre',
-    submitting: 'Gönderiliyor...',
-    signInBtn: 'Giriş Yap',
-    colSalary: 'Maaş',
-    colDemandStatus: 'Talep Durumu',
-    regFormTitle: 'Aday Kayıt Formu',
-    regFormSub: 'Bilgilerinizi eksiksiz doldurun',
-    regSuccessTitle: 'Kayıt Başarılı',
-    regSuccessDesc: 'Başvurunuz alınmıştır.',
-    nameLabel: 'Ad Soyad',
-    passportLabel: 'Pasaport No',
-    sectorLabel: 'Sektör',
-    professionLabel: 'Meslek',
-    certNoLabel: 'Sertifika No',
-    certNo: 'Sertifika No',
-    certificateNo: 'Sertifika No',
-    issuingBodyLabel: 'Veren Kurum',
-    issuingBody: 'Veren Kurum',
-    videoUrlLabel: 'Video URL',
-    expectedSalaryLabel: 'Beklenen Maaş',
-    shiftSuitableLabel: 'Vardiyalı Çalışmaya Uygunluk',
-    emailLabel: 'E-Posta',
-    phone: 'Telefon',
-    phoneLabel: 'Telefon',
-    pendingStatus: 'Beklemede',
-    reviewingStatus: 'İnceleniyor',
-    visaProcessingStatus: 'Vize İşlemde',
-    approvedStatus: 'Onaylandı',
-    colPosSec: 'Pozisyon / Sektör',
-    colHeadcount: 'Kişi Sayısı',
-    newDemandBtn: 'Yeni Talep Oluştur',
-    modalDemandTitle: 'Talep Detayları',
-    specifyCustomPos: 'Özel Pozisyon Belirtin',
-    specialReqs: 'Özel Şartlar',
-    creatingDossier: 'Dosya Oluşturuluyor...',
-    submitDossierBtn: 'Talebi Gönder',
-    employerPortal: 'İşveren Girişi',
-    selectedCompany: 'Seçilen Firma',
-    candidatePortalLogin: 'Aday Girişi',
-    candidatePortalBtn: 'Aday Portalı & Giriş',
-    registerTitle: 'Kayıt Ol',
-    saveBtn: 'Kaydet',
-    colProfSector: 'Meslek / Sektör',
-    dossierTitle: 'Dosya Yönetimi',
-    searchPlaceholder: 'Arama yapın...',
-    allstatuses: 'Tüm Durumlar',
-    colCandidate: 'Aday',
-    colPassportNat: 'Pasaport / Uyruk',
-    colVisaStatus: 'Vize Durumu',
-    portalTitle: 'Yönetim Portalı',
-    portalSub: 'Sistem operasyonlarını yönetin',
-    usernameLabel: 'Kullanıcı Adı',
-    authSystem: 'Yetkilendirme Sistemi',
-    mgmtTitle: 'Yönetim Paneli',
-    submitBtn: 'Gönder',
-    scopeTitle: 'Faaliyet Alanı',
-    logoutBtn: 'Çıkış Yap',
-    totalDemands: 'Toplam Talep',
-    requestedHeadcount: 'Talep Edilen Kişi',
-    activeProcesses: 'Aktif Süreçler',
-    companies: {
-      hr: { name: 'Panova HR', tagline: 'İnsan Kaynakları ve İstihdam' },
-      trade: { name: 'Panova Trade', tagline: 'Dış Ticaret ve Lojistik' },
-      agriculture: { name: 'Panova Tarım ve Hayvancılık', tagline: 'Tarımsal Üretim ve Bahçe' },
-      construction: { name: 'Panova Construction', tagline: 'İnşaat ve Yapı' }
-    },
-    certAndVideo: 'Sertifika & Video',
-    salaryAndShift: 'Ücret & Vardiya',
-    trackingPeriod: '30-60-90 Gün Takip',
-    noCertificate: 'Sertifika Yok',
-    watchVideo: 'Videoyu İzle',
-    monthText: 'ay',
-    shiftSuitableText: 'Vardiyaya Uygun',
-    standardShiftText: 'Standart Vardiya',
-    employerCompany: 'İşveren Şirket',
-    createdDate: 'Tarih',
-    personCount: 'Kişi',
-    overviewTab: 'Genel Durum',
-    candidatesTab: 'Aday Havuzu',
-    requestsTab: 'Personel Talepleri',
-    employersTab: 'İşverenler',
-    matchingTab: 'Eşleştirmeler',
-    travelTab: 'Seyahatler & Vize',
-    employeesTab: 'Aktif Çalışanlar (30/60/90)',
-    supportTab: 'Sorunlar / Bildirimler',
-    totalCandidatesCard: 'TOPLAM ADAY',
-    activeEmployersCard: 'AKTİF İŞVERENLER',
-    openRequestsCard: 'AÇIK TALEPLER',
-    openSupportCard: 'AÇIK SORUNLAR / DESTEK',
-    portalSummaryTitle: 'PANOVA Operasyon Özeti',
-    portalSummaryDesc: 'Sistem üzerinden aday başvurularını yönetebilir, işverenlerin personel taleplerine aday eşleştirmesi yapabilir, vize ve seyahat süreçlerini takip edebilirsiniz.',
-    staffTab: 'Ekip & Yetkiler',
-    tasksTab: 'Görevler',
-    auditTab: 'İşlem Geçmişi (Audit)',
-    addStaffTitle: 'Yeni Ekip Üyesi ve Rol Ata',
-    staffNameLabel: 'Ad Soyad *',
-    staffEmailLabel: 'E-Posta (Giriş için) *',
-    staffRoleLabel: 'Rol Açıklaması',
-    staffPermLabel: 'Rol / Yetki Seviyesi *',
-    saveStaffBtn: 'Ekip Üyesini Kaydet',
-    staffMatrixTitle: 'PANOVA Operasyon Kadrosu ve Rol Matrisi',
-    staffMatrixSub: 'Üst Yönetim, Kaynak Ülke, Hedef Ülke ve Saha Sorumlusu rolleri',
-    permLevelText: 'Rol Seviyesi:',
-    newTaskTitleHeader: 'Yeni Görev ve Sorumlu Ata',
-    taskDescLabel: 'Görev Açıklaması *',
-    taskAssigneeLabel: 'Ana Sorumlu',
-    taskBackupAssigneeLabel: 'Yedek Sorumlu',
-    taskDueDateLabel: 'Son Tarih',
-    saveTaskBtn: 'Görevi Kaydet',
-    taskListHeader: 'Ekip Görevleri ve Sorumluluk Takibi',
-    statusPending: 'Bekliyor',
-    statusCompleted: 'Tamamlandı',
-    auditLogTitle: 'Sistem İşlem Geçmişi (Audit Log)',
-    auditLogSub: 'Sistemde yapılan kritik işlemler, durum değişiklikleri ve sorumlu atamaları',
-    colAction: 'İşlem / Eylem',
-    colPerformer: 'İşlemi Yapan',
-    colTime: 'Zaman Damgası',
-    delayAlertsTitle: '⚠️ Gecikme ve Süre Uyarıları',
-    delayAlertsDesc: 'Vize süresi 15 günü aşan veya belgesi eksik olan dosyalar için otomatik sistem uyarıları aktif.',
-    roleUpperManagement: 'Üst Yönetim',
-    roleSourceCountry: 'Kaynak Ülke Sorumlusu',
-    roleTargetCountry: 'Hedef Ülke Sorumlusu',
-    roleFieldOfficer: 'Saha Sorumlusu',
-    applicationStatusAndSummary: 'Başvuru Durumu ve Özet',
-    currentProcessStage: 'GÜNCEL SÜREÇ AŞAMASI',
-    assigneeText: 'Sorumlu',
-    backupText: 'Yedek',
-    dueDateText: 'Son Tarih',
-    noEmployers: 'Kayıtlı işveren bulunmuyor.',
-    noSupport: 'Aktif sorun bildirimi bulunmuyor.',
-    initialAuditLog: 'Sistem Başlatıldı & Rol Matrisi Kuruldu',
-    dateFormatPlaceholder: 'gg.aa.yyyy',
-    message: 'Mesaj',
-
-    signInMenu: 'Giriş Yap',
-    signUpMenu: 'Kayıt Ol',
-    loginPortalTitle: 'İşveren Giriş Portalı',
-    loginPortalSub: 'Şirket e-postanız ve şifrenizle giriş yapın.',
-    companyEmailLabel: 'Şirket E-Postası',
-    signUpPortalTitle: 'İşveren Kaydı',
-    signUpPortalSub: 'İş gücü talepleri sunmak için şirketinizi kaydedin.',
-    companyNameLabel: 'Şirket Unvanı',
-    contactPersonLabel: 'Yetkili Kişi',
-    completeSignUpBtn: 'Kaydı Tamamla',
-    demoLoginText: 'Demo Giriş:',
-    regSuccessHeader: 'Kayıt Başarılı!',
-    regSuccessText: 'Şirket hesabınız oluşturuldu. Artık giriş yapabilirsiniz.',
-    goToSignInBtn: 'Giriş Sayfasına Git',
-
-    empTabRequests: 'Personel Taleplerim',
-    empTabCandidates: 'Adaylar / Eşleşmeler',
-    empTabSelected: 'Seçtiğim Adaylar',
-    empTabTravel: 'Seyahat ve Başlangıç',
-    empTabSupport: 'Destek / Bildirim',
-    empTabProfile: 'Şirket Profili',
-    empNoRequests: 'Kayıtlı personel talebiniz bulunmuyor.',
-    empCandidatesPoolTitle: 'Taleplerinize Sunulan Aday Havuzu',
-    empNoCandidates: 'Henüz eşleşen aday bulunmuyor.',
-    empInterviewRequestBtn: 'Görüşme İste',
-    empShortlistBtn: 'Kısa Listeye Al',
-    empInterviewsTitle: 'Planlanan ve Tamamlanan Görüşmeler',
-    empNoInterviews: 'Planlanmış aktif mülakat randevunuz bulunmamaktadır.',
-    empSelectedTitle: 'Onayladığınız ve İşlemde Olan Adaylar',
-    empNoSelected: 'Henüz onayladığınız bir aday bulunmuyor.',
-    empTravelTitle: 'Uçuş, Varış ve Karşılama Bilgileri',
-    empNoTravel: 'Vize ve biletleme işlemleri tamamlanan personellerin seyahat detayları burada listelenecektir.',
-    empEmployeesTitle: 'İşe Başlayan Personel ve 30/60/90 Gün Takibi',
-    empNoEmployees: 'Şirketinizde aktif çalışan personel bulunmuyor.',
-    empSupportFormTitle: 'Operasyonel Destek Talebi Aç',
-    empSupportSubjectLabel: 'Konu / Başlık',
-    empSupportMessageLabel: 'Mesajınız',
-    empSupportSubmitBtn: 'Destek Talebi Gönder',
-    empSupportHistoryTitle: 'Destek Geçmişim',
-    empNoSupportTickets: 'Aktif destek kaydınız yok.',
-    empProfileTitle: 'Firma ve İletişim Bilgilerim',
-    empProfileCompanyName: 'Şirket Unvanı',
-    empProfileContactPerson: 'Yetkili Kişi',
-
-    profileUpdateTitle: 'Şirket Profili ve Bilgi Güncelleme',
-    profileUpdateDesc: 'Şirket bilgilerinizi ve şifrenizi buradan güncelleyebilirsiniz.',
-    countryLocationLabel: 'Ülke / Konum',
-    emailReadonlyLabel: 'E-posta (Değiştirilemez)',
-    updatingBtn: 'Güncelleniyor...',
-    saveChangesBtn: 'Değişiklikleri Kaydet',
-    profileUpdatedSuccess: 'Şirket profili başarıyla güncellendi!',
-  },
-  en: {
-    returnHome: 'Return to Home',
-    candidatePortal: 'Candidate Login Portal',
-    loginDesc: 'Sign in with your email, phone, or passport number and password.',
-    emailOrPhone: 'Email / Phone / Passport *',
-    password: 'Password *',
-    loginBtn: 'Sign In',
-    overview: 'Overview',
-    profile: 'Profile',
-    documents: 'Documents',
-    jobs: 'Job Opportunities',
-    interviews: 'Interviews',
-    offers: 'Job Offers',
-    process: 'Process Status',
-    travel: 'Travel Info',
-    support: 'Support',
-    logout: 'Logout',
-    contactUs: 'Contact Us',
-    candidateRegister: 'Candidate Register',
-    portalLogin: 'Portal Login',
-    tagline: 'International Employment & Visa Management',
-    heroTitle: 'Professional Workforce Solutions',
-    completeReg: 'Register',
-    colTargetStart: 'Target Start',
-    colBenefits: 'Benefits',
-    accommodation: 'Accommodation',
-    foodAllowance: 'Food',
-    localTransport: 'Transport',
-    flightTicket: 'Flight Ticket',
-    empPortalTitle: 'Employer Portal',
-    empPortalSub: 'Manage your workforce demands',
-    empPortalLabel: 'Employer Email',
-    passwordLabel: 'Password',
-    submitting: 'Submitting...',
-    signInBtn: 'Sign In',
-    colSalary: 'Salary',
-    colDemandStatus: 'Demand Status',
-    regFormTitle: 'Candidate Registration Form',
-    regFormSub: 'Fill in your details completely',
-    regSuccessTitle: 'Registration Successful',
-    regSuccessDesc: 'Your application has been received.',
-    nameLabel: 'Full Name',
-    passportLabel: 'Passport No',
-    sectorLabel: 'Sector',
-    professionLabel: 'Profession',
-    certNoLabel: 'Certificate No',
-    certNo: 'Cert No',
-    certificateNo: 'Cert No',
-    issuingBodyLabel: 'Issuing Body',
-    issuingBody: 'Issuing Body',
-    videoUrlLabel: 'Video URL',
-    expectedSalaryLabel: 'Expected Salary',
-    shiftSuitableLabel: 'Shift Suitable',
-    emailLabel: 'Email',
-    phone: 'Phone',
-    phoneLabel: 'Phone',
-    pendingStatus: 'Pending',
-    reviewingStatus: 'Reviewing',
-    visaProcessingStatus: 'Visa Processing',
-    approvedStatus: 'Approved',
-    colPosSec: 'Position / Sector',
-    colHeadcount: 'Headcount',
-    newDemandBtn: 'Create New Demand',
-    modalDemandTitle: 'Demand Details',
-    specifyCustomPos: 'Specify Custom Position',
-    specialReqs: 'Special Requirements',
-    creatingDossier: 'Creating Dossier...',
-    submitDossierBtn: 'Submit Demand',
-    employerPortal: 'Employer Portal',
-    selectedCompany: 'Selected Company',
-    candidatePortalLogin: 'Candidate Login',
-    candidatePortalBtn: 'Candidate Portal & Sign In',
-    registerTitle: 'Register',
-    saveBtn: 'Save',
-    colProfSector: 'Profession / Sector',
-    dossierTitle: 'Dossier Management',
-    searchPlaceholder: 'Search...',
-    allstatuses: 'All Statuses',
-    colCandidate: 'Candidate',
-    colPassportNat: 'Passport / Nationality',
-    colVisaStatus: 'Visa Status',
-    portalTitle: 'Management Portal',
-    portalSub: 'Manage system operations',
-    usernameLabel: 'Username',
-    authSystem: 'Authorization System',
-    mgmtTitle: 'Management Panel',
-    submitBtn: 'Submit',
-    scopeTitle: 'Scope of Activity',
-    logoutBtn: 'Logout',
-    totalDemands: 'Total Demands',
-    requestedHeadcount: 'Requested Headcount',
-    activeProcesses: 'Active Processes',
-    companies: {
-      hr: { name: 'Panova HR', tagline: 'Human Resources & Employment' },
-      trade: { name: 'Panova Trade', tagline: 'Foreign Trade & Logistics' },
-      agriculture: { name: 'Panova Agriculture & Livestock', tagline: 'Agricultural Production' },
-      construction: { name: 'Panova Construction', tagline: 'Construction & Building' }
-    },
-    certAndVideo: 'Certificate & Video',
-    salaryAndShift: 'Salary & Shift',
-    trackingPeriod: '30-60-90 Tracking',
-    noCertificate: 'No Cert',
-    watchVideo: 'Watch Video',
-    monthText: 'mo',
-    shiftSuitableText: 'Shift Suitable',
-    standardShiftText: 'Standard Shift',
-    employerCompany: 'Employer Company',
-    createdDate: 'Created',
-    personCount: 'Person(s)',
-    overviewTab: 'Overview',
-    candidatesTab: 'Candidate Pool',
-    requestsTab: 'Personnel Requests',
-    employersTab: 'Employers',
-    matchingTab: 'Matching',
-    travelTab: 'Travel & Visa',
-    employeesTab: 'Active Employees (30/60/90)',
-    supportTab: 'Issues / Support',
-    totalCandidatesCard: 'TOTAL CANDIDATES',
-    activeEmployersCard: 'ACTIVE EMPLOYERS',
-    openRequestsCard: 'OPEN REQUESTS',
-    openSupportCard: 'OPEN ISSUES / SUPPORT',
-    portalSummaryTitle: 'PANOVA Operations Summary',
-    portalSummaryDesc: 'You can manage candidate applications through the system, match candidates to employer workforce requests, and track visa and travel processes.',
-    staffTab: 'Staff & Roles',
-    tasksTab: 'Tasks',
-    auditTab: 'Audit Log',
-    addStaffTitle: 'Assign New Staff & Role',
-    staffNameLabel: 'Full Name *',
-    staffEmailLabel: 'Email (For Login) *',
-    staffRoleLabel: 'Role Description',
-    staffPermLabel: 'Role / Permission Level *',
-    saveStaffBtn: 'Save Staff Member',
-    staffMatrixTitle: 'PANOVA Operations Staff & Role Matrix',
-    staffMatrixSub: 'Upper Management, Source Country, Target Country and Field Officer roles',
-    permLevelText: 'Role Level:',
-    newTaskTitleHeader: 'Assign New Task & Assignee',
-    taskDescLabel: 'Task Description *',
-    taskAssigneeLabel: 'Main Assignee',
-    taskBackupAssigneeLabel: 'Backup Assignee',
-    taskDueDateLabel: 'Due Date',
-    saveTaskBtn: 'Save Task',
-    taskListHeader: 'Team Tasks & Responsibility Tracking',
-    statusPending: 'Pending',
-    statusCompleted: 'Completed',
-    auditLogTitle: 'System Audit Log',
-    auditLogSub: 'Critical actions, status changes, and staff assignments in the system',
-    colAction: 'Action / Event',
-    colPerformer: 'Performed By',
-    colTime: 'Timestamp',
-    delayAlertsTitle: '⚠️ Delay & Deadline Alerts',
-    delayAlertsDesc: 'Automatic system alerts are active for files whose visa process exceeds 15 days or has missing documents.',
-    roleUpperManagement: 'Upper Management',
-    roleSourceCountry: 'Source Country Officer',
-    roleTargetCountry: 'Target Country Officer',
-    roleFieldOfficer: 'Field Officer',
-    applicationStatusAndSummary: 'Application Status and Summary',
-    currentProcessStage: 'CURRENT PROCESS STAGE',
-    assigneeText: 'Assignee',
-    backupText: 'Backup',
-    dueDateText: 'Due Date',
-    noEmployers: 'No registered employers found.',
-    noSupport: 'No active support tickets found.',
-    initialAuditLog: 'System Initialized & Role Matrix Established',
-    dateFormatPlaceholder: 'dd.mm.yyyy',
-    message: 'Message',
-
-    signInMenu: 'Sign In',
-    signUpMenu: 'Sign Up',
-    loginPortalTitle: 'Employer Login Portal',
-    loginPortalSub: 'Sign in with your company email and password.',
-    companyEmailLabel: 'Company Email',
-    signUpPortalTitle: 'Employer Registration',
-    signUpPortalSub: 'Register your company to submit workforce demands.',
-    companyNameLabel: 'Company Name',
-    contactPersonLabel: 'Contact Person',
-    completeSignUpBtn: 'Complete Registration',
-    demoLoginText: 'Demo Login:',
-    regSuccessHeader: 'Registration Successful!',
-    regSuccessText: 'Your company account has been created. You can now sign in.',
-    goToSignInBtn: 'Go to Sign In',
-
-    empTabRequests: 'Personnel Requests',
-    empTabCandidates: 'Candidates / Matching',
-    empTabSelected: 'Selected Candidates',
-    empTabTravel: 'Travel & Start',
-    empTabSupport: 'Support / Notices',
-    empTabProfile: 'Company Profile',
-    empNoRequests: 'No active workforce requests found.',
-    empCandidatesPoolTitle: 'Candidate Pool Offered for Your Demands',
-    empNoCandidates: 'No matching candidates found yet.',
-    empInterviewRequestBtn: 'Request Interview',
-    empShortlistBtn: 'Shortlist',
-    empInterviewsTitle: 'Scheduled and Completed Interviews',
-    empNoInterviews: 'No active interview appointments scheduled.',
-    empSelectedTitle: 'Approved and Processing Candidates',
-    empNoSelected: 'No approved candidates yet.',
-    empTravelTitle: 'Flight, Arrival and Pickup Info',
-    empNoTravel: 'Travel details of personnel whose visa and ticketing are completed will be listed here.',
-    empEmployeesTitle: 'Hired Personnel & 30/60/90 Day Tracking',
-    empNoEmployees: 'No active employees in your company.',
-    empSupportFormTitle: 'Open Operational Support Ticket',
-    empSupportSubjectLabel: 'Subject / Title',
-    empSupportMessageLabel: 'Your Message',
-    empSupportSubmitBtn: 'Send Support Ticket',
-    empSupportHistoryTitle: 'Support History',
-    empNoSupportTickets: 'No active support records.',
-    empProfileTitle: 'Company & Contact Information',
-    empProfileCompanyName: 'Company Name',
-    empProfileContactPerson: 'Contact Person',
-
-    profileUpdateTitle: 'Company Profile & Info Update',
-    profileUpdateDesc: 'You can update your company information and password here.',
-    countryLocationLabel: 'Country / Location',
-    emailReadonlyLabel: 'Email (Read-only)',
-    updatingBtn: 'Updating...',
-    saveChangesBtn: 'Save Changes',
-    profileUpdatedSuccess: 'Company profile successfully updated!',
-  },
-  sq: {
-    returnHome: 'Kthehu në Faqen Kryesore',
-    candidatePortal: 'Portali i Hyrjes për Kandidatët',
-    loginDesc: 'Hyni me email, telefon ose numër pasaporte dhe fjalëkalim.',
-    emailOrPhone: 'Email / Telefon / Pasaportë *',
-    password: 'Fjalëkalimi *',
-    loginBtn: 'Hyni në Sistem',
-    overview: 'Përmbledhje',
-    profile: 'Profili',
-    documents: 'Dokumentet',
-    jobs: 'Mundësitë e Punës',
-    interviews: 'Intervistat',
-    offers: 'Ofertat e Punës',
-    process: 'Statusi i Proçesit',
-    travel: 'Informacioni i Udhëtimit',
-    support: 'Mbështetje',
-    logout: 'Dilni',
-    contactUs: 'Na Kontaktoni',
-    candidateRegister: 'Regjistrimi i Kandidatëve',
-    portalLogin: 'Hyrja në Portal',
-    tagline: 'Punësim Ndërkombëtar dhe Menaxhim Vizash',
-    heroTitle: 'Zgjidhje Profesionale të Fuqisë Punëtore',
-    completeReg: 'Regjistrohuni',
-    colTargetStart: 'Fillimi i Synuar',
-    colBenefits: 'Përfitimet',
-    accommodation: 'Akomodimi',
-    foodAllowance: 'Ushqimi',
-    localTransport: 'Transporti',
-    flightTicket: 'Bileta e Avionit',
-    empPortalTitle: 'Portali i Punëdhënësve',
-    empPortalSub: 'Menaxhoni kërkesat tuaja për fuqi punëtore',
-    empPortalLabel: 'Email i Punëdhënësit',
-    passwordLabel: 'Fjalëkalimi',
-    submitting: 'Duke dërguar...',
-    signInBtn: 'Hyni',
-    colSalary: 'Paga',
-    colDemandStatus: 'Statusi i Kërkesës',
-    regFormTitle: 'Formulari i Regjistrimit',
-    regFormSub: 'Plotësoni të dhënat tuaja',
-    regSuccessTitle: 'Regjistrimi u Krye',
-    regSuccessDesc: 'Aplikimi juaj u pranua.',
-    nameLabel: 'Emri Mbiemri',
-    passportLabel: 'Nr. Pasaportës',
-    sectorLabel: 'Sektori',
-    professionLabel: 'Profesioni',
-    certNoLabel: 'Nr. Certifikatës',
-    certNo: 'Nr. Certifikatës',
-    certificateNo: 'Nr. Certifikatës',
-    issuingBodyLabel: 'Institucioni Lëshues',
-    issuingBody: 'Institucioni Lëshues',
-    videoUrlLabel: 'URL e Videos',
-    expectedSalaryLabel: 'Paga e Pritur',
-    shiftSuitableLabel: 'I përshtatshëm për turne',
-    emailLabel: 'Email',
-    phone: 'Telefon',
-    phoneLabel: 'Telefon',
-    pendingStatus: 'Në pritje',
-    reviewingStatus: 'Duke u shqyrtuar',
-    visaProcessingStatus: 'Viza në proces',
-    approvedStatus: 'Miratuar',
-    colPosSec: 'Pozicioni / Sektori',
-    colHeadcount: 'Numri i Personave',
-    newDemandBtn: 'Krijo Kërkesë të Re',
-    modalDemandTitle: 'Detajet e Kërkesës',
-    specifyCustomPos: 'Specifiko Pozicionin',
-    specialReqs: 'Kërkesa Speciale',
-    creatingDossier: 'Duke krijuar dosjen...',
-    submitDossierBtn: 'Dërgo Kërkesën',
-    employerPortal: 'Hyrja e Punëdhënësit',
-    selectedCompany: 'Kompania e Zgjedhur',
-    candidatePortalLogin: 'Hyrja e Kandidatit',
-    candidatePortalBtn: 'Portali i Kandidatëve & Hyrja',
-    registerTitle: 'Regjistrohuni',
-    saveBtn: 'Ruaj',
-    colProfSector: 'Profesioni / Sektori',
-    dossierTitle: 'Menaxhimi i Dosjeve',
-    searchPlaceholder: 'Kërko...',
-    allstatuses: 'Të gjitha statuset',
-    colCandidate: 'Kandidati',
-    colPassportNat: 'Pasaporta / Kombësia',
-    colVisaStatus: 'Statusi i Vizës',
-    portalTitle: 'Portali i Menaxhimit',
-    portalSub: 'Menaxhoni operacionet e sistemit',
-    usernameLabel: 'Emri i Përdoruesit',
-    authSystem: 'Sistemi i Autorizimit',
-    mgmtTitle: 'Paneli i Menaxhimit',
-    submitBtn: 'Dërgo',
-    scopeTitle: 'Fusha e Veprimtarisë',
-    logoutBtn: 'Dilni',
-    totalDemands: 'Kërkesat Totale',
-    requestedHeadcount: 'Personeli i Kërkuar',
-    activeProcesses: 'Proceset Aktive',
-    companies: {
-      hr: { name: 'Panova HR', tagline: 'Burimet Njerëzore dhe Punësimi' },
-      trade: { name: 'Panova Trade', tagline: 'Tregti e Jashtme dhe Logjistikë' },
-      agriculture: { name: 'Panova Bujqësi dhe Blegtori', tagline: 'Prodhimi Bujqësor' },
-      construction: { name: 'Panova Ndërtim', tagline: 'Ndërtim dhe Objekte' }
-    },
-    certAndVideo: 'Certifikata & Video',
-    salaryAndShift: 'Paga & Turni',
-    trackingPeriod: 'Gjurmimi 30-60-90',
-    noCertificate: 'Pa Certifikatë',
-    watchVideo: 'Shiko Videon',
-    monthText: 'muaj',
-    shiftSuitableText: 'I përshtatshëm për turne',
-    standardShiftText: 'Turni Standard',
-    employerCompany: 'Kompania Punëdhënëse',
-    createdDate: 'Krijuar',
-    personCount: 'Person(a)',
-    overviewTab: 'Përmbledhje',
-    candidatesTab: 'Grupi i Kandidatëve',
-    requestsTab: 'Kërkesat e Personelit',
-    employersTab: 'Punëdhënësit',
-    matchingTab: 'Përputhjet',
-    travelTab: 'Udhëtimet & Vizat',
-    employeesTab: 'Punonjësit Aktivë (30/60/90)',
-    supportTab: 'Problemet / Mbështetja',
-    totalCandidatesCard: 'TOTALI I KANDIDATËVE',
-    activeEmployersCard: 'PUNËDHËNËSIT AKTIVË',
-    openRequestsCard: 'KËRKESAT E HAPURA',
-    openSupportCard: 'PROBLEMET / MBËSHTETJA',
-    portalSummaryTitle: 'Përmbledhje e Operacioneve PANOVA',
-    portalSummaryDesc: 'Ju mund të menaxhoni aplikimet e kandidatëve, të përputhni kandidatët me kërkesat e punëdhënësve dhe të ndiqni vizat.',
-    staffTab: 'Stafi & Rolet',
-    tasksTab: 'Detyrat',
-    auditTab: 'Regjistri i Auditimit',
-    addStaffTitle: 'Cakto Staf & Rol të Ri',
-    staffNameLabel: 'Emri Mbiemri *',
-    staffEmailLabel: 'Email (Për hyrje) *',
-    staffRoleLabel: 'Përshkrimi i Rolit',
-    staffPermLabel: 'Niveli i Rolit *',
-    saveStaffBtn: 'Ruaj Anëtarin e Stafit',
-    staffMatrixTitle: 'Matrica e Stafit dhe Rolet PANOVA',
-    staffMatrixSub: 'Rolet: Menaxhimi i Lartë, Vendi Burim, Vendi i Synuar dhe Oficeri i Fushës',
-    permLevelText: 'Niveli i Rolit:',
-    newTaskTitleHeader: 'Cakto Detyrë & Përgjegjës',
-    taskDescLabel: 'Përshkrimi i Detyrës *',
-    taskAssigneeLabel: 'Përgjegjësi Kryesor',
-    taskBackupAssigneeLabel: 'Përgjegjësi Rezervë',
-    taskDueDateLabel: 'Data e Afatit',
-    saveTaskBtn: 'Ruaj Detyrën',
-    taskListHeader: 'Detyrat e Ekipit & Gjurmimi i Përgjegjësisë',
-    statusPending: 'Në pritje',
-    statusCompleted: 'Përfunduar',
-    auditLogTitle: 'Regjistri i Veprimeve të Sistemit (Audit Log)',
-    auditLogSub: 'Veprimet kritike, ndryshimet e statusit dhe caktimet e stafit në sistem',
-    colAction: 'Veprimi / Ngjarja',
-    colPerformer: 'Kryer nga',
-    colTime: 'Koha',
-    delayAlertsTitle: '⚠️ Njoftimet e Vonesave & Afateve',
-    delayAlertsDesc: 'Alarmet automatike të sistemit janë aktive për skedarët, procesi i vizave të të cilëve kalon 15 ditë.',
-    roleUpperManagement: 'Menaxhimi i Lartë',
-    roleSourceCountry: 'Oficeri i Vendit Burim',
-    roleTargetCountry: 'Oficeri i Vendit të Synuar',
-    roleFieldOfficer: 'Oficeri i Fushës',
-    applicationStatusAndSummary: 'Application Status and Summary',
-    currentProcessStage: 'CURRENT PROCESS STAGE',
-    assigneeText: 'Përgjegjës',
-    backupText: 'Rezervë',
-    dueDateText: 'Afati',
-    noEmployers: 'Nuk u gjetën punëdhënës të regjistruar.',
-    noSupport: 'Nuk u gjetën njoftime mbështetjeje aktive.',
-    initialAuditLog: 'Sistemi u Iniciua & Matrica e Roleve u Krijua',
-    dateFormatPlaceholder: 'dd.mm.vvvv',
-    message: 'Mesazhi',
-
-    signInMenu: 'Hyni',
-    signUpMenu: 'Regjistrohuni',
-    loginPortalTitle: 'Portali i Hyrjes për Punëdhënësit',
-    loginPortalSub: 'Hyni me emailin dhe fjalëkalimin e kompanisë suaj.',
-    companyEmailLabel: 'Email i Kompanisë',
-    signUpPortalTitle: 'Regjistrimi i Punëdhënësit',
-    signUpPortalSub: 'Regjistroni kompaninë tuaj për të paraqitur kërkesa.',
-    companyNameLabel: 'Emri i Kompanisë',
-    contactPersonLabel: 'Personi i Kontaktit',
-    completeSignUpBtn: 'Përfundo Regjistrimin',
-    demoLoginText: 'Demo Hyrje:',
-    regSuccessHeader: 'Regjistrimi u Krye me Sukses!',
-    regSuccessText: 'Llogaria e kompanisë suaj u krijua. Tani mund të hyni.',
-    goToSignInBtn: 'Shko te Hyrja',
-
-    empTabRequests: 'Kërkesat e Personelit',
-    empTabCandidates: 'Kandidatët / Përputhjet',
-    empTabSelected: 'Kandidatët e Zgjedhur',
-    empTabTravel: 'Udhëtimi dhe Fillimi',
-    empTabSupport: 'Mbështetje / Njoftim',
-    empTabProfile: 'Profili i Kompanisë',
-    empNoRequests: 'Nuk u gjet asnjë kërkesë aktive për personel.',
-    empCandidatesPoolTitle: 'Grupi i Kandidatëve për Kërkesat Tuaja',
-    empNoCandidates: 'Ende nuk ka kandidatë përputhës.',
-    empInterviewRequestBtn: 'Kërko Intervistë',
-    empShortlistBtn: 'Shto në Listë të Shkurtër',
-    empInterviewsTitle: 'Intervistat e Planifikuara dhe të Përfunduara',
-    empNoInterviews: 'Nuk keni asnjë takim interviste aktiv.',
-    empSelectedTitle: 'Kandidatët e Miratuar dhe në Proçes',
-    empNoSelected: 'Ende nuk keni ndonjë kandidat të miratuar.',
-    empTravelTitle: 'Informacioni i Fluturimit, Mbërritjes dhe Pritjes',
-    empNoTravel: 'Detajet e udhëtimit të personelit do të listohen këtu.',
-    empEmployeesTitle: 'Personeli i Punësuar & Gjurmimi 30/60/90 Ditë',
-    empNoEmployees: 'Nuk ka punonjës aktivë në kompaninë tuaj.',
-    empSupportFormTitle: 'Hap Ticket Mbështetjeje Operacionale',
-    empSupportSubjectLabel: 'Subjekti / Titulli',
-    empSupportMessageLabel: 'Mesazhi Juaj',
-    empSupportSubmitBtn: 'Dërgo Kërkesën e Mbështetjes',
-    empSupportHistoryTitle: 'Historiku i Mbështetjes',
-    empNoSupportTickets: 'Nuk keni regjistrime mbështetjeje aktive.',
-    empProfileTitle: 'Informacioni i Kompanisë dhe Kontaktit',
-    empProfileCompanyName: 'Emri i Kompanisë',
-    empProfileContactPerson: 'Personi i Kontaktit',
-
-    profileUpdateTitle: 'Përditësimi i Profilit dhe Informacionit të Kompanisë',
-    profileUpdateDesc: 'Ju mund të përditësoni informacionin e kompanisë suaj dhe fjalëkalimin këtu.',
-    countryLocationLabel: 'Shteti / Vendndodhja',
-    emailReadonlyLabel: 'Email (I pandryshueshëm)',
-    updatingBtn: 'Duke përditësuar...',
-    saveChangesBtn: 'Ruaj Ndryshimet',
-    profileUpdatedSuccess: 'Profili i kompanisë u përditësuar me sukses!',
-  },
-  ar: {
-    returnHome: 'العودة إلى الرئيسية',
-    candidatePortal: 'بوابة تسجيل دخول المرشحين',
-    loginDesc: 'قم بتسجيل الدخول بريدك الإلكتروني أو هاتفك أو رقم جواز السفر.',
-    emailOrPhone: 'البريد الإلكتروني / الهاتف / جواز السفر *',
-    password: 'كلمة المرور *',
-    loginBtn: 'تسجيل الدخول',
-    overview: 'نظرة عامة',
-    profile: 'الملف الشخصي',
-    documents: 'المستندات',
-    jobs: 'فرص العمل',
-    interviews: 'المقابلات',
-    offers: 'عروض العمل',
-    process: 'حالة العملية',
-    travel: 'معلومات السفر',
-    support: 'الدعم',
-    logout: 'تسجيل الخروج',
-    contactUs: 'اتصل بنا',
-    candidateRegister: 'تسجيل المرشحين',
-    portalLogin: 'تسجيل الدخول للبوابة',
-    tagline: 'التوظيف الدولي وإدارة التأشيرات',
-    heroTitle: 'حلول القوى العاملة المهنية',
-    completeReg: 'التسجيل',
-    colTargetStart: 'بداية المستهدف',
-    colBenefits: 'المزايا',
-    accommodation: 'الإقامة',
-    foodAllowance: 'بدل الطعام',
-    localTransport: 'المواصلات المحلية',
-    flightTicket: 'تذكرة الطيران',
-    empPortalTitle: 'بوابة أصحاب العمل',
-    empPortalSub: 'إدارة طلبات القوى العاملة الخاصة بك',
-    empPortalLabel: 'بريد صاحب العمل',
-    passwordLabel: 'كلمة المرور',
-    submitting: 'جاري الإرسال...',
-    signInBtn: 'تسجيل الدخول',
-    colSalary: 'الراتب',
-    colDemandStatus: 'حالة الطلب',
-    regFormTitle: 'استمارة تسجيل المرشح',
-    regFormSub: 'املأ تفاصيلك بالكامل',
-    regSuccessTitle: 'تم التسجيل بنجاح',
-    regSuccessDesc: 'تم استلام طلبك.',
-    nameLabel: 'الاسم الكامل',
-    passportLabel: 'رقم جواز السفر',
-    sectorLabel: 'القطاع',
-    professionLabel: 'المهنة',
-    certNoLabel: 'رقم الشهادة',
-    certNo: 'رقم الشهادة',
-    certificateNo: 'رقم الشهادة',
-    issuingBodyLabel: 'جهة الإصدار',
-    issuingBody: 'جهة الإصدار',
-    videoUrlLabel: 'رابط الفيديو',
-    expectedSalaryLabel: 'الراتب المتوقع',
-    shiftSuitableLabel: 'مناسب للعمل بنظام النوبات',
-    emailLabel: 'البريد الإلكتروني',
-    phone: 'الهاتف',
-    phoneLabel: 'الهاتف',
-    pendingStatus: 'قيد الانتظار',
-    reviewingStatus: 'قيد المراجعة',
-    visaProcessingStatus: 'جاري استخراج التأشيرة',
-    approvedStatus: 'تم الموافقة',
-    colPosSec: 'المنصب / القطاع',
-    colHeadcount: 'عدد الأفراد',
-    newDemandBtn: 'إنشاء طلب جديد',
-    modalDemandTitle: 'تفاصيل الطلب',
-    specifyCustomPos: 'حدد منصب مخصص',
-    specialReqs: 'متطلبات خاصة',
-    creatingDossier: 'جاري إنشاء الملف...',
-    submitDossierBtn: 'إرسال الطلب',
-    employerPortal: 'بوابة أصحاب العمل',
-    selectedCompany: 'الشركة المختارة',
-    candidatePortalLogin: 'تسجيل دخول المرشح',
-    candidatePortalBtn: 'بوابة المرشحين وتسجيل الدخول',
-    registerTitle: 'التسجيل',
-    saveBtn: 'حفظ',
-    colProfSector: 'المهنة / القطاع',
-    dossierTitle: 'إدارة الملفات',
-    searchPlaceholder: 'بحث...',
-    allstatuses: 'جميع الحالات',
-    colCandidate: 'المرشح',
-    colPassportNat: 'جواز السفر / الجنسية',
-    colVisaStatus: 'حالة التأشيرة',
-    portalTitle: 'بوابة الإدارة',
-    portalSub: 'إدارة عمليات النظام',
-    usernameLabel: 'اسم المستخدم',
-    authSystem: 'نظام المصادقة',
-    mgmtTitle: 'لوحة الإدارة',
-    submitBtn: 'إرسال',
-    scopeTitle: 'نطاق النشاط',
-    logoutBtn: 'تسجيل الخروج',
-    totalDemands: 'إجمالي الطلبات',
-    requestedHeadcount: 'الأفراد المطلوبين',
-    activeProcesses: 'العمليات النشطة',
-    companies: {
-      hr: { name: 'Panova HR', tagline: 'الموارد البشرية والتوظيف' },
-      trade: { name: 'Panova Trade', tagline: 'التجارة الخارجية والخدمات اللوجستية' },
-      agriculture: { name: 'Panova للزراعة والثروة الحيوانية', tagline: 'الإنتاج الزراعي' },
-      construction: { name: 'Panova Construction', tagline: 'البناء والتشييد' }
-    },
-    certAndVideo: 'الشهادة والفيديو',
-    salaryAndShift: 'الراتب ونظام العمل',
-    trackingPeriod: 'متابعة 30-60-90',
-    noCertificate: 'لا توجد شهادة',
-    watchVideo: 'مشاهدة الفيديو',
-    monthText: 'شهر',
-    shiftSuitableText: 'مناسب للنوبات',
-    standardShiftText: 'نوبة قياسية',
-    employerCompany: 'الشركة المصدرة للطلب',
-    createdDate: 'التاريخ',
-    personCount: 'أشخاص',
-    overviewTab: 'نظرة عامة',
-    candidatesTab: 'قائمة المرشحين',
-    requestsTab: 'طلبات الموظفين',
-    employersTab: 'أصحاب العمل',
-    matchingTab: 'المطابقة',
-    travelTab: 'السفر والتأشيرات',
-    employeesTab: 'الموظفون النشطون (30/60/90)',
-    supportTab: 'المشكلات / الدعم',
-    totalCandidatesCard: 'إجمالي المرشحين',
-    activeEmployersCard: 'أصحاب العمل النشطون',
-    openRequestsCard: 'الطلبات المفتوحة',
-    openSupportCard: 'المشكلات / الدعم المفتوح',
-    portalSummaryTitle: 'ملخص عمليات بانوفا',
-    portalSummaryDesc: 'يمكنك إدارة طلبات المرشحين ومطابقة الكفاءات مع طلبات أصحاب العمل ومتابعة التأشيرات.',
-    staffTab: 'الموظفون والأدوار',
-    tasksTab: 'المهام',
-    auditTab: 'سجل التدقيق (Audit)',
-    addStaffTitle: 'تعيين موظف ودور جديد',
-    staffNameLabel: 'الاسم الكامل *',
-    staffEmailLabel: 'البريد الإلكتروني (لتسجيل الدخول) *',
-    staffRoleLabel: 'وصف الدور',
-    staffPermLabel: 'مستوى الصلاحية / الدور *',
-    saveStaffBtn: 'حفظ موظف',
-    staffMatrixTitle: 'طاقم العمل في بانوفا ومصفوفة الأدوار',
-    staffMatrixSub: 'أدوار الإدارة العليا، بلد المصدر، البلد المستهدف، ومسؤول الميدان',
-    permLevelText: 'مستوى الدور:',
-    newTaskTitleHeader: 'تعيين مهمة ومسؤول جديد',
-    taskDescLabel: 'وصف المهمة *',
-    taskAssigneeLabel: 'المسؤول الأساسي',
-    taskBackupAssigneeLabel: 'المسؤول الاحتياطي',
-    taskDueDateLabel: 'تاريخ الاستحقاق',
-    saveTaskBtn: 'حفظ المهمة',
-    taskListHeader: 'مهام الفريق ومتابعة المسؤوليات',
-    statusPending: 'قيد الانتظار',
-    statusCompleted: 'مكتمل',
-    auditLogTitle: 'سجل عمليات النظام (Audit Log)',
-    auditLogSub: 'العمليات الحرجة وتغييرات الحالة وتعيينات الموظفين في النظام',
-    colAction: 'العملية / الحدث',
-    colPerformer: 'تم بواسطة',
-    colTime: 'الوقت',
-    delayAlertsTitle: '⚠️ تنبيهات التأخير والمواعيد النهائية',
-    delayAlertsDesc: 'تنبيهات النظام التلقائية نشطة للملفات التي تتجاوز فيها عملية التأشيرة 15 يوماً.',
-    roleUpperManagement: 'الإدارة العليا',
-    roleSourceCountry: 'مسؤول بلد المصدر',
-    roleTargetCountry: 'مسؤول البلد المستهدف',
-    roleFieldOfficer: 'مسؤول الميدان',
-    applicationStatusAndSummary: 'Application Status and Summary',
-    currentProcessStage: 'CURRENT PROCESS STAGE',
-    assigneeText: 'المسؤول',
-    backupText: 'الاحتياطي',
-    dueDateText: 'تاريخ الاستحقاق',
-    noEmployers: 'لا يوجد أصحاب عمل مسجلين.',
-    noSupport: 'لا توجد تذاكر دعم نشطة.',
-    initialAuditLog: 'تم بدء النظام وإنشاء مصفوفة الأدوار',
-    dateFormatPlaceholder: 'dd.mm.yyyy',
-    message: 'الرسالة',
-
-    signInMenu: 'تسجيل الدخول',
-    signUpMenu: 'التسجيل',
-    loginPortalTitle: 'بوابة تسجيل دخول أصحاب العمل',
-    loginPortalSub: 'قم بتسجيل الدخول بريد الشركة الإلكتروني وكلمة المرور.',
-    companyEmailLabel: 'البريد الإلكتروني للشركة',
-    signUpPortalTitle: 'تسجيل صاحب العمل',
-    signUpPortalSub: 'سجل شركتك لتقديم طلبات القوى العاملة.',
-    companyNameLabel: 'اسم الشركة',
-    contactPersonLabel: 'الشخص المسؤول',
-    completeSignUpBtn: 'إتمام التسجيل',
-    demoLoginText: 'تسجيل تجريبي:',
-    regSuccessHeader: 'تم التسجيل بنجاح!',
-    regSuccessText: 'تم إنشاء حساب شركتك. يمكنك الآن تسجيل الدخول.',
-    goToSignInBtn: 'الانتقال لتسجيل الدخول',
-
-    empTabRequests: 'طلبات الموظفين',
-    empTabCandidates: 'المرشحون / المطابقة',
-    empTabSelected: 'المرشحون المختارون',
-    empTabTravel: 'السفر والبداية',
-    empTabSupport: 'الدعم / الإشعارات',
-    empTabProfile: 'ملف الشركة',
-    empNoRequests: 'لا توجد طلبات قوى عاملة نشطة.',
-    empCandidatesPoolTitle: 'قائمة المرشحين المقدمة لطلباتك',
-    empNoCandidates: 'لا يوجد مرشحون مطابقون حتى الآن.',
-    empInterviewRequestBtn: 'طلب مقابلة',
-    empShortlistBtn: 'إضافة للقائمة المختصرة',
-    empInterviewsTitle: 'المقابلات المجدولة والمكتملة',
-    empNoInterviews: 'ليس لديك مواعيد مقابلات نشطة مجدولة.',
-    empSelectedTitle: 'المرشحون الموافق عليهم وتحت الإجراء',
-    empNoSelected: 'لا يوجد مرشحون موافق عليهم حتى الآن.',
-    empTravelTitle: 'معلومات الرحلة والوصول والاستقبال',
-    empNoTravel: 'سيتم سرد تفاصيل السفر للموظفين هنا.',
-    empEmployeesTitle: 'الموظفون المعينون ومتابعة 30/60/90 يوم',
-    empNoEmployees: 'لا توجد موظفون نشطون في شركتك.',
-    empSupportFormTitle: 'فتح تذكرة دعم تشغيلي',
-    empSupportSubjectLabel: 'الموضوع / العنوان',
-    empSupportMessageLabel: 'رسالتك',
-    empSupportSubmitBtn: 'إرسال تذكرة الدعم',
-    empSupportHistoryTitle: 'سجل الدعم',
-    empNoSupportTickets: 'لا توجد سجلات دعم نشطة.',
-    empProfileTitle: 'معلومات الشركة والاتصال',
-    empProfileCompanyName: 'اسم الشركة',
-    empProfileContactPerson: 'الشخص المسؤول',
-
-    profileUpdateTitle: 'تحديث ملف الشركة والمعلومات',
-    profileUpdateDesc: 'يمكنك تحديث معلومات شركتك وكلمة المرور من هنا.',
-    countryLocationLabel: 'الدولة / الموقع',
-    emailReadonlyLabel: 'البريد الإلكتروني (غير قابل للتعديل)',
-    updatingBtn: 'جاري التحديث...',
-    saveChangesBtn: 'حفظ التغييرات',
-    profileUpdatedSuccess: 'تم تحديث ملف الشركة بنجاح!',
-  },
-};

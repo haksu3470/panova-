@@ -225,7 +225,6 @@ export interface Translation {
   issuingbody?: string;
   sendnotification?: string;
 
-  // Loglarda Belirtilen Tüm Eksik Seyahat, Belge ve Görev Alanları
   planned?: string;
   ticketed?: string;
   flightNumber?: string;
@@ -245,6 +244,75 @@ export interface Translation {
   taskMatchCandidate?: string;
   taskPrepareOffer?: string;
   taskTrackPerformance?: string;
+
+  docPassportScan?: string;
+  docProfessionalCert?: string;
+  docCriminalRecord?: string;
+  docHealthReport?: string;
+  savedSuccess?: string;
+  fillEmployerAndSalary?: string;
+  offerSentSuccess?: string;
+  notificationSentSuccess?: string;
+  returnToPortal?: string;
+  saving?: string;
+  saveChanges?: string;
+  dossierClosedNotice?: string;
+  reason?: string;
+  reopenProcess?: string;
+  profileCredentialsManagement?: string;
+  phoneNumberGsm?: string;
+  emailAddress?: string;
+  portalPassword?: string;
+  travelFlightLogistics?: string;
+  file?: string;
+  uploaded?: string;
+  rejected?: string;
+  reRequested?: string;
+  preview?: string;
+  noFileUploaded?: string;
+  uploadFromComputer?: string;
+  newDocNamePlaceholder?: string;
+  add?: string;
+  professionalEvaluationCertificate?: string;
+  workVideoUrl?: string;
+  previewPlayVideo?: string;
+  internalNotesAdminOnly?: string;
+  visaProcessing?: string;
+  processClosureWithdrawal?: string;
+  closureDesc?: string;
+  closureReasonPlaceholder?: string;
+  closeArchiveProcess?: string;
+  sendOfficialJobOffer?: string;
+  monthlyNetSalary?: string;
+  startDate?: string;
+  termsConditions?: string;
+  sendOfferToCandidate?: string;
+  notificationTitle?: string;
+  messageBody?: string;
+  workVideoPreview?: string;
+  demandFilesTitle?: string;
+  demandFilesSub?: string;
+  lifecycleStatusLabel?: string;
+  stageNewRequest?: string;
+  stageReviewing?: string;
+  stageSearchingCandidates?: string;
+  stagePresentingCandidates?: string;
+  stageInterviews?: string;
+  stageSelectionCompleted?: string;
+  stageOfficialProcess?: string;
+  stageTravelPlanning?: string;
+  stageCompleted?: string;
+  stageCancelled?: string;
+  openDemandFilesBtn?: string;
+  taskGroupTarget?: string;
+  taskGroupField?: string;
+  taskEnterTravelData?: string;
+  taskPlanAccommodation?: string;
+  taskManageSupport?: string;
+  taskUpdateFieldStatus?: string;
+  taskGroupManagement?: string;
+  taskAuditSystem?: string;
+  taskApproveStrategic?: string;
 }
 
 export const languages = [
@@ -500,6 +568,75 @@ export const translations: Record<Language, Translation> = {
     taskMatchCandidate: 'Aday Eşleştirme',
     taskPrepareOffer: 'İş Teklifi Hazırla',
     taskTrackPerformance: '30/60/90 Gün Performans Takibi',
+
+    docPassportScan: 'Pasaport Taraması',
+    docProfessionalCert: 'Mesleki Sertifika',
+    docCriminalRecord: 'Adli Sicil Kaydı',
+    docHealthReport: 'Sağlık Raporu',
+    savedSuccess: 'Başarıyla Kaydedildi',
+    fillEmployerAndSalary: 'Lütfen İşveren ve Maaş Bilgilerini Doldurun',
+    offerSentSuccess: 'İş Teklifi Başarıyla Gönderildi',
+    notificationSentSuccess: 'Bildirim Başarıyla Gönderildi',
+    returnToPortal: 'Portala Dön',
+    saving: 'Kaydediliyor...',
+    saveChanges: 'Değişiklikleri Kaydet',
+    dossierClosedNotice: 'Dosya Kapatıldı',
+    reason: 'Gerekçe / Neden',
+    reopenProcess: 'Süreci Yeniden Aç',
+    profileCredentialsManagement: 'Profil ve Kimlik Bilgileri Yönetimi',
+    phoneNumberGsm: 'Telefon Numarası (GSM)',
+    emailAddress: 'E-Posta Adresi',
+    portalPassword: 'Portal Şifresi',
+    travelFlightLogistics: 'Seyahat, Uçuş ve Lojistik',
+    file: 'Dosya',
+    uploaded: 'Yüklendi',
+    rejected: 'Reddedildi',
+    reRequested: 'Yeniden İstendi',
+    preview: 'Önizleme',
+    noFileUploaded: 'Henüz dosya yüklenmedi',
+    uploadFromComputer: 'Bilgisayardan Dosya Yükle',
+    newDocNamePlaceholder: 'Belge Adı / Türü',
+    add: 'Ekle',
+    professionalEvaluationCertificate: 'Mesleki Değerlendirme Sertifikası',
+    workVideoUrl: 'Çalışma / Tanıtım Videosu URL',
+    previewPlayVideo: 'Videoyu Oynat & Önizle',
+    internalNotesAdminOnly: 'Dahili Notlar (Yalnızca Admin)',
+    visaProcessing: 'Vize İşlemde',
+    processClosureWithdrawal: 'Süreç Kapatma / Geri Çekme',
+    closureDesc: 'Bu adayın başvuru sürecini sonlandırmak veya kapatmak için gerekçe belirtin.',
+    closureReasonPlaceholder: 'Kapatma gerekçesini yazın...',
+    closeArchiveProcess: 'Süreci Kapat / Arşivle',
+    sendOfficialJobOffer: 'Resmi İş Teklifi Gönder',
+    monthlyNetSalary: 'Aylık Net Maaş',
+    startDate: 'İşe Başlangıç Tarihi',
+    termsConditions: 'Özel Şartlar ve Koşullar',
+    sendOfferToCandidate: 'Teklifi Adaya Gönder',
+    notificationTitle: 'Bildirim Konusu',
+    messageBody: 'Mesaj İçeriği',
+    workVideoPreview: 'Aday Çalışma Videosu Önizlemesi',
+    demandFilesTitle: 'Talep Dosyaları ve Aday Eşleşmeleri',
+    demandFilesSub: 'Bu talebe bağlı süreçleri ve adayları yönetin',
+    lifecycleStatusLabel: 'Yaşam Döngüsü Durumu',
+    stageNewRequest: 'Yeni Talep',
+    stageReviewing: 'İncelemede',
+    stageSearchingCandidates: 'Aday Aranıyor',
+    stagePresentingCandidates: 'Adaylar Sunuluyor',
+    stageInterviews: 'Görüşmeler Yapılıyor',
+    stageSelectionCompleted: 'Seçim Tamamlandı',
+    stageOfficialProcess: 'Resmi İşlemler / Vize',
+    stageTravelPlanning: 'Seyahat Planlanıyor',
+    stageCompleted: 'Tamamlandı',
+    stageCancelled: 'İptal Edildi',
+    openDemandFilesBtn: 'Dosyaları Aç',
+    taskGroupTarget: 'Hedef Ülke Ekibi',
+    taskGroupField: 'Saha Ekibi',
+    taskEnterTravelData: 'Seyahat Verilerini Gir',
+    taskPlanAccommodation: 'Konaklama Planla',
+    taskManageSupport: 'Destek Yönetimi',
+    taskUpdateFieldStatus: 'Saha Durumunu Güncelle',
+    taskGroupManagement: 'Yönetim Ekibi',
+    taskAuditSystem: 'Sistem Denetimi',
+    taskApproveStrategic: 'Stratejik Onaylar',
   },
   en: {
     returnHome: 'Return to Home',
@@ -746,6 +883,75 @@ export const translations: Record<Language, Translation> = {
     taskMatchCandidate: 'Candidate Matching',
     taskPrepareOffer: 'Prepare Job Offer',
     taskTrackPerformance: '30/60/90 Day Performance Tracking',
+
+    docPassportScan: 'Passport Scan',
+    docProfessionalCert: 'Professional Certificate',
+    docCriminalRecord: 'Criminal Record',
+    docHealthReport: 'Health Report',
+    savedSuccess: 'Successfully Saved',
+    fillEmployerAndSalary: 'Please Fill Employer and Salary Details',
+    offerSentSuccess: 'Job Offer Sent Successfully',
+    notificationSentSuccess: 'Notification Sent Successfully',
+    returnToPortal: 'Return to Portal',
+    saving: 'Saving...',
+    saveChanges: 'Save Changes',
+    dossierClosedNotice: 'Dossier Closed',
+    reason: 'Reason',
+    reopenProcess: 'Reopen Process',
+    profileCredentialsManagement: 'Profile & Credentials Management',
+    phoneNumberGsm: 'Phone Number (GSM)',
+    emailAddress: 'Email Address',
+    portalPassword: 'Portal Password',
+    travelFlightLogistics: 'Travel, Flight & Logistics',
+    file: 'File',
+    uploaded: 'Uploaded',
+    rejected: 'Rejected',
+    reRequested: 'Re-requested',
+    preview: 'Preview',
+    noFileUploaded: 'No files uploaded yet',
+    uploadFromComputer: 'Upload File from Computer',
+    newDocNamePlaceholder: 'Document Name / Type',
+    add: 'Add',
+    professionalEvaluationCertificate: 'Professional Evaluation Certificate',
+    workVideoUrl: 'Work / Intro Video URL',
+    previewPlayVideo: 'Preview & Play Video',
+    internalNotesAdminOnly: 'Internal Notes (Admin Only)',
+    visaProcessing: 'Visa Processing',
+    processClosureWithdrawal: 'Process Closure / Withdrawal',
+    closureDesc: 'Provide a reason to terminate or close this candidate application process.',
+    closureReasonPlaceholder: 'Type closure reason...',
+    closeArchiveProcess: 'Close / Archive Process',
+    sendOfficialJobOffer: 'Send Official Job Offer',
+    monthlyNetSalary: 'Monthly Net Salary',
+    startDate: 'Start Date',
+    termsConditions: 'Terms and Conditions',
+    sendOfferToCandidate: 'Send Offer to Candidate',
+    notificationTitle: 'Notification Title',
+    messageBody: 'Message Body',
+    workVideoPreview: 'Candidate Work Video Preview',
+    demandFilesTitle: 'Demand Files and Candidate Matches',
+    demandFilesSub: 'Manage processes and candidates linked to this demand',
+    lifecycleStatusLabel: 'Lifecycle Status',
+    stageNewRequest: 'New Request',
+    stageReviewing: 'Reviewing',
+    stageSearchingCandidates: 'Searching Candidates',
+    stagePresentingCandidates: 'Presenting Candidates',
+    stageInterviews: 'Interviews in Progress',
+    stageSelectionCompleted: 'Selection Completed',
+    stageOfficialProcess: 'Official Process / Visa',
+    stageTravelPlanning: 'Travel Planning',
+    stageCompleted: 'Completed',
+    stageCancelled: 'Cancelled',
+    openDemandFilesBtn: 'Open Files',
+    taskGroupTarget: 'Target Country Team',
+    taskGroupField: 'Field Team',
+    taskEnterTravelData: 'Enter Travel Data',
+    taskPlanAccommodation: 'Plan Accommodation',
+    taskManageSupport: 'Manage Support',
+    taskUpdateFieldStatus: 'Update Field Status',
+    taskGroupManagement: 'Management Team',
+    taskAuditSystem: 'System Audit',
+    taskApproveStrategic: 'Strategic Approvals',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -992,6 +1198,75 @@ export const translations: Record<Language, Translation> = {
     taskMatchCandidate: 'Përputhja e Kandidatit',
     taskPrepareOffer: 'Përgatit Ofertën e Punës',
     taskTrackPerformance: 'Gjurmimi i Performancës 30/60/90 Ditë',
+
+    docPassportScan: 'Skanimi i Pasaportës',
+    docProfessionalCert: 'Certifikata Profesionale',
+    docCriminalRecord: 'Dëshmi Penaliteti',
+    docHealthReport: 'Raporti Mjekësor',
+    savedSuccess: 'U Ruajt me Sukses',
+    fillEmployerAndSalary: 'Ju lutemi plotësoni detajet e punëdhënësit dhe pagës',
+    offerSentSuccess: 'Oferta e punës u dërgua me sukses',
+    notificationSentSuccess: 'Njoftimi u dërgua me sukses',
+    returnToPortal: 'Kthehu te Portali',
+    saving: 'Duke ruajtur...',
+    saveChanges: 'Ruaj Ndryshimet',
+    dossierClosedNotice: 'Dosja u Mbyll',
+    reason: 'Arsyeja',
+    reopenProcess: 'Rihap Proçesin',
+    profileCredentialsManagement: 'Menaxhimi i Profilit dhe Kredencialeve',
+    phoneNumberGsm: 'Numri i Telefonit (GSM)',
+    emailAddress: 'Adresa e Emailit',
+    portalPassword: 'Fjalëkalimi i Portalit',
+    travelFlightLogistics: 'Udhëtimi, Fluturimi & Logjistika',
+    file: 'Skedari',
+    uploaded: 'Ngarkuar',
+    rejected: 'Refuzuar',
+    reRequested: 'Rikuperuar / Kërkuar Përsëri',
+    preview: 'Pamja paraprake',
+    noFileUploaded: 'Ende nuk ka skedarë të ngarkuar',
+    uploadFromComputer: 'Ngarko Skedar nga Kompjuter',
+    newDocNamePlaceholder: 'Emri / Lloji i Dokumentit',
+    add: 'Shto',
+    professionalEvaluationCertificate: 'Certifikata e Vlerësimit Profesional',
+    workVideoUrl: 'URL e Videos së Punës / Prezantimit',
+    previewPlayVideo: 'Parapamje & Luaj Videon',
+    internalNotesAdminOnly: 'Shënime të Brendshme (Vetëm për Admin)',
+    visaProcessing: 'Viza në Proçes',
+    processClosureWithdrawal: 'Mbyllja e Proçesit / Tërheqja',
+    closureDesc: 'Jepni një arsyetim për të përfunduar ose mbyllur këtë proces aplikimi.',
+    closureReasonPlaceholder: 'Shkruani arsyen e mbylljes...',
+    closeArchiveProcess: 'Mbyll / Arkivo Proçesin',
+    sendOfficialJobOffer: 'Dërgo Ofertë Zyrtare Pune',
+    monthlyNetSalary: 'Paga Netë Mujore',
+    startDate: 'Data e Fillimit',
+    termsConditions: 'Kushtet dhe Afatet',
+    sendOfferToCandidate: 'Dërgo Ofertën te Kandidati',
+    notificationTitle: 'Titulli i Njoftimit',
+    messageBody: 'Trupi i Mesazhit',
+    workVideoPreview: 'Parapamje e Videos së Punës të Kandidatit',
+    demandFilesTitle: 'Skedarët e Kërkesës dhe Përputhjet e Kandidatëve',
+    demandFilesSub: 'Menaxhoni proceset dhe kandidatët e lidhur me këtë kërkesë',
+    lifecycleStatusLabel: 'Statusi i Cikli Jetësor',
+    stageNewRequest: 'Kërkesë e Re',
+    stageReviewing: 'Në Shqyrtim',
+    stageSearchingCandidates: 'Kërkohen Kandidatë',
+    stagePresentingCandidates: 'Prezantohen Kandidatët',
+    stageInterviews: 'Intervistat në Proçes',
+    stageSelectionCompleted: 'Përzgjedhja u Përfundua',
+    stageOfficialProcess: 'Proçesi Zyrtar / Viza',
+    stageTravelPlanning: 'Planifikimi i Udhëtimit',
+    stageCompleted: 'Përfunduar',
+    stageCancelled: 'Anuluar',
+    openDemandFilesBtn: 'Hap Skedarët',
+    taskGroupTarget: 'Ekipi i Vendit të Synuar',
+    taskGroupField: 'Ekipi i Fushës',
+    taskEnterTravelData: 'Fut të dhënat e udhëtimit',
+    taskPlanAccommodation: 'Planifiko akomodimin',
+    taskManageSupport: 'Menaxho Mbështetjen',
+    taskUpdateFieldStatus: 'Përditëso statusin e fushës',
+    taskGroupManagement: 'Ekipi i Menaxhimit',
+    taskAuditSystem: 'Auditimi i Sistemit',
+    taskApproveStrategic: 'Miratimet Strategjike',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -1238,5 +1513,74 @@ export const translations: Record<Language, Translation> = {
     taskMatchCandidate: 'مطابقة المرشح',
     taskPrepareOffer: 'إعداد عرض العمل',
     taskTrackPerformance: 'متابعة الأداء 30/60/90 يوم',
+
+    docPassportScan: 'مسح جواز السفر',
+    docProfessionalCert: 'الشهادة المهنية',
+    docCriminalRecord: 'السجل الجنائي',
+    docHealthReport: 'التقرير الطبي',
+    savedSuccess: 'تم الحفظ بنجاح',
+    fillEmployerAndSalary: 'يرجى ملء تفاصيل صاحب العمل والراتب',
+    offerSentSuccess: 'تم إرسال عرض العمل بنجاح',
+    notificationSentSuccess: 'تم إرسال الإشعار بنجاح',
+    returnToPortal: 'العودة إلى البوابة',
+    saving: 'جاري الحفظ...',
+    saveChanges: 'حفظ التغييرات',
+    dossierClosedNotice: 'تم إغلاق الملف',
+    reason: 'السبب',
+    reopenProcess: 'إعادة فتح العملية',
+    profileCredentialsManagement: 'إدارة الملف الشخصي وبيانات الاعتماد',
+    phoneNumberGsm: 'رقم الهاتف (GSM)',
+    emailAddress: 'عنوان البريد الإلكتروني',
+    portalPassword: 'كلمة مرور البوابة',
+    travelFlightLogistics: 'السفر والرحلات والخدمات اللوجستية',
+    file: 'ملف',
+    uploaded: 'تم الرفع',
+    rejected: 'مرفوض',
+    reRequested: 'إعادة الطلب',
+    preview: 'معاينة',
+    noFileUploaded: 'لم يتم رفع أي ملفات بعد',
+    uploadFromComputer: 'رفع ملف من الكمبيوتر',
+    newDocNamePlaceholder: 'اسم / نوع المستند',
+    add: 'إضافة',
+    professionalEvaluationCertificate: 'شهادة التقييم المهني',
+    workVideoUrl: 'رابط فيديو العمل / التعريف',
+    previewPlayVideo: 'معاينة وتشغيل الفيديو',
+    internalNotesAdminOnly: 'ملاحظات داخلية (للإدارة فقط)',
+    visaProcessing: 'تأشيرة قيد المعالجة',
+    processClosureWithdrawal: 'إغلاق العملية / الانسحاب',
+    closureDesc: 'أدخل سبباً لإنهاء أو إغلاق عملية طلب المرشح هذا.',
+    closureReasonPlaceholder: 'اكتب سبب الإغلاق...',
+    closeArchiveProcess: 'إغلاق / أرشفة العملية',
+    sendOfficialJobOffer: 'إرسال عرض عمل رسمي',
+    monthlyNetSalary: 'الراتب الشهري الصافي',
+    startDate: 'تاريخ البدء',
+    termsConditions: 'الشروط والأحكام',
+    sendOfferToCandidate: 'إرسال العرض للمرشح',
+    notificationTitle: 'عنوان الإشعار',
+    messageBody: 'نص الرسالة',
+    workVideoPreview: 'معاينة فيديو عمل المرشح',
+    demandFilesTitle: 'ملفات الطلبات ومطابقات المرشحين',
+    demandFilesSub: 'إدارة العمليات والمرشحين المرتبطين بهذا الطلب',
+    lifecycleStatusLabel: 'حالة دورة الحياة',
+    stageNewRequest: 'طلب جديد',
+    stageReviewing: 'قيد المراجعة',
+    stageSearchingCandidates: 'البحث عن مرشحين',
+    stagePresentingCandidates: 'تقديم المرشحين',
+    stageInterviews: 'المقابلات جارية',
+    stageSelectionCompleted: 'اكتمل الاختيار',
+    stageOfficialProcess: 'الإجراءات الرسمية / التأشيرة',
+    stageTravelPlanning: 'تخطيط السفر',
+    stageCompleted: 'مكتمل',
+    stageCancelled: 'ملغي',
+    openDemandFilesBtn: 'فتح الملفات',
+    taskGroupTarget: 'فريق البلد المستهدف',
+    taskGroupField: 'الفريق الميداني',
+    taskEnterTravelData: 'إدخال بيانات السفر',
+    taskPlanAccommodation: 'تخطيط الإقامة',
+    taskManageSupport: 'إدارة الدعم',
+    taskUpdateFieldStatus: 'تحديث الحالة الميدانية',
+    taskGroupManagement: 'فريق الإدارة',
+    taskAuditSystem: 'تدقيق النظام',
+    taskApproveStrategic: 'الموافقات الاستراتيجية',
   },
 };
