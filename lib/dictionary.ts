@@ -246,6 +246,62 @@ export interface Translation {
   stageTravelPlanning?: string;
   stageCompleted?: string;
   stageCancelled?: string;
+
+  // Admin Aday Detay Ekranı Yeni Anahtarları
+  saveChanges?: string;
+  saving?: string;
+  dossierClosedNotice?: string;
+  reason?: string;
+  reopenProcess?: string;
+  profileCredentialsManagement?: string;
+  phoneNumberGsm?: string;
+  emailAddress?: string;
+  portalPassword?: string;
+  travelFlightLogistics?: string;
+  planned?: string;
+  ticketed?: string;
+  flightDateTime?: string;
+  flightNumber?: string;
+  departureCityAirport?: string;
+  arrivalCityAirport?: string;
+  pnrBookingCode?: string;
+  accommodationTransferDetails?: string;
+  documentTrackingMechanism?: string;
+  file?: string;
+  uploaded?: string;
+  rejected?: string;
+  reRequested?: string;
+  preview?: string;
+  noFileUploaded?: string;
+  uploadFromComputer?: string;
+  newDocNamePlaceholder?: string;
+  add?: string;
+  professionalEvaluationCertificate?: string;
+  certificateInfo?: string;
+  workVideoUrl?: string;
+  previewPlayVideo?: string;
+  internalNotesAdminOnly?: string;
+  candidateStatus?: string;
+  visaProcessing?: string;
+  processClosureWithdrawal?: string;
+  closureDesc?: string;
+  closureReasonPlaceholder?: string;
+  closeArchiveProcess?: string;
+  sendOfficialJobOffer?: string;
+  employerCompanyName?: string;
+  monthlyNetSalary?: string;
+  startDate?: string;
+  termsConditions?: string;
+  sendOfferToCandidate?: string;
+  notificationTitle?: string;
+  messageBody?: string;
+  sendNotificationBtn?: string;
+  workVideoPreview?: string;
+  savedSuccess?: string;
+  fillEmployerAndSalary?: string;
+  offerSentSuccess?: string;
+  notificationSentSuccess?: string;
+  returnToPortal?: string;
 }
 
 export const languages = [
@@ -465,7 +521,7 @@ export const translations: Record<Language, Translation> = {
     taskPlanAccommodation: 'Konaklama ve Karşılama Planla',
     taskManageSupport: 'Destek Taleplerini Yönet',
     taskUpdateFieldStatus: 'Saha Görev Durumunu Güncelle',
-    taskAuditSystem: 'Sistem i Logları Denetle',
+    taskAuditSystem: 'Sistem Loglarını Denetle',
     taskApproveStrategic: 'Mali ve Stratejik Kararları Onayla',
 
     reportsTab: 'Raporlar',
@@ -501,6 +557,64 @@ export const translations: Record<Language, Translation> = {
     stageTravelPlanning: 'Seyahat planlama (Varış ve başlangıç)',
     stageCompleted: 'Tamamlandı (Talep kapanmıştır)',
     stageCancelled: 'İptal edildi (Gerekçe kayıtlı)',
+
+    // Admin Aday Detay Çevirileri
+    saveChanges: 'Değişiklikleri Kaydet',
+    saving: 'Kaydediliyor...',
+    dossierClosedNotice: 'Bu aday dosyası kapatılmıştır / süreçten çıkılmıştır.',
+    reason: 'Sebep:',
+    reopenProcess: 'Süreci Tekrar Aç',
+    profileCredentialsManagement: 'Aday Fotoğraf, GSM, E-Posta ve Şifre Yönetimi',
+    phoneNumberGsm: 'Telefon Numarası (GSM)',
+    emailAddress: 'E-Posta Adresi',
+    portalPassword: 'Aday Portalı Şifresi',
+    travelFlightLogistics: 'Seyahat, Uçuş ve Konaklama Lojistiği',
+    planned: 'Planlanıyor',
+    ticketed: 'Biletlendi',
+    completed: 'Seyahat Tamamlandı',
+    flightDateTime: 'Uçuş Tarihi & Saati',
+    flightNumber: 'Uçuş Kodu / Sefer No',
+    departureCityAirport: 'Kalkış Yeri / Havalimanı',
+    arrivalCityAirport: 'Varış Yeri / Havalimanı',
+    pnrBookingCode: 'PNR / Bilet Rezervasyon Kodu',
+    accommodationTransferDetails: 'Konaklama & Karşılama Detayları',
+    documentTrackingMechanism: 'Evrak & Belge Takip Mekanizması',
+    file: 'Dosya',
+    uploaded: 'Yüklendi',
+    rejected: 'Reddedildi',
+    reRequested: 'Yeniden istendi',
+    preview: 'Önizle',
+    noFileUploaded: 'Dosya yüklenmedi',
+    uploadFromComputer: 'Bilgisayardan Yükle',
+    newDocNamePlaceholder: 'Yeni Belge Adı',
+    add: 'Ekle',
+    professionalEvaluationCertificate: 'Mesleki Değerlendirme & Sertifika',
+    certificateInfo: 'Sertifika Bilgileri',
+    workVideoUrl: 'Çalışma Videosu URL',
+    previewPlayVideo: 'Videoyu Önizle / Oynat',
+    internalNotesAdminOnly: 'İç Değerlendirme Notları (Sadece PANOVA)',
+    candidateStatus: 'Aday Süreç Durumu',
+    visaProcessing: 'Vize Sürecinde',
+    processClosureWithdrawal: 'Vazgeçme ve Süreçten Çıkış',
+    closureDesc: 'Aday iş teklifini reddederse veya süreç olumsuz sonuçlanırsa kaydı silmeden kapatabilirsiniz.',
+    closureReasonPlaceholder: 'Kapanış / Vazgeçme sebebi...',
+    closeArchiveProcess: 'Aday Sürecini Kapat / Arşivle',
+    sendOfficialJobOffer: 'Resmi İş Teklifi Gönder',
+    employerCompanyName: 'İşveren / Firma Adı',
+    monthlyNetSalary: 'Aylık Net Ücret (€)',
+    startDate: 'İşe Başlama Tarihi',
+    termsConditions: 'Teklif / Sözleşme Şartları',
+    sendOfferToCandidate: 'Resmi Teklifi Adaya İlet',
+    sendNotification: 'Adaya Bildirim Gönder',
+    notificationTitle: 'Bildirim Başlığı',
+    messageBody: 'Mesaj İçeriği',
+    sendNotificationBtn: 'Bildirimi Adaya Gönder',
+    workVideoPreview: 'Çalışma Videosu Önizleme',
+    savedSuccess: 'Başarıyla kaydedildi!',
+    fillEmployerAndSalary: 'Lütfen firma adı ve maaş bilgilerini doldurun.',
+    offerSentSuccess: 'Resmi iş teklifi başarıyla adaya iletildi!',
+    notificationSentSuccess: 'Bildirim adaya başarıyla gönderildi!',
+    returnToPortal: 'Yönetim Paneline Dön',
   },
   en: {
     returnHome: 'Return to Home',
@@ -747,6 +861,63 @@ export const translations: Record<Language, Translation> = {
     stageTravelPlanning: 'Travel planning (Arrival and start)',
     stageCompleted: 'Completed (Demand closed)',
     stageCancelled: 'Cancelled (Reason recorded)',
+
+    // Admin Candidate Detail En
+    saveChanges: 'Save Changes',
+    saving: 'Saving...',
+    dossierClosedNotice: 'This candidate dossier is closed.',
+    reason: 'Reason:',
+    reopenProcess: 'Re-open Process',
+    profileCredentialsManagement: 'Candidate Profile & Credentials Management',
+    phoneNumberGsm: 'Phone Number (GSM)',
+    emailAddress: 'Email Address',
+    portalPassword: 'Portal Password',
+    travelFlightLogistics: 'Travel & Flight Logistics',
+    planned: 'Planned',
+    ticketed: 'Ticketed',
+    flightDateTime: 'Flight Date & Time',
+    flightNumber: 'Flight Number',
+    departureCityAirport: 'Departure City / Airport',
+    arrivalCityAirport: 'Arrival City / Airport',
+    pnrBookingCode: 'PNR Booking Code',
+    accommodationTransferDetails: 'Accommodation & Transfer Details',
+    documentTrackingMechanism: 'Document Tracking Mechanism',
+    file: 'File',
+    uploaded: 'Uploaded',
+    rejected: 'Rejected',
+    reRequested: 'Re-requested',
+    preview: 'Preview',
+    noFileUploaded: 'No file uploaded',
+    uploadFromComputer: 'Upload File',
+    newDocNamePlaceholder: 'New Document Name',
+    add: 'Add',
+    professionalEvaluationCertificate: 'Professional Evaluation & Certificate',
+    certificateInfo: 'Certificate Info',
+    workVideoUrl: 'Work Video URL',
+    previewPlayVideo: 'Preview / Play Video',
+    internalNotesAdminOnly: 'Internal Notes (PANOVA Only)',
+    candidateStatus: 'Candidate Status',
+    visaProcessing: 'Visa Processing',
+    processClosureWithdrawal: 'Process Closure / Withdrawal',
+    closureDesc: 'Close candidate process without deleting records if declined.',
+    closureReasonPlaceholder: 'Closure reason...',
+    closeArchiveProcess: 'Close / Archive Candidate Process',
+    sendOfficialJobOffer: 'Send Official Job Offer',
+    employerCompanyName: 'Employer / Company Name',
+    monthlyNetSalary: 'Monthly Net Salary (€)',
+    startDate: 'Start Date',
+    termsConditions: 'Terms & Conditions',
+    sendOfferToCandidate: 'Send Offer to Candidate',
+    sendNotification: 'Send Notification',
+    notificationTitle: 'Notification Title',
+    messageBody: 'Message Body',
+    sendNotificationBtn: 'Send Notification',
+    workVideoPreview: 'Work Video Preview',
+    savedSuccess: 'Successfully saved!',
+    fillEmployerAndSalary: 'Please fill in employer name and salary.',
+    offerSentSuccess: 'Official job offer sent successfully!',
+    notificationSentSuccess: 'Notification sent successfully!',
+    returnToPortal: 'Return to Portal',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -993,6 +1164,63 @@ export const translations: Record<Language, Translation> = {
     stageTravelPlanning: 'Planifikimi i udhëtimit (Mbërritja dhe fillimi)',
     stageCompleted: 'Përfunduar (Kërkesa është mbyllur)',
     stageCancelled: 'Anuluar (Arsyeja e regjistruar)',
+
+    // Admin Aday Detay Sq
+    saveChanges: 'Ruaj Ndryshimet',
+    saving: 'Duke ruajtur...',
+    dossierClosedNotice: 'Dosja e këtij kandidati është mbyllur.',
+    reason: 'Arsyeja:',
+    reopenProcess: 'Rihap Procesin',
+    profileCredentialsManagement: 'Menaxhimi i Profilit dhe Kredencialeve',
+    phoneNumberGsm: 'Numri i Telefonit (GSM)',
+    emailAddress: 'Adresa Email',
+    portalPassword: 'Fjalëkalimi i Portalit',
+    travelFlightLogistics: 'Logjistika e Udhëtimit dhe Fluturimit',
+    planned: 'Planifikuar',
+    ticketed: 'Me biletë',
+    flightDateTime: 'Data dhe Ora e Fluturimit',
+    flightNumber: 'Numri i Fluturimit',
+    departureCityAirport: 'Qyteti / Aeroporti i Nisjes',
+    arrivalCityAirport: 'Qyteti / Aeroporti i Mbërritjes',
+    pnrBookingCode: 'Kodi PNR',
+    accommodationTransferDetails: 'Detajet e Akomodimit dhe Transfertës',
+    documentTrackingMechanism: 'Mekanizmi i Njekjes së Dokumenteve',
+    file: 'Skedari',
+    uploaded: 'Ngarkuar',
+    rejected: 'Refuzuar',
+    reRequested: 'Rikërkuar',
+    preview: 'Parashiko',
+    noFileUploaded: 'Nuk ka skedar',
+    uploadFromComputer: 'Ngarko nga Kompjuteri',
+    newDocNamePlaceholder: 'Emri i Dokumentit të Ri',
+    add: 'Shto',
+    professionalEvaluationCertificate: 'Vlerësimi Profesional & Certifikata',
+    certificateInfo: 'Informacioni i Certifikatës',
+    workVideoUrl: 'URL e Videos së Punës',
+    previewPlayVideo: 'Parashiko / Luaj Videon',
+    internalNotesAdminOnly: 'Shënimet e Brendshme (Vetëm për PANOVA)',
+    candidateStatus: 'Statusi i Kandidatit',
+    visaProcessing: 'Në proces vizash',
+    processClosureWithdrawal: 'Mbyllja e Procesit / Tërheqja',
+    closureDesc: 'Mbyllni procesin e kandidatit pa fshirë të dhënat.',
+    closureReasonPlaceholder: 'Arsyeja e mbylljes...',
+    closeArchiveProcess: 'Mbyll / Arkivo Procesin',
+    sendOfficialJobOffer: 'Dërgo Ofertë Zyrtare Pune',
+    employerCompanyName: 'Emri i Punëdhënësit / Kompanisë',
+    monthlyNetSalary: 'Paga Neto Mujore (€)',
+    startDate: 'Data e Fillimit',
+    termsConditions: 'Kushtet e Ofertave',
+    sendOfferToCandidate: 'Dërgo Ofertën te Kandidati',
+    sendNotification: 'Dërgo Njoftim',
+    notificationTitle: 'Titulli i Njoftimit',
+    messageBody: 'Përmbajtja e Mesazhit',
+    sendNotificationBtn: 'Dërgo Njoftimin',
+    workVideoPreview: 'Pamja Paraprake e Videos',
+    savedSuccess: 'U ruajt me sukses!',
+    fillEmployerAndSalary: 'Ju lutemi plotësoni emrin e punëdhënësit dhe pagën.',
+    offerSentSuccess: 'Oferta zyrtare u dërgua me sukses!',
+    notificationSentSuccess: 'Njoftimi u dërgua me sukses!',
+    returnToPortal: 'Kthehu te Portali',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -1239,5 +1467,62 @@ export const translations: Record<Language, Translation> = {
     stageTravelPlanning: 'تخطيط السفر (الوصول والبداية)',
     stageCompleted: 'مكتمل (تم إغلاق الطلب)',
     stageCancelled: 'ملغى (تم تسجيل السبب)',
+
+    // Admin Aday Detay Ar
+    saveChanges: 'حفظ التغييرات',
+    saving: 'جاري الحفظ...',
+    dossierClosedNotice: 'تم إغلاق ملف هذا المرشح.',
+    reason: 'السبب:',
+    reopenProcess: 'إعادة فتح العملية',
+    profileCredentialsManagement: 'إدارة ملف المرشح وبيانات الاعتماد',
+    phoneNumberGsm: 'رقم الهاتف (GSM)',
+    emailAddress: 'عنوان البريد الإلكتروني',
+    portalPassword: 'كلمة مرور البوابة',
+    travelFlightLogistics: 'لوجستيات السفر والرحلات الجوية',
+    planned: 'مخطط له',
+    ticketed: 'تم إصدار التذكرة',
+    flightDateTime: 'تاريخ ووقت الرحلة',
+    flightNumber: 'رقم الرحلة',
+    departureCityAirport: 'مدينة المغادرة / المطار',
+    arrivalCityAirport: 'مدينة الوصول / المطار',
+    pnrBookingCode: 'رمز الحجز PNR',
+    accommodationTransferDetails: 'تفاصيل الإقامة والاستقبال',
+    documentTrackingMechanism: 'آلية تتبع المستندات',
+    file: 'ملف',
+    uploaded: 'تم الرفع',
+    rejected: 'مرفوض',
+    reRequested: 'إعادة الطلب',
+    preview: 'معاينة',
+    noFileUploaded: 'لم يتم رفع ملف',
+    uploadFromComputer: 'رفع من الكمبيوتر',
+    newDocNamePlaceholder: 'اسم المستند الجديد',
+    add: 'إضافة',
+    professionalEvaluationCertificate: 'التقييم المهني والشهادة',
+    certificateInfo: 'معلومات الشهادة',
+    workVideoUrl: 'رابط فيديو العمل',
+    previewPlayVideo: 'معاينة / تشغيل الفيديو',
+    internalNotesAdminOnly: 'ملاحظات داخلية (خاص بـ PANOVA فقط)',
+    candidateStatus: 'حالة المرشح',
+    visaProcessing: 'قيد معالجة التأشيرة',
+    processClosureWithdrawal: 'إغلاق العملية / الانسحاب',
+    closureDesc: 'يمكنك إغلاق عملية المرشح دون حذف السجلات.',
+    closureReasonPlaceholder: 'سبب الإغلاق...',
+    closeArchiveProcess: 'إغلاق / أرشفة عملية المرشح',
+    sendOfficialJobOffer: 'إرسال عرض عمل رسمي',
+    employerCompanyName: 'اسم صاحب العمل / الشركة',
+    monthlyNetSalary: 'صافي الراتب الشهري (€)',
+    startDate: 'تاريخ البدء',
+    termsConditions: 'شروط العقد',
+    sendOfferToCandidate: 'إرسال العرض إلى المرشح',
+    sendNotification: 'إرسال إشعار',
+    notificationTitle: 'عنوان الإشعار',
+    messageBody: 'نص الرسالة',
+    sendNotificationBtn: 'إرسال الإشعار للمرشح',
+    workVideoPreview: 'معاينة فيديو العمل',
+    savedSuccess: 'تم الحفظ بنجاح!',
+    fillEmployerAndSalary: 'يرجى ملء اسم صاحب العمل والراتب.',
+    offerSentSuccess: 'تم إرسال عرض العمل الرسمي بنجاح!',
+    notificationSentSuccess: 'تم إرسال الإشعار بنجاح!',
+    returnToPortal: 'العودة إلى لوحة التحكم',
   },
 };
