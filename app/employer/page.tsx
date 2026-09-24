@@ -2,11 +2,10 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useLanguage } from '@/components/LanguageContext';
-import { translations } from '@/lib/dictionary';
+import { translations, Language } from '@/lib/dictionary';
 
 export default function EmployerPage() {
-  const { lang, setLang } = useLanguage();
+  const [lang, setLang] = useState<Language>('tr');
   const t = translations[lang] || translations['tr'];
 
   // --- State Yönetimi ---
@@ -28,11 +27,10 @@ export default function EmployerPage() {
   const [supportMessage, setSupportMessage] = useState('');
   const [supportSuccess, setSupportSuccess] = useState(false);
 
-  // Filtreleme ve Arama State'leri
+  // Filtreleme State'i
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
 
-  // Örnek Veri Listeleri (Mock Data & State)
+  // Örnek Veri Listeleri
   const [demands, setDemands] = useState([
     { id: 1, sector: 'Tarım ve Hayvancılık', position: 'Ziraat Mühendisi / Bahçe Şefi', headcount: 3, salary: '1.500 € + Konaklama', status: 'reviewing', date: '2026-06-12' },
     { id: 2, sector: 'İnşaat ve Yapı', position: 'Şantiye Şefi / Kalıp Ustası', headcount: 5, salary: '2.000 €', status: 'approved', date: '2026-06-15' },
@@ -101,7 +99,7 @@ export default function EmployerPage() {
           <div className="flex items-center space-x-4">
             <select
               value={lang}
-              onChange={(e) => setLang(e.target.value as any)}
+              onChange={(e) => setLang(e.target.value as Language)}
               aria-label="Dil Seçimi / Language Selection"
               className="bg-emerald-800 text-white text-sm rounded px-2.5 py-1.5 border border-emerald-700 focus:outline-none cursor-pointer"
             >
@@ -169,7 +167,7 @@ export default function EmployerPage() {
 
               <button
                 type="submit"
-                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-3 rounded-xl transition text-sm shadow-md"
+                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-3 rounded-xl transition text-sm shadow-md cursor-pointer"
               >
                 {t.signInBtn || 'Giriş Yap'}
               </button>
@@ -199,17 +197,17 @@ export default function EmployerPage() {
               </div>
               <button
                 onClick={() => setIsLoggedIn(false)}
-                className="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold px-4 py-2 rounded-xl border border-rose-200 transition shadow-sm"
+                className="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold px-4 py-2 rounded-xl border border-rose-200 transition shadow-sm cursor-pointer"
               >
                 {t.logout || 'Çıkış Yap'}
               </button>
             </div>
 
             {/* Navigasyon Sekmeleri */}
-            <div className="flex overflow-x-auto space-x-2 border-b border-slate-200 pb-2 scrollbar-none">
+            <div className="flex overflow-x-auto space-x-2 border-b border-slate-200 pb-2">
               <button
                 onClick={() => setActiveTab('requests')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                   activeTab === 'requests' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -217,7 +215,7 @@ export default function EmployerPage() {
               </button>
               <button
                 onClick={() => setActiveTab('candidates')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                   activeTab === 'candidates' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -225,7 +223,7 @@ export default function EmployerPage() {
               </button>
               <button
                 onClick={() => setActiveTab('selected')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                   activeTab === 'selected' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -233,7 +231,7 @@ export default function EmployerPage() {
               </button>
               <button
                 onClick={() => setActiveTab('travel')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                   activeTab === 'travel' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -241,7 +239,7 @@ export default function EmployerPage() {
               </button>
               <button
                 onClick={() => setActiveTab('employees')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                   activeTab === 'employees' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -249,7 +247,7 @@ export default function EmployerPage() {
               </button>
               <button
                 onClick={() => setActiveTab('support')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                   activeTab === 'support' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -257,7 +255,7 @@ export default function EmployerPage() {
               </button>
               <button
                 onClick={() => setActiveTab('profile')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                   activeTab === 'profile' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -268,14 +266,13 @@ export default function EmployerPage() {
             {/* 1. SEKME: Personel Taleplerim */}
             {activeTab === 'requests' && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Talep Oluşturma Formu */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm lg:col-span-1">
                   <h2 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
                     <span>✨</span> {t.newDemandBtn || 'Yeni Talep Oluştur'}
                   </h2>
 
                   {successMsg && (
-                    <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3.5 rounded-xl font-medium animate-pulse">
+                    <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3.5 rounded-xl font-medium">
                       🎉 İş gücü talebiniz sisteme başarıyla kaydedildi!
                     </div>
                   )}
@@ -353,14 +350,13 @@ export default function EmployerPage() {
 
                     <button
                       type="submit"
-                      className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 rounded-xl text-xs transition shadow-md"
+                      className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 rounded-xl text-xs transition shadow-md cursor-pointer"
                     >
                       {t.submitDossierBtn || 'Talebi Gönder'}
                     </button>
                   </form>
                 </div>
 
-                {/* Talepler Listesi Tablosu */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm lg:col-span-2">
                   <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
                     <h2 className="text-base font-bold text-slate-800">
@@ -441,10 +437,10 @@ export default function EmployerPage() {
                         <div className="text-[11px] text-slate-400 mt-1">Deneyim: {candidate.experience}</div>
                       </div>
                       <div className="mt-5 pt-3 border-t border-slate-200 flex gap-2">
-                        <button className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-2 rounded-xl text-xs font-semibold transition">
+                        <button className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">
                           {t.empInterviewRequestBtn || 'Görüşme İste'}
                         </button>
-                        <button className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl text-xs font-semibold transition">
+                        <button className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">
                           {t.empShortlistBtn || 'Kısa Liste'}
                         </button>
                       </div>
@@ -561,7 +557,7 @@ export default function EmployerPage() {
                   </div>
                   <button
                     type="submit"
-                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-5 py-2.5 rounded-xl text-xs transition shadow-md"
+                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-5 py-2.5 rounded-xl text-xs transition shadow-md cursor-pointer"
                   >
                     {t.empSupportSubmitBtn || 'Destek Talebi Gönder'}
                   </button>
