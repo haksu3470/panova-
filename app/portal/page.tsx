@@ -845,13 +845,15 @@ export default function PortalPage() {
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskDueDateLabel}</label>
                   <input 
-                    type="text" 
-                    onFocus={(e) => (e.target.type = 'date')}
-                    onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
+                    type="date" 
                     value={newTaskDueDate} 
                     onChange={(e) => setNewTaskDueDate(e.target.value)} 
-                    placeholder={currentLang === 'tr' ? 'gg.aa.yyyy' : currentLang === 'ar' ? 'yyyy.aa.gg' : 'dd.mm.yyyy'}
-                    className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm" 
+                    placeholder={
+                      currentLang === 'tr' ? 'gg.aa.yyyy' :
+                      currentLang === 'sq' ? 'dd.mm.vvvv' :
+                      currentLang === 'ar' ? 'yyyy.mm.dd' : 'dd.mm.yyyy'
+                    }
+                    className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm [&::-webkit-datetime-edit]:text-slate-900 [&::-webkit-calendar-picker-indicator]:cursor-pointer" 
                   />
                 </div>
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-xs sm:text-sm">
