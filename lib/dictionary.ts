@@ -320,6 +320,15 @@ export interface Translation {
   taskGroupManagement?: string;
   taskAuditSystem?: string;
   taskApproveStrategic?: string;
+
+    // ... (diğer mevcut tanımlarınız)
+  certificateInfo?: string;
+  candidateStatus?: string;
+  employerCompanyName?: string;
+  sendNotification?: string;
+  sending?: string;
+  sendNotificationBtn?: string;
+}
 }
 
 export const languages = [
