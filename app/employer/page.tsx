@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { 
   Building2, PlusCircle, FileText, Clock, Users, ArrowLeft, Languages, 
-  Send, Plane, UserPlus, LogIn, CheckCircle2 
+  Send, Plane, UserPlus, LogIn, CheckCircle2, Save 
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
@@ -79,6 +79,16 @@ export default function EmployerPortalPage() {
   const [regLoading, setRegLoading] = useState(false);
   const [regSuccess, setRegSuccess] = useState(false);
 
+  // Profile Edit State
+  const [editProfile, setEditProfile] = useState({
+    company_name: '',
+    contact_person: '',
+    phone: '',
+    country: '',
+    password: ''
+  });
+  const [profileSaving, setProfileSaving] = useState(false);
+
   const [requests, setRequests] = useState<any[]>([]);
   const [candidates, setCandidates] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
@@ -100,8 +110,15 @@ export default function EmployerPortalPage() {
   useEffect(() => {
     if (authenticated && employer?.id) {
       fetchEmployerData(employer.id);
+      setEditProfile({
+        company_name: employer.company_name || '',
+        contact_person: employer.contact_person || '',
+        phone: employer.phone || '',
+        country: employer.country || '',
+        password: employer.password || ''
+      });
     }
-  }, [authenticated]);
+  }, [authenticated, employer?.id]);
 
   const [newRequest, setNewRequest] = useState({
     sector: 'construction',
@@ -215,6 +232,39 @@ export default function EmployerPortalPage() {
       alert('Kayıt Hatası: ' + err.message);
     } finally {
       setRegLoading(false);
+    }
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!employer?.id) return;
+
+    setProfileSaving(true);
+    try {
+      const { data, error } = await supabase
+        .from('employers')
+        .update({
+          company_name: editProfile.company_name,
+          contact_person: editProfile.contact_person,
+          phone: editProfile.phone,
+          country: editProfile.country,
+          password: editProfile.password
+        })
+        .eq('id', employer.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setEmployer(data);
+        localStorage.setItem('panova_employer_data', JSON.stringify(data));
+        alert('Şirket profili başarıyla güncellendi!');
+      }
+    } catch (err: any) {
+      alert('Güncelleme Hatası: ' + err.message);
+    } finally {
+      setProfileSaving(false);
     }
   };
 
@@ -456,9 +506,15 @@ export default function EmployerPortalPage() {
             </div>
           )}
 
-          <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:underline pt-2 border-t">
+          <button
+            onClick={() => {
+              handleLogout();
+              router.push('/');
+            }}
+            className="w-full inline-flex items-center justify-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 pt-3 border-t cursor-pointer font-medium"
+          >
             <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> Return to Home
-          </Link>
+          </button>
         </div>
       </div>
     );
@@ -494,12 +550,15 @@ export default function EmployerPortalPage() {
               </select>
             </div>
 
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border"
+            <button
+              onClick={() => {
+                handleLogout();
+                router.push('/');
+              }}
+              className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" /> {t.returnHome}
-            </Link>
+            </button>
 
             <button
               onClick={() => setShowNewRequestModal(true)}
@@ -557,7 +616,7 @@ export default function EmployerPortalPage() {
           <button onClick={() => setActiveTab('travel')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>✈️ {t.empTabTravel}</button>
           <button onClick={() => setActiveTab('employees')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>🛡️ {t.employeesTab}</button>
           <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>💬 {t.empTabSupport}</button>
-          <button onClick={() => setActiveTab('profile')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>🏢 {t.empTabProfile}</button>
+          <button onClick={() => setActiveTab('profile')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>🏢 Şirket Profili</button>
         </div>
 
         {/* Tab 1: Personel Taleplerim */}
@@ -722,20 +781,92 @@ export default function EmployerPortalPage() {
           </div>
         )}
 
-        {/* Tab 8: Şirket Bilgilerim */}
+        {/* Tab 8: Şirket Bilgilerim ve Düzenleme */}
         {activeTab === 'profile' && (
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm max-w-2xl space-y-4">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.empProfileTitle}</h3>
-            <div className="space-y-3 text-xs">
-              <div className="p-4 bg-slate-50 rounded-xl border">
-                <span className="font-bold text-slate-500 uppercase block mb-1">{t.empProfileCompanyName}</span>
-                <span className="font-extrabold text-slate-900 text-sm sm:text-base">{employer?.company_name}</span>
-              </div>
-              <div className="p-4 bg-slate-50 rounded-xl border">
-                <span className="font-bold text-slate-500 uppercase block mb-1">{t.empProfileContactPerson}</span>
-                <span className="font-extrabold text-slate-900 text-sm sm:text-base">{employer?.contact_person}</span>
-              </div>
+          <div className="bg-white p-4 sm:p-8 rounded-3xl border shadow-sm max-w-2xl mx-auto space-y-6">
+            <div className="border-b pb-4">
+              <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                🏢 Şirket Profili ve Bilgi Güncelleme
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">Şirket bilgilerinizi ve şifrenizi buradan güncelleyebilirsiniz.</p>
             </div>
+
+            <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs sm:text-sm">
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Şirket Unvanı *</label>
+                <input
+                  type="text"
+                  required
+                  value={editProfile.company_name}
+                  onChange={(e) => setEditProfile({ ...editProfile, company_name: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Yetkili Kişi *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editProfile.contact_person}
+                    onChange={(e) => setEditProfile({ ...editProfile, contact_person: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Telefon *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={editProfile.phone}
+                    onChange={(e) => setEditProfile({ ...editProfile, phone: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Ülke / Konum *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editProfile.country}
+                    onChange={(e) => setEditProfile({ ...editProfile, country: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Şifre *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editProfile.password}
+                    onChange={(e) => setEditProfile({ ...editProfile, password: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-500 uppercase mb-1">E-posta (Değiştirilemez)</label>
+                <input
+                  type="email"
+                  disabled
+                  value={employer?.email || ''}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-400 font-medium bg-slate-100 cursor-not-allowed"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={profileSaving}
+                className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm mt-4 cursor-pointer"
+              >
+                <Save className="w-4 h-4" /> {profileSaving ? 'Güncelleniyor...' : 'Değişiklikleri Kaydet'}
+              </button>
+            </form>
           </div>
         )}
 
