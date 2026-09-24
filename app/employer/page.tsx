@@ -11,7 +11,7 @@ export default function EmployerPage() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isLoggedIn, setIsLoggedIn] = useState(true);
 
-  // Form State'leri (Ülke ve firma bilgileri kalıcı state'e bağlandı)
+  // Şirket ve Profil State'leri
   const [companyName, setCompanyName] = useState('AKAY EĞİTİM');
   const [contactPerson, setContactPerson] = useState('Hüseyin Aksu');
   const [phone, setPhone] = useState('+38970385792');
@@ -309,7 +309,7 @@ export default function EmployerPage() {
               </div>
             </div>
 
-            {/* Navigasyon Sekmeleri */}
+            {/* Navigasyon Sekmeleri (Tamamen Dile Duyarlı) */}
             <div className="flex overflow-x-auto space-x-2 border-b border-slate-200 pb-2 scrollbar-none">
               <button
                 onClick={() => setActiveTab('requests')}
