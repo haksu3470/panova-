@@ -686,7 +686,7 @@ export default function EmployerPortalPage() {
                   <select
                     value={newRequest.positionTitle}
                     onChange={(e) => setNewRequest({ ...newRequest, positionTitle: e.target.value })}
-                    className="v-full px-3.5 py-3 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white outline-none cursor-pointer"
+                    className="w-full px-3.5 py-3 rounded-xl border border-slate-300 text-slate-900 font-medium bg-white outline-none cursor-pointer"
                   >
                     {(positionOptions[newRequest.sector] || ['Other']).map((pos) => (
                       <option key={pos} value={pos}>{pos}</option>
@@ -724,12 +724,12 @@ export default function EmployerPortalPage() {
                     <input type="checkbox" checked={newRequest.accommodationProvided} onChange={(e) => setNewRequest({ ...newRequest, accommodationProvided: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.accommodation}
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer p-1">
-                    <input type="checkbox" checked={newRequest.foodProvided} onChange={(e) => setNewRequest({ ...newRequest, foodProvider: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.foodAllowance}
+                    <input type="checkbox" checked={newRequest.foodProvided} onChange={(e) => setNewRequest({ ...newRequest, foodProvided: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.foodAllowance}
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer p-1">
                     <input type="checkbox" checked={newRequest.transportProvided} onChange={(e) => setNewRequest({ ...newRequest, transportProvided: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.localTransport}
                   </label>
-                  <label className="flex items-center gap-2 keyword-check p-1">
+                  <label className="flex items-center gap-2 cursor-pointer p-1">
                     <input type="checkbox" checked={newRequest.flightCovered} onChange={(e) => setNewRequest({ ...newRequest, flightCovered: e.target.checked })} className="w-4 h-4 accent-[#2e7d32]" /> {t.flightTicket}
                   </label>
                 </div>
