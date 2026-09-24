@@ -945,7 +945,7 @@ export default function PortalPage() {
                       <span>{tkt.subject} ({tkt.candidate_name})</span>
                       <span className="text-red-600 uppercase text-[10px]">{tkt.status}</span>
                     </div>
-                    <p className="text-slate-600">{t.message}</p>
+                    <p className="text-slate-600">{tkt.message}</p>
                   </div>
                 ))}
               </div>
