@@ -11,13 +11,13 @@ export default function EmployerPage() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isLoggedIn, setIsLoggedIn] = useState(true);
 
-  // Form State'leri (Ülke alanı state'e bağlanarak kalıcı hale getirildi)
+  // Form State'leri (Ülke ve firma bilgileri kalıcı state'e bağlandı)
   const [companyName, setCompanyName] = useState('AKAY EĞİTİM');
   const [contactPerson, setContactPerson] = useState('Hüseyin Aksu');
   const [phone, setPhone] = useState('+38970385792');
   const [country, setCountry] = useState('North Macedonia');
   const [email, setEmail] = useState('huseyinaksu@gmail.com');
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState('••••••');
   const [updateMsg, setUpdateMsg] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'requests' | 'candidates' | 'interviews' | 'selected' | 'travel' | 'employees' | 'support' | 'profile'>('profile');
@@ -145,8 +145,6 @@ export default function EmployerPage() {
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       placeholder="AKAY EĞİTİM"
-                      name="no-autofill-company-name"
-                      autoComplete="off"
                       className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
                     />
                   </div>
@@ -162,8 +160,6 @@ export default function EmployerPage() {
                         value={contactPerson}
                         onChange={(e) => setContactPerson(e.target.value)}
                         placeholder="Hüseyin Aksu"
-                        name="no-autofill-contact-person"
-                        autoComplete="off"
                         className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
                       />
                     </div>
@@ -177,8 +173,6 @@ export default function EmployerPage() {
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+389..."
-                        name="no-autofill-phone"
-                        autoComplete="off"
                         className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
                       />
                     </div>
@@ -196,8 +190,6 @@ export default function EmployerPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="info@akayegitim.com"
-                  name="no-autofill-email"
-                  autoComplete="off"
                   className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
                 />
               </div>
@@ -212,8 +204,6 @@ export default function EmployerPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  name="no-autofill-password"
-                  autoComplete="new-password"
                   className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
                 />
               </div>
@@ -234,7 +224,7 @@ export default function EmployerPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Üst Bar: Şirket Unvanı, Dil Seçimi, Yeni Talep ve Çıkış */}
+            {/* Üst Bar */}
             <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <div className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider bg-emerald-50 inline-block px-2.5 py-1 rounded-full mb-1">
@@ -284,7 +274,7 @@ export default function EmployerPage() {
               </div>
             </div>
 
-            {/* Özet İstatistik Kartları */}
+            {/* İstatistik Kartları */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex justify-between items-center">
                 <div>

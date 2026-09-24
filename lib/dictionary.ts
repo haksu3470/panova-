@@ -22,7 +22,6 @@ export interface Translation {
   portalLogin?: string;
   tagline?: string;
   heroTitle?: string;
-  completeReg?: string;
   colTargetStart?: string;
   colBenefits?: string;
   accommodation?: string;
@@ -184,7 +183,7 @@ export interface Translation {
 
   employerRegTitle?: string;
   employerRegSub?: string;
-  
+  completeReg?: string;
 
   empTabRequests?: string;
   empTabCandidates?: string;
@@ -542,7 +541,7 @@ export const translations: Record<Language, Translation> = {
     empSupportSubmitBtn: 'Destek Talebi Gönder',
     empSupportHistoryTitle: 'Destek Geçmişim',
     empNoSupportTickets: 'Aktif destek kaydınız yok.',
-    empProfileTitle: 'Firma ve İletişim Bilgilerim',
+    empProfileTitle: 'Şirket Profili ve Bilgi Güncelleme',
     empProfileCompanyName: 'Şirket Unvanı',
     empProfileContactPerson: 'Yetkili Kişi',
 
@@ -829,8 +828,8 @@ export const translations: Record<Language, Translation> = {
     signUpPortalSub: 'Register your company to submit workforce demands.',
     employerRegTitle: 'Employer Registration',
     employerRegSub: 'Register your company to submit workforce demands.',
-    companyNameLabel: 'Company Name',
-    contactPersonLabel: 'Contact Person',
+    companyNameLabel: 'COMPANY NAME',
+    contactPersonLabel: 'CONTACT PERSON',
     completeSignUpBtn: 'Complete Registration',
     demoLoginText: 'Demo Login:',
     regSuccessHeader: 'Registration Successful!',
@@ -863,18 +862,18 @@ export const translations: Record<Language, Translation> = {
     empSupportSubmitBtn: 'Send Support Ticket',
     empSupportHistoryTitle: 'Support History',
     empNoSupportTickets: 'No active support records.',
-    empProfileTitle: 'Company & Contact Information',
+    empProfileTitle: 'Company Profile & Info Update',
     empProfileCompanyName: 'Company Name',
     empProfileContactPerson: 'Contact Person',
 
     profileUpdateTitle: 'Company Profile & Info Update',
-    profileUpdateDesc: 'You can update your company information and password here.',
-    countryLocationLabel: 'Country / Location',
-    emailImmutableLabel: 'Email (Read-only)',
+    profileUpdateDesc: 'Update your company details and password here.',
+    countryLocationLabel: 'COUNTRY / LOCATION',
+    emailImmutableLabel: 'EMAIL (IMMUTABLE)',
     emailReadonlyLabel: 'Email (Read-only)',
     updatingBtn: 'Updating...',
     saveChangesBtn: 'Save Changes',
-    profileUpdatedSuccess: 'Company profile successfully updated!',
+    profileUpdatedSuccess: 'Changes successfully saved!',
 
     completed: 'Completed',
     approved: 'Approved',
@@ -1150,8 +1149,8 @@ export const translations: Record<Language, Translation> = {
     signUpPortalSub: 'Regjistroni kompaninë tuaj për të paraqitur kërkesa.',
     employerRegTitle: 'Regjistrimi i Punëdhënësit',
     employerRegSub: 'Regjistroni kompaninë tuaj për të paraqitur kërkesa për fuqi punëtore.',
-    companyNameLabel: 'Emri i Kompanisë',
-    contactPersonLabel: 'Personi i Kontaktit',
+    companyNameLabel: 'EMRI I KOMPANISË',
+    contactPersonLabel: 'PERSONI PËRGJEGJËS',
     completeSignUpBtn: 'Përfundo Regjistrimin',
     demoLoginText: 'Demo Hyrje:',
     regSuccessHeader: 'Regjistrimi u Krye me Sukses!',
@@ -1159,7 +1158,7 @@ export const translations: Record<Language, Translation> = {
     goToSignInBtn: 'Shko te Hyrja',
 
     empTabRequests: 'Kërkesat e Personelit',
-    empTabCandidates: 'Kandidatët / Përputhjet',
+    empTabCandidates: 'Kandidatët / Përputhja',
     empTabInterviews: 'Intervistat',
     empTabSelected: 'Kandidatët e Zgjedhur',
     empTabTravel: 'Udhëtimi dhe Fillimi',
@@ -1184,18 +1183,18 @@ export const translations: Record<Language, Translation> = {
     empSupportSubmitBtn: 'Dërgo Kërkesën e Mbështetjes',
     empSupportHistoryTitle: 'Historiku i Mbështetjes',
     empNoSupportTickets: 'Nuk keni regjistrime mbështetjeje aktive.',
-    empProfileTitle: 'Informacioni i Kompanisë dhe Kontaktit',
+    empProfileTitle: 'Përditësimi i Profilit',
     empProfileCompanyName: 'Emri i Kompanisë',
     empProfileContactPerson: 'Personi i Kontaktit',
 
     profileUpdateTitle: 'Përditësimi i Profilit dhe Informacionit të Kompanisë',
-    profileUpdateDesc: 'Ju mund të përditësoni informacionin e kompanisë suaj dhe fjalëkalimin këtu.',
-    countryLocationLabel: 'Shteti / Vendndodhja',
-    emailImmutableLabel: 'Email (I pandryshueshëm)',
+    profileUpdateDesc: 'Përditësoni të dhënat e kompanisë tuaj këtu.',
+    countryLocationLabel: 'VENDI / LOKACIONI',
+    emailImmutableLabel: 'EMAIL (I PACHANGZHUESHËM)',
     emailReadonlyLabel: 'Email (I pandryshueshëm)',
     updatingBtn: 'Duke përditësuar...',
     saveChangesBtn: 'Ruaj Ndryshimet',
-    profileUpdatedSuccess: 'Profili i kompanisë u përditësuar me sukses!',
+    profileUpdatedSuccess: 'Ndryshimet u ruajtën me sukses!',
 
     completed: 'Përfunduar',
     approved: 'Miratuar',
@@ -1505,12 +1504,12 @@ export const translations: Record<Language, Translation> = {
     empSupportSubmitBtn: 'إرسال تذكرة الدعم',
     empSupportHistoryTitle: 'سجل الدعم',
     empNoSupportTickets: 'لا توجد سجلات دعم نشطة.',
-    empProfileTitle: 'معلومات الشركة والاتصال',
+    empProfileTitle: 'تحديث ملف الشركة والمعلومات',
     empProfileCompanyName: 'اسم الشركة',
     empProfileContactPerson: 'الشخص المسؤول',
 
     profileUpdateTitle: 'تحديث ملف الشركة والمعلومات',
-    profileUpdateDesc: 'يمكنك تحديث معلومات شركتك وكلمة المرور من هنا.',
+    profileUpdateDesc: 'قم بتحديث تفاصيل شركتك وكلمة المرور من هنا.',
     countryLocationLabel: 'الدولة / الموقع',
     emailImmutableLabel: 'البريد الإلكتروني (ثابت)',
     emailReadonlyLabel: 'البريد الإلكتروني (ثابت)',
