@@ -845,11 +845,11 @@ export default function PortalPage() {
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskDueDateLabel}</label>
                   <input 
-                    type="date" 
+                    type="text" 
                     value={newTaskDueDate} 
                     onChange={(e) => setNewTaskDueDate(e.target.value)} 
                     placeholder={t.dateFormatPlaceholder}
-                    className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm [&::-webkit-datetime-edit]:text-slate-900 [&::-webkit-calendar-picker-indicator]:cursor-pointer" 
+                    className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#2e7d32]" 
                   />
                 </div>
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-xs sm:text-sm">
@@ -945,7 +945,7 @@ export default function PortalPage() {
                       <span>{tkt.subject} ({tkt.candidate_name})</span>
                       <span className="text-red-600 uppercase text-[10px]">{tkt.status}</span>
                     </div>
-                    <p className="text-slate-600">{tkt.message}</p>
+                    <p className="text-slate-600">{t.message}: {tkt.message}</p>
                   </div>
                 ))}
               </div>
