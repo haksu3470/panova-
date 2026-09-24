@@ -791,31 +791,39 @@ export default function PortalPage() {
                   >
                     <option value="" disabled>Görev Seçin...</option>
                     
-                    <optgroup label="🌍 Kaynak Ülke Sorumlusu">
-                      <option value="Pasaportu kontrol et">Pasaportu Kontrol Et</option>
-                      <option value="Aday ön görüşmesi planla">Aday Ön Görüşmesi Planla</option>
-                      <option value="Aday bilgilerini güncelle">Aday Bilgilerini Güncelle</option>
-                      <option value="Eksik evrak talep et">Eksik Evrak Talep Et</option>
-                    </optgroup>
+                    {(isUpperManagement || userRole === 'source_country') && (
+                      <optgroup label="🌍 Kaynak Ülke Sorumlusu">
+                        <option value="Pasaportu kontrol et">Pasaportu Kontrol Et</option>
+                        <option value="Aday ön görüşmesi planla">Aday Ön Görüşmesi Planla</option>
+                        <option value="Aday bilgilerini güncelle">Aday Bilgilerini Güncelle</option>
+                        <option value="Eksik evrak talep et">Eksik Evrak Talep Et</option>
+                      </optgroup>
+                    )}
 
-                    <optgroup label="🏢 Hedef Ülke Sorumlusu">
-                      <option value="İşveren talebini kaydet">İşveren Talebini Kaydet</option>
-                      <option value="Aday eşleştirme yap">Aday Eşleştirme Yap</option>
-                      <option value="İş teklifi hazırla">İş Teklifi Hazırla (Job Offer)</option>
-                      <option value="Performans ve uyum takibi yap">Performans ve Uyum Takibi Yap</option>
-                    </optgroup>
+                    {(isUpperManagement || userRole === 'target_country') && (
+                      <optgroup label="🏢 Hedef Ülke Sorumlusu">
+                        <option value="İşveren talebini kaydet">İşveren Talebini Kaydet</option>
+                        <option value="Aday eşleştirme yap">Aday Eşleştirme Yap</option>
+                        <option value="İş teklifi hazırla">İş Teklifi Hazırla (Job Offer)</option>
+                        <option value="Performans ve uyum takibi yap">Performans ve Uyum Takibi Yap</option>
+                      </optgroup>
+                    )}
 
-                    <optgroup label="✈️ Saha Sorumlusu">
-                      <option value="Seyahat tarihini gir">Seyahat Tarihini Gir</option>
-                      <option value="Konaklama ve karşılama planla">Konaklama ve Karşılama Planla</option>
-                      <option value="Destek taleplerini yönet">Destek Taleplerini Yönet</option>
-                      <option value="Saha görev durumunu güncelle">Saha Görev Durumunu Güncelle</option>
-                    </optgroup>
+                    {(isUpperManagement || userRole === 'field_officer') && (
+                      <optgroup label="✈️ Saha Sorumlusu">
+                        <option value="Seyahat tarihini gir">Seyahat Tarihini Gir</option>
+                        <option value="Konaklama ve karşılama planla">Konaklama ve Karşılama Planla</option>
+                        <option value="Destek taleplerini yönet">Destek Taleplerini Yönet</option>
+                        <option value="Saha görev durumunu güncelle">Saha Görev Durumunu Güncelle</option>
+                      </optgroup>
+                    )}
 
-                    <optgroup label="👑 Üst Yönetim">
-                      <option value="Sistem ve logları denetle">Sistem ve Logları Denetle</option>
-                      <option value="Mali ve stratejik kararları onayla">Mali ve Stratejik Kararları Onayla</option>
-                    </optgroup>
+                    {isUpperManagement && (
+                      <optgroup label="👑 Üst Yönetim">
+                        <option value="Sistem ve logları denetle">Sistem ve Logları Denetle</option>
+                        <option value="Mali ve stratejik kararları onayla">Mali ve Stratejik Kararları Onayla</option>
+                      </optgroup>
+                    )}
                   </select>
                 </div>
                 <div>
