@@ -393,14 +393,14 @@ export default function EmployerPortalPage() {
               onClick={() => { setAuthMode('login'); setRegSuccess(false); }}
               className={`py-2.5 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 ${authMode === 'login' ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'}`}
             >
-              <LogIn className="w-4 h-4" /> Sign In
+              <LogIn className="w-4 h-4" /> {t.signInMenu || 'Sign In'}
             </button>
             <button
               type="button"
               onClick={() => setAuthMode('register')}
               className={`py-2.5 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 ${authMode === 'register' ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'}`}
             >
-              <UserPlus className="w-4 h-4" /> Sign Up
+              <UserPlus className="w-4 h-4" /> {t.signUpMenu || 'Sign Up'}
             </button>
           </div>
 
@@ -411,13 +411,13 @@ export default function EmployerPortalPage() {
           {authMode === 'login' ? (
             <div className="space-y-4 text-left">
               <div>
-                <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 text-center">Employer Login Portal</h1>
-                <p className="text-slate-500 text-xs text-center mt-1">Sign in with your company email and password.</p>
+                <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 text-center">{t.loginPortalTitle || 'Employer Login Portal'}</h1>
+                <p className="text-slate-500 text-xs text-center mt-1">{t.loginPortalSub || 'Sign in with your company email and password.'}</p>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-3 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Company Email *</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.companyEmailLabel || 'Company Email'} *</label>
                   <input
                     type="email"
                     required
@@ -443,55 +443,55 @@ export default function EmployerPortalPage() {
                   disabled={loading}
                   className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-md mt-2 text-xs cursor-pointer"
                 >
-                  {loading ? 'Signing in...' : 'Sign In'}
+                  {loading ? (t.submitting || 'Signing in...') : (t.signInBtn || 'Sign In')}
                 </button>
               </form>
 
               <div className="text-[11px] text-slate-600 bg-slate-50 p-3 rounded-xl border text-center">
-                Demo Login: <strong>demo@panova.com</strong> / <strong>employer2026</strong>
+                {t.demoLoginText || 'Demo Login:'} <strong>demo@panova.com</strong> / <strong>employer2026</strong>
               </div>
             </div>
           ) : (
             <div className="space-y-4 text-left">
               <div>
-                <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 text-center">Employer Registration</h1>
-                <p className="text-slate-500 text-xs text-center mt-1">Register your company to submit workforce demands.</p>
+                <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 text-center">{t.signUpPortalTitle || 'Employer Registration'}</h1>
+                <p className="text-slate-500 text-xs text-center mt-1">{t.signUpPortalSub || 'Register your company to submit workforce demands.'}</p>
               </div>
 
               {regSuccess ? (
                 <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center space-y-3">
                   <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
-                  <h3 className="font-extrabold text-slate-900 text-sm">Registration Successful!</h3>
-                  <p className="text-xs text-slate-600">Your company account has been created. You can now sign in.</p>
+                  <h3 className="font-extrabold text-slate-900 text-sm">{t.regSuccessHeader || 'Registration Successful!'}</h3>
+                  <p className="text-xs text-slate-600">{t.regSuccessText || 'Your company account has been created. You can now sign in.'}</p>
                   <button
                     onClick={() => { setAuthMode('login'); setEmail(regEmail); setRegSuccess(false); }}
                     className="w-full bg-[#2e7d32] text-white py-2.5 rounded-xl font-bold text-xs mt-2"
                   >
-                    Go to Sign In
+                    {t.goToSignInBtn || 'Go to Sign In'}
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleRegister} className="space-y-3 text-xs">
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">Company Name *</label>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.companyNameLabel || 'Company Name'} *</label>
                     <input type="text" required value={regCompanyName} onChange={(e) => setRegCompanyName(e.target.value)} placeholder="Panova Tarim DOO" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block font-bold text-slate-700 uppercase mb-1">Contact Person *</label>
+                      <label className="block font-bold text-slate-700 uppercase mb-1">{t.contactPersonLabel || 'Contact Person'} *</label>
                       <input type="text" required value={regContactPerson} onChange={(e) => setRegContactPerson(e.target.value)} placeholder="Full Name" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
                     </div>
                     <div>
-                      <label className="block font-bold text-slate-700 uppercase mb-1">Phone *</label>
+                      <label className="block font-bold text-slate-700 uppercase mb-1">{t.phone || 'Phone'} *</label>
                       <input type="tel" required value={regPhone} onChange={(e) => setRegPhone(e.target.value)} placeholder="+389..." className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
                     </div>
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">Company Email *</label>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.companyEmailLabel || 'Company Email'} *</label>
                     <input type="email" required value={regEmail} onChange={(e) => setRegEmail(e.target.value)} placeholder="info@company.com" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">Password *</label>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.passwordLabel || 'Password'} *</label>
                     <input type="password" required value={regPassword} onChange={(e) => setRegPassword(e.target.value)} placeholder="••••••••" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
                   </div>
                   <button
@@ -499,7 +499,7 @@ export default function EmployerPortalPage() {
                     disabled={regLoading}
                     className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-md mt-2 text-xs cursor-pointer"
                   >
-                    {regLoading ? 'Registering...' : 'Complete Registration'}
+                    {regLoading ? (t.submitting || 'Registering...') : (t.completeSignUpBtn || 'Complete Registration')}
                   </button>
                 </form>
               )}
@@ -513,7 +513,7 @@ export default function EmployerPortalPage() {
             }}
             className="w-full inline-flex items-center justify-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 pt-3 border-t cursor-pointer font-medium"
           >
-            <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> Return to Home
+            <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
           </button>
         </div>
       </div>
