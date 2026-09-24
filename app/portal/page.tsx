@@ -848,11 +848,7 @@ export default function PortalPage() {
                     type="date" 
                     value={newTaskDueDate} 
                     onChange={(e) => setNewTaskDueDate(e.target.value)} 
-                    placeholder={
-                      currentLang === 'tr' ? 'gg.aa.yyyy' :
-                      currentLang === 'sq' ? 'dd.mm.vvvv' :
-                      currentLang === 'ar' ? 'yyyy.mm.dd' : 'dd.mm.yyyy'
-                    }
+                    placeholder={t.dateFormatPlaceholder}
                     className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm [&::-webkit-datetime-edit]:text-slate-900 [&::-webkit-calendar-picker-indicator]:cursor-pointer" 
                   />
                 </div>
