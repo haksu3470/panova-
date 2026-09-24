@@ -205,8 +205,7 @@ export default function EmployerPortalPage() {
           email: regEmail.trim().toLowerCase(),
           phone: regPhone,
           country: regCountry,
-          password: regPassword,
-          status: 'active'
+          password: regPassword
         }
       ]);
 
