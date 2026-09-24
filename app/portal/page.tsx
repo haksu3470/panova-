@@ -66,7 +66,6 @@ export default function PortalPage() {
   const [staffMembers, setStaffMembers] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
 
-  // 5. Personel Talebi Dosyası Detay Modalı için State
   const [selectedDemandDetail, setSelectedDemandDetail] = useState<any | null>(null);
 
   const [auditLogs, setAuditLogs] = useState<any[]>([
@@ -75,13 +74,11 @@ export default function PortalPage() {
 
   const [loading, setLoading] = useState(false);
 
-  // Arama ve Gelişmiş Filtreleme State'leri
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSector, setSelectedSector] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedCountry, setSelectedCountry] = useState('all');
 
-  // Toplu İşlem (Bulk Actions) State'leri
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkStatus, setBulkStatus] = useState('reviewing');
   const [updatingBulk, setUpdatingBulk] = useState(false);
@@ -214,7 +211,6 @@ export default function PortalPage() {
     logAudit(`Aday Durumu Değiştirildi -> ${newStatus}`, currentUser?.name);
   };
 
-  // 5.1 & 5.2 Personel Talebi Durum ve Kapanış / İptal Yönetimi
   const updateRequestStatus = async (id: string, newStatus: string, cancellationReason: string = '') => {
     const updatePayload: any = { status: newStatus };
     if (newStatus === 'cancelled' && cancellationReason) {
@@ -370,7 +366,6 @@ export default function PortalPage() {
     logAudit('Görev durumu güncellendi', currentUser?.name);
   };
 
-  // Gelişmiş Filtreleme ve Arama Mantığı
   const filteredCandidates = candidates.filter((cand) => {
     const matchesSearch = 
       (cand.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
@@ -493,7 +488,6 @@ export default function PortalPage() {
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         
-        {/* Header with User Info Badge */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="PANOVA" className="h-10 w-auto object-contain shrink-0" />
@@ -548,7 +542,6 @@ export default function PortalPage() {
           </div>
         </div>
 
-        {/* Tab Navigation */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
           <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
@@ -580,7 +573,6 @@ export default function PortalPage() {
           </button>
         </div>
 
-        {/* Tab 1: Genel Durum */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
             <div className={`grid grid-cols-1 sm:grid-cols-2 ${isUpperManagement ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
@@ -634,7 +626,6 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 2: Aday Havuzu */}
         {activeTab === 'candidates' && (
           <div className="space-y-4">
             <div className="bg-white p-4 rounded-2xl border shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -642,7 +633,7 @@ export default function PortalPage() {
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
                 <input
                   type="text"
-                  placeholder={t.searchPlaceholder || 'Ara...'}
+                  placeholder={t.searchPlaceholder || 'Search...'}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs sm:text-sm outline-none text-slate-900 font-medium bg-white focus:ring-2 focus:ring-[#2e7d32]"
@@ -655,7 +646,7 @@ export default function PortalPage() {
                   onChange={(e) => setSelectedSector(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 bg-white cursor-pointer outline-none focus:ring-2 focus:ring-[#2e7d32]"
                 >
-                  <option value="all">📁 Tüm Sektörler</option>
+                  <option value="all">📁 All Sectors</option>
                   <option value="construction">Construction</option>
                   <option value="agriculture">Agriculture</option>
                   <option value="hr">General HR</option>
@@ -683,7 +674,7 @@ export default function PortalPage() {
                   onChange={(e) => setSelectedCountry(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 bg-white cursor-pointer outline-none focus:ring-2 focus:ring-[#2e7d32]"
                 >
-                  <option value="all">🌍 Tüm Ülkeler</option>
+                  <option value="all">🌍 All Countries</option>
                   <option value="North Macedonia">North Macedonia</option>
                   <option value="Turkey">Turkey</option>
                   <option value="Albania">Albania</option>
@@ -695,7 +686,7 @@ export default function PortalPage() {
             {selectedIds.length > 0 && (
               <div className="bg-emerald-900 text-white p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg animate-fadeIn">
                 <div className="text-xs sm:text-sm font-bold">
-                  Seçilen Aday Sayısı: <span className="bg-emerald-800 px-2.5 py-1 rounded-lg ml-1">{selectedIds.length}</span>
+                  Selected Candidates: <span className="bg-emerald-800 px-2.5 py-1 rounded-lg ml-1">{selectedIds.length}</span>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                   <select
@@ -703,17 +694,17 @@ export default function PortalPage() {
                     onChange={(e) => setBulkStatus(e.target.value)}
                     className="bg-emerald-800 text-white border border-emerald-700 px-3 py-2 rounded-xl text-xs font-bold outline-none cursor-pointer"
                   >
-                    <option value="pending">Durum Yap: {t.pendingStatus}</option>
-                    <option value="reviewing">Durum Yap: {t.reviewingStatus}</option>
-                    <option value="visa_processing">Durum Yap: {t.visaProcessingStatus}</option>
-                    <option value="approved">Durum Yap: {t.approvedStatus}</option>
+                    <option value="pending">Set Status: {t.pendingStatus}</option>
+                    <option value="reviewing">Set Status: {t.reviewingStatus}</option>
+                    <option value="visa_processing">Set Status: {t.visaProcessingStatus}</option>
+                    <option value="approved">Set Status: {t.approvedStatus}</option>
                   </select>
                   <button
                     onClick={handleBulkStatusUpdate}
                     disabled={updatingBulk}
                     className="bg-white text-emerald-900 hover:bg-emerald-50 px-4 py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer shrink-0"
                   >
-                    {updatingBulk ? 'Güncelleniyor...' : 'Toplu Durumu Güncelle'}
+                    {updatingBulk ? 'Updating...' : 'Update Bulk Status'}
                   </button>
                 </div>
               </div>
@@ -721,12 +712,12 @@ export default function PortalPage() {
 
             <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
               <div className="p-4 border-b border-slate-100 flex items-center justify-between text-xs sm:text-sm font-bold text-slate-900">
-                <span>Aday Listesi ({filteredCandidates.length} / {candidates.length})</span>
+                <span>Candidate List ({filteredCandidates.length} / {candidates.length})</span>
                 <button
                   onClick={fetchAllData}
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 px-3 py-1.5 rounded-xl cursor-pointer transition"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" /> Yenile
+                  <RefreshCw className="w-3.5 h-3.5" /> Refresh
                 </button>
               </div>
               <div className="overflow-x-auto">
@@ -807,16 +798,16 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 3: 5. Personel Talebi Dosyası (Yol Haritası 5 & 5.1 & 5.2 Tam Uyarlaması) */}
+        {/* Tab 3: Personel Talebi Dosyası (Tamamen Dinamik Çevrili) */}
         {activeTab === 'requests' && (
           <div className="space-y-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-base sm:text-lg font-extrabold text-slate-900">📁 Personel Talebi Dosyaları</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Her talebin operasyon, çalışma şartları, aday ölçütleri ve seyahat yaşam döngüsü.</p>
+                <h3 className="text-base sm:text-lg font-extrabold text-slate-900">📁 {t.demandFilesTitle}</h3>
+                <p className="text-xs text-slate-500 mt-0.5">{t.demandFilesSub}</p>
               </div>
               <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
-                Toplam Aktif Talep: {jobRequests.length}
+                {t.openRequestsCard}: {jobRequests.length}
               </div>
             </div>
 
@@ -827,7 +818,7 @@ export default function PortalPage() {
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-                          {req.sector || 'Genel Sektör'}
+                          {req.sector || 'General Sector'}
                         </span>
                         <h4 className="font-extrabold text-slate-900 text-base mt-1.5">{req.position_title}</h4>
                         <p className="text-xs font-bold text-slate-600 flex items-center gap-1 mt-0.5">
@@ -842,21 +833,20 @@ export default function PortalPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 pt-2 border-t text-[11px] text-slate-500">
-                      <div>📍 {req.city || 'Belirtilmemiş'}, {req.country || 'Uluslararası'}</div>
-                      <div>📅 Talep: {req.created_at ? req.created_at.substring(0, 10) : '2026-09'}</div>
-                      <div>🎯 Hedef Başlangıç: {req.target_start_date || '2026-10-15'}</div>
-                      <div>💰 Maaş: {req.salary || 'Teklif Usulü'}</div>
+                      <div>📍 {req.city || 'N/A'}, {req.country || 'International'}</div>
+                      <div>📅 {t.createdDate}: {req.created_at ? req.created_at.substring(0, 10) : '2026-09'}</div>
+                      <div>🎯 {t.colTargetStart}: {req.target_start_date || '2026-10-15'}</div>
+                      <div>💰 {t.colSalary}: {req.salary || 'Negotiable'}</div>
                     </div>
 
-                    {/* 5.1 Talep Durumları Seçici ve Kapanış/İptal Durumu */}
                     <div className="pt-2 border-t space-y-1.5">
-                      <label className="block text-[10px] font-bold text-slate-600 uppercase">Talep Yaşam Döngüsü Durumu (5.1)</label>
+                      <label className="block text-[10px] font-bold text-slate-600 uppercase">{t.lifecycleStatusLabel}</label>
                       <select
                         value={req.status || 'new_request'}
                         onChange={(e) => {
                           const val = e.target.value;
                           if (val === 'cancelled') {
-                            const reason = prompt('Lütfen iptal sebebini girin (5.2):', 'İşveren talebi iptal etti');
+                            const reason = prompt('Please enter cancellation reason:', 'Employer cancelled demand');
                             if (reason !== null) {
                               updateRequestStatus(req.id, val, reason);
                             }
@@ -870,19 +860,19 @@ export default function PortalPage() {
                           'bg-slate-50 text-slate-900'
                         }`}
                       >
-                        <option value="new_request">🟡 Yeni talep (Henüz inceleme başlamadı)</option>
-                        <option value="reviewing">🔵 İnceleniyor (Şartlar kontrol ediliyor)</option>
-                        <option value="searching_candidates">🌍 Aday aranıyor (Kaynak ülkede çalışma)</option>
-                        <option value="presenting_candidates">📤 Adaylar sunuluyor (İşverene gönderiliyor)</option>
-                        <option value="interviews">🤝 Görüşmeler (İşveren görüşmeleri sürüyor)</option>
-                        <option value="selection_completed">⭐ Seçim tamamlandı (Gerekli aday seçildi)</option>
-                        <option value="official_process">📋 Belge / resmî süreç (İşlemler devam ediyor)</option>
-                        <option value="travel_planning">✈️ Seyahat planlama (Varış ve başlangıç)</option>
-                        <option value="completed">🟢 Tamamlandı (Talep kapanmıştır)</option>
-                        <option value="cancelled">🔴 İptal edildi (Gerekçe kayıtlı)</option>
+                        <option value="new_request">🟡 {t.stageNewRequest}</option>
+                        <option value="reviewing">🔵 {t.stageReviewing}</option>
+                        <option value="searching_candidates">🌍 {t.stageSearchingCandidates}</option>
+                        <option value="presenting_candidates">📤 {t.stagePresentingCandidates}</option>
+                        <option value="interviews">🤝 {t.stageInterviews}</option>
+                        <option value="selection_completed">⭐ {t.stageSelectionCompleted}</option>
+                        <option value="official_process">📋 {t.stageOfficialProcess}</option>
+                        <option value="travel_planning">✈️ {t.stageTravelPlanning}</option>
+                        <option value="completed">🟢 {t.stageCompleted}</option>
+                        <option value="cancelled">🔴 {t.stageCancelled}</option>
                       </select>
                       {req.cancellation_reason && (
-                        <p className="text-[10px] text-red-600 font-medium">İptal Gerekçesi: {req.cancellation_reason}</p>
+                        <p className="text-[10px] text-red-600 font-medium">Cancellation Reason: {req.cancellation_reason}</p>
                       )}
                     </div>
                   </div>
@@ -892,7 +882,7 @@ export default function PortalPage() {
                       onClick={() => setSelectedDemandDetail(req)}
                       className="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      <FileText className="w-4 h-4" /> Talep Dosyasını Aç (Tüm Detaylar)
+                      <FileText className="w-4 h-4" /> {t.openDemandFilesBtn}
                     </button>
                   </div>
                 </div>
@@ -901,7 +891,6 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 4: Ekip & Şifreli Yönetici Personel Yönetimi */}
         {activeTab === 'staff' && isUpperManagement && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
@@ -911,14 +900,14 @@ export default function PortalPage() {
               <form onSubmit={handleAddStaff} className="space-y-3 text-xs">
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.staffNameLabel}</label>
-                  <input type="text" required value={newStaffName} onChange={(e) => setNewStaffName(e.target.value)} placeholder="Ahmet Yılmaz" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white text-xs sm:text-sm" />
+                  <input type="text" required value={newStaffName} onChange={(e) => setNewStaffName(e.target.value)} placeholder="Ahmet Yilmaz" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white text-xs sm:text-sm" />
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.staffEmailLabel}</label>
                   <input type="email" required value={newStaffEmail} onChange={(e) => setNewStaffEmail(e.target.value)} placeholder="ahmet@panova.com" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white text-xs sm:text-sm" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Giriş Şifresi *</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Login Password *</label>
                   <input type="password" required value={newStaffPassword} onChange={(e) => setNewStaffPassword(e.target.value)} placeholder="••••••••" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white text-xs sm:text-sm" />
                 </div>
                 <div>
@@ -952,12 +941,12 @@ export default function PortalPage() {
                       <div className="flex items-center justify-between">
                         <h4 className="font-extrabold text-slate-900 text-sm">{staff.name}</h4>
                         <div className="flex items-center gap-1">
-                          <button onClick={() => setEditingStaff(staff)} className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-[11px] font-bold transition cursor-pointer">Düzenle / Şifre</button>
+                          <button onClick={() => setEditingStaff(staff)} className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-[11px] font-bold transition cursor-pointer">Edit / Pwd</button>
                           <button onClick={() => handleDeleteStaff(staff.id)} className="p-1 text-slate-400 hover:text-red-600 transition cursor-pointer"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </div>
                       <p className="text-xs text-slate-500">{staff.email}</p>
-                      <p className="text-[11px] text-slate-400 font-mono">Şifre: ••••••••</p>
+                      <p className="text-[11px] text-slate-400 font-mono">Password: ••••••••</p>
                     </div>
 
                     <div className="pt-2 border-t space-y-1.5">
@@ -982,7 +971,6 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 5: Görevler */}
         {activeTab === 'tasks' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
@@ -998,7 +986,7 @@ export default function PortalPage() {
                     onChange={(e) => setNewTaskTitle(e.target.value)} 
                     className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm"
                   >
-                    <option value="" disabled>{t.selectTaskPrompt || 'Görev Seçin...'}</option>
+                    <option value="" disabled>{t.selectTaskPrompt || 'Select Task...'}</option>
                     
                     {(isUpperManagement || userRole === 'source_country') && (
                       <optgroup label={t.taskGroupSource}>
@@ -1089,7 +1077,6 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 6: Audit Log */}
         {activeTab === 'audit' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
@@ -1122,7 +1109,6 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Diğer Tablar */}
         {activeTab === 'employers' && (
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden p-4 sm:p-6 space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.employersTab}</h3>
@@ -1133,7 +1119,7 @@ export default function PortalPage() {
                 {employers.map((emp) => (
                   <div key={emp.id} className="p-4 bg-slate-50 rounded-2xl border space-y-2 text-xs sm:text-sm">
                     <h4 className="font-extrabold text-slate-900">{emp.company_name}</h4>
-                    <p className="text-slate-500">Yetkili: <strong>{emp.contact_person}</strong> | Ülke: {emp.country}</p>
+                    <p className="text-slate-500">Contact: <strong>{emp.contact_person}</strong> | Country: {emp.country}</p>
                   </div>
                 ))}
               </div>
@@ -1164,14 +1150,13 @@ export default function PortalPage() {
 
       </div>
 
-      {/* 5. Personel Talebi Dosyası Detay Modalı (Full Specification Modal) */}
       {selectedDemandDetail && (
         <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 z-50 overflow-y-auto">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-4xl w-full shadow-2xl border space-y-6 my-8 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b pb-4">
               <div>
                 <span className="text-xs font-bold text-emerald-700 uppercase bg-emerald-50 px-2.5 py-1 rounded-lg">
-                  Personel Talebi Dosyası (ID: {selectedDemandDetail.id})
+                  Personnel Demand Dossier (ID: {selectedDemandDetail.id})
                 </span>
                 <h3 className="text-xl font-extrabold text-slate-900 mt-1">{selectedDemandDetail.position_title} - {selectedDemandDetail.employer_name}</h3>
               </div>
@@ -1179,70 +1164,65 @@ export default function PortalPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
-              {/* Talep Özeti */}
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
-                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">📌 Talep Özeti</h4>
+                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">📌 Demand Summary</h4>
                 <div className="grid grid-cols-2 gap-2 text-slate-700">
-                  <div><strong>İşveren:</strong> {selectedDemandDetail.employer_name}</div>
-                  <div><strong>Ülke / Şehir:</strong> {selectedDemandDetail.country} / {selectedDemandDetail.city || 'Merkez'}</div>
-                  <div><strong>Sektör:</strong> {selectedDemandDetail.sector}</div>
-                  <div><strong>Pozisyon:</strong> {selectedDemandDetail.position_title}</div>
-                  <div><strong>Kişi Sayısı:</strong> {selectedDemandDetail.headcount}</div>
-                  <div><strong>Talep Tarihi:</strong> {selectedDemandDetail.created_at ? selectedDemandDetail.created_at.substring(0, 10) : 'N/A'}</div>
-                  <div><strong>Hedef Başlangıç:</strong> {selectedDemandDetail.target_start_date || '2026-10-15'}</div>
-                  <div><strong>Durum:</strong> <span className="uppercase font-bold text-emerald-700">{selectedDemandDetail.status}</span></div>
+                  <div><strong>Employer:</strong> {selectedDemandDetail.employer_name}</div>
+                  <div><strong>Country / City:</strong> {selectedDemandDetail.country} / {selectedDemandDetail.city || 'Center'}</div>
+                  <div><strong>Sector:</strong> {selectedDemandDetail.sector}</div>
+                  <div><strong>Position:</strong> {selectedDemandDetail.position_title}</div>
+                  <div><strong>Headcount:</strong> {selectedDemandDetail.headcount}</div>
+                  <div><strong>Created Date:</strong> {selectedDemandDetail.created_at ? selectedDemandDetail.created_at.substring(0, 10) : 'N/A'}</div>
+                  <div><strong>Target Start:</strong> {selectedDemandDetail.target_start_date || '2026-10-15'}</div>
+                  <div><strong>Status:</strong> <span className="uppercase font-bold text-emerald-700">{selectedDemandDetail.status}</span></div>
                 </div>
               </div>
 
-              {/* Çalışma Şartları */}
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
-                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">💼 Çalışma Şartları & Yan Haklar</h4>
+                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">💼 Working Conditions & Benefits</h4>
                 <div className="grid grid-cols-2 gap-2 text-slate-700">
-                  <div><strong>Ücret:</strong> {selectedDemandDetail.salary || 'Teklif Usulü'}</div>
-                  <div><strong>Çalışma Saatleri:</strong> {selectedDemandDetail.working_hours || 'Haftalık 40-45 Saat'}</div>
-                  <div><strong>Haftalık Gün:</strong> {selectedDemandDetail.weekly_days || '5-6 Gün'}</div>
-                  <div><strong>Fazla Mesai:</strong> {selectedDemandDetail.overtime_policy || 'Yasal Mevzuata Uygun'}</div>
-                  <div><strong>Konaklama:</strong> {selectedDemandDetail.accommodation ? '✅ Sağlanıyor' : '❌ Sağlanmıyor'}</div>
-                  <div><strong>Yemek / Ulaşım:</strong> {selectedDemandDetail.food_allowance ? '✅ Var' : '❌ Yok'} / {selectedDemandDetail.transportation ? '✅ Var' : '❌ Yok'}</div>
-                  <div><strong>Uçak/Seyahat Gideri:</strong> {selectedDemandDetail.flight_ticket ? '✅ İşveren Karşılıyor' : 'Adaya Ait'}</div>
-                  <div><strong>Sözleşme Süresi:</strong> {selectedDemandDetail.contract_term || '1 Yıl (Yenilenebilir)'}</div>
+                  <div><strong>Salary:</strong> {selectedDemandDetail.salary || 'Negotiable'}</div>
+                  <div><strong>Working Hours:</strong> {selectedDemandDetail.working_hours || '40-45 hrs/week'}</div>
+                  <div><strong>Weekly Days:</strong> {selectedDemandDetail.weekly_days || '5-6 Days'}</div>
+                  <div><strong>Overtime:</strong> {selectedDemandDetail.overtime_policy || 'Standard Legal'}</div>
+                  <div><strong>Accommodation:</strong> {selectedDemandDetail.accommodation ? '✅ Provided' : '❌ Not Provided'}</div>
+                  <div><strong>Food / Transport:</strong> {selectedDemandDetail.food_allowance ? '✅ Yes' : '❌ No'} / {selectedDemandDetail.transportation ? '✅ Yes' : '❌ No'}</div>
+                  <div><strong>Flight Ticket:</strong> {selectedDemandDetail.flight_ticket ? '✅ Employer Covers' : 'Candidate'}</div>
+                  <div><strong>Contract Term:</strong> {selectedDemandDetail.contract_term || '1 Year'}</div>
                 </div>
               </div>
 
-              {/* Aday Ölçütleri */}
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
-                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">🎯 Aday Ölçütleri & Nitelikler</h4>
+                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">🎯 Candidate Criteria & Qualifications</h4>
                 <div className="space-y-1 text-slate-700">
-                  <div><strong>Deneyim:</strong> {selectedDemandDetail.experience_required || 'En az 2 yıl mesleki tecrübe'}</div>
-                  <div><strong>Mesleki Belge:</strong> {selectedDemandDetail.certificate_required || 'Usta öğreticilik / Mesleki yeterlilik belgesi zorunlu'}</div>
-                  <div><strong>Dil Bilgisi:</strong> {selectedDemandDetail.language_required || 'Temel düzeyde İngilizce veya yerel dil'}</div>
-                  <div><strong>Özel Şartlar:</strong> {selectedDemandDetail.special_requirements || selectedDemandDetail.special_reqs || 'Vardiyalı çalışmaya uygunluk ve seyahat engeli olmaması.'}</div>
+                  <div><strong>Experience:</strong> {selectedDemandDetail.experience_required || 'Min 2 years'}</div>
+                  <div><strong>Certificate:</strong> {selectedDemandDetail.certificate_required || 'Professional Certificate Required'}</div>
+                  <div><strong>Language:</strong> {selectedDemandDetail.language_required || 'Basic English or Local Language'}</div>
+                  <div><strong>Special Req:</strong> {selectedDemandDetail.special_requirements || selectedDemandDetail.special_reqs || 'Shift suitability.'}</div>
                 </div>
               </div>
 
-              {/* Süreç Sayıları & Metrikler */}
               <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 space-y-2">
-                <h4 className="font-extrabold text-emerald-900 uppercase text-xs border-b border-emerald-200 pb-1">📊 Süreç Sayıları & Metrikler</h4>
+                <h4 className="font-extrabold text-emerald-900 uppercase text-xs border-b border-emerald-200 pb-1">📊 Process Counts & Metrics</h4>
                 <div className="grid grid-cols-3 gap-2 text-center text-xs">
                   <div className="bg-white p-2 rounded-xl border">
-                    <span className="block text-slate-500 text-[10px]">Talep Edilen</span>
+                    <span className="block text-slate-500 text-[10px]">Requested</span>
                     <strong className="text-base text-slate-900">{selectedDemandDetail.headcount}</strong>
                   </div>
                   <div className="bg-white p-2 rounded-xl border">
-                    <span className="block text-slate-500 text-[10px]">Bağlanan</span>
+                    <span className="block text-slate-500 text-[10px]">Connected</span>
                     <strong className="text-base text-blue-600">{candidates.length}</strong>
                   </div>
                   <div className="bg-white p-2 rounded-xl border">
-                    <span className="block text-slate-500 text-[10px]">Onaylanan</span>
+                    <span className="block text-slate-500 text-[10px]">Approved</span>
                     <strong className="text-base text-emerald-700">{candidates.filter(c => c.status === 'approved').length}</strong>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Adaylar ve Görüşmeler Bölümü */}
             <div className="space-y-3 border-t pt-4">
-              <h4 className="font-extrabold text-slate-900 text-sm">👥 Bu Talebe Bağlanan ve Sunulan Adaylar</h4>
+              <h4 className="font-extrabold text-slate-900 text-sm">👥 Candidates Connected & Offered to This Demand</h4>
               <div className="bg-slate-50 rounded-2xl p-4 border max-h-48 overflow-y-auto space-y-2">
                 {candidates.slice(0, 3).map((cand) => (
                   <div key={cand.id} className="flex items-center justify-between bg-white p-3 rounded-xl border text-xs">
@@ -1255,19 +1235,18 @@ export default function PortalPage() {
                   </div>
                 ))}
                 {candidates.length === 0 && (
-                  <p className="text-xs text-slate-400 text-center py-2">Henüz bu talebe aday atanmadı.</p>
+                  <p className="text-xs text-slate-400 text-center py-2">No candidates assigned yet.</p>
                 )}
               </div>
             </div>
 
-            {/* Notlar ve Zaman Çizelgesi */}
             <div className="space-y-2 border-t pt-4 text-xs">
-              <h4 className="font-extrabold text-slate-900 uppercase">📝 Ekip İçi Notlar & İşlem Zaman Çizelgeleri</h4>
+              <h4 className="font-extrabold text-slate-900 uppercase">📝 Internal Notes & Timeline</h4>
               <div className="bg-slate-50 p-3 rounded-xl border text-slate-600 space-y-1">
-                <p>• {selectedDemandDetail.created_at ? selectedDemandDetail.created_at.substring(0, 10) : '2026-09-22'}: İşveren talebi sisteme kaydedildi ve dosya açıldı.</p>
-                <p>• Kaynak ülkede aday taraması ve ön mülakatlar başlatıldı.</p>
+                <p>• {selectedDemandDetail.created_at ? selectedDemandDetail.created_at.substring(0, 10) : '2026-09-22'}: Employer demand registered in system and dossier opened.</p>
+                <p>• Candidate sourcing and preliminary interviews initiated in source country.</p>
                 {selectedDemandDetail.cancellation_reason && (
-                  <p className="text-red-600 font-bold">• İptal Bilgisi: {selectedDemandDetail.cancellation_reason}</p>
+                  <p className="text-red-600 font-bold">• Cancellation Info: {selectedDemandDetail.cancellation_reason}</p>
                 )}
               </div>
             </div>
@@ -1277,38 +1256,37 @@ export default function PortalPage() {
                 onClick={() => setSelectedDemandDetail(null)}
                 className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-6 py-2.5 rounded-xl text-xs font-bold transition shadow cursor-pointer"
               >
-                Kapat
+                Close
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Personel ve Şifre Düzenleme Modalı */}
       {editingStaff && isUpperManagement && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 z-50">
           <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border space-y-4">
             <div className="flex justify-between items-center border-b pb-3">
               <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                <Key className="w-4 h-4 text-emerald-700" /> Personel & Şifre Düzenle
+                <Key className="w-4 h-4 text-emerald-700" /> Edit Staff & Password
               </h3>
               <button onClick={() => setEditingStaff(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
             </div>
             <form onSubmit={handleSaveStaffEdit} className="space-y-3 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Ad Soyad</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Full Name</label>
                 <input type="text" required value={editingStaff.name} onChange={(e) => setEditingStaff({ ...editingStaff, name: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
               </div>
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">E-Posta (Giriş için)</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Email (For Login)</label>
                 <input type="email" required value={editingStaff.email} onChange={(e) => setEditingStaff({ ...editingStaff, email: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
               </div>
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Yeni Şifre</label>
-                <input type="text" required value={editingStaff.password || ''} onChange={(e) => setEditingStaff({ ...editingStaff, password: e.target.value })} placeholder="Yeni şifreyi girin" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
+                <label className="block font-bold text-slate-700 uppercase mb-1">New Password</label>
+                <input type="text" required value={editingStaff.password || ''} onChange={(e) => setEditingStaff({ ...editingStaff, password: e.target.value })} placeholder="Enter new password" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
               </div>
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Rol / Yetki Seviyesi</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Role / Permission Level</label>
                 <select value={editingStaff.role_level} onChange={(e) => setEditingStaff({ ...editingStaff, role_level: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer">
                   <option value="upper_management" className="text-slate-900 bg-white">👑 {t.roleUpperManagement}</option>
                   <option value="source_country" className="text-slate-900 bg-white">🌍 {t.roleSourceCountry}</option>
@@ -1317,7 +1295,7 @@ export default function PortalPage() {
                 </select>
               </div>
               <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs">
-                Değişiklikleri ve Şifreyi Kaydet
+                Save Changes and Password
               </button>
             </form>
           </div>
