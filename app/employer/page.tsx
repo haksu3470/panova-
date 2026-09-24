@@ -61,15 +61,12 @@ export default function EmployerPortalPage() {
     return null;
   });
 
-  // Auth Modu: 'login' veya 'register'
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
-  // Login State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Register State
   const [regCompanyName, setRegCompanyName] = useState('');
   const [regContactPerson, setRegContactPerson] = useState('');
   const [regEmail, setRegEmail] = useState('');
@@ -79,7 +76,6 @@ export default function EmployerPortalPage() {
   const [regLoading, setRegLoading] = useState(false);
   const [regSuccess, setRegSuccess] = useState(false);
 
-  // Profile Edit State
   const [editProfile, setEditProfile] = useState({
     company_name: '',
     contact_person: '',
@@ -259,7 +255,7 @@ export default function EmployerPortalPage() {
         const updatedEmp = data[0];
         setEmployer(updatedEmp);
         localStorage.setItem('panova_employer_data', JSON.stringify(updatedEmp));
-        alert('Şirket profili başarıyla güncellendi!');
+        alert(t.profileUpdatedSuccess || 'Şirket profili başarıyla güncellendi!');
       }
     } catch (err: any) {
       alert('Güncelleme Hatası: ' + err.message);
@@ -616,7 +612,7 @@ export default function EmployerPortalPage() {
           <button onClick={() => setActiveTab('travel')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>✈️ {t.empTabTravel}</button>
           <button onClick={() => setActiveTab('employees')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>🛡️ {t.employeesTab}</button>
           <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>💬 {t.empTabSupport}</button>
-          <button onClick={() => setActiveTab('profile')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>🏢 Şirket Profili</button>
+          <button onClick={() => setActiveTab('profile')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>🏢 {t.empTabProfile || 'Company Profile'}</button>
         </div>
 
         {/* Tab 1: Personel Taleplerim */}
@@ -781,19 +777,19 @@ export default function EmployerPortalPage() {
           </div>
         )}
 
-        {/* Tab 8: Şirket Bilgilerim ve Düzenleme */}
+        {/* Tab 8: Şirket Bilgilerim ve Düzenleme (Tüm dil etiketleri bağlandı) */}
         {activeTab === 'profile' && (
           <div className="bg-white p-4 sm:p-8 rounded-3xl border shadow-sm max-w-2xl mx-auto space-y-6">
             <div className="border-b pb-4">
               <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                🏢 Şirket Profili ve Bilgi Güncelleme
+                🏢 {t.profileUpdateTitle || 'Company Profile & Info Update'}
               </h3>
-              <p className="text-xs text-slate-500 mt-1">Şirket bilgilerinizi ve şifrenizi buradan güncelleyebilirsiniz.</p>
+              <p className="text-xs text-slate-500 mt-1">{t.profileUpdateDesc || 'You can update your company information and password here.'}</p>
             </div>
 
             <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs sm:text-sm">
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Şirket Unvanı *</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">{t.companyNameLabel || 'Company Name'} *</label>
                 <input
                   type="text"
                   required
@@ -805,7 +801,7 @@ export default function EmployerPortalPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Yetkili Kişi *</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.contactPersonLabel || 'Contact Person'} *</label>
                   <input
                     type="text"
                     required
@@ -815,7 +811,7 @@ export default function EmployerPortalPage() {
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Telefon *</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.phone || 'Phone'} *</label>
                   <input
                     type="tel"
                     required
@@ -828,7 +824,7 @@ export default function EmployerPortalPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Ülke / Konum *</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.countryLocationLabel || 'Country / Location'} *</label>
                   <input
                     type="text"
                     required
@@ -850,7 +846,7 @@ export default function EmployerPortalPage() {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-500 uppercase mb-1">E-posta (Değiştirilemez)</label>
+                <label className="block font-bold text-slate-500 uppercase mb-1">{t.emailReadonlyLabel || 'Email (Read-only)'}</label>
                 <input
                   type="email"
                   disabled
@@ -864,7 +860,7 @@ export default function EmployerPortalPage() {
                 disabled={profileSaving}
                 className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm mt-4 cursor-pointer"
               >
-                <Save className="w-4 h-4" /> {profileSaving ? 'Güncelleniyor...' : 'Değişiklikleri Kaydet'}
+                <Save className="w-4 h-4" /> {profileSaving ? (t.updatingBtn || 'Updating...') : (t.saveChangesBtn || 'Save Changes')}
               </button>
             </form>
           </div>

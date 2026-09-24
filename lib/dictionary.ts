@@ -165,6 +165,21 @@ export interface Translation {
   dateFormatPlaceholder: string;
   message: string;
 
+  signInMenu?: string;
+  signUpMenu?: string;
+  loginPortalTitle?: string;
+  loginPortalSub?: string;
+  companyEmailLabel?: string;
+  signUpPortalTitle?: string;
+  signUpPortalSub?: string;
+  companyNameLabel?: string;
+  contactPersonLabel?: string;
+  completeSignUpBtn?: string;
+  demoLoginText?: string;
+  regSuccessHeader?: string;
+  regSuccessText?: string;
+  goToSignInBtn?: string;
+
   empTabRequests?: string;
   empTabCandidates?: string;
   empTabSelected?: string;
@@ -193,128 +208,15 @@ export interface Translation {
   empProfileTitle?: string;
   empProfileCompanyName?: string;
   empProfileContactPerson?: string;
-
-  selectTaskPrompt?: string;
-  taskGroupSource?: string;
-  taskGroupTarget?: string;
-  taskGroupField?: string;
-  taskGroupManagement?: string;
-  taskPassportCheck?: string;
-  taskInterviewPlan?: string;
-  taskUpdateCandidate?: string;
-  taskRequestDocs?: string;
-  taskSaveDemand?: string;
-  taskMatchCandidate?: string;
-  taskPrepareOffer?: string;
-  taskTrackPerformance?: string;
-  taskEnterTravelDate?: string;
-  taskPlanAccommodation?: string;
-  taskManageSupport?: string;
-  taskUpdateFieldStatus?: string;
-  taskAuditSystem?: string;
-  taskApproveStrategic?: string;
-
-  reportsTab?: string;
-  analyticsTab?: string;
-  financialsTab?: string;
-  exportPdfBtn?: string;
-  exportExcelBtn?: string;
-  filterBtn?: string;
-  clearFiltersBtn?: string;
-  statusActive?: string;
-  statusInactive?: string;
-  statusCancelled?: string;
-  actionsLabel?: string;
-  detailsLabel?: string;
-  editLabel?: string;
-  deleteLabel?: string;
-  confirmDeleteTitle?: string;
-  confirmDeleteDesc?: string;
-  yesBtn?: string;
-  noBtn?: string;
-
-  demandFilesTitle?: string;
-  demandFilesSub?: string;
-  openDemandFilesBtn?: string;
-  lifecycleStatusLabel?: string;
-  stageNewRequest?: string;
-  stageReviewing?: string;
-  stageSearchingCandidates?: string;
-  stagePresentingCandidates?: string;
-  stageInterviews?: string;
-  stageSelectionCompleted?: string;
-  stageOfficialProcess?: string;
-  stageTravelPlanning?: string;
-  stageCompleted?: string;
-  stageCancelled?: string;
-
-  completed?: string;
-  approved?: string;
-  pending?: string;
-  reviewing?: string;
-  sencing?: string;
-  sending?: string;
-  sendNotification?: string;
-  saveChanges?: string;
-  saving?: string;
-  dossierClosedNotice?: string;
-  reason?: string;
-  reopenProcess?: string;
-  profileCredentialsManagement?: string;
-  phoneNumberGsm?: string;
-  emailAddress?: string;
-  portalPassword?: string;
-  travelFlightLogistics?: string;
-  planned?: string;
-  ticketed?: string;
-  flightDateTime?: string;
-  flightNumber?: string;
-  departureCityAirport?: string;
-  arrivalCityAirport?: string;
-  pnrBookingCode?: string;
-  accommodationTransferDetails?: string;
-  documentTrackingMechanism?: string;
-  file?: string;
-  uploaded?: string;
-  rejected?: string;
-  reRequested?: string;
-  preview?: string;
-  noFileUploaded?: string;
-  uploadFromComputer?: string;
-  newDocNamePlaceholder?: string;
-  add?: string;
-  professionalEvaluationCertificate?: string;
-  certificateInfo?: string;
-  workVideoUrl?: string;
-  previewPlayVideo?: string;
-  internalNotesAdminOnly?: string;
-  candidateStatus?: string;
-  visaProcessing?: string;
-  processClosureWithdrawal?: string;
-  closureDesc?: string;
-  closureReasonPlaceholder?: string;
-  closeArchiveProcess?: string;
-  sendOfficialJobOffer?: string;
-  employerCompanyName?: string;
-  monthlyNetSalary?: string;
-  startDate?: string;
-  termsConditions?: string;
-  sendOfferToCandidate?: string;
-  notificationTitle?: string;
-  messageBody?: string;
-  sendNotificationBtn?: string;
-  workVideoPreview?: string;
-  savedSuccess?: string;
-  fillEmployerAndSalary?: string;
-  offerSentSuccess?: string;
-  notificationSentSuccess?: string;
-  returnToPortal?: string;
   
-  // Eklenen Yeni Belge Çeviri Anahtarları
-  docPassportScan?: string;
-  docProfessionalCert?: string;
-  docCriminalRecord?: string;
-  docHealthReport?: string;
+  // Profil & Güncelleme Çevirileri
+  profileUpdateTitle?: string;
+  profileUpdateDesc?: string;
+  countryLocationLabel?: string;
+  emailReadonlyLabel?: string;
+  updatingBtn?: string;
+  saveChangesBtn?: string;
+  profileUpdatedSuccess?: string;
 }
 
 export const languages = [
@@ -491,6 +393,21 @@ export const translations: Record<Language, Translation> = {
     dateFormatPlaceholder: 'gg.aa.yyyy',
     message: 'Mesaj',
 
+    signInMenu: 'Giriş Yap',
+    signUpMenu: 'Kayıt Ol',
+    loginPortalTitle: 'İşveren Giriş Portalı',
+    loginPortalSub: 'Şirket e-postanız ve şifrenizle giriş yapın.',
+    companyEmailLabel: 'Şirket E-Postası',
+    signUpPortalTitle: 'İşveren Kaydı',
+    signUpPortalSub: 'İş gücü talepleri sunmak için şirketinizi kaydedin.',
+    companyNameLabel: 'Şirket Unvanı',
+    contactPersonLabel: 'Yetkili Kişi',
+    completeSignUpBtn: 'Kaydı Tamamla',
+    demoLoginText: 'Demo Giriş:',
+    regSuccessHeader: 'Kayıt Başarılı!',
+    regSuccessText: 'Şirket hesabınız oluşturuldu. Artık giriş yapabilirsiniz.',
+    goToSignInBtn: 'Giriş Sayfasına Git',
+
     empTabRequests: 'Personel Taleplerim',
     empTabCandidates: 'Adaylar / Eşleşmeler',
     empTabSelected: 'Seçtiğim Adaylar',
@@ -520,125 +437,13 @@ export const translations: Record<Language, Translation> = {
     empProfileCompanyName: 'Şirket Unvanı',
     empProfileContactPerson: 'Yetkili Kişi',
 
-    selectTaskPrompt: 'Görev Seçin...',
-    taskGroupSource: '🌍 Kaynak Ülke Sorumlusu',
-    taskGroupTarget: '🏢 Hedef Ülke Sorumlusu',
-    taskGroupField: '✈️ Saha Sorumlusu',
-    taskGroupManagement: '👑 Üst Yönetim',
-    taskPassportCheck: 'Pasaportu Kontrol Et',
-    taskInterviewPlan: 'Aday Ön Görüşmesi Planla',
-    taskUpdateCandidate: 'Aday Bilgilerini Güncelle',
-    taskRequestDocs: 'Eksik Evrak Talep Et',
-    taskSaveDemand: 'İşveren Talebini Kaydet',
-    taskMatchCandidate: 'Aday Eşleştirme Yap',
-    taskPrepareOffer: 'İş Teklifi Hazırla (Job Offer)',
-    taskTrackPerformance: 'Performans ve Uyum Takibi Yap',
-    taskEnterTravelDate: 'Seyahat Tarihini Gir',
-    taskPlanAccommodation: 'Konaklama ve Karşılama Planla',
-    taskManageSupport: 'Destek Taleplerini Yönet',
-    taskUpdateFieldStatus: 'Saha Görev Durumunu Güncelle',
-    taskAuditSystem: 'Sistem Loglarını Denetle',
-    taskApproveStrategic: 'Mali ve Stratejik Kararları Onayla',
-
-    reportsTab: 'Raporlar',
-    analyticsTab: 'Analizler',
-    financialsTab: 'Mali İşler',
-    exportPdfBtn: 'PDF İndir',
-    exportExcelBtn: 'Excel İndir',
-    filterBtn: 'Filtrele',
-    clearFiltersBtn: 'Filtreleri Temizle',
-    statusActive: 'Aktif',
-    statusInactive: 'Pasif',
-    statusCancelled: 'İptal Edildi',
-    actionsLabel: 'İşlemler',
-    detailsLabel: 'Detaylar',
-    editLabel: 'Düzenle',
-    deleteLabel: 'Sil',
-    confirmDeleteTitle: 'Silme İşlemini Onayla',
-    confirmDeleteDesc: 'Bu kaydı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
-    yesBtn: 'Evet',
-    noBtn: 'Hayır',
-
-    demandFilesTitle: 'Personel Talebi Dosyaları',
-    demandFilesSub: 'Her talebin operasyon, çalışma şartları, aday ölçütleri ve seyahat yaşam döngüsü.',
-    openDemandFilesBtn: 'Talep Dosyasını Aç (Tüm Detaylar)',
-    lifecycleStatusLabel: 'TALEP YAŞAM DÖNGÜSÜ DURUMU (5.1)',
-    stageNewRequest: 'Yeni talep (Henüz inceleme başlamadı)',
-    stageReviewing: 'İnceleniyor (Şartlar kontrol ediliyor)',
-    stageSearchingCandidates: 'Aday aranıyor (Kaynak ülkede çalışma)',
-    stagePresentingCandidates: 'Adaylar sunuluyor (İşverene gönderiliyor)',
-    stageInterviews: 'Görüşmeler (İşveren görüşmeleri sürüyor)',
-    stageSelectionCompleted: 'Seçim tamamlandı (Gerekli aday seçildi)',
-    stageOfficialProcess: 'Belge / resmî süreç (İşlemler devam ediyor)',
-    stageTravelPlanning: 'Seyahat planlama (Varış ve başlangıç)',
-    stageCompleted: 'Tamamlandı (Talep kapanmıştır)',
-    stageCancelled: 'İptal edildi (Gerekçe kayıtlı)',
-
-    completed: 'Tamamlandı',
-    approved: 'Onaylandı',
-    pending: 'Beklemede',
-    reviewing: 'İnceleniyor',
-    sencing: 'Gönderiliyor',
-    sending: 'Gönderiliyor',
-    sendNotification: 'Bildirim Gönder',
-    saveChanges: 'Değişiklikleri Kaydet',
-    saving: 'Kaydediliyor...',
-    dossierClosedNotice: 'Bu aday dosyası kapatılmıştır / süreçten çıkılmıştır.',
-    reason: 'Sebep:',
-    reopenProcess: 'Süreci Tekrar Aç',
-    profileCredentialsManagement: 'Aday Fotoğraf, GSM, E-Posta ve Şifre Yönetimi',
-    phoneNumberGsm: 'Telefon Numarası (GSM)',
-    emailAddress: 'E-Posta Adresi',
-    portalPassword: 'Aday Portalı Şifresi',
-    travelFlightLogistics: 'Seyahat, Uçuş ve Konaklama Lojistiği',
-    planned: 'Planlanıyor',
-    ticketed: 'Biletlendi',
-    flightDateTime: 'Uçuş Tarihi & Saati',
-    flightNumber: 'Uçuş Kodu / Sefer No',
-    departureCityAirport: 'Kalkış Yeri / Havalimanı',
-    arrivalCityAirport: 'Varış Yeri / Havalimanı',
-    pnrBookingCode: 'PNR / Bilet Rezervasyon Kodu',
-    accommodationTransferDetails: 'Konaklama & Karşılama Detayları',
-    documentTrackingMechanism: 'Evrak & Belge Takip Mekanizması',
-    file: 'Dosya',
-    uploaded: 'Yüklendi',
-    rejected: 'Reddedildi',
-    reRequested: 'Yeniden istendi',
-    preview: 'Önizle',
-    noFileUploaded: 'Dosya yüklenmedi',
-    uploadFromComputer: 'Bilgisayardan Yükle',
-    newDocNamePlaceholder: 'Yeni Belge Adı',
-    add: 'Ekle',
-    professionalEvaluationCertificate: 'Mesleki Değerlendirme & Sertifika',
-    certificateInfo: 'Sertifika Bilgileri',
-    workVideoUrl: 'Çalışma Videosu URL',
-    previewPlayVideo: 'Videoyu Önizle / Oynat',
-    internalNotesAdminOnly: 'İç Değerlendirme Notları (Sadece PANOVA)',
-    candidateStatus: 'Aday Süreç Durumu',
-    visaProcessing: 'Vize Sürecinde',
-    processClosureWithdrawal: 'Vazgeçme ve Süreçten Çıkış',
-    closureDesc: 'Aday iş teklifini reddederse veya süreç olumsuz sonuçlanırsa kaydı silmeden kapatabilirsiniz.',
-    closureReasonPlaceholder: 'Kapanış / Vazgeçme sebebi...',
-    closeArchiveProcess: 'Aday Sürecini Kapat / Arşivle',
-    sendOfficialJobOffer: 'Resmi İş Teklifi Gönder',
-    employerCompanyName: 'İşveren / Firma Adı',
-    monthlyNetSalary: 'Aylık Net Ücret (€)',
-    startDate: 'İşe Başlama Tarihi',
-    termsConditions: 'Teklif / Sözleşme Şartları',
-    sendOfferToCandidate: 'Resmi Teklifi Adaya İlet',
-    notificationTitle: 'Bildirim Başlığı',
-    messageBody: 'Mesaj İçeriği',
-    sendNotificationBtn: 'Bildirimi Adaya Gönder',
-    workVideoPreview: 'Çalışma Videosu Önizleme',
-    savedSuccess: 'Başarıyla kaydedildi!',
-    fillEmployerAndSalary: 'Lütfen firma adı ve maaş bilgilerini doldurun.',
-    offerSentSuccess: 'Resmi iş teklifi başarıyla adaya iletildi!',
-    notificationSentSuccess: 'Bildirim adaya başarıyla gönderildi!',
-    returnToPortal: 'Yönetim Paneline Dön',
-    docPassportScan: 'Pasaport Taraması',
-    docProfessionalCert: 'Mesleki Sertifika / İzin Belgesi',
-    docCriminalRecord: 'Adli Sicil Kaydı (Sabıka Kaydı)',
-    docHealthReport: 'Sağlık Raporu / Akciğer Grafisi',
+    profileUpdateTitle: 'Şirket Profili ve Bilgi Güncelleme',
+    profileUpdateDesc: 'Şirket bilgilerinizi ve şifrenizi buradan güncelleyebilirsiniz.',
+    countryLocationLabel: 'Ülke / Konum',
+    emailReadonlyLabel: 'E-posta (Değiştirilemez)',
+    updatingBtn: 'Güncelleniyor...',
+    saveChangesBtn: 'Değişiklikleri Kaydet',
+    profileUpdatedSuccess: 'Şirket profili başarıyla güncellendi!',
   },
   en: {
     returnHome: 'Return to Home',
@@ -806,6 +611,21 @@ export const translations: Record<Language, Translation> = {
     dateFormatPlaceholder: 'dd.mm.yyyy',
     message: 'Message',
 
+    signInMenu: 'Sign In',
+    signUpMenu: 'Sign Up',
+    loginPortalTitle: 'Employer Login Portal',
+    loginPortalSub: 'Sign in with your company email and password.',
+    companyEmailLabel: 'Company Email',
+    signUpPortalTitle: 'Employer Registration',
+    signUpPortalSub: 'Register your company to submit workforce demands.',
+    companyNameLabel: 'Company Name',
+    contactPersonLabel: 'Contact Person',
+    completeSignUpBtn: 'Complete Registration',
+    demoLoginText: 'Demo Login:',
+    regSuccessHeader: 'Registration Successful!',
+    regSuccessText: 'Your company account has been created. You can now sign in.',
+    goToSignInBtn: 'Go to Sign In',
+
     empTabRequests: 'Personnel Requests',
     empTabCandidates: 'Candidates / Matching',
     empTabSelected: 'Selected Candidates',
@@ -835,125 +655,13 @@ export const translations: Record<Language, Translation> = {
     empProfileCompanyName: 'Company Name',
     empProfileContactPerson: 'Contact Person',
 
-    selectTaskPrompt: 'Select Task...',
-    taskGroupSource: '🌍 Source Country Officer',
-    taskGroupTarget: '🏢 Target Country Officer',
-    taskGroupField: '✈️ Field Officer',
-    taskGroupManagement: '👑 Upper Management',
-    taskPassportCheck: 'Check Passport',
-    taskInterviewPlan: 'Plan Candidate Interview',
-    taskUpdateCandidate: 'Update Candidate Info',
-    taskRequestDocs: 'Request Missing Documents',
-    taskSaveDemand: 'Save Employer Demand',
-    taskMatchCandidate: 'Match Candidate',
-    taskPrepareOffer: 'Prepare Job Offer (Job Offer)',
-    taskTrackPerformance: 'Track Performance & Compliance',
-    taskEnterTravelDate: 'Enter Travel Date',
-    taskPlanAccommodation: 'Plan Accommodation & Pickup',
-    taskManageSupport: 'Manage Support Tickets',
-    taskUpdateFieldStatus: 'Update Field Task Status',
-    taskAuditSystem: 'Audit System & Logs',
-    taskApproveStrategic: 'Approve Financial & Strategic Decisions',
-
-    reportsTab: 'Reports',
-    analyticsTab: 'Analytics',
-    financialsTab: 'Financials',
-    exportPdfBtn: 'Export PDF',
-    exportExcelBtn: 'Export Excel',
-    filterBtn: 'Filter',
-    clearFiltersBtn: 'Clear Filters',
-    statusActive: 'Active',
-    statusInactive: 'Inactive',
-    statusCancelled: 'Cancelled',
-    actionsLabel: 'Actions',
-    detailsLabel: 'Details',
-    editLabel: 'Edit',
-    deleteLabel: 'Delete',
-    confirmDeleteTitle: 'Confirm Deletion',
-    confirmDeleteDesc: 'Are you sure you want to delete this record? This action cannot be undone.',
-    yesBtn: 'Yes',
-    noBtn: 'No',
-
-    demandFilesTitle: 'Personnel Demand Dossiers',
-    demandFilesSub: 'Operations, working conditions, candidate criteria, and travel lifecycle for each demand.',
-    openDemandFilesBtn: 'Open Demand Dossier (All Details)',
-    lifecycleStatusLabel: 'DEMAND LIFECYCLE STATUS (5.1)',
-    stageNewRequest: 'New request (Review not started)',
-    stageReviewing: 'Reviewing (Checking conditions)',
-    stageSearchingCandidates: 'Searching candidates (Source country work)',
-    stagePresentingCandidates: 'Presenting candidates (Sending to employer)',
-    stageInterviews: 'Interviews (Employer interviews ongoing)',
-    stageSelectionCompleted: 'Selection completed (Required candidate chosen)',
-    stageOfficialProcess: 'Official process / Docs (Procedures ongoing)',
-    stageTravelPlanning: 'Travel planning (Arrival and start)',
-    stageCompleted: 'Completed (Demand closed)',
-    stageCancelled: 'Cancelled (Reason recorded)',
-
-    completed: 'Completed',
-    approved: 'Approved',
-    pending: 'Pending',
-    reviewing: 'Reviewing',
-    sencing: 'Sending',
-    sending: 'Sending',
-    sendNotification: 'Send Notification',
-    saveChanges: 'Save Changes',
-    saving: 'Saving...',
-    dossierClosedNotice: 'This candidate dossier is closed.',
-    reason: 'Reason:',
-    reopenProcess: 'Re-open Process',
-    profileCredentialsManagement: 'Candidate Profile & Credentials Management',
-    phoneNumberGsm: 'Phone Number (GSM)',
-    emailAddress: 'Email Address',
-    portalPassword: 'Portal Password',
-    travelFlightLogistics: 'Travel & Flight Logistics',
-    planned: 'Planned',
-    ticketed: 'Ticketed',
-    flightDateTime: 'Flight Date & Time',
-    flightNumber: 'Flight Number',
-    departureCityAirport: 'Departure City / Airport',
-    arrivalCityAirport: 'Arrival City / Airport',
-    pnrBookingCode: 'PNR Booking Code',
-    accommodationTransferDetails: 'Accommodation & Transfer Details',
-    documentTrackingMechanism: 'Document Tracking Mechanism',
-    file: 'File',
-    uploaded: 'Uploaded',
-    rejected: 'Rejected',
-    reRequested: 'Re-requested',
-    preview: 'Preview',
-    noFileUploaded: 'No file uploaded',
-    uploadFromComputer: 'Upload File',
-    newDocNamePlaceholder: 'New Document Name',
-    add: 'Add',
-    professionalEvaluationCertificate: 'Professional Evaluation & Certificate',
-    certificateInfo: 'Certificate Info',
-    workVideoUrl: 'Work Video URL',
-    previewPlayVideo: 'Preview / Play Video',
-    internalNotesAdminOnly: 'Internal Notes (PANOVA Only)',
-    candidateStatus: 'Candidate Status',
-    visaProcessing: 'Visa Processing',
-    processClosureWithdrawal: 'Process Closure / Withdrawal',
-    closureDesc: 'Close candidate process without deleting records if declined.',
-    closureReasonPlaceholder: 'Closure reason...',
-    closeArchiveProcess: 'Close / Archive Candidate Process',
-    sendOfficialJobOffer: 'Send Official Job Offer',
-    employerCompanyName: 'Employer / Company Name',
-    monthlyNetSalary: 'Monthly Net Salary (€)',
-    startDate: 'Start Date',
-    termsConditions: 'Terms & Conditions',
-    sendOfferToCandidate: 'Send Offer to Candidate',
-    notificationTitle: 'Notification Title',
-    messageBody: 'Message Body',
-    sendNotificationBtn: 'Send Notification',
-    workVideoPreview: 'Work Video Preview',
-    savedSuccess: 'Successfully saved!',
-    fillEmployerAndSalary: 'Please fill in employer name and salary.',
-    offerSentSuccess: 'Official job offer sent successfully!',
-    notificationSentSuccess: 'Notification sent successfully!',
-    returnToPortal: 'Return to Portal',
-    docPassportScan: 'Passport Scan',
-    docProfessionalCert: 'Professional Certificate / Work Permit',
-    docCriminalRecord: 'Criminal Record Certificate',
-    docHealthReport: 'Health Report / Chest X-Ray',
+    profileUpdateTitle: 'Company Profile & Info Update',
+    profileUpdateDesc: 'You can update your company information and password here.',
+    countryLocationLabel: 'Country / Location',
+    emailReadonlyLabel: 'Email (Read-only)',
+    updatingBtn: 'Updating...',
+    saveChangesBtn: 'Save Changes',
+    profileUpdatedSuccess: 'Company profile successfully updated!',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -1121,6 +829,21 @@ export const translations: Record<Language, Translation> = {
     dateFormatPlaceholder: 'dd.mm.vvvv',
     message: 'Mesazhi',
 
+    signInMenu: 'Hyni',
+    signUpMenu: 'Regjistrohuni',
+    loginPortalTitle: 'Portali i Hyrjes për Punëdhënësit',
+    loginPortalSub: 'Hyni me emailin dhe fjalëkalimin e kompanisë suaj.',
+    companyEmailLabel: 'Email i Kompanisë',
+    signUpPortalTitle: 'Regjistrimi i Punëdhënësit',
+    signUpPortalSub: 'Regjistroni kompaninë tuaj për të paraqitur kërkesa.',
+    companyNameLabel: 'Emri i Kompanisë',
+    contactPersonLabel: 'Personi i Kontaktit',
+    completeSignUpBtn: 'Përfundo Regjistrimin',
+    demoLoginText: 'Demo Hyrje:',
+    regSuccessHeader: 'Regjistrimi u Krye me Sukses!',
+    regSuccessText: 'Llogaria e kompanisë suaj u krijua. Tani mund të hyni.',
+    goToSignInBtn: 'Shko te Hyrja',
+
     empTabRequests: 'Kërkesat e Personelit',
     empTabCandidates: 'Kandidatët / Përputhjet',
     empTabSelected: 'Kandidatët e Zgjedhur',
@@ -1150,123 +873,13 @@ export const translations: Record<Language, Translation> = {
     empProfileCompanyName: 'Emri i Kompanisë',
     empProfileContactPerson: 'Personi i Kontaktit',
 
-    selectTaskPrompt: 'Zgjidh Detyrën...',
-    taskGroupSource: '🌍 Oficeri i Vendit Burim',
-    taskGroupTarget: '🏢 Oficeri i Vendit të Synuar',
-    taskGroupField: '✈️ Oficeri i Fushës',
-    taskGroupManagement: '👑 Menaxhimi i Lartë',
-    taskPassportCheck: 'Kontrollo Pasaportën',
-    taskInterviewPlan: 'Planifiko Intervistën e Kandidatit',
-    taskUpdateCandidate: 'Përditëso të Dhënat e Kandidatit',
-    taskRequestDocs: 'Kërko Dokumentet e Munguara',
-    taskSaveDemand: 'Ruaj Kërkesën e Punëdhënësit',
-    taskMatchCandidate: 'Përputh Kandidatin',
-    taskPrepareOffer: 'Përgatit Ofertën e Punës (Job Offer)',
-    taskTrackPerformance: 'Ndiq Performancën & Pajtueshmërinë',
-    taskEnterTravelDate: 'Vendos Datën e Udhëtimit',
-    taskPlanAccommodation: 'Planifiko Akomodimin & Pritjen',
-    taskManageSupport: 'Menaxho Tikat e Mbështetjes',
-    taskUpdateFieldStatus: 'Përditëso Statusin e Detyrës në Teren',
-    taskAuditSystem: 'Audito Sistemin & Regjistrat',
-    taskApproveStrategic: 'Mirato Vendimet Financiare & Strategjike',
-
-    reportsTab: 'Raportet',
-    analyticsTab: 'Analitika',
-    financialsTab: 'Financiare',
-    exportPdfBtn: 'Eksporto PDF',
-    exportExcelBtn: 'Eksporto Excel',
-    filterBtn: 'Filtro',
-    clearFiltersBtn: 'Pastro Filtrat',
-    statusActive: 'Aktiv',
-    statusInactive: 'Joaktiv',
-    statusCancelled: 'Anuluar',
-    actionsLabel: 'Veprimet',
-    detailsLabel: 'Detajet',
-    editLabel: 'Ndrysho',
-    deleteLabel: 'Fshi',
-    confirmDeleteTitle: 'Konfirmo Fshirjen',
-    confirmDeleteDesc: 'A jeni i sigurt që dëshironi ta fshini këtë regjistrim? Ky veprim nuk mund të zhbëhet.',
-    yesBtn: 'Po',
-    noBtn: 'Jo',
-
-    demandFilesTitle: 'Dosjet e Kërkesave të Personelit',
-    demandFilesSub: 'Operacionet, kushtet e punës, kriteret e kandidatëve dhe cikli i jetës së udhëtimit për çdo kërkesë.',
-    openDemandFilesBtn: 'Hap Dosjen e Kërkesës (Të Gjitha Detajet)',
-    lifecycleStatusLabel: 'STATUSI I CIKLIT TË JETËS SË KËRKESËS (5.1)',
-    stageNewRequest: 'Kërkesë e re (Shqyrtimi ende nuk ka filluar)',
-    stageReviewing: 'Duke u shqyrtuar (Kontrolli i kushteve)',
-    stageSearchingCandidates: 'Duke kërkuar kandidatë (Puna në vendin e burimit)',
-    stagePresentingCandidates: 'Duke paraqitur kandidatët (Dërgimi tek punëdhënësi)',
-    stageInterviews: 'Intervistat (Intervistat e punëdhënësit vazhdojnë)',
-    stageSelectionCompleted: 'Przgjedhja u kompletua (Kandidati i duhur u zgjodh)',
-    stageOfficialProcess: 'Procesi zyrtar / Dokumentet (Procedurat vazhdojnë)',
-    stageTravelPlanning: 'Planifikimi i udhëtimit (Mbërritja dhe fillimi)',
-    stageCompleted: 'Përfunduar (Kërkesa është mbyllur)',
-    stageCancelled: 'Anuluar (Arsyeja e regjistruar)',
-
-    completed: 'Përfunduar',
-    approved: 'Miratuar',
-    pending: 'Në pritje',
-    reviewing: 'Duke shqyrtuar',
-    sencing: 'Duke dërguar',
-    sending: 'Duke dërguar',
-    sendNotification: 'Dërgo Njoftim',
-    saveChanges: 'Ruaj Ndryshimet',
-    saving: 'Duke ruajtur...',
-    dossierClosedNotice: 'Dosja e këtij kandidati është mbyllur.',
-    reason: 'Arsyeja:',
-    reopenProcess: 'Rihap Procesin',
-    profileCredentialsManagement: 'Menaxhimi i Profilit dhe Kredencialeve',
-    phoneNumberGsm: 'Numri i Telefonit (GSM)',
-    emailAddress: 'Adresa Email',
-    portalPassword: 'Fjalëkalimi i Portalit',
-    travelFlightLogistics: 'Logjistika e Udhëtimit dhe Fluturimit',
-    planned: 'Planifikuar',
-    ticketed: 'Me biletë',
-    flightDateTime: 'Data dhe Ora e Fluturimit',
-    flightNumber: 'Numri i Fluturimit',
-    departureCityAirport: 'Qyteti / Aeroporti i Nisjes',
-    arrivalCityAirport: 'Qyteti / Aeroporti i Mbërritjes',
-    pnrBookingCode: 'Kodi PNR',
-    accommodationTransferDetails: 'Detajet e Akomodimit dhe Transfertës',
-    documentTrackingMechanism: 'Mekanizmi i Njekjes së Dokumenteve',
-    file: 'Skedari',
-    uploaded: 'Ngarkuar',
-    rejected: 'Refuzuar',
-    reRequested: 'Rikërkuar',
-    preview: 'Parashiko',
-    noFileUploaded: 'Nuk ka skedar',
-    uploadFromComputer: 'Ngarko nga Kompjuteri',
-    newDocNamePlaceholder: 'Emri i Dokumentit të Ri',
-    add: 'Shto',
-    professionalEvaluationCertificate: 'Vlerësimi Profesional & Certifikata',
-    certificateInfo: 'Informacioni i Certifikatës',
-    workVideoUrl: 'URL e Videos së Punës',
-    previewPlayVideo: 'Parashiko / Luaj Videon',
-    internalNotesAdminOnly: 'Shënimet e Brendshme (Vetëm për PANOVA)',
-    candidateStatus: 'Statusi i Kandidatit',
-    visaProcessing: 'Në proces vizash',
-    processClosureWithdrawal: 'Mbyllja e Procesit / Tërheqja',
-    closureDesc: 'Mbyllni procesin e kandidatit pa fshirë të dhënat.',
-    closureReasonPlaceholder: 'Arsyeja e mbylljes...',
-    closeArchiveProcess: 'Mbyll / Arkivo Procesin',
-    sendOfficialJobOffer: 'Dërgo Ofertë Zyrtare Pune',
-    employerCompanyName: 'Emri i Punëdhënësit / Kompanisë',
-    monthlyNetSalary: 'Paga Neto Mujore (€)',
-    startDate: 'Data e Fillimit',
-    termsConditions: 'Kushtet e Ofertave',
-    sendOfferToCandidate: 'Dërgo Ofertën te Kandidati',
-    sendNotificationBtn: 'Dërgo Njoftimin',
-    workVideoPreview: 'Pamja Paraprake e Videos',
-    savedSuccess: 'U ruajt me sukses!',
-    fillEmployerAndSalary: 'Ju lutemi plotësoni emrin e punëdhënësit dhe pagën.',
-    offerSentSuccess: 'Oferta zyrtare u dërgua me sukses!',
-    notificationSentSuccess: 'Njoftimi u dërgua me sukses!',
-    returnToPortal: 'Kthehu te Portali',
-    docPassportScan: 'Skanimi i Pasaportës',
-    docProfessionalCert: 'Certifikata Profesionale / Leja e Punës',
-    docCriminalRecord: 'Dëshmia e Penalitetit',
-    docHealthReport: 'Raporti Shëndetësor / Radiografia e Mushkërive',
+    profileUpdateTitle: 'Përditësimi i Profilit dhe Informacionit të Kompanisë',
+    profileUpdateDesc: 'Ju mund të përditësoni informacionin e kompanisë suaj dhe fjalëkalimin këtu.',
+    countryLocationLabel: 'Shteti / Vendndodhja',
+    emailReadonlyLabel: 'Email (I pandryshueshëm)',
+    updatingBtn: 'Duke përditësuar...',
+    saveChangesBtn: 'Ruaj Ndryshimet',
+    profileUpdatedSuccess: 'Profili i kompanisë u përditësuar me sukses!',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -1434,6 +1047,21 @@ export const translations: Record<Language, Translation> = {
     dateFormatPlaceholder: 'dd.mm.yyyy',
     message: 'الرسالة',
 
+    signInMenu: 'تسجيل الدخول',
+    signUpMenu: 'التسجيل',
+    loginPortalTitle: 'بوابة تسجيل دخول أصحاب العمل',
+    loginPortalSub: 'قم بتسجيل الدخول بريد الشركة الإلكتروني وكلمة المرور.',
+    companyEmailLabel: 'البريد الإلكتروني للشركة',
+    signUpPortalTitle: 'تسجيل صاحب العمل',
+    signUpPortalSub: 'سجل شركتك لتقديم طلبات القوى العاملة.',
+    companyNameLabel: 'اسم الشركة',
+    contactPersonLabel: 'الشخص المسؤول',
+    completeSignUpBtn: 'إتمام التسجيل',
+    demoLoginText: 'تسجيل تجريبي:',
+    regSuccessHeader: 'تم التسجيل بنجاح!',
+    regSuccessText: 'تم إنشاء حساب شركتك. يمكنك الآن تسجيل الدخول.',
+    goToSignInBtn: 'الانتقال لتسجيل الدخول',
+
     empTabRequests: 'طلبات الموظفين',
     empTabCandidates: 'المرشحون / المطابقة',
     empTabSelected: 'المرشحون المختارون',
@@ -1463,124 +1091,12 @@ export const translations: Record<Language, Translation> = {
     empProfileCompanyName: 'اسم الشركة',
     empProfileContactPerson: 'الشخص المسؤول',
 
-    selectTaskPrompt: 'اختر المهمة...',
-    taskGroupSource: '🌍 مسؤول بلد المصدر',
-    taskGroupTarget: '🏢 مسؤول البلد المستهدف',
-    taskGroupField: '✈️ مسؤول الميدان',
-    taskGroupManagement: '👑 الإدارة العليا',
-    taskPassportCheck: 'فحص جواز السفر',
-    taskInterviewPlan: 'التخطيط لمقابلة المرشح',
-    taskUpdateCandidate: 'تحديث بيانات المرشح',
-    taskRequestDocs: 'طلب المستندات الناقصة',
-    taskSaveDemand: 'حفظ طلب صاحب العمل',
-    taskMatchCandidate: 'مطابقة المرشح',
-    taskPrepareOffer: 'إعداد عرض العمل (Job Offer)',
-    taskTrackPerformance: 'متابعة الأداء والامتثال',
-    taskEnterTravelDate: 'إدخال تاريخ السفر',
-    taskPlanAccommodation: 'تخطيط الإقامة والترحيب',
-    taskManageSupport: 'إدارة تذاكر الدعم',
-    taskUpdateFieldStatus: 'تحديث حالة المهمة الميدانية',
-    taskAuditSystem: 'تدقيق النظام والسجلات',
-    taskApproveStrategic: 'الموافقة على القرارات المالية والاستراتيجية',
-
-    reportsTab: 'التقارير',
-    analyticsTab: 'التحليلات',
-    financialsTab: 'المالية',
-    exportPdfBtn: 'تصدير PDF',
-    exportExcelBtn: 'تصدير Excel',
-    filterBtn: 'تصفية',
-    clearFiltersBtn: 'مسح الفلاتر',
-    statusActive: 'نشط',
-    statusInactive: 'غير نشط',
-    statusCancelled: 'ملغى',
-    actionsLabel: 'الإجراءات',
-    detailsLabel: 'التفاصيل',
-    editLabel: 'تعديل',
-    deleteLabel: 'حذف',
-    confirmDeleteTitle: 'تأكيد الحذف',
-    confirmDeleteDesc: 'هل أنت متأكد أنك تريد حذف هذا السجل؟ لا يمكن التراجع عن هذا الإجراء.',
-    yesBtn: 'نعم',
-    noBtn: 'لا',
-
-    demandFilesTitle: 'ملفات طلبات الموظفين',
-    demandFilesSub: 'العمليات، ظروف العمل، معايير المرشحين، ودورة حياة السفر لكل طلب.',
-    openDemandFilesBtn: 'فتح ملف الطلب (جميع التفاصيل)',
-    lifecycleStatusLabel: 'حالة دورة حياة الطلب (5.1)',
-    stageNewRequest: 'طلب جديد (لم تبدأ المراجعة بعد)',
-    stageReviewing: 'قيد المراجعة (جاري التحقق من الشروط)',
-    stageSearchingCandidates: 'جاري البحث عن مرشحين (العمل في بلد المصدر)',
-    stagePresentingCandidates: 'جاري تقديم المرشحين (إرسالهم إلى صاحب العمل)',
-    stageInterviews: 'المقابلات (مقابلات صاحب العمل مستمرة)',
-    stageSelectionCompleted: 'اكتمل الاختيار (تم اختيار المرشح المطلوب)',
-    stageOfficialProcess: 'العملية الرسمية / المستندات (الإجراءات مستمرة)',
-    stageTravelPlanning: 'تخطيط السفر (الوصول والبداية)',
-    stageCompleted: 'مكتمل (تم إغلاق الطلب)',
-    stageCancelled: 'ملغى (تم تسجيل السبب)',
-
-    completed: 'مكتمل',
-    approved: 'تم الموافقة',
-    pending: 'قيد الانتظار',
-    reviewing: 'قيد المراجعة',
-    sencing: 'جاري الإرسال',
-    sending: 'جاري الإرسال',
-    sendNotification: 'إرسال إشعار',
-    saveChanges: 'حفظ التغييرات',
-    saving: 'جاري الحفظ...',
-    dossierClosedNotice: 'تم إغلاق ملف هذا المرشح.',
-    reason: 'السبب:',
-    reopenProcess: 'إعادة فتح العملية',
-    profileCredentialsManagement: 'إدارة ملف المرشح وبيانات الاعتماد',
-    phoneNumberGsm: 'رقم الهاتف (GSM)',
-    emailAddress: 'عنوان البريد الإلكتروني',
-    portalPassword: 'كلمة مرور البوابة',
-    travelFlightLogistics: 'لوجستيات السفر والرحلات الجوية',
-    planned: 'مخطط له',
-    ticketed: 'تم إصدار التذكرة',
-    flightDateTime: 'تاريخ ووقت الرحلة',
-    flightNumber: 'رقم الرحلة',
-    departureCityAirport: 'مدينة المغادرة / المطار',
-    arrivalCityAirport: 'مدينة الوصول / المطار',
-    pnrBookingCode: 'رمز الحجز PNR',
-    accommodationTransferDetails: 'تفاصيل الإقامة والاستقبال',
-    documentTrackingMechanism: 'آلية تتبع المستندات',
-    file: 'ملف',
-    uploaded: 'تم الرفع',
-    rejected: 'مرفوض',
-    reRequested: 'إعادة الطلب',
-    preview: 'معاينة',
-    noFileUploaded: 'لم يتم رفع ملف',
-    uploadFromComputer: 'رفع من الكمبيوتر',
-    newDocNamePlaceholder: 'اسم المستند الجديد',
-    add: 'إضافة',
-    professionalEvaluationCertificate: 'التقييم المهني والشهادة',
-    certificateInfo: 'معلومات الشهادة',
-    workVideoUrl: 'رابط فيديو العمل',
-    previewPlayVideo: 'معاينة / تشغيل الفيديو',
-    internalNotesAdminOnly: 'ملاحظات داخلية (خاص بـ PANOVA فقط)',
-    candidateStatus: 'حالة المرشح',
-    visaProcessing: 'قيد معالجة التأشيرة',
-    processClosureWithdrawal: 'إغلاق العملية / الانسحاب',
-    closureDesc: 'يمكنك إغلاق عملية المرشح دون حذف السجلات.',
-    closureReasonPlaceholder: 'سبب الإغلاق...',
-    closeArchiveProcess: 'إغلاق / أرشفة عملية المرشح',
-    sendOfficialJobOffer: 'إرسال عرض عمل رسمي',
-    employerCompanyName: 'اسم صاحب العمل / الشركة',
-    monthlyNetSalary: 'صافي الراتب الشهري (€)',
-    startDate: 'تاريخ البدء',
-    termsConditions: 'شروط العقد',
-    sendOfferToCandidate: 'إرسال العرض إلى المرشح',
-    notificationTitle: 'عنوان الإشعار',
-    messageBody: 'نص الرسالة',
-    sendNotificationBtn: 'إرسال الإشعار للمرشح',
-    workVideoPreview: 'معاينة فيديو العمل',
-    savedSuccess: 'تم الحفظ بنجاح!',
-    fillEmployerAndSalary: 'يرجى ملء اسم صاحب العمل والراتب.',
-    offerSentSuccess: 'تم إرسال عرض العمل الرسمي بنجاح!',
-    notificationSentSuccess: 'تم إرسال الإشعار بنجاح!',
-    returnToPortal: 'العودة إلى لوحة التحكم',
-    docPassportScan: 'مسح جواز السفر',
-    docProfessionalCert: 'الشهادة المهنية / تصريح العمل',
-    docCriminalRecord: 'سجل السوابق العدلية',
-    docHealthReport: 'التقرير الطبي / أشعة الصدر',
+    profileUpdateTitle: 'تحديث ملف الشركة والمعلومات',
+    profileUpdateDesc: 'يمكنك تحديث معلومات شركتك وكلمة المرور من هنا.',
+    countryLocationLabel: 'الدولة / الموقع',
+    emailReadonlyLabel: 'البريد الإلكتروني (غير قابل للتعديل)',
+    updatingBtn: 'جاري التحديث...',
+    saveChangesBtn: 'حفظ التغييرات',
+    profileUpdatedSuccess: 'تم تحديث ملف الشركة بنجاح!',
   },
 };
