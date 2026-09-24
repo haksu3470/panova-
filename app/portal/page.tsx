@@ -845,10 +845,12 @@ export default function PortalPage() {
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskDueDateLabel}</label>
                   <input 
-                    type="date" 
+                    type="text" 
+                    onFocus={(e) => (e.target.type = 'date')}
+                    onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
                     value={newTaskDueDate} 
                     onChange={(e) => setNewTaskDueDate(e.target.value)} 
-                    placeholder={t.dateFormatPlaceholder || 'gg.aa.yyyy'}
+                    placeholder={currentLang === 'tr' ? 'gg.aa.yyyy' : currentLang === 'ar' ? 'yyyy.aa.gg' : 'dd.mm.yyyy'}
                     className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm" 
                   />
                 </div>
