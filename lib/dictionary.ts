@@ -208,8 +208,7 @@ export interface Translation {
   empProfileTitle?: string;
   empProfileCompanyName?: string;
   empProfileContactPerson?: string;
-  
-  // Profil & Güncelleme Çevirileri
+
   profileUpdateTitle?: string;
   profileUpdateDesc?: string;
   countryLocationLabel?: string;
@@ -377,7 +376,7 @@ export const translations: Record<Language, Translation> = {
     colPerformer: 'İşlemi Yapan',
     colTime: 'Zaman Damgası',
     delayAlertsTitle: '⚠️ Gecikme ve Süre Uyarıları',
-    delayAlertsDesc: 'Vize süreci 15 günü aşan veya belgesi eksik olan dosyalar için otomatik sistem uyarıları aktif.',
+    delayAlertsDesc: 'Vize süresi 15 günü aşan veya belgesi eksik olan dosyalar için otomatik sistem uyarıları aktif.',
     roleUpperManagement: 'Üst Yönetim',
     roleSourceCountry: 'Kaynak Ülke Sorumlusu',
     roleTargetCountry: 'Hedef Ülke Sorumlusu',
@@ -413,7 +412,7 @@ export const translations: Record<Language, Translation> = {
     empTabSelected: 'Seçtiğim Adaylar',
     empTabTravel: 'Seyahat ve Başlangıç',
     empTabSupport: 'Destek / Bildirim',
-    empTabProfile: 'Şirket Bilgilerim',
+    empTabProfile: 'Şirket Profili',
     empNoRequests: 'Kayıtlı personel talebiniz bulunmuyor.',
     empCandidatesPoolTitle: 'Taleplerinize Sunulan Aday Havuzu',
     empNoCandidates: 'Henüz eşleşen aday bulunmuyor.',
@@ -631,7 +630,7 @@ export const translations: Record<Language, Translation> = {
     empTabSelected: 'Selected Candidates',
     empTabTravel: 'Travel & Start',
     empTabSupport: 'Support / Notices',
-    empTabProfile: 'Company Info',
+    empTabProfile: 'Company Profile',
     empNoRequests: 'No active workforce requests found.',
     empCandidatesPoolTitle: 'Candidate Pool Offered for Your Demands',
     empNoCandidates: 'No matching candidates found yet.',
@@ -849,7 +848,7 @@ export const translations: Record<Language, Translation> = {
     empTabSelected: 'Kandidatët e Zgjedhur',
     empTabTravel: 'Udhëtimi dhe Fillimi',
     empTabSupport: 'Mbështetje / Njoftim',
-    empTabProfile: 'Të Dhënat e Kompanisë',
+    empTabProfile: 'Profili i Kompanisë',
     empNoRequests: 'Nuk u gjet asnjë kërkesë aktive për personel.',
     empCandidatesPoolTitle: 'Grupi i Kandidatëve për Kërkesat Tuaja',
     empNoCandidates: 'Ende nuk ka kandidatë përputhës.',
@@ -1067,7 +1066,7 @@ export const translations: Record<Language, Translation> = {
     empTabSelected: 'المرشحون المختارون',
     empTabTravel: 'السفر والبداية',
     empTabSupport: 'الدعم / الإشعارات',
-    empTabProfile: 'معلومات الشركة',
+    empTabProfile: 'ملف الشركة',
     empNoRequests: 'لا توجد طلبات قوى عاملة نشطة.',
     empCandidatesPoolTitle: 'قائمة المرشحين المقدمة لطلباتك',
     empNoCandidates: 'لا يوجد مرشحون مطابقون حتى الآن.',
