@@ -42,10 +42,27 @@ export default function EmployerPortalPage() {
     }
   };
 
-  const [authenticated, setAuthenticated] = useState(false);
+  // Kalıcı Oturum Yönetimi (Sayfa yenilendiğinde dışarı atmaz)
+  const [authenticated, setAuthenticated] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('panova_employer_auth') === 'true';
+    }
+    return false;
+  });
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [employer, setEmployer] = useState<any | null>(null);
+  
+  const [employer, setEmployer] = useState<any | null>(() => {
+    if (typeof window !== 'undefined') {
+      const savedEmp = localStorage.getItem('panova_employer_data');
+      if (savedEmp) {
+        try { return JSON.parse(savedEmp); } catch { return null; }
+      }
+    }
+    return null;
+  });
+
   const [requests, setRequests] = useState<any[]>([]);
   const [candidates, setCandidates] = useState<any[]>([]);
   const [interviews, setInterviews] = useState<any[]>([]);
@@ -67,6 +84,13 @@ export default function EmployerPortalPage() {
   
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
   const activeLangObj = languages.find((l) => l.code === currentLang);
+
+  // Sayfa yüklendiğinde oturum açıksa verileri otomatik çek
+  useEffect(() => {
+    if (authenticated && employer?.id) {
+      fetchEmployerData(employer.id);
+    }
+  }, [authenticated]);
 
   const [newRequest, setNewRequest] = useState({
     sector: 'construction',
@@ -99,13 +123,15 @@ export default function EmployerPortalPage() {
     setLoading(true);
 
     try {
+      let currentEmployer = null;
+
       if (email === 'demo@panova.com' && password === 'employer2026') {
         const { data: existingEmployers } = await supabase
           .from('employers')
           .select('*')
           .eq('email', 'demo@panova.com');
 
-        let currentEmployer = existingEmployers && existingEmployers.length > 0 ? existingEmployers[0] : null;
+        currentEmployer = existingEmployers && existingEmployers.length > 0 ? existingEmployers[0] : null;
 
         if (!currentEmployer) {
           const { data: newEmp, error: createErr } = await supabase
@@ -126,10 +152,6 @@ export default function EmployerPortalPage() {
           if (createErr) throw createErr;
           currentEmployer = newEmp;
         }
-
-        setEmployer(currentEmployer);
-        setAuthenticated(true);
-        if (currentEmployer) fetchEmployerData(currentEmployer.id);
       } else {
         const { data, error } = await supabase
           .from('employers')
@@ -140,17 +162,31 @@ export default function EmployerPortalPage() {
 
         if (error || !data) {
           alert('Invalid email or password! (Demo: demo@panova.com / employer2026)');
-        } else {
-          setEmployer(data);
-          setAuthenticated(true);
-          fetchEmployerData(data.id);
+          setLoading(false);
+          return;
         }
+        currentEmployer = data;
+      }
+
+      if (currentEmployer) {
+        setEmployer(currentEmployer);
+        setAuthenticated(true);
+        localStorage.setItem('panova_employer_auth', 'true');
+        localStorage.setItem('panova_employer_data', JSON.stringify(currentEmployer));
+        fetchEmployerData(currentEmployer.id);
       }
     } catch (err: any) {
       alert('Login Error: ' + err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    setAuthenticated(false);
+    setEmployer(null);
+    localStorage.removeItem('panova_employer_auth');
+    localStorage.removeItem('panova_employer_data');
   };
 
   const fetchEmployerData = async (employerId: string) => {
@@ -361,7 +397,7 @@ export default function EmployerPortalPage() {
             </button>
 
             <button
-              onClick={() => setAuthenticated(false)}
+              onClick={handleLogout}
               className="bg-red-50 hover:bg-red-100 text-red-700 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
             >
               {t.logoutBtn}
