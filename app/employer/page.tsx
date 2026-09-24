@@ -838,9 +838,9 @@ export default function EmployerPortalPage() {
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Şifre *</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.passwordLabel || 'Password'} *</label>
                   <input
-                    type="text"
+                    type="password"
                     required
                     value={editProfile.password}
                     onChange={(e) => setEditProfile({ ...editProfile, password: e.target.value })}
