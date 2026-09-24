@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Building2, ArrowLeft, Languages, Lock, Mail, User, Phone } from 'lucide-react';
+import { Building2, ArrowLeft, Languages } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
@@ -29,8 +29,6 @@ export default function EmployerLoginPage() {
   const [regContactPerson, setRegContactPerson] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPhone, setRegPhone] = useState('');
-  const [regCountry, setRegCountry] = useState('North Macedonia');
-  const [regSector, setRegSector] = useState('Agriculture');
   const [regPassword, setRegPassword] = useState('');
   const [regLoading, setRegLoading] = useState(false);
 
@@ -119,8 +117,8 @@ export default function EmployerLoginPage() {
         contact_person: regContactPerson,
         email: regEmail,
         phone: regPhone,
-        country: regCountry,
-        sector: regSector,
+        country: 'North Macedonia',
+        sector: 'Agriculture',
         password: regPassword,
         status: 'active'
       }
