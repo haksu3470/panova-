@@ -216,6 +216,15 @@ export interface Translation {
   updatingBtn?: string;
   saveChangesBtn?: string;
   profileUpdatedSuccess?: string;
+
+  // TypeScript Hata Loglarında Belirtilen Eksik Alanlar
+  completed?: string;
+  approved?: string;
+  pending?: string;
+  reviewing?: string;
+  certificateno?: string;
+  issuingbody?: string;
+  sendnotification?: string;
 }
 
 export const languages = [
@@ -443,6 +452,14 @@ export const translations: Record<Language, Translation> = {
     updatingBtn: 'Güncelleniyor...',
     saveChangesBtn: 'Değişiklikleri Kaydet',
     profileUpdatedSuccess: 'Şirket profili başarıyla güncellendi!',
+
+    completed: 'Tamamlandı',
+    approved: 'Onaylandı',
+    pending: 'Beklemede',
+    reviewing: 'İnceleniyor',
+    certificateno: 'Sertifika No',
+    issuingbody: 'Veren Kurum',
+    sendnotification: 'Bildirim Gönder',
   },
   en: {
     returnHome: 'Return to Home',
@@ -661,6 +678,14 @@ export const translations: Record<Language, Translation> = {
     updatingBtn: 'Updating...',
     saveChangesBtn: 'Save Changes',
     profileUpdatedSuccess: 'Company profile successfully updated!',
+
+    completed: 'Completed',
+    approved: 'Approved',
+    pending: 'Pending',
+    reviewing: 'Reviewing',
+    certificateno: 'Certificate No',
+    issuingbody: 'Issuing Body',
+    sendnotification: 'Send Notification',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -879,6 +904,14 @@ export const translations: Record<Language, Translation> = {
     updatingBtn: 'Duke përditësuar...',
     saveChangesBtn: 'Ruaj Ndryshimet',
     profileUpdatedSuccess: 'Profili i kompanisë u përditësuar me sukses!',
+
+    completed: 'Përfunduar',
+    approved: 'Miratuar',
+    pending: 'Në pritje',
+    reviewing: 'Duke shqyrtuar',
+    certificateno: 'Nr. Certifikatës',
+    issuingbody: 'Institucioni Lëshues',
+    sendnotification: 'Dërgo Njoftim',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -1097,5 +1130,13 @@ export const translations: Record<Language, Translation> = {
     updatingBtn: 'جاري التحديث...',
     saveChangesBtn: 'حفظ التغييرات',
     profileUpdatedSuccess: 'تم تحديث ملف الشركة بنجاح!',
+
+    completed: 'مكتمل',
+    approved: 'تم الموافقة',
+    pending: 'قيد الانتظار',
+    reviewing: 'قيد المراجعة',
+    certificateno: 'رقم الشهادة',
+    issuingbody: 'جهة الإصدار',
+    sendnotification: 'إرسال إشعار',
   },
 };
