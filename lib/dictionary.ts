@@ -211,6 +211,26 @@ export interface Translation {
   taskUpdateFieldStatus?: string;
   taskAuditSystem?: string;
   taskApproveStrategic?: string;
+
+  // Yeni Eklenen Raporlama, Filtreleme ve Aksiyon Anahtarları
+  reportsTab?: string;
+  analyticsTab?: string;
+  financialsTab?: string;
+  exportPdfBtn?: string;
+  exportExcelBtn?: string;
+  filterBtn?: string;
+  clearFiltersBtn?: string;
+  statusActive?: string;
+  statusInactive?: string;
+  statusCancelled?: string;
+  actionsLabel?: string;
+  detailsLabel?: string;
+  editLabel?: string;
+  deleteLabel?: string;
+  confirmDeleteTitle?: string;
+  confirmDeleteDesc?: string;
+  yesBtn?: string;
+  noBtn?: string;
 }
 
 export const languages = [
@@ -409,7 +429,7 @@ export const translations: Record<Language, Translation> = {
     empSupportSubmitBtn: 'Destek Talebi Gönder',
     empSupportHistoryTitle: 'Destek Geçmişim',
     empNoSupportTickets: 'Aktif destek kaydınız yok.',
-    empProfileTitle: 'Firma ve İletişim Bilgilerim',
+    empProfileTitle: 'Firma dan İletişim Bilgilerim',
     empProfileCompanyName: 'Şirket Unvanı',
     empProfileContactPerson: 'Yetkili Kişi',
 
@@ -432,6 +452,25 @@ export const translations: Record<Language, Translation> = {
     taskUpdateFieldStatus: 'Saha Görev Durumunu Güncelle',
     taskAuditSystem: 'Sistem ve Logları Denetle',
     taskApproveStrategic: 'Mali ve Stratejik Kararları Onayla',
+
+    reportsTab: 'Raporlar',
+    analyticsTab: 'Analizler',
+    financialsTab: 'Mali İşler',
+    exportPdfBtn: 'PDF İndir',
+    exportExcelBtn: 'Excel İndir',
+    filterBtn: 'Filtrele',
+    clearFiltersBtn: 'Filtreleri Temizle',
+    statusActive: 'Aktif',
+    statusInactive: 'Pasif',
+    statusCancelled: 'İptal Edildi',
+    actionsLabel: 'İşlemler',
+    detailsLabel: 'Detaylar',
+    editLabel: 'Düzenle',
+    deleteLabel: 'Sil',
+    confirmDeleteTitle: 'Silme İşlemini Onayla',
+    confirmDeleteDesc: 'Bu kaydı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+    yesBtn: 'Evet',
+    noBtn: 'Hayır',
   },
   en: {
     returnHome: 'Return to Home',
@@ -644,6 +683,25 @@ export const translations: Record<Language, Translation> = {
     taskUpdateFieldStatus: 'Update Field Task Status',
     taskAuditSystem: 'Audit System & Logs',
     taskApproveStrategic: 'Approve Financial & Strategic Decisions',
+
+    reportsTab: 'Reports',
+    analyticsTab: 'Analytics',
+    financialsTab: 'Financials',
+    exportPdfBtn: 'Export PDF',
+    exportExcelBtn: 'Export Excel',
+    filterBtn: 'Filter',
+    clearFiltersBtn: 'Clear Filters',
+    statusActive: 'Active',
+    statusInactive: 'Inactive',
+    statusCancelled: 'Cancelled',
+    actionsLabel: 'Actions',
+    detailsLabel: 'Details',
+    editLabel: 'Edit',
+    deleteLabel: 'Delete',
+    confirmDeleteTitle: 'Confirm Deletion',
+    confirmDeleteDesc: 'Are you sure you want to delete this record? This action cannot be undone.',
+    yesBtn: 'Yes',
+    noBtn: 'No',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -856,6 +914,25 @@ export const translations: Record<Language, Translation> = {
     taskUpdateFieldStatus: 'Përditëso Statusin e Detyrës në Teren',
     taskAuditSystem: 'Audito Sistemin & Regjistrat',
     taskApproveStrategic: 'Mirato Vendimet Financiare & Strategjike',
+
+    reportsTab: 'Raportet',
+    analyticsTab: 'Analitika',
+    financialsTab: 'Financiare',
+    exportPdfBtn: 'Eksporto PDF',
+    exportExcelBtn: 'Eksporto Excel',
+    filterBtn: 'Filtro',
+    clearFiltersBtn: 'Pastro Filtrat',
+    statusActive: 'Aktiv',
+    statusInactive: 'Joaktiv',
+    statusCancelled: 'Anuluar',
+    actionsLabel: 'Veprimet',
+    detailsLabel: 'Detajet',
+    editLabel: 'Ndrysho',
+    deleteLabel: 'Fshi',
+    confirmDeleteTitle: 'Konfirmo Fshirjen',
+    confirmDeleteDesc: 'A jeni i sigurt që dëshironi ta fshini këtë regjistrim? Ky veprim nuk mund të zhbëhet.',
+    yesBtn: 'Po',
+    noBtn: 'Jo',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -1068,5 +1145,24 @@ export const translations: Record<Language, Translation> = {
     taskUpdateFieldStatus: 'تحديث حالة المهمة الميدانية',
     taskAuditSystem: 'تدقيق النظام والسجلات',
     taskApproveStrategic: 'الموافقة على القرارات المالية والاستراتيجية',
+
+    reportsTab: 'التقارير',
+    analyticsTab: 'التحليلات',
+    financialsTab: 'المالية',
+    exportPdfBtn: 'تصدير PDF',
+    exportExcelBtn: 'تصدير Excel',
+    filterBtn: 'تصفية',
+    clearFiltersBtn: 'مسح الفلاتر',
+    statusActive: 'نشط',
+    statusInactive: 'غير نشط',
+    statusCancelled: 'ملغى',
+    actionsLabel: 'الإجراءات',
+    detailsLabel: 'التفاصيل',
+    editLabel: 'تعديل',
+    deleteLabel: 'حذف',
+    confirmDeleteTitle: 'تأكيد الحذف',
+    confirmDeleteDesc: 'هل أنت متأكد أنك تريد حذف هذا السجل؟ لا يمكن التراجع عن هذا الإجراء.',
+    yesBtn: 'نعم',
+    noBtn: 'لا',
   },
 };
