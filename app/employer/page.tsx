@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { 
   Building2, PlusCircle, FileText, Clock, Users, ArrowLeft, Languages, 
-  Send, Plane, UserPlus, LogIn, AlertTriangle, CheckCircle2 
+  Send, Plane, UserPlus, LogIn, CheckCircle2 
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
@@ -75,7 +75,6 @@ export default function EmployerPortalPage() {
   const [regEmail, setRegEmail] = useState('');
   const [regPhone, setRegPhone] = useState('');
   const [regCountry, setRegCountry] = useState('North Macedonia');
-  const [regSector, setRegSector] = useState('construction');
   const [regPassword, setRegPassword] = useState('');
   const [regLoading, setRegLoading] = useState(false);
   const [regSuccess, setRegSuccess] = useState(false);
@@ -206,7 +205,6 @@ export default function EmployerPortalPage() {
           email: regEmail.trim().toLowerCase(),
           phone: regPhone,
           country: regCountry,
-          sector: regSector,
           password: regPassword,
           status: 'active'
         }
@@ -320,7 +318,6 @@ export default function EmployerPortalPage() {
     }
   };
 
-  // EĞER OTURUM AÇILMAMIŞSA -> ADAY SAYFASIYLA BİREBİR AYNİ SEKME TASARIMI
   if (!authenticated) {
     return (
       <div className={`min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 sm:p-6 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -341,8 +338,6 @@ export default function EmployerPortalPage() {
         </div>
 
         <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full text-center space-y-6">
-          
-          {/* Üst Sekmeler (Aday Portalındaki Gibi) */}
           <div className="grid grid-cols-2 bg-slate-100 p-1.5 rounded-2xl font-bold text-xs">
             <button
               type="button"
@@ -470,7 +465,6 @@ export default function EmployerPortalPage() {
     );
   }
 
-  // OTURUM AÇILDIYSA İŞVEREN PANELİ GÖSTERİLİR
   return (
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
