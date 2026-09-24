@@ -378,7 +378,7 @@ export default function CandidateDetailPage() {
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
               <div>
-                <strong>Bu aday dosyası kapatılmıştır / süreçten çıkılmıştır.</strong> Sebep: {closureReason || Belirtilmemiş}
+                <strong>Bu aday dosyası kapatılmıştır / süreçten çıkılmıştır.</strong> Sebep: {closureReason || 'Belirtilmemiş'}
               </div>
             </div>
             <button onClick={() => { setIsClosed(false); setClosureReason(''); }} className="bg-white px-3 py-1.5 rounded-lg border border-red-300 font-bold hover:bg-red-100 transition cursor-pointer">
