@@ -87,9 +87,10 @@ export default function CandidateDetailPage() {
   const [offerDate, setOfferDate] = useState('');
   const [offerTerms, setOfferTerms] = useState('');
 
-  // Yeni Belge & Önizleme
+  // Yeni Belge & Önizleme / Video Önizleme
   const [newDocName, setNewDocName] = useState('');
   const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
+  const [previewVideo, setPreviewVideo] = useState<string | null>(null);
 
   // Aday Bildirim Gönderme State'leri
   const [notifTitle, setNotifTitle] = useState('');
@@ -322,7 +323,7 @@ export default function CandidateDetailPage() {
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         
-        {/* Üst Bar ve Aday Özet Kartı (6. Madde) */}
+        {/* Üst Bar ve Aday Özet Kartı */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             <Link href="/portal" className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-700 font-bold text-xs w-fit">
@@ -575,9 +576,20 @@ export default function CandidateDetailPage() {
                   <input type="text" value={certificateNo} onChange={(e) => setCertificateNo(e.target.value)} placeholder="Sertifika No" className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
                   <input type="text" value={issuingBody} onChange={(e) => setIssuingBody(e.target.value)} placeholder="Veren Kurum" className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
                 </div>
-                <div className="p-4 bg-slate-50 rounded-xl border space-y-2">
-                  <span className="font-bold text-slate-500 uppercase block">Çalışma Videosu URL</span>
-                  <input type="url" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
+                <div className="p-4 bg-slate-50 rounded-xl border space-y-2 flex flex-col justify-between">
+                  <div>
+                    <span className="font-bold text-slate-500 uppercase block mb-1">Çalışma Videosu URL</span>
+                    <input type="url" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
+                  </div>
+                  {videoUrl && (
+                    <button 
+                      type="button" 
+                      onClick={() => setPreviewVideo(videoUrl)} 
+                      className="mt-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer border border-indigo-200"
+                    >
+                      <Video className="w-4 h-4" /> Videoyu Önizle / Oynat
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -595,11 +607,15 @@ export default function CandidateDetailPage() {
           <div className="lg:col-span-4 space-y-4 sm:space-y-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3">
               <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b pb-2">Aday Süreç Durumu</h3>
-              <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full p-3 rounded-xl border text-xs sm:text-sm font-bold bg-slate-50 outline-none cursor-pointer">
-                <option value="pending">🟡 Beklemede</option>
-                <option value="reviewing">🔵 İncelemede</option>
-                <option value="visa_processing">🟣 Vize Sürecinde</option>
-                <option value="approved">🟢 Onaylandı</option>
+              <select 
+                value={status} 
+                onChange={(e) => setStatus(e.target.value)} 
+                className="w-full p-3 rounded-xl border text-xs sm:text-sm font-extrabold bg-slate-900 text-white outline-none cursor-pointer shadow-sm"
+              >
+                <option value="pending" className="bg-white text-slate-900">🟡 Beklemede (Pending)</option>
+                <option value="reviewing" className="bg-white text-slate-900">🔵 İncelemede (Reviewing)</option>
+                <option value="visa_processing" className="bg-white text-slate-900">🟣 Vize Sürecinde (Visa Processing)</option>
+                <option value="approved" className="bg-white text-slate-900">🟢 Onaylandı (Approved)</option>
               </select>
             </div>
 
@@ -724,6 +740,7 @@ export default function CandidateDetailPage() {
         </div>
       </div>
 
+      {/* Belge Önizleme Modal */}
       {previewDoc && (
         <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
           <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
@@ -733,6 +750,30 @@ export default function CandidateDetailPage() {
             </div>
             <div className="p-2 sm:p-4 flex-1 overflow-auto flex justify-center items-center bg-slate-100">
               <iframe src={previewDoc.url} className="w-full h-[70vh] rounded-xl border bg-white" title="Önizleme" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Önizleme Modal */}
+      {previewVideo && (
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
+              <h3 className="font-bold text-xs sm:text-sm">Aday Çalışma Videosu Önizleme</h3>
+              <button onClick={() => setPreviewVideo(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300 cursor-pointer"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-4 flex-1 overflow-auto flex justify-center items-center bg-slate-100">
+              {previewVideo.includes('youtube.com') || previewVideo.includes('youtu.be') ? (
+                <iframe 
+                  src={previewVideo.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')} 
+                  className="w-full h-[70vh] rounded-xl border bg-black" 
+                  title="Video Önizleme" 
+                  allowFullScreen 
+                />
+              ) : (
+                <video src={previewVideo} controls className="w-full h-[70vh] rounded-xl border bg-black" />
+              )}
             </div>
           </div>
         </div>
