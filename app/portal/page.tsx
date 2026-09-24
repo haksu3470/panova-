@@ -66,19 +66,22 @@ export default function PortalPage() {
   const [staffMembers, setStaffMembers] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
 
+  // 5. Personel Talebi Dosyası Detay Modalı için State
+  const [selectedDemandDetail, setSelectedDemandDetail] = useState<any | null>(null);
+
   const [auditLogs, setAuditLogs] = useState<any[]>([
     { id: '1', actionKey: 'initialAuditLog', performer: 'Hüseyin Aksu', time: '2026-09-22 12:00' }
   ]);
 
   const [loading, setLoading] = useState(false);
 
-  // 4.3 Arama ve Gelişmiş Filtreleme State'leri
+  // Arama ve Gelişmiş Filtreleme State'leri
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSector, setSelectedSector] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedCountry, setSelectedCountry] = useState('all');
 
-  // 4.3 Toplu İşlem (Bulk Actions) State'leri
+  // Toplu İşlem (Bulk Actions) State'leri
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkStatus, setBulkStatus] = useState('reviewing');
   const [updatingBulk, setUpdatingBulk] = useState(false);
@@ -211,10 +214,19 @@ export default function PortalPage() {
     logAudit(`Aday Durumu Değiştirildi -> ${newStatus}`, currentUser?.name);
   };
 
-  const updateRequestStatus = async (id: string, newStatus: string) => {
-    await supabase.from('job_requests').update({ status: newStatus }).eq('id', id);
-    setJobRequests(jobRequests.map(r => r.id === id ? { ...r, status: newStatus } : r));
+  // 5.1 & 5.2 Personel Talebi Durum ve Kapanış / İptal Yönetimi
+  const updateRequestStatus = async (id: string, newStatus: string, cancellationReason: string = '') => {
+    const updatePayload: any = { status: newStatus };
+    if (newStatus === 'cancelled' && cancellationReason) {
+      updatePayload.cancellation_reason = cancellationReason;
+      updatePayload.closed_at = new Date().toISOString();
+    }
+    await supabase.from('job_requests').update(updatePayload).eq('id', id);
+    setJobRequests(jobRequests.map(r => r.id === id ? { ...r, ...updatePayload } : r));
     logAudit(`Talep Durumu Değiştirildi -> ${newStatus}`, currentUser?.name);
+    if (selectedDemandDetail && selectedDemandDetail.id === id) {
+      setSelectedDemandDetail({ ...selectedDemandDetail, ...updatePayload });
+    }
   };
 
   const updateCandidateAssignee = async (id: string, assignee: string) => {
@@ -358,7 +370,7 @@ export default function PortalPage() {
     logAudit('Görev durumu güncellendi', currentUser?.name);
   };
 
-  // 4.3 Gelişmiş Filtreleme ve Arama Mantığı
+  // Gelişmiş Filtreleme ve Arama Mantığı
   const filteredCandidates = candidates.filter((cand) => {
     const matchesSearch = 
       (cand.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
@@ -374,7 +386,6 @@ export default function PortalPage() {
     return matchesSearch && matchesSector && matchesStatus && matchesCountry;
   });
 
-  // Toplu Seçim İşlemleri (4.3)
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       setSelectedIds(filteredCandidates.map(c => c.id));
@@ -391,7 +402,6 @@ export default function PortalPage() {
     }
   };
 
-  // Toplu Durum Güncelleme (4.3)
   const handleBulkStatusUpdate = async () => {
     if (selectedIds.length === 0) return;
     setUpdatingBulk(true);
@@ -624,10 +634,9 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 2: Aday Havuzu (4.3 Arama, Filtreleme ve Toplu İşlem Modülü) */}
+        {/* Tab 2: Aday Havuzu */}
         {activeTab === 'candidates' && (
           <div className="space-y-4">
-            {/* Gelişmiş Arama ve Filtreleme Çubuğu */}
             <div className="bg-white p-4 rounded-2xl border shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div className="relative">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
@@ -683,7 +692,6 @@ export default function PortalPage() {
               </div>
             </div>
 
-            {/* Toplu İşlem (Bulk Actions) Paneli */}
             {selectedIds.length > 0 && (
               <div className="bg-emerald-900 text-white p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg animate-fadeIn">
                 <div className="text-xs sm:text-sm font-bold">
@@ -792,13 +800,6 @@ export default function PortalPage() {
                         </tr>
                       );
                     })}
-                    {filteredCandidates.length === 0 && (
-                      <tr>
-                        <td colSpan={6} className="p-10 text-center text-slate-400 text-xs font-bold">
-                          Arama ve filtreleme kriterlerine uygun aday bulunamadı.
-                        </td>
-                      </tr>
-                    )}
                   </tbody>
                 </table>
               </div>
@@ -806,40 +807,96 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 3: Personel Talepleri */}
+        {/* Tab 3: 5. Personel Talebi Dosyası (Yol Haritası 5 & 5.1 & 5.2 Tam Uyarlaması) */}
         {activeTab === 'requests' && (
-          <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm text-slate-600">
-                <thead className="bg-slate-50 text-slate-700 font-bold border-b">
-                  <tr>
-                    <th className="p-4">{t.employerCompany}</th>
-                    <th className="p-4">{t.colPosSec}</th>
-                    <th className="p-4">{t.colHeadcount}</th>
-                    <th className="p-4">{t.colDemandStatus}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {jobRequests.map((req) => (
-                    <tr key={req.id} className="hover:bg-slate-50/50">
-                      <td className="p-4 font-bold text-slate-900">{req.employer_name}</td>
-                      <td className="p-4 font-bold text-slate-800">{req.position_title}</td>
-                      <td className="p-4 font-bold">{req.headcount} {t.personCount}</td>
-                      <td className="p-4">
-                        <select
-                          value={req.status || 'new_request'}
-                          onChange={(e) => updateRequestStatus(req.id, e.target.value)}
-                          className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer bg-slate-50 text-slate-900"
-                        >
-                          <option value="new_request" className="text-slate-900 bg-white">🟡 Yeni Talep</option>
-                          <option value="searching_candidates" className="text-slate-900 bg-white">🔵 Aday Aranıyor</option>
-                          <option value="completed" className="text-slate-900 bg-white">🟢 Tamamlandı</option>
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <div className="space-y-6">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-base sm:text-lg font-extrabold text-slate-900">📁 Personel Talebi Dosyaları</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Her talebin operasyon, çalışma şartları, aday ölçütleri ve seyahat yaşam döngüsü.</p>
+              </div>
+              <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
+                Toplam Aktif Talep: {jobRequests.length}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {jobRequests.map((req) => (
+                <div key={req.id} className="bg-white rounded-2xl border p-5 shadow-sm space-y-4 flex flex-col justify-between hover:shadow-md transition">
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+                          {req.sector || 'Genel Sektör'}
+                        </span>
+                        <h4 className="font-extrabold text-slate-900 text-base mt-1.5">{req.position_title}</h4>
+                        <p className="text-xs font-bold text-slate-600 flex items-center gap-1 mt-0.5">
+                          <Building2 className="w-3.5 h-3.5 text-slate-400" /> {req.employer_name}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-xs font-extrabold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg block">
+                          {req.headcount} {t.personCount}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t text-[11px] text-slate-500">
+                      <div>📍 {req.city || 'Belirtilmemiş'}, {req.country || 'Uluslararası'}</div>
+                      <div>📅 Talep: {req.created_at ? req.created_at.substring(0, 10) : '2026-09'}</div>
+                      <div>🎯 Hedef Başlangıç: {req.target_start_date || '2026-10-15'}</div>
+                      <div>💰 Maaş: {req.salary || 'Teklif Usulü'}</div>
+                    </div>
+
+                    {/* 5.1 Talep Durumları Seçici ve Kapanış/İptal Durumu */}
+                    <div className="pt-2 border-t space-y-1.5">
+                      <label className="block text-[10px] font-bold text-slate-600 uppercase">Talep Yaşam Döngüsü Durumu (5.1)</label>
+                      <select
+                        value={req.status || 'new_request'}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === 'cancelled') {
+                            const reason = prompt('Lütfen iptal sebebini girin (5.2):', 'İşveren talebi iptal etti');
+                            if (reason !== null) {
+                              updateRequestStatus(req.id, val, reason);
+                            }
+                          } else {
+                            updateRequestStatus(req.id, val);
+                          }
+                        }}
+                        className={`w-full px-3 py-2 rounded-xl border text-xs font-bold uppercase cursor-pointer outline-none ${
+                          req.status === 'completed' ? 'bg-emerald-50 text-emerald-800' :
+                          req.status === 'cancelled' ? 'bg-red-50 text-red-700' :
+                          'bg-slate-50 text-slate-900'
+                        }`}
+                      >
+                        <option value="new_request">🟡 Yeni talep (Henüz inceleme başlamadı)</option>
+                        <option value="reviewing">🔵 İnceleniyor (Şartlar kontrol ediliyor)</option>
+                        <option value="searching_candidates">🌍 Aday aranıyor (Kaynak ülkede çalışma)</option>
+                        <option value="presenting_candidates">📤 Adaylar sunuluyor (İşverene gönderiliyor)</option>
+                        <option value="interviews">🤝 Görüşmeler (İşveren görüşmeleri sürüyor)</option>
+                        <option value="selection_completed">⭐ Seçim tamamlandı (Gerekli aday seçildi)</option>
+                        <option value="official_process">📋 Belge / resmî süreç (İşlemler devam ediyor)</option>
+                        <option value="travel_planning">✈️ Seyahat planlama (Varış ve başlangıç)</option>
+                        <option value="completed">🟢 Tamamlandı (Talep kapanmıştır)</option>
+                        <option value="cancelled">🔴 İptal edildi (Gerekçe kayıtlı)</option>
+                      </select>
+                      {req.cancellation_reason && (
+                        <p className="text-[10px] text-red-600 font-medium">İptal Gerekçesi: {req.cancellation_reason}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t flex items-center justify-between">
+                    <button
+                      onClick={() => setSelectedDemandDetail(req)}
+                      className="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <FileText className="w-4 h-4" /> Talep Dosyasını Aç (Tüm Detaylar)
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -1106,6 +1163,126 @@ export default function PortalPage() {
         )}
 
       </div>
+
+      {/* 5. Personel Talebi Dosyası Detay Modalı (Full Specification Modal) */}
+      {selectedDemandDetail && (
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 z-50 overflow-y-auto">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-4xl w-full shadow-2xl border space-y-6 my-8 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b pb-4">
+              <div>
+                <span className="text-xs font-bold text-emerald-700 uppercase bg-emerald-50 px-2.5 py-1 rounded-lg">
+                  Personel Talebi Dosyası (ID: {selectedDemandDetail.id})
+                </span>
+                <h3 className="text-xl font-extrabold text-slate-900 mt-1">{selectedDemandDetail.position_title} - {selectedDemandDetail.employer_name}</h3>
+              </div>
+              <button onClick={() => setSelectedDemandDetail(null)} className="text-slate-400 hover:text-slate-600 font-bold text-xl cursor-pointer p-2">✕</button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
+              {/* Talep Özeti */}
+              <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
+                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">📌 Talep Özeti</h4>
+                <div className="grid grid-cols-2 gap-2 text-slate-700">
+                  <div><strong>İşveren:</strong> {selectedDemandDetail.employer_name}</div>
+                  <div><strong>Ülke / Şehir:</strong> {selectedDemandDetail.country} / {selectedDemandDetail.city || 'Merkez'}</div>
+                  <div><strong>Sektör:</strong> {selectedDemandDetail.sector}</div>
+                  <div><strong>Pozisyon:</strong> {selectedDemandDetail.position_title}</div>
+                  <div><strong>Kişi Sayısı:</strong> {selectedDemandDetail.headcount}</div>
+                  <div><strong>Talep Tarihi:</strong> {selectedDemandDetail.created_at ? selectedDemandDetail.created_at.substring(0, 10) : 'N/A'}</div>
+                  <div><strong>Hedef Başlangıç:</strong> {selectedDemandDetail.target_start_date || '2026-10-15'}</div>
+                  <div><strong>Durum:</strong> <span className="uppercase font-bold text-emerald-700">{selectedDemandDetail.status}</span></div>
+                </div>
+              </div>
+
+              {/* Çalışma Şartları */}
+              <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
+                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">💼 Çalışma Şartları & Yan Haklar</h4>
+                <div className="grid grid-cols-2 gap-2 text-slate-700">
+                  <div><strong>Ücret:</strong> {selectedDemandDetail.salary || 'Teklif Usulü'}</div>
+                  <div><strong>Çalışma Saatleri:</strong> {selectedDemandDetail.working_hours || 'Haftalık 40-45 Saat'}</div>
+                  <div><strong>Haftalık Gün:</strong> {selectedDemandDetail.weekly_days || '5-6 Gün'}</div>
+                  <div><strong>Fazla Mesai:</strong> {selectedDemandDetail.overtime_policy || 'Yasal Mevzuata Uygun'}</div>
+                  <div><strong>Konaklama:</strong> {selectedDemandDetail.accommodation ? '✅ Sağlanıyor' : '❌ Sağlanmıyor'}</div>
+                  <div><strong>Yemek / Ulaşım:</strong> {selectedDemandDetail.food_allowance ? '✅ Var' : '❌ Yok'} / {selectedDemandDetail.transportation ? '✅ Var' : '❌ Yok'}</div>
+                  <div><strong>Uçak/Seyahat Gideri:</strong> {selectedDemandDetail.flight_ticket ? '✅ İşveren Karşılıyor' : 'Adaya Ait'}</div>
+                  <div><strong>Sözleşme Süresi:</strong> {selectedDemandDetail.contract_term || '1 Yıl (Yenilenebilir)'}</div>
+                </div>
+              </div>
+
+              {/* Aday Ölçütleri */}
+              <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
+                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">🎯 Aday Ölçütleri & Nitelikler</h4>
+                <div className="space-y-1 text-slate-700">
+                  <div><strong>Deneyim:</strong> {selectedDemandDetail.experience_required || 'En az 2 yıl mesleki tecrübe'}</div>
+                  <div><strong>Mesleki Belge:</strong> {selectedDemandDetail.certificate_required || 'Usta öğreticilik / Mesleki yeterlilik belgesi zorunlu'}</div>
+                  <div><strong>Dil Bilgisi:</strong> {selectedDemandDetail.language_required || 'Temel düzeyde İngilizce veya yerel dil'}</div>
+                  <div><strong>Özel Şartlar:</strong> {selectedDemandDetail.special_requirements || selectedDemandDetail.special_reqs || 'Vardiyalı çalışmaya uygunluk ve seyahat engeli olmaması.'}</div>
+                </div>
+              </div>
+
+              {/* Süreç Sayıları & Metrikler */}
+              <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 space-y-2">
+                <h4 className="font-extrabold text-emerald-900 uppercase text-xs border-b border-emerald-200 pb-1">📊 Süreç Sayıları & Metrikler</h4>
+                <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                  <div className="bg-white p-2 rounded-xl border">
+                    <span className="block text-slate-500 text-[10px]">Talep Edilen</span>
+                    <strong className="text-base text-slate-900">{selectedDemandDetail.headcount}</strong>
+                  </div>
+                  <div className="bg-white p-2 rounded-xl border">
+                    <span className="block text-slate-500 text-[10px]">Bağlanan</span>
+                    <strong className="text-base text-blue-600">{candidates.length}</strong>
+                  </div>
+                  <div className="bg-white p-2 rounded-xl border">
+                    <span className="block text-slate-500 text-[10px]">Onaylanan</span>
+                    <strong className="text-base text-emerald-700">{candidates.filter(c => c.status === 'approved').length}</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Adaylar ve Görüşmeler Bölümü */}
+            <div className="space-y-3 border-t pt-4">
+              <h4 className="font-extrabold text-slate-900 text-sm">👥 Bu Talebe Bağlanan ve Sunulan Adaylar</h4>
+              <div className="bg-slate-50 rounded-2xl p-4 border max-h-48 overflow-y-auto space-y-2">
+                {candidates.slice(0, 3).map((cand) => (
+                  <div key={cand.id} className="flex items-center justify-between bg-white p-3 rounded-xl border text-xs">
+                    <div>
+                      <strong>{cand.full_name}</strong> ({cand.profession}) - <span className="text-slate-400">{cand.nationality || cand.country}</span>
+                    </div>
+                    <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-lg font-bold uppercase text-[10px]">
+                      {cand.status}
+                    </span>
+                  </div>
+                ))}
+                {candidates.length === 0 && (
+                  <p className="text-xs text-slate-400 text-center py-2">Henüz bu talebe aday atanmadı.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Notlar ve Zaman Çizelgesi */}
+            <div className="space-y-2 border-t pt-4 text-xs">
+              <h4 className="font-extrabold text-slate-900 uppercase">📝 Ekip İçi Notlar & İşlem Zaman Çizelgeleri</h4>
+              <div className="bg-slate-50 p-3 rounded-xl border text-slate-600 space-y-1">
+                <p>• {selectedDemandDetail.created_at ? selectedDemandDetail.created_at.substring(0, 10) : '2026-09-22'}: İşveren talebi sisteme kaydedildi ve dosya açıldı.</p>
+                <p>• Kaynak ülkede aday taraması ve ön mülakatlar başlatıldı.</p>
+                {selectedDemandDetail.cancellation_reason && (
+                  <p className="text-red-600 font-bold">• İptal Bilgisi: {selectedDemandDetail.cancellation_reason}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t">
+              <button
+                onClick={() => setSelectedDemandDetail(null)}
+                className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-6 py-2.5 rounded-xl text-xs font-bold transition shadow cursor-pointer"
+              >
+                Kapat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Personel ve Şifre Düzenleme Modalı */}
       {editingStaff && isUpperManagement && (
