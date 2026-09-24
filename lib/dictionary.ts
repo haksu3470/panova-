@@ -212,7 +212,6 @@ export interface Translation {
   taskAuditSystem?: string;
   taskApproveStrategic?: string;
 
-  // Yeni Eklenen Raporlama, Filtreleme ve Aksiyon Anahtarları
   reportsTab?: string;
   analyticsTab?: string;
   financialsTab?: string;
@@ -231,6 +230,22 @@ export interface Translation {
   confirmDeleteDesc?: string;
   yesBtn?: string;
   noBtn?: string;
+
+  // Personel Talebi Yaşam Döngüsü ve Dosya Anahtarları
+  demandFilesTitle?: string;
+  demandFilesSub?: string;
+  openDemandFilesBtn?: string;
+  lifecycleStatusLabel?: string;
+  stageNewRequest?: string;
+  stageReviewing?: string;
+  stageSearchingCandidates?: string;
+  stagePresentingCandidates?: string;
+  stageInterviews?: string;
+  stageSelectionCompleted?: string;
+  stageOfficialProcess?: string;
+  stageTravelPlanning?: string;
+  stageCompleted?: string;
+  stageCancelled?: string;
 }
 
 export const languages = [
@@ -429,7 +444,7 @@ export const translations: Record<Language, Translation> = {
     empSupportSubmitBtn: 'Destek Talebi Gönder',
     empSupportHistoryTitle: 'Destek Geçmişim',
     empNoSupportTickets: 'Aktif destek kaydınız yok.',
-    empProfileTitle: 'Firma dan İletişim Bilgilerim',
+    empProfileTitle: 'Firma ve İletişim Bilgilerim',
     empProfileCompanyName: 'Şirket Unvanı',
     empProfileContactPerson: 'Yetkili Kişi',
 
@@ -450,7 +465,7 @@ export const translations: Record<Language, Translation> = {
     taskPlanAccommodation: 'Konaklama ve Karşılama Planla',
     taskManageSupport: 'Destek Taleplerini Yönet',
     taskUpdateFieldStatus: 'Saha Görev Durumunu Güncelle',
-    taskAuditSystem: 'Sistem ve Logları Denetle',
+    taskAuditSystem: 'Sistem i Logları Denetle',
     taskApproveStrategic: 'Mali ve Stratejik Kararları Onayla',
 
     reportsTab: 'Raporlar',
@@ -471,6 +486,21 @@ export const translations: Record<Language, Translation> = {
     confirmDeleteDesc: 'Bu kaydı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
     yesBtn: 'Evet',
     noBtn: 'Hayır',
+
+    demandFilesTitle: 'Personel Talebi Dosyaları',
+    demandFilesSub: 'Her talebin operasyon, çalışma şartları, aday ölçütleri ve seyahat yaşam döngüsü.',
+    openDemandFilesBtn: 'Talep Dosyasını Aç (Tüm Detaylar)',
+    lifecycleStatusLabel: 'TALEP YAŞAM DÖNGÜSÜ DURUMU (5.1)',
+    stageNewRequest: 'Yeni talep (Henüz inceleme başlamadı)',
+    stageReviewing: 'İnceleniyor (Şartlar kontrol ediliyor)',
+    stageSearchingCandidates: 'Aday aranıyor (Kaynak ülkede çalışma)',
+    stagePresentingCandidates: 'Adaylar sunuluyor (İşverene gönderiliyor)',
+    stageInterviews: 'Görüşmeler (İşveren görüşmeleri sürüyor)',
+    stageSelectionCompleted: 'Seçim tamamlandı (Gerekli aday seçildi)',
+    stageOfficialProcess: 'Belge / resmî süreç (İşlemler devam ediyor)',
+    stageTravelPlanning: 'Seyahat planlama (Varış ve başlangıç)',
+    stageCompleted: 'Tamamlandı (Talep kapanmıştır)',
+    stageCancelled: 'İptal edildi (Gerekçe kayıtlı)',
   },
   en: {
     returnHome: 'Return to Home',
@@ -702,6 +732,21 @@ export const translations: Record<Language, Translation> = {
     confirmDeleteDesc: 'Are you sure you want to delete this record? This action cannot be undone.',
     yesBtn: 'Yes',
     noBtn: 'No',
+
+    demandFilesTitle: 'Personnel Demand Dossiers',
+    demandFilesSub: 'Operations, working conditions, candidate criteria, and travel lifecycle for each demand.',
+    openDemandFilesBtn: 'Open Demand Dossier (All Details)',
+    lifecycleStatusLabel: 'DEMAND LIFECYCLE STATUS (5.1)',
+    stageNewRequest: 'New request (Review not started)',
+    stageReviewing: 'Reviewing (Checking conditions)',
+    stageSearchingCandidates: 'Searching candidates (Source country work)',
+    stagePresentingCandidates: 'Presenting candidates (Sending to employer)',
+    stageInterviews: 'Interviews (Employer interviews ongoing)',
+    stageSelectionCompleted: 'Selection completed (Required candidate chosen)',
+    stageOfficialProcess: 'Official process / Docs (Procedures ongoing)',
+    stageTravelPlanning: 'Travel planning (Arrival and start)',
+    stageCompleted: 'Completed (Demand closed)',
+    stageCancelled: 'Cancelled (Reason recorded)',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -933,6 +978,21 @@ export const translations: Record<Language, Translation> = {
     confirmDeleteDesc: 'A jeni i sigurt që dëshironi ta fshini këtë regjistrim? Ky veprim nuk mund të zhbëhet.',
     yesBtn: 'Po',
     noBtn: 'Jo',
+
+    demandFilesTitle: 'Dosjet e Kërkesave të Personelit',
+    demandFilesSub: 'Operacionet, kushtet e punës, kriteret e kandidatëve dhe cikli i jetës së udhëtimit për çdo kërkesë.',
+    openDemandFilesBtn: 'Hap Dosjen e Kërkesës (Të Gjitha Detajet)',
+    lifecycleStatusLabel: 'STATUSI I CIKLIT TË JETËS SË KËRKESËS (5.1)',
+    stageNewRequest: 'Kërkesë e re (Shqyrtimi ende nuk ka filluar)',
+    stageReviewing: 'Duke u shqyrtuar (Kontrolli i kushteve)',
+    stageSearchingCandidates: 'Duke kërkuar kandidatë (Puna në vendin e burimit)',
+    stagePresentingCandidates: 'Duke paraqitur kandidatët (Dërgimi tek punëdhënësi)',
+    stageInterviews: 'Intervistat (Intervistat e punëdhënësit vazhdojnë)',
+    stageSelectionCompleted: 'Przgjedhja u kompletua (Kandidati i duhur u zgjodh)',
+    stageOfficialProcess: 'Procesi zyrtar / Dokumentet (Procedurat vazhdojnë)',
+    stageTravelPlanning: 'Planifikimi i udhëtimit (Mbërritja dhe fillimi)',
+    stageCompleted: 'Përfunduar (Kërkesa është mbyllur)',
+    stageCancelled: 'Anuluar (Arsyeja e regjistruar)',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -1164,5 +1224,20 @@ export const translations: Record<Language, Translation> = {
     confirmDeleteDesc: 'هل أنت متأكد أنك تريد حذف هذا السجل؟ لا يمكن التراجع عن هذا الإجراء.',
     yesBtn: 'نعم',
     noBtn: 'لا',
+
+    demandFilesTitle: 'ملفات طلبات الموظفين',
+    demandFilesSub: 'العمليات، ظروف العمل، معايير المرشحين، ودورة حياة السفر لكل طلب.',
+    openDemandFilesBtn: 'فتح ملف الطلب (جميع التفاصيل)',
+    lifecycleStatusLabel: 'حالة دورة حياة الطلب (5.1)',
+    stageNewRequest: 'طلب جديد (لم تبدأ المراجعة بعد)',
+    stageReviewing: 'قيد المراجعة (جاري التحقق من الشروط)',
+    stageSearchingCandidates: 'جاري البحث عن مرشحين (العمل في بلد المصدر)',
+    stagePresentingCandidates: 'جاري تقديم المرشحين (إرسالهم إلى صاحب العمل)',
+    stageInterviews: 'المقابلات (مقابلات صاحب العمل مستمرة)',
+    stageSelectionCompleted: 'اكتمل الاختيار (تم اختيار المرشح المطلوب)',
+    stageOfficialProcess: 'العملية الرسمية / المستندات (الإجراءات مستمرة)',
+    stageTravelPlanning: 'تخطيط السفر (الوصول والبداية)',
+    stageCompleted: 'مكتمل (تم إغلاق الطلب)',
+    stageCancelled: 'ملغى (تم تسجيل السبب)',
   },
 };
