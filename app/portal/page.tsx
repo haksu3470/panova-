@@ -143,8 +143,8 @@ export default function PortalPage() {
       setTasks(taskData);
     } else {
       setTasks([
-        { id: '1', title: 'Pasaport ve vize evraklarını kontrol et', assignee: 'Hüseyin Aksu', backup_assignee: 'Aleksandar Petrov', due_date: '2026-10-01', status: 'pending' },
-        { id: '2', title: 'PANOVA Construction işveren iş görüşmesi', assignee: 'Mehmet Çitil', backup_assignee: 'Rabia Aksu', due_date: '2026-09-25', status: 'completed' }
+        { id: '1', title: 'Pasaportu kontrol et', assignee: 'Hüseyin Aksu', backup_assignee: 'Aleksandar Petrov', due_date: '2026-10-01', status: 'pending' },
+        { id: '2', title: 'İşvereni ara', assignee: 'Mehmet Çitil', backup_assignee: 'Rabia Aksu', due_date: '2026-09-25', status: 'completed' }
       ]);
     }
 
@@ -783,7 +783,40 @@ export default function PortalPage() {
               <form onSubmit={handleCreateTask} className="space-y-3 text-xs">
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskDescLabel}</label>
-                  <input type="text" required value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} placeholder="Pasaport kontrolü" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white text-xs sm:text-sm" />
+                  <select 
+                    required 
+                    value={newTaskTitle} 
+                    onChange={(e) => setNewTaskTitle(e.target.value)} 
+                    className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm"
+                  >
+                    <option value="" disabled>Görev Seçin...</option>
+                    
+                    <optgroup label="🌍 Kaynak Ülke Sorumlusu">
+                      <option value="Pasaportu kontrol et">Pasaportu Kontrol Et</option>
+                      <option value="Aday ön görüşmesi planla">Aday Ön Görüşmesi Planla</option>
+                      <option value="Aday bilgilerini güncelle">Aday Bilgilerini Güncelle</option>
+                      <option value="Eksik evrak talep et">Eksik Evrak Talep Et</option>
+                    </optgroup>
+
+                    <optgroup label="🏢 Hedef Ülke Sorumlusu">
+                      <option value="İşveren talebini kaydet">İşveren Talebini Kaydet</option>
+                      <option value="Aday eşleştirme yap">Aday Eşleştirme Yap</option>
+                      <option value="İş teklifi hazırla">İş Teklifi Hazırla (Job Offer)</option>
+                      <option value="Performans ve uyum takibi yap">Performans ve Uyum Takibi Yap</option>
+                    </optgroup>
+
+                    <optgroup label="✈️ Saha Sorumlusu">
+                      <option value="Seyahat tarihini gir">Seyahat Tarihini Gir</option>
+                      <option value="Konaklama ve karşılama planla">Konaklama ve Karşılama Planla</option>
+                      <option value="Destek taleplerini yönet">Destek Taleplerini Yönet</option>
+                      <option value="Saha görev durumunu güncelle">Saha Görev Durumunu Güncelle</option>
+                    </optgroup>
+
+                    <optgroup label="👑 Üst Yönetim">
+                      <option value="Sistem ve logları denetle">Sistem ve Logları Denetle</option>
+                      <option value="Mali ve stratejik kararları onayla">Mali ve Stratejik Kararları Onayla</option>
+                    </optgroup>
+                  </select>
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskAssigneeLabel}</label>

@@ -159,6 +159,26 @@ export interface Translation {
   noEmployers: string;
   noSupport: string;
   initialAuditLog: string;
+  
+  // Rol bazlı görev etiketleri
+  taskGroupSource?: string;
+  taskGroupTarget?: string;
+  taskGroupField?: string;
+  taskGroupManagement?: string;
+  taskPassportCheck?: string;
+  taskInterviewPlan?: string;
+  taskUpdateCandidate?: string;
+  taskRequestDocs?: string;
+  taskSaveDemand?: string;
+  taskMatchCandidate?: string;
+  taskPrepareOffer?: string;
+  taskTrackPerformance?: string;
+  taskEnterTravelDate?: string;
+  taskPlanAccommodation?: string;
+  taskManageSupport?: string;
+  taskUpdateFieldStatus?: string;
+  taskAuditSystem?: string;
+  taskApproveStrategic?: string;
 }
 
 export const languages = [
@@ -328,7 +348,26 @@ export const translations: Record<Language, Translation> = {
     dueDateText: 'Son Tarih',
     noEmployers: 'Kayıtlı işveren bulunmuyor.',
     noSupport: 'Aktif sorun bildirimi bulunmuyor.',
-    initialAuditLog: 'Sistem Başlatıldı & Rol Matrisi Kuruldu'
+    initialAuditLog: 'Sistem Başlatıldı & Rol Matrisi Kuruldu',
+
+    taskGroupSource: '🌍 Kaynak Ülke Sorumlusu',
+    taskGroupTarget: '🏢 Hedef Ülke Sorumlusu',
+    taskGroupField: '✈️ Saha Sorumlusu',
+    taskGroupManagement: '👑 Üst Yönetim',
+    taskPassportCheck: 'Pasaportu Kontrol Et',
+    taskInterviewPlan: 'Aday Ön Görüşmesi Planla',
+    taskUpdateCandidate: 'Aday Bilgilerini Güncelle',
+    taskRequestDocs: 'Eksik Evrak Talep Et',
+    taskSaveDemand: 'İşveren Talebini Kaydet',
+    taskMatchCandidate: 'Aday Eşleştirme Yap',
+    taskPrepareOffer: 'İş Teklifi Hazırla (Job Offer)',
+    taskTrackPerformance: 'Performans ve Uyum Takibi Yap',
+    taskEnterTravelDate: 'Seyahat Tarihini Gir',
+    taskPlanAccommodation: 'Konaklama ve Karşılama Planla',
+    taskManageSupport: 'Destek Taleplerini Yönet',
+    taskUpdateFieldStatus: 'Saha Görev Durumunu Güncelle',
+    taskAuditSystem: 'Sistem ve Logları Denetle',
+    taskApproveStrategic: 'Mali ve Stratejik Kararları Onayla',
   },
   en: {
     returnHome: 'Return to Home',
@@ -489,7 +528,26 @@ export const translations: Record<Language, Translation> = {
     dueDateText: 'Due Date',
     noEmployers: 'No registered employers found.',
     noSupport: 'No active support tickets found.',
-    initialAuditLog: 'System Initialized & Role Matrix Established'
+    initialAuditLog: 'System Initialized & Role Matrix Established',
+
+    taskGroupSource: '🌍 Source Country Officer',
+    taskGroupTarget: '🏢 Target Country Officer',
+    taskGroupField: '✈️ Field Officer',
+    taskGroupManagement: '👑 Upper Management',
+    taskPassportCheck: 'Check Passport',
+    taskInterviewPlan: 'Plan Candidate Interview',
+    taskUpdateCandidate: 'Update Candidate Info',
+    taskRequestDocs: 'Request Missing Documents',
+    taskSaveDemand: 'Save Employer Demand',
+    taskMatchCandidate: 'Match Candidate',
+    taskPrepareOffer: 'Prepare Job Offer (Job Offer)',
+    taskTrackPerformance: 'Track Performance & Compliance',
+    taskEnterTravelDate: 'Enter Travel Date',
+    taskPlanAccommodation: 'Plan Accommodation & Pickup',
+    taskManageSupport: 'Manage Support Tickets',
+    taskUpdateFieldStatus: 'Update Field Task Status',
+    taskAuditSystem: 'Audit System & Logs',
+    taskApproveStrategic: 'Approve Financial & Strategic Decisions',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -643,14 +701,33 @@ export const translations: Record<Language, Translation> = {
     roleSourceCountry: 'Oficeri i Vendit Burim',
     roleTargetCountry: 'Oficeri i Vendit të Synuar',
     roleFieldOfficer: 'Oficeri i Fushës',
-    applicationStatusAndSummary: 'Statusi i Aplikimit dhe Përmbledhja',
-    currentProcessStage: 'FAZA AKTUALE E PROÇESIT',
+    applicationStatusAndSummary: 'Application Status and Summary',
+    currentProcessStage: 'CURRENT PROCESS STAGE',
     assigneeText: 'Përgjegjës',
     backupText: 'Rezervë',
     dueDateText: 'Afati',
     noEmployers: 'Nuk u gjetën punëdhënës të regjistruar.',
     noSupport: 'Nuk u gjetën njoftime mbështetjeje aktive.',
-    initialAuditLog: 'Sistemi u Iniciua & Matrica e Roleve u Krijua'
+    initialAuditLog: 'Sistemi u Iniciua & Matrica e Roleve u Krijua',
+
+    taskGroupSource: '🌍 Oficeri i Vendit Burim',
+    taskGroupTarget: '🏢 Oficeri i Vendit të Synuar',
+    taskGroupField: '✈️ Oficeri i Fushës',
+    taskGroupManagement: '👑 Menaxhimi i Lartë',
+    taskPassportCheck: 'Kontrollo Pasaportën',
+    taskInterviewPlan: 'Planifiko Intervistën e Kandidatit',
+    taskUpdateCandidate: 'Përditëso të Dhënat e Kandidatit',
+    taskRequestDocs: 'Kërko Dokumentet e Munguara',
+    taskSaveDemand: 'Ruaj Kërkesën e Punëdhënësit',
+    taskMatchCandidate: 'Përputh Kandidatin',
+    taskPrepareOffer: 'Përgatit Ofertën e Punës (Job Offer)',
+    taskTrackPerformance: 'Niq Performancën & Pajtueshmërinë',
+    taskEnterTravelDate: 'Vendos Datën e Udhëtimit',
+    taskPlanAccommodation: 'Planifiko Akomodimin & Pritjen',
+    taskManageSupport: 'Menaxho Tikat e Mbështetjes',
+    taskUpdateFieldStatus: 'Përditëso Statusin e Detyrës në Teren',
+    taskAuditSystem: 'Audito Sistemin & Regjistrat',
+    taskApproveStrategic: 'Mirato Vendimet Financiare & Strategjike',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -811,6 +888,25 @@ export const translations: Record<Language, Translation> = {
     dueDateText: 'تاريخ الاستحقاق',
     noEmployers: 'لا يوجد أصحاب عمل مسجلين.',
     noSupport: 'لا توجد تذاكر دعم نشطة.',
-    initialAuditLog: 'تم بدء النظام وإنشاء مصفوفة الأدوار'
+    initialAuditLog: 'تم بدء النظام وإنشاء مصفوفة الأدوار',
+
+    taskGroupSource: '🌍 مسؤول بلد المصدر',
+    taskGroupTarget: '🏢 مسؤول البلد المستهدف',
+    taskGroupField: '✈️ مسؤول الميدان',
+    taskGroupManagement: '👑 الإدارة العليا',
+    taskPassportCheck: 'فحص جواز السفر',
+    taskInterviewPlan: 'التخطيط لمقابلة المرشح',
+    taskUpdateCandidate: 'تحديث بيانات المرشح',
+    taskRequestDocs: 'طلب المستندات الناقصة',
+    taskSaveDemand: 'حفظ طلب صاحب العمل',
+    taskMatchCandidate: 'مطابقة المرشح',
+    taskPrepareOffer: 'إعداد عرض العمل (Job Offer)',
+    taskTrackPerformance: 'متابعة الأداء والامتثال',
+    taskEnterTravelDate: 'إدخال تاريخ السفر',
+    taskPlanAccommodation: 'تخطيط الإقامة والترحيب',
+    taskManageSupport: 'إدارة تذاكر الدعم',
+    taskUpdateFieldStatus: 'تحديث حالة المهمة الميدانية',
+    taskAuditSystem: 'تدقيق النظام والسجلات',
+    taskApproveStrategic: 'الموافقة على القرارات المالية والاستراتيجية',
   },
 };
