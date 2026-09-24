@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   Lock, ShieldCheck, Search, Filter, Languages, ArrowLeft, Award, Video, 
-  CheckCircle, Clock, Star, Calendar, Building2, Users, FileText, Plane, AlertCircle, Briefcase, UserCheck, User, CheckSquare, Plus, UserPlus, Settings, History, ShieldAlert, Trash2, Key 
+  CheckCircle, Clock, Star, Calendar, Building2, Users, FileText, Plane, AlertCircle, Briefcase, UserCheck, User, CheckSquare, Plus, UserPlus, Settings, History, ShieldAlert, Trash2, Key, RefreshCw 
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
@@ -71,8 +71,17 @@ export default function PortalPage() {
   ]);
 
   const [loading, setLoading] = useState(false);
+
+  // 4.3 Arama ve Gelişmiş Filtreleme State'leri
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSector, setSelectedSector] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedCountry, setSelectedCountry] = useState('all');
+
+  // 4.3 Toplu İşlem (Bulk Actions) State'leri
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkStatus, setBulkStatus] = useState('reviewing');
+  const [updatingBulk, setUpdatingBulk] = useState(false);
 
   const [newStaffName, setNewStaffName] = useState('');
   const [newStaffEmail, setNewStaffEmail] = useState('');
@@ -349,13 +358,62 @@ export default function PortalPage() {
     logAudit('Görev durumu güncellendi', currentUser?.name);
   };
 
-  const filteredCandidates = candidates.filter(c => {
-    const matchesSearch = c.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          c.passport_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          c.profession?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = selectedStatus === 'all' || c.status === selectedStatus;
-    return matchesSearch && matchesStatus;
+  // 4.3 Gelişmiş Filtreleme ve Arama Mantığı
+  const filteredCandidates = candidates.filter((cand) => {
+    const matchesSearch = 
+      (cand.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (cand.profession?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (cand.passport_no?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (cand.passport_number?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (cand.email?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+
+    const matchesSector = selectedSector === 'all' || cand.sector === selectedSector;
+    const matchesStatus = selectedStatus === 'all' || cand.status === selectedStatus;
+    const matchesCountry = selectedCountry === 'all' || (cand.country && cand.country.toLowerCase() === selectedCountry.toLowerCase());
+
+    return matchesSearch && matchesSector && matchesStatus && matchesCountry;
   });
+
+  // Toplu Seçim İşlemleri (4.3)
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(filteredCandidates.map(c => c.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: string) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter(item => item !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
+
+  // Toplu Durum Güncelleme (4.3)
+  const handleBulkStatusUpdate = async () => {
+    if (selectedIds.length === 0) return;
+    setUpdatingBulk(true);
+
+    try {
+      const { error } = await supabase
+        .from('job_candidates')
+        .update({ status: bulkStatus })
+        .in('id', selectedIds);
+
+      if (error) throw error;
+
+      alert(`Başarıyla ${selectedIds.length} adayın durumu güncellendi!`);
+      logAudit(`Toplu Aday Durumu Güncellendi -> ${bulkStatus} (${selectedIds.length} aday)`, currentUser?.name);
+      setSelectedIds([]);
+      fetchAllData();
+    } catch (err: any) {
+      alert('Toplu Güncelleme Hatası: ' + err.message);
+    } finally {
+      setUpdatingBulk(false);
+    }
+  };
 
   if (!authenticated) {
     return (
@@ -385,7 +443,7 @@ export default function PortalPage() {
 
           <form onSubmit={handleLogin} className="space-y-4 text-left rtl:text-right">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">E-Posta veya Kullanıcı Adı</label>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.usernameLabel || 'E-Posta veya Kullanıcı Adı'}</label>
               <input
                 type="text"
                 required
@@ -566,39 +624,115 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 2: Aday Havuzu */}
+        {/* Tab 2: Aday Havuzu (4.3 Arama, Filtreleme ve Toplu İşlem Modülü) */}
         {activeTab === 'candidates' && (
           <div className="space-y-4">
-            <div className="bg-white p-4 rounded-2xl border shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
-              <div className="relative flex-1 w-full">
+            {/* Gelişmiş Arama ve Filtreleme Çubuğu */}
+            <div className="bg-white p-4 rounded-2xl border shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="relative">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
                 <input
                   type="text"
-                  placeholder={t.searchPlaceholder}
+                  placeholder={t.searchPlaceholder || 'Ara...'}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs sm:text-sm outline-none text-slate-900 font-medium bg-white"
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs sm:text-sm outline-none text-slate-900 font-medium bg-white focus:ring-2 focus:ring-[#2e7d32]"
                 />
               </div>
 
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full sm:w-auto px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 bg-white cursor-pointer"
-              >
-                <option value="all" className="text-slate-900 bg-white">{t.allstatuses}</option>
-                <option value="pending" className="text-slate-900 bg-white">{t.pendingStatus}</option>
-                <option value="reviewing" className="text-slate-900 bg-white">{t.reviewingStatus}</option>
-                <option value="visa_processing" className="text-slate-900 bg-white">{t.visaProcessingStatus}</option>
-                <option value="approved" className="text-slate-900 bg-white">{t.approvedStatus}</option>
-              </select>
+              <div>
+                <select
+                  value={selectedSector}
+                  onChange={(e) => setSelectedSector(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 bg-white cursor-pointer outline-none focus:ring-2 focus:ring-[#2e7d32]"
+                >
+                  <option value="all">📁 Tüm Sektörler</option>
+                  <option value="construction">Construction</option>
+                  <option value="agriculture">Agriculture</option>
+                  <option value="hr">General HR</option>
+                  <option value="trade">Foreign Trade</option>
+                </select>
+              </div>
+
+              <div>
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 bg-white cursor-pointer outline-none focus:ring-2 focus:ring-[#2e7d32]"
+                >
+                  <option value="all">{t.allstatuses}</option>
+                  <option value="pending">{t.pendingStatus}</option>
+                  <option value="reviewing">{t.reviewingStatus}</option>
+                  <option value="visa_processing">{t.visaProcessingStatus}</option>
+                  <option value="approved">{t.approvedStatus}</option>
+                </select>
+              </div>
+
+              <div>
+                <select
+                  value={selectedCountry}
+                  onChange={(e) => setSelectedCountry(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 bg-white cursor-pointer outline-none focus:ring-2 focus:ring-[#2e7d32]"
+                >
+                  <option value="all">🌍 Tüm Ülkeler</option>
+                  <option value="North Macedonia">North Macedonia</option>
+                  <option value="Turkey">Turkey</option>
+                  <option value="Albania">Albania</option>
+                  <option value="Kosovo">Kosovo</option>
+                </select>
+              </div>
             </div>
 
+            {/* Toplu İşlem (Bulk Actions) Paneli */}
+            {selectedIds.length > 0 && (
+              <div className="bg-emerald-900 text-white p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg animate-fadeIn">
+                <div className="text-xs sm:text-sm font-bold">
+                  Seçilen Aday Sayısı: <span className="bg-emerald-800 px-2.5 py-1 rounded-lg ml-1">{selectedIds.length}</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                  <select
+                    value={bulkStatus}
+                    onChange={(e) => setBulkStatus(e.target.value)}
+                    className="bg-emerald-800 text-white border border-emerald-700 px-3 py-2 rounded-xl text-xs font-bold outline-none cursor-pointer"
+                  >
+                    <option value="pending">Durum Yap: {t.pendingStatus}</option>
+                    <option value="reviewing">Durum Yap: {t.reviewingStatus}</option>
+                    <option value="visa_processing">Durum Yap: {t.visaProcessingStatus}</option>
+                    <option value="approved">Durum Yap: {t.approvedStatus}</option>
+                  </select>
+                  <button
+                    onClick={handleBulkStatusUpdate}
+                    disabled={updatingBulk}
+                    className="bg-white text-emerald-900 hover:bg-emerald-50 px-4 py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer shrink-0"
+                  >
+                    {updatingBulk ? 'Güncelleniyor...' : 'Toplu Durumu Güncelle'}
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-slate-100 flex items-center justify-between text-xs sm:text-sm font-bold text-slate-900">
+                <span>Aday Listesi ({filteredCandidates.length} / {candidates.length})</span>
+                <button
+                  onClick={fetchAllData}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 px-3 py-1.5 rounded-xl cursor-pointer transition"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" /> Yenile
+                </button>
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs sm:text-sm text-slate-600">
                   <thead className="bg-slate-50 text-slate-700 font-bold border-b">
                     <tr>
+                      <th className="p-4 w-12 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.length > 0 && selectedIds.length === filteredCandidates.length}
+                          onChange={handleSelectAll}
+                          className="w-4 h-4 accent-[#2e7d32] cursor-pointer"
+                        />
+                      </th>
                       <th className="p-4">{t.colCandidate}</th>
                       <th className="p-4">{t.colPassportNat}</th>
                       <th className="p-4">{t.colProfSector}</th>
@@ -607,46 +741,64 @@ export default function PortalPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {filteredCandidates.map((candidate) => (
-                      <tr key={candidate.id} className="hover:bg-slate-50/50">
-                        <td className="p-4 font-bold text-slate-900">
-                          <Link href={`/portal/candidates/${candidate.id}`} className="hover:text-[#2e7d32] hover:underline">
-                            {candidate.full_name}
-                          </Link>
-                        </td>
-                        <td className="p-4">
-                          <div>{candidate.passport_number || 'N/A'}</div>
-                          <div className="text-[11px] text-slate-400">{candidate.nationality}</div>
-                        </td>
-                        <td className="p-4">
-                          <span className="font-semibold text-slate-800">{candidate.profession}</span>
-                          <div className="text-[11px] text-slate-400 uppercase">{candidate.sector}</div>
-                        </td>
-                        <td className="p-4">
-                          <select
-                            value={candidate.assigned_to || staffMembers[0]?.name}
-                            onChange={(e) => updateCandidateAssignee(candidate.id, e.target.value)}
-                            className="px-3 py-1.5 rounded-lg border text-xs font-bold bg-emerald-50 text-emerald-900 cursor-pointer outline-none"
-                          >
-                            {staffMembers.map((staff) => (
-                              <option key={staff.id} value={staff.name} className="text-slate-900 bg-white">{staff.name}</option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="p-4">
-                          <select
-                            value={candidate.status || 'pending'}
-                            onChange={(e) => updateCandidateStatus(candidate.id, e.target.value)}
-                            className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer bg-slate-50 text-slate-900"
-                          >
-                            <option value="pending" className="text-slate-900 bg-white">🟡 {t.pendingStatus}</option>
-                            <option value="reviewing" className="text-slate-900 bg-white">🔵 {t.reviewingStatus}</option>
-                            <option value="visa_processing" className="text-slate-900 bg-white">🟣 {t.visaProcessingStatus}</option>
-                            <option value="approved" className="text-slate-900 bg-white">🟢 {t.approvedStatus}</option>
-                          </select>
+                    {filteredCandidates.map((candidate) => {
+                      const isSelected = selectedIds.includes(candidate.id);
+                      return (
+                        <tr key={candidate.id} className={`hover:bg-slate-50/50 ${isSelected ? 'bg-emerald-50/40' : ''}`}>
+                          <td className="p-4 text-center">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleSelectOne(candidate.id)}
+                              className="w-4 h-4 accent-[#2e7d32] cursor-pointer"
+                            />
+                          </td>
+                          <td className="p-4 font-bold text-slate-900">
+                            <Link href={`/portal/candidates/${candidate.id}`} className="hover:text-[#2e7d32] hover:underline">
+                              {candidate.full_name}
+                            </Link>
+                          </td>
+                          <td className="p-4">
+                            <div>{candidate.passport_number || candidate.passport_no || 'N/A'}</div>
+                            <div className="text-[11px] text-slate-400">{candidate.nationality || candidate.country}</div>
+                          </td>
+                          <td className="p-4">
+                            <span className="font-semibold text-slate-800">{candidate.profession}</span>
+                            <div className="text-[11px] text-slate-400 uppercase">{candidate.sector}</div>
+                          </td>
+                          <td className="p-4">
+                            <select
+                              value={candidate.assigned_to || staffMembers[0]?.name}
+                              onChange={(e) => updateCandidateAssignee(candidate.id, e.target.value)}
+                              className="px-3 py-1.5 rounded-lg border text-xs font-bold bg-emerald-50 text-emerald-900 cursor-pointer outline-none"
+                            >
+                              {staffMembers.map((staff) => (
+                                <option key={staff.id} value={staff.name} className="text-slate-900 bg-white">{staff.name}</option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="p-4">
+                            <select
+                              value={candidate.status || 'pending'}
+                              onChange={(e) => updateCandidateStatus(candidate.id, e.target.value)}
+                              className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer bg-slate-50 text-slate-900"
+                            >
+                              <option value="pending" className="text-slate-900 bg-white">🟡 {t.pendingStatus}</option>
+                              <option value="reviewing" className="text-slate-900 bg-white">🔵 {t.reviewingStatus}</option>
+                              <option value="visa_processing" className="text-slate-900 bg-white">🟣 {t.visaProcessingStatus}</option>
+                              <option value="approved" className="text-slate-900 bg-white">🟢 {t.approvedStatus}</option>
+                            </select>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {filteredCandidates.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="p-10 text-center text-slate-400 text-xs font-bold">
+                          Arama ve filtreleme kriterlerine uygun aday bulunamadı.
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
