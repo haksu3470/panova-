@@ -337,7 +337,6 @@ export interface Translation {
   salaryOfferLabel?: string;
   searchDemandPlaceholder?: string;
 
-  // Tablo Başlıkları ve Form Seçenekleri İçin Eklenen Anahtarlar
   colPosSectorTitle?: string;
   colCriteriaTitle?: string;
   colHeadcountSalaryTitle?: string;
@@ -354,6 +353,11 @@ export interface Translation {
   expOpt2?: string;
   expOpt3?: string;
   expOpt4?: string;
+
+  sectorAgriculture?: string;
+  sectorConstruction?: string;
+  sectorTrade?: string;
+  sectorHR?: string;
 }
 
 export const languages = [
@@ -716,7 +720,12 @@ export const translations: Record<Language, Translation> = {
     expOpt1: 'Deneyimsiz / Yeni Mezun',
     expOpt2: '1 - 3 Yıl Tecrübe',
     expOpt3: '3 - 5 Yıl Tecrübe',
-    expOpt4: '5+ Yıl Uzman / Kıdemli'
+    expOpt4: '5+ Yıl Uzman / Kıdemli',
+
+    sectorAgriculture: 'Tarım ve Hayvancılık',
+    sectorConstruction: 'İnşaat ve Yapı',
+    sectorTrade: 'Dış Ticaret ve Lojistik',
+    sectorHR: 'İnsan Kaynakları'
   },
   en: {
     returnHome: 'Return to Home',
@@ -1070,7 +1079,12 @@ export const translations: Record<Language, Translation> = {
     expOpt1: 'Entry Level / Fresh Graduate',
     expOpt2: '1 - 3 Years Experience',
     expOpt3: '3 - 5 Years Experience',
-    expOpt4: '5+ Years Senior / Expert'
+    expOpt4: '5+ Years Senior / Expert',
+
+    sectorAgriculture: 'Agriculture & Livestock',
+    sectorConstruction: 'Construction & Building',
+    sectorTrade: 'Foreign Trade & Logistics',
+    sectorHR: 'Human Resources'
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -1303,7 +1317,7 @@ export const translations: Record<Language, Translation> = {
     certificateno: 'Nr. Certifikatës',
     issuingbody: 'Institucioni Lëshues',
 
-    certificateInfo: 'Informacioni i Certifikatës',
+    certificateInfo: 'Informacioni i Certifikatos',
     candidateStatus: 'Statusi i Kandidatit',
     employerCompanyName: 'Emri i Kompanisë Punëdhënëse',
     sendNotification: 'Dërgo Njoftim',
@@ -1424,7 +1438,12 @@ export const translations: Record<Language, Translation> = {
     expOpt1: 'Pa Eksperiencë / Diplomuar i Ri',
     expOpt2: '1 - 3 Vite Eksperiencë',
     expOpt3: '3 - 5 Vite Eksperiencë',
-    expOpt4: '5+ Vite Ekspert / I Lartë'
+    expOpt4: '5+ Vite Ekspert / I Lartë',
+
+    sectorAgriculture: 'Bujqësi dhe Blegtori',
+    sectorConstruction: 'Ndërtim dhe Objekte',
+    sectorTrade: 'Tregti e Jashtme dhe Logjistikë',
+    sectorHR: 'Burimet Njerëzore'
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -1778,6 +1797,11 @@ export const translations: Record<Language, Translation> = {
     expOpt1: 'بدون خبرة / خريج جديد',
     expOpt2: '1 - 3 سنوات خبرة',
     expOpt3: '3 - 5 سنوات خبرة',
-    expOpt4: '5+ سنوات خبير / متقدم'
+    expOpt4: '5+ سنوات خبير / متقدم',
+
+    sectorAgriculture: 'الزراعة والثروة الحيوانية',
+    sectorConstruction: 'البناء والتشييد',
+    sectorTrade: 'التجارة الخارجية والخدمات اللوجستية',
+    sectorHR: 'الموارد البشرية'
   }
 };

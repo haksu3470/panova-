@@ -457,12 +457,12 @@ export default function EmployerPage() {
                       <select
                         value={sector}
                         onChange={(e) => setSector(e.target.value)}
-                        className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white font-medium"
+                        className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white font-medium cursor-pointer"
                       >
-                        <option value="Tarım ve Hayvancılık">Tarım ve Hayvancılık (Agriculture)</option>
-                        <option value="İnşaat ve Yapı">İnşaat ve Yapı (Construction)</option>
-                        <option value="Dış Ticaret ve Lojistik">Dış Ticaret ve Lojistik (Trade)</option>
-                        <option value="İnsan Kaynakları">İnsan Kaynakları (HR)</option>
+                        <option value="Tarım ve Hayvancılık">{t.sectorAgriculture || 'Tarım ve Hayvancılık'}</option>
+                        <option value="İnşaat ve Yapı">{t.sectorConstruction || 'İnşaat ve Yapı'}</option>
+                        <option value="Dış Ticaret ve Lojistik">{t.sectorTrade || 'Dış Ticaret ve Lojistik'}</option>
+                        <option value="İnsan Kaynakları">{t.sectorHR || 'İnsan Kaynakları'}</option>
                       </select>
                     </div>
 
