@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { translations, Language } from '@/lib/dictionary';
-import EmployerHeader from '@/components/employer/EmployerHeader';
-import DemandForm from '@/components/employer/DemandForm';
-import DemandsTable from '@/components/employer/DemandsTable';
 
 export default function EmployerPage() {
   const [lang, setLang] = useState<Language>('tr');
@@ -24,11 +22,24 @@ export default function EmployerPage() {
 
   const [activeTab, setActiveTab] = useState<'requests' | 'candidates' | 'interviews' | 'selected' | 'travel' | 'employees' | 'support' | 'profile'>('requests');
   
+  // Talep Formu State'leri
+  const [position, setPosition] = useState('');
+  const [headcount, setHeadcount] = useState(1);
+  const [sector, setSector] = useState('Tarım ve Hayvancılık');
+  const [salary, setSalary] = useState('');
+  
+  // Gelişmiş Kriterler
+  const [experienceYears, setExperienceYears] = useState(t.expOpt3 || '3 - 5 Yıl Tecrübe');
+  const [videoRequired, setVideoRequired] = useState(true);
+  const [selectedCertificates, setSelectedCertificates] = useState<string[]>([t.certOpt1 || 'B Sınıfı Sürücü Belgesi']);
+  const [customRequirement, setCustomRequirement] = useState('');
+  
   const [successMsg, setSuccessMsg] = useState(false);
 
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMessage, setSupportMessage] = useState('');
   const [supportSuccess, setSupportSuccess] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [demands, setDemands] = useState([
     { 
@@ -92,6 +103,14 @@ export default function EmployerPage() {
     { id: 202, name: 'Caner Çelik', position: 'Tekniker', startDate: '2026-04-15', day30: 'Tamamlandı', day60: 'Tamamlandı', day90: 'Devam Ediyor', status: 'Aktif' },
   ]);
 
+  const handleCertificateToggle = (cert: string) => {
+    if (selectedCertificates.includes(cert)) {
+      setSelectedCertificates(selectedCertificates.filter(c => c !== cert));
+    } else {
+      setSelectedCertificates([...selectedCertificates, cert]);
+    }
+  };
+
   const handleSubmitAuth = (e: React.FormEvent) => {
     e.preventDefault();
     if (email) {
@@ -99,20 +118,23 @@ export default function EmployerPage() {
     }
   };
 
-  const handleCreateDemand = (demandData: any) => {
-    const allCerts = [...demandData.selectedCertificates];
-    if (demandData.customRequirement.trim()) {
-      allCerts.push(demandData.customRequirement.trim());
+  const handleCreateDemand = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!position) return;
+
+    const allCerts = [...selectedCertificates];
+    if (customRequirement.trim()) {
+      allCerts.push(customRequirement.trim());
     }
 
     const newDemand = {
       id: Date.now(),
-      sector: demandData.sector,
-      position: demandData.position,
-      headcount: demandData.headcount,
-      salary: demandData.salary || 'Belirtilmedi',
-      experience: demandData.experienceYears,
-      video: demandData.videoRequired,
+      sector,
+      position,
+      headcount,
+      salary: salary || 'Belirtilmedi',
+      experience: experienceYears,
+      video: videoRequired,
       certificates: allCerts,
       status: 'pending',
       date: new Date().toISOString().split('T')[0],
@@ -124,6 +146,9 @@ export default function EmployerPage() {
 
     setSuccessMsg(true);
     setTimeout(() => setSuccessMsg(false), 4000);
+    setPosition('');
+    setSalary('');
+    setCustomRequirement('');
   };
 
   const handleSupportSubmit = (e: React.FormEvent) => {
@@ -143,6 +168,11 @@ export default function EmployerPage() {
     setUpdateMsg(true);
     setTimeout(() => setUpdateMsg(false), 4000);
   };
+
+  const filteredDemands = demands.filter(item => 
+    item.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.sector.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
@@ -259,19 +289,55 @@ export default function EmployerPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Üst Bar Modülü */}
-            <EmployerHeader
-              country={country}
-              companyName={companyName}
-              lang={lang}
-              setLang={setLang}
-              t={t}
-              onNewDemandClick={() => setActiveTab('requests')}
-              onLogout={() => {
-                setIsLoggedIn(false);
-                setPassword('');
-              }}
-            />
+            {/* Üst Bar */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <div className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider bg-emerald-50 inline-block px-2.5 py-1 rounded-full mb-1">
+                  {country}
+                </div>
+                <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                  {companyName}
+                </h1>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <select
+                  value={lang}
+                  onChange={(e) => setLang(e.target.value as Language)}
+                  aria-label="Dil Seçimi"
+                  className="bg-slate-100 text-slate-800 text-xs rounded-xl px-3 py-2 border border-slate-300 focus:outline-none cursor-pointer font-semibold shadow-sm"
+                >
+                  <option value="tr">🇹🇷 Türkçe</option>
+                  <option value="en">🇬🇧 English</option>
+                  <option value="sq">🇦🇱 Shqip</option>
+                  <option value="ar">🇸🇦 العربية</option>
+                </select>
+
+                <Link
+                  href="/"
+                  className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl transition font-semibold border border-slate-300 shadow-sm"
+                >
+                  {t.returnHome || 'Ana Sayfa'}
+                </Link>
+
+                <button
+                  onClick={() => setActiveTab('requests')}
+                  className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded-xl transition shadow-md cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>+</span> {t.newDemandBtn || 'Yeni Talep Oluştur'}
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsLoggedIn(false);
+                    setPassword('');
+                  }}
+                  className="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold px-4 py-2 rounded-xl border border-rose-200 transition cursor-pointer shadow-sm"
+                >
+                  {t.logout || 'Çıkış Yap'}
+                </button>
+              </div>
+            </div>
 
             {/* İstatistik Kartları */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -373,21 +439,218 @@ export default function EmployerPage() {
             {/* İçerik Alanları */}
             {activeTab === 'requests' && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Yeni Talep Oluşturma Modülü */}
-                <div className="lg:col-span-1">
-                  <DemandForm
-                    t={t}
-                    onSubmitDemand={handleCreateDemand}
-                    successMsg={successMsg}
-                  />
+                {/* Yeni Talep Oluşturma Paneli */}
+                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl lg:col-span-1">
+                  <h2 className="text-sm font-black text-slate-900 mb-4 flex items-center gap-2">
+                    <span>✨</span> {t.newDemandBtn || 'Yeni Talep Oluştur'}
+                  </h2>
+
+                  {successMsg && (
+                    <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3.5 rounded-2xl font-medium">
+                      🎉 {t.regSuccessTitle || 'Başarılı'}! İş gücü talebiniz sisteme kaydedildi.
+                    </div>
+                  )}
+
+                  <form onSubmit={handleCreateDemand} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t.sectorLabel || 'Sektör'}</label>
+                      <select
+                        value={sector}
+                        onChange={(e) => setSector(e.target.value)}
+                        className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white font-medium cursor-pointer"
+                      >
+                        <option value="Tarım ve Hayvancılık">{t.sectorAgriculture || 'Tarım ve Hayvancılık'}</option>
+                        <option value="İnşaat ve Yapı">{t.sectorConstruction || 'İnşaat ve Yapı'}</option>
+                        <option value="Dış Ticaret ve Lojistik">{t.sectorTrade || 'Dış Ticaret ve Lojistik'}</option>
+                        <option value="İnsan Kaynakları">{t.sectorHR || 'İnsan Kaynakları'}</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t.colPosSec || 'Pozisyon'} *</label>
+                      <input
+                        type="text"
+                        required
+                        value={position}
+                        onChange={(e) => setPosition(e.target.value)}
+                        placeholder={t.positionPlaceholder || 'Örn: Ziraat Mühendisi / Bahçe Şefi'}
+                        className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t.headcountLabel || 'Kişi Sayısı'}</label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={100}
+                          value={headcount}
+                          onChange={(e) => setHeadcount(Number(e.target.value))}
+                          className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t.colSalary || 'Maaş Teklifi'}</label>
+                        <input
+                          type="text"
+                          value={salary}
+                          onChange={(e) => setSalary(e.target.value)}
+                          placeholder={t.salaryPlaceholder || 'Örn: 1.500 €'}
+                          className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Tecrübe Yılı Seçimi */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t.expYearsLabel || '⏱️ Tecrübe Süresi / Yıl'}</label>
+                      <select
+                        value={experienceYears}
+                        onChange={(e) => setExperienceYears(e.target.value)}
+                        className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white font-medium"
+                      >
+                        <option value={t.expOpt1 || 'Deneyimsiz / Yeni Mezun'}>{t.expOpt1 || 'Deneyimsiz / Yeni Mezun'}</option>
+                        <option value={t.expOpt2 || '1 - 3 Yıl Tecrübe'}>{t.expOpt2 || '1 - 3 Yıl Tecrübe'}</option>
+                        <option value={t.expOpt3 || '3 - 5 Yıl Tecrübe'}>{t.expOpt3 || '3 - 5 Yıl Tecrübe'}</option>
+                        <option value={t.expOpt4 || '5+ Yıl Uzman / Kıdemli'}>{t.expOpt4 || '5+ Yıl Uzman / Kıdemli'}</option>
+                      </select>
+                    </div>
+
+                    {/* Video Mülakat İsteği */}
+                    <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                      <label className="flex items-center justify-between cursor-pointer">
+                        <span className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                          {t.videoInterviewReqLabel || '📹 Adaydan Video Ön Mülakat İste'}
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={videoRequired}
+                          onChange={(e) => setVideoRequired(e.target.checked)}
+                          className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                        />
+                      </label>
+                    </div>
+
+                    {/* Sertifikalar / Belgeler */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">{t.requiredCertsLabel || '📜 Aranan Belge ve Sertifikalar'}</label>
+                      <div className="space-y-2 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                        {[
+                          t.certOpt1 || 'B Sınıfı Sürücü Belgesi',
+                          t.certOpt2 || 'Uluslararası Pasaport / Seyahat Engelsiz',
+                          t.certOpt3 || 'Ziraat / Mühendislik Fakültesi Diploma',
+                          t.certOpt4 || 'Usta Öğreticilik / Mesleki Sertifika',
+                          t.certOpt5 || 'İleri Düzey Yabancı Dil'
+                        ].map((cert) => (
+                          <label key={cert} className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer hover:text-slate-900">
+                            <input
+                              type="checkbox"
+                              checked={selectedCertificates.includes(cert)}
+                              onChange={() => handleCertificateToggle(cert)}
+                              className="w-3.5 h-3.5 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                            />
+                            {cert}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Özel Not Alanı */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t.customNoteLabel || '📝 İlave Özel Açıklama / Not'}</label>
+                      <input
+                        type="text"
+                        value={customRequirement}
+                        onChange={(e) => setCustomRequirement(e.target.value)}
+                        placeholder={t.customNotePlaceholder || 'Örn: Hafta sonu mesaisi uyumlu...'}
+                        className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl text-xs transition shadow-md cursor-pointer"
+                    >
+                      {t.submitDossierBtn || 'Talebi Kriterlerle Gönder'}
+                    </button>
+                  </form>
                 </div>
 
-                {/* Talepler Listesi Modülü */}
-                <div className="lg:col-span-2">
-                  <DemandsTable
-                    t={t}
-                    demands={demands}
-                  />
+                {/* Talepler Listesi (Tablo) */}
+                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl lg:col-span-2">
+                  <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
+                    <h2 className="text-sm font-black text-slate-900">
+                      {t.empTabRequests || 'Personel Taleplerim'}
+                    </h2>
+                    <input
+                      type="text"
+                      placeholder={t.searchDemandPlaceholder || 'Talep ara...'}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="px-3 py-1.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 w-48"
+                    />
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-600 uppercase font-bold">
+                          <th className="p-3.5 rounded-l-xl">{t.colPosSectorTitle || 'POZİSYON / SEKTÖR'}</th>
+                          <th className="p-3.5">{t.colCriteriaTitle || 'KRİTERLER (TECRÜBE / VİDEO / BELGE)'}</th>
+                          <th className="p-3.5">{t.colHeadcountSalaryTitle || 'KİŞİ / MAAŞ'}</th>
+                          <th className="p-3.5 rounded-r-xl">{t.colStatusTitle || 'DURUM'}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {filteredDemands.map((item: any) => (
+                          <tr key={item.id} className="hover:bg-slate-50 transition align-top">
+                            <td className="p-3.5 font-medium text-slate-900">
+                              <div className="font-bold">{item.position}</div>
+                              <div className="text-[10px] text-slate-400">{item.sector}</div>
+                              <div className="text-[10px] text-slate-500 mt-1">Tarih: {item.date}</div>
+                            </td>
+                            <td className="p-3.5 text-slate-700">
+                              <div className="flex flex-wrap gap-1 mb-1.5">
+                                {item.experience && (
+                                  <span className="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded font-bold text-[10px]">
+                                    ⏱️ {item.experience}
+                                  </span>
+                                )}
+                                {item.video && (
+                                  <span className="bg-blue-50 text-blue-800 px-2 py-0.5 rounded font-bold text-[10px]">
+                                    📹 Video Mülakatlı
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[10px] text-slate-500">
+                                {Array.isArray(item.certificates) ? item.certificates.join(', ') : item.certificates}
+                              </div>
+                            </td>
+                            <td className="p-3.5">
+                              <div className="font-semibold text-slate-800">{item.headcount} Kişi</div>
+                              <div className="text-slate-600 font-medium">{item.salary}</div>
+                            </td>
+                            <td className="p-3.5">
+                              {item.status === 'approved' ? (
+                                <span className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-bold text-[10px]">
+                                  {t.approvedStatus || 'Onaylandı'}
+                                </span>
+                              ) : item.status === 'reviewing' ? (
+                                <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-bold text-[10px]">
+                                  {t.reviewingStatus || 'İnceleniyor'}
+                                </span>
+                              ) : (
+                                <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full font-bold text-[10px]">
+                                  {t.pendingStatus || 'Beklemede'}
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}
