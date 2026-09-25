@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { translations, Language } from '@/lib/dictionary';
 
@@ -11,7 +11,7 @@ export default function EmployerPage() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isLoggedIn, setIsLoggedIn] = useState(true);
 
-  // Şirket ve Profil State'leri
+  // Şirket ve Profil State'leri (localStorage entegre)
   const [companyName, setCompanyName] = useState('AKAY EĞİTİM');
   const [contactPerson, setContactPerson] = useState('Hüseyin Aksu');
   const [phone, setPhone] = useState('+38970385792');
@@ -20,7 +20,7 @@ export default function EmployerPage() {
   const [password, setPassword] = useState('••••••');
   const [updateMsg, setUpdateMsg] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'requests' | 'candidates' | 'interviews' | 'selected' | 'travel' | 'employees' | 'support' | 'profile'>('profile');
+  const [activeTab, setActiveTab] = useState<'requests' | 'candidates' | 'interviews' | 'selected' | 'travel' | 'employees' | 'support' | 'profile'>('requests');
   const [position, setPosition] = useState('');
   const [headcount, setHeadcount] = useState(1);
   const [sector, setSector] = useState('Tarım ve Hayvancılık');
@@ -32,6 +32,31 @@ export default function EmployerPage() {
   const [supportMessage, setSupportMessage] = useState('');
   const [supportSuccess, setSupportSuccess] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // LocalStorage'dan Verileri Yükleme
+  useEffect(() => {
+    const savedDemands = localStorage.getItem('panova_employer_demands');
+    if (savedDemands) {
+      try {
+        setDemands(JSON.parse(savedDemands));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    const savedProfile = localStorage.getItem('panova_employer_profile');
+    if (savedProfile) {
+      try {
+        const prof = JSON.parse(savedProfile);
+        if (prof.companyName) setCompanyName(prof.companyName);
+        if (prof.contactPerson) setContactPerson(prof.contactPerson);
+        if (prof.phone) setPhone(prof.phone);
+        if (prof.country) setCountry(prof.country);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
 
   const [demands, setDemands] = useState([
     { id: 1, sector: 'Tarım ve Hayvancılık', position: 'Ziraat Mühendisi / Bahçe Şefi', headcount: 3, salary: '1.500 € + Konaklama', status: 'reviewing', date: '2026-06-12' },
@@ -69,7 +94,10 @@ export default function EmployerPage() {
       status: 'pending',
       date: new Date().toISOString().split('T')[0],
     };
-    setDemands([newDemand, ...demands]);
+    const updatedDemands = [newDemand, ...demands];
+    setDemands(updatedDemands);
+    localStorage.setItem('panova_employer_demands', JSON.stringify(updatedDemands));
+
     setSuccessMsg(true);
     setTimeout(() => setSuccessMsg(false), 4000);
     setPosition('');
@@ -88,9 +116,17 @@ export default function EmployerPage() {
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
+    const profileData = { companyName, contactPerson, phone, country };
+    localStorage.setItem('panova_employer_profile', JSON.stringify(profileData));
+
     setUpdateMsg(true);
     setTimeout(() => setUpdateMsg(false), 4000);
   };
+
+  const filteredDemands = demands.filter(item => 
+    item.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.sector.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
@@ -309,11 +345,11 @@ export default function EmployerPage() {
               </div>
             </div>
 
-            {/* Navigasyon Sekmeleri (Tamamen Dile Duyarlı) */}
-            <div className="flex overflow-x-auto space-x-2 border-b border-slate-200 pb-2 scrollbar-none">
+            {/* Navigasyon Sekmeleri (Sığmama Sorununa Karşı flex-wrap Eklendi) */}
+            <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
               <button
                 onClick={() => setActiveTab('requests')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
                   activeTab === 'requests' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -321,7 +357,7 @@ export default function EmployerPage() {
               </button>
               <button
                 onClick={() => setActiveTab('candidates')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
                   activeTab === 'candidates' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -329,7 +365,7 @@ export default function EmployerPage() {
               </button>
               <button
                 onClick={() => setActiveTab('interviews')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
                   activeTab === 'interviews' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -337,7 +373,7 @@ export default function EmployerPage() {
               </button>
               <button
                 onClick={() => setActiveTab('selected')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
                   activeTab === 'selected' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -345,7 +381,7 @@ export default function EmployerPage() {
               </button>
               <button
                 onClick={() => setActiveTab('travel')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
                   activeTab === 'travel' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -353,7 +389,7 @@ export default function EmployerPage() {
               </button>
               <button
                 onClick={() => setActiveTab('employees')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
                   activeTab === 'employees' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -361,7 +397,7 @@ export default function EmployerPage() {
               </button>
               <button
                 onClick={() => setActiveTab('support')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
                   activeTab === 'support' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -369,7 +405,7 @@ export default function EmployerPage() {
               </button>
               <button
                 onClick={() => setActiveTab('profile')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
                   activeTab === 'profile' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -497,7 +533,7 @@ export default function EmployerPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {demands.map((item) => (
+                        {filteredDemands.map((item) => (
                           <tr key={item.id} className="hover:bg-slate-50 transition">
                             <td className="p-3.5 font-medium text-slate-900">
                               <div className="font-bold">{item.position}</div>
