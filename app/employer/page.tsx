@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { translations, Language } from '@/lib/dictionary';
-import EmployerHeader from '../../components/employer/EmployerHeader';
-import DemandForm from '../../components/employer/DemandForm';
-import DemandsTable from '../../components/employer/DemandsTable';
+import EmployerHeader from './components/EmployerHeader';
+import DemandForm from './components/DemandForm';
+import DemandsTable from './components/DemandsTable';
 
 export default function EmployerPage() {
   const [lang, setLang] = useState<Language>('tr');

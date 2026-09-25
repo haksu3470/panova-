@@ -5,9 +5,10 @@ import React, { useState } from 'react';
 interface DemandsTableProps {
   t: any;
   demands: any[];
+  onSubmitDemand?: any;
 }
 
-export default function DemandsTable({ t, demands }: DemandsTableProps) {
+export default function DemandsTable({ t, demands, onSubmitDemand }: DemandsTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredDemands = demands.filter(item => 
