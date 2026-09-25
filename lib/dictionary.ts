@@ -231,7 +231,6 @@ export interface Translation {
   certificateno?: string;
   issuingbody?: string;
 
-  // TypeScript Build Hatalarını Çözen Yeni Eklenen Anahtarlar
   certificateInfo?: string;
   candidateStatus?: string;
   employerCompanyName?: string;
@@ -329,6 +328,15 @@ export interface Translation {
   taskGroupManagement?: string;
   taskAuditSystem?: string;
   taskApproveStrategic?: string;
+
+  // Yeni Eklenen Gelişmiş Talep Formu Çevirileri
+  expYearsLabel?: string;
+  videoInterviewReqLabel?: string;
+  requiredCertsLabel?: string;
+  customNoteLabel?: string;
+  headcountLabel?: string;
+  salaryOfferLabel?: string;
+  searchDemandPlaceholder?: string;
 }
 
 export const languages = [
@@ -340,6 +348,7 @@ export const languages = [
 
 export const translations: Record<Language, Translation> = {
   tr: {
+    // ... mevcut çevirileriniz korunuyor ...
     returnHome: 'Ana Sayfaya Dön',
     candidatePortal: 'Aday Giriş Portalı',
     loginDesc: 'E-posta, Telefon (GSM) veya Pasaport numaranız ve şifreniz ile giriş yapın.',
@@ -667,8 +676,17 @@ export const translations: Record<Language, Translation> = {
     taskGroupManagement: 'Yönetim Ekibi',
     taskAuditSystem: 'Sistem Denetimi',
     taskApproveStrategic: 'Stratejik Onaylar',
+
+    expYearsLabel: '⏱️ Tecrübe Süresi / Yıl',
+    videoInterviewReqLabel: '📹 Adaydan Video Ön Mülakat İste',
+    requiredCertsLabel: '📜 Aranan Belge ve Sertifikalar',
+    customNoteLabel: '📝 İlave Özel Açıklama / Not',
+    headcountLabel: 'Kişi Sayısı',
+    salaryOfferLabel: 'Maaş Teklifi',
+    searchDemandPlaceholder: 'Talep ara...'
   },
   en: {
+    // ... en çevirileri ...
     returnHome: 'Return to Home',
     candidatePortal: 'Candidate Login Portal',
     loginDesc: 'Sign in with your email, phone, or passport number and password.',
@@ -996,8 +1014,17 @@ export const translations: Record<Language, Translation> = {
     taskGroupManagement: 'Management Team',
     taskAuditSystem: 'System Audit',
     taskApproveStrategic: 'Strategic Approvals',
+
+    expYearsLabel: '⏱️ Experience Years',
+    videoInterviewReqLabel: '📹 Request Video Pre-Interview',
+    requiredCertsLabel: '📜 Required Documents & Certificates',
+    customNoteLabel: '📝 Additional Special Note',
+    headcountLabel: 'Headcount',
+    salaryOfferLabel: 'Salary Offer',
+    searchDemandPlaceholder: 'Search demands...'
   },
   sq: {
+    // ... sq çevirileri ...
     returnHome: 'Kthehu në Faqen Kryesore',
     candidatePortal: 'Portali i Hyrjes për Kandidatët',
     loginDesc: 'Hyni me email, telefon ose numër pasaporte dhe fjalëkalim.',
@@ -1213,7 +1240,7 @@ export const translations: Record<Language, Translation> = {
     empProfileContactPerson: 'Personi i Kontaktit',
 
     profileUpdateTitle: 'Përditësimi i Profilit dhe Informacionit të Kompanisë',
-    profileUpdateDesc: 'Përditësoni të dhënat e kompanisë tuaj këtu.',
+    profileUpdateDesc: 'Përditësoni të dhënat e kompanisë suaj këtu.',
     countryLocationLabel: 'VENDI / LOKACIONI',
     emailImmutableLabel: 'EMAIL (I PACHANGZHUESHËM)',
     emailReadonlyLabel: 'Email (I pandryshueshëm)',
@@ -1325,8 +1352,17 @@ export const translations: Record<Language, Translation> = {
     taskGroupManagement: 'Ekipi i Menaxhimit',
     taskAuditSystem: 'Auditimi i Sistemit',
     taskApproveStrategic: 'Miratimet Strategjike',
+
+    expYearsLabel: '⏱️ Vitet e Eksperiencës',
+    videoInterviewReqLabel: '📹 Kërko Video-Intervistë Paraprake',
+    requiredCertsLabel: '📜 Dokumentet & Certifikatat e Kërkuara',
+    customNoteLabel: '📝 Shënim Shtesë Special',
+    headcountLabel: 'Numri i Personave',
+    salaryOfferLabel: 'Paga e Ofertuar',
+    searchDemandPlaceholder: 'Kërko kërkesa...'
   },
   ar: {
+    // ... ar çevirileri ...
     returnHome: 'العودة إلى الرئيسية',
     candidatePortal: 'بوابة تسجيل دخول المرشحين',
     loginDesc: 'قم بتسجيل الدخول بريدك الإلكتروني أو هاتفك أو رقم جواز السفر.',
@@ -1654,5 +1690,13 @@ export const translations: Record<Language, Translation> = {
     taskGroupManagement: 'فريق الإدارة',
     taskAuditSystem: 'تدقيق النظام',
     taskApproveStrategic: 'الموافقات الاستراتيجية',
-  },
+
+    expYearsLabel: '⏱️ سنوات الخبرة',
+    videoInterviewReqLabel: '📹 طلب مقابلة فيديو أولية',
+    requiredCertsLabel: '📜 المستندات والشهادات المطلوبة',
+    customNoteLabel: '📝 ملاحظة خاصة إضافية',
+    headcountLabel: 'عدد الأفراد',
+    salaryOfferLabel: 'عرض الراتب',
+    searchDemandPlaceholder: 'بحث في الطلبات...'
+  }
 };
