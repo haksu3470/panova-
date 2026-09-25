@@ -329,7 +329,6 @@ export interface Translation {
   taskAuditSystem?: string;
   taskApproveStrategic?: string;
 
-  // Yeni Eklenen Gelişmiş Talep Formu Çevirileri
   expYearsLabel?: string;
   videoInterviewReqLabel?: string;
   requiredCertsLabel?: string;
@@ -337,6 +336,24 @@ export interface Translation {
   headcountLabel?: string;
   salaryOfferLabel?: string;
   searchDemandPlaceholder?: string;
+
+  // Tablo Başlıkları ve Form Seçenekleri İçin Eklenen Anahtarlar
+  colPosSectorTitle?: string;
+  colCriteriaTitle?: string;
+  colHeadcountSalaryTitle?: string;
+  colStatusTitle?: string;
+  positionPlaceholder?: string;
+  salaryPlaceholder?: string;
+  customNotePlaceholder?: string;
+  certOpt1?: string;
+  certOpt2?: string;
+  certOpt3?: string;
+  certOpt4?: string;
+  certOpt5?: string;
+  expOpt1?: string;
+  expOpt2?: string;
+  expOpt3?: string;
+  expOpt4?: string;
 }
 
 export const languages = [
@@ -348,7 +365,6 @@ export const languages = [
 
 export const translations: Record<Language, Translation> = {
   tr: {
-    // ... mevcut çevirileriniz korunuyor ...
     returnHome: 'Ana Sayfaya Dön',
     candidatePortal: 'Aday Giriş Portalı',
     loginDesc: 'E-posta, Telefon (GSM) veya Pasaport numaranız ve şifreniz ile giriş yapın.',
@@ -683,10 +699,26 @@ export const translations: Record<Language, Translation> = {
     customNoteLabel: '📝 İlave Özel Açıklama / Not',
     headcountLabel: 'Kişi Sayısı',
     salaryOfferLabel: 'Maaş Teklifi',
-    searchDemandPlaceholder: 'Talep ara...'
+    searchDemandPlaceholder: 'Talep ara...',
+
+    colPosSectorTitle: 'POZİSYON / SEKTÖR',
+    colCriteriaTitle: 'KRİTERLER (TECRÜBE / VİDEO / BELGE)',
+    colHeadcountSalaryTitle: 'KİŞİ / MAAŞ',
+    colStatusTitle: 'DURUM',
+    positionPlaceholder: 'Örn: Ziraat Mühendisi / Bahçe Şefi',
+    salaryPlaceholder: 'Örn: 1.500 €',
+    customNotePlaceholder: 'Örn: Hafta sonu mesaisi uyumlu...',
+    certOpt1: 'B Sınıfı Sürücü Belgesi',
+    certOpt2: 'Uluslararası Pasaport / Seyahat Engelsiz',
+    certOpt3: 'Ziraat / Mühendislik Fakültesi Diploma',
+    certOpt4: 'Usta Öğreticilik / Mesleki Sertifika',
+    certOpt5: 'İleri Düzey Yabancı Dil',
+    expOpt1: 'Deneyimsiz / Yeni Mezun',
+    expOpt2: '1 - 3 Yıl Tecrübe',
+    expOpt3: '3 - 5 Yıl Tecrübe',
+    expOpt4: '5+ Yıl Uzman / Kıdemli'
   },
   en: {
-    // ... en çevirileri ...
     returnHome: 'Return to Home',
     candidatePortal: 'Candidate Login Portal',
     loginDesc: 'Sign in with your email, phone, or passport number and password.',
@@ -1021,10 +1053,26 @@ export const translations: Record<Language, Translation> = {
     customNoteLabel: '📝 Additional Special Note',
     headcountLabel: 'Headcount',
     salaryOfferLabel: 'Salary Offer',
-    searchDemandPlaceholder: 'Search demands...'
+    searchDemandPlaceholder: 'Search demands...',
+
+    colPosSectorTitle: 'POSITION / SECTOR',
+    colCriteriaTitle: 'CRITERIA (EXPERIENCE / VIDEO / DOCS)',
+    colHeadcountSalaryTitle: 'HEADCOUNT / SALARY',
+    colStatusTitle: 'STATUS',
+    positionPlaceholder: 'E.g: Agricultural Engineer / Garden Lead',
+    salaryPlaceholder: 'E.g: 1,500 €',
+    customNotePlaceholder: 'E.g: Weekend shift compatible...',
+    certOpt1: 'Class B Driver License',
+    certOpt2: 'International Passport / Travel Free',
+    certOpt3: 'Agriculture / Engineering Degree',
+    certOpt4: 'Master Trainer / Professional Certificate',
+    certOpt5: 'Advanced Foreign Language',
+    expOpt1: 'Entry Level / Fresh Graduate',
+    expOpt2: '1 - 3 Years Experience',
+    expOpt3: '3 - 5 Years Experience',
+    expOpt4: '5+ Years Senior / Expert'
   },
   sq: {
-    // ... sq çevirileri ...
     returnHome: 'Kthehu në Faqen Kryesore',
     candidatePortal: 'Portali i Hyrjes për Kandidatët',
     loginDesc: 'Hyni me email, telefon ose numër pasaporte dhe fjalëkalim.',
@@ -1359,10 +1407,26 @@ export const translations: Record<Language, Translation> = {
     customNoteLabel: '📝 Shënim Shtesë Special',
     headcountLabel: 'Numri i Personave',
     salaryOfferLabel: 'Paga e Ofertuar',
-    searchDemandPlaceholder: 'Kërko kërkesa...'
+    searchDemandPlaceholder: 'Kërko kërkesa...',
+
+    colPosSectorTitle: 'POZICIONI / SEKTORI',
+    colCriteriaTitle: 'KRITERET (EKSPERIENCA / VIDEO / DOKUMENTET)',
+    colHeadcountSalaryTitle: 'PERSONAT / PAGA',
+    colStatusTitle: 'STATUSI',
+    positionPlaceholder: 'P.sh: Inxhinier Bujqësor / Kryetar Kopshti',
+    salaryPlaceholder: 'P.sh: 1,500 €',
+    customNotePlaceholder: 'P.sh: I përshtatshëm për turne fundjave...',
+    certOpt1: 'Leje Drejtimi e Klasës B',
+    certOpt2: 'Pasaportë Ndërkombëtare / Pa Pengesa Udhëtimi',
+    certOpt3: 'Diplomë Bujqësie / Inxhinierie',
+    certOpt4: 'Trajner / Certifikatë Profesionale',
+    certOpt5: 'Gjuhë e Huaj e Avancuar',
+    expOpt1: 'Pa Eksperiencë / Diplomuar i Ri',
+    expOpt2: '1 - 3 Vite Eksperiencë',
+    expOpt3: '3 - 5 Vite Eksperiencë',
+    expOpt4: '5+ Vite Ekspert / I Lartë'
   },
   ar: {
-    // ... ar çevirileri ...
     returnHome: 'العودة إلى الرئيسية',
     candidatePortal: 'بوابة تسجيل دخول المرشحين',
     loginDesc: 'قم بتسجيل الدخول بريدك الإلكتروني أو هاتفك أو رقم جواز السفر.',
@@ -1697,6 +1761,23 @@ export const translations: Record<Language, Translation> = {
     customNoteLabel: '📝 ملاحظة خاصة إضافية',
     headcountLabel: 'عدد الأفراد',
     salaryOfferLabel: 'عرض الراتب',
-    searchDemandPlaceholder: 'بحث في الطلبات...'
+    searchDemandPlaceholder: 'بحث في الطلبات...',
+
+    colPosSectorTitle: 'المنصب / القطاع',
+    colCriteriaTitle: 'المعايير (الخبرة / الفيديو / المستندات)',
+    colHeadcountSalaryTitle: 'الأفراد / الراتب',
+    colStatusTitle: 'الحالة',
+    positionPlaceholder: 'مثال: مهندس زراعي / مشرف حدائق',
+    salaryPlaceholder: 'مثال: 1,500 €',
+    customNotePlaceholder: 'مثال: متوافق مع مناوبات نهاية الأسبوع...',
+    certOpt1: 'رخصة قيادة فئة B',
+    certOpt2: 'جواز سفر دولي / حرية السفر',
+    certOpt3: 'شهادة زراعة / هندسة',
+    certOpt4: 'مدرب محترف / شهادة مهنية',
+    certOpt5: 'لغة أجنبية متقدمة',
+    expOpt1: 'بدون خبرة / خريج جديد',
+    expOpt2: '1 - 3 سنوات خبرة',
+    expOpt3: '3 - 5 سنوات خبرة',
+    expOpt4: '5+ سنوات خبير / متقدم'
   }
 };

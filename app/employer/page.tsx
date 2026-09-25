@@ -28,10 +28,10 @@ export default function EmployerPage() {
   const [sector, setSector] = useState('Tarım ve Hayvancılık');
   const [salary, setSalary] = useState('');
   
-  // Yeni İstediğiniz Gelişmiş Kriterler
-  const [experienceYears, setExperienceYears] = useState('3-5 Yıl');
+  // Gelişmiş Kriterler
+  const [experienceYears, setExperienceYears] = useState(t.expOpt3 || '3 - 5 Yıl Tecrübe');
   const [videoRequired, setVideoRequired] = useState(true);
-  const [selectedCertificates, setSelectedCertificates] = useState<string[]>(['B Sınıfı Sürücü Belgesi']);
+  const [selectedCertificates, setSelectedCertificates] = useState<string[]>([t.certOpt1 || 'B Sınıfı Sürücü Belgesi']);
   const [customRequirement, setCustomRequirement] = useState('');
   
   const [successMsg, setSuccessMsg] = useState(false);
@@ -48,7 +48,7 @@ export default function EmployerPage() {
       position: 'Ziraat Mühendisi / Bahçe Şefi', 
       headcount: 3, 
       salary: '1.500 € + Konaklama', 
-      experience: '3-5 Yıl',
+      experience: '3 - 5 Yıl',
       video: true,
       certificates: ['B Sınıfı Sürücü Belgesi', 'Ziraat Fakültesi Diploma'],
       status: 'reviewing', 
@@ -439,7 +439,7 @@ export default function EmployerPage() {
             {/* İçerik Alanları */}
             {activeTab === 'requests' && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Yeni Talep Oluşturma Paneli (Gelişmiş Seçeneklerle) */}
+                {/* Yeni Talep Oluşturma Paneli */}
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl lg:col-span-1">
                   <h2 className="text-sm font-black text-slate-900 mb-4 flex items-center gap-2">
                     <span>✨</span> {t.newDemandBtn || 'Yeni Talep Oluştur'}
@@ -473,7 +473,7 @@ export default function EmployerPage() {
                         required
                         value={position}
                         onChange={(e) => setPosition(e.target.value)}
-                        placeholder="Örn: Ziraat Mühendisi / Bahçe Şefi"
+                        placeholder={t.positionPlaceholder || 'Örn: Ziraat Mühendisi / Bahçe Şefi'}
                         className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                       />
                     </div>
@@ -496,7 +496,7 @@ export default function EmployerPage() {
                           type="text"
                           value={salary}
                           onChange={(e) => setSalary(e.target.value)}
-                          placeholder="Örn: 1.500 €"
+                          placeholder={t.salaryPlaceholder || 'Örn: 1.500 €'}
                           className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         />
                       </div>
@@ -510,10 +510,10 @@ export default function EmployerPage() {
                         onChange={(e) => setExperienceYears(e.target.value)}
                         className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white font-medium"
                       >
-                        <option value="Deneyimsiz / Yeni Mezun">Deneyimsiz / Yeni Mezun</option>
-                        <option value="1-3 Yıl">1 - 3 Yıl Tecrübe</option>
-                        <option value="3-5 Yıl">3 - 5 Yıl Tecrübe</option>
-                        <option value="5+ Yıl">5+ Yıl Uzman / Kıdemli</option>
+                        <option value={t.expOpt1 || 'Deneyimsiz / Yeni Mezun'}>{t.expOpt1 || 'Deneyimsiz / Yeni Mezun'}</option>
+                        <option value={t.expOpt2 || '1 - 3 Yıl Tecrübe'}>{t.expOpt2 || '1 - 3 Yıl Tecrübe'}</option>
+                        <option value={t.expOpt3 || '3 - 5 Yıl Tecrübe'}>{t.expOpt3 || '3 - 5 Yıl Tecrübe'}</option>
+                        <option value={t.expOpt4 || '5+ Yıl Uzman / Kıdemli'}>{t.expOpt4 || '5+ Yıl Uzman / Kıdemli'}</option>
                       </select>
                     </div>
 
@@ -532,16 +532,16 @@ export default function EmployerPage() {
                       </label>
                     </div>
 
-                    {/* Tıkla Seçilebilir Sertifikalar / Belgeler */}
+                    {/* Sertifikalar / Belgeler */}
                     <div>
                       <label className="block text-xs font-semibold text-slate-600 mb-2">{t.requiredCertsLabel || '📜 Aranan Belge ve Sertifikalar'}</label>
                       <div className="space-y-2 bg-slate-50 p-3 rounded-2xl border border-slate-200">
                         {[
-                          'B Sınıfı Sürücü Belgesi',
-                          'Uluslararası Pasaport / Seyahat Engelsiz',
-                          'Ziraat / Mühendislik Fakültesi Diploma',
-                          'Usta Öğreticilik / Mesleki Sertifika',
-                          'İleri Düzey Yabancı Dil'
+                          t.certOpt1 || 'B Sınıfı Sürücü Belgesi',
+                          t.certOpt2 || 'Uluslararası Pasaport / Seyahat Engelsiz',
+                          t.certOpt3 || 'Ziraat / Mühendislik Fakültesi Diploma',
+                          t.certOpt4 || 'Usta Öğreticilik / Mesleki Sertifika',
+                          t.certOpt5 || 'İleri Düzey Yabancı Dil'
                         ].map((cert) => (
                           <label key={cert} className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer hover:text-slate-900">
                             <input
@@ -556,14 +556,14 @@ export default function EmployerPage() {
                       </div>
                     </div>
 
-                    {/* Özel Not / Ek Text Alanı */}
+                    {/* Özel Not Alanı */}
                     <div>
                       <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t.customNoteLabel || '📝 İlave Özel Açıklama / Not'}</label>
                       <input
                         type="text"
                         value={customRequirement}
                         onChange={(e) => setCustomRequirement(e.target.value)}
-                        placeholder="Örn: Hafta sonu mesaisi uyumlu..."
+                        placeholder={t.customNotePlaceholder || 'Örn: Hafta sonu mesaisi uyumlu...'}
                         className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                       />
                     </div>
@@ -577,7 +577,7 @@ export default function EmployerPage() {
                   </form>
                 </div>
 
-                {/* Talepler Listesi (Kriter Gösterimli) */}
+                {/* Talepler Listesi (Tablo) */}
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl lg:col-span-2">
                   <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
                     <h2 className="text-sm font-black text-slate-900">
@@ -596,10 +596,10 @@ export default function EmployerPage() {
                     <table className="w-full text-left text-xs">
                       <thead>
                         <tr className="bg-slate-100 text-slate-600 uppercase font-bold">
-                          <th className="p-3.5 rounded-l-xl">Pozisyon / Sektör</th>
-                          <th className="p-3.5">Kriterler (Tecrübe / Video / Belge)</th>
-                          <th className="p-3.5">Kişi / Maaş</th>
-                          <th className="p-3.5 rounded-r-xl">Durum</th>
+                          <th className="p-3.5 rounded-l-xl">{t.colPosSectorTitle || 'POZİSYON / SEKTÖR'}</th>
+                          <th className="p-3.5">{t.colCriteriaTitle || 'KRİTERLER (TECRÜBE / VİDEO / BELGE)'}</th>
+                          <th className="p-3.5">{t.colHeadcountSalaryTitle || 'KİŞİ / MAAŞ'}</th>
+                          <th className="p-3.5 rounded-r-xl">{t.colStatusTitle || 'DURUM'}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
