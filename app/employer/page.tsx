@@ -386,7 +386,7 @@ export default function EmployerPortal() {
               href="/"
               className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border"
             >
-              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.homeBtn || 'Ana Sayfa'}
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome || 'Ana Sayfa'}
             </Link>
 
             <div className="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200">
