@@ -400,7 +400,10 @@ export default function PortalPage() {
     return (
       <div className={`min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
         <header className="max-w-7xl w-full mx-auto p-4 md:p-6 flex items-center justify-between border-b border-slate-200">
-          <div className="text-lg font-black text-slate-900 tracking-tight">PANOVA PORTAL</div>
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="PANOVA" className="h-8 w-auto object-contain shrink-0" />
+            <div className="text-lg font-black text-slate-900 tracking-tight">PANOVA PORTAL</div>
+          </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center bg-white rounded-xl px-3 py-1.5 border border-slate-200 shadow-sm">
               <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
