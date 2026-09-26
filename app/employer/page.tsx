@@ -13,7 +13,6 @@ export default function EmployerPage() {
 
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   
-  // Oturum durumunu doğrudan localStorage'dan okuyarak başlat
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('panova_employer_logged_in') === 'true' || localStorage.getItem('panova_is_impersonating') === 'true';
@@ -28,7 +27,7 @@ export default function EmployerPage() {
     return false;
   });
 
-  // Profil verilerini localStorage'dan anında yükle (Asla boş dönmez)
+  // LocalStorage profil verilerini öncelikli ve kalıcı olarak yükle
   const [employerId, setEmployerId] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       const p = localStorage.getItem('panova_employer_profile');
@@ -73,10 +72,10 @@ export default function EmployerPage() {
     if (typeof window !== 'undefined') {
       const p = localStorage.getItem('panova_employer_profile');
       if (p) {
-        try { return JSON.parse(p).country || 'Türkiye'; } catch(e) {}
+        try { return JSON.parse(p).country || 'North Macedonia'; } catch(e) {}
       }
     }
-    return 'Türkiye';
+    return 'North Macedonia';
   });
 
   const [email, setEmail] = useState(() => {
@@ -127,23 +126,51 @@ export default function EmployerPage() {
     }
   ]);
 
-  // Sayfa açıldığında talepleri yükle
+  // Sayfa açıldığında localStorage verilerini koruyarak state'i sabitle
   useEffect(() => {
-    const savedDemands = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_demands') : null;
-    if (savedDemands) {
-      try {
-        setDemands(JSON.parse(savedDemands));
-      } catch (e) {
-        console.error(e);
+    const checkAuthAndFetchData = async () => {
+      const impersonating = typeof window !== 'undefined' && localStorage.getItem('panova_is_impersonating') === 'true';
+      const savedProfile = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_profile') : null;
+      const persistentLoggedIn = typeof window !== 'undefined' && localStorage.getItem('panova_employer_logged_in') === 'true';
+
+      if (impersonating || persistentLoggedIn || savedProfile) {
+        setIsLoggedIn(true);
+        setIsAdminImpersonating(impersonating);
       }
-    }
+
+      if (savedProfile) {
+        try {
+          const prof = JSON.parse(savedProfile);
+          if (prof.email) {
+            setEmail(prof.email);
+            if (prof.companyName) setCompanyName(prof.companyName);
+            if (prof.contactPerson) setContactPerson(prof.contactPerson);
+            if (prof.phone) setPhone(prof.phone);
+            if (prof.country) setCountry(prof.country);
+            if (prof.companyLogo) setCompanyLogo(prof.companyLogo);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      const savedDemands = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_demands') : null;
+      if (savedDemands) {
+        try {
+          setDemands(JSON.parse(savedDemands));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
+    checkAuthAndFetchData();
   }, []);
 
   const handleSubmitAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
-    // Supabase'den bu e-postaya ait kayıt varsa çek
     const { data: dbEmp } = await supabase
       .from('employers')
       .select('*')
@@ -434,6 +461,7 @@ export default function EmployerPage() {
             setCompanyName('AKAY EĞİTİM');
             setContactPerson('Hüseyin Aksu');
             setPhone('+38970385792');
+            setCountry('North Macedonia');
             setCompanyLogo('');
           }}
           onReturnToAdmin={() => {
