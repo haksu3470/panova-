@@ -27,12 +27,20 @@ export default function EmployerPage() {
     return false;
   });
 
-  const [employerId, setEmployerId] = useState<string | null>(null);
+  const [employerId, setEmployerId] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const p = localStorage.getItem('panova_employer_profile');
+      if (p) {
+        try { return JSON.parse(p).id || null; } catch(e) {}
+      }
+    }
+    return null;
+  });
 
   const [companyName, setCompanyName] = useState('');
   const [contactPerson, setContactPerson] = useState('');
   const [phone, setPhone] = useState('');
-  const [country, setCountry] = useState('North Macedonia');
+  const [country, setCountry] = useState('Türkiye');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [companyLogo, setCompanyLogo] = useState('');
@@ -63,7 +71,7 @@ export default function EmployerPage() {
     }
   ]);
 
-  // Sayfa açıldığında Supabase employers tablosundan verileri çekme
+  // Sayfa açıldığında Supabase veritabanından güncel verileri ve logoyu çekme
   useEffect(() => {
     const checkAuthAndFetchData = async () => {
       const impersonating = typeof window !== 'undefined' && localStorage.getItem('panova_is_impersonating') === 'true';
@@ -80,24 +88,29 @@ export default function EmployerPage() {
           const prof = JSON.parse(savedProfile);
           if (prof.email) {
             setEmail(prof.email);
-            const { data: dbEmp, error } = await supabase
-              .from('employers')
-              .select('*')
-              .eq('email', prof.email)
-              .single();
+            
+            // Supabase'den ID veya Email ile veritabanındaki en güncel kaydı çek
+            let query = supabase.from('employers').select('*');
+            if (prof.id) {
+              query = query.eq('id', prof.id);
+            } else {
+              query = query.eq('email', prof.email);
+            }
+
+            const { data: dbEmp, error } = await query.single();
 
             if (dbEmp && !error) {
               setEmployerId(dbEmp.id);
-              setCompanyName(dbEmp.company_name || prof.companyName || '');
-              setContactPerson(dbEmp.contact_name || prof.contactPerson || '');
-              setPhone(dbEmp.phone || prof.phone || '');
-              setCountry(dbEmp.country || prof.country || 'North Macedonia');
-              setCompanyLogo(dbEmp.logo || dbEmp.company_logo || prof.companyLogo || '');
+              setCompanyName(dbEmp.company_name || prof.companyName || 'AKAY EĞİTİM');
+              setContactPerson(dbEmp.contact_name || prof.contactPerson || 'Hüseyin Aksu');
+              setPhone(dbEmp.phone || prof.phone || '+38970385792');
+              setCountry(dbEmp.country || prof.country || 'Türkiye');
+              setCompanyLogo(dbEmp.logo || prof.companyLogo || '');
             } else {
               setCompanyName(prof.companyName || 'AKAY EĞİTİM');
               setContactPerson(prof.contactPerson || 'Hüseyin Aksu');
-              setPhone(prof.phone || '+389...');
-              setCountry(prof.country || 'North Macedonia');
+              setPhone(prof.phone || '+38970385792');
+              setCountry(prof.country || 'Türkiye');
               setCompanyLogo(prof.companyLogo || '');
             }
           }
@@ -131,8 +144,8 @@ export default function EmployerPage() {
 
     let currentCompName = 'AKAY EĞİTİM';
     let currentContact = 'Hüseyin Aksu';
-    let currentPhone = '+389 70 385 792';
-    let currentCountry = 'North Macedonia';
+    let currentPhone = '+38970385792';
+    let currentCountry = 'Türkiye';
     let currentLogo = '';
     let currentId = null;
 
@@ -142,7 +155,7 @@ export default function EmployerPage() {
       currentContact = dbEmp.contact_name || currentContact;
       currentPhone = dbEmp.phone || currentPhone;
       currentCountry = dbEmp.country || currentCountry;
-      currentLogo = dbEmp.logo || dbEmp.company_logo || '';
+      currentLogo = dbEmp.logo || '';
     }
 
     setEmployerId(currentId);
