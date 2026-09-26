@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, Languages, 
-  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, Plane, ShieldCheck, HeartHandshake, UploadCloud
+  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, Plane, ShieldCheck, HeartHandshake, UploadCloud, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
@@ -73,7 +73,6 @@ export default function EmployerPortal() {
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
 
-  // Şirket Bilgilerim form state'leri
   const [editCompanyName, setEditCompanyName] = useState('');
   const [editContactPerson, setEditContactPerson] = useState('');
   const [editPhone, setEditPhone] = useState('');
@@ -463,7 +462,7 @@ export default function EmployerPortal() {
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         
-        {/* ÜST HEADER: PANOVA LOGOSU + İŞVEREN ŞİRKET BİLGİSİ (ÇAKIŞMAYACAK ŞEKİLDE) */}
+        {/* ÜST HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="PANOVA" className="h-10 w-auto object-contain shrink-0" />
@@ -517,38 +516,40 @@ export default function EmployerPortal() {
           </div>
         </div>
 
-        {/* TÜM 10 SEKME EKSİKSİZ */}
-        <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
-          <button onClick={() => setActiveTab('home')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'home' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            🏠 Ana Sayfa (Özet)
-          </button>
-          <button onClick={() => setActiveTab('demands')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'demands' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📁 Personel Taleplerim ({jobDemands.length})
-          </button>
-          <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            👥 Adaylar ({candidates.length})
-          </button>
-          <button onClick={() => setActiveTab('interviews')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'interviews' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📅 Görüşmeler
-          </button>
-          <button onClick={() => setActiveTab('selected')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'selected' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            ⭐ Seçtiğim Adaylar
-          </button>
-          <button onClick={() => setActiveTab('status')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'status' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📄 Belge ve İşlem Durumları
-          </button>
-          <button onClick={() => setActiveTab('travel')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            ✈️ Seyahat ve İşe Başlangıç
-          </button>
-          <button onClick={() => setActiveTab('employees')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            👷 Aktif Çalışanlar
-          </button>
-          <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            💬 Destek / Bildirim ({supportTickets.length})
-          </button>
-          <button onClick={() => setActiveTab('company')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'company' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            🏢 Şirket Bilgilerim
-          </button>
+        {/* SEKME ÇUBUĞU (KAYDIRILABİLİR VE OKLU - TÜM SEKMEER EKSİKSİZ GÖRÜNÜR) */}
+        <div className="relative flex items-center bg-white p-2 rounded-2xl border shadow-sm">
+          <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none py-1 px-1 w-full">
+            <button onClick={() => setActiveTab('home')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'home' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+              🏠 Ana Sayfa (Özet)
+            </button>
+            <button onClick={() => setActiveTab('demands')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'demands' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+              📁 Personel Taleplerim ({jobDemands.length})
+            </button>
+            <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+              👥 Adaylar ({candidates.length})
+            </button>
+            <button onClick={() => setActiveTab('interviews')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'interviews' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+              📅 Görüşmeler
+            </button>
+            <button onClick={() => setActiveTab('selected')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'selected' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+              ⭐ Seçtiğim Adaylar
+            </button>
+            <button onClick={() => setActiveTab('status')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'status' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+              📄 Belge ve İşlem Durumları
+            </button>
+            <button onClick={() => setActiveTab('travel')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+              ✈️ Seyahat ve İşe Başlangıç
+            </button>
+            <button onClick={() => setActiveTab('employees')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+              👷 Aktif Çalışanlar
+            </button>
+            <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+              💬 Destek / Bildirim ({supportTickets.length})
+            </button>
+            <button onClick={() => setActiveTab('company')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'company' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+              🏢 Şirket Bilgilerim
+            </button>
+          </div>
         </div>
 
         {/* 1. ANA SAYFA */}
@@ -801,7 +802,7 @@ export default function EmployerPortal() {
           </div>
         )}
 
-        {/* 10. ŞİRKET BİLGİLERİM (VERİTABANI LOGOSU VE DETAYLAR DAHİL) */}
+        {/* 10. ŞİRKET BİLGİLERİM (LOGO GÜNCELLEME) */}
         {activeTab === 'company' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-6">
             <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Şirket Bilgilerim ve Logo Yönetimi</h3>
