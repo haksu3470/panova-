@@ -189,7 +189,7 @@ export default function EmployerPortal() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('panova_employer_profile');
     }
-    window.location.href = '/employer/login';
+    window.location.href = '/employer-login';
   };
 
   const togglePositionSelection = (pos: string) => {
