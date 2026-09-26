@@ -40,6 +40,13 @@ export default function DemandForm({ t, onSubmitDemand, successMsg }: DemandForm
     setCustomRequirement('');
   };
 
+  // Dile göre sektör seçenekleri
+  const sectors = [
+    { value: 'Tarım ve Hayvancılık', labelTr: 'Tarım ve Hayvancılık', labelEn: 'Agriculture & Livestock', labelSq: 'Bujqësi dhe Blegtori', labelAr: 'الزراعة والثروة الحيوانية' },
+    { value: 'İnşaat ve Yapı', labelTr: 'İnşaat ve Yapı', labelEn: 'Construction & Building', labelSq: 'Ndërtim', labelAr: 'الإنشاءات والبناء' },
+    { value: 'Gıda ve Üretim', labelTr: 'Gıda ve Üretim', labelEn: 'Food & Production', labelSq: 'Uhq dhe Prodhim', labelAr: 'الغذاء والإنتاج' },
+  ];
+
   return (
     <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl">
       <h2 className="text-sm font-black text-slate-900 mb-4">
@@ -62,9 +69,11 @@ export default function DemandForm({ t, onSubmitDemand, successMsg }: DemandForm
             onChange={(e) => setSector(e.target.value)}
             className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs bg-slate-50 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
           >
-            <option value="Tarım ve Hayvancılık">Tarım ve Hayvancılık</option>
-            <option value="İnşaat ve Yapı">İnşaat ve Yapı</option>
-            <option value="Gıda ve Üretim">Gıda ve Üretim</option>
+            {sectors.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.labelTr} {/* İsteğe göre veya sözlüğe bağlı olarak dinamik gösterim */}
+              </option>
+            ))}
           </select>
         </div>
 
