@@ -70,6 +70,7 @@ export default function EmployerPortal() {
 
   const [editCompanyName, setEditCompanyName] = useState('');
   const [editContactPerson, setEditContactPerson] = useState('');
+  const [editEmail, setEditEmail] = useState('');
   const [editPhone, setEditPhone] = useState('');
   const [editCountry, setEditCountry] = useState('Turkey');
   const [editCompanyLogo, setEditCompanyLogo] = useState('');
@@ -78,6 +79,7 @@ export default function EmployerPortal() {
     if (employerProfile) {
       setEditCompanyName(employerProfile.companyName || employerProfile.company_name || 'AKAY EĞİTİM');
       setEditContactPerson(employerProfile.contactPerson || employerProfile.contact_person || 'Hüseyin Aksu');
+      setEditEmail(employerProfile.email || 'huseyinaksu@gmail.com');
       setEditPhone(employerProfile.phone || '+38970385792');
       setEditCountry(employerProfile.country || 'Turkey');
       setEditCompanyLogo(employerProfile.companyLogo || employerProfile.company_logo || '');
@@ -162,6 +164,7 @@ export default function EmployerPortal() {
       ...employerProfile,
       companyName: editCompanyName,
       contactPerson: editContactPerson,
+      email: editEmail,
       phone: editPhone,
       country: editCountry,
       companyLogo: editCompanyLogo
@@ -172,6 +175,7 @@ export default function EmployerPortal() {
         await supabase.from('employers').update({
           company_name: editCompanyName,
           contact_person: editContactPerson,
+          email: editEmail,
           phone: editPhone,
           country: editCountry,
           company_logo: editCompanyLogo
@@ -183,6 +187,7 @@ export default function EmployerPortal() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('panova_employer_profile', JSON.stringify(updated));
     }
+    alert('Şirket bilgileriniz ve logonuz başarıyla kaydedildi!');
   };
 
   const handleLogout = () => {
@@ -723,18 +728,23 @@ export default function EmployerPortal() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">E-Posta Adresi</label>
+                  <input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-950 font-semibold" />
+                </div>
+                <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.phoneLabel || 'Telefon Numarası'}</label>
                   <input type="text" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-950 font-semibold" />
                 </div>
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.countryLabel || 'Ülke'}</label>
-                  <select value={editCountry} onChange={(e) => setEditCountry(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-950 font-semibold cursor-pointer">
-                    <option value="North Macedonia">North Macedonia</option>
-                    <option value="Turkey">Turkey</option>
-                    <option value="Albania">Albania</option>
-                    <option value="Kosovo">Kosovo</option>
-                  </select>
-                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">{t.countryLabel || 'Ülke'}</label>
+                <select value={editCountry} onChange={(e) => setEditCountry(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-950 font-semibold cursor-pointer">
+                  <option value="North Macedonia">North Macedonia</option>
+                  <option value="Turkey">Turkey</option>
+                  <option value="Albania">Albania</option>
+                  <option value="Kosovo">Kosovo</option>
+                </select>
               </div>
 
               <div>
