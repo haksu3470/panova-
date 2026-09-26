@@ -19,6 +19,7 @@ export default function EmployerPage() {
   const [country, setCountry] = useState('North Macedonia');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [companyLogo, setCompanyLogo] = useState('');
   
   const [activeTab, setActiveTab] = useState<
     'home' | 'requests' | 'candidates' | 'interviews' | 'selected' | 'documents' | 'travel' | 'employees' | 'support' | 'profile'
@@ -65,6 +66,7 @@ export default function EmployerPage() {
         if (prof.phone) setPhone(prof.phone);
         if (prof.country) setCountry(prof.country);
         if (prof.email) setEmail(prof.email);
+        if (prof.companyLogo) setCompanyLogo(prof.companyLogo);
       } catch (e) {
         console.error(e);
       }
@@ -103,11 +105,22 @@ export default function EmployerPage() {
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    const profileData = { companyName, contactPerson, phone, country, email };
+    const profileData = { companyName, contactPerson, phone, country, email, companyLogo };
     localStorage.setItem('panova_employer_profile', JSON.stringify(profileData));
 
     setUpdateMsg(true);
     setTimeout(() => setUpdateMsg(false), 4000);
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCompanyLogo(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSupportSubmit = (e: React.FormEvent) => {
@@ -199,6 +212,7 @@ export default function EmployerPage() {
             setCompanyName('');
             setContactPerson('');
             setPhone('');
+            setCompanyLogo('');
           }}
         />
 
@@ -230,9 +244,7 @@ export default function EmployerPage() {
                 🏢
               </div>
               <h1 className="text-xl font-black text-slate-900">
-                {authMode === 'signup' 
-                  ? (lang === 'en' ? 'Employer Registration' : lang === 'sq' ? 'Regjistrimi i Punëdhënësit' : lang === 'ar' ? 'تسجيل صاحب العمل' : 'İşveren Kaydı') 
-                  : (lang === 'en' ? 'Employer Login Portal' : lang === 'sq' ? 'Portali i Hyrjes për Punëdhënësit' : lang === 'ar' ? 'بوابة تسجيل دخول صاحب العمل' : 'İşveren Giriş Portalı')}
+                {authMode === 'signup' ? 'İşveren Kaydı' : 'İşveren Giriş Portalı'}
               </h1>
             </div>
 
@@ -240,14 +252,12 @@ export default function EmployerPage() {
               {authMode === 'signup' && (
                 <>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                      {lang === 'en' ? 'COMPANY NAME' : lang === 'sq' ? 'EMRI I KOMPANISË' : lang === 'ar' ? 'اسم الشركة' : 'ŞİRKET UNVANI'} *
-                    </label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİRKET UNVANI *</label>
                     <input
                       type="text"
                       required
                       autoComplete="off"
-                      placeholder={lang === 'en' ? 'Enter company name' : 'Şirket unvanınızı girin'}
+                      placeholder="Şirket unvanınızı girin"
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
@@ -255,9 +265,7 @@ export default function EmployerPage() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                        {lang === 'en' ? 'CONTACT PERSON' : lang === 'sq' ? 'PERSONI I KONTAKTIT' : lang === 'ar' ? 'مسؤول الاتصال' : 'YETKİLİ KİŞİ'} *
-                      </label>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">YETKİLİ KİŞİ *</label>
                       <input
                         type="text"
                         required
@@ -269,9 +277,7 @@ export default function EmployerPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                        {lang === 'en' ? 'PHONE' : lang === 'sq' ? 'TELEFONI' : lang === 'ar' ? 'الهاتف' : 'TELEFON'} *
-                      </label>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">TELEFON *</label>
                       <input
                         type="tel"
                         required
@@ -287,9 +293,7 @@ export default function EmployerPage() {
               )}
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  {lang === 'en' ? 'COMPANY EMAIL' : lang === 'sq' ? 'EMAIL I KOMPANISË' : lang === 'ar' ? 'البريد الإلكتروني' : 'ŞİRKET E-POSTASI'} *
-                </label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİRKET E-POSTASI *</label>
                 <input
                   type="email"
                   required
@@ -302,9 +306,7 @@ export default function EmployerPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  {lang === 'en' ? 'PASSWORD' : lang === 'sq' ? 'FJALËKALIMI' : lang === 'ar' ? 'كلمة المرور' : 'ŞİFRE'} *
-                </label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİFRE *</label>
                 <input
                   type="password"
                   required
@@ -320,9 +322,7 @@ export default function EmployerPage() {
                 type="submit"
                 className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2"
               >
-                {authMode === 'signup' 
-                  ? (lang === 'en' ? 'Complete Registration' : lang === 'sq' ? 'Përfundo Regjistrimin' : lang === 'ar' ? 'إتمام التسجيل' : 'Kayıt Ol') 
-                  : (lang === 'en' ? 'Sign In' : lang === 'sq' ? 'Kyçu' : lang === 'ar' ? 'تسجيل الدخول' : 'Giriş Yap')}
+                {authMode === 'signup' ? 'Kayıt Ol' : 'Giriş Yap'}
               </button>
             </form>
           </div>
@@ -460,9 +460,21 @@ export default function EmployerPage() {
 
             {activeTab === 'profile' && (
               <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl max-w-xl text-xs">
-                <h2 className="text-sm font-black text-slate-900 mb-2">Şirket ve İletişim Bilgileri</h2>
-                {updateMsg && <div className="mb-4 bg-emerald-50 text-emerald-800 p-3 rounded-xl">✅ Güncellendi!</div>}
+                <h2 className="text-sm font-black text-slate-900 mb-2">Şirket Profili ve Firma Logosu</h2>
+                {updateMsg && <div className="mb-4 bg-emerald-50 text-emerald-800 p-3 rounded-xl">✅ Bilgiler ve logo güncellendi!</div>}
                 <form onSubmit={handleSaveProfile} className="space-y-4">
+                  <div>
+                    <label className="block font-bold mb-1">Firma Logosu</label>
+                    <div className="flex items-center gap-4">
+                      {companyLogo ? (
+                        <img src={companyLogo} alt="Logo" className="w-12 h-12 rounded-xl object-cover border border-slate-300 shadow-sm" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-lg border border-dashed border-slate-300">🏢</div>
+                      )}
+                      <input type="file" accept="image/*" onChange={handleLogoUpload} className="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer" />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block font-bold mb-1">Şirket Unvanı</label>
                     <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
@@ -477,7 +489,17 @@ export default function EmployerPage() {
                       <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
                     </div>
                   </div>
-                  <button type="submit" className="w-full bg-emerald-700 text-white py-3.5 rounded-xl font-bold">Değişiklikleri Kaydet</button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block font-bold mb-1">Ülke</label>
+                      <input type="text" value={country} onChange={(e) => setCountry(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
+                    </div>
+                    <div>
+                      <label className="block font-bold mb-1">E-Posta</label>
+                      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
+                    </div>
+                  </div>
+                  <button type="submit" className="w-full bg-emerald-700 text-white py-3.5 rounded-xl font-bold cursor-pointer">Değişiklikleri Kaydet</button>
                 </form>
               </div>
             )}
