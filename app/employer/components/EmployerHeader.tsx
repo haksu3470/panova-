@@ -33,11 +33,11 @@ export default function EmployerHeader({
   return (
     <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
       <div className="flex items-center gap-4">
-        {isLoggedIn && companyLogo && (
+        {isLoggedIn && (
           <img 
-            src={companyLogo} 
+            src={companyLogo || 'https://images.unsplash.com/photo-1541888946425-d0fbb18f844e?w=150&auto=format&fit=crop&q=80'} 
             alt="Company Logo" 
-            className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shadow-sm" 
+            className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shadow-sm bg-slate-100" 
           />
         )}
         <div>
@@ -53,7 +53,6 @@ export default function EmployerHeader({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        {/* Admin tarafından bağlandıysa Admin Paneline Dön Butonu */}
         {isAdminImpersonating && onReturnToAdmin && (
           <button
             onClick={onReturnToAdmin}

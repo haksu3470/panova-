@@ -205,14 +205,15 @@ export default function PortalPage() {
     }
   };
 
-  // İşveren Olarak Oturum Açma (Impersonate) Fonksiyonu
+  // İşveren Olarak Oturum Açma (Impersonate) ve Logo/Profil Aktarımı
   const handleImpersonateEmployer = (emp: any) => {
     const profileData = {
       companyName: emp.company_name || emp.name,
       contactPerson: emp.contact_person || emp.contact,
-      phone: emp.phone || '+389...',
+      phone: emp.phone || '+389 70 385 792',
       country: emp.country || 'North Macedonia',
-      email: emp.email || 'isveren@panova.com',
+      email: emp.email || 'huseyinaksu@gmail.com',
+      companyLogo: emp.logo || emp.company_logo || 'https://images.unsplash.com/photo-1541888946425-d0fbb18f844e?w=150&auto=format&fit=crop&q=80',
     };
     localStorage.setItem('panova_employer_profile', JSON.stringify(profileData));
     localStorage.setItem('panova_is_impersonating', 'true');
@@ -1062,7 +1063,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* 🏢 İşverenler Sekmesi ve Impersonate (İşveren Gibi Giriş) Özelliği */}
+        {/* 🏢 İşverenler Sekmesi ve Impersonate Özelliği (Logolu) */}
         {activeTab === 'employers' && (
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden p-4 sm:p-6 space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">🏢 Registered Employers & Management Access</h3>
