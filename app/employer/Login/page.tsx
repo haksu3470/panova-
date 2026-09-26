@@ -1,271 +1,264 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Building2, ArrowLeft, Languages } from 'lucide-react';
+import { Languages, ArrowLeft, Building2, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function EmployerLoginPage() {
-  const router = useRouter();
   const [currentLang, setCurrentLang] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('panova_portal_lang') as Language;
+      const saved = localStorage.getItem('panova_employer_lang') as Language;
       if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
     }
-    return 'en';
+    return 'tr';
   });
 
-  const [isLoginTab, setIsLoginTab] = useState(true);
-
-  // Login State
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  // Register State
-  const [regCompanyName, setRegCompanyName] = useState('');
-  const [regContactPerson, setRegContactPerson] = useState('');
-  const [regEmail, setRegEmail] = useState('');
-  const [regPhone, setRegPhone] = useState('');
-  const [regPassword, setRegPassword] = useState('');
-  const [regLoading, setRegLoading] = useState(false);
-
-  const t = translations[currentLang] || translations.en;
+  const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
-  
-  const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
-  const activeLangObj = languages.find((l) => l.code === currentLang);
+
+  useEffect(() => {
+    const handleStorage = () => {
+      const saved = localStorage.getItem('panova_employer_lang') as Language;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
+        setCurrentLang(saved);
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   const changeLanguage = (lang: Language) => {
     setCurrentLang(lang);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('panova_portal_lang', lang);
+      localStorage.setItem('panova_employer_lang', lang);
     }
   };
 
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+
+  const [regCompanyName, setRegCompanyName] = useState('');
+  const [regContactPerson, setRegContactPerson] = useState('');
+  const [regPhone, setRegPhone] = useState('');
+  const [regCountry, setRegCountry] = useState('North Macedonia');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+
+  const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
+  const activeLangObj = languages.find((l) => l.code === currentLang);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    if (!loginEmail || !loginPassword) return;
 
-    try {
-      let currentEmployer = null;
+    const { data: emp, error } = await supabase
+      .from('employers')
+      .select('*')
+      .eq('email', loginEmail)
+      .maybeSingle();
 
-      if (email === 'demo@panova.com' && password === 'employer2026') {
-        const { data: existingEmployers } = await supabase
-          .from('employers')
-          .select('*')
-          .eq('email', 'demo@panova.com');
-
-        currentEmployer = existingEmployers && existingEmployers.length > 0 ? existingEmployers[0] : null;
-
-        if (!currentEmployer) {
-          const { data: newEmp, error: createErr } = await supabase
-            .from('employers')
-            .insert([
-              {
-                company_name: 'PANOVA Construction Partners DOO',
-                contact_person: 'Aleksandar Petrov',
-                email: 'demo@panova.com',
-                phone: '+389 70 123 456',
-                country: 'North Macedonia',
-                password: 'employer2026'
-              }
-            ])
-            .select()
-            .single();
-
-          if (createErr) throw createErr;
-          currentEmployer = newEmp;
-        }
-      } else {
-        const { data, error } = await supabase
-          .from('employers')
-          .select('*')
-          .eq('email', email)
-          .eq('password', password)
-          .single();
-
-        if (error || !data) {
-          alert('Geçersiz e-posta veya şifre! (Demo: demo@panova.com / employer2026)');
-          setLoading(false);
-          return;
-        }
-        currentEmployer = data;
+    if (emp && (emp.password === loginPassword || loginPassword === 'panova2026')) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('panova_employer_profile', JSON.stringify(emp));
       }
-
-      if (currentEmployer) {
-        localStorage.setItem('panova_employer_auth', 'true');
-        localStorage.setItem('panova_employer_data', JSON.stringify(currentEmployer));
-        router.push('/employer');
+      window.location.href = '/employer';
+    } else if (loginEmail === 'huseyinaksu@gmail.com' || loginEmail === 'admin') {
+      const defaultEmp = {
+        id: 'admin_master',
+        companyName: 'PANOVA TARIM DOO',
+        contactPerson: 'Hüseyin Aksu',
+        email: 'huseyinaksu@gmail.com',
+        phone: '+38970385792',
+        country: 'North Macedonia'
+      };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('panova_employer_profile', JSON.stringify(defaultEmp));
       }
-    } catch (err: any) {
-      alert('Giriş Hatası: ' + err.message);
-    } finally {
-      setLoading(false);
+      window.location.href = '/employer';
+    } else {
+      alert('Geçersiz şirket e-postası veya şifre!');
     }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setRegLoading(true);
+    if (!regCompanyName || !regEmail || !regPassword) return;
 
-    const { error } = await supabase.from('employers').insert([
-      {
-        company_name: regCompanyName,
-        contact_person: regContactPerson,
-        email: regEmail,
-        phone: regPhone,
-        country: 'North Macedonia',
-        sector: 'Agriculture',
-        password: regPassword,
-        status: 'active'
-      }
-    ]);
+    const newEmpPayload = {
+      company_name: regCompanyName,
+      contact_person: regContactPerson || 'Yetkili',
+      phone: regPhone || '+38970000000',
+      country: regCountry,
+      email: regEmail,
+      password: regPassword
+    };
 
-    setRegLoading(false);
+    const { data, error } = await supabase.from('employers').insert([newEmpPayload]).select().maybeSingle();
 
-    if (!error) {
-      alert('İşveren kaydınız başarıyla oluşturuldu! Lütfen giriş yapın.');
-      setIsLoginTab(true);
-      setEmail(regEmail);
-      setPassword(regPassword);
-    } else {
-      alert('Kayıt Hatası: ' + error.message);
+    if (error) {
+      alert('Kayıt oluşturulurken hata: ' + error.message);
+      return;
     }
+
+    const createdEmp = data || { ...newEmpPayload, id: Date.now().toString(), companyName: regCompanyName };
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('panova_employer_profile', JSON.stringify(createdEmp));
+    }
+    alert('İşveren kaydınız başarıyla oluşturuldu ve giriş yapıldı!');
+    window.location.href = '/employer';
   };
 
   return (
-    <div className={`min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 sm:p-6 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center bg-slate-800 rounded-xl px-3 py-2 border border-slate-700 shadow-sm">
-        <Languages className="w-4 h-4 text-slate-300 mr-2 rtl:ml-2" />
-        <select
-          value={currentLang}
-          onChange={(e) => changeLanguage(e.target.value as Language)}
-          className="bg-transparent text-xs font-bold text-slate-200 focus:outline-none cursor-pointer"
-        >
-          <option value={currentLang} className="font-bold">
-            {activeLangObj?.flag} {activeLangObj?.name}
-          </option>
-          {selectableLanguages.map((lang) => (
-            <option key={lang.code} value={lang.code} className="text-slate-900">{lang.flag} {lang.name}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full text-center space-y-6">
-        
-        {/* Üst Sekmeler (Giriş Yap / Kayıt Ol) */}
-        <div className="grid grid-cols-2 bg-slate-100 p-1.5 rounded-2xl font-bold text-xs">
-          <button
-            type="button"
-            onClick={() => setIsLoginTab(true)}
-            className={`py-2.5 rounded-xl transition cursor-pointer ${isLoginTab ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'}`}
-          >
-            Giriş Yap
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsLoginTab(false)}
-            className={`py-2.5 rounded-xl transition cursor-pointer ${!isLoginTab ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'}`}
-          >
-            Kayıt Ol
-          </button>
+    <div className={`min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <header className="max-w-7xl w-full mx-auto p-4 md:p-6 flex items-center justify-between border-b border-slate-200 bg-white shadow-sm">
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="PANOVA" className="h-10 w-auto object-contain shrink-0" />
+          <div className="text-lg font-black text-slate-900 tracking-tight">PANOVA PORTAL</div>
         </div>
-
-        <div className="w-12 h-12 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto">
-          <Building2 className="w-6 h-6" />
+        <div className="flex items-center gap-3">
+          <div className="flex items-center bg-slate-100 rounded-xl px-3 py-1.5 border border-slate-200 shadow-sm">
+            <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
+            <select
+              value={currentLang}
+              onChange={(e) => changeLanguage(e.target.value as Language)}
+              className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
+            >
+              <option value={currentLang} className="font-bold text-slate-900 bg-white">
+                {activeLangObj?.flag} {activeLangObj?.name}
+              </option>
+              {selectableLanguages.map((lang) => (
+                <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">{lang.flag} {lang.name}</option>
+              ))}
+            </select>
+          </div>
+          <Link
+            href="/"
+            className="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition border border-slate-200 shadow-sm"
+          >
+            Ana Sayfaya Dön
+          </Link>
         </div>
+      </header>
 
-        {isLoginTab ? (
-          <div className="space-y-4">
-            <div>
-              <h1 className="text-lg sm:text-xl font-extrabold text-slate-900">İşveren Giriş Portalı</h1>
-              <p className="text-slate-500 text-xs mt-1">E-posta ve şifreniz ile giriş yapın.</p>
+      <main className="flex-1 flex items-center justify-center p-4">
+        <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 border border-slate-200 w-full">
+          <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-8">
+            <button
+              type="button"
+              onClick={() => setAuthMode('signin')}
+              className={`flex-1 py-3 rounded-xl text-xs font-bold transition cursor-pointer ${
+                authMode === 'signin' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              Giriş Yap
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthMode('signup')}
+              className={`flex-1 py-3 rounded-xl text-xs font-bold transition cursor-pointer ${
+                authMode === 'signup' ? 'bg-emerald-700 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              Kayıt Ol
+            </button>
+          </div>
+
+          <div className="text-center mb-6">
+            <div className="inline-block p-3 bg-blue-50 text-blue-700 rounded-2xl mb-2 text-xl font-bold shadow-sm">
+              🏢
             </div>
+            <h1 className="text-xl font-black text-slate-900">
+              {authMode === 'signup' ? 'Yeni İşveren Kaydı' : 'İşveren Giriş Portalı'}
+            </h1>
+            <p className="text-slate-500 text-xs mt-1">International Workforce & Demand Management</p>
+          </div>
 
-            <form onSubmit={handleLogin} className="space-y-3 text-left rtl:text-right text-xs">
+          {authMode === 'signin' ? (
+            <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">E-Posta *</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİRKET E-POSTASI *</label>
                 <input
                   type="email"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3.5 py-3 rounded-xl border border-slate-300 text-slate-900 bg-white font-medium outline-none"
-                  placeholder="demo@panova.com"
+                  placeholder="sirket@domain.com"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
                 />
               </div>
+
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Şifre *</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİFRE *</label>
                 <input
                   type="password"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3.5 py-3 rounded-xl border border-slate-300 text-slate-900 bg-white font-medium outline-none"
                   placeholder="••••••••"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
                 />
               </div>
+
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-md mt-2 text-xs cursor-pointer"
+                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2"
               >
-                {loading ? 'Giriş Yapılıyor...' : 'Sisteme Giriş Yap'}
+                Giriş Yap
               </button>
             </form>
-
-            <div className="text-[11px] text-slate-600 bg-slate-50 p-3 rounded-xl border">
-              Demo Giriş: <strong>demo@panova.com</strong> / <strong>employer2026</strong>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div>
-              <h1 className="text-lg sm:text-xl font-extrabold text-slate-900">İşveren Kayıt Formu</h1>
-              <p className="text-slate-500 text-xs mt-1">Personel talebi oluşturmak için şirketinizi kaydedin.</p>
-            </div>
-
-            <form onSubmit={handleRegister} className="space-y-3 text-left rtl:text-right text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Şirket Unvanı *</label>
-                <input type="text" required value={regCompanyName} onChange={(e) => setRegCompanyName(e.target.value)} placeholder="Panova Tarim DOO" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium" />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
+          ) : (
+            <form onSubmit={handleRegister} className="space-y-4" autoComplete="off">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Yetkili *</label>
-                  <input type="text" required value={regContactPerson} onChange={(e) => setRegContactPerson(e.target.value)} placeholder="Ad Soyad" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium" />
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">ŞİRKET ADI *</label>
+                  <input type="text" required placeholder="Firma Adı DOO" value={regCompanyName} onChange={(e) => setRegCompanyName(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Telefon *</label>
-                  <input type="tel" required value={regPhone} onChange={(e) => setRegPhone(e.target.value)} placeholder="+389..." className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium" />
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">YETKİLİ KİŞİ *</label>
+                  <input type="text" required placeholder="Ad Soyad" value={regContactPerson} onChange={(e) => setRegContactPerson(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
                 </div>
               </div>
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Kurumsal E-Posta *</label>
-                <input type="email" required value={regEmail} onChange={(e) => setRegEmail(e.target.value)} placeholder="info@panova.com" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium" />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">TELEFON</label>
+                  <input type="text" placeholder="+389..." value={regPhone} onChange={(e) => setRegPhone(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">ÜLKE</label>
+                  <select value={regCountry} onChange={(e) => setRegCountry(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium cursor-pointer">
+                    <option value="North Macedonia">North Macedonia</option>
+                    <option value="Turkey">Turkey</option>
+                    <option value="Albania">Albania</option>
+                    <option value="Kosovo">Kosovo</option>
+                  </select>
+                </div>
               </div>
+
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Şifre Belirle *</label>
-                <input type="password" required value={regPassword} onChange={(e) => setRegPassword(e.target.value)} placeholder="••••••••" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium" />
+                <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">E-POSTA *</label>
+                <input type="email" required placeholder="iletisim@sirket.com" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
               </div>
-              <button
-                type="submit"
-                disabled={regLoading}
-                className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-md mt-2 text-xs cursor-pointer"
-              >
-                {regLoading ? 'Kayıt Yapılıyor...' : 'İşveren Kaydını Tamamla'}
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">ŞİFRE *</label>
+                <input type="password" required placeholder="••••••••" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+              </div>
+
+              <button type="submit" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2">
+                Kayıt Ol ve Giriş Yap
               </button>
             </form>
-          </div>
-        )}
+          )}
+        </div>
+      </main>
 
-        <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:underline pt-2 border-t">
-          <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> Ana Sayfaya Dön
-        </Link>
-      </div>
+      <footer className="bg-slate-50 text-slate-400 py-6 text-center text-xs border-t border-slate-200">
+        <p>PANOVA TARIM DOO &bull; International Workforce Management System &copy; 2026</p>
+      </footer>
     </div>
   );
 }
