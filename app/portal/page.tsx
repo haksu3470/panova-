@@ -139,7 +139,7 @@ export default function PortalPage() {
       }
     } else {
       const defaultStaff = [
-        { id: '1', name: 'Hüseyin Aksu', email: 'admin@panova.com', password: 'panova2026', role_level: 'upper_management' },
+        { id: '1', name: 'Hüseyin Aksu', email: 'huseyinaksu@gmail.com', password: 'panova2026', role_level: 'upper_management' },
         { id: '2', name: 'Mehmet Çitil', email: 'mehmet@panova.com', password: '123', role_level: 'target_country' }
       ];
       setStaffMembers(defaultStaff);
@@ -170,16 +170,27 @@ export default function PortalPage() {
     setAuditLogs([newLog, ...auditLogs]);
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  // Supabase Veritabanı ve LocalStorage Destekli Güvenli Giriş
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const matchedStaff = staffMembers.find(s => (s.email === username || s.name.toLowerCase() === username.toLowerCase()) && s.password === password);
-    
+    if (!username || !password) return;
+
     let loggedUser = null;
 
-    if (username === 'admin' && password === 'panova2026') {
-      loggedUser = { name: 'Hüseyin Aksu (Master Admin)', email: 'admin@panova.com', role_level: 'upper_management', isAdmin: true };
-    } else if (matchedStaff) {
-      loggedUser = matchedStaff;
+    // Master Admin Kontrolü
+    if ((username === 'admin' || username === 'huseyinaksu@gmail.com') && password === 'panova2026') {
+      loggedUser = { name: 'Hüseyin Aksu (Master Admin)', email: 'huseyinaksu@gmail.com', role_level: 'upper_management', isAdmin: true };
+    } else {
+      // Supabase staff_members tablosundan e-posta veya isim ile kontrol
+      const { data: dbStaff, error } = await supabase
+        .from('staff_members')
+        .select('*')
+        .or(`email.eq.${username},name.ilike.%${username}%`)
+        .maybeSingle();
+
+      if (dbStaff && dbStaff.password === password) {
+        loggedUser = dbStaff;
+      }
     }
 
     if (loggedUser) {
@@ -192,7 +203,7 @@ export default function PortalPage() {
       logAudit('Sisteme Giriş Yapıldı', loggedUser.name);
       fetchAllData();
     } else {
-      alert('Geçersiz kullanıcı adı veya şifre!');
+      alert('Geçersiz kullanıcı adı/e-posta veya şifre!');
     }
   };
 
@@ -205,15 +216,15 @@ export default function PortalPage() {
     }
   };
 
-  // İşveren Olarak Oturum Açma (Impersonate) ve Logo/Profil Aktarımı
   const handleImpersonateEmployer = (emp: any) => {
     const profileData = {
+      id: emp.id,
       companyName: emp.company_name || emp.name,
-      contactPerson: emp.contact_person || emp.contact,
-      phone: emp.phone || '+389 70 385 792',
+      contactPerson: emp.contact_person || emp.contact_name,
+      phone: emp.phone || '+38970385792',
       country: emp.country || 'North Macedonia',
       email: emp.email || 'huseyinaksu@gmail.com',
-      companyLogo: emp.logo || emp.company_logo || 'https://images.unsplash.com/photo-1541888946425-d0fbb18f844e?w=150&auto=format&fit=crop&q=80',
+      companyLogo: emp.logo || '',
     };
     localStorage.setItem('panova_employer_profile', JSON.stringify(profileData));
     localStorage.setItem('panova_is_impersonating', 'true');
@@ -436,46 +447,58 @@ export default function PortalPage() {
           </select>
         </div>
 
-        <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
-          <div className="w-14 h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-7 h-7" />
+        {/* Employer Giriş Ekranı ile Birebir Aynı Tasarım */}
+        <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 my-8 border border-slate-200 w-full">
+          <div className="text-center mb-6">
+            <div className="inline-block p-3 bg-emerald-50 text-emerald-700 rounded-2xl mb-2 text-xl font-bold shadow-sm">
+              🛡️
+            </div>
+            <h1 className="text-xl font-black text-slate-900">
+              Management Portal
+            </h1>
+            <p className="text-slate-500 text-xs mt-1">Manage system operations & workforce</p>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1">{t.portalTitle}</h1>
-          <p className="text-slate-500 text-xs sm:text-sm mb-6">{t.portalSub}</p>
 
-          <form onSubmit={handleLogin} className="space-y-4 text-left rtl:text-right">
+          <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.usernameLabel || 'E-Posta veya Kullanıcı Adı'}</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">USERNAME / EMAIL *</label>
               <input
                 type="text"
                 required
+                autoComplete="off"
+                placeholder="admin veya e-posta"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
-                placeholder="admin veya ahmet@panova.com"
+                className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
               />
             </div>
+
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.passwordLabel}</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">PASSWORD *</label>
               <input
                 type="password"
                 required
+                autoComplete="new-password"
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
-                placeholder="••••••••"
+                className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
               />
             </div>
+
             <button
               type="submit"
-              className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 cursor-pointer text-sm"
+              className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2"
             >
-              {t.signInBtn}
+              Sign In
             </button>
           </form>
-          <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-xs sm:text-sm text-slate-500 hover:underline">
-            <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
-          </Link>
+
+          <div className="text-center mt-6">
+            <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:underline">
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -1063,7 +1086,6 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* 🏢 İşverenler Sekmesi ve Impersonate Özelliği (Logolu) */}
         {activeTab === 'employers' && (
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden p-4 sm:p-6 space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">🏢 Registered Employers & Management Access</h3>
@@ -1075,7 +1097,7 @@ export default function PortalPage() {
                   <div key={emp.id} className="p-5 bg-slate-50 rounded-2xl border space-y-3 text-xs sm:text-sm flex flex-col justify-between">
                     <div>
                       <h4 className="font-extrabold text-slate-900 text-base">{emp.company_name || emp.name}</h4>
-                      <p className="text-slate-500 mt-1">Contact: <strong>{emp.contact_person || emp.contact}</strong> | Country: {emp.country}</p>
+                      <p className="text-slate-500 mt-1">Contact: <strong>{emp.contact_person || emp.contact_name}</strong> | Country: {emp.country}</p>
                       <p className="text-slate-500 text-xs mt-0.5">Email: {emp.email} | Phone: {emp.phone}</p>
                     </div>
                     <button
