@@ -58,7 +58,7 @@ export default function EmployerPage() {
     }
 
     const savedProfile = localStorage.getItem('panova_employer_profile');
-    if (savedProfile && isLoggedIn) {
+    if (savedProfile) {
       try {
         const prof = JSON.parse(savedProfile);
         if (prof.companyName) setCompanyName(prof.companyName);
@@ -71,7 +71,7 @@ export default function EmployerPage() {
         console.error(e);
       }
     }
-  }, [isLoggedIn]);
+  }, []);
 
   const handleSubmitAuth = (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,6 +141,7 @@ export default function EmployerPage() {
     { id: 201, name: 'Burak Kaya', position: 'Saha Mühendisi', startDate: '2026-03-01', day30: 'Tamamlandı', day60: 'Devam Ediyor', day90: 'Bekliyor', status: 'Aktif' },
   ]);
 
+  // 4 Dil İçin Tam Sözlük
   const labels = {
     tr: {
       home: '🏠 Ana Sayfa',
@@ -153,6 +154,26 @@ export default function EmployerPage() {
       employees: '📊 Aktif Çalışanlar',
       support: '🛠️ Destek / Bildirim',
       profile: '⚙️ Şirket Bilgilerim',
+      activeDemands: 'Aktif Talepler',
+      presentedCandidates: 'Sunulan Adaylar',
+      inProcess: 'İşlemde Olanlar',
+      started: 'İşe Başlayanlar',
+      supportTitle: 'Operasyonel Destek / Bildirim Aç',
+      subjectPlaceholder: 'Konu',
+      messagePlaceholder: 'Mesajınız...',
+      sendBtn: 'Gönder',
+      supportSuccessMsg: 'Destek talebiniz başarıyla alındı.',
+      profileTitle: 'Şirket Profili ve Firma Logosu',
+      companyLogoLabel: 'Firma Logosu',
+      companyNameLabel: 'Şirket Unvanı',
+      contactPersonLabel: 'Yetkili Kişi',
+      phoneLabel: 'Telefon',
+      countryLabel: 'Ülke',
+      emailLabel: 'E-Posta',
+      saveChangesBtn: 'Değişiklikleri Kaydet',
+      profileUpdatedMsg: 'Bilgiler ve logo başarıyla güncellendi!',
+      chooseFileBtn: 'Dosya Seç',
+      noFileChosen: 'Dosya seçilmedi',
     },
     en: {
       home: '🏠 Home',
@@ -165,6 +186,26 @@ export default function EmployerPage() {
       employees: '📊 Active Employees',
       support: '🛠️ Support / Notice',
       profile: '⚙️ Company Profile',
+      activeDemands: 'Active Demands',
+      presentedCandidates: 'Presented Candidates',
+      inProcess: 'In Process',
+      started: 'Started Working',
+      supportTitle: 'Open Operational Support / Notice',
+      subjectPlaceholder: 'Subject',
+      messagePlaceholder: 'Your message...',
+      sendBtn: 'Send',
+      supportSuccessMsg: 'Your support request has been received.',
+      profileTitle: 'Company Profile & Company Logo',
+      companyLogoLabel: 'Company Logo',
+      companyNameLabel: 'Company Name',
+      contactPersonLabel: 'Contact Person',
+      phoneLabel: 'Phone',
+      countryLabel: 'Country',
+      emailLabel: 'Email',
+      saveChangesBtn: 'Save Changes',
+      profileUpdatedMsg: 'Profile and logo updated successfully!',
+      chooseFileBtn: 'Choose File',
+      noFileChosen: 'No file chosen',
     },
     sq: {
       home: '🏠 Kryefaqja',
@@ -177,6 +218,26 @@ export default function EmployerPage() {
       employees: '📊 Punonjësit',
       support: '🛠️ Mbështetje',
       profile: '⚙️ Profili i Kompanisë',
+      activeDemands: 'Kërkesat Aktive',
+      presentedCandidates: 'Kandidatët e Paraqitur',
+      inProcess: 'Në Proces',
+      started: 'Filluan Punën',
+      supportTitle: 'Hap Mbështetje Operacionale',
+      subjectPlaceholder: 'Subjekti',
+      messagePlaceholder: 'Mesazhi juaj...',
+      sendBtn: 'Dërgo',
+      supportSuccessMsg: 'Kërkesa juaj u mor me sukses.',
+      profileTitle: 'Profili i Kompanisë & Logoja',
+      companyLogoLabel: 'Logoja e Kompanisë',
+      companyNameLabel: 'Emri i Kompanisë',
+      contactPersonLabel: 'Personi i Kontaktit',
+      phoneLabel: 'Telefoni',
+      countryLabel: 'Shteti',
+      emailLabel: 'Email',
+      saveChangesBtn: 'Ruaj Ndryshimet',
+      profileUpdatedMsg: 'Profili u përditësua me sukses!',
+      chooseFileBtn: 'Zgjidh Skedar',
+      noFileChosen: 'Asnjë skedar i zgjedhur',
     },
     ar: {
       home: '🏠 الرئيسية',
@@ -189,6 +250,26 @@ export default function EmployerPage() {
       employees: '📊 الموظفون النشطون',
       support: '🛠️ الدعم',
       profile: '⚙️ ملف الشركة',
+      activeDemands: 'الطلبات النشطة',
+      presentedCandidates: 'المرشحون المقدمون',
+      inProcess: 'قيد المعالجة',
+      started: 'بدأ العمل',
+      supportTitle: 'فتح دعم تشغيلي / إشعار',
+      subjectPlaceholder: 'الموضوع',
+      messagePlaceholder: 'رسالتك...',
+      sendBtn: 'إرسال',
+      supportSuccessMsg: 'تم استلام طلب الدعم الخاص بك بنجاح.',
+      profileTitle: 'ملف الشركة وشعار الشركة',
+      companyLogoLabel: 'شعار الشركة',
+      companyNameLabel: 'اسم الشركة',
+      contactPersonLabel: 'مسؤول الاتصال',
+      phoneLabel: 'الهاتف',
+      countryLabel: 'الدولة',
+      emailLabel: 'البريد الإلكتروني',
+      saveChangesBtn: 'حفظ التغييرات',
+      profileUpdatedMsg: 'تم تحديث الملف الشخصي والشعار بنجاح!',
+      chooseFileBtn: 'اختر ملف',
+      noFileChosen: 'لم يتم اختيار ملف',
     },
   };
 
@@ -200,6 +281,7 @@ export default function EmployerPage() {
         <EmployerHeader
           country={country}
           companyName={isLoggedIn ? companyName : 'PANOVA PORTAL'}
+          companyLogo={companyLogo}
           lang={lang}
           setLang={setLang}
           t={t}
@@ -346,19 +428,19 @@ export default function EmployerPage() {
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
-                    <div className="text-[11px] uppercase font-bold text-slate-400">Aktif Talepler</div>
+                    <div className="text-[11px] uppercase font-bold text-slate-400">{currentLabels.activeDemands}</div>
                     <div className="text-3xl font-black text-slate-900 mt-1">{demands.length}</div>
                   </div>
                   <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
-                    <div className="text-[11px] uppercase font-bold text-slate-400">Sunulan Adaylar</div>
+                    <div className="text-[11px] uppercase font-bold text-slate-400">{currentLabels.presentedCandidates}</div>
                     <div className="text-3xl font-black text-slate-900 mt-1">{candidatesPool.length}</div>
                   </div>
                   <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
-                    <div className="text-[11px] uppercase font-bold text-slate-400">İşlemde Olanlar</div>
+                    <div className="text-[11px] uppercase font-bold text-slate-400">{currentLabels.inProcess}</div>
                     <div className="text-3xl font-black text-slate-900 mt-1">2</div>
                   </div>
                   <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
-                    <div className="text-[11px] uppercase font-bold text-slate-400">İşe Başlayanlar</div>
+                    <div className="text-[11px] uppercase font-bold text-slate-400">{currentLabels.started}</div>
                     <div className="text-3xl font-black text-slate-900 mt-1">{activeEmployees.length}</div>
                   </div>
                 </div>
@@ -448,23 +530,23 @@ export default function EmployerPage() {
 
             {activeTab === 'support' && (
               <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl max-w-xl text-xs">
-                <h2 className="text-sm font-black text-slate-900 mb-4">Operasyonel Destek / Bildirim Aç</h2>
-                {supportSuccess && <div className="mb-4 bg-emerald-50 text-emerald-800 p-3 rounded-xl">✅ Destek talebiniz alındı.</div>}
+                <h2 className="text-sm font-black text-slate-900 mb-4">{currentLabels.supportTitle}</h2>
+                {supportSuccess && <div className="mb-4 bg-emerald-50 text-emerald-800 p-3 rounded-xl">✅ {currentLabels.supportSuccessMsg}</div>}
                 <form onSubmit={handleSupportSubmit} className="space-y-4">
-                  <input type="text" placeholder="Konu" value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} required className="w-full p-3 border rounded-xl" />
-                  <textarea rows={4} placeholder="Mesajınız..." value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)} required className="w-full p-3 border rounded-xl" />
-                  <button type="submit" className="bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold">Gönder</button>
+                  <input type="text" placeholder={currentLabels.subjectPlaceholder} value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} required className="w-full p-3 border rounded-xl" />
+                  <textarea rows={4} placeholder={currentLabels.messagePlaceholder} value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)} required className="w-full p-3 border rounded-xl" />
+                  <button type="submit" className="bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold cursor-pointer">{currentLabels.sendBtn}</button>
                 </form>
               </div>
             )}
 
             {activeTab === 'profile' && (
               <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl max-w-xl text-xs">
-                <h2 className="text-sm font-black text-slate-900 mb-2">Şirket Profili ve Firma Logosu</h2>
-                {updateMsg && <div className="mb-4 bg-emerald-50 text-emerald-800 p-3 rounded-xl">✅ Bilgiler ve logo güncellendi!</div>}
+                <h2 className="text-sm font-black text-slate-900 mb-2">{currentLabels.profileTitle}</h2>
+                {updateMsg && <div className="mb-4 bg-emerald-50 text-emerald-800 p-3 rounded-xl">✅ {currentLabels.profileUpdatedMsg}</div>}
                 <form onSubmit={handleSaveProfile} className="space-y-4">
                   <div>
-                    <label className="block font-bold mb-1">Firma Logosu</label>
+                    <label className="block font-bold mb-1">{currentLabels.companyLogoLabel}</label>
                     <div className="flex items-center gap-4">
                       {companyLogo ? (
                         <img src={companyLogo} alt="Logo" className="w-12 h-12 rounded-xl object-cover border border-slate-300 shadow-sm" />
@@ -476,30 +558,30 @@ export default function EmployerPage() {
                   </div>
 
                   <div>
-                    <label className="block font-bold mb-1">Şirket Unvanı</label>
+                    <label className="block font-bold mb-1">{currentLabels.companyNameLabel}</label>
                     <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block font-bold mb-1">Yetkili Kişi</label>
+                      <label className="block font-bold mb-1">{currentLabels.contactPersonLabel}</label>
                       <input type="text" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
                     </div>
                     <div>
-                      <label className="block font-bold mb-1">Telefon</label>
+                      <label className="block font-bold mb-1">{currentLabels.phoneLabel}</label>
                       <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block font-bold mb-1">Ülke</label>
+                      <label className="block font-bold mb-1">{currentLabels.countryLabel}</label>
                       <input type="text" value={country} onChange={(e) => setCountry(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
                     </div>
                     <div>
-                      <label className="block font-bold mb-1">E-Posta</label>
+                      <label className="block font-bold mb-1">{currentLabels.emailLabel}</label>
                       <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
                     </div>
                   </div>
-                  <button type="submit" className="w-full bg-emerald-700 text-white py-3.5 rounded-xl font-bold cursor-pointer">Değişiklikleri Kaydet</button>
+                  <button type="submit" className="w-full bg-emerald-700 text-white py-3.5 rounded-xl font-bold cursor-pointer">{currentLabels.saveChangesBtn}</button>
                 </form>
               </div>
             )}

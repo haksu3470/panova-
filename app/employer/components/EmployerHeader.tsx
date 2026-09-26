@@ -6,6 +6,7 @@ import { Language } from '@/lib/dictionary';
 interface EmployerHeaderProps {
   country: string;
   companyName: string;
+  companyLogo?: string;
   lang: Language;
   setLang: (lang: Language) => void;
   t: any;
@@ -17,6 +18,7 @@ interface EmployerHeaderProps {
 export default function EmployerHeader({
   country,
   companyName,
+  companyLogo,
   lang,
   setLang,
   t,
@@ -26,19 +28,27 @@ export default function EmployerHeader({
 }: EmployerHeaderProps) {
   return (
     <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
-      <div>
-        {isLoggedIn && (
-          <div className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full inline-block mb-1 uppercase tracking-wider">
-            {country}
-          </div>
+      <div className="flex items-center gap-4">
+        {isLoggedIn && companyLogo && (
+          <img 
+            src={companyLogo} 
+            alt="Company Logo" 
+            className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shadow-sm" 
+          />
         )}
-        <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
-          {companyName}
-        </h1>
+        <div>
+          {isLoggedIn && (
+            <div className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full inline-block mb-1 uppercase tracking-wider">
+              {country}
+            </div>
+          )}
+          <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+            {companyName}
+          </h1>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        {/* 4 Resmi Dil Seçeneği */}
         <select
           value={lang}
           onChange={(e) => setLang(e.target.value as Language)}
@@ -50,7 +60,6 @@ export default function EmployerHeader({
           <option value="ar">🇸🇦 العربية</option>
         </select>
 
-        {/* Ana Sayfaya Dön Butonu (Dile duyarlı sözlük desteği) */}
         <button
           onClick={() => window.location.href = '/'}
           className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition cursor-pointer"
@@ -58,7 +67,6 @@ export default function EmployerHeader({
           {t.returnHomeBtn || (lang === 'en' ? 'Return to Home' : lang === 'sq' ? 'Kthehu në Faqen Kryesore' : lang === 'ar' ? 'العودة إلى الصفحة الرئيسية' : 'Ana Sayfaya Dön')}
         </button>
 
-        {/* Sadece giriş yapılmışsa görünen butonlar */}
         {isLoggedIn && (
           <>
             {onNewDemandClick && (
