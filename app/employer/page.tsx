@@ -13,7 +13,6 @@ export default function EmployerPage() {
 
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   
-  // Sayfa yenilendiğinde (F5) oturumun düşmemesi için localStorage kontrolü
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('panova_employer_logged_in') === 'true' || localStorage.getItem('panova_is_impersonating') === 'true';
@@ -64,7 +63,7 @@ export default function EmployerPage() {
     }
   ]);
 
-  // Sayfa açıldığında veya yenilendiğinde (F5) Supabase veritabanından ve localStorage'dan verileri koruma
+  // Sayfa açıldığında Supabase employers tablosundan verileri çekme
   useEffect(() => {
     const checkAuthAndFetchData = async () => {
       const impersonating = typeof window !== 'undefined' && localStorage.getItem('panova_is_impersonating') === 'true';
@@ -89,10 +88,10 @@ export default function EmployerPage() {
 
             if (dbEmp && !error) {
               setEmployerId(dbEmp.id);
-              setCompanyName(dbEmp.company_name || dbEmp.name || prof.companyName);
-              setContactPerson(dbEmp.contact_person || dbEmp.contact || prof.contactPerson);
-              setPhone(dbEmp.phone || prof.phone);
-              setCountry(dbEmp.country || prof.country);
+              setCompanyName(dbEmp.company_name || prof.companyName || '');
+              setContactPerson(dbEmp.contact_name || prof.contactPerson || '');
+              setPhone(dbEmp.phone || prof.phone || '');
+              setCountry(dbEmp.country || prof.country || 'North Macedonia');
               setCompanyLogo(dbEmp.logo || dbEmp.company_logo || prof.companyLogo || '');
             } else {
               setCompanyName(prof.companyName || 'AKAY EĞİTİM');
@@ -139,8 +138,8 @@ export default function EmployerPage() {
 
     if (dbEmp) {
       currentId = dbEmp.id;
-      currentCompName = dbEmp.company_name || dbEmp.name || currentCompName;
-      currentContact = dbEmp.contact_person || dbEmp.contact || currentContact;
+      currentCompName = dbEmp.company_name || currentCompName;
+      currentContact = dbEmp.contact_name || currentContact;
       currentPhone = dbEmp.phone || currentPhone;
       currentCountry = dbEmp.country || currentCountry;
       currentLogo = dbEmp.logo || dbEmp.company_logo || '';
@@ -191,23 +190,25 @@ export default function EmployerPage() {
     setTimeout(() => setSuccessMsg(false), 4000);
   };
 
+  // 🗄️ Supabase employers tablosuna tam uyumlu Güncelleme Fonksiyonu
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const updatePayload = {
       company_name: companyName,
-      contact_person: contactPerson,
+      contact_name: contactPerson,
       phone: phone,
       country: country,
       email: email,
       logo: companyLogo,
-      company_logo: companyLogo,
     };
 
     if (employerId) {
-      await supabase.from('employers').update(updatePayload).eq('id', employerId);
+      const { error } = await supabase.from('employers').update(updatePayload).eq('id', employerId);
+      if (error) console.error('Update error:', error.message);
     } else {
-      await supabase.from('employers').update(updatePayload).eq('email', email);
+      const { error } = await supabase.from('employers').update(updatePayload).eq('email', email);
+      if (error) console.error('Update error:', error.message);
     }
 
     const profileData = { id: employerId, companyName, contactPerson, phone, country, email, companyLogo };
@@ -227,9 +228,8 @@ export default function EmployerPage() {
 
         const updatePayload = { 
           logo: base64Logo, 
-          company_logo: base64Logo, 
           company_name: companyName, 
-          contact_person: contactPerson, 
+          contact_name: contactPerson, 
           phone, 
           country, 
           email 
@@ -295,7 +295,7 @@ export default function EmployerPage() {
       countryLabel: 'Ülke',
       emailLabel: 'E-Posta',
       saveChangesBtn: 'Güncelle',
-      profileUpdatedMsg: 'Şirket bilgileri ve logo başarıyla güncellendi!',
+      profileUpdatedMsg: 'Şirket bilgileri ve logo Supabase veritabanına başarıyla kaydedildi!',
     },
     en: {
       home: '🏠 Home',
@@ -325,7 +325,7 @@ export default function EmployerPage() {
       countryLabel: 'Country',
       emailLabel: 'Email',
       saveChangesBtn: 'Update',
-      profileUpdatedMsg: 'Profile and logo updated successfully!',
+      profileUpdatedMsg: 'Profile and logo updated successfully in database!',
     },
     sq: {
       home: '🏠 Kryefaqja',
