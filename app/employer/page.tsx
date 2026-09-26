@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, Languages, 
-  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, Plane, ShieldCheck, HeartHandshake, UploadCloud
+  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, Plane, ShieldCheck, HeartHandshake, UploadCloud, Check
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
@@ -47,16 +47,14 @@ export default function EmployerPortal() {
       if (saved) {
         try {
           return JSON.parse(saved);
-        } catch (e) {
-          // parse error
-        }
+        } catch (e) {}
       }
       return {
         id: 'admin_master',
         companyName: 'AKAY EĞİTİM',
         contactPerson: 'Hüseyin Aksu',
         phone: '+38970385792',
-        country: 'North Macedonia',
+        country: 'Turkey',
         email: 'huseyinaksu@gmail.com',
         companyLogo: ''
       };
@@ -66,7 +64,7 @@ export default function EmployerPortal() {
       companyName: 'AKAY EĞİTİM',
       contactPerson: 'Hüseyin Aksu',
       phone: '+38970385792',
-      country: 'North Macedonia',
+      country: 'Turkey',
       email: 'huseyinaksu@gmail.com',
       companyLogo: ''
     };
@@ -85,7 +83,7 @@ export default function EmployerPortal() {
   const [editCompanyName, setEditCompanyName] = useState('');
   const [editContactPerson, setEditContactPerson] = useState('');
   const [editPhone, setEditPhone] = useState('');
-  const [editCountry, setEditCountry] = useState('North Macedonia');
+  const [editCountry, setEditCountry] = useState('Turkey');
   const [editCompanyLogo, setEditCompanyLogo] = useState('');
 
   useEffect(() => {
@@ -93,7 +91,7 @@ export default function EmployerPortal() {
       setEditCompanyName(employerProfile.companyName || employerProfile.company_name || 'AKAY EĞİTİM');
       setEditContactPerson(employerProfile.contactPerson || employerProfile.contact_person || 'Hüseyin Aksu');
       setEditPhone(employerProfile.phone || '+38970385792');
-      setEditCountry(employerProfile.country || 'North Macedonia');
+      setEditCountry(employerProfile.country || 'Turkey');
       setEditCompanyLogo(employerProfile.companyLogo || employerProfile.company_logo || '');
     }
   }, [employerProfile]);
@@ -106,14 +104,18 @@ export default function EmployerPortal() {
   const [candidates, setCandidates] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
 
-  const [newPositionTitle, setNewPositionTitle] = useState('');
-  const [newSector, setNewSector] = useState('construction');
-  const [newHeadcount, setNewHeadcount] = useState(5);
-  const [newCity, setNewCity] = useState('Struga');
-  const [newSalary, setNewSalary] = useState('1200 EUR');
-  const [newTargetDate, setNewTargetDate] = useState('2026-11-01');
-  const [newJobDesc, setNewJobDesc] = useState('');
-  const [newRequirements, setNewRequirements] = useState('');
+  // Zengin Tıklanabilir Talep Formu State'leri
+  const [selectedSector, setSelectedSector] = useState<'agriculture' | 'construction' | 'trade'>('construction');
+  const [selectedPositions, setSelectedPositions] = useState<string[]>(['Kalıp Ustası']);
+  const [customPosition, setCustomPosition] = useState('');
+  const [demandHeadcount, setDemandHeadcount] = useState(5);
+  const [demandCity, setDemandCity] = useState('Struga');
+  const [demandSalary, setDemandSalary] = useState('1200 EUR');
+  const [demandDuration, setDemandDuration] = useState('12 Ay (Sezonluk / Tam Zamanlı)');
+  const [demandAccommodation, setDemandAccommodation] = useState(true);
+  const [demandFood, setDemandFood] = useState(true);
+  const [demandTransport, setDemandTransport] = useState(true);
+  const [demandNotes, setDemandNotes] = useState('');
 
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMessage, setSupportMessage] = useState('');
@@ -168,7 +170,7 @@ export default function EmployerPortal() {
         companyName: emp.company_name || emp.companyName || 'AKAY EĞİTİM', 
         contactPerson: emp.contact_person || emp.contactPerson || 'Hüseyin Aksu',
         companyLogo: emp.company_logo || emp.companyLogo || '',
-        country: emp.country || 'North Macedonia'
+        country: emp.country || 'Turkey'
       };
       setEmployerProfile(formattedEmp);
       if (typeof window !== 'undefined') {
@@ -181,7 +183,7 @@ export default function EmployerPortal() {
         contactPerson: 'Hüseyin Aksu',
         email: 'huseyinaksu@gmail.com',
         phone: '+38970385792',
-        country: editCountry || 'North Macedonia',
+        country: editCountry || 'Turkey',
         companyLogo: editCompanyLogo || ''
       };
       setEmployerProfile(defaultEmp);
@@ -254,15 +256,13 @@ export default function EmployerPortal() {
           company_logo: editCompanyLogo
         }).eq('id', employerProfile.id);
       }
-    } catch (err) {
-      console.log('Supabase update skipped, relying on local state');
-    }
+    } catch (err) {}
 
     setEmployerProfile(updated);
     if (typeof window !== 'undefined') {
       localStorage.setItem('panova_employer_profile', JSON.stringify(updated));
     }
-    alert('Şirket bilgileriniz ve yüklenen logo başarıyla kaydedildi!');
+    alert(currentLang === 'en' ? 'Company info and logo saved successfully!' : 'Şirket bilgileriniz ve yüklenen logo başarıyla kaydedildi!');
   };
 
   const handleLogout = () => {
@@ -271,7 +271,7 @@ export default function EmployerPortal() {
       companyName: editCompanyName || 'AKAY EĞİTİM',
       contactPerson: editContactPerson || 'Hüseyin Aksu',
       phone: editPhone || '+38970385792',
-      country: editCountry || 'North Macedonia',
+      country: editCountry || 'Turkey',
       email: 'huseyinaksu@gmail.com',
       companyLogo: editCompanyLogo || ''
     };
@@ -281,21 +281,33 @@ export default function EmployerPortal() {
     }
   };
 
-  const handleCreateDemand = async (e: React.FormEvent) => {
+  const togglePositionSelection = (pos: string) => {
+    if (selectedPositions.includes(pos)) {
+      setSelectedPositions(selectedPositions.filter(p => p !== pos));
+    } else {
+      setSelectedPositions([...selectedPositions, pos]);
+    }
+  };
+
+  const handleCreateRichDemand = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPositionTitle.trim()) return;
+    if (selectedPositions.length === 0 && !customPosition.trim()) {
+      alert('Lütfen en az bir pozisyon seçin veya yazın.');
+      return;
+    }
+
+    const finalPositions = [...selectedPositions];
+    if (customPosition.trim()) finalPositions.push(customPosition.trim());
 
     const newDemandPayload = {
       employer_id: employerProfile?.id || 'admin_master',
       employer_name: employerProfile?.companyName || employerProfile?.company_name || 'AKAY EĞİTİM',
-      position_title: newPositionTitle,
-      sector: newSector,
-      headcount: Number(newHeadcount),
-      city: newCity,
-      salary: newSalary,
-      target_start_date: newTargetDate,
-      job_description: newJobDesc,
-      requirements: newRequirements,
+      position_title: finalPositions.join(', '),
+      sector: selectedSector,
+      headcount: Number(demandHeadcount),
+      city: demandCity,
+      salary: demandSalary,
+      job_description: `Süre: ${demandDuration} | Konaklama: ${demandAccommodation ? 'Var' : 'Yok'} | Yemek: ${demandFood ? 'Var' : 'Yok'} | Ulaşım: ${demandTransport ? 'Var' : 'Yok'} | Notlar: ${demandNotes}`,
       status: 'new_request'
     };
 
@@ -306,11 +318,11 @@ export default function EmployerPortal() {
       return;
     }
 
-    alert('İş gücü talebiniz başarıyla PANOVA yönetim ekibine iletildi!');
-    setNewPositionTitle('');
-    setNewJobDesc('');
-    setNewRequirements('');
+    alert('Zengin iş gücü talebiniz başarıyla PANOVA operasyon ekibine iletildi!');
+    setCustomPosition('');
+    setDemandNotes('');
     fetchEmployerData();
+    setActiveTab('demands');
   };
 
   const handleSendSupport = async (e: React.FormEvent) => {
@@ -338,17 +350,23 @@ export default function EmployerPortal() {
     fetchEmployerData();
   };
 
+  const sectorPositions: Record<string, string[]> = {
+    agriculture: ['Hasat İşçisi', 'Sera Sorumlusu', 'Budama Uzmanı', 'Traktör Operatörü', 'Mantar Yetiştirme Uzmanı', 'Paketleme Elemanı'],
+    construction: ['Kalıp Ustası', 'Demirci', 'Duvarcı / Sıvacı', 'Kaynakçı', 'Elektrikçi', 'İnşaat Mühendisi', 'Şantiye Şefi'],
+    trade: ['Depo Sorumlusu', 'Forklift Operatörü', 'Dış Ticaret Uzmanı', 'Lojistik Sorumlusu', 'Ön Muhasebe', 'Satış Temsilcisi']
+  };
+
   return (
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         
-        {/* ÜST HEADER */}
+        {/* ÜST HEADER (DİL DESTEĞİ VE LOGO ÇAKIŞMASIZ) */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="PANOVA" className="h-10 w-auto object-contain shrink-0" />
             <div className="border-l pl-3 border-slate-200">
               <div className="flex items-center gap-2 text-emerald-700 font-bold text-[11px] uppercase tracking-wider mb-0.5">
-                <Building2 className="w-3.5 h-3.5" /> İşveren Partner Portalı
+                <Building2 className="w-3.5 h-3.5" /> {t.employerPortal || 'İşveren Partner Portalı'}
               </div>
               <div className="flex items-center gap-2">
                 {editCompanyLogo && (
@@ -368,7 +386,7 @@ export default function EmployerPortal() {
               href="/"
               className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border"
             >
-              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> Ana Sayfa
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.home || 'Ana Sayfa'}
             </Link>
 
             <div className="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200">
@@ -391,7 +409,7 @@ export default function EmployerPortal() {
               onClick={handleLogout}
               className="bg-red-50 hover:bg-red-100 text-red-700 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
             >
-              Çıkış Yap
+              {t.logout || 'Çıkış Yap'}
             </button>
           </div>
         </div>
@@ -400,34 +418,34 @@ export default function EmployerPortal() {
         <div className="bg-white p-3 rounded-2xl border shadow-sm">
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
             <button onClick={() => setActiveTab('home')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'home' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              🏠 Ana Sayfa (Özet)
+              🏠 {t.homeSummary || 'Ana Sayfa (Özet)'}
             </button>
             <button onClick={() => setActiveTab('demands')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'demands' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              📁 Personel Taleplerim ({jobDemands.length})
+              📁 {t.personnelDemands || 'Personel Taleplerim'} ({jobDemands.length})
             </button>
             <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              👥 Adaylar ({candidates.length})
+              👥 {t.candidates || 'Adaylar'} ({candidates.length})
             </button>
             <button onClick={() => setActiveTab('interviews')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'interviews' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              📅 Görüşmeler
+              📅 {t.interviews || 'Görüşmeler'}
             </button>
             <button onClick={() => setActiveTab('selected')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'selected' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              ⭐ Seçtiğim Adaylar
+              ⭐ {t.selectedCandidates || 'Seçtiğim Adaylar'}
             </button>
             <button onClick={() => setActiveTab('status')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'status' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              📄 Belge ve İşlem Durumları
+              📄 {t.documentAndProcess || 'Belge ve İşlem Durumları'}
             </button>
             <button onClick={() => setActiveTab('travel')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              ✈️ Seyahat ve İşe Başlangıç
+              ✈️ {t.travelAndStart || 'Seyahat ve İşe Başlangıç'}
             </button>
             <button onClick={() => setActiveTab('employees')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              👷 Aktif Çalışanlar
+              👷 {t.activeEmployees || 'Aktif Çalışanlar'}
             </button>
             <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              💬 Destek / Bildirim ({supportTickets.length})
+              💬 {t.support || 'Destek / Bildirim'} ({supportTickets.length})
             </button>
             <button onClick={() => setActiveTab('company')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'company' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              🏢 Şirket Bilgilerim
+              🏢 {t.companyProfile || 'Şirket Bilgilerim'}
             </button>
           </div>
         </div>
@@ -463,63 +481,143 @@ export default function EmployerPortal() {
           </div>
         )}
 
-        {/* 2. PERSONEL TALEPLERİM */}
+        {/* 2. PERSONEL TALEPLERİM VE ZENGİN TIKLANARAK İŞARETLENEN TALEP FORMU */}
         {activeTab === 'demands' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-                <Plus className="w-5 h-5 text-emerald-700" /> Yeni Personel Talebi Oluştur
-              </h3>
-              <form onSubmit={handleCreateDemand} className="space-y-3 text-xs">
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6">
+              <div className="flex justify-between items-center border-b pb-4">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Pozisyon Ünvanı *</label>
-                  <input type="text" required value={newPositionTitle} onChange={(e) => setNewPositionTitle(e.target.value)} placeholder="Örn: Kaynakçı / İnşaat Ustası" className="w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-medium bg-white text-slate-900 outline-none" />
+                  <h3 className="text-lg font-extrabold text-slate-900">Zengin İş Gücü Talep Sihirbazı</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Sektör seçin, aradığınız pozisyonları ve çalışma şartlarını tıklayarak detaylıca belirleyin.</p>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">Sektör</label>
-                    <select value={newSector} onChange={(e) => setNewSector(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border font-semibold bg-white text-slate-900 cursor-pointer">
-                      <option value="construction">Construction</option>
-                      <option value="agriculture">Agriculture</option>
-                      <option value="trade">Foreign Trade</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">Kişi Sayısı</label>
-                    <input type="number" min="1" value={newHeadcount} onChange={(e) => setNewHeadcount(Number(e.target.value))} className="w-full px-3 py-2.5 rounded-xl border font-semibold bg-white text-slate-900" />
-                  </div>
+                <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
+                  Toplam Aktif Dosya: {jobDemands.length}
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">Şehir / Lokasyon</label>
-                    <input type="text" value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="Struga / Skopje" className="w-full px-3 py-2.5 rounded-xl border font-semibold bg-white text-slate-900" />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">Maaş Teklifi</label>
-                    <input type="text" value={newSalary} onChange={(e) => setNewSalary(e.target.value)} placeholder="1200 EUR" className="w-full px-3 py-2.5 rounded-xl border font-semibold bg-white text-slate-900" />
-                  </div>
-                </div>
+              </div>
+
+              <form onSubmit={handleCreateRichDemand} className="space-y-6">
+                {/* 1. SEKTÖR SEÇİMİ */}
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">İş Açıklaması & Şartlar</label>
-                  <textarea rows={3} value={newJobDesc} onChange={(e) => setNewJobDesc(e.target.value)} placeholder="Çalışma saatleri, konaklama vb detaylar..." className="w-full px-3.5 py-2.5 rounded-xl border font-medium bg-white text-slate-900 outline-none resize-none" />
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">1. Sektör Seçin *</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedSector('agriculture'); setSelectedPositions([]); }}
+                      className={`p-4 rounded-xl border text-left transition cursor-pointer flex items-center justify-between ${
+                        selectedSector === 'agriculture' ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500 text-emerald-900 font-extrabold' : 'bg-slate-50 border-slate-200 text-slate-700 font-semibold'
+                      }`}
+                    >
+                      <span>🌱 Tarım & Hayvancılık</span>
+                      {selectedSector === 'agriculture' && <Check className="w-4 h-4 text-emerald-700" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedSector('construction'); setSelectedPositions([]); }}
+                      className={`p-4 rounded-xl border text-left transition cursor-pointer flex items-center justify-between ${
+                        selectedSector === 'construction' ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500 text-emerald-900 font-extrabold' : 'bg-slate-50 border-slate-200 text-slate-700 font-semibold'
+                      }`}
+                    >
+                      <span>🏗️ İnşaat & Yapı</span>
+                      {selectedSector === 'construction' && <Check className="w-4 h-4 text-emerald-700" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedSector('trade'); setSelectedPositions([]); }}
+                      className={`p-4 rounded-xl border text-left transition cursor-pointer flex items-center justify-between ${
+                        selectedSector === 'trade' ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500 text-emerald-900 font-extrabold' : 'bg-slate-50 border-slate-200 text-slate-700 font-semibold'
+                      }`}
+                    >
+                      <span>📦 Dış Ticaret & Lojistik</span>
+                      {selectedSector === 'trade' && <Check className="w-4 h-4 text-emerald-700" />}
+                    </button>
+                  </div>
                 </div>
-                <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-md cursor-pointer text-xs sm:text-sm">
-                  Talebi Gönder
+
+                {/* 2. POZİSYONLARI TIKLAYARAK İŞARETLEME */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">2. Pozisyonları İşaretleyin (Birden Fazla Seçilebilir) *</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+                    {sectorPositions[selectedSector].map((pos) => {
+                      const isSelected = selectedPositions.includes(pos);
+                      return (
+                        <button
+                          type="button"
+                          key={pos}
+                          onClick={() => togglePositionSelection(pos)}
+                          className={`p-3 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
+                            isSelected ? 'bg-emerald-700 text-white shadow-md border-emerald-700' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                          }`}
+                        >
+                          <span>{pos}</span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-3">
+                    <input
+                      type="text"
+                      placeholder="Veya diğer özel pozisyon ünvanını buraya yazın..."
+                      value={customPosition}
+                      onChange={(e) => setCustomPosition(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-xs bg-white text-slate-900 font-medium"
+                    />
+                  </div>
+                </div>
+
+                {/* 3. KİŞİ SAYISI, LOKASYON, MAAŞ VE SÜRE */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Kişi Sayısı</label>
+                    <input type="number" min="1" value={demandHeadcount} onChange={(e) => setDemandHeadcount(Number(e.target.value))} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-900" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Şehir / Lokasyon</label>
+                    <input type="text" value={demandCity} onChange={(e) => setDemandCity(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-900" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Maaş Teklifi</label>
+                    <input type="text" value={demandSalary} onChange={(e) => setDemandSalary(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-900" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Çalışma Süresi</label>
+                    <input type="text" value={demandDuration} onChange={(e) => setDemandDuration(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-900" />
+                  </div>
+                </div>
+
+                {/* 4. İMKANLAR VE ŞARTLAR (CHECKBOX) */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">3. Sağlanan İmkanlar</label>
+                  <div className="flex flex-wrap gap-6 bg-slate-50 p-4 rounded-xl border text-xs font-semibold text-slate-800">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={demandAccommodation} onChange={(e) => setDemandAccommodation(e.target.checked)} className="w-4 h-4 accent-emerald-700 rounded cursor-pointer" />
+                      Konaklama (Lojman / Daire)
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={demandFood} onChange={(e) => setDemandFood(e.target.checked)} className="w-4 h-4 accent-emerald-700 rounded cursor-pointer" />
+                      Yemek (3 Öğün / Yemek Ücreti)
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={demandTransport} onChange={(e) => setDemandTransport(e.target.checked)} className="w-4 h-4 accent-emerald-700 rounded cursor-pointer" />
+                      Ulaşım (Servis / Yol Masrafı)
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Ek Açıklama ve Özel Şartlar</label>
+                  <textarea rows={3} value={demandNotes} onChange={(e) => setDemandNotes(e.target.value)} placeholder="Çalışma saatleri, mesai detayları vb..." className="w-full px-3.5 py-2.5 rounded-xl border text-xs bg-white text-slate-900 resize-none" />
+                </div>
+
+                <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-4 rounded-xl font-bold transition shadow-lg cursor-pointer text-sm">
+                  Zengin Personel Talebini PANOVA Operasyona Gönder
                 </button>
               </form>
             </div>
 
-            <div className="lg:col-span-2 space-y-4">
-              <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
-                <div>
-                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900">Personel Taleplerim</h3>
-                  <p className="text-xs text-slate-500">Her talep ayrı dosya olarak görüntülenir ve takip edilir.</p>
-                </div>
-                <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
-                  Toplam Dosya: {jobDemands.length}
-                </div>
-              </div>
-
+            {/* MEVCUT TALEPLER LİSTESİ */}
+            <div className="space-y-4">
+              <h4 className="font-extrabold text-slate-900 text-base">Aktif İş Gücü Talep Dosyalarınız ({jobDemands.length})</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {jobDemands.map((dem) => (
                   <div key={dem.id} className="bg-white rounded-2xl border p-5 shadow-sm space-y-3 flex flex-col justify-between">
