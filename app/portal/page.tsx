@@ -384,7 +384,7 @@ export default function EmployerPortal() {
 
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">ŞİFRE *</label>
-                  <input type="password" required placeholder="••••••••" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} className="w-full px-3.5 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                  <input type="password" required placeholder="••••••••" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
                 </div>
 
                 <button type="submit" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2">
