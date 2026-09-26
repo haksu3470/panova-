@@ -13,7 +13,6 @@ export default function EmployerPage() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Kesinlikle boş başlatılıyor
   const [companyName, setCompanyName] = useState('');
   const [contactPerson, setContactPerson] = useState('');
   const [phone, setPhone] = useState('');
@@ -21,14 +20,22 @@ export default function EmployerPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
-  const [activeTab, setActiveTab] = useState<'requests' | 'candidates' | 'interviews' | 'selected' | 'travel' | 'employees' | 'support' | 'profile'>('requests');
+  // 11 Ana Sekme Yönetimi
+  const [activeTab, setActiveTab] = useState<
+    'home' | 'requests' | 'candidates' | 'interviews' | 'selected' | 'documents' | 'travel' | 'employees' | 'support' | 'profile'
+  >('home');
+
   const [successMsg, setSuccessMsg] = useState(false);
   const [updateMsg, setUpdateMsg] = useState(false);
+
+  const [supportSubject, setSupportSubject] = useState('');
+  const [supportMessage, setSupportMessage] = useState('');
+  const [supportSuccess, setSupportSuccess] = useState(false);
 
   const [demands, setDemands] = useState([
     { 
       id: 1, 
-      sector: 'Tarım dan Hayvancılık', 
+      sector: 'Tarım ve Hayvancılık', 
       position: 'Ziraat Mühendisi / Bahçe Şefi', 
       headcount: 3, 
       salary: '1.500 € + Konaklama', 
@@ -50,7 +57,6 @@ export default function EmployerPage() {
       }
     }
 
-    // Sadece kullanıcı giriş yapmışsa profili yükle, dışarıdayken formu doldurma
     const savedProfile = localStorage.getItem('panova_employer_profile');
     if (savedProfile && isLoggedIn) {
       try {
@@ -70,6 +76,7 @@ export default function EmployerPage() {
     e.preventDefault();
     if (email) {
       setIsLoggedIn(true);
+      if (!companyName) setCompanyName('AKAY EĞİTİM');
     }
   };
 
@@ -103,6 +110,24 @@ export default function EmployerPage() {
     setUpdateMsg(true);
     setTimeout(() => setUpdateMsg(false), 4000);
   };
+
+  const handleSupportSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supportSubject || !supportMessage) return;
+    setSupportSuccess(true);
+    setTimeout(() => setSupportSuccess(false), 4000);
+    setSupportSubject('');
+    setSupportMessage('');
+  };
+
+  const [candidatesPool] = useState([
+    { id: 101, name: 'Ahmet Yılmaz', profession: 'Ziraat Mühendisi', experience: '5 Yıl', nationality: 'Türkiye', status: 'Hazır' },
+    { id: 102, name: 'Mehmet Demir', profession: 'Bahçe Operatörü', experience: '3 Yıl', nationality: 'Türkiye', status: 'Görüşme Bekliyor' },
+  ]);
+
+  const [activeEmployees] = useState([
+    { id: 201, name: 'Burak Kaya', position: 'Saha Mühendisi', startDate: '2026-03-01', day30: 'Tamamlandı', day60: 'Devam Ediyor', day90: 'Bekliyor', status: 'Aktif' },
+  ]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
@@ -153,9 +178,7 @@ export default function EmployerPage() {
                 🏢
               </div>
               <h1 className="text-xl font-black text-slate-900">
-                {authMode === 'signup' 
-                  ? (t.employerRegTitle || (lang === 'en' ? 'Employer Registration' : lang === 'sq' ? 'Regjistrimi i Punëdhënësit' : lang === 'ar' ? 'تسجيل صاحب العمل' : 'İşveren Kaydı')) 
-                  : (t.loginPortalTitle || (lang === 'en' ? 'Employer Login Portal' : lang === 'sq' ? 'Portali i Hyrjes për Punëdhënësit' : lang === 'ar' ? 'بوابة تسجيل دخول صاحب العمل' : 'İşveren Giriş Portalı'))}
+                {authMode === 'signup' ? 'İşveren Kaydı' : 'İşveren Giriş Portalı'}
               </h1>
             </div>
 
@@ -163,9 +186,7 @@ export default function EmployerPage() {
               {authMode === 'signup' && (
                 <>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                      {t.companyNameLabel || 'ŞİRKET UNVANI'} *
-                    </label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİRKET UNVANI *</label>
                     <input
                       type="text"
                       required
@@ -178,9 +199,7 @@ export default function EmployerPage() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                        {t.contactPersonLabel || 'YETKİLİ KİŞİ'} *
-                      </label>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">YETKİLİ KİŞİ *</label>
                       <input
                         type="text"
                         required
@@ -192,9 +211,7 @@ export default function EmployerPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                        {t.phoneLabel || 'TELEFON'} *
-                      </label>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">TELEFON *</label>
                       <input
                         type="tel"
                         required
@@ -210,9 +227,7 @@ export default function EmployerPage() {
               )}
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  {t.companyEmailLabel || 'ŞİRKET E-POSTASI'} *
-                </label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİRKET E-POSTASI *</label>
                 <input
                   type="email"
                   required
@@ -225,9 +240,7 @@ export default function EmployerPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  {t.passwordLabel || 'ŞİFRE'} *
-                </label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİFRE *</label>
                 <input
                   type="password"
                   required
@@ -243,121 +256,162 @@ export default function EmployerPage() {
                 type="submit"
                 className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2"
               >
-                {authMode === 'signup' 
-                  ? (t.completeRegBtn || (lang === 'en' ? 'Sign Up' : lang === 'sq' ? 'Regjistrohuni' : lang === 'ar' ? 'اشتراك' : 'Kayıt Ol')) 
-                  : (t.signInBtn || (lang === 'en' ? 'Sign In' : lang === 'sq' ? 'Kyçu' : lang === 'ar' ? 'تسجيل الدخول' : 'Giriş Yap'))}
+                {authMode === 'signup' ? 'Kayıt Ol' : 'Giriş Yap'}
               </button>
             </form>
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Navigasyon Sekmeleri */}
-            <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
-              <button
-                onClick={() => setActiveTab('requests')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                  activeTab === 'requests' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                }`}
-              >
-                📁 {t.empTabRequests || 'Personel Taleplerim'}
-              </button>
-              <button
-                onClick={() => setActiveTab('profile')}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                  activeTab === 'profile' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                }`}
-              >
-                ⚙️ {t.empTabProfile || 'Şirket Profili'}
-              </button>
+            {/* 10+ Detaylı Sekme Navigasyonu */}
+            <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3 text-xs">
+              <button onClick={() => setActiveTab('home')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'home' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>🏠 Ana Sayfa</button>
+              <button onClick={() => setActiveTab('requests')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'requests' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>📁 Personel Taleplerim</button>
+              <button onClick={() => setActiveTab('candidates')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'candidates' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>👥 Adaylar</button>
+              <button onClick={() => setActiveTab('interviews')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'interviews' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>📅 Görüşmeler</button>
+              <button onClick={() => setActiveTab('selected')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'selected' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>⭐ Seçtiğim Adaylar</button>
+              <button onClick={() => setActiveTab('documents')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'documents' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>📄 Belge ve İşlemler</button>
+              <button onClick={() => setActiveTab('travel')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'travel' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>✈️ Seyahat ve Başlangıç</button>
+              <button onClick={() => setActiveTab('employees')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'employees' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>📊 Aktif Çalışanlar</button>
+              <button onClick={() => setActiveTab('support')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'support' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>🛠️ Destek / Bildirim</button>
+              <button onClick={() => setActiveTab('profile')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'profile' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>⚙️ Şirket Bilgilerim</button>
             </div>
 
-            {activeTab === 'requests' && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1">
-                  <DemandForm
-                    t={t}
-                    onSubmitDemand={handleCreateDemand}
-                    successMsg={successMsg}
-                  />
-                </div>
-                <div className="lg:col-span-2">
-                  <DemandsTable
-                    t={t}
-                    demands={demands}
-                  />
+            {activeTab === 'home' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+                    <div className="text-[11px] uppercase font-bold text-slate-400">Aktif Talepler</div>
+                    <div className="text-3xl font-black text-slate-900 mt-1">{demands.length}</div>
+                  </div>
+                  <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+                    <div className="text-[11px] uppercase font-bold text-slate-400">Sunulan Adaylar</div>
+                    <div className="text-3xl font-black text-slate-900 mt-1">{candidatesPool.length}</div>
+                  </div>
+                  <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+                    <div className="text-[11px] uppercase font-bold text-slate-400">İşlemde Olanlar</div>
+                    <div className="text-3xl font-black text-slate-900 mt-1">2</div>
+                  </div>
+                  <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+                    <div className="text-[11px] uppercase font-bold text-slate-400">İşe Başlayanlar</div>
+                    <div className="text-3xl font-black text-slate-900 mt-1">{activeEmployees.length}</div>
+                  </div>
                 </div>
               </div>
             )}
 
+            {activeTab === 'requests' && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-1">
+                  <DemandForm t={t} onSubmitDemand={handleCreateDemand} successMsg={successMsg} />
+                </div>
+                <div className="lg:col-span-2">
+                  <DemandsTable t={t} demands={demands} />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'candidates' && (
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl">
+                <h2 className="text-sm font-black text-slate-900 mb-2">Taleplerinize Sunulan Aday Havuzu</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  {candidatesPool.map((c) => (
+                    <div key={c.id} className="border border-slate-200 rounded-2xl p-4 bg-slate-50">
+                      <div className="font-bold text-slate-900">{c.name}</div>
+                      <div className="text-xs text-slate-600">{c.profession} ({c.experience})</div>
+                      <button className="mt-4 w-full bg-emerald-700 text-white py-2 rounded-xl text-xs font-bold">Görüşme İste</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'interviews' && (
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl text-xs text-slate-500 text-center py-12">
+                📅 Planlanan veya tamamlanan mülakat randevunuz bulunmamaktadır.
+              </div>
+            )}
+
+            {activeTab === 'selected' && (
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl text-xs">
+                <h2 className="text-sm font-black text-slate-900 mb-2">Onayladığınız Adaylar</h2>
+                <p className="text-slate-500">Şu an vize ve sözleşme aşamasında olan onaylı adaylarınız burada listelenir.</p>
+              </div>
+            )}
+
+            {activeTab === 'documents' && (
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl text-xs">
+                <h2 className="text-sm font-black text-slate-900 mb-2">Belge ve Genel İşlem Durumları</h2>
+                <p className="text-slate-500">Çalışma izni, konsolosluk evrakları ve resmi işlem durum özetleri.</p>
+              </div>
+            )}
+
+            {activeTab === 'travel' && (
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl text-xs">
+                <h2 className="text-sm font-black text-slate-900 mb-2">Seyahat ve İşe Başlangıç</h2>
+                <p className="text-slate-500">Uçuş biletleri, varış tarihleri ve havalimanı karşılama detayları.</p>
+              </div>
+            )}
+
+            {activeTab === 'employees' && (
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl text-xs">
+                <h2 className="text-sm font-black text-slate-900 mb-2">Aktif Çalışanlar (30 / 60 / 90 Gün Takibi)</h2>
+                <table className="w-full text-left mt-4">
+                  <thead>
+                    <tr className="bg-slate-100 text-slate-600 font-bold">
+                      <th className="p-3 rounded-l-xl">Personel</th>
+                      <th className="p-3">Pozisyon</th>
+                      <th className="p-3">30. Gün</th>
+                      <th className="p-3">60. Gün</th>
+                      <th className="p-3 rounded-r-xl">90. Gün</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {activeEmployees.map((e) => (
+                      <tr key={e.id}>
+                        <td className="p-3 font-bold">{e.name}</td>
+                        <td className="p-3">{e.position}</td>
+                        <td className="p-3 text-emerald-700 font-bold">{e.day30}</td>
+                        <td className="p-3 text-amber-700 font-bold">{e.day60}</td>
+                        <td className="p-3 text-slate-500 font-bold">{e.day90}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {activeTab === 'support' && (
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl max-w-xl text-xs">
+                <h2 className="text-sm font-black text-slate-900 mb-4">Operasyonel Destek / Bildirim Aç</h2>
+                {supportSuccess && <div className="mb-4 bg-emerald-50 text-emerald-800 p-3 rounded-xl">✅ Destek talebiniz alındı.</div>}
+                <form onSubmit={handleSupportSubmit} className="space-y-4">
+                  <input type="text" placeholder="Konu" value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} required className="w-full p-3 border rounded-xl" />
+                  <textarea rows={4} placeholder="Mesajınız..." value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)} required className="w-full p-3 border rounded-xl" />
+                  <button type="submit" className="bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold">Gönder</button>
+                </form>
+              </div>
+            )}
+
             {activeTab === 'profile' && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl max-w-xl">
-                <h2 className="text-sm font-black text-slate-900 mb-2">{t.profileUpdateTitle || 'Şirket Profili ve Bilgi Güncelleme'}</h2>
-                {updateMsg && (
-                  <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3.5 rounded-2xl font-medium">
-                    ✅ {t.profileUpdatedSuccess || 'Şirket profili başarıyla güncellendi!'}
-                  </div>
-                )}
-                <form onSubmit={handleSaveProfile} className="space-y-4 text-xs">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl max-w-xl text-xs">
+                <h2 className="text-sm font-black text-slate-900 mb-2">Şirket ve İletişim Bilgileri</h2>
+                {updateMsg && <div className="mb-4 bg-emerald-50 text-emerald-800 p-3 rounded-xl">✅ Güncellendi!</div>}
+                <form onSubmit={handleSaveProfile} className="space-y-4">
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t.companyNameLabel || 'ŞİRKET UNVANI'} *</label>
-                    <input
-                      type="text"
-                      required
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs bg-slate-50 font-medium"
-                    />
+                    <label className="block font-bold mb-1">Şirket Unvanı</label>
+                    <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t.contactPersonLabel || 'YETKİLİ KİŞİ'} *</label>
-                      <input
-                        type="text"
-                        required
-                        value={contactPerson}
-                        onChange={(e) => setContactPerson(e.target.value)}
-                        className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs bg-slate-50 font-medium"
-                      />
+                      <label className="block font-bold mb-1">Yetkili Kişi</label>
+                      <input type="text" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t.phoneLabel || 'TELEFON'} *</label>
-                      <input
-                        type="tel"
-                        required
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs bg-slate-50 font-medium"
-                      />
+                      <label className="block font-bold mb-1">Telefon</label>
+                      <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t.countryLocationLabel || 'ÜLKE'} *</label>
-                      <input
-                        type="text"
-                        required
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value)}
-                        className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs bg-slate-50 font-medium"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t.companyEmailLabel || 'E-POSTA'} *</label>
-                      <input
-                        type="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs bg-slate-50 font-medium"
-                      />
-                    </div>
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer"
-                  >
-                    {t.saveChangesBtn || 'Değişiklikleri Kaydet'}
-                  </button>
+                  <button type="submit" className="w-full bg-emerald-700 text-white py-3.5 rounded-xl font-bold">Değişiklikleri Kaydet</button>
                 </form>
               </div>
             )}
