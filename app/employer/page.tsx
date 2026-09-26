@@ -88,8 +88,22 @@ export default function EmployerPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 space-y-6">
+        {/* Üst Bar: Giriş ekranında da dil seçimi ve ana sayfaya dön tuşu için yer alıyor */}
+        <EmployerHeader
+          country={country}
+          companyName={isLoggedIn ? companyName : 'PANOVA PORTAL'}
+          lang={lang}
+          setLang={setLang}
+          t={t}
+          onNewDemandClick={() => setActiveTab('requests')}
+          onLogout={() => {
+            setIsLoggedIn(false);
+            setPassword('');
+          }}
+        />
+
         {!isLoggedIn ? (
-          <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 my-16 border border-slate-200">
+          <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 my-8 border border-slate-200">
             <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-8">
               <button
                 type="button"
@@ -200,19 +214,6 @@ export default function EmployerPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            <EmployerHeader
-              country={country}
-              companyName={companyName}
-              lang={lang}
-              setLang={setLang}
-              t={t}
-              onNewDemandClick={() => setActiveTab('requests')}
-              onLogout={() => {
-                setIsLoggedIn(false);
-                setPassword('');
-              }}
-            />
-
             {/* Navigasyon Sekmeleri */}
             <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
               <button
@@ -244,7 +245,7 @@ export default function EmployerPage() {
                 </div>
                 <div className="lg:col-span-2">
                   <DemandsTable
-                    t= {t}
+                    t={t}
                     demands={demands}
                   />
                 </div>
