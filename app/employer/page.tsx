@@ -13,6 +13,7 @@ export default function EmployerPage() {
 
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   
+  // Oturum durumunu doğrudan localStorage'dan okuyarak başlat
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('panova_employer_logged_in') === 'true' || localStorage.getItem('panova_is_impersonating') === 'true';
@@ -27,6 +28,7 @@ export default function EmployerPage() {
     return false;
   });
 
+  // Profil verilerini localStorage'dan anında yükle (Asla boş dönmez)
   const [employerId, setEmployerId] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       const p = localStorage.getItem('panova_employer_profile');
@@ -37,13 +39,67 @@ export default function EmployerPage() {
     return null;
   });
 
-  const [companyName, setCompanyName] = useState('AKAY EĞİTİM');
-  const [contactPerson, setContactPerson] = useState('Hüseyin Aksu');
-  const [phone, setPhone] = useState('+38970385792');
-  const [country, setCountry] = useState('Türkiye');
-  const [email, setEmail] = useState('');
+  const [companyName, setCompanyName] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = localStorage.getItem('panova_employer_profile');
+      if (p) {
+        try { return JSON.parse(p).companyName || 'AKAY EĞİTİM'; } catch(e) {}
+      }
+    }
+    return 'AKAY EĞİTİM';
+  });
+
+  const [contactPerson, setContactPerson] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = localStorage.getItem('panova_employer_profile');
+      if (p) {
+        try { return JSON.parse(p).contactPerson || 'Hüseyin Aksu'; } catch(e) {}
+      }
+    }
+    return 'Hüseyin Aksu';
+  });
+
+  const [phone, setPhone] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = localStorage.getItem('panova_employer_profile');
+      if (p) {
+        try { return JSON.parse(p).phone || '+38970385792'; } catch(e) {}
+      }
+    }
+    return '+38970385792';
+  });
+
+  const [country, setCountry] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = localStorage.getItem('panova_employer_profile');
+      if (p) {
+        try { return JSON.parse(p).country || 'Türkiye'; } catch(e) {}
+      }
+    }
+    return 'Türkiye';
+  });
+
+  const [email, setEmail] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = localStorage.getItem('panova_employer_profile');
+      if (p) {
+        try { return JSON.parse(p).email || ''; } catch(e) {}
+      }
+    }
+    return '';
+  });
+
   const [password, setPassword] = useState('');
-  const [companyLogo, setCompanyLogo] = useState('');
+
+  const [companyLogo, setCompanyLogo] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = localStorage.getItem('panova_employer_profile');
+      if (p) {
+        try { return JSON.parse(p).companyLogo || ''; } catch(e) {}
+      }
+    }
+    return '';
+  });
   
   const [activeTab, setActiveTab] = useState<
     'home' | 'requests' | 'candidates' | 'interviews' | 'selected' | 'documents' | 'travel' | 'employees' | 'support' | 'profile'
@@ -71,88 +127,43 @@ export default function EmployerPage() {
     }
   ]);
 
-  // Sayfa açıldığında Supabase employers tablosundan güncel verileri ve logoyu çekme
+  // Sayfa açıldığında talepleri yükle
   useEffect(() => {
-    const checkAuthAndFetchData = async () => {
-      const impersonating = typeof window !== 'undefined' && localStorage.getItem('panova_is_impersonating') === 'true';
-      const savedProfile = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_profile') : null;
-      const persistentLoggedIn = typeof window !== 'undefined' && localStorage.getItem('panova_employer_logged_in') === 'true';
-
-      if (impersonating || persistentLoggedIn || savedProfile) {
-        setIsLoggedIn(true);
-        setIsAdminImpersonating(impersonating);
+    const savedDemands = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_demands') : null;
+    if (savedDemands) {
+      try {
+        setDemands(JSON.parse(savedDemands));
+      } catch (e) {
+        console.error(e);
       }
-
-      if (savedProfile) {
-        try {
-          const prof = JSON.parse(savedProfile);
-          if (prof.email) {
-            setEmail(prof.email);
-            
-            // Supabase veritabanından e-posta ile en güncel şirket kaydını çek
-            const { data: dbEmp, error } = await supabase
-              .from('employers')
-              .select('*')
-              .eq('email', prof.email)
-              .single();
-
-            if (dbEmp && !error) {
-              setEmployerId(dbEmp.id);
-              setCompanyName(dbEmp.company_name || dbEmp.name || prof.companyName || 'AKAY EĞİTİM');
-              setContactPerson(dbEmp.contact_name || dbEmp.contact_person || prof.contactPerson || 'Hüseyin Aksu');
-              setPhone(dbEmp.phone || prof.phone || '+38970385792');
-              setCountry(dbEmp.country || prof.country || 'Türkiye');
-              setCompanyLogo(dbEmp.logo || prof.companyLogo || '');
-            } else {
-              setCompanyName(prof.companyName || 'AKAY EĞİTİM');
-              setContactPerson(prof.contactPerson || 'Hüseyin Aksu');
-              setPhone(prof.phone || '+38970385792');
-              setCountry(prof.country || 'Türkiye');
-              setCompanyLogo(prof.companyLogo || '');
-            }
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      }
-
-      const savedDemands = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_demands') : null;
-      if (savedDemands) {
-        try {
-          setDemands(JSON.parse(savedDemands));
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    };
-
-    checkAuthAndFetchData();
+    }
   }, []);
 
   const handleSubmitAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
+    // Supabase'den bu e-postaya ait kayıt varsa çek
     const { data: dbEmp } = await supabase
       .from('employers')
       .select('*')
       .eq('email', email)
       .single();
 
-    let currentCompName = 'AKAY EĞİTİM';
-    let currentContact = 'Hüseyin Aksu';
-    let currentPhone = '+38970385792';
-    let currentCountry = 'Türkiye';
-    let currentLogo = '';
-    let currentId = null;
+    let currentCompName = companyName;
+    let currentContact = contactPerson;
+    let currentPhone = phone;
+    let currentCountry = country;
+    let currentLogo = companyLogo;
+    let currentId = employerId;
 
     if (dbEmp) {
       currentId = dbEmp.id;
-      currentCompName = dbEmp.company_name || dbEmp.name || currentCompName;
-      currentContact = dbEmp.contact_name || dbEmp.contact_person || currentContact;
+      currentCompName = dbEmp.company_name || currentCompName;
+      currentContact = dbEmp.contact_name || currentContact;
       currentPhone = dbEmp.phone || currentPhone;
       currentCountry = dbEmp.country || currentCountry;
-      currentLogo = dbEmp.logo || '';
+      currentLogo = dbEmp.logo || currentLogo;
     }
 
     setEmployerId(currentId);
@@ -200,7 +211,7 @@ export default function EmployerPage() {
     setTimeout(() => setSuccessMsg(false), 4000);
   };
 
-  // 🗄️ Supabase employers tablosuna tam uyumlu Güncelleme Fonksiyonu
+  // 🗄️ Supabase ve localStorage güncellemeleri
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -303,7 +314,7 @@ export default function EmployerPage() {
       countryLabel: 'Ülke',
       emailLabel: 'E-Posta',
       saveChangesBtn: 'Güncelle',
-      profileUpdatedMsg: 'Şirket bilgileri ve logo Supabase veritabanına başarıyla kaydedildi!',
+      profileUpdatedMsg: 'Şirket bilgileri ve logo başarıyla kaydedildi!',
     },
     en: {
       home: '🏠 Home',
@@ -333,7 +344,7 @@ export default function EmployerPage() {
       countryLabel: 'Country',
       emailLabel: 'Email',
       saveChangesBtn: 'Update',
-      profileUpdatedMsg: 'Profile and logo updated successfully in database!',
+      profileUpdatedMsg: 'Profile and logo updated successfully!',
     },
     sq: {
       home: '🏠 Kryefaqja',
@@ -420,9 +431,9 @@ export default function EmployerPage() {
             setIsAdminImpersonating(false);
             setPassword('');
             setEmail('');
-            setCompanyName('');
-            setContactPerson('');
-            setPhone('');
+            setCompanyName('AKAY EĞİTİM');
+            setContactPerson('Hüseyin Aksu');
+            setPhone('+38970385792');
             setCompanyLogo('');
           }}
           onReturnToAdmin={() => {
