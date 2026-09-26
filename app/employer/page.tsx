@@ -185,12 +185,12 @@ export default function EmployerPortal() {
     }
   };
 
-  // Logout Düzeltmesi: 404 vermemesi için /employer sayfasına yönlendirir
+  // Logout İşlemi: Doğrudan /employer/login ekranına yönlendirir
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('panova_employer_profile');
     }
-    window.location.href = '/employer';
+    window.location.href = '/employer/login';
   };
 
   const togglePositionSelection = (pos: string) => {
@@ -313,7 +313,7 @@ export default function EmployerPortal() {
           </div>
         </div>
 
-        {/* 10 SEKME (Dictionary / 4 Dil Tam Uyumlu) */}
+        {/* 10 SEKME */}
         <div className="bg-white p-3 rounded-2xl border shadow-sm">
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
             <button onClick={() => setActiveTab('home')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'home' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
@@ -386,17 +386,17 @@ export default function EmployerPortal() {
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6">
               <div className="flex justify-between items-center border-b pb-4">
                 <div>
-                  <h3 className="text-lg font-extrabold text-slate-950">Zengin İş Gücü Talep Sihirbazı</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Sektör seçin, aradığınız pozisyonları, tecrübe, dil ve çalışma şartlarını belirleyin.</p>
+                  <h3 className="text-lg font-extrabold text-slate-950">{t.richDemandWizardTitle || 'Zengin İş Gücü Talep Sihirbazı'}</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">{t.richDemandWizardDesc || 'Sektör seçin, aradığınız pozisyonları, tecrübe, dil ve çalışma şartlarını belirleyin.'}</p>
                 </div>
                 <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
-                  Toplam Aktif Dosya: {jobDemands.length}
+                  {t.totalActiveFiles || 'Toplam Aktif Dosya'}: {jobDemands.length}
                 </div>
               </div>
 
               <form onSubmit={handleCreateRichDemand} className="space-y-6">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">1. Sektör Seçin *</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">1. {t.selectSectorLabel || 'Sektör Seçin'} *</label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <button
                       type="button"
@@ -433,7 +433,7 @@ export default function EmployerPortal() {
 
                 {/* Üniversal Pozisyon Seçimi ve Diğer İnput */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">2. Pozisyonları İşaretleyin veya Üniversal Dropdown ile Seçin *</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">2. {t.selectPositionsLabel || 'Pozisyonları İşaretleyin veya Üniversal Dropdown ile Seçin'} *</label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 mb-3">
                     {sectorPositions[selectedSector].map((pos) => {
                       const isSelected = selectedPositions.includes(pos);
@@ -459,7 +459,7 @@ export default function EmployerPortal() {
                       className="w-full px-3.5 py-2.5 rounded-xl border text-xs bg-white text-slate-950 font-semibold cursor-pointer"
                       defaultValue=""
                     >
-                      <option value="" disabled>📋 Üniversal Pozisyon Listesinden Seç...</option>
+                      <option value="" disabled>📋 {t.universalPositionSelect || 'Üniversal Pozisyon Listesinden Seç...'}</option>
                       {Object.values(sectorPositions).flat().map((p) => (
                         <option key={p} value={p}>{p}</option>
                       ))}
@@ -467,7 +467,7 @@ export default function EmployerPortal() {
 
                     <input
                       type="text"
-                      placeholder="Veya diğer özel pozisyon ünvanını buraya yazın..."
+                      placeholder={t.otherPositionPlaceholder || 'Veya diğer özel pozisyon ünvanını buraya yazın...'}
                       value={customPosition}
                       onChange={(e) => setCustomPosition(e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded-xl border text-xs bg-white text-slate-950 font-medium"
@@ -478,7 +478,7 @@ export default function EmployerPortal() {
                 {/* Tecrübe ve Dil Becerileri */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">⏱️ Aranan Tecrübe Süresi</label>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">⏱️ {t.experienceLabel || 'Aranan Tecrübe Süresi'}</label>
                     <select value={demandExperience} onChange={(e) => setDemandExperience(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950 cursor-pointer">
                       <option value="Deneyimsiz / Yeni Mezun">Deneyimsiz / Yeni Mezun</option>
                       <option value="1 - 3 Yıl Tecrübe">1 - 3 Yıl Tecrübe</option>
@@ -487,7 +487,7 @@ export default function EmployerPortal() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">🗣️ Aranan Dil Becerisi</label>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">🗣️ {t.languageReqLabel || 'Aranan Dil Becerisi'}</label>
                     <select value={demandLanguageReq} onChange={(e) => setDemandLanguageReq(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950 cursor-pointer">
                       <option value="Gerekli Değil / Temel">Gerekli Değil / Temel</option>
                       <option value="İngilizce (Orta Seviye)">İngilizce (Orta Seviye)</option>
@@ -499,61 +499,61 @@ export default function EmployerPortal() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Kişi Sayısı</label>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.headcountLabel || 'Kişi Sayısı'}</label>
                     <input type="number" min="1" value={demandHeadcount} onChange={(e) => setDemandHeadcount(Number(e.target.value))} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Şehir / Lokasyon</label>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.cityLocationLabel || 'Şehir / Lokasyon'}</label>
                     <input type="text" value={demandCity} onChange={(e) => setDemandCity(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Maaş Teklifi</label>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.salaryOfferLabel || 'Maaş Teklifi'}</label>
                     <input type="text" value={demandSalary} onChange={(e) => setDemandSalary(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Çalışma Süresi</label>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.durationLabel || 'Çalışma Süresi'}</label>
                     <input type="text" value={demandDuration} onChange={(e) => setDemandDuration(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Sağlanan İmkanlar</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">{t.providedFacilitiesLabel || 'Sağlanan İmkanlar'}</label>
                   <div className="flex flex-wrap gap-6 bg-slate-50 p-4 rounded-xl border text-xs font-semibold text-slate-900">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={demandAccommodation} onChange={(e) => setDemandAccommodation(e.target.checked)} className="w-4 h-4 accent-emerald-700 rounded cursor-pointer" />
-                      Konaklama (Lojman / Daire)
+                      {t.facilityAccommodation || 'Konaklama (Lojman / Daire)'}
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={demandFood} onChange={(e) => setDemandFood(e.target.checked)} className="w-4 h-4 accent-emerald-700 rounded cursor-pointer" />
-                      Yemek (3 Öğün / Yemek Ücreti)
+                      {t.facilityFood || 'Yemek (3 Öğün / Yemek Ücreti)'}
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={demandTransport} onChange={(e) => setDemandTransport(e.target.checked)} className="w-4 h-4 accent-emerald-700 rounded cursor-pointer" />
-                      Ulaşım (Servis / Yol Masrafı)
+                      {t.facilityTransport || 'Ulaşım (Servis / Yol Masrafı)'}
                     </label>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Ek Açıklama ve Özel Şartlar</label>
-                  <textarea rows={3} value={demandNotes} onChange={(e) => setDemandNotes(e.target.value)} placeholder="Çalışma saatleri, mesai detayları vb..." className="w-full px-3.5 py-2.5 rounded-xl border text-xs bg-white text-slate-950 resize-none" />
+                  <label className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.notesLabel || 'Ek Açıklama ve Özel Şartlar'}</label>
+                  <textarea rows={3} value={demandNotes} onChange={(e) => setDemandNotes(e.target.value)} placeholder={t.notesPlaceholder || 'Çalışma saatleri, mesai detayları vb...'} className="w-full px-3.5 py-2.5 rounded-xl border text-xs bg-white text-slate-950 resize-none" />
                 </div>
 
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-4 rounded-xl font-bold transition shadow-lg cursor-pointer text-sm">
-                  Zengin Personel Talebini PANOVA Operasyona Gönder
+                  {t.submitDemandBtn || 'Zengin Personel Talebini PANOVA Operasyona Gönder'}
                 </button>
               </form>
             </div>
 
             <div className="space-y-4">
-              <h4 className="font-extrabold text-slate-950 text-base">Aktif İş Gücü Talep Dosyalarınız ({jobDemands.length})</h4>
+              <h4 className="font-extrabold text-slate-950 text-base">{t.activeDemandFilesTitle || 'Aktif İş Gücü Talep Dosyalarınız'} ({jobDemands.length})</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {jobDemands.map((dem) => (
                   <div key={dem.id} className="bg-white rounded-2xl border p-5 shadow-sm space-y-3 flex flex-col justify-between">
                     <div className="space-y-2">
                       <div className="flex justify-between items-start">
                         <span className="text-[10px] font-bold uppercase bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-md">{dem.sector}</span>
-                        <span className="text-xs font-extrabold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">{dem.headcount} Kişi</span>
+                        <span className="text-xs font-extrabold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">{dem.headcount} {t.peopleUnit || 'Kişi'}</span>
                       </div>
                       <h4 className="font-extrabold text-slate-950 text-base">{dem.position_title}</h4>
                       <p className="text-xs text-slate-500">📍 {dem.city} | 💰 {dem.salary}</p>
@@ -561,7 +561,7 @@ export default function EmployerPortal() {
                     </div>
                     <div className="pt-2 border-t flex justify-between items-center text-xs">
                       <span className="text-slate-400">📅 {dem.created_at ? dem.created_at.substring(0, 10) : '2026-09'}</span>
-                      <span className="font-bold uppercase text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">Durum: {dem.status || 'new_request'}</span>
+                      <span className="font-bold uppercase text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">{t.statusLabel || 'Durum'}: {dem.status || 'new_request'}</span>
                     </div>
                   </div>
                 ))}
@@ -573,15 +573,15 @@ export default function EmployerPortal() {
         {/* 3. ADAYLAR */}
         {activeTab === 'candidates' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">Tarafınıza Sunulan Adaylar</h3>
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">{t.candidatesTitle || 'Tarafınıza Sunulan Adaylar'}</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs sm:text-sm text-slate-700">
                 <thead className="bg-slate-50 text-slate-900 font-bold border-b">
                   <tr>
-                    <th className="p-4">Ad Soyad</th>
-                    <th className="p-4">Meslek / Sektör</th>
-                    <th className="p-4">Uyruk / Ülke</th>
-                    <th className="p-4">Durum / İşlem</th>
+                    <th className="p-4">{t.fullNameCol || 'Ad Soyad'}</th>
+                    <th className="p-4">{t.professionCol || 'Meslek / Sektör'}</th>
+                    <th className="p-4">{t.nationalityCol || 'Uyruk / Ülke'}</th>
+                    <th className="p-4">{t.actionCol || 'Durum / İşlem'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -591,8 +591,8 @@ export default function EmployerPortal() {
                       <td className="p-4">{cand.profession} ({cand.sector})</td>
                       <td className="p-4">{cand.nationality || cand.country}</td>
                       <td className="p-4 flex items-center gap-2">
-                        <button onClick={() => {}} className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-100">Görüşme İste</button>
-                        <button onClick={() => {}} className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-100">Seç</button>
+                        <button onClick={() => {}} className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-100">{t.interviewReqBtn || 'Görüşme İste'}</button>
+                        <button onClick={() => {}} className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-100">{t.selectBtn || 'Seç'}</button>
                       </td>
                     </tr>
                   ))}
@@ -605,7 +605,7 @@ export default function EmployerPortal() {
         {/* 4. GÖRÜŞMELER */}
         {activeTab === 'interviews' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">Planlanan ve Tamamlanan Görüşmeler</h3>
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">{t.interviewsTitle || 'Planlanan ve Tamamlanan Görüşmeler'}</h3>
             <div className="p-4 bg-slate-50 rounded-2xl border text-xs space-y-1">
               <div className="font-bold text-slate-950">Ahmet Yılmaz - İnşaat Ustası Mülakatı</div>
               <div className="text-slate-500">📅 Tarih: 2026-10-02 14:00 | Durum: Planlandı (Online)</div>
@@ -616,9 +616,9 @@ export default function EmployerPortal() {
         {/* 5. SEÇTİĞİM ADAYLAR */}
         {activeTab === 'selected' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">Onayladığınız / Seçtiğiniz Adaylar</h3>
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">{t.selectedCandidatesTitle || 'Onayladığınız / Seçtiğiniz Adaylar'}</h3>
             <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs font-semibold text-emerald-950">
-              Şu an onaylanmış 2 adayınız için vize ve çalışma izni işlemleri yürütülmektedir.
+              {t.selectedCandidatesDesc || 'Şu an onaylanmış adaylarınız için vize ve çalışma izni işlemleri yürütülmektedir.'}
             </div>
           </div>
         )}
@@ -626,15 +626,15 @@ export default function EmployerPortal() {
         {/* 6. BELGE VE İŞLEM DURUMLARI */}
         {activeTab === 'status' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">Genel İşlem ve Belge Durumları</h3>
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">{t.processStatusTitle || 'Genel İşlem ve Belge Durumları'}</h3>
             <div className="space-y-2 text-xs">
               <div className="p-3.5 bg-slate-50 rounded-xl border flex justify-between items-center">
-                <span className="font-bold text-slate-900">Çalışma İzin Başvuruları (Grup 1)</span>
-                <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-md font-bold">Onaylandı</span>
+                <span className="font-bold text-slate-900">{t.statusWorkPermit || 'Çalışma İzin Başvuruları (Grup 1)'}</span>
+                <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-md font-bold">{t.statusApproved || 'Onaylandı'}</span>
               </div>
               <div className="p-3.5 bg-slate-50 rounded-xl border flex justify-between items-center">
-                <span className="font-bold text-slate-900">Elçilik Vize Randevuları</span>
-                <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-md font-bold">Bekleniyor</span>
+                <span className="font-bold text-slate-900">{t.statusVisa || 'Elçilik Vize Randevuları'}</span>
+                <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-md font-bold">{t.statusPending || 'Bekleniyor'}</span>
               </div>
             </div>
           </div>
@@ -643,9 +643,9 @@ export default function EmployerPortal() {
         {/* 7. SEYAHAT VE İŞE BAŞLANGIÇ */}
         {activeTab === 'travel' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">Seyahat, Varış ve İşe Başlangıç</h3>
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">{t.travelStartTitle || 'Seyahat, Varış ve İşe Başlangıç'}</h3>
             <div className="p-4 bg-slate-50 rounded-2xl border text-xs space-y-2">
-              <div className="font-bold text-slate-950 flex items-center gap-1.5"><Plane className="w-4 h-4 text-blue-600" /> Grup 1 Seyahat Planı</div>
+              <div className="font-bold text-slate-950 flex items-center gap-1.5"><Plane className="w-4 h-4 text-blue-600" /> {t.groupTravelPlan || 'Grup 1 Seyahat Planı'}</div>
               <p className="text-slate-700">Varış Tarihi: 2026-11-15 | Karşılama Lokasyonu: Havalimanı / Terminal | İşe Başlama Tarihi: 2026-11-16</p>
             </div>
           </div>
@@ -654,7 +654,7 @@ export default function EmployerPortal() {
         {/* 8. AKTİF ÇALIŞANLAR */}
         {activeTab === 'employees' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">Aktif Çalışan Personel & 30/60/90 Günlük Takip</h3>
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">{t.activeEmployeesTitle || 'Aktif Çalışan Personel & 30/60/90 Günlük Takip'}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div className="p-4 bg-slate-50 rounded-2xl border space-y-1">
                 <div className="font-extrabold text-slate-950">Mehmet Demir (Kaynakçı)</div>
@@ -668,26 +668,26 @@ export default function EmployerPortal() {
         {activeTab === 'support' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
-              <h3 className="text-base sm:text-lg font-bold text-slate-950 border-b pb-3">Yeni Destek / Bildirim Kaydı</h3>
+              <h3 className="text-base sm:text-lg font-bold text-slate-950 border-b pb-3">{t.newSupportTitle || 'Yeni Destek / Bildirim Kaydı'}</h3>
               <form onSubmit={handleSendSupport} className="space-y-3 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Konu *</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.supportSubjectLabel || 'Konu'} *</label>
                   <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Örn: Yeni ihtiyaç / Çalışan sorunu" className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-950" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Bildirim Mesajı *</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.supportMessageLabel || 'Bildirim Mesajı'} *</label>
                   <textarea rows={4} required value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)} placeholder="Detayları yazın..." className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-950 resize-none" />
                 </div>
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold cursor-pointer text-xs sm:text-sm">
-                  Gönder
+                  {t.sendBtn || 'Gönder'}
                 </button>
               </form>
             </div>
 
             <div className="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">Destek ve İletişim Geçmişi</h3>
+              <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">{t.supportHistoryTitle || 'Destek ve İletişim Geçmişi'}</h3>
               {supportTickets.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 text-xs">Henüz bildirim bulunmuyor.</div>
+                <div className="p-8 text-center text-slate-400 text-xs">{t.noSupportYet || 'Henüz bildirim bulunmuyor.'}</div>
               ) : (
                 <div className="space-y-3">
                   {supportTickets.map((tkt) => (
@@ -708,27 +708,27 @@ export default function EmployerPortal() {
         {/* 10. ŞİRKET BİLGİLERİM VE LOGO YÜKLEME */}
         {activeTab === 'company' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-6">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">Şirket Bilgilerim ve Logo Yükleme</h3>
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">{t.companyProfileTitle || 'Şirket Bilgilerim ve Logo Yükleme'}</h3>
             
             <form onSubmit={handleUpdateCompanyInfo} className="space-y-4 text-xs max-w-2xl">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Şirket Adı</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.companyNameLabel || 'Şirket Adı'}</label>
                   <input type="text" value={editCompanyName} onChange={(e) => setEditCompanyName(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-950 font-semibold" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Yetkili Kişi</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.contactPersonLabel || 'Yetkili Kişi'}</label>
                   <input type="text" value={editContactPerson} onChange={(e) => setEditContactPerson(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-950 font-semibold" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Telefon Numarası</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.phoneLabel || 'Telefon Numarası'}</label>
                   <input type="text" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-950 font-semibold" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Ülke</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.countryLabel || 'Ülke'}</label>
                   <select value={editCountry} onChange={(e) => setEditCountry(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-950 font-semibold cursor-pointer">
                     <option value="North Macedonia">North Macedonia</option>
                     <option value="Turkey">Turkey</option>
@@ -739,7 +739,7 @@ export default function EmployerPortal() {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Şirket Logosu Yükle (Dosya Seç)</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">{t.uploadLogoLabel || 'Şirket Logosu Yükle (Dosya Seç)'}</label>
                 <input 
                   type="file" 
                   accept="image/*"
@@ -750,13 +750,13 @@ export default function EmployerPortal() {
 
               {editCompanyLogo && (
                 <div className="p-3 bg-slate-50 border rounded-xl flex items-center gap-3">
-                  <span className="font-bold text-slate-700">Logo Önizleme:</span>
+                  <span className="font-bold text-slate-700">{t.logoPreview || 'Logo Önizleme'}:</span>
                   <img src={editCompanyLogo} alt="Logo Önizleme" className="h-10 w-auto object-contain bg-white p-1 border rounded shadow-sm" />
                 </div>
               )}
 
               <button type="submit" className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-6 py-3 rounded-xl font-bold transition shadow cursor-pointer">
-                Bilgileri ve Logoyu Kalıcı Olarak Kaydet
+                {t.saveCompanyBtn || 'Bilgileri ve Logoyu Kalıcı Olarak Kaydet'}
               </button>
             </form>
           </div>
