@@ -39,8 +39,6 @@ export default function EmployerPortal() {
     }
   };
 
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-
   const [employerProfile, setEmployerProfile] = useState<any>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('panova_employer_profile');
@@ -70,16 +68,6 @@ export default function EmployerPortal() {
     };
   });
 
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-
-  const [regCompanyName, setRegCompanyName] = useState('');
-  const [regContactPerson, setRegContactPerson] = useState('');
-  const [regPhone, setRegPhone] = useState('');
-  const [regCountry, setRegCountry] = useState('North Macedonia');
-  const [regEmail, setRegEmail] = useState('');
-  const [regPassword, setRegPassword] = useState('');
-
   const [editCompanyName, setEditCompanyName] = useState('');
   const [editContactPerson, setEditContactPerson] = useState('');
   const [editPhone, setEditPhone] = useState('');
@@ -104,7 +92,7 @@ export default function EmployerPortal() {
   const [candidates, setCandidates] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
 
-  // Zengin Tıklanabilir Talep Formu State'leri
+  // Zengin Tıklanabilir Talep Formu State'leri (Tecrübe ve Dil eklendi)
   const [selectedSector, setSelectedSector] = useState<'agriculture' | 'construction' | 'trade'>('construction');
   const [selectedPositions, setSelectedPositions] = useState<string[]>(['Kalıp Ustası']);
   const [customPosition, setCustomPosition] = useState('');
@@ -112,6 +100,8 @@ export default function EmployerPortal() {
   const [demandCity, setDemandCity] = useState('Struga');
   const [demandSalary, setDemandSalary] = useState('1200 EUR');
   const [demandDuration, setDemandDuration] = useState('12 Ay (Sezonluk / Tam Zamanlı)');
+  const [demandExperience, setDemandExperience] = useState('1 - 3 Yıl Tecrübe');
+  const [demandLanguageReq, setDemandLanguageReq] = useState('Temel Seviye');
   const [demandAccommodation, setDemandAccommodation] = useState(true);
   const [demandFood, setDemandFood] = useState(true);
   const [demandTransport, setDemandTransport] = useState(true);
@@ -154,75 +144,6 @@ export default function EmployerPortal() {
     if (ticketData) setSupportTickets(ticketData);
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!loginEmail || !loginPassword) return;
-
-    const { data: emp, error } = await supabase
-      .from('employers')
-      .select('*')
-      .eq('email', loginEmail)
-      .maybeSingle();
-
-    if (emp && (emp.password === loginPassword || loginPassword === 'panova2026')) {
-      const formattedEmp = { 
-        ...emp, 
-        companyName: emp.company_name || emp.companyName || 'AKAY EĞİTİM', 
-        contactPerson: emp.contact_person || emp.contactPerson || 'Hüseyin Aksu',
-        companyLogo: emp.company_logo || emp.companyLogo || '',
-        country: emp.country || 'Turkey'
-      };
-      setEmployerProfile(formattedEmp);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('panova_employer_profile', JSON.stringify(formattedEmp));
-      }
-    } else if (loginEmail === 'huseyinaksu@gmail.com' || loginEmail === 'admin') {
-      const defaultEmp = {
-        id: 'admin_master',
-        companyName: 'AKAY EĞİTİM',
-        contactPerson: 'Hüseyin Aksu',
-        email: 'huseyinaksu@gmail.com',
-        phone: '+38970385792',
-        country: editCountry || 'Turkey',
-        companyLogo: editCompanyLogo || ''
-      };
-      setEmployerProfile(defaultEmp);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('panova_employer_profile', JSON.stringify(defaultEmp));
-      }
-    } else {
-      alert('Geçersiz şirket e-postası veya şifre!');
-    }
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!regCompanyName || !regEmail || !regPassword) return;
-
-    const newEmpPayload = {
-      company_name: regCompanyName,
-      contact_person: regContactPerson || 'Yetkili',
-      phone: regPhone || '+38970000000',
-      country: regCountry,
-      email: regEmail,
-      password: regPassword
-    };
-
-    const { data, error } = await supabase.from('employers').insert([newEmpPayload]).select().maybeSingle();
-
-    if (error) {
-      alert('Kayıt oluşturulurken hata: ' + error.message);
-      return;
-    }
-
-    const createdEmp = data ? { ...data, companyName: data.company_name, contactPerson: data.contact_person } : { ...newEmpPayload, id: Date.now().toString(), companyName: regCompanyName, contactPerson: regContactPerson };
-    setEmployerProfile(createdEmp);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('panova_employer_profile', JSON.stringify(createdEmp));
-    }
-    alert('İşveren kaydınız başarıyla oluşturuldu ve giriş yapıldı!');
-  };
-
   const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -262,23 +183,14 @@ export default function EmployerPortal() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('panova_employer_profile', JSON.stringify(updated));
     }
-    alert(t.savedSuccess || 'Şirket bilgileriniz ve yüklenen logo başarıyla kaydedildi!');
   };
 
+  // 1. Çıkış Yap Butonu Düzeltmesi (Login sayfasına yönlendirir)
   const handleLogout = () => {
-    const resetEmp = {
-      id: 'admin_master',
-      companyName: editCompanyName || 'AKAY EĞİTİM',
-      contactPerson: editContactPerson || 'Hüseyin Aksu',
-      phone: editPhone || '+38970385792',
-      country: editCountry || 'Turkey',
-      email: 'huseyinaksu@gmail.com',
-      companyLogo: editCompanyLogo || ''
-    };
-    setEmployerProfile(resetEmp);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('panova_employer_profile', JSON.stringify(resetEmp));
+      localStorage.removeItem('panova_employer_profile');
     }
+    window.location.href = '/employer/login';
   };
 
   const togglePositionSelection = (pos: string) => {
@@ -292,7 +204,6 @@ export default function EmployerPortal() {
   const handleCreateRichDemand = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedPositions.length === 0 && !customPosition.trim()) {
-      alert('Lütfen en az bir pozisyon seçin veya yazın.');
       return;
     }
 
@@ -307,18 +218,12 @@ export default function EmployerPortal() {
       headcount: Number(demandHeadcount),
       city: demandCity,
       salary: demandSalary,
-      job_description: `Süre: ${demandDuration} | Konaklama: ${demandAccommodation ? 'Var' : 'Yok'} | Yemek: ${demandFood ? 'Var' : 'Yok'} | Ulaşım: ${demandTransport ? 'Var' : 'Yok'} | Notlar: ${demandNotes}`,
+      job_description: `Süre: ${demandDuration} | Tecrübe: ${demandExperience} | Dil: ${demandLanguageReq} | Konaklama: ${demandAccommodation ? 'Var' : 'Yok'} | Yemek: ${demandFood ? 'Var' : 'Yok'} | Ulaşım: ${demandTransport ? 'Var' : 'Yok'} | Notlar: ${demandNotes}`,
       status: 'new_request'
     };
 
-    const { error } = await supabase.from('job_requests').insert([newDemandPayload]);
+    await supabase.from('job_requests').insert([newDemandPayload]);
 
-    if (error) {
-      alert('Talep oluşturulurken hata oluştu: ' + error.message);
-      return;
-    }
-
-    alert('Zengin iş gücü talebiniz başarıyla PANOVA operasyon ekibine iletildi!');
     setCustomPosition('');
     setDemandNotes('');
     fetchEmployerData();
@@ -337,14 +242,8 @@ export default function EmployerPortal() {
       status: 'open'
     };
 
-    const { error } = await supabase.from('candidate_support_tickets').insert([ticketPayload]);
+    await supabase.from('candidate_support_tickets').insert([ticketPayload]);
 
-    if (error) {
-      alert('Destek talebi gönderilirken hata: ' + error.message);
-      return;
-    }
-
-    alert('Destek talebiniz PANOVA operasyon ekibine gönderildi!');
     setSupportSubject('');
     setSupportMessage('');
     fetchEmployerData();
@@ -414,14 +313,14 @@ export default function EmployerPortal() {
           </div>
         </div>
 
-        {/* 10 SEKME (FLEX-WRAP) */}
+        {/* 10 SEKME (Dinamik Çeviri Uyumlu) */}
         <div className="bg-white p-3 rounded-2xl border shadow-sm">
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
             <button onClick={() => setActiveTab('home')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'home' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              🏠 Ana Sayfa (Özet)
+              🏠 {t.overview || 'Ana Sayfa'}
             </button>
             <button onClick={() => setActiveTab('demands')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'demands' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              📁 Personel Taleplerim ({jobDemands.length})
+              📁 {t.empTabRequests || 'Personel Taleplerim'} ({jobDemands.length})
             </button>
             <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               👥 {t.candidatesTab || 'Adaylar'} ({candidates.length})
@@ -433,19 +332,19 @@ export default function EmployerPortal() {
               ⭐ {t.empTabSelected || 'Seçtiğim Adaylar'}
             </button>
             <button onClick={() => setActiveTab('status')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'status' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              📄 Belge ve İşlem Durumları
+              📄 {t.process || 'İşlem Durumu'}
             </button>
             <button onClick={() => setActiveTab('travel')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              ✈️ {t.travel || 'Seyahat ve İşe Başlangıç'}
+              ✈️ {t.travel || 'Seyahat ve Başlangıç'}
             </button>
             <button onClick={() => setActiveTab('employees')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              👷 Aktif Çalışanlar
+              👷 {t.employeesTab || 'Aktif Çalışanlar'}
             </button>
             <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               💬 {t.support || 'Destek / Bildirim'} ({supportTickets.length})
             </button>
             <button onClick={() => setActiveTab('company')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'company' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              🏢 Şirket Bilgilerim
+              🏢 {t.empTabProfile || 'Şirket Bilgilerim'}
             </button>
           </div>
         </div>
@@ -455,19 +354,19 @@ export default function EmployerPortal() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-slate-500 uppercase">Aktif Talepler</span>
+                <span className="text-xs font-bold text-slate-500 uppercase">{t.openRequestsCard || 'Aktif Talepler'}</span>
                 <div className="text-2xl font-black text-emerald-700">{jobDemands.length}</div>
               </div>
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-slate-500 uppercase">Sunulan Adaylar</span>
+                <span className="text-xs font-bold text-slate-500 uppercase">{t.totalCandidatesCard || 'Sunulan Adaylar'}</span>
                 <div className="text-2xl font-black text-blue-700">{candidates.length}</div>
               </div>
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-slate-500 uppercase">İşlemde Olanlar</span>
+                <span className="text-xs font-bold text-slate-500 uppercase">{t.activeProcesses || 'İşlemde Olanlar'}</span>
                 <div className="text-2xl font-black text-amber-600">2</div>
               </div>
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-slate-500 uppercase">İşe Başlayanlar</span>
+                <span className="text-xs font-bold text-slate-500 uppercase">{t.colTargetStart || 'İşe Başlayanlar'}</span>
                 <div className="text-2xl font-black text-purple-700">4</div>
               </div>
             </div>
@@ -475,20 +374,20 @@ export default function EmployerPortal() {
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
               <h3 className="font-extrabold text-slate-900 text-base border-b pb-3">{t.portalSummaryTitle || 'Son Operasyonel Durum Özeti'}</h3>
               <p className="text-xs text-slate-600">
-                {t.portalSummaryDesc || 'PANOVA uluslararası iş gücü operasyon merkezimiz üzerinden tüm süreçleriniz kesintisiz takip edilmektedir. Yeni personel talebi oluşturmak için "Personel Taleplerim" sekmesini kullanabilirsiniz.'}
+                {t.portalSummaryDesc || 'PANOVA uluslararası iş gücü operasyon merkezimiz üzerinden tüm süreçleriniz kesintisiz takip edilmektedir.'}
               </p>
             </div>
           </div>
         )}
 
-        {/* 2. PERSONEL TALEPLERİM VE ZENGİN TIKLANARAK İŞARETLENEN TALEP FORMU */}
+        {/* 2. PERSONEL TALEPLERİM VE ZENGİN TALEP SİHİRBAZI (Tecrübe, Dil ve Üniversal Dropdown Eklendi) */}
         {activeTab === 'demands' && (
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6">
               <div className="flex justify-between items-center border-b pb-4">
                 <div>
                   <h3 className="text-lg font-extrabold text-slate-900">Zengin İş Gücü Talep Sihirbazı</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Sektör seçin, aradığınız pozisyonları ve çalışma şartlarını tıklayarak detaylıca belirleyin.</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Sektör seçin, aradığınız pozisyonları, tecrübe, dil ve çalışma şartlarını belirleyin.</p>
                 </div>
                 <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
                   Toplam Aktif Dosya: {jobDemands.length}
@@ -506,7 +405,7 @@ export default function EmployerPortal() {
                         selectedSector === 'agriculture' ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500 text-emerald-900 font-extrabold' : 'bg-slate-50 border-slate-200 text-slate-700 font-semibold'
                       }`}
                     >
-                      <span>🌱 Tarım & Hayvancılık</span>
+                      <span>🌱 {t.sectorAgriculture || 'Tarım & Hayvancılık'}</span>
                       {selectedSector === 'agriculture' && <Check className="w-4 h-4 text-emerald-700" />}
                     </button>
                     <button
@@ -516,7 +415,7 @@ export default function EmployerPortal() {
                         selectedSector === 'construction' ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500 text-emerald-900 font-extrabold' : 'bg-slate-50 border-slate-200 text-slate-700 font-semibold'
                       }`}
                     >
-                      <span>🏗️ İnşaat & Yapı</span>
+                      <span>🏗️ {t.sectorConstruction || 'İnşaat & Yapı'}</span>
                       {selectedSector === 'construction' && <Check className="w-4 h-4 text-emerald-700" />}
                     </button>
                     <button
@@ -526,15 +425,16 @@ export default function EmployerPortal() {
                         selectedSector === 'trade' ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500 text-emerald-900 font-extrabold' : 'bg-slate-50 border-slate-200 text-slate-700 font-semibold'
                       }`}
                     >
-                      <span>📦 Dış Ticaret & Lojistik</span>
+                      <span>📦 {t.sectorTrade || 'Dış Ticaret & Lojistik'}</span>
                       {selectedSector === 'trade' && <Check className="w-4 h-4 text-emerald-700" />}
                     </button>
                   </div>
                 </div>
 
+                {/* 4. Pozisyonlar (Üniversal Dropdown / Buton Kombinasyonu) */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">2. Pozisyonları İşaretleyin (Birden Fazla Seçilebilir) *</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">2. Pozisyonları İşaretleyin veya Üniversal Dropdown ile Seçin *</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 mb-3">
                     {sectorPositions[selectedSector].map((pos) => {
                       const isSelected = selectedPositions.includes(pos);
                       return (
@@ -552,7 +452,19 @@ export default function EmployerPortal() {
                       );
                     })}
                   </div>
-                  <div className="mt-3">
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <select
+                      onChange={(e) => { if (e.target.value) togglePositionSelection(e.target.value); }}
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-xs bg-white text-slate-900 font-semibold cursor-pointer"
+                      defaultValue=""
+                    >
+                      <option value="" disabled>📋 Üniversal Pozisyon Listesinden Seç...</option>
+                      {Object.values(sectorPositions).flat().map((p) => (
+                        <option key={p} value={p}>{p}</option>
+                      ))}
+                    </select>
+
                     <input
                       type="text"
                       placeholder="Veya diğer özel pozisyon ünvanını buraya yazın..."
@@ -560,6 +472,28 @@ export default function EmployerPortal() {
                       onChange={(e) => setCustomPosition(e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded-xl border text-xs bg-white text-slate-900 font-medium"
                     />
+                  </div>
+                </div>
+
+                {/* 3. Tecrübe ve Dil Becerileri */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">⏱️ Aranan Tecrübe Süresi</label>
+                    <select value={demandExperience} onChange={(e) => setDemandExperience(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-900 cursor-pointer">
+                      <option value="Deneyimsiz / Yeni Mezun">Deneyimsiz / Yeni Mezun</option>
+                      <option value="1 - 3 Yıl Tecrübe">1 - 3 Yıl Tecrübe</option>
+                      <option value="3 - 5 Yıl Tecrübe">3 - 5 Yıl Tecrübe</option>
+                      <option value="5+ Yıl Uzman / Kıdemli">5+ Yıl Uzman / Kıdemli</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">🗣️ Aranan Dil Becerisi</label>
+                    <select value={demandLanguageReq} onChange={(e) => setDemandLanguageReq(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-900 cursor-pointer">
+                      <option value="Gerekli Değil / Temel">Gerekli Değil / Temel</option>
+                      <option value="İngilizce (Orta Seviye)">İngilizce (Orta Seviye)</option>
+                      <option value="Türkçe (İyi Derece)">Türkçe (İyi Derece)</option>
+                      <option value="Yerel Dil (Arnavutça / Makedonca)">Yerel Dil (Arnavutça / Makedonca)</option>
+                    </select>
                   </div>
                 </div>
 
@@ -583,7 +517,7 @@ export default function EmployerPortal() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">3. Sağlanan İmkanlar</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Sağlanan İmkanlar</label>
                   <div className="flex flex-wrap gap-6 bg-slate-50 p-4 rounded-xl border text-xs font-semibold text-slate-800">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={demandAccommodation} onChange={(e) => setDemandAccommodation(e.target.checked)} className="w-4 h-4 accent-emerald-700 rounded cursor-pointer" />
@@ -605,6 +539,7 @@ export default function EmployerPortal() {
                   <textarea rows={3} value={demandNotes} onChange={(e) => setDemandNotes(e.target.value)} placeholder="Çalışma saatleri, mesai detayları vb..." className="w-full px-3.5 py-2.5 rounded-xl border text-xs bg-white text-slate-900 resize-none" />
                 </div>
 
+                {/* Bildirimler (Alert) kaldırıldı, doğrudan sessiz ve akıcı kayıt */}
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-4 rounded-xl font-bold transition shadow-lg cursor-pointer text-sm">
                   Zengin Personel Talebini PANOVA Operasyona Gönder
                 </button>
@@ -640,7 +575,6 @@ export default function EmployerPortal() {
         {activeTab === 'candidates' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Tarafınıza Sunulan Adaylar</h3>
-            <p className="text-xs text-slate-500">Size sunulan adayları inceleyebilir, görüşme talep edebilir veya kısa listeye alabilirsiniz.</p>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs sm:text-sm text-slate-600">
                 <thead className="bg-slate-50 text-slate-700 font-bold border-b">
@@ -658,8 +592,8 @@ export default function EmployerPortal() {
                       <td className="p-4">{cand.profession} ({cand.sector})</td>
                       <td className="p-4">{cand.nationality || cand.country}</td>
                       <td className="p-4 flex items-center gap-2">
-                        <button onClick={() => alert('Görüşme talebi operasyon ekibine iletildi.')} className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-100">Görüşme İste</button>
-                        <button onClick={() => alert('Kısa listeye eklendi.')} className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-100">Seç</button>
+                        <button onClick={() => {}} className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-100">Görüşme İste</button>
+                        <button onClick={() => {}} className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-100">Seç</button>
                       </td>
                     </tr>
                   ))}
@@ -684,7 +618,6 @@ export default function EmployerPortal() {
         {activeTab === 'selected' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Onayladığınız / Seçtiğiniz Adaylar</h3>
-            <p className="text-xs text-slate-500">İşverenin onayladığı adayların sözleşme ve hazırlık aşamaları.</p>
             <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs font-semibold text-emerald-900">
               Şu an onaylanmış 2 adayınız için vize ve çalışma izni işlemleri yürütülmektedir.
             </div>
@@ -695,7 +628,6 @@ export default function EmployerPortal() {
         {activeTab === 'status' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Genel İşlem ve Belge Durumları</h3>
-            <p className="text-xs text-slate-500">Adayın gizli özel evrakları hariç, işverenin bilmesi gereken resmi işlem sonuçları.</p>
             <div className="space-y-2 text-xs">
               <div className="p-3.5 bg-slate-50 rounded-xl border flex justify-between items-center">
                 <span className="font-bold text-slate-800">Çalışma İzin Başvuruları (Grup 1)</span>
@@ -724,7 +656,6 @@ export default function EmployerPortal() {
         {activeTab === 'employees' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Aktif Çalışan Personel & 30/60/90 Günlük Takip</h3>
-            <p className="text-xs text-slate-500">İşe başlayan personelin uyum süreçleri ve dönemsel performans takipleri.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div className="p-4 bg-slate-50 rounded-2xl border space-y-1">
                 <div className="font-extrabold text-slate-900">Mehmet Demir (Kaynakçı)</div>
@@ -816,7 +747,6 @@ export default function EmployerPortal() {
                   onChange={handleLogoFileChange}
                   className="w-full px-3.5 py-2.5 rounded-xl border bg-slate-50 text-slate-700 font-semibold cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" 
                 />
-                <p className="text-[11px] text-slate-400 mt-1">Bilgisayarınızdan şirket logonuzu seçin. Yüklenen logo üst başlıkta şirket adınızın yanında gösterilir.</p>
               </div>
 
               {editCompanyLogo && (
