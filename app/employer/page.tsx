@@ -12,6 +12,7 @@ export default function EmployerPage() {
 
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdminImpersonating, setIsAdminImpersonating] = useState(false);
 
   const [companyName, setCompanyName] = useState('');
   const [contactPerson, setContactPerson] = useState('');
@@ -48,16 +49,15 @@ export default function EmployerPage() {
   ]);
 
   useEffect(() => {
-    const savedDemands = localStorage.getItem('panova_employer_demands');
-    if (savedDemands) {
-      try {
-        setDemands(JSON.parse(savedDemands));
-      } catch (e) {
-        console.error(e);
-      }
+    // Admin tarafından impersonate ile gelindiyse veya oturum varsa direkt giriş yap
+    const impersonating = typeof window !== 'undefined' && localStorage.getItem('panova_is_impersonating') === 'true';
+    const savedProfile = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_profile') : null;
+
+    if (impersonating || savedProfile) {
+      setIsLoggedIn(true);
+      setIsAdminImpersonating(impersonating);
     }
 
-    const savedProfile = localStorage.getItem('panova_employer_profile');
     if (savedProfile) {
       try {
         const prof = JSON.parse(savedProfile);
@@ -67,6 +67,15 @@ export default function EmployerPage() {
         if (prof.country) setCountry(prof.country);
         if (prof.email) setEmail(prof.email);
         if (prof.companyLogo) setCompanyLogo(prof.companyLogo);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    const savedDemands = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_demands') : null;
+    if (savedDemands) {
+      try {
+        setDemands(JSON.parse(savedDemands));
       } catch (e) {
         console.error(e);
       }
@@ -141,7 +150,6 @@ export default function EmployerPage() {
     { id: 201, name: 'Burak Kaya', position: 'Saha Mühendisi', startDate: '2026-03-01', day30: 'Tamamlandı', day60: 'Devam Ediyor', day90: 'Bekliyor', status: 'Aktif' },
   ]);
 
-  // 4 Dil İçin Tam Sözlük
   const labels = {
     tr: {
       home: '🏠 Ana Sayfa',
@@ -172,8 +180,6 @@ export default function EmployerPage() {
       emailLabel: 'E-Posta',
       saveChangesBtn: 'Değişiklikleri Kaydet',
       profileUpdatedMsg: 'Bilgiler ve logo başarıyla güncellendi!',
-      chooseFileBtn: 'Dosya Seç',
-      noFileChosen: 'Dosya seçilmedi',
     },
     en: {
       home: '🏠 Home',
@@ -204,8 +210,6 @@ export default function EmployerPage() {
       emailLabel: 'Email',
       saveChangesBtn: 'Save Changes',
       profileUpdatedMsg: 'Profile and logo updated successfully!',
-      chooseFileBtn: 'Choose File',
-      noFileChosen: 'No file chosen',
     },
     sq: {
       home: '🏠 Kryefaqja',
@@ -236,8 +240,6 @@ export default function EmployerPage() {
       emailLabel: 'Email',
       saveChangesBtn: 'Ruaj Ndryshimet',
       profileUpdatedMsg: 'Profili u përditësua me sukses!',
-      chooseFileBtn: 'Zgjidh Skedar',
-      noFileChosen: 'Asnjë skedar i zgjedhur',
     },
     ar: {
       home: '🏠 الرئيسية',
@@ -268,8 +270,6 @@ export default function EmployerPage() {
       emailLabel: 'البريد الإلكتروني',
       saveChangesBtn: 'حفظ التغييرات',
       profileUpdatedMsg: 'تم تحديث الملف الشخصي والشعار بنجاح!',
-      chooseFileBtn: 'اختر ملف',
-      noFileChosen: 'لم يتم اختيار ملف',
     },
   };
 
@@ -286,15 +286,23 @@ export default function EmployerPage() {
           setLang={setLang}
           t={t}
           isLoggedIn={isLoggedIn}
+          isAdminImpersonating={isAdminImpersonating}
           onNewDemandClick={() => setActiveTab('requests')}
           onLogout={() => {
+            localStorage.removeItem('panova_is_impersonating');
+            localStorage.removeItem('panova_employer_profile');
             setIsLoggedIn(false);
+            setIsAdminImpersonating(false);
             setPassword('');
             setEmail('');
             setCompanyName('');
             setContactPerson('');
             setPhone('');
             setCompanyLogo('');
+          }}
+          onReturnToAdmin={() => {
+            localStorage.removeItem('panova_is_impersonating');
+            window.location.href = '/portal';
           }}
         />
 
@@ -410,7 +418,6 @@ export default function EmployerPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Dile Duyarlı Sekme Navigasyonu */}
             <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3 text-xs">
               <button onClick={() => setActiveTab('home')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'home' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.home}</button>
               <button onClick={() => setActiveTab('requests')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'requests' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.requests}</button>
