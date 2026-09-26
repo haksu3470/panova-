@@ -37,9 +37,9 @@ export default function EmployerPage() {
     return null;
   });
 
-  const [companyName, setCompanyName] = useState('');
-  const [contactPerson, setContactPerson] = useState('');
-  const [phone, setPhone] = useState('');
+  const [companyName, setCompanyName] = useState('AKAY EĞİTİM');
+  const [contactPerson, setContactPerson] = useState('Hüseyin Aksu');
+  const [phone, setPhone] = useState('+38970385792');
   const [country, setCountry] = useState('Türkiye');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -71,7 +71,7 @@ export default function EmployerPage() {
     }
   ]);
 
-  // Sayfa açıldığında Supabase veritabanından güncel verileri ve logoyu çekme
+  // Sayfa açıldığında Supabase employers tablosundan güncel verileri ve logoyu çekme
   useEffect(() => {
     const checkAuthAndFetchData = async () => {
       const impersonating = typeof window !== 'undefined' && localStorage.getItem('panova_is_impersonating') === 'true';
@@ -89,20 +89,17 @@ export default function EmployerPage() {
           if (prof.email) {
             setEmail(prof.email);
             
-            // Supabase'den ID veya Email ile veritabanındaki en güncel kaydı çek
-            let query = supabase.from('employers').select('*');
-            if (prof.id) {
-              query = query.eq('id', prof.id);
-            } else {
-              query = query.eq('email', prof.email);
-            }
-
-            const { data: dbEmp, error } = await query.single();
+            // Supabase veritabanından e-posta ile en güncel şirket kaydını çek
+            const { data: dbEmp, error } = await supabase
+              .from('employers')
+              .select('*')
+              .eq('email', prof.email)
+              .single();
 
             if (dbEmp && !error) {
               setEmployerId(dbEmp.id);
-              setCompanyName(dbEmp.company_name || prof.companyName || 'AKAY EĞİTİM');
-              setContactPerson(dbEmp.contact_name || prof.contactPerson || 'Hüseyin Aksu');
+              setCompanyName(dbEmp.company_name || dbEmp.name || prof.companyName || 'AKAY EĞİTİM');
+              setContactPerson(dbEmp.contact_name || dbEmp.contact_person || prof.contactPerson || 'Hüseyin Aksu');
               setPhone(dbEmp.phone || prof.phone || '+38970385792');
               setCountry(dbEmp.country || prof.country || 'Türkiye');
               setCompanyLogo(dbEmp.logo || prof.companyLogo || '');
@@ -151,8 +148,8 @@ export default function EmployerPage() {
 
     if (dbEmp) {
       currentId = dbEmp.id;
-      currentCompName = dbEmp.company_name || currentCompName;
-      currentContact = dbEmp.contact_name || currentContact;
+      currentCompName = dbEmp.company_name || dbEmp.name || currentCompName;
+      currentContact = dbEmp.contact_name || dbEmp.contact_person || currentContact;
       currentPhone = dbEmp.phone || currentPhone;
       currentCountry = dbEmp.country || currentCountry;
       currentLogo = dbEmp.logo || '';
@@ -217,11 +214,9 @@ export default function EmployerPage() {
     };
 
     if (employerId) {
-      const { error } = await supabase.from('employers').update(updatePayload).eq('id', employerId);
-      if (error) console.error('Update error:', error.message);
+      await supabase.from('employers').update(updatePayload).eq('id', employerId);
     } else {
-      const { error } = await supabase.from('employers').update(updatePayload).eq('email', email);
-      if (error) console.error('Update error:', error.message);
+      await supabase.from('employers').update(updatePayload).eq('email', email);
     }
 
     const profileData = { id: employerId, companyName, contactPerson, phone, country, email, companyLogo };
