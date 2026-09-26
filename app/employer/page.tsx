@@ -212,6 +212,19 @@ export default function EmployerPortal() {
     alert('İşveren kaydınız başarıyla oluşturuldu ve giriş yapıldı!');
   };
 
+  // Logo dosyası yükleme fonksiyonu
+  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setEditCompanyLogo(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleUpdateCompanyInfo = async (e: React.FormEvent) => {
     e.preventDefault();
     const updated = {
@@ -237,7 +250,7 @@ export default function EmployerPortal() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('panova_employer_profile', JSON.stringify(updated));
     }
-    alert('Şirket bilgileriniz ve logo veritabanı kaydı güncellendi!');
+    alert('Şirket bilgileriniz ve yüklenen logo başarıyla kaydedildi!');
   };
 
   const handleLogout = () => {
@@ -516,7 +529,7 @@ export default function EmployerPortal() {
           </div>
         </div>
 
-        {/* 10 SEKME İÇİN ÇOK SATIRLI (FLEX-WRAP) DÜZEN - ASLA TAŞMA YAPMAZ */}
+        {/* 10 SEKME (FLEX-WRAP) */}
         <div className="bg-white p-3 rounded-2xl border shadow-sm">
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
             <button onClick={() => setActiveTab('home')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'home' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
@@ -802,10 +815,10 @@ export default function EmployerPortal() {
           </div>
         )}
 
-        {/* 10. ŞİRKET BİLGİLERİM (LOGO GÜNCELLEME) */}
+        {/* 10. ŞİRKET BİLGİLERİM (DOSYA YÜKLEME İLE LOGO SEÇİMİ) */}
         {activeTab === 'company' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-6">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Şirket Bilgilerim ve Logo Yönetimi</h3>
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Şirket Bilgilerim ve Logo Yükleme</h3>
             
             <form onSubmit={handleUpdateCompanyInfo} className="space-y-4 text-xs max-w-2xl">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -831,20 +844,25 @@ export default function EmployerPortal() {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Şirket Logo URL (Görsel Adresi)</label>
-                <input type="text" value={editCompanyLogo} onChange={(e) => setEditCompanyLogo(e.target.value)} placeholder="/logo.png veya görsel linki" className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-900 font-semibold" />
-                <p className="text-[11px] text-slate-400 mt-1">Bu logo işveren panelinizin üst kısmında kendi şirket adınızın yanında gösterilir.</p>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Şirket Logosu Yükle (Dosya Seç)</label>
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleLogoFileChange}
+                  className="w-full px-3.5 py-2.5 rounded-xl border bg-slate-50 text-slate-700 font-semibold cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" 
+                />
+                <p className="text-[11px] text-slate-400 mt-1">Bilgisayarınızdan şirket logonuzu seçin. Yüklenen logo üst başlıkta şirket adınızın yanında gösterilir.</p>
               </div>
 
               {editCompanyLogo && (
                 <div className="p-3 bg-slate-50 border rounded-xl flex items-center gap-3">
                   <span className="font-bold text-slate-700">Logo Önizleme:</span>
-                  <img src={editCompanyLogo} alt="Logo Önizleme" className="h-8 w-auto object-contain bg-white p-1 border rounded" />
+                  <img src={editCompanyLogo} alt="Logo Önizleme" className="h-10 w-auto object-contain bg-white p-1 border rounded shadow-sm" />
                 </div>
               )}
 
               <button type="submit" className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-6 py-3 rounded-xl font-bold transition shadow cursor-pointer">
-                Bilgileri ve Logoyu Güncelle
+                Bilgileri ve Logoyu Kaydet
               </button>
             </form>
           </div>
