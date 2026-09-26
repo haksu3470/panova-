@@ -92,7 +92,7 @@ export default function EmployerPortal() {
   const [candidates, setCandidates] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
 
-  // Zengin Talep Formu State'leri
+  // Kurumsal Talep Formu State'leri
   const [selectedSector, setSelectedSector] = useState<'agriculture' | 'construction' | 'trade'>('construction');
   const [selectedPositions, setSelectedPositions] = useState<string[]>(['Kalıp Ustası']);
   const [customPosition, setCustomPosition] = useState('');
@@ -185,7 +185,6 @@ export default function EmployerPortal() {
     }
   };
 
-  // Logout İşlemi: Doğrudan /employer/login ekranına yönlendirir
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('panova_employer_profile');
@@ -201,7 +200,7 @@ export default function EmployerPortal() {
     }
   };
 
-  const handleCreateRichDemand = async (e: React.FormEvent) => {
+  const handleCreateCorporateDemand = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedPositions.length === 0 && !customPosition.trim()) {
       return;
@@ -308,7 +307,7 @@ export default function EmployerPortal() {
               onClick={handleLogout}
               className="bg-red-50 hover:bg-red-100 text-red-700 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
             >
-              {t.logoutBtn || 'Çıkış Yap'}
+              {t.logout || 'Çıkış Yap'}
             </button>
           </div>
         </div>
@@ -380,21 +379,21 @@ export default function EmployerPortal() {
           </div>
         )}
 
-        {/* 2. PERSONEL TALEPLERİM VE ZENGİN TALEP SİHİRBAZI */}
+        {/* 2. PERSONEL TALEPLERİM VE KURUMSAL TALEP FORMU */}
         {activeTab === 'demands' && (
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6">
               <div className="flex justify-between items-center border-b pb-4">
                 <div>
-                  <h3 className="text-lg font-extrabold text-slate-950">{t.richDemandWizardTitle || 'Zengin İş Gücü Talep Sihirbazı'}</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">{t.richDemandWizardDesc || 'Sektör seçin, aradığınız pozisyonları, tecrübe, dil ve çalışma şartlarını belirleyin.'}</p>
+                  <h3 className="text-lg font-extrabold text-slate-950">{t.corporateDemandTitle || 'Kurumsal İş Gücü Talep Formu'}</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">{t.corporateDemandDesc || 'Sektör seçin, aradığınız pozisyonları, tecrübe, dil ve çalışma şartlarını belirleyin.'}</p>
                 </div>
                 <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
                   {t.totalActiveFiles || 'Toplam Aktif Dosya'}: {jobDemands.length}
                 </div>
               </div>
 
-              <form onSubmit={handleCreateRichDemand} className="space-y-6">
+              <form onSubmit={handleCreateCorporateDemand} className="space-y-6">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">1. {t.selectSectorLabel || 'Sektör Seçin'} *</label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -405,7 +404,7 @@ export default function EmployerPortal() {
                         selectedSector === 'agriculture' ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500 text-emerald-950 font-extrabold' : 'bg-slate-50 border-slate-200 text-slate-700 font-semibold'
                       }`}
                     >
-                      <span>🌱 {t.sectorAgriculture || 'Tarım & Hayvancılık'}</span>
+                      <span>🌱 {t.sectorAgriculture || 'Tarım ve Hayvancılık'}</span>
                       {selectedSector === 'agriculture' && <Check className="w-4 h-4 text-emerald-700" />}
                     </button>
                     <button
@@ -415,7 +414,7 @@ export default function EmployerPortal() {
                         selectedSector === 'construction' ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500 text-emerald-950 font-extrabold' : 'bg-slate-50 border-slate-200 text-slate-700 font-semibold'
                       }`}
                     >
-                      <span>🏗️ {t.sectorConstruction || 'İnşaat & Yapı'}</span>
+                      <span>🏗️ {t.sectorConstruction || 'İnşaat ve Yapı'}</span>
                       {selectedSector === 'construction' && <Check className="w-4 h-4 text-emerald-700" />}
                     </button>
                     <button
@@ -425,7 +424,7 @@ export default function EmployerPortal() {
                         selectedSector === 'trade' ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500 text-emerald-950 font-extrabold' : 'bg-slate-50 border-slate-200 text-slate-700 font-semibold'
                       }`}
                     >
-                      <span>📦 {t.sectorTrade || 'Dış Ticaret & Lojistik'}</span>
+                      <span>📦 {t.sectorTrade || 'Dış Ticaret ve Lojistik'}</span>
                       {selectedSector === 'trade' && <Check className="w-4 h-4 text-emerald-700" />}
                     </button>
                   </div>
@@ -540,7 +539,7 @@ export default function EmployerPortal() {
                 </div>
 
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-4 rounded-xl font-bold transition shadow-lg cursor-pointer text-sm">
-                  {t.submitDemandBtn || 'Zengin Personel Talebini PANOVA Operasyona Gönder'}
+                  {t.submitDemandBtn || 'Kurumsal Personel Talebini PANOVA Operasyona Gönder'}
                 </button>
               </form>
             </div>
