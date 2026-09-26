@@ -13,7 +13,7 @@ export default function EmployerPage() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Başlangıçta tamamen boş (empty string) olarak tanımlandı
+  // Kesinlikle boş başlatılıyor
   const [companyName, setCompanyName] = useState('');
   const [contactPerson, setContactPerson] = useState('');
   const [phone, setPhone] = useState('');
@@ -28,7 +28,7 @@ export default function EmployerPage() {
   const [demands, setDemands] = useState([
     { 
       id: 1, 
-      sector: 'Tarım ve Hayvancılık', 
+      sector: 'Tarım dan Hayvancılık', 
       position: 'Ziraat Mühendisi / Bahçe Şefi', 
       headcount: 3, 
       salary: '1.500 € + Konaklama', 
@@ -50,8 +50,9 @@ export default function EmployerPage() {
       }
     }
 
+    // Sadece kullanıcı giriş yapmışsa profili yükle, dışarıdayken formu doldurma
     const savedProfile = localStorage.getItem('panova_employer_profile');
-    if (savedProfile) {
+    if (savedProfile && isLoggedIn) {
       try {
         const prof = JSON.parse(savedProfile);
         if (prof.companyName) setCompanyName(prof.companyName);
@@ -63,7 +64,7 @@ export default function EmployerPage() {
         console.error(e);
       }
     }
-  }, []);
+  }, [isLoggedIn]);
 
   const handleSubmitAuth = (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,6 +118,10 @@ export default function EmployerPage() {
           onLogout={() => {
             setIsLoggedIn(false);
             setPassword('');
+            setEmail('');
+            setCompanyName('');
+            setContactPerson('');
+            setPhone('');
           }}
         />
 
@@ -130,7 +135,7 @@ export default function EmployerPage() {
                   authMode === 'signin' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                {t.signInBtn || 'Giriş Yap'}
+                {t.signInBtn || (lang === 'en' ? 'Sign In' : lang === 'sq' ? 'Kyçu' : lang === 'ar' ? 'تسجيل الدخول' : 'Giriş Yap')}
               </button>
               <button
                 type="button"
@@ -139,7 +144,7 @@ export default function EmployerPage() {
                   authMode === 'signup' ? 'bg-emerald-700 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                {t.signUpBtn || 'Kayıt Ol'}
+                {t.signUpBtn || (lang === 'en' ? 'Sign Up' : lang === 'sq' ? 'Regjistrohuni' : lang === 'ar' ? 'اشتراك' : 'Kayıt Ol')}
               </button>
             </div>
 
@@ -148,7 +153,9 @@ export default function EmployerPage() {
                 🏢
               </div>
               <h1 className="text-xl font-black text-slate-900">
-                {authMode === 'signup' ? (t.employerRegTitle || 'İşveren Kaydı') : (t.loginPortalTitle || 'İşveren Giriş Portalı')}
+                {authMode === 'signup' 
+                  ? (t.employerRegTitle || (lang === 'en' ? 'Employer Registration' : lang === 'sq' ? 'Regjistrimi i Punëdhënësit' : lang === 'ar' ? 'تسجيل صاحب العمل' : 'İşveren Kaydı')) 
+                  : (t.loginPortalTitle || (lang === 'en' ? 'Employer Login Portal' : lang === 'sq' ? 'Portali i Hyrjes për Punëdhënësit' : lang === 'ar' ? 'بوابة تسجيل دخول صاحب العمل' : 'İşveren Giriş Portalı'))}
               </h1>
             </div>
 
@@ -162,6 +169,7 @@ export default function EmployerPage() {
                     <input
                       type="text"
                       required
+                      autoComplete="off"
                       placeholder="Şirket unvanınızı girin"
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
@@ -176,6 +184,7 @@ export default function EmployerPage() {
                       <input
                         type="text"
                         required
+                        autoComplete="off"
                         placeholder="Ad Soyad"
                         value={contactPerson}
                         onChange={(e) => setContactPerson(e.target.value)}
@@ -189,6 +198,7 @@ export default function EmployerPage() {
                       <input
                         type="tel"
                         required
+                        autoComplete="off"
                         placeholder="+389..."
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
@@ -206,6 +216,7 @@ export default function EmployerPage() {
                 <input
                   type="email"
                   required
+                  autoComplete="off"
                   placeholder="ornek@sirket.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -220,6 +231,7 @@ export default function EmployerPage() {
                 <input
                   type="password"
                   required
+                  autoComplete="new-password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -231,7 +243,9 @@ export default function EmployerPage() {
                 type="submit"
                 className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2"
               >
-                {authMode === 'signup' ? (t.completeRegBtn || 'Kayıt Ol') : (t.signInBtn || 'Giriş Yap')}
+                {authMode === 'signup' 
+                  ? (t.completeRegBtn || (lang === 'en' ? 'Sign Up' : lang === 'sq' ? 'Regjistrohuni' : lang === 'ar' ? 'اشتراك' : 'Kayıt Ol')) 
+                  : (t.signInBtn || (lang === 'en' ? 'Sign In' : lang === 'sq' ? 'Kyçu' : lang === 'ar' ? 'تسجيل الدخول' : 'Giriş Yap'))}
               </button>
             </form>
           </div>
