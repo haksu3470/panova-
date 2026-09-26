@@ -12,8 +12,22 @@ export default function EmployerPage() {
   const t = translations[lang] || translations['tr'];
 
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAdminImpersonating, setIsAdminImpersonating] = useState(false);
+  
+  // Sayfa yenilendiğinde (F5) oturumun düşmemesi için localStorage kontrolü
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('panova_employer_logged_in') === 'true' || localStorage.getItem('panova_is_impersonating') === 'true';
+    }
+    return false;
+  });
+
+  const [isAdminImpersonating, setIsAdminImpersonating] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('panova_is_impersonating') === 'true';
+    }
+    return false;
+  });
+
   const [employerId, setEmployerId] = useState<string | null>(null);
 
   const [companyName, setCompanyName] = useState('');
@@ -50,12 +64,14 @@ export default function EmployerPage() {
     }
   ]);
 
+  // Sayfa açıldığında veya yenilendiğinde (F5) Supabase veritabanından ve localStorage'dan verileri koruma
   useEffect(() => {
     const checkAuthAndFetchData = async () => {
       const impersonating = typeof window !== 'undefined' && localStorage.getItem('panova_is_impersonating') === 'true';
       const savedProfile = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_profile') : null;
+      const persistentLoggedIn = typeof window !== 'undefined' && localStorage.getItem('panova_employer_logged_in') === 'true';
 
-      if (impersonating || savedProfile) {
+      if (impersonating || persistentLoggedIn || savedProfile) {
         setIsLoggedIn(true);
         setIsAdminImpersonating(impersonating);
       }
@@ -63,12 +79,6 @@ export default function EmployerPage() {
       if (savedProfile) {
         try {
           const prof = JSON.parse(savedProfile);
-          if (prof.id) setEmployerId(prof.id);
-          if (prof.companyName) setCompanyName(prof.companyName);
-          if (prof.contactPerson) setContactPerson(prof.contactPerson);
-          if (prof.phone) setPhone(prof.phone);
-          if (prof.country) setCountry(prof.country);
-          if (prof.companyLogo) setCompanyLogo(prof.companyLogo);
           if (prof.email) {
             setEmail(prof.email);
             const { data: dbEmp, error } = await supabase
@@ -84,6 +94,12 @@ export default function EmployerPage() {
               setPhone(dbEmp.phone || prof.phone);
               setCountry(dbEmp.country || prof.country);
               setCompanyLogo(dbEmp.logo || dbEmp.company_logo || prof.companyLogo || '');
+            } else {
+              setCompanyName(prof.companyName || 'AKAY EĞİTİM');
+              setContactPerson(prof.contactPerson || 'Hüseyin Aksu');
+              setPhone(prof.phone || '+389...');
+              setCountry(prof.country || 'North Macedonia');
+              setCompanyLogo(prof.companyLogo || '');
             }
           }
         } catch (e) {
@@ -114,19 +130,43 @@ export default function EmployerPage() {
       .eq('email', email)
       .single();
 
+    let currentCompName = 'AKAY EĞİTİM';
+    let currentContact = 'Hüseyin Aksu';
+    let currentPhone = '+389 70 385 792';
+    let currentCountry = 'North Macedonia';
+    let currentLogo = '';
+    let currentId = null;
+
     if (dbEmp) {
-      setEmployerId(dbEmp.id);
-      setCompanyName(dbEmp.company_name || dbEmp.name || 'AKAY EĞİTİM');
-      setContactPerson(dbEmp.contact_person || dbEmp.contact || 'Hüseyin Aksu');
-      setPhone(dbEmp.phone || '+389...');
-      setCountry(dbEmp.country || 'North Macedonia');
-      setCompanyLogo(dbEmp.logo || dbEmp.company_logo || '');
-    } else {
-      setCompanyName('AKAY EĞİTİM');
-      setContactPerson('Hüseyin Aksu');
+      currentId = dbEmp.id;
+      currentCompName = dbEmp.company_name || dbEmp.name || currentCompName;
+      currentContact = dbEmp.contact_person || dbEmp.contact || currentContact;
+      currentPhone = dbEmp.phone || currentPhone;
+      currentCountry = dbEmp.country || currentCountry;
+      currentLogo = dbEmp.logo || dbEmp.company_logo || '';
     }
 
+    setEmployerId(currentId);
+    setCompanyName(currentCompName);
+    setContactPerson(currentContact);
+    setPhone(currentPhone);
+    setCountry(currentCountry);
+    setCompanyLogo(currentLogo);
+
     setIsLoggedIn(true);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('panova_employer_logged_in', 'true');
+      const profileData = {
+        id: currentId,
+        companyName: currentCompName,
+        contactPerson: currentContact,
+        phone: currentPhone,
+        country: currentCountry,
+        email: email,
+        companyLogo: currentLogo
+      };
+      localStorage.setItem('panova_employer_profile', JSON.stringify(profileData));
+    }
   };
 
   const handleCreateDemand = (demandData: any) => {
@@ -151,7 +191,6 @@ export default function EmployerPage() {
     setTimeout(() => setSuccessMsg(false), 4000);
   };
 
-  // 🗄️ Şirket Bilgilerini ve Logoyu Supabase Veritabanına Kaydetme
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -368,6 +407,7 @@ export default function EmployerPage() {
           onLogout={() => {
             localStorage.removeItem('panova_is_impersonating');
             localStorage.removeItem('panova_employer_profile');
+            localStorage.removeItem('panova_employer_logged_in');
             setIsLoggedIn(false);
             setIsAdminImpersonating(false);
             setPassword('');
@@ -379,6 +419,7 @@ export default function EmployerPage() {
           }}
           onReturnToAdmin={() => {
             localStorage.removeItem('panova_is_impersonating');
+            localStorage.removeItem('panova_employer_logged_in');
             window.location.href = '/portal';
           }}
         />
