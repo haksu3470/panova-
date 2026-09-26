@@ -61,19 +61,41 @@ export default function EmployerLoginPage() {
       .maybeSingle();
 
     if (emp && (emp.password === loginPassword || loginPassword === 'panova2026')) {
+      // Veritabanından gelen verileri standart formata mapliyoruz
+      const formattedEmp = {
+        id: emp.id,
+        companyName: emp.company_name || emp.companyName || 'AKAY EĞİTİM',
+        contactPerson: emp.contact_person || emp.contactPerson || 'Hüseyin Aksu',
+        email: emp.email || loginEmail,
+        phone: emp.phone || '+38970385792',
+        country: emp.country || 'North Macedonia',
+        companyLogo: emp.company_logo || emp.companyLogo || ''
+      };
+
       if (typeof window !== 'undefined') {
-        localStorage.setItem('panova_employer_profile', JSON.stringify(emp));
+        localStorage.setItem('panova_employer_profile', JSON.stringify(formattedEmp));
       }
       window.location.href = '/employer';
     } else if (loginEmail === 'huseyinaksu@gmail.com' || loginEmail === 'admin') {
-      const defaultEmp = {
+      // Eğer localStorage'da daha önce kaydedilmiş güncel profil varsa onu koru, yoksa default kullan
+      let existingProfile = null;
+      if (typeof window !== 'undefined') {
+        const savedProfile = localStorage.getItem('panova_employer_profile');
+        if (savedProfile) {
+          try { existingProfile = JSON.parse(savedProfile); } catch(e) {}
+        }
+      }
+
+      const defaultEmp = existingProfile || {
         id: 'admin_master',
-        companyName: 'PANOVA TARIM DOO',
+        companyName: 'AKAY EĞİTİM',
         contactPerson: 'Hüseyin Aksu',
         email: 'huseyinaksu@gmail.com',
         phone: '+38970385792',
-        country: 'North Macedonia'
+        country: 'North Macedonia',
+        companyLogo: ''
       };
+
       if (typeof window !== 'undefined') {
         localStorage.setItem('panova_employer_profile', JSON.stringify(defaultEmp));
       }
@@ -93,7 +115,8 @@ export default function EmployerLoginPage() {
       phone: regPhone || '+38970000000',
       country: regCountry,
       email: regEmail,
-      password: regPassword
+      password: regPassword,
+      company_logo: ''
     };
 
     const { data, error } = await supabase.from('employers').insert([newEmpPayload]).select().maybeSingle();
@@ -103,7 +126,16 @@ export default function EmployerLoginPage() {
       return;
     }
 
-    const createdEmp = data || { ...newEmpPayload, id: Date.now().toString(), companyName: regCompanyName };
+    const createdEmp = {
+      id: data?.id || Date.now().toString(),
+      companyName: regCompanyName,
+      contactPerson: regContactPerson || 'Yetkili',
+      email: regEmail,
+      phone: regPhone || '+38970000000',
+      country: regCountry,
+      companyLogo: ''
+    };
+
     if (typeof window !== 'undefined') {
       localStorage.setItem('panova_employer_profile', JSON.stringify(createdEmp));
     }
