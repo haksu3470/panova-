@@ -191,9 +191,7 @@ export default function EmployerPortal() {
   };
 
   const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('panova_employer_profile');
-    }
+    // Çıkış yapıldığında şirket profil verisi (panova_employer_profile) silinmez, korunur.
     window.location.href = '/employer-login';
   };
 
