@@ -11,8 +11,10 @@ interface EmployerHeaderProps {
   setLang: (lang: Language) => void;
   t: any;
   isLoggedIn?: boolean;
+  isAdminImpersonating?: boolean;
   onNewDemandClick?: () => void;
   onLogout?: () => void;
+  onReturnToAdmin?: () => void;
 }
 
 export default function EmployerHeader({
@@ -23,8 +25,10 @@ export default function EmployerHeader({
   setLang,
   t,
   isLoggedIn = false,
+  isAdminImpersonating = false,
   onNewDemandClick,
   onLogout,
+  onReturnToAdmin,
 }: EmployerHeaderProps) {
   return (
     <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
@@ -49,6 +53,16 @@ export default function EmployerHeader({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
+        {/* Admin tarafından bağlandıysa Admin Paneline Dön Butonu */}
+        {isAdminImpersonating && onReturnToAdmin && (
+          <button
+            onClick={onReturnToAdmin}
+            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-md flex items-center gap-1.5"
+          >
+            <span>🛡️</span> Admin Paneline Dön
+          </button>
+        )}
+
         <select
           value={lang}
           onChange={(e) => setLang(e.target.value as Language)}
@@ -64,7 +78,7 @@ export default function EmployerHeader({
           onClick={() => window.location.href = '/'}
           className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition cursor-pointer"
         >
-          {t.returnHomeBtn || (lang === 'en' ? 'Return to Home' : lang === 'sq' ? 'Kthehu në Faqen Kryesore' : lang === 'ar' ? 'العودة إلى الصفحة الرئيسية' : 'Ana Sayfaya Dön')}
+          {t.returnHomeBtn || 'Ana Sayfaya Dön'}
         </button>
 
         {isLoggedIn && (
@@ -74,7 +88,7 @@ export default function EmployerHeader({
                 onClick={onNewDemandClick}
                 className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition shadow-md cursor-pointer"
               >
-                + {t.newDemandBtn || (lang === 'en' ? 'New Demand' : lang === 'sq' ? 'Kërkesë e Re' : lang === 'ar' ? 'طلب جديد' : 'Yeni Talep Oluştur')}
+                + {t.newDemandBtn || 'Yeni Talep Oluştur'}
               </button>
             )}
 
@@ -83,7 +97,7 @@ export default function EmployerHeader({
                 onClick={onLogout}
                 className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl text-xs transition cursor-pointer border border-rose-200"
               >
-                {t.logoutBtn || (lang === 'en' ? 'Sign Out' : lang === 'sq' ? 'Dil' : lang === 'ar' ? 'تسجيل الخروج' : 'Çıkış Yap')}
+                {t.logoutBtn || 'Çıkış Yap'}
               </button>
             )}
           </>

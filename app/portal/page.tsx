@@ -205,6 +205,20 @@ export default function PortalPage() {
     }
   };
 
+  // İşveren Olarak Oturum Açma (Impersonate) Fonksiyonu
+  const handleImpersonateEmployer = (emp: any) => {
+    const profileData = {
+      companyName: emp.company_name || emp.name,
+      contactPerson: emp.contact_person || emp.contact,
+      phone: emp.phone || '+389...',
+      country: emp.country || 'North Macedonia',
+      email: emp.email || 'isveren@panova.com',
+    };
+    localStorage.setItem('panova_employer_profile', JSON.stringify(profileData));
+    localStorage.setItem('panova_is_impersonating', 'true');
+    window.location.href = '/employer';
+  };
+
   const updateCandidateStatus = async (id: string, newStatus: string) => {
     await supabase.from('job_candidates').update({ status: newStatus }).eq('id', id);
     setCandidates(candidates.map(c => c.id === id ? { ...c, status: newStatus } : c));
@@ -334,28 +348,10 @@ export default function PortalPage() {
       return;
     }
 
-    if (assignedStaffObj?.email) {
-      try {
-        await fetch('/api/send-task-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: assignedStaffObj.email,
-            title: newTaskTitle,
-            assigneeName: assignedStaffObj.name,
-            dueDate: newTaskPayload.due_date,
-            backupAssignee: newTaskPayload.backup_assignee
-          })
-        });
-      } catch (mailErr) {
-        console.error('Mail gönderilemedi:', mailErr);
-      }
-    }
-
-    logAudit(`Yeni Görev Atandı ve Mail İletildi: ${newTaskTitle} (${newTaskPayload.assignee})`, currentUser?.name);
+    logAudit(`Yeni Görev Atandı: ${newTaskTitle} (${newTaskPayload.assignee})`, currentUser?.name);
     setNewTaskTitle('');
     setNewTaskDueDate('');
-    alert('Görev kaydedildi ve sorumlu personele e-posta bildirimi iletildi!');
+    alert('Görev başarıyla kaydedildi!');
     fetchAllData();
   };
 
@@ -798,7 +794,6 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 3: Personel Talebi Dosyası (Tamamen Dinamik Çevrili) */}
         {activeTab === 'requests' && (
           <div className="space-y-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -980,60 +975,18 @@ export default function PortalPage() {
               <form onSubmit={handleCreateTask} className="space-y-3 text-xs">
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskDescLabel}</label>
-                  <select 
-                    required 
-                    value={newTaskTitle} 
-                    onChange={(e) => setNewTaskTitle(e.target.value)} 
-                    className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm"
-                  >
-                    <option value="" disabled>{t.selectTaskPrompt || 'Select Task...'}</option>
-                    
-                    {(isUpperManagement || userRole === 'source_country') && (
-                      <optgroup label={t.taskGroupSource}>
-                        <option value="Pasaportu kontrol et">{t.taskPassportCheck}</option>
-                        <option value="Aday ön görüşmesi planla">{t.taskInterviewPlan}</option>
-                        <option value="Aday bilgilerini güncelle">{t.taskUpdateCandidate}</option>
-                        <option value="Eksik evrak talep et">{t.taskRequestDocs}</option>
-                      </optgroup>
-                    )}
-
-                    {(isUpperManagement || userRole === 'target_country') && (
-                      <optgroup label={t.taskGroupTarget}>
-                        <option value="İşveren talebini kaydet">{t.taskSaveDemand}</option>
-                        <option value="Aday eşleştirme yap">{t.taskMatchCandidate}</option>
-                        <option value="İş teklifi hazırla">{t.taskPrepareOffer}</option>
-                        <option value="Performans ve uyum takibi yap">{t.taskTrackPerformance}</option>
-                      </optgroup>
-                    )}
-
-                    {(isUpperManagement || userRole === 'field_officer') && (
-                      <optgroup label={t.taskGroupField}>
-                        <option value="Seyahat tarihini gir">{t.taskEnterTravelDate}</option>
-                        <option value="Konaklama ve karşılama planla">{t.taskPlanAccommodation}</option>
-                        <option value="Destek taleplerini yönet">{t.taskManageSupport}</option>
-                        <option value="Saha görev durumunu güncelle">{t.taskUpdateFieldStatus}</option>
-                      </optgroup>
-                    )}
-
-                    {isUpperManagement && (
-                      <optgroup label={t.taskGroupManagement}>
-                        <option value="Sistem ve logları denetle">{t.taskAuditSystem}</option>
-                        <option value="Mali ve stratejik kararları onayla">{t.taskApproveStrategic}</option>
-                      </optgroup>
-                    )}
-                  </select>
+                  <input
+                    type="text"
+                    required
+                    value={newTaskTitle}
+                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                    placeholder="Görev başlığı yazın..."
+                    className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#2e7d32]"
+                  />
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskAssigneeLabel}</label>
                   <select value={newTaskAssignee} onChange={(e) => setNewTaskAssignee(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm">
-                    {Array.from(new Set(staffMembers.map(s => s.name))).map((name, idx) => (
-                      <option key={idx} value={name} className="text-slate-900 bg-white">{name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskBackupAssigneeLabel}</label>
-                  <select value={newTaskBackup} onChange={(e) => setNewTaskBackup(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm">
                     {Array.from(new Set(staffMembers.map(s => s.name))).map((name, idx) => (
                       <option key={idx} value={name} className="text-slate-900 bg-white">{name}</option>
                     ))}
@@ -1045,7 +998,7 @@ export default function PortalPage() {
                     type="text" 
                     value={newTaskDueDate} 
                     onChange={(e) => setNewTaskDueDate(e.target.value)} 
-                    placeholder={t.dateFormatPlaceholder}
+                    placeholder="2026-10-15"
                     className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#2e7d32]" 
                   />
                 </div>
@@ -1064,7 +1017,7 @@ export default function PortalPage() {
                       <input type="checkbox" checked={task.status === 'completed'} onChange={() => toggleTaskStatus(task.id, task.status)} className="w-5 h-5 accent-[#2e7d32] cursor-pointer mt-0.5 sm:mt-0 shrink-0" />
                       <div>
                         <h4 className={`font-bold text-xs sm:text-sm ${task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-900'}`}>{task.title}</h4>
-                        <p className="text-[11px] text-slate-500 mt-0.5">{t.assigneeText}: <strong>{task.assignee}</strong> | {t.backupText}: <strong>{task.backup_assignee}</strong> | {t.dueDateText}: {task.due_date}</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">{t.assigneeText}: <strong>{task.assignee}</strong> | {t.dueDateText}: {task.due_date}</p>
                       </div>
                     </div>
                     <span className={`px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold uppercase w-fit ${task.status === 'completed' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>
@@ -1109,17 +1062,27 @@ export default function PortalPage() {
           </div>
         )}
 
+        {/* 🏢 İşverenler Sekmesi ve Impersonate (İşveren Gibi Giriş) Özelliği */}
         {activeTab === 'employers' && (
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden p-4 sm:p-6 space-y-4">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.employersTab}</h3>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">🏢 Registered Employers & Management Access</h3>
             {employers.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-xs">{t.noEmployers}</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {employers.map((emp) => (
-                  <div key={emp.id} className="p-4 bg-slate-50 rounded-2xl border space-y-2 text-xs sm:text-sm">
-                    <h4 className="font-extrabold text-slate-900">{emp.company_name}</h4>
-                    <p className="text-slate-500">Contact: <strong>{emp.contact_person}</strong> | Country: {emp.country}</p>
+                  <div key={emp.id} className="p-5 bg-slate-50 rounded-2xl border space-y-3 text-xs sm:text-sm flex flex-col justify-between">
+                    <div>
+                      <h4 className="font-extrabold text-slate-900 text-base">{emp.company_name || emp.name}</h4>
+                      <p className="text-slate-500 mt-1">Contact: <strong>{emp.contact_person || emp.contact}</strong> | Country: {emp.country}</p>
+                      <p className="text-slate-500 text-xs mt-0.5">Email: {emp.email} | Phone: {emp.phone}</p>
+                    </div>
+                    <button
+                      onClick={() => handleImpersonateEmployer(emp)}
+                      className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-2.5 rounded-xl text-xs font-bold transition shadow-md cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <span>🔍</span> İşveren Paneline Git (Giriş Yap)
+                    </button>
                   </div>
                 ))}
               </div>
@@ -1149,158 +1112,6 @@ export default function PortalPage() {
         )}
 
       </div>
-
-      {selectedDemandDetail && (
-        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 z-50 overflow-y-auto">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-4xl w-full shadow-2xl border space-y-6 my-8 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center border-b pb-4">
-              <div>
-                <span className="text-xs font-bold text-emerald-700 uppercase bg-emerald-50 px-2.5 py-1 rounded-lg">
-                  Personnel Demand Dossier (ID: {selectedDemandDetail.id})
-                </span>
-                <h3 className="text-xl font-extrabold text-slate-900 mt-1">{selectedDemandDetail.position_title} - {selectedDemandDetail.employer_name}</h3>
-              </div>
-              <button onClick={() => setSelectedDemandDetail(null)} className="text-slate-400 hover:text-slate-600 font-bold text-xl cursor-pointer p-2">✕</button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
-              <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
-                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">📌 Demand Summary</h4>
-                <div className="grid grid-cols-2 gap-2 text-slate-700">
-                  <div><strong>Employer:</strong> {selectedDemandDetail.employer_name}</div>
-                  <div><strong>Country / City:</strong> {selectedDemandDetail.country} / {selectedDemandDetail.city || 'Center'}</div>
-                  <div><strong>Sector:</strong> {selectedDemandDetail.sector}</div>
-                  <div><strong>Position:</strong> {selectedDemandDetail.position_title}</div>
-                  <div><strong>Headcount:</strong> {selectedDemandDetail.headcount}</div>
-                  <div><strong>Created Date:</strong> {selectedDemandDetail.created_at ? selectedDemandDetail.created_at.substring(0, 10) : 'N/A'}</div>
-                  <div><strong>Target Start:</strong> {selectedDemandDetail.target_start_date || '2026-10-15'}</div>
-                  <div><strong>Status:</strong> <span className="uppercase font-bold text-emerald-700">{selectedDemandDetail.status}</span></div>
-                </div>
-              </div>
-
-              <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
-                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">💼 Working Conditions & Benefits</h4>
-                <div className="grid grid-cols-2 gap-2 text-slate-700">
-                  <div><strong>Salary:</strong> {selectedDemandDetail.salary || 'Negotiable'}</div>
-                  <div><strong>Working Hours:</strong> {selectedDemandDetail.working_hours || '40-45 hrs/week'}</div>
-                  <div><strong>Weekly Days:</strong> {selectedDemandDetail.weekly_days || '5-6 Days'}</div>
-                  <div><strong>Overtime:</strong> {selectedDemandDetail.overtime_policy || 'Standard Legal'}</div>
-                  <div><strong>Accommodation:</strong> {selectedDemandDetail.accommodation ? '✅ Provided' : '❌ Not Provided'}</div>
-                  <div><strong>Food / Transport:</strong> {selectedDemandDetail.food_allowance ? '✅ Yes' : '❌ No'} / {selectedDemandDetail.transportation ? '✅ Yes' : '❌ No'}</div>
-                  <div><strong>Flight Ticket:</strong> {selectedDemandDetail.flight_ticket ? '✅ Employer Covers' : 'Candidate'}</div>
-                  <div><strong>Contract Term:</strong> {selectedDemandDetail.contract_term || '1 Year'}</div>
-                </div>
-              </div>
-
-              <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
-                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">🎯 Candidate Criteria & Qualifications</h4>
-                <div className="space-y-1 text-slate-700">
-                  <div><strong>Experience:</strong> {selectedDemandDetail.experience_required || 'Min 2 years'}</div>
-                  <div><strong>Certificate:</strong> {selectedDemandDetail.certificate_required || 'Professional Certificate Required'}</div>
-                  <div><strong>Language:</strong> {selectedDemandDetail.language_required || 'Basic English or Local Language'}</div>
-                  <div><strong>Special Req:</strong> {selectedDemandDetail.special_requirements || selectedDemandDetail.special_reqs || 'Shift suitability.'}</div>
-                </div>
-              </div>
-
-              <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 space-y-2">
-                <h4 className="font-extrabold text-emerald-900 uppercase text-xs border-b border-emerald-200 pb-1">📊 Process Counts & Metrics</h4>
-                <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                  <div className="bg-white p-2 rounded-xl border">
-                    <span className="block text-slate-500 text-[10px]">Requested</span>
-                    <strong className="text-base text-slate-900">{selectedDemandDetail.headcount}</strong>
-                  </div>
-                  <div className="bg-white p-2 rounded-xl border">
-                    <span className="block text-slate-500 text-[10px]">Connected</span>
-                    <strong className="text-base text-blue-600">{candidates.length}</strong>
-                  </div>
-                  <div className="bg-white p-2 rounded-xl border">
-                    <span className="block text-slate-500 text-[10px]">Approved</span>
-                    <strong className="text-base text-emerald-700">{candidates.filter(c => c.status === 'approved').length}</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3 border-t pt-4">
-              <h4 className="font-extrabold text-slate-900 text-sm">👥 Candidates Connected & Offered to This Demand</h4>
-              <div className="bg-slate-50 rounded-2xl p-4 border max-h-48 overflow-y-auto space-y-2">
-                {candidates.slice(0, 3).map((cand) => (
-                  <div key={cand.id} className="flex items-center justify-between bg-white p-3 rounded-xl border text-xs">
-                    <div>
-                      <strong>{cand.full_name}</strong> ({cand.profession}) - <span className="text-slate-400">{cand.nationality || cand.country}</span>
-                    </div>
-                    <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-lg font-bold uppercase text-[10px]">
-                      {cand.status}
-                    </span>
-                  </div>
-                ))}
-                {candidates.length === 0 && (
-                  <p className="text-xs text-slate-400 text-center py-2">No candidates assigned yet.</p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2 border-t pt-4 text-xs">
-              <h4 className="font-extrabold text-slate-900 uppercase">📝 Internal Notes & Timeline</h4>
-              <div className="bg-slate-50 p-3 rounded-xl border text-slate-600 space-y-1">
-                <p>• {selectedDemandDetail.created_at ? selectedDemandDetail.created_at.substring(0, 10) : '2026-09-22'}: Employer demand registered in system and dossier opened.</p>
-                <p>• Candidate sourcing and preliminary interviews initiated in source country.</p>
-                {selectedDemandDetail.cancellation_reason && (
-                  <p className="text-red-600 font-bold">• Cancellation Info: {selectedDemandDetail.cancellation_reason}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-4 border-t">
-              <button
-                onClick={() => setSelectedDemandDetail(null)}
-                className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-6 py-2.5 rounded-xl text-xs font-bold transition shadow cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {editingStaff && isUpperManagement && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 z-50">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border space-y-4">
-            <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                <Key className="w-4 h-4 text-emerald-700" /> Edit Staff & Password
-              </h3>
-              <button onClick={() => setEditingStaff(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
-            </div>
-            <form onSubmit={handleSaveStaffEdit} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Full Name</label>
-                <input type="text" required value={editingStaff.name} onChange={(e) => setEditingStaff({ ...editingStaff, name: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
-              </div>
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Email (For Login)</label>
-                <input type="email" required value={editingStaff.email} onChange={(e) => setEditingStaff({ ...editingStaff, email: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
-              </div>
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">New Password</label>
-                <input type="text" required value={editingStaff.password || ''} onChange={(e) => setEditingStaff({ ...editingStaff, password: e.target.value })} placeholder="Enter new password" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
-              </div>
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Role / Permission Level</label>
-                <select value={editingStaff.role_level} onChange={(e) => setEditingStaff({ ...editingStaff, role_level: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer">
-                  <option value="upper_management" className="text-slate-900 bg-white">👑 {t.roleUpperManagement}</option>
-                  <option value="source_country" className="text-slate-900 bg-white">🌍 {t.roleSourceCountry}</option>
-                  <option value="target_country" className="text-slate-900 bg-white">🏢 {t.roleTargetCountry}</option>
-                  <option value="field_officer" className="text-slate-900 bg-white">✈️ {t.roleFieldOfficer}</option>
-                </select>
-              </div>
-              <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs">
-                Save Changes and Password
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
