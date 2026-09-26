@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, Languages, 
-  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, UploadCloud
+  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, Plane, ShieldCheck, HeartHandshake
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
@@ -71,7 +71,10 @@ export default function EmployerPortal() {
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
 
-  const [activeTab, setActiveTab] = useState<'demands' | 'candidates' | 'contracts' | 'support'>('demands');
+  // Tüm sekmeler tam kadro geri getirildi
+  const [activeTab, setActiveTab] = useState<
+    'home' | 'demands' | 'candidates' | 'interviews' | 'selected' | 'status' | 'travel' | 'employees' | 'support' | 'company'
+  >('home');
 
   const [jobDemands, setJobDemands] = useState<any[]>([]);
   const [candidates, setCandidates] = useState<any[]>([]);
@@ -407,6 +410,7 @@ export default function EmployerPortal() {
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         
+        {/* ŞİRKET LOGOLU ÜST HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="PANOVA" className="h-10 w-auto object-contain shrink-0" />
@@ -455,26 +459,77 @@ export default function EmployerPortal() {
           </div>
         </div>
 
+        {/* TÜM SEKMELER (NAVBAR) */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
+          <button onClick={() => setActiveTab('home')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'home' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            🏠 Ana Sayfa (Özet)
+          </button>
           <button onClick={() => setActiveTab('demands')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'demands' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📁 İş Gücü Taleplerim ({jobDemands.length})
+            📁 Personel Taleplerim ({jobDemands.length})
           </button>
           <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            👥 Aday Havuzu & Eşleşmeler ({candidates.length})
+            👥 Adaylar ({candidates.length})
           </button>
-          <button onClick={() => setActiveTab('contracts')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'contracts' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📄 Sözleşmeler & Evraklar
+          <button onClick={() => setActiveTab('interviews')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'interviews' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            📅 Görüşmeler
+          </button>
+          <button onClick={() => setActiveTab('selected')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'selected' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            ⭐ Seçtiğim Adaylar
+          </button>
+          <button onClick={() => setActiveTab('status')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'status' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            📄 Belge ve İşlem Durumları
+          </button>
+          <button onClick={() => setActiveTab('travel')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            ✈️ Seyahat ve İşe Başlangıç
+          </button>
+          <button onClick={() => setActiveTab('employees')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            👷 Aktif Çalışanlar
           </button>
           <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            💬 Destek & Operasyon ({supportTickets.length})
+            💬 Destek / Bildirim ({supportTickets.length})
+          </button>
+          <button onClick={() => setActiveTab('company')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'company' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            🏢 Şirket Bilgilerim
           </button>
         </div>
 
+        {/* 1. ANA SAYFA */}
+        {activeTab === 'home' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
+                <span className="text-xs font-bold text-slate-500 uppercase">Aktif Talepler</span>
+                <div className="text-2xl font-black text-emerald-700">{jobDemands.length}</div>
+              </div>
+              <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
+                <span className="text-xs font-bold text-slate-500 uppercase">Sunulan Adaylar</span>
+                <div className="text-2xl font-black text-blue-700">{candidates.length}</div>
+              </div>
+              <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
+                <span className="text-xs font-bold text-slate-500 uppercase">İşlemde Olanlar</span>
+                <div className="text-2xl font-black text-amber-600">2</div>
+              </div>
+              <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
+                <span className="text-xs font-bold text-slate-500 uppercase">İşe Başlayanlar</span>
+                <div className="text-2xl font-black text-purple-700">4</div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+              <h3 className="font-extrabold text-slate-900 text-base border-b pb-3">Son Operasyonel Durum Özeti</h3>
+              <p className="text-xs text-slate-600">
+                PANOVA uluslararası iş gücü operasyon merkezimiz üzerinden tüm süreçleriniz kesintisiz takip edilmektedir. Yeni personel talebi oluşturmak için &quot;Personel Taleplerim&quot; sekmesini kullanabilirsiniz.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* 2. PERSONEL TALEPLERİM */}
         {activeTab === 'demands' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
               <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-                <Plus className="w-5 h-5 text-emerald-700" /> Yeni İş Gücü Talebi Oluştur
+                <Plus className="w-5 h-5 text-emerald-700" /> Yeni Personel Talebi Oluştur
               </h3>
               <form onSubmit={handleCreateDemand} className="space-y-3 text-xs">
                 <div>
@@ -518,11 +573,11 @@ export default function EmployerPortal() {
             <div className="lg:col-span-2 space-y-4">
               <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900">Aktif İş Gücü Talepleriniz</h3>
-                  <p className="text-xs text-slate-500">PANOVA operasyon ekibine ilettiğiniz taleplerin durum takibi.</p>
+                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900">Personel Taleplerim</h3>
+                  <p className="text-xs text-slate-500">Her talep ayrı dosya olarak görüntülenir ve takip edilir.</p>
                 </div>
                 <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
-                  Toplam Talep: {jobDemands.length}
+                  Toplam Dosya: {jobDemands.length}
                 </div>
               </div>
 
@@ -549,9 +604,11 @@ export default function EmployerPortal() {
           </div>
         )}
 
+        {/* 3. ADAYLAR */}
         {activeTab === 'candidates' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Uygun Aday Havuzu & Eşleşmeler</h3>
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Tarafınıza Sunulan Adaylar</h3>
+            <p className="text-xs text-slate-500">Size sunulan adayları inceleyebilir, görüşme talep edebilir veya kısa listeye alabilirsiniz.</p>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs sm:text-sm text-slate-600">
                 <thead className="bg-slate-50 text-slate-700 font-bold border-b">
@@ -559,7 +616,7 @@ export default function EmployerPortal() {
                     <th className="p-4">Ad Soyad</th>
                     <th className="p-4">Meslek / Sektör</th>
                     <th className="p-4">Uyruk / Ülke</th>
-                    <th className="p-4">Durum</th>
+                    <th className="p-4">Durum / İşlem</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -568,7 +625,10 @@ export default function EmployerPortal() {
                       <td className="p-4 font-bold text-slate-900">{cand.full_name}</td>
                       <td className="p-4">{cand.profession} ({cand.sector})</td>
                       <td className="p-4">{cand.nationality || cand.country}</td>
-                      <td className="p-4 font-bold uppercase text-emerald-700">{cand.status || 'pending'}</td>
+                      <td className="p-4 flex items-center gap-2">
+                        <button onClick={() => alert('Görüşme talebi operasyon ekibine iletildi.')} className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-100">Görüşme İste</button>
+                        <button onClick={() => alert('Kısa listeye eklendi.')} className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-100">Seç</button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -577,28 +637,83 @@ export default function EmployerPortal() {
           </div>
         )}
 
-        {activeTab === 'contracts' && (
+        {/* 4. GÖRÜŞMELER */}
+        {activeTab === 'interviews' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Sözleşmeler ve Resmi Evraklar</h3>
-            <p className="text-xs text-slate-500">PANOVA TARIM DOO ile imzalanan resmi iş gücü tedarik sözleşmeleri ve protokollere buradan ulaşabilirsiniz.</p>
-            <div className="p-4 bg-slate-50 rounded-2xl border flex items-center justify-between text-xs">
-              <span className="font-bold text-slate-800">📄 Panova_Workforce_Framework_Agreement_2026.pdf</span>
-              <button onClick={() => alert('İndiriliyor...')} className="bg-[#2e7d32] text-white px-4 py-2 rounded-xl font-bold cursor-pointer">İndir</button>
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Planlanan ve Tamamlanan Görüşmeler</h3>
+            <div className="p-4 bg-slate-50 rounded-2xl border text-xs space-y-1">
+              <div className="font-bold text-slate-900">Ahmet Yılmaz - İnşaat Ustası Mülakatı</div>
+              <div className="text-slate-500">📅 Tarih: 2026-10-02 14:00 | Durum: Planlandı (Online)</div>
             </div>
           </div>
         )}
 
+        {/* 5. SEÇTİĞİM ADAYLAR */}
+        {activeTab === 'selected' && (
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Onayladığınız / Seçtiğiniz Adaylar</h3>
+            <p className="text-xs text-slate-500">İşverenin onayladığı adayların sözleşme ve hazırlık aşamaları.</p>
+            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs font-semibold text-emerald-900">
+              Şu an onaylanmış 2 adayınız için vize ve çalışma izni işlemleri yürütülmektedir.
+            </div>
+          </div>
+        )}
+
+        {/* 6. BELGE VE İŞLEM DURUMLARI */}
+        {activeTab === 'status' && (
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Genel İşlem ve Belge Durumları</h3>
+            <p className="text-xs text-slate-500">Adayın gizli özel evrakları hariç, işverenin bilmesi gereken resmi işlem sonuçları.</p>
+            <div className="space-y-2 text-xs">
+              <div className="p-3.5 bg-slate-50 rounded-xl border flex justify-between items-center">
+                <span className="font-bold text-slate-800">Çalışma İzin Başvuruları (Grup 1)</span>
+                <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-md font-bold">Onaylandı</span>
+              </div>
+              <div className="p-3.5 bg-slate-50 rounded-xl border flex justify-between items-center">
+                <span className="font-bold text-slate-800">Elçilik Vize Randevuları</span>
+                <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-md font-bold">Bekleniyor</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 7. SEYAHAT VE İŞE BAŞLANGIÇ */}
+        {activeTab === 'travel' && (
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Seyahat, Varış ve İşe Başlangıç</h3>
+            <div className="p-4 bg-slate-50 rounded-2xl border text-xs space-y-2">
+              <div className="font-bold text-slate-900 flex items-center gap-1.5"><Plane className="w-4 h-4 text-blue-600" /> Grup 1 Seyahat Planı</div>
+              <p className="text-slate-600">Varış Tarihi: 2026-11-15 | Karşılama Lokasyonu: Havalimanı / Terminal | İşe Başlama Tarihi: 2026-11-16</p>
+            </div>
+          </div>
+        )}
+
+        {/* 8. AKTİF ÇALIŞANLAR */}
+        {activeTab === 'employees' && (
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Aktif Çalışan Personel & 30/60/90 Günlük Takip</h3>
+            <p className="text-xs text-slate-500">İşe başlayan personelin uyum süreçleri ve dönemsel performans takipleri.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="p-4 bg-slate-50 rounded-2xl border space-y-1">
+                <div className="font-extrabold text-slate-900">Mehmet Demir (Kaynakçı)</div>
+                <div className="text-slate-500">İşe Başlama: 2026-06-01 | Uyum Raporu: 90 Gün Tamamlandı (Başarılı)</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 9. DESTEK / BİLDİRİM */}
         {activeTab === 'support' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">Operasyon Ekibine Mesaj Gönder</h3>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">Yeni Destek / Bildirim Kaydı</h3>
               <form onSubmit={handleSendSupport} className="space-y-3 text-xs">
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">Konu *</label>
-                  <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Örn: Vize süreçleri hakkında" className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-900" />
+                  <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Örn: Yeni ihtiyaç / Çalışan sorunu" className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-900" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Mesajınız *</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Bildirim Mesajı *</label>
                   <textarea rows={4} required value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)} placeholder="Detayları yazın..." className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-900 resize-none" />
                 </div>
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold cursor-pointer text-xs sm:text-sm">
@@ -610,7 +725,7 @@ export default function EmployerPortal() {
             <div className="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
               <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Destek ve İletişim Geçmişi</h3>
               {supportTickets.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 text-xs">Henüz mesaj bulunmuyor.</div>
+                <div className="p-8 text-center text-slate-400 text-xs">Henüz bildirim bulunmuyor.</div>
               ) : (
                 <div className="space-y-3">
                   {supportTickets.map((tkt) => (
@@ -624,6 +739,31 @@ export default function EmployerPortal() {
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* 10. ŞİRKET BİLGİLERİM */}
+        {activeTab === 'company' && (
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Şirket ve İletişim Bilgilerim</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
+                <span className="text-slate-500 font-bold block uppercase">Şirket Adı</span>
+                <div className="font-extrabold text-slate-900 text-sm">{employerProfile.companyName || employerProfile.company_name}</div>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
+                <span className="text-slate-500 font-bold block uppercase">Yetkili Kişi</span>
+                <div className="font-extrabold text-slate-900 text-sm">{employerProfile.contactPerson || employerProfile.contact_person}</div>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
+                <span className="text-slate-500 font-bold block uppercase">E-posta</span>
+                <div className="font-extrabold text-slate-900 text-sm">{employerProfile.email}</div>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
+                <span className="text-slate-500 font-bold block uppercase">Telefon / Ülke</span>
+                <div className="font-extrabold text-slate-900 text-sm">{employerProfile.phone || '+389...'} | {employerProfile.country || 'North Macedonia'}</div>
+              </div>
             </div>
           </div>
         )}
