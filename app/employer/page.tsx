@@ -50,7 +50,6 @@ export default function EmployerPage() {
     }
   ]);
 
-  // Sayfa açıldığında oturum ve Supabase veritabanından şirket bilgilerini çekme
   useEffect(() => {
     const checkAuthAndFetchData = async () => {
       const impersonating = typeof window !== 'undefined' && localStorage.getItem('panova_is_impersonating') === 'true';
@@ -69,9 +68,9 @@ export default function EmployerPage() {
           if (prof.contactPerson) setContactPerson(prof.contactPerson);
           if (prof.phone) setPhone(prof.phone);
           if (prof.country) setCountry(prof.country);
+          if (prof.companyLogo) setCompanyLogo(prof.companyLogo);
           if (prof.email) {
             setEmail(prof.email);
-            // Supabase'den güncel verileri veritabanından çek
             const { data: dbEmp, error } = await supabase
               .from('employers')
               .select('*')
@@ -109,7 +108,6 @@ export default function EmployerPage() {
     e.preventDefault();
     if (!email) return;
 
-    // Supabase employers tablosunda bu e-posta var mı kontrol et
     const { data: dbEmp } = await supabase
       .from('employers')
       .select('*')
@@ -153,7 +151,7 @@ export default function EmployerPage() {
     setTimeout(() => setSuccessMsg(false), 4000);
   };
 
-  // 🗄️ Şirket Bilgilerini ve Logoyu DOĞRUDAN SUPABASE VERİTABANINA KAYDETME
+  // 🗄️ Şirket Bilgilerini ve Logoyu Supabase Veritabanına Kaydetme
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -164,16 +162,15 @@ export default function EmployerPage() {
       country: country,
       email: email,
       logo: companyLogo,
+      company_logo: companyLogo,
     };
 
     if (employerId) {
       await supabase.from('employers').update(updatePayload).eq('id', employerId);
     } else {
-      // Eğer ID yoksa e-postaya göre güncelle veya ekle
       await supabase.from('employers').update(updatePayload).eq('email', email);
     }
 
-    // Yerel profili de güncelle
     const profileData = { id: employerId, companyName, contactPerson, phone, country, email, companyLogo };
     localStorage.setItem('panova_employer_profile', JSON.stringify(profileData));
 
@@ -189,8 +186,16 @@ export default function EmployerPage() {
         const base64Logo = reader.result as string;
         setCompanyLogo(base64Logo);
 
-        // Veritabanına anında logo güncellemesi gönder
-        const updatePayload = { logo: base64Logo, company_name: companyName, contact_person: contactPerson, phone, country, email };
+        const updatePayload = { 
+          logo: base64Logo, 
+          company_logo: base64Logo, 
+          company_name: companyName, 
+          contact_person: contactPerson, 
+          phone, 
+          country, 
+          email 
+        };
+
         if (employerId) {
           await supabase.from('employers').update(updatePayload).eq('id', employerId);
         } else {
@@ -250,8 +255,8 @@ export default function EmployerPage() {
       phoneLabel: 'Telefon',
       countryLabel: 'Ülke',
       emailLabel: 'E-Posta',
-      saveChangesBtn: 'Değişiklikleri Veritabanına Kaydet',
-      profileUpdatedMsg: 'Bilgiler ve logo Supabase veritabanına başarıyla kaydedildi!',
+      saveChangesBtn: 'Güncelle',
+      profileUpdatedMsg: 'Şirket bilgileri ve logo başarıyla güncellendi!',
     },
     en: {
       home: '🏠 Home',
@@ -280,8 +285,8 @@ export default function EmployerPage() {
       phoneLabel: 'Phone',
       countryLabel: 'Country',
       emailLabel: 'Email',
-      saveChangesBtn: 'Save Changes to Database',
-      profileUpdatedMsg: 'Profile and logo updated successfully in database!',
+      saveChangesBtn: 'Update',
+      profileUpdatedMsg: 'Profile and logo updated successfully!',
     },
     sq: {
       home: '🏠 Kryefaqja',
@@ -310,7 +315,7 @@ export default function EmployerPage() {
       phoneLabel: 'Telefoni',
       countryLabel: 'Shteti',
       emailLabel: 'Email',
-      saveChangesBtn: 'Ruaj në Bazën e të Dhënave',
+      saveChangesBtn: 'Përditëso',
       profileUpdatedMsg: 'Profili u përditësua me sukses!',
     },
     ar: {
@@ -340,8 +345,8 @@ export default function EmployerPage() {
       phoneLabel: 'الهاتف',
       countryLabel: 'الدولة',
       emailLabel: 'البريد الإلكتروني',
-      saveChangesBtn: 'حفظ في قاعدة البيانات',
-      profileUpdatedMsg: 'تم تحديث الملف الشخصي والشعار بنجاح في قاعدة البيانات!',
+      saveChangesBtn: 'تحديث',
+      profileUpdatedMsg: 'تم تحديث الملف الشخصي والشعار بنجاح!',
     },
   };
 
