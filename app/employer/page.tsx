@@ -13,7 +13,7 @@ export default function EmployerPage() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Şirket ve Profil State'leri (Tüm alanlar eklendi)
+  // Şirket ve Profil State'leri
   const [companyName, setCompanyName] = useState('AKAY EĞİTİM');
   const [contactPerson, setContactPerson] = useState('Hüseyin Aksu');
   const [phone, setPhone] = useState('+38970385792');
@@ -106,24 +106,22 @@ export default function EmployerPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 space-y-6">
-        {/* Üst Bar: Sadece kullanıcı giriş yaptıysa tam fonksiyonel görünür */}
-        {isLoggedIn && (
-          <EmployerHeader
-            country={country}
-            companyName={companyName}
-            lang={lang}
-            setLang={setLang}
-            t={t}
-            onNewDemandClick={() => setActiveTab('requests')}
-            onLogout={() => {
-              setIsLoggedIn(false);
-              setPassword('');
-            }}
-          />
-        )}
+        {/* Üst Bar: Giriş yapılmış olsun veya olmasın her zaman en üstte yer alır */}
+        <EmployerHeader
+          country={country}
+          companyName={isLoggedIn ? companyName : 'PANOVA PORTAL'}
+          lang={lang}
+          setLang={setLang}
+          t={t}
+          onNewDemandClick={() => setActiveTab('requests')}
+          onLogout={() => {
+            setIsLoggedIn(false);
+            setPassword('');
+          }}
+        />
 
         {!isLoggedIn ? (
-          <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 my-16 border border-slate-200">
+          <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 my-8 border border-slate-200">
             <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-8">
               <button
                 type="button"
