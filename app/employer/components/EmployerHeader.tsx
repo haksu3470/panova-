@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { Language } from '@/lib/dictionary';
 
 interface EmployerHeaderProps {
@@ -10,8 +9,9 @@ interface EmployerHeaderProps {
   lang: Language;
   setLang: (lang: Language) => void;
   t: any;
-  onNewDemandClick: () => void;
-  onLogout: () => void;
+  isLoggedIn?: boolean;
+  onNewDemandClick?: () => void;
+  onLogout?: () => void;
 }
 
 export default function EmployerHeader({
@@ -20,53 +20,63 @@ export default function EmployerHeader({
   lang,
   setLang,
   t,
+  isLoggedIn = false,
   onNewDemandClick,
   onLogout,
 }: EmployerHeaderProps) {
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
       <div>
-        <div className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider bg-emerald-50 inline-block px-2.5 py-1 rounded-full mb-1">
+        <div className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full inline-block mb-1 uppercase tracking-wider">
           {country}
         </div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+        <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
           {companyName}
         </h1>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
+        {/* Dil Seçimi */}
         <select
           value={lang}
           onChange={(e) => setLang(e.target.value as Language)}
-          aria-label="Dil Seçimi"
-          className="bg-slate-100 text-slate-800 text-xs rounded-xl px-3 py-2 border border-slate-300 focus:outline-none cursor-pointer font-semibold shadow-sm"
+          className="px-3 py-2 border border-slate-300 rounded-xl text-xs bg-slate-50 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
         >
           <option value="tr">🇹🇷 Türkçe</option>
           <option value="en">🇬🇧 English</option>
-          <option value="sq">🇦🇱 Shqip</option>
-          <option value="ar">🇸🇦 العربية</option>
+          <option value="mk">🇲🇰 Македонски</option>
         </select>
 
-        <Link
-          href="/"
-          className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl transition font-semibold border border-slate-300 shadow-sm"
-        >
-          {t.returnHome || 'Ana Sayfa'}
-        </Link>
-
+        {/* Ana Sayfaya Dön Butonu */}
         <button
-          onClick={onNewDemandClick}
-          className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded-xl transition shadow-md cursor-pointer flex items-center gap-1.5"
+          onClick={() => window.location.href = '/'}
+          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition cursor-pointer"
         >
-          <span>+</span> {t.newDemandBtn || 'Yeni Talep Oluştur'}
+          {t.returnHomeBtn || 'Ana Sayfaya Dön'}
         </button>
 
-        <button
-          onClick={onLogout}
-          className="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold px-4 py-2 rounded-xl border border-rose-200 transition cursor-pointer shadow-sm"
-        >
-          {t.logout || 'Çıkış Yap'}
-        </button>
+        {/* Sadece giriş yapılmışsa görünen butonlar */}
+        {isLoggedIn && (
+          <>
+            {onNewDemandClick && (
+              <button
+                onClick={onNewDemandClick}
+                className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition shadow-md cursor-pointer"
+              >
+                + {t.newDemandBtn || 'Yeni Talep Oluştur'}
+              </button>
+            )}
+
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl text-xs transition cursor-pointer border border-rose-200"
+              >
+                {t.logoutBtn || 'Çıkış Yap'}
+              </button>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
