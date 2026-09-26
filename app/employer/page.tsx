@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, Languages, 
-  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, Plane, ShieldCheck, HeartHandshake
+  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, Plane, ShieldCheck, HeartHandshake, UploadCloud
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
@@ -50,11 +50,13 @@ export default function EmployerPortal() {
       }
       if (isImpersonating) {
         return {
-          companyName: 'PANOVA TARIM DOO',
+          companyName: 'AKAY EĞİTİM',
           contactPerson: 'Hüseyin Aksu',
           phone: '+38970385792',
           country: 'North Macedonia',
-          email: 'huseyinaksu@gmail.com'
+          email: 'huseyinaksu@gmail.com',
+          companyLogo: '/logo.png',
+          taxNumber: '1234567890'
         };
       }
     }
@@ -71,7 +73,23 @@ export default function EmployerPortal() {
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
 
-  // Tüm sekmeler tam kadro geri getirildi
+  // Şirket Bilgilerim form state'leri
+  const [editCompanyName, setEditCompanyName] = useState('');
+  const [editContactPerson, setEditContactPerson] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editTaxNumber, setEditTaxNumber] = useState('');
+  const [editCompanyLogo, setEditCompanyLogo] = useState('');
+
+  useEffect(() => {
+    if (employerProfile) {
+      setEditCompanyName(employerProfile.companyName || employerProfile.company_name || '');
+      setEditContactPerson(employerProfile.contactPerson || employerProfile.contact_person || '');
+      setEditPhone(employerProfile.phone || '');
+      setEditTaxNumber(employerProfile.taxNumber || employerProfile.tax_number || '');
+      setEditCompanyLogo(employerProfile.companyLogo || employerProfile.company_logo || '');
+    }
+  }, [employerProfile]);
+
   const [activeTab, setActiveTab] = useState<
     'home' | 'demands' | 'candidates' | 'interviews' | 'selected' | 'status' | 'travel' | 'employees' | 'support' | 'company'
   >('home');
@@ -137,7 +155,12 @@ export default function EmployerPortal() {
       .maybeSingle();
 
     if (emp && (emp.password === loginPassword || loginPassword === 'panova2026')) {
-      const formattedEmp = { ...emp, companyName: emp.company_name || emp.companyName, contactPerson: emp.contact_person || emp.contactPerson };
+      const formattedEmp = { 
+        ...emp, 
+        companyName: emp.company_name || emp.companyName || 'AKAY EĞİTİM', 
+        contactPerson: emp.contact_person || emp.contactPerson || 'Hüseyin Aksu',
+        companyLogo: emp.company_logo || emp.companyLogo || ''
+      };
       setEmployerProfile(formattedEmp);
       if (typeof window !== 'undefined') {
         localStorage.setItem('panova_employer_profile', JSON.stringify(formattedEmp));
@@ -145,11 +168,13 @@ export default function EmployerPortal() {
     } else if (loginEmail === 'huseyinaksu@gmail.com' || loginEmail === 'admin') {
       const defaultEmp = {
         id: 'admin_master',
-        companyName: 'PANOVA TARIM DOO',
+        companyName: 'AKAY EĞİTİM',
         contactPerson: 'Hüseyin Aksu',
         email: 'huseyinaksu@gmail.com',
         phone: '+38970385792',
-        country: 'North Macedonia'
+        country: 'North Macedonia',
+        companyLogo: '',
+        taxNumber: '123456789'
       };
       setEmployerProfile(defaultEmp);
       if (typeof window !== 'undefined') {
@@ -188,6 +213,34 @@ export default function EmployerPortal() {
     alert('İşveren kaydınız başarıyla oluşturuldu ve giriş yapıldı!');
   };
 
+  const handleUpdateCompanyInfo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const updated = {
+      ...employerProfile,
+      companyName: editCompanyName,
+      contactPerson: editContactPerson,
+      phone: editPhone,
+      taxNumber: editTaxNumber,
+      companyLogo: editCompanyLogo
+    };
+
+    if (employerProfile.id && employerProfile.id !== 'admin_master') {
+      await supabase.from('employers').update({
+        company_name: editCompanyName,
+        contact_person: editContactPerson,
+        phone: editPhone,
+        tax_number: editTaxNumber,
+        company_logo: editCompanyLogo
+      }).eq('id', employerProfile.id);
+    }
+
+    setEmployerProfile(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('panova_employer_profile', JSON.stringify(updated));
+    }
+    alert('Şirket bilgileriniz ve logo veritabanı kaydı güncellendi!');
+  };
+
   const handleLogout = () => {
     setEmployerProfile(null);
     if (typeof window !== 'undefined') {
@@ -202,7 +255,7 @@ export default function EmployerPortal() {
 
     const newDemandPayload = {
       employer_id: employerProfile?.id || 'admin_master',
-      employer_name: employerProfile?.companyName || employerProfile?.company_name || 'PANOVA TARIM DOO',
+      employer_name: employerProfile?.companyName || employerProfile?.company_name || 'AKAY EĞİTİM',
       position_title: newPositionTitle,
       sector: newSector,
       headcount: Number(newHeadcount),
@@ -234,7 +287,7 @@ export default function EmployerPortal() {
 
     const ticketPayload = {
       candidate_id: employerProfile?.id || 'employer',
-      candidate_name: employerProfile?.companyName || employerProfile?.company_name || 'İşveren',
+      candidate_name: employerProfile?.companyName || employerProfile?.company_name || 'AKAY EĞİTİM',
       subject: supportSubject,
       message: supportMessage,
       status: 'open'
@@ -410,15 +463,20 @@ export default function EmployerPortal() {
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         
-        {/* ŞİRKET LOGOLU ÜST HEADER */}
+        {/* ÜST HEADER: PANOVA LOGOSU + İŞVEREN ŞİRKET BİLGİSİ (ÇAKIŞMAYACAK ŞEKİLDE) */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="PANOVA" className="h-10 w-auto object-contain shrink-0" />
-            <div>
-              <div className="flex items-center gap-2 text-emerald-700 font-bold text-xs mb-0.5">
+            <div className="border-l pl-3 border-slate-200">
+              <div className="flex items-center gap-2 text-emerald-700 font-bold text-[11px] uppercase tracking-wider mb-0.5">
                 <Building2 className="w-3.5 h-3.5" /> İşveren Partner Portalı
               </div>
-              <h1 className="text-lg sm:text-xl font-extrabold text-slate-900">{employerProfile.companyName || employerProfile.company_name}</h1>
+              <div className="flex items-center gap-2">
+                {employerProfile.companyLogo && (
+                  <img src={employerProfile.companyLogo} alt="Şirket Logosu" className="h-6 w-auto object-contain rounded" />
+                )}
+                <h1 className="text-lg sm:text-xl font-extrabold text-slate-900">{employerProfile.companyName || employerProfile.company_name}</h1>
+              </div>
             </div>
           </div>
 
@@ -459,7 +517,7 @@ export default function EmployerPortal() {
           </div>
         </div>
 
-        {/* TÜM SEKMELER (NAVBAR) */}
+        {/* TÜM 10 SEKME EKSİKSİZ */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
           <button onClick={() => setActiveTab('home')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'home' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             🏠 Ana Sayfa (Özet)
@@ -743,28 +801,51 @@ export default function EmployerPortal() {
           </div>
         )}
 
-        {/* 10. ŞİRKET BİLGİLERİM */}
+        {/* 10. ŞİRKET BİLGİLERİM (VERİTABANI LOGOSU VE DETAYLAR DAHİL) */}
         {activeTab === 'company' && (
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Şirket ve İletişim Bilgilerim</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
-                <span className="text-slate-500 font-bold block uppercase">Şirket Adı</span>
-                <div className="font-extrabold text-slate-900 text-sm">{employerProfile.companyName || employerProfile.company_name}</div>
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-6">
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Şirket Bilgilerim ve Logo Yönetimi</h3>
+            
+            <form onSubmit={handleUpdateCompanyInfo} className="space-y-4 text-xs max-w-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Şirket Adı</label>
+                  <input type="text" value={editCompanyName} onChange={(e) => setEditCompanyName(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-900 font-semibold" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Yetkili Kişi</label>
+                  <input type="text" value={editContactPerson} onChange={(e) => setEditContactPerson(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-900 font-semibold" />
+                </div>
               </div>
-              <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
-                <span className="text-slate-500 font-bold block uppercase">Yetkili Kişi</span>
-                <div className="font-extrabold text-slate-900 text-sm">{employerProfile.contactPerson || employerProfile.contact_person}</div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Telefon Numarası</label>
+                  <input type="text" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-900 font-semibold" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Vergi Numarası</label>
+                  <input type="text" value={editTaxNumber} onChange={(e) => setEditTaxNumber(e.target.value)} placeholder="Vergi No / Sicil No" className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-900 font-semibold" />
+                </div>
               </div>
-              <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
-                <span className="text-slate-500 font-bold block uppercase">E-posta</span>
-                <div className="font-extrabold text-slate-900 text-sm">{employerProfile.email}</div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Şirket Logo URL (Görsel Adresi)</label>
+                <input type="text" value={editCompanyLogo} onChange={(e) => setEditCompanyLogo(e.target.value)} placeholder="/logo.png veya görsel linki" className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-900 font-semibold" />
+                <p className="text-[11px] text-slate-400 mt-1">Bu logo işveren panelinizin üst kısmında kendi şirket adınızın yanında gösterilir.</p>
               </div>
-              <div className="p-4 bg-slate-50 rounded-2xl border space-y-2">
-                <span className="text-slate-500 font-bold block uppercase">Telefon / Ülke</span>
-                <div className="font-extrabold text-slate-900 text-sm">{employerProfile.phone || '+389...'} | {employerProfile.country || 'North Macedonia'}</div>
-              </div>
-            </div>
+
+              {editCompanyLogo && (
+                <div className="p-3 bg-slate-50 border rounded-xl flex items-center gap-3">
+                  <span className="font-bold text-slate-700">Logo Önizleme:</span>
+                  <img src={editCompanyLogo} alt="Logo Önizleme" className="h-8 w-auto object-contain bg-white p-1 border rounded" />
+                </div>
+              )}
+
+              <button type="submit" className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-6 py-3 rounded-xl font-bold transition shadow cursor-pointer">
+                Bilgileri ve Logoyu Güncelle
+              </button>
+            </form>
           </div>
         )}
 
