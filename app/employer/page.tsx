@@ -128,7 +128,6 @@ export default function EmployerPage() {
     { id: 201, name: 'Burak Kaya', position: 'Saha Mühendisi', startDate: '2026-03-01', day30: 'Tamamlandı', day60: 'Devam Ediyor', day90: 'Bekliyor', status: 'Aktif' },
   ]);
 
-  // Dile duyarlı sekme isimleri çeviri sözlüğü
   const labels = {
     tr: {
       home: '🏠 Ana Sayfa',
@@ -369,7 +368,7 @@ export default function EmployerPage() {
             {activeTab === 'requests' && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1">
-                  <DemandForm t={t} onSubmitDemand={handleCreateDemand} successMsg={successMsg} />
+                  <DemandForm t={t} lang={lang} onSubmitDemand={handleCreateDemand} successMsg={successMsg} />
                 </div>
                 <div className="lg:col-span-2">
                   <DemandsTable t={t} demands={demands} />

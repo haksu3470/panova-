@@ -1,15 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Language } from '@/lib/dictionary';
 
 interface DemandFormProps {
   t: any;
+  lang: Language;
   onSubmitDemand: (demandData: any) => void;
   successMsg: boolean;
   [key: string]: any;
 }
 
-export default function DemandForm({ t, onSubmitDemand, successMsg }: DemandFormProps) {
+export default function DemandForm({ t, lang, onSubmitDemand, successMsg }: DemandFormProps) {
   const [sector, setSector] = useState('Tarım ve Hayvancılık');
   const [position, setPosition] = useState('');
   const [headcount, setHeadcount] = useState(1);
@@ -40,11 +42,20 @@ export default function DemandForm({ t, onSubmitDemand, successMsg }: DemandForm
     setCustomRequirement('');
   };
 
-  // Dile göre sektör seçenekleri
+  // Dile göre dinamik sektör etiketleri
   const sectors = [
-    { value: 'Tarım ve Hayvancılık', labelTr: 'Tarım ve Hayvancılık', labelEn: 'Agriculture & Livestock', labelSq: 'Bujqësi dhe Blegtori', labelAr: 'الزراعة والثروة الحيوانية' },
-    { value: 'İnşaat ve Yapı', labelTr: 'İnşaat ve Yapı', labelEn: 'Construction & Building', labelSq: 'Ndërtim', labelAr: 'الإنشاءات والبناء' },
-    { value: 'Gıda ve Üretim', labelTr: 'Gıda ve Üretim', labelEn: 'Food & Production', labelSq: 'Uhq dhe Prodhim', labelAr: 'الغذاء والإنتاج' },
+    { 
+      value: 'Tarım ve Hayvancılık', 
+      label: lang === 'en' ? 'Agriculture & Livestock' : lang === 'sq' ? 'Bujqësi dhe Blegtori' : lang === 'ar' ? 'الزراعة والثروة الحيوانية' : 'Tarım ve Hayvancılık' 
+    },
+    { 
+      value: 'İnşaat ve Yapı', 
+      label: lang === 'en' ? 'Construction & Building' : lang === 'sq' ? 'Ndërtim' : lang === 'ar' ? 'الإنشاءات والبناء' : 'İnşaat ve Yapı' 
+    },
+    { 
+      value: 'Gıda ve Üretim', 
+      label: lang === 'en' ? 'Food & Production' : lang === 'sq' ? 'Uhq dhe Prodhim' : lang === 'ar' ? 'الغذاء والإنتاج' : 'Gıda ve Üretim' 
+    },
   ];
 
   return (
@@ -71,7 +82,7 @@ export default function DemandForm({ t, onSubmitDemand, successMsg }: DemandForm
           >
             {sectors.map((s) => (
               <option key={s.value} value={s.value}>
-                {s.labelTr} {/* İsteğe göre veya sözlüğe bağlı olarak dinamik gösterim */}
+                {s.label}
               </option>
             ))}
           </select>
