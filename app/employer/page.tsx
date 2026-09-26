@@ -13,6 +13,7 @@ export default function EmployerPage() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Şirket ve Profil State'leri (Tüm alanlar eklendi)
   const [companyName, setCompanyName] = useState('AKAY EĞİTİM');
   const [contactPerson, setContactPerson] = useState('Hüseyin Aksu');
   const [phone, setPhone] = useState('+38970385792');
@@ -44,6 +45,20 @@ export default function EmployerPage() {
     if (savedDemands) {
       try {
         setDemands(JSON.parse(savedDemands));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    const savedProfile = localStorage.getItem('panova_employer_profile');
+    if (savedProfile) {
+      try {
+        const prof = JSON.parse(savedProfile);
+        if (prof.companyName) setCompanyName(prof.companyName);
+        if (prof.contactPerson) setContactPerson(prof.contactPerson);
+        if (prof.phone) setPhone(prof.phone);
+        if (prof.country) setCountry(prof.country);
+        if (prof.email) setEmail(prof.email);
       } catch (e) {
         console.error(e);
       }
@@ -81,6 +96,9 @@ export default function EmployerPage() {
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
+    const profileData = { companyName, contactPerson, phone, country, email };
+    localStorage.setItem('panova_employer_profile', JSON.stringify(profileData));
+
     setUpdateMsg(true);
     setTimeout(() => setUpdateMsg(false), 4000);
   };
@@ -88,22 +106,24 @@ export default function EmployerPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 space-y-6">
-        {/* Üst Bar: Giriş ekranında da dil seçimi ve ana sayfaya dön tuşu için yer alıyor */}
-        <EmployerHeader
-          country={country}
-          companyName={isLoggedIn ? companyName : 'PANOVA PORTAL'}
-          lang={lang}
-          setLang={setLang}
-          t={t}
-          onNewDemandClick={() => setActiveTab('requests')}
-          onLogout={() => {
-            setIsLoggedIn(false);
-            setPassword('');
-          }}
-        />
+        {/* Üst Bar: Sadece kullanıcı giriş yaptıysa tam fonksiyonel görünür */}
+        {isLoggedIn && (
+          <EmployerHeader
+            country={country}
+            companyName={companyName}
+            lang={lang}
+            setLang={setLang}
+            t={t}
+            onNewDemandClick={() => setActiveTab('requests')}
+            onLogout={() => {
+              setIsLoggedIn(false);
+              setPassword('');
+            }}
+          />
+        )}
 
         {!isLoggedIn ? (
-          <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 my-8 border border-slate-200">
+          <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 my-16 border border-slate-200">
             <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-8">
               <button
                 type="button"
@@ -254,7 +274,7 @@ export default function EmployerPage() {
 
             {activeTab === 'profile' && (
               <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl max-w-xl">
-                <h2 className="text-sm font-black text-slate-900 mb-2">{t.profileUpdateTitle || 'Şirket Profili'}</h2>
+                <h2 className="text-sm font-black text-slate-900 mb-2">{t.profileUpdateTitle || 'Şirket Profili ve Bilgi Güncelleme'}</h2>
                 {updateMsg && (
                   <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3.5 rounded-2xl font-medium">
                     ✅ {t.profileUpdatedSuccess || 'Şirket profili başarıyla güncellendi!'}
@@ -270,6 +290,50 @@ export default function EmployerPage() {
                       onChange={(e) => setCompanyName(e.target.value)}
                       className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs bg-slate-50 font-medium"
                     />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t.contactPersonLabel || 'YETKİLİ KİŞİ'} *</label>
+                      <input
+                        type="text"
+                        required
+                        value={contactPerson}
+                        onChange={(e) => setContactPerson(e.target.value)}
+                        className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs bg-slate-50 font-medium"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t.phoneLabel || 'TELEFON'} *</label>
+                      <input
+                        type="tel"
+                        required
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs bg-slate-50 font-medium"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t.countryLocationLabel || 'ÜLKE'} *</label>
+                      <input
+                        type="text"
+                        required
+                        value={country}
+                        onChange={(e) => setCountry(e.target.value)}
+                        className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs bg-slate-50 font-medium"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t.companyEmailLabel || 'E-POSTA'} *</label>
+                      <input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs bg-slate-50 font-medium"
+                      />
+                    </div>
                   </div>
                   <button
                     type="submit"
