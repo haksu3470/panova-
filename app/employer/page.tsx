@@ -13,7 +13,7 @@ export default function EmployerPage() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Default olarak içi boş başlatıldı
+  // Başlangıçta tamamen boş (empty string) olarak tanımlandı
   const [companyName, setCompanyName] = useState('');
   const [contactPerson, setContactPerson] = useState('');
   const [phone, setPhone] = useState('');
@@ -69,7 +69,6 @@ export default function EmployerPage() {
     e.preventDefault();
     if (email) {
       setIsLoggedIn(true);
-      if (!companyName) setCompanyName('AKAY EĞİTİM');
     }
   };
 
