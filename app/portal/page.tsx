@@ -15,10 +15,10 @@ export default function PortalPage() {
       const saved = localStorage.getItem('panova_portal_lang') as Language;
       if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
     }
-    return 'en';
+    return 'tr';
   });
 
-  const t = translations[currentLang] || translations.en;
+  const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
 
   useEffect(() => {
@@ -170,18 +170,15 @@ export default function PortalPage() {
     setAuditLogs([newLog, ...auditLogs]);
   };
 
-  // Supabase Veritabanı ve LocalStorage Destekli Güvenli Giriş
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !password) return;
 
     let loggedUser = null;
 
-    // Master Admin Kontrolü
     if ((username === 'admin' || username === 'huseyinaksu@gmail.com') && password === 'panova2026') {
       loggedUser = { name: 'Hüseyin Aksu (Master Admin)', email: 'huseyinaksu@gmail.com', role_level: 'upper_management', isAdmin: true };
     } else {
-      // Supabase staff_members tablosundan e-posta veya isim ile kontrol
       const { data: dbStaff, error } = await supabase
         .from('staff_members')
         .select('*')
@@ -297,35 +294,6 @@ export default function PortalPage() {
     fetchAllData();
   };
 
-  const handleSaveStaffEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isUpperManagement || !editingStaff) return;
-
-    try {
-      const { error } = await supabase.from('staff_members').update({
-        name: editingStaff.name,
-        email: editingStaff.email,
-        password: editingStaff.password,
-        role_level: editingStaff.role_level
-      }).eq('id', editingStaff.id);
-
-      if (error) {
-        await supabase.from('staff_members').update({
-          name: editingStaff.name,
-          password: editingStaff.password,
-          role_level: editingStaff.role_level
-        }).eq('email', editingStaff.email);
-      }
-
-      logAudit(`Personel Bilgileri ve Şifresi Düzenlendi: ${editingStaff.name}`, currentUser?.name);
-      setEditingStaff(null);
-      alert('Personel bilgileri başarıyla güncellendi!');
-      fetchAllData();
-    } catch (err: any) {
-      alert('Güncelleme hatası: ' + err.message);
-    }
-  };
-
   const handleDeleteStaff = async (staffId: string) => {
     if (!isUpperManagement) {
       alert('Bu işlem için Üst Yönetim yetkisi gereklidir!');
@@ -430,76 +398,86 @@ export default function PortalPage() {
 
   if (!authenticated) {
     return (
-      <div className={`min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center bg-slate-800 rounded-lg px-2.5 py-1.5 border border-slate-700 shadow-sm">
-          <Languages className="w-4 h-4 text-slate-300 mr-1.5 rtl:ml-1.5" />
-          <select
-            value={currentLang}
-            onChange={(e) => changeLanguage(e.target.value as Language)}
-            className="bg-transparent text-xs sm:text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer"
-          >
-            <option value={currentLang} className="text-slate-900 font-bold">
-              {activeLangObj?.flag} {activeLangObj?.name}
-            </option>
-            {selectableLanguages.map((lang) => (
-              <option key={lang.code} value={lang.code} className="text-slate-900">{lang.flag} {lang.name}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Employer Giriş Ekranı ile Birebir Aynı Tasarım */}
-        <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 my-8 border border-slate-200 w-full">
-          <div className="text-center mb-6">
-            <div className="inline-block p-3 bg-emerald-50 text-emerald-700 rounded-2xl mb-2 text-xl font-bold shadow-sm">
-              🛡️
+      <div className={`min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+        <header className="max-w-7xl w-full mx-auto p-4 md:p-6 flex items-center justify-between border-b border-slate-200">
+          <div className="text-lg font-black text-slate-900 tracking-tight">PANOVA PORTAL</div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center bg-white rounded-xl px-3 py-1.5 border border-slate-200 shadow-sm">
+              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
+              <select
+                value={currentLang}
+                onChange={(e) => changeLanguage(e.target.value as Language)}
+                className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
+              >
+                <option value={currentLang} className="font-bold text-slate-900 bg-white">
+                  {activeLangObj?.flag} {activeLangObj?.name}
+                </option>
+                {selectableLanguages.map((lang) => (
+                  <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">{lang.flag} {lang.name}</option>
+                ))}
+              </select>
             </div>
-            <h1 className="text-xl font-black text-slate-900">
-              Management Portal
-            </h1>
-            <p className="text-slate-500 text-xs mt-1">Manage system operations & workforce</p>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">USERNAME / EMAIL *</label>
-              <input
-                type="text"
-                required
-                autoComplete="off"
-                placeholder="admin veya e-posta"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">PASSWORD *</label>
-              <input
-                type="password"
-                required
-                autoComplete="new-password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2"
+            <Link
+              href="/"
+              className="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition border border-slate-200 shadow-sm"
             >
-              Sign In
-            </button>
-          </form>
-
-          <div className="text-center mt-6">
-            <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:underline">
-              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
+              Ana Sayfaya Dön
             </Link>
           </div>
-        </div>
+        </header>
+
+        <main className="flex-1 flex items-center justify-center p-4">
+          <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 border border-slate-200 w-full">
+            <div className="text-center mb-6">
+              <div className="inline-block p-3 bg-emerald-50 text-emerald-700 rounded-2xl mb-2 text-xl font-bold shadow-sm">
+                🛡️
+              </div>
+              <h1 className="text-xl font-black text-slate-900">
+                Yönetim Portal Girişi
+              </h1>
+              <p className="text-slate-500 text-xs mt-1">Manage system operations & workforce</p>
+            </div>
+
+            <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">KULLANICI ADI VEYA E-POSTA *</label>
+                <input
+                  type="text"
+                  required
+                  autoComplete="off"
+                  placeholder="admin veya e-posta"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİFRE *</label>
+                <input
+                  type="password"
+                  required
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2"
+              >
+                Giriş Yap
+              </button>
+            </form>
+          </div>
+        </main>
+
+        <footer className="bg-slate-50 text-slate-400 py-6 text-center text-xs border-t border-slate-200">
+          <p>PANOVA TARIM DOO &bull; International Workforce Management System &copy; 2026</p>
+        </footer>
       </div>
     );
   }
