@@ -20,7 +20,6 @@ export default function EmployerPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
-  // 11 Ana Sekme Yönetimi
   const [activeTab, setActiveTab] = useState<
     'home' | 'requests' | 'candidates' | 'interviews' | 'selected' | 'documents' | 'travel' | 'employees' | 'support' | 'profile'
   >('home');
@@ -129,6 +128,60 @@ export default function EmployerPage() {
     { id: 201, name: 'Burak Kaya', position: 'Saha Mühendisi', startDate: '2026-03-01', day30: 'Tamamlandı', day60: 'Devam Ediyor', day90: 'Bekliyor', status: 'Aktif' },
   ]);
 
+  // Dile duyarlı sekme isimleri çeviri sözlüğü
+  const labels = {
+    tr: {
+      home: '🏠 Ana Sayfa',
+      requests: '📁 Personel Taleplerim',
+      candidates: '👥 Adaylar',
+      interviews: '📅 Görüşmeler',
+      selected: '⭐ Seçtiğim Adaylar',
+      documents: '📄 Belge ve İşlemler',
+      travel: '✈️ Seyahat ve Başlangıç',
+      employees: '📊 Aktif Çalışanlar',
+      support: '🛠️ Destek / Bildirim',
+      profile: '⚙️ Şirket Bilgilerim',
+    },
+    en: {
+      home: '🏠 Home',
+      requests: '📁 My Demands',
+      candidates: '👥 Candidates',
+      interviews: '📅 Interviews',
+      selected: '⭐ Selected Candidates',
+      documents: '📄 Documents & Status',
+      travel: '✈️ Travel & Arrival',
+      employees: '📊 Active Employees',
+      support: '🛠️ Support / Notice',
+      profile: '⚙️ Company Profile',
+    },
+    sq: {
+      home: '🏠 Kryefaqja',
+      requests: '📁 Kërkesat e Mia',
+      candidates: '👥 Kandidatët',
+      interviews: '📅 Intervistat',
+      selected: '⭐ Kandidatët e Zgjedhur',
+      documents: '📄 Dokumentet',
+      travel: '✈️ Udhëtimi',
+      employees: '📊 Punonjësit',
+      support: '🛠️ Mbështetje',
+      profile: '⚙️ Profili i Kompanisë',
+    },
+    ar: {
+      home: '🏠 الرئيسية',
+      requests: '📁 طلباتي',
+      candidates: '👥 المرشحون',
+      interviews: '📅 المقابلات',
+      selected: '⭐ المرشحون المختصرون',
+      documents: '📄 المستندات',
+      travel: '✈️ السفر',
+      employees: '📊 الموظفون النشطون',
+      support: '🛠️ الدعم',
+      profile: '⚙️ ملف الشركة',
+    },
+  };
+
+  const currentLabels = labels[lang] || labels['tr'];
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 space-y-6">
@@ -160,7 +213,7 @@ export default function EmployerPage() {
                   authMode === 'signin' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                {t.signInBtn || (lang === 'en' ? 'Sign In' : lang === 'sq' ? 'Kyçu' : lang === 'ar' ? 'تسجيل الدخول' : 'Giriş Yap')}
+                {lang === 'en' ? 'Sign In' : lang === 'sq' ? 'Kyçu' : lang === 'ar' ? 'تسجيل الدخول' : 'Giriş Yap'}
               </button>
               <button
                 type="button"
@@ -169,7 +222,7 @@ export default function EmployerPage() {
                   authMode === 'signup' ? 'bg-emerald-700 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                {t.signUpBtn || (lang === 'en' ? 'Sign Up' : lang === 'sq' ? 'Regjistrohuni' : lang === 'ar' ? 'اشتراك' : 'Kayıt Ol')}
+                {lang === 'en' ? 'Sign Up' : lang === 'sq' ? 'Regjistrohuni' : lang === 'ar' ? 'اشتراك' : 'Kayıt Ol'}
               </button>
             </div>
 
@@ -178,7 +231,9 @@ export default function EmployerPage() {
                 🏢
               </div>
               <h1 className="text-xl font-black text-slate-900">
-                {authMode === 'signup' ? 'İşveren Kaydı' : 'İşveren Giriş Portalı'}
+                {authMode === 'signup' 
+                  ? (lang === 'en' ? 'Employer Registration' : lang === 'sq' ? 'Regjistrimi i Punëdhënësit' : lang === 'ar' ? 'تسجيل صاحب العمل' : 'İşveren Kaydı') 
+                  : (lang === 'en' ? 'Employer Login Portal' : lang === 'sq' ? 'Portali i Hyrjes për Punëdhënësit' : lang === 'ar' ? 'بوابة تسجيل دخول صاحب العمل' : 'İşveren Giriş Portalı')}
               </h1>
             </div>
 
@@ -186,12 +241,14 @@ export default function EmployerPage() {
               {authMode === 'signup' && (
                 <>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİRKET UNVANI *</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                      {lang === 'en' ? 'COMPANY NAME' : lang === 'sq' ? 'EMRI I KOMPANISË' : lang === 'ar' ? 'اسم الشركة' : 'ŞİRKET UNVANI'} *
+                    </label>
                     <input
                       type="text"
                       required
                       autoComplete="off"
-                      placeholder="Şirket unvanınızı girin"
+                      placeholder={lang === 'en' ? 'Enter company name' : 'Şirket unvanınızı girin'}
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
@@ -199,7 +256,9 @@ export default function EmployerPage() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">YETKİLİ KİŞİ *</label>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        {lang === 'en' ? 'CONTACT PERSON' : lang === 'sq' ? 'PERSONI I KONTAKTIT' : lang === 'ar' ? 'مسؤول الاتصال' : 'YETKİLİ KİŞİ'} *
+                      </label>
                       <input
                         type="text"
                         required
@@ -211,7 +270,9 @@ export default function EmployerPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">TELEFON *</label>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        {lang === 'en' ? 'PHONE' : lang === 'sq' ? 'TELEFONI' : lang === 'ar' ? 'الهاتف' : 'TELEFON'} *
+                      </label>
                       <input
                         type="tel"
                         required
@@ -227,7 +288,9 @@ export default function EmployerPage() {
               )}
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİRKET E-POSTASI *</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  {lang === 'en' ? 'COMPANY EMAIL' : lang === 'sq' ? 'EMAIL I KOMPANISË' : lang === 'ar' ? 'البريد الإلكتروني' : 'ŞİRKET E-POSTASI'} *
+                </label>
                 <input
                   type="email"
                   required
@@ -240,7 +303,9 @@ export default function EmployerPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİFRE *</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  {lang === 'en' ? 'PASSWORD' : lang === 'sq' ? 'FJALËKALIMI' : lang === 'ar' ? 'كلمة المرور' : 'ŞİFRE'} *
+                </label>
                 <input
                   type="password"
                   required
@@ -256,24 +321,26 @@ export default function EmployerPage() {
                 type="submit"
                 className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2"
               >
-                {authMode === 'signup' ? 'Kayıt Ol' : 'Giriş Yap'}
+                {authMode === 'signup' 
+                  ? (lang === 'en' ? 'Complete Registration' : lang === 'sq' ? 'Përfundo Regjistrimin' : lang === 'ar' ? 'إتمام التسجيل' : 'Kayıt Ol') 
+                  : (lang === 'en' ? 'Sign In' : lang === 'sq' ? 'Kyçu' : lang === 'ar' ? 'تسجيل الدخول' : 'Giriş Yap')}
               </button>
             </form>
           </div>
         ) : (
           <div className="space-y-6">
-            {/* 10+ Detaylı Sekme Navigasyonu */}
+            {/* Dile Duyarlı Sekme Navigasyonu */}
             <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3 text-xs">
-              <button onClick={() => setActiveTab('home')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'home' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>🏠 Ana Sayfa</button>
-              <button onClick={() => setActiveTab('requests')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'requests' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>📁 Personel Taleplerim</button>
-              <button onClick={() => setActiveTab('candidates')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'candidates' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>👥 Adaylar</button>
-              <button onClick={() => setActiveTab('interviews')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'interviews' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>📅 Görüşmeler</button>
-              <button onClick={() => setActiveTab('selected')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'selected' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>⭐ Seçtiğim Adaylar</button>
-              <button onClick={() => setActiveTab('documents')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'documents' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>📄 Belge ve İşlemler</button>
-              <button onClick={() => setActiveTab('travel')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'travel' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>✈️ Seyahat ve Başlangıç</button>
-              <button onClick={() => setActiveTab('employees')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'employees' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>📊 Aktif Çalışanlar</button>
-              <button onClick={() => setActiveTab('support')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'support' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>🛠️ Destek / Bildirim</button>
-              <button onClick={() => setActiveTab('profile')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'profile' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>⚙️ Şirket Bilgilerim</button>
+              <button onClick={() => setActiveTab('home')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'home' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.home}</button>
+              <button onClick={() => setActiveTab('requests')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'requests' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.requests}</button>
+              <button onClick={() => setActiveTab('candidates')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'candidates' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.candidates}</button>
+              <button onClick={() => setActiveTab('interviews')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'interviews' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.interviews}</button>
+              <button onClick={() => setActiveTab('selected')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'selected' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.selected}</button>
+              <button onClick={() => setActiveTab('documents')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'documents' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.documents}</button>
+              <button onClick={() => setActiveTab('travel')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'travel' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.travel}</button>
+              <button onClick={() => setActiveTab('employees')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'employees' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.employees}</button>
+              <button onClick={() => setActiveTab('support')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'support' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.support}</button>
+              <button onClick={() => setActiveTab('profile')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'profile' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.profile}</button>
             </div>
 
             {activeTab === 'home' && (
@@ -401,7 +468,7 @@ export default function EmployerPage() {
                     <label className="block font-bold mb-1">Şirket Unvanı</label>
                     <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block font-bold mb-1">Yetkili Kişi</label>
                       <input type="text" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
