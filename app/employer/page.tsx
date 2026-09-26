@@ -99,7 +99,7 @@ export default function EmployerPortal() {
   }, [employerProfile]);
 
   const fetchEmployerData = async () => {
-    const compName = employerProfile?.companyName || '';
+    const compName = employerProfile?.companyName || employerProfile?.company_name || '';
     
     const { data: demData } = await supabase
       .from('job_requests')
@@ -107,7 +107,7 @@ export default function EmployerPortal() {
       .or(`employer_name.ilike.%${compName}%,employer_id.eq.${employerProfile?.id || 'none'}`)
       .order('created_at', { ascending: false });
 
-    if (demData) {
+    if (demData && demData.length > 0) {
       setJobDemands(demData);
     } else {
       setJobDemands([
@@ -134,9 +134,10 @@ export default function EmployerPortal() {
       .maybeSingle();
 
     if (emp && (emp.password === loginPassword || loginPassword === 'panova2026')) {
-      setEmployerProfile(emp);
+      const formattedEmp = { ...emp, companyName: emp.company_name || emp.companyName, contactPerson: emp.contact_person || emp.contactPerson };
+      setEmployerProfile(formattedEmp);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('panova_employer_profile', JSON.stringify(emp));
+        localStorage.setItem('panova_employer_profile', JSON.stringify(formattedEmp));
       }
     } else if (loginEmail === 'huseyinaksu@gmail.com' || loginEmail === 'admin') {
       const defaultEmp = {
@@ -176,7 +177,7 @@ export default function EmployerPortal() {
       return;
     }
 
-    const createdEmp = data || { ...newEmpPayload, id: Date.now().toString(), companyName: regCompanyName };
+    const createdEmp = data ? { ...data, companyName: data.company_name, contactPerson: data.contact_person } : { ...newEmpPayload, id: Date.now().toString(), companyName: regCompanyName, contactPerson: regContactPerson };
     setEmployerProfile(createdEmp);
     if (typeof window !== 'undefined') {
       localStorage.setItem('panova_employer_profile', JSON.stringify(createdEmp));
@@ -230,7 +231,7 @@ export default function EmployerPortal() {
 
     const ticketPayload = {
       candidate_id: employerProfile?.id || 'employer',
-      candidate_name: employerProfile?.companyName || 'İşveren',
+      candidate_name: employerProfile?.companyName || employerProfile?.company_name || 'İşveren',
       subject: supportSubject,
       message: supportMessage,
       status: 'open'
@@ -310,7 +311,7 @@ export default function EmployerPortal() {
                 🏢
               </div>
               <h1 className="text-xl font-black text-slate-900">
-                {authMode === 'signup' ? 'İşveren Kaydı' : 'İşveren Giriş Portalı'}
+                {authMode === 'signup' ? 'Yeni İşveren Kaydı' : 'İşveren Giriş Portalı'}
               </h1>
               <p className="text-slate-500 text-xs mt-1">International Workforce & Demand Management</p>
             </div>
