@@ -77,7 +77,7 @@ export default function EmployerLoginPage() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('panova_employer_profile', JSON.stringify(defaultEmp));
       }
-      window.location.href = '/employer';
+      window.location.href = '/employer/login';
     } else {
       alert('Geçersiz şirket e-postası veya şifre!');
     }

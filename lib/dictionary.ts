@@ -407,6 +407,10 @@ export interface Translation {
   uploadLogoLabel?: string;
   logoPreview?: string;
   saveCompanyBtn?: string;
+
+  // Build hatasını çözen eksik property'ler
+  richDemandWizardTitle?: string;
+  richDemandWizardDesc?: string;
 }
 
 export const languages = [
@@ -585,6 +589,8 @@ export const translations: Record<Language, Translation> = {
     dateFormatPlaceholder: 'gg.aa.yyyy',
     message: 'Mesaj',
     notesPlaceholder: 'Çalışma saatleri, mesai detayları vb...',
+    richDemandWizardTitle: 'Kurumsal İş Gücü Talep Sihirbazı',
+    richDemandWizardDesc: 'Sektör seçin, aradığınız pozisyonları, tecrübe, dil ve çalışma şartlarını belirleyin.',
 
     signInMenu: 'Giriş Yap',
     signUpMenu: 'Kayıt Ol',
@@ -993,6 +999,8 @@ export const translations: Record<Language, Translation> = {
     dateFormatPlaceholder: 'dd.mm.yyyy',
     message: 'Message',
     notesPlaceholder: 'E.g: Working hours, shift details...',
+    richDemandWizardTitle: 'Corporate Workforce Demand Wizard',
+    richDemandWizardDesc: 'Select sector, specify positions, experience, language and working conditions.',
 
     signInMenu: 'Sign In',
     signUpMenu: 'Sign Up',
@@ -1399,6 +1407,8 @@ export const translations: Record<Language, Translation> = {
     initialAuditLog: 'Sistemi u Iniciua & Matrica e Roleve u Krijua',
     dateFormatPlaceholder: 'dd.mm.vvvv',
     message: 'Mesazhi',
+    richDemandWizardTitle: 'Formulari i Kërkesës për Fuqi Punëtore Korporative',
+    richDemandWizardDesc: 'Zgjidhni sektorin, pozicionet, eksperiencën, gjuhën dhe kushtet e punës.',
 
     signInMenu: 'Hyni',
     signUpMenu: 'Regjistrohuni',
@@ -1807,6 +1817,8 @@ export const translations: Record<Language, Translation> = {
     dateFormatPlaceholder: 'dd.mm.yyyy',
     message: 'الرسالة',
     notesPlaceholder: 'مثال: ساعات العمل، تفاصيل المناوبات...',
+    richDemandWizardTitle: 'استمارة طلب القوى العاملة المؤسسية',
+    richDemandWizardDesc: 'حدد القطاع والوظائف المطلوبة والخبرة واللغة وشروط العمل.',
 
     corporateDemandTitle: 'استمارة طلب القوى العاملة المؤسسية',
     corporateDemandDesc: 'حدد القطاع والوظائف المطلوبة والخبرة واللغة وشروط العمل.',
