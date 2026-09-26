@@ -2,93 +2,121 @@
 
 import React, { useState } from 'react';
 
-interface DemandsTableProps {
+interface DemandFormProps {
   t: any;
-  demands: any[];
+  onSubmitDemand: (demandData: any) => void;
+  successMsg: boolean;
+  [key: string]: any;
 }
 
-export default function DemandsTable({ t, demands }: DemandsTableProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+export default function DemandForm({ t, onSubmitDemand, successMsg }: DemandFormProps) {
+  const [sector, setSector] = useState('Tarım ve Hayvancılık');
+  const [position, setPosition] = useState('');
+  const [headcount, setHeadcount] = useState(1);
+  const [salary, setSalary] = useState('');
+  const [experienceYears, setExperienceYears] = useState('1 - 3 Yıl');
+  const [videoRequired, setVideoRequired] = useState(true);
+  const [selectedCertificates, setSelectedCertificates] = useState<string[]>(['B Sınıfı Sürücü Belgesi']);
+  const [customRequirement, setCustomRequirement] = useState('');
 
-  const filteredDemands = demands.filter(item => 
-    item.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.sector.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!position.trim()) return;
+
+    onSubmitDemand({
+      sector,
+      position,
+      headcount: Number(headcount),
+      salary,
+      experienceYears,
+      videoRequired,
+      selectedCertificates,
+      customRequirement,
+    });
+
+    setPosition('');
+    setHeadcount(1);
+    setSalary('');
+    setCustomRequirement('');
+  };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl lg:col-span-2">
-      <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
-        <h2 className="text-sm font-black text-slate-900">
-          {t.empTabRequests || 'Personel Taleplerim'}
-        </h2>
-        <input
-          type="text"
-          placeholder={t.searchDemandPlaceholder || 'Talep ara...'}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="px-3 py-1.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 w-48"
-        />
-      </div>
+    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl">
+      <h2 className="text-sm font-black text-slate-900 mb-4">
+        {t.newDemandTitle || 'Yeni Personel Talep Et'}
+      </h2>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
-          <thead>
-            <tr className="bg-slate-100 text-slate-600 uppercase font-bold">
-              <th className="p-3.5 rounded-l-xl">{t.colPosSectorTitle || 'POZİSYON / SEKTÖR'}</th>
-              <th className="p-3.5">{t.colCriteriaTitle || 'KRİTERLER (TECRÜBE / VİDEO / BELGE)'}</th>
-              <th className="p-3.5">{t.colHeadcountSalaryTitle || 'KİŞİ / MAAŞ'}</th>
-              <th className="p-3.5 rounded-r-xl">{t.colStatusTitle || 'DURUM'}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filteredDemands.map((item: any) => (
-              <tr key={item.id} className="hover:bg-slate-50 transition align-top">
-                <td className="p-3.5 font-medium text-slate-900">
-                  <div className="font-bold">{item.position}</div>
-                  <div className="text-[10px] text-slate-400">{item.sector}</div>
-                  <div className="text-[10px] text-slate-500 mt-1">Tarih: {item.date}</div>
-                </td>
-                <td className="p-3.5 text-slate-700">
-                  <div className="flex flex-wrap gap-1 mb-1.5">
-                    {item.experience && (
-                      <span className="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded font-bold text-[10px]">
-                        ⏱️ {item.experience}
-                      </span>
-                    )}
-                    {item.video && (
-                      <span className="bg-blue-50 text-blue-800 px-2 py-0.5 rounded font-bold text-[10px]">
-                        📹 Video Mülakatlı
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-[10px] text-slate-500">
-                    {Array.isArray(item.certificates) ? item.certificates.join(', ') : item.certificates}
-                  </div>
-                </td>
-                <td className="p-3.5">
-                  <div className="font-semibold text-slate-800">{item.headcount} Kişi</div>
-                  <div className="text-slate-600 font-medium">{item.salary}</div>
-                </td>
-                <td className="p-3.5">
-                  {item.status === 'approved' ? (
-                    <span className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-bold text-[10px]">
-                      {t.approvedStatus || 'Onaylandı'}
-                    </span>
-                  ) : item.status === 'reviewing' ? (
-                    <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-bold text-[10px]">
-                      {t.reviewingStatus || 'İnceleniyor'}
-                    </span>
-                  ) : (
-                    <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full font-bold text-[10px]">
-                      {t.pendingStatus || 'Beklemede'}
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {successMsg && (
+        <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3.5 rounded-2xl font-medium">
+          ✅ {t.demandSuccessMsg || 'Personel talebiniz başarıyla oluşturuldu!'}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        <div>
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+            {t.sectorLabel || 'SEKTÖR'} *
+          </label>
+          <select
+            value={sector}
+            onChange={(e) => setSector(e.target.value)}
+            className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs bg-slate-50 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+          >
+            <option value="Tarım ve Hayvancılık">Tarım ve Hayvancılık</option>
+            <option value="İnşaat ve Yapı">İnşaat ve Yapı</option>
+            <option value="Gıda ve Üretim">Gıda ve Üretim</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+            {t.positionLabel || 'POZİSYON'} *
+          </label>
+          <input
+            type="text"
+            required
+            placeholder="Örn: Ziraat Mühendisi / Şantiye Şefi"
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+            className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs bg-slate-50 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+              {t.headcountLabel || 'KİŞİ SAYISI'} *
+            </label>
+            <input
+              type="number"
+              min={1}
+              required
+              value={headcount}
+              onChange={(e) => setHeadcount(Number(e.target.value))}
+              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs bg-slate-50 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+              {t.salaryLabel || 'MAAŞ / ŞARTLAR'}
+            </label>
+            <input
+              type="text"
+              placeholder="Örn: 1.500 € + Konaklama"
+              value={salary}
+              onChange={(e) => setSalary(e.target.value)}
+              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs bg-slate-50 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2"
+        >
+          {t.submitDemandBtn || 'Talep Oluştur'}
+        </button>
+      </form>
     </div>
   );
 }

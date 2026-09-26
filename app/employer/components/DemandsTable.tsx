@@ -5,10 +5,10 @@ import React, { useState } from 'react';
 interface DemandsTableProps {
   t: any;
   demands: any[];
-  onSubmitDemand?: any;
+  [key: string]: any;
 }
 
-export default function DemandsTable({ t, demands, onSubmitDemand }: DemandsTableProps) {
+export default function DemandsTable({ t, demands }: DemandsTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredDemands = demands.filter(item => 
@@ -36,7 +36,7 @@ export default function DemandsTable({ t, demands, onSubmitDemand }: DemandsTabl
           <thead>
             <tr className="bg-slate-100 text-slate-600 uppercase font-bold">
               <th className="p-3.5 rounded-l-xl">{t.colPosSectorTitle || 'POZİSYON / SEKTÖR'}</th>
-              <th className="p-3.5">{t.colCriteriaTitle || 'KRİTERLER (TECRÜBE / VİDEO / BELGE)'}</th>
+              <th className="p-3.5">{t.colCriteriaTitle || 'KRİTERLER'}</th>
               <th className="p-3.5">{t.colHeadcountSalaryTitle || 'KİŞİ / MAAŞ'}</th>
               <th className="p-3.5 rounded-r-xl">{t.colStatusTitle || 'DURUM'}</th>
             </tr>
@@ -56,11 +56,6 @@ export default function DemandsTable({ t, demands, onSubmitDemand }: DemandsTabl
                         ⏱️ {item.experience}
                       </span>
                     )}
-                    {item.video && (
-                      <span className="bg-blue-50 text-blue-800 px-2 py-0.5 rounded font-bold text-[10px]">
-                        📹 Video Mülakatlı
-                      </span>
-                    )}
                   </div>
                   <div className="text-[10px] text-slate-500">
                     {Array.isArray(item.certificates) ? item.certificates.join(', ') : item.certificates}
@@ -71,19 +66,9 @@ export default function DemandsTable({ t, demands, onSubmitDemand }: DemandsTabl
                   <div className="text-slate-600 font-medium">{item.salary}</div>
                 </td>
                 <td className="p-3.5">
-                  {item.status === 'approved' ? (
-                    <span className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-bold text-[10px]">
-                      {t.approvedStatus || 'Onaylandı'}
-                    </span>
-                  ) : item.status === 'reviewing' ? (
-                    <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-bold text-[10px]">
-                      {t.reviewingStatus || 'İnceleniyor'}
-                    </span>
-                  ) : (
-                    <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full font-bold text-[10px]">
-                      {t.pendingStatus || 'Beklemede'}
-                    </span>
-                  )}
+                  <span className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-bold text-[10px]">
+                    {item.status || 'Aktif'}
+                  </span>
                 </td>
               </tr>
             ))}
