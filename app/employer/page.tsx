@@ -27,78 +27,14 @@ export default function EmployerPage() {
     return false;
   });
 
-  // LocalStorage profil verilerini öncelikli ve kalıcı olarak yükle
-  const [employerId, setEmployerId] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      const p = localStorage.getItem('panova_employer_profile');
-      if (p) {
-        try { return JSON.parse(p).id || null; } catch(e) {}
-      }
-    }
-    return null;
-  });
-
-  const [companyName, setCompanyName] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const p = localStorage.getItem('panova_employer_profile');
-      if (p) {
-        try { return JSON.parse(p).companyName || 'AKAY EĞİTİM'; } catch(e) {}
-      }
-    }
-    return 'AKAY EĞİTİM';
-  });
-
-  const [contactPerson, setContactPerson] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const p = localStorage.getItem('panova_employer_profile');
-      if (p) {
-        try { return JSON.parse(p).contactPerson || 'Hüseyin Aksu'; } catch(e) {}
-      }
-    }
-    return 'Hüseyin Aksu';
-  });
-
-  const [phone, setPhone] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const p = localStorage.getItem('panova_employer_profile');
-      if (p) {
-        try { return JSON.parse(p).phone || '+38970385792'; } catch(e) {}
-      }
-    }
-    return '+38970385792';
-  });
-
-  const [country, setCountry] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const p = localStorage.getItem('panova_employer_profile');
-      if (p) {
-        try { return JSON.parse(p).country || 'North Macedonia'; } catch(e) {}
-      }
-    }
-    return 'North Macedonia';
-  });
-
-  const [email, setEmail] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const p = localStorage.getItem('panova_employer_profile');
-      if (p) {
-        try { return JSON.parse(p).email || ''; } catch(e) {}
-      }
-    }
-    return '';
-  });
-
+  const [employerId, setEmployerId] = useState<string | null>(null);
+  const [companyName, setCompanyName] = useState('AKAY EĞİTİM');
+  const [contactPerson, setContactPerson] = useState('Hüseyin Aksu');
+  const [phone, setPhone] = useState('+38970385792');
+  const [country, setCountry] = useState('North Macedonia');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  const [companyLogo, setCompanyLogo] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const p = localStorage.getItem('panova_employer_profile');
-      if (p) {
-        try { return JSON.parse(p).companyLogo || ''; } catch(e) {}
-      }
-    }
-    return '';
-  });
+  const [companyLogo, setCompanyLogo] = useState('');
   
   const [activeTab, setActiveTab] = useState<
     'home' | 'requests' | 'candidates' | 'interviews' | 'selected' | 'documents' | 'travel' | 'employees' | 'support' | 'profile'
@@ -126,93 +62,81 @@ export default function EmployerPage() {
     }
   ]);
 
-  // Sayfa açıldığında localStorage verilerini koruyarak state'i sabitle
+  // Sayfa açıldığında veya oturum açıldığında Supabase'den verileri senkronize et
   useEffect(() => {
-    const checkAuthAndFetchData = async () => {
-      const impersonating = typeof window !== 'undefined' && localStorage.getItem('panova_is_impersonating') === 'true';
-      const savedProfile = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_profile') : null;
-      const persistentLoggedIn = typeof window !== 'undefined' && localStorage.getItem('panova_employer_logged_in') === 'true';
+    const fetchFromSupabase = async () => {
+      const savedEmail = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_email') : null;
+      if (savedEmail) {
+        setEmail(savedEmail);
+        const { data: dbEmp, error } = await supabase
+          .from('employers')
+          .select('*')
+          .eq('email', savedEmail)
+          .maybeSingle();
 
-      if (impersonating || persistentLoggedIn || savedProfile) {
-        setIsLoggedIn(true);
-        setIsAdminImpersonating(impersonating);
-      }
-
-      if (savedProfile) {
-        try {
-          const prof = JSON.parse(savedProfile);
-          if (prof.email) {
-            setEmail(prof.email);
-            if (prof.companyName) setCompanyName(prof.companyName);
-            if (prof.contactPerson) setContactPerson(prof.contactPerson);
-            if (prof.phone) setPhone(prof.phone);
-            if (prof.country) setCountry(prof.country);
-            if (prof.companyLogo) setCompanyLogo(prof.companyLogo);
-          }
-        } catch (e) {
-          console.error(e);
+        if (dbEmp && !error) {
+          setEmployerId(dbEmp.id);
+          setCompanyName(dbEmp.company_name || dbEmp.name || 'AKAY EĞİTİM');
+          setContactPerson(dbEmp.contact_name || dbEmp.contact_person || 'Hüseyin Aksu');
+          setPhone(dbEmp.phone || '+38970385792');
+          setCountry(dbEmp.country || 'North Macedonia');
+          setCompanyLogo(dbEmp.logo || '');
         }
       }
 
       const savedDemands = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_demands') : null;
       if (savedDemands) {
-        try {
-          setDemands(JSON.parse(savedDemands));
-        } catch (e) {
-          console.error(e);
-        }
+        try { setDemands(JSON.parse(savedDemands)); } catch (e) {}
       }
     };
 
-    checkAuthAndFetchData();
+    fetchFromSupabase();
   }, []);
 
   const handleSubmitAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
-    const { data: dbEmp } = await supabase
+    // Supabase'de bu e-posta var mı kontrol et, yoksa oluştur
+    let { data: dbEmp } = await supabase
       .from('employers')
       .select('*')
       .eq('email', email)
-      .single();
+      .maybeSingle();
 
-    let currentCompName = companyName;
-    let currentContact = contactPerson;
-    let currentPhone = phone;
-    let currentCountry = country;
-    let currentLogo = companyLogo;
-    let currentId = employerId;
+    if (!dbEmp) {
+      // Kayıt yoksa veritabanına ilk kaydı aç
+      const { data: newEmp, error } = await supabase
+        .from('employers')
+        .insert([{ 
+          email, 
+          company_name: companyName, 
+          contact_name: contactPerson, 
+          phone, 
+          country, 
+          logo: companyLogo 
+        }])
+        .select()
+        .single();
 
-    if (dbEmp) {
-      currentId = dbEmp.id;
-      currentCompName = dbEmp.company_name || currentCompName;
-      currentContact = dbEmp.contact_name || currentContact;
-      currentPhone = dbEmp.phone || currentPhone;
-      currentCountry = dbEmp.country || currentCountry;
-      currentLogo = dbEmp.logo || currentLogo;
+      if (newEmp && !error) {
+        dbEmp = newEmp;
+      }
     }
 
-    setEmployerId(currentId);
-    setCompanyName(currentCompName);
-    setContactPerson(currentContact);
-    setPhone(currentPhone);
-    setCountry(currentCountry);
-    setCompanyLogo(currentLogo);
+    if (dbEmp) {
+      setEmployerId(dbEmp.id);
+      setCompanyName(dbEmp.company_name || dbEmp.name || companyName);
+      setContactPerson(dbEmp.contact_name || dbEmp.contact_person || contactPerson);
+      setPhone(dbEmp.phone || phone);
+      setCountry(dbEmp.country || country);
+      setCompanyLogo(dbEmp.logo || companyLogo);
+    }
 
     setIsLoggedIn(true);
     if (typeof window !== 'undefined') {
       localStorage.setItem('panova_employer_logged_in', 'true');
-      const profileData = {
-        id: currentId,
-        companyName: currentCompName,
-        contactPerson: currentContact,
-        phone: currentPhone,
-        country: currentCountry,
-        email: email,
-        companyLogo: currentLogo
-      };
-      localStorage.setItem('panova_employer_profile', JSON.stringify(profileData));
+      localStorage.setItem('panova_employer_email', email);
     }
   };
 
@@ -238,27 +162,43 @@ export default function EmployerPage() {
     setTimeout(() => setSuccessMsg(false), 4000);
   };
 
-  // 🗄️ Supabase ve localStorage güncellemeleri
+  // 🗄️ UPSERT (Kayıt varsa güncelle, yoksa ekle) - Gerçek Veritabanı Kaydı
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const updatePayload = {
+    const payload: any = {
+      email,
       company_name: companyName,
       contact_name: contactPerson,
-      phone: phone,
-      country: country,
-      email: email,
+      phone,
+      country,
       logo: companyLogo,
     };
 
     if (employerId) {
-      await supabase.from('employers').update(updatePayload).eq('id', employerId);
-    } else {
-      await supabase.from('employers').update(updatePayload).eq('email', email);
+      payload.id = employerId;
     }
 
-    const profileData = { id: employerId, companyName, contactPerson, phone, country, email, companyLogo };
-    localStorage.setItem('panova_employer_profile', JSON.stringify(profileData));
+    // Supabase upsert işlemi: E-posta veya ID çakışmasında günceller, yoksa ekler
+    const { data, error } = await supabase
+      .from('employers')
+      .upsert(payload, { onConflict: 'email' })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase save error:', error);
+      alert('Veritabanına kaydedilirken hata oluştu: ' + error.message);
+      return;
+    }
+
+    if (data) {
+      setEmployerId(data.id);
+    }
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('panova_employer_email', email);
+    }
 
     setUpdateMsg(true);
     setTimeout(() => setUpdateMsg(false), 4000);
@@ -272,23 +212,17 @@ export default function EmployerPage() {
         const base64Logo = reader.result as string;
         setCompanyLogo(base64Logo);
 
-        const updatePayload = { 
-          logo: base64Logo, 
-          company_name: companyName, 
-          contact_name: contactPerson, 
-          phone, 
-          country, 
-          email 
+        const payload: any = {
+          email,
+          company_name: companyName,
+          contact_name: contactPerson,
+          phone,
+          country,
+          logo: base64Logo,
         };
+        if (employerId) payload.id = employerId;
 
-        if (employerId) {
-          await supabase.from('employers').update(updatePayload).eq('id', employerId);
-        } else {
-          await supabase.from('employers').update(updatePayload).eq('email', email);
-        }
-
-        const currentProfile = { id: employerId, companyName, contactPerson, phone, country, email, companyLogo: base64Logo };
-        localStorage.setItem('panova_employer_profile', JSON.stringify(currentProfile));
+        await supabase.from('employers').upsert(payload, { onConflict: 'email' });
       };
       reader.readAsDataURL(file);
     }
@@ -341,7 +275,7 @@ export default function EmployerPage() {
       countryLabel: 'Ülke',
       emailLabel: 'E-Posta',
       saveChangesBtn: 'Güncelle',
-      profileUpdatedMsg: 'Şirket bilgileri ve logo başarıyla kaydedildi!',
+      profileUpdatedMsg: 'Şirket bilgileri ve logo Supabase veritabanına başarıyla kaydedildi!',
     },
     en: {
       home: '🏠 Home',
@@ -371,7 +305,7 @@ export default function EmployerPage() {
       countryLabel: 'Country',
       emailLabel: 'Email',
       saveChangesBtn: 'Update',
-      profileUpdatedMsg: 'Profile and logo updated successfully!',
+      profileUpdatedMsg: 'Profile and logo updated successfully in database!',
     },
     sq: {
       home: '🏠 Kryefaqja',
@@ -401,7 +335,7 @@ export default function EmployerPage() {
       countryLabel: 'Shteti',
       emailLabel: 'Email',
       saveChangesBtn: 'Përditëso',
-      profileUpdatedMsg: 'Profili u përditësua me sukses!',
+      profileUpdatedMsg: 'Profili u përditësua me sukses në bazën e të dhënave!',
     },
     ar: {
       home: '🏠 الرئيسية',
@@ -431,7 +365,7 @@ export default function EmployerPage() {
       countryLabel: 'الدولة',
       emailLabel: 'البريد الإلكتروني',
       saveChangesBtn: 'تحديث',
-      profileUpdatedMsg: 'تم تحديث الملف الشخصي والشعار بنجاح!',
+      profileUpdatedMsg: 'تم تحديث الملف الشخصي والشعار في قاعدة البيانات بنجاح!',
     },
   };
 
@@ -452,17 +386,10 @@ export default function EmployerPage() {
           onNewDemandClick={() => setActiveTab('requests')}
           onLogout={() => {
             localStorage.removeItem('panova_is_impersonating');
-            localStorage.removeItem('panova_employer_profile');
             localStorage.removeItem('panova_employer_logged_in');
             setIsLoggedIn(false);
             setIsAdminImpersonating(false);
             setPassword('');
-            setEmail('');
-            setCompanyName('AKAY EĞİTİM');
-            setContactPerson('Hüseyin Aksu');
-            setPhone('+38970385792');
-            setCountry('North Macedonia');
-            setCompanyLogo('');
           }}
           onReturnToAdmin={() => {
             localStorage.removeItem('panova_is_impersonating');
