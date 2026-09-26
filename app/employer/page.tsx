@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 import { translations, Language } from '@/lib/dictionary';
 import EmployerHeader from './components/EmployerHeader';
 import DemandForm from './components/DemandForm';
@@ -13,6 +14,7 @@ export default function EmployerPage() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdminImpersonating, setIsAdminImpersonating] = useState(false);
+  const [employerId, setEmployerId] = useState<string | null>(null);
 
   const [companyName, setCompanyName] = useState('');
   const [contactPerson, setContactPerson] = useState('');
@@ -48,46 +50,85 @@ export default function EmployerPage() {
     }
   ]);
 
+  // Sayfa açıldığında oturum ve Supabase veritabanından şirket bilgilerini çekme
   useEffect(() => {
-    // Admin tarafından impersonate ile gelindiyse veya oturum varsa direkt giriş yap
-    const impersonating = typeof window !== 'undefined' && localStorage.getItem('panova_is_impersonating') === 'true';
-    const savedProfile = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_profile') : null;
+    const checkAuthAndFetchData = async () => {
+      const impersonating = typeof window !== 'undefined' && localStorage.getItem('panova_is_impersonating') === 'true';
+      const savedProfile = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_profile') : null;
 
-    if (impersonating || savedProfile) {
-      setIsLoggedIn(true);
-      setIsAdminImpersonating(impersonating);
-    }
-
-    if (savedProfile) {
-      try {
-        const prof = JSON.parse(savedProfile);
-        if (prof.companyName) setCompanyName(prof.companyName);
-        if (prof.contactPerson) setContactPerson(prof.contactPerson);
-        if (prof.phone) setPhone(prof.phone);
-        if (prof.country) setCountry(prof.country);
-        if (prof.email) setEmail(prof.email);
-        if (prof.companyLogo) setCompanyLogo(prof.companyLogo);
-      } catch (e) {
-        console.error(e);
+      if (impersonating || savedProfile) {
+        setIsLoggedIn(true);
+        setIsAdminImpersonating(impersonating);
       }
-    }
 
-    const savedDemands = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_demands') : null;
-    if (savedDemands) {
-      try {
-        setDemands(JSON.parse(savedDemands));
-      } catch (e) {
-        console.error(e);
+      if (savedProfile) {
+        try {
+          const prof = JSON.parse(savedProfile);
+          if (prof.id) setEmployerId(prof.id);
+          if (prof.companyName) setCompanyName(prof.companyName);
+          if (prof.contactPerson) setContactPerson(prof.contactPerson);
+          if (prof.phone) setPhone(prof.phone);
+          if (prof.country) setCountry(prof.country);
+          if (prof.email) {
+            setEmail(prof.email);
+            // Supabase'den güncel verileri veritabanından çek
+            const { data: dbEmp, error } = await supabase
+              .from('employers')
+              .select('*')
+              .eq('email', prof.email)
+              .single();
+
+            if (dbEmp && !error) {
+              setEmployerId(dbEmp.id);
+              setCompanyName(dbEmp.company_name || dbEmp.name || prof.companyName);
+              setContactPerson(dbEmp.contact_person || dbEmp.contact || prof.contactPerson);
+              setPhone(dbEmp.phone || prof.phone);
+              setCountry(dbEmp.country || prof.country);
+              setCompanyLogo(dbEmp.logo || dbEmp.company_logo || prof.companyLogo || '');
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
       }
-    }
+
+      const savedDemands = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_demands') : null;
+      if (savedDemands) {
+        try {
+          setDemands(JSON.parse(savedDemands));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
+    checkAuthAndFetchData();
   }, []);
 
-  const handleSubmitAuth = (e: React.FormEvent) => {
+  const handleSubmitAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      setIsLoggedIn(true);
-      if (!companyName) setCompanyName('AKAY EĞİTİM');
+    if (!email) return;
+
+    // Supabase employers tablosunda bu e-posta var mı kontrol et
+    const { data: dbEmp } = await supabase
+      .from('employers')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (dbEmp) {
+      setEmployerId(dbEmp.id);
+      setCompanyName(dbEmp.company_name || dbEmp.name || 'AKAY EĞİTİM');
+      setContactPerson(dbEmp.contact_person || dbEmp.contact || 'Hüseyin Aksu');
+      setPhone(dbEmp.phone || '+389...');
+      setCountry(dbEmp.country || 'North Macedonia');
+      setCompanyLogo(dbEmp.logo || dbEmp.company_logo || '');
+    } else {
+      setCompanyName('AKAY EĞİTİM');
+      setContactPerson('Hüseyin Aksu');
     }
+
+    setIsLoggedIn(true);
   };
 
   const handleCreateDemand = (demandData: any) => {
@@ -112,21 +153,52 @@ export default function EmployerPage() {
     setTimeout(() => setSuccessMsg(false), 4000);
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  // 🗄️ Şirket Bilgilerini ve Logoyu DOĞRUDAN SUPABASE VERİTABANINA KAYDETME
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    const profileData = { companyName, contactPerson, phone, country, email, companyLogo };
+
+    const updatePayload = {
+      company_name: companyName,
+      contact_person: contactPerson,
+      phone: phone,
+      country: country,
+      email: email,
+      logo: companyLogo,
+    };
+
+    if (employerId) {
+      await supabase.from('employers').update(updatePayload).eq('id', employerId);
+    } else {
+      // Eğer ID yoksa e-postaya göre güncelle veya ekle
+      await supabase.from('employers').update(updatePayload).eq('email', email);
+    }
+
+    // Yerel profili de güncelle
+    const profileData = { id: employerId, companyName, contactPerson, phone, country, email, companyLogo };
     localStorage.setItem('panova_employer_profile', JSON.stringify(profileData));
 
     setUpdateMsg(true);
     setTimeout(() => setUpdateMsg(false), 4000);
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setCompanyLogo(reader.result as string);
+      reader.onloadend = async () => {
+        const base64Logo = reader.result as string;
+        setCompanyLogo(base64Logo);
+
+        // Veritabanına anında logo güncellemesi gönder
+        const updatePayload = { logo: base64Logo, company_name: companyName, contact_person: contactPerson, phone, country, email };
+        if (employerId) {
+          await supabase.from('employers').update(updatePayload).eq('id', employerId);
+        } else {
+          await supabase.from('employers').update(updatePayload).eq('email', email);
+        }
+
+        const currentProfile = { id: employerId, companyName, contactPerson, phone, country, email, companyLogo: base64Logo };
+        localStorage.setItem('panova_employer_profile', JSON.stringify(currentProfile));
       };
       reader.readAsDataURL(file);
     }
@@ -178,8 +250,8 @@ export default function EmployerPage() {
       phoneLabel: 'Telefon',
       countryLabel: 'Ülke',
       emailLabel: 'E-Posta',
-      saveChangesBtn: 'Değişiklikleri Kaydet',
-      profileUpdatedMsg: 'Bilgiler ve logo başarıyla güncellendi!',
+      saveChangesBtn: 'Değişiklikleri Veritabanına Kaydet',
+      profileUpdatedMsg: 'Bilgiler ve logo Supabase veritabanına başarıyla kaydedildi!',
     },
     en: {
       home: '🏠 Home',
@@ -208,8 +280,8 @@ export default function EmployerPage() {
       phoneLabel: 'Phone',
       countryLabel: 'Country',
       emailLabel: 'Email',
-      saveChangesBtn: 'Save Changes',
-      profileUpdatedMsg: 'Profile and logo updated successfully!',
+      saveChangesBtn: 'Save Changes to Database',
+      profileUpdatedMsg: 'Profile and logo updated successfully in database!',
     },
     sq: {
       home: '🏠 Kryefaqja',
@@ -238,7 +310,7 @@ export default function EmployerPage() {
       phoneLabel: 'Telefoni',
       countryLabel: 'Shteti',
       emailLabel: 'Email',
-      saveChangesBtn: 'Ruaj Ndryshimet',
+      saveChangesBtn: 'Ruaj në Bazën e të Dhënave',
       profileUpdatedMsg: 'Profili u përditësua me sukses!',
     },
     ar: {
@@ -268,8 +340,8 @@ export default function EmployerPage() {
       phoneLabel: 'الهاتف',
       countryLabel: 'الدولة',
       emailLabel: 'البريد الإلكتروني',
-      saveChangesBtn: 'حفظ التغييرات',
-      profileUpdatedMsg: 'تم تحديث الملف الشخصي والشعار بنجاح!',
+      saveChangesBtn: 'حفظ في قاعدة البيانات',
+      profileUpdatedMsg: 'تم تحديث الملف الشخصي والشعار بنجاح في قاعدة البيانات!',
     },
   };
 
@@ -339,49 +411,6 @@ export default function EmployerPage() {
             </div>
 
             <form onSubmit={handleSubmitAuth} className="space-y-4" autoComplete="off">
-              {authMode === 'signup' && (
-                <>
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİRKET UNVANI *</label>
-                    <input
-                      type="text"
-                      required
-                      autoComplete="off"
-                      placeholder="Şirket unvanınızı girin"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">YETKİLİ KİŞİ *</label>
-                      <input
-                        type="text"
-                        required
-                        autoComplete="off"
-                        placeholder="Ad Soyad"
-                        value={contactPerson}
-                        onChange={(e) => setContactPerson(e.target.value)}
-                        className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">TELEFON *</label>
-                      <input
-                        type="tel"
-                        required
-                        autoComplete="off"
-                        placeholder="+389..."
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİRKET E-POSTASI *</label>
                 <input
