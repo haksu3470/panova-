@@ -262,7 +262,7 @@ export default function EmployerPortal() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('panova_employer_profile', JSON.stringify(updated));
     }
-    alert(t.saveSuccess || 'Şirket bilgileriniz ve yüklenen logo başarıyla kaydedildi!');
+    alert(t.savedSuccess || 'Şirket bilgileriniz ve yüklenen logo başarıyla kaydedildi!');
   };
 
   const handleLogout = () => {
@@ -360,13 +360,13 @@ export default function EmployerPortal() {
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         
-        {/* ÜST HEADER (4 DİL DESTEKLİ) */}
+        {/* ÜST HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="PANOVA" className="h-10 w-auto object-contain shrink-0" />
             <div className="border-l pl-3 border-slate-200">
               <div className="flex items-center gap-2 text-emerald-700 font-bold text-[11px] uppercase tracking-wider mb-0.5">
-                <Building2 className="w-3.5 h-3.5" /> {t.employerPortalTitle || 'İşveren Partner Portalı'}
+                <Building2 className="w-3.5 h-3.5" /> {t.empPortalTitle || 'İşveren Partner Portalı'}
               </div>
               <div className="flex items-center gap-2">
                 {editCompanyLogo && (
@@ -379,14 +379,14 @@ export default function EmployerPortal() {
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl text-xs">
-              <span className="font-bold text-slate-900">{t.contactPerson || 'Yetkili'}: {editContactPerson || employerProfile.contactPerson}</span>
+              <span className="font-bold text-slate-900">Yetkili: {editContactPerson || employerProfile.contactPerson}</span>
             </div>
 
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border"
             >
-              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.homeButton || 'Ana Sayfa'}
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.homeBtn || 'Ana Sayfa'}
             </Link>
 
             <div className="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200">
@@ -409,7 +409,7 @@ export default function EmployerPortal() {
               onClick={handleLogout}
               className="bg-red-50 hover:bg-red-100 text-red-700 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
             >
-              {t.logoutButton || 'Çıkış Yap'}
+              {t.logoutBtn || 'Çıkış Yap'}
             </button>
           </div>
         </div>
@@ -418,34 +418,34 @@ export default function EmployerPortal() {
         <div className="bg-white p-3 rounded-2xl border shadow-sm">
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
             <button onClick={() => setActiveTab('home')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'home' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              🏠 {t.tabHomeSummary || 'Ana Sayfa (Özet)'}
+              🏠 Ana Sayfa (Özet)
             </button>
             <button onClick={() => setActiveTab('demands')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'demands' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              📁 {t.tabPersonnelDemands || 'Personel Taleplerim'} ({jobDemands.length})
+              📁 Personel Taleplerim ({jobDemands.length})
             </button>
             <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               👥 {t.candidatesTab || 'Adaylar'} ({candidates.length})
             </button>
             <button onClick={() => setActiveTab('interviews')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'interviews' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              📅 {t.tabInterviews || 'Görüşmeler'}
+              📅 {t.interviews || 'Görüşmeler'}
             </button>
             <button onClick={() => setActiveTab('selected')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'selected' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              ⭐ {t.tabSelected || 'Seçtiğim Adaylar'}
+              ⭐ {t.empTabSelected || 'Seçtiğim Adaylar'}
             </button>
             <button onClick={() => setActiveTab('status')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'status' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              📄 {t.tabStatus || 'Belge ve İşlem Durumları'}
+              📄 Belge ve İşlem Durumları
             </button>
             <button onClick={() => setActiveTab('travel')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              ✈️ {t.tabTravel || 'Seyahat ve İşe Başlangıç'}
+              ✈️ {t.travel || 'Seyahat ve İşe Başlangıç'}
             </button>
             <button onClick={() => setActiveTab('employees')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              👷 {t.tabEmployees || 'Aktif Çalışanlar'}
+              👷 Aktif Çalışanlar
             </button>
             <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              💬 {t.tabSupport || 'Destek / Bildirim'} ({supportTickets.length})
+              💬 {t.support || 'Destek / Bildirim'} ({supportTickets.length})
             </button>
             <button onClick={() => setActiveTab('company')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'company' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              🏢 {t.tabCompany || 'Şirket Bilgilerim'}
+              🏢 Şirket Bilgilerim
             </button>
           </div>
         </div>
@@ -455,27 +455,27 @@ export default function EmployerPortal() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-slate-500 uppercase">{t.activeDemandsCard || 'Aktif Talepler'}</span>
+                <span className="text-xs font-bold text-slate-500 uppercase">Aktif Talepler</span>
                 <div className="text-2xl font-black text-emerald-700">{jobDemands.length}</div>
               </div>
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-slate-500 uppercase">{t.presentedCandidatesCard || 'Sunulan Adaylar'}</span>
+                <span className="text-xs font-bold text-slate-500 uppercase">Sunulan Adaylar</span>
                 <div className="text-2xl font-black text-blue-700">{candidates.length}</div>
               </div>
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-slate-500 uppercase">{t.inProcessCard || 'İşlemde Olanlar'}</span>
+                <span className="text-xs font-bold text-slate-500 uppercase">İşlemde Olanlar</span>
                 <div className="text-2xl font-black text-amber-600">2</div>
               </div>
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-slate-500 uppercase">{t.startedCard || 'İşe Başlayanlar'}</span>
+                <span className="text-xs font-bold text-slate-500 uppercase">İşe Başlayanlar</span>
                 <div className="text-2xl font-black text-purple-700">4</div>
               </div>
             </div>
 
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="font-extrabold text-slate-900 text-base border-b pb-3">{t.operationalSummaryTitle || 'Son Operasyonel Durum Özeti'}</h3>
+              <h3 className="font-extrabold text-slate-900 text-base border-b pb-3">{t.portalSummaryTitle || 'Son Operasyonel Durum Özeti'}</h3>
               <p className="text-xs text-slate-600">
-                {t.operationalSummaryDesc || 'PANOVA uluslararası iş gücü operasyon merkezimiz üzerinden tüm süreçleriniz kesintisiz takip edilmektedir. Yeni personel talebi oluşturmak için "Personel Taleplerim" sekmesini kullanabilirsiniz.'}
+                {t.portalSummaryDesc || 'PANOVA uluslararası iş gücü operasyon merkezimiz üzerinden tüm süreçleriniz kesintisiz takip edilmektedir. Yeni personel talebi oluşturmak için "Personel Taleplerim" sekmesini kullanabilirsiniz.'}
               </p>
             </div>
           </div>
