@@ -44,25 +44,17 @@ export default function EmployerPortal() {
       const saved = localStorage.getItem('panova_employer_profile');
       if (saved) {
         try {
-          return JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.companyName) return parsed;
         } catch (e) {}
       }
-      return {
-        id: 'admin_master',
-        companyName: 'AKAY EĞİTİM',
-        contactPerson: 'Hüseyin Aksu',
-        phone: '+38970385792',
-        country: 'Turkey',
-        email: 'huseyinaksu@gmail.com',
-        companyLogo: ''
-      };
     }
     return {
       id: 'admin_master',
       companyName: 'AKAY EĞİTİM',
       contactPerson: 'Hüseyin Aksu',
       phone: '+38970385792',
-      country: 'Turkey',
+      country: 'North Macedonia',
       email: 'huseyinaksu@gmail.com',
       companyLogo: ''
     };
@@ -72,7 +64,7 @@ export default function EmployerPortal() {
   const [editContactPerson, setEditContactPerson] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [editPhone, setEditPhone] = useState('');
-  const [editCountry, setEditCountry] = useState('Turkey');
+  const [editCountry, setEditCountry] = useState('North Macedonia');
   const [editCompanyLogo, setEditCompanyLogo] = useState('');
 
   useEffect(() => {
@@ -81,7 +73,7 @@ export default function EmployerPortal() {
       setEditContactPerson(employerProfile.contactPerson || employerProfile.contact_person || 'Hüseyin Aksu');
       setEditEmail(employerProfile.email || 'huseyinaksu@gmail.com');
       setEditPhone(employerProfile.phone || '+38970385792');
-      setEditCountry(employerProfile.country || 'Turkey');
+      setEditCountry(employerProfile.country || 'North Macedonia');
       setEditCompanyLogo(employerProfile.companyLogo || employerProfile.company_logo || '');
     }
   }, [employerProfile]);
@@ -191,7 +183,7 @@ export default function EmployerPortal() {
   };
 
   const handleLogout = () => {
-    // Çıkış yapıldığında şirket profil verisi (panova_employer_profile) silinmez, korunur.
+    // Çıkışta profil asla silinmez, korunur.
     window.location.href = '/employer-login';
   };
 
