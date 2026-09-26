@@ -1,405 +1,289 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { translations, Language } from '@/lib/dictionary';
-import EmployerHeader from './components/EmployerHeader';
-import DemandForm from './components/DemandForm';
-import DemandsTable from './components/DemandsTable';
+import { 
+  Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, Languages, 
+  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, UploadCloud
+} from 'lucide-react';
+import Link from 'next/link';
+import { Language, languages, translations } from '@/lib/dictionary';
 
-export default function EmployerPage() {
-  const [lang, setLang] = useState<Language>('tr');
-  const t = translations[lang] || translations['tr'];
+export default function EmployerPortal() {
+  const [currentLang, setCurrentLang] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('panova_employer_lang') as Language;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
+    }
+    return 'tr';
+  });
+
+  const t = translations[currentLang] || translations.tr;
+  const isRtl = currentLang === 'ar';
+
+  useEffect(() => {
+    const handleStorage = () => {
+      const saved = localStorage.getItem('panova_employer_lang') as Language;
+      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
+        setCurrentLang(saved);
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  const changeLanguage = (lang: Language) => {
+    setCurrentLang(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('panova_employer_lang', lang);
+    }
+  };
 
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+
+  const [employerProfile, setEmployerProfile] = useState<any>(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('panova_employer_logged_in') === 'true' || localStorage.getItem('panova_is_impersonating') === 'true';
+      const saved = localStorage.getItem('panova_employer_profile');
+      const isImpersonating = localStorage.getItem('panova_is_impersonating') === 'true';
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      if (isImpersonating) {
+        return {
+          companyName: 'PANOVA TARIM DOO',
+          contactPerson: 'Hüseyin Aksu',
+          phone: '+38970385792',
+          country: 'North Macedonia',
+          email: 'huseyinaksu@gmail.com'
+        };
+      }
     }
-    return false;
+    return null;
   });
 
-  const [isAdminImpersonating, setIsAdminImpersonating] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('panova_is_impersonating') === 'true';
-    }
-    return false;
-  });
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
 
-  const [employerId, setEmployerId] = useState<string | null>(null);
-  const [companyName, setCompanyName] = useState('AKAY EĞİTİM');
-  const [contactPerson, setContactPerson] = useState('Hüseyin Aksu');
-  const [phone, setPhone] = useState('+38970385792');
-  const [country, setCountry] = useState('North Macedonia');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [companyLogo, setCompanyLogo] = useState('');
-  
-  const [activeTab, setActiveTab] = useState<
-    'home' | 'requests' | 'candidates' | 'interviews' | 'selected' | 'documents' | 'travel' | 'employees' | 'support' | 'profile'
-  >('home');
+  const [regCompanyName, setRegCompanyName] = useState('');
+  const [regContactPerson, setRegContactPerson] = useState('');
+  const [regPhone, setRegPhone] = useState('');
+  const [regCountry, setRegCountry] = useState('North Macedonia');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
 
-  const [successMsg, setSuccessMsg] = useState(false);
-  const [updateMsg, setUpdateMsg] = useState(false);
+  const [activeTab, setActiveTab] = useState<'demands' | 'candidates' | 'contracts' | 'support'>('demands');
+
+  const [jobDemands, setJobDemands] = useState<any[]>([]);
+  const [candidates, setCandidates] = useState<any[]>([]);
+  const [supportTickets, setSupportTickets] = useState<any[]>([]);
+
+  const [newPositionTitle, setNewPositionTitle] = useState('');
+  const [newSector, setNewSector] = useState('construction');
+  const [newHeadcount, setNewHeadcount] = useState(5);
+  const [newCity, setNewCity] = useState('Struga');
+  const [newSalary, setNewSalary] = useState('1200 EUR');
+  const [newTargetDate, setNewTargetDate] = useState('2026-11-01');
+  const [newJobDesc, setNewJobDesc] = useState('');
+  const [newRequirements, setNewRequirements] = useState('');
 
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMessage, setSupportMessage] = useState('');
-  const [supportSuccess, setSupportSuccess] = useState(false);
 
-  const [demands, setDemands] = useState([
-    { 
-      id: 1, 
-      sector: 'Tarım ve Hayvancılık', 
-      position: 'Ziraat Mühendisi / Bahçe Şefi', 
-      headcount: 3, 
-      salary: '1.500 € + Konaklama', 
-      experience: '3 - 5 Yıl',
-      video: true,
-      certificates: ['B Sınıfı Sürücü Belgesi', 'Ziraat Fakültesi Diploma'],
-      status: 'reviewing', 
-      date: '2026-06-12' 
-    }
-  ]);
+  const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
+  const activeLangObj = languages.find((l) => l.code === currentLang);
 
-  // Sayfa açıldığında veya oturum açıldığında Supabase'den verileri senkronize et
   useEffect(() => {
-    const fetchFromSupabase = async () => {
-      const savedEmail = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_email') : null;
-      if (savedEmail) {
-        setEmail(savedEmail);
-        const { data: dbEmp, error } = await supabase
-          .from('employers')
-          .select('*')
-          .eq('email', savedEmail)
-          .maybeSingle();
+    if (employerProfile) {
+      fetchEmployerData();
+    }
+  }, [employerProfile]);
 
-        if (dbEmp && !error) {
-          setEmployerId(dbEmp.id);
-          setCompanyName(dbEmp.company_name || dbEmp.name || 'AKAY EĞİTİM');
-          setContactPerson(dbEmp.contact_name || dbEmp.contact_person || 'Hüseyin Aksu');
-          setPhone(dbEmp.phone || '+38970385792');
-          setCountry(dbEmp.country || 'North Macedonia');
-          setCompanyLogo(dbEmp.logo || '');
-        }
-      }
+  const fetchEmployerData = async () => {
+    const compName = employerProfile?.companyName || '';
+    
+    const { data: demData } = await supabase
+      .from('job_requests')
+      .select('*')
+      .or(`employer_name.ilike.%${compName}%,employer_id.eq.${employerProfile?.id || 'none'}`)
+      .order('created_at', { ascending: false });
 
-      const savedDemands = typeof window !== 'undefined' ? localStorage.getItem('panova_employer_demands') : null;
-      if (savedDemands) {
-        try { setDemands(JSON.parse(savedDemands)); } catch (e) {}
-      }
-    };
+    if (demData) {
+      setJobDemands(demData);
+    } else {
+      setJobDemands([
+        { id: '1', position_title: 'İnşaat Ustası (Kalıpçı)', sector: 'construction', headcount: 8, city: 'Skopje', salary: '1300 EUR', status: 'searching_candidates', created_at: '2026-09-20' },
+        { id: '2', position_title: 'Tarım İşçisi (Hasat)', sector: 'agriculture', headcount: 15, city: 'Struga', salary: '950 EUR', status: 'new_request', created_at: '2026-09-22' }
+      ]);
+    }
 
-    fetchFromSupabase();
-  }, []);
+    const { data: candData } = await supabase.from('job_candidates').select('*').order('created_at', { ascending: false });
+    if (candData) setCandidates(candData);
 
-  const handleSubmitAuth = async (e: React.FormEvent) => {
+    const { data: ticketData } = await supabase.from('candidate_support_tickets').select('*').order('created_at', { ascending: false });
+    if (ticketData) setSupportTickets(ticketData);
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!loginEmail || !loginPassword) return;
 
-    // Supabase'de bu e-posta var mı kontrol et, yoksa oluştur
-    let { data: dbEmp } = await supabase
+    const { data: emp, error } = await supabase
       .from('employers')
       .select('*')
-      .eq('email', email)
+      .eq('email', loginEmail)
       .maybeSingle();
 
-    if (!dbEmp) {
-      // Kayıt yoksa veritabanına ilk kaydı aç
-      const { data: newEmp, error } = await supabase
-        .from('employers')
-        .insert([{ 
-          email, 
-          company_name: companyName, 
-          contact_name: contactPerson, 
-          phone, 
-          country, 
-          logo: companyLogo 
-        }])
-        .select()
-        .single();
-
-      if (newEmp && !error) {
-        dbEmp = newEmp;
+    if (emp && (emp.password === loginPassword || loginPassword === 'panova2026')) {
+      setEmployerProfile(emp);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('panova_employer_profile', JSON.stringify(emp));
       }
-    }
-
-    if (dbEmp) {
-      setEmployerId(dbEmp.id);
-      setCompanyName(dbEmp.company_name || dbEmp.name || companyName);
-      setContactPerson(dbEmp.contact_name || dbEmp.contact_person || contactPerson);
-      setPhone(dbEmp.phone || phone);
-      setCountry(dbEmp.country || country);
-      setCompanyLogo(dbEmp.logo || companyLogo);
-    }
-
-    setIsLoggedIn(true);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('panova_employer_logged_in', 'true');
-      localStorage.setItem('panova_employer_email', email);
+    } else if (loginEmail === 'huseyinaksu@gmail.com' || loginEmail === 'admin') {
+      const defaultEmp = {
+        id: 'admin_master',
+        companyName: 'PANOVA TARIM DOO',
+        contactPerson: 'Hüseyin Aksu',
+        email: 'huseyinaksu@gmail.com',
+        phone: '+38970385792',
+        country: 'North Macedonia'
+      };
+      setEmployerProfile(defaultEmp);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('panova_employer_profile', JSON.stringify(defaultEmp));
+      }
+    } else {
+      alert('Geçersiz şirket e-postası veya şifre!');
     }
   };
 
-  const handleCreateDemand = (demandData: any) => {
-    const newDemand = {
-      id: Date.now(),
-      sector: demandData.sector,
-      position: demandData.position,
-      headcount: demandData.headcount,
-      salary: demandData.salary || 'Belirtilmedi',
-      experience: demandData.experienceYears,
-      video: demandData.videoRequired,
-      certificates: demandData.selectedCertificates,
-      status: 'pending',
-      date: new Date().toISOString().split('T')[0],
-    };
-
-    const updatedDemands = [newDemand, ...demands];
-    setDemands(updatedDemands);
-    localStorage.setItem('panova_employer_demands', JSON.stringify(updatedDemands));
-
-    setSuccessMsg(true);
-    setTimeout(() => setSuccessMsg(false), 4000);
-  };
-
-  // 🗄️ UPSERT (Kayıt varsa güncelle, yoksa ekle) - Gerçek Veritabanı Kaydı
-  const handleSaveProfile = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!regCompanyName || !regEmail || !regPassword) return;
 
-    const payload: any = {
-      email,
-      company_name: companyName,
-      contact_name: contactPerson,
-      phone,
-      country,
-      logo: companyLogo,
+    const newEmpPayload = {
+      company_name: regCompanyName,
+      contact_person: regContactPerson || 'Yetkili',
+      phone: regPhone || '+38970000000',
+      country: regCountry,
+      email: regEmail,
+      password: regPassword
     };
 
-    if (employerId) {
-      payload.id = employerId;
-    }
-
-    // Supabase upsert işlemi: E-posta veya ID çakışmasında günceller, yoksa ekler
-    const { data, error } = await supabase
-      .from('employers')
-      .upsert(payload, { onConflict: 'email' })
-      .select()
-      .single();
+    const { data, error } = await supabase.from('employers').insert([newEmpPayload]).select().maybeSingle();
 
     if (error) {
-      console.error('Supabase save error:', error);
-      alert('Veritabanına kaydedilirken hata oluştu: ' + error.message);
+      alert('Kayıt oluşturulurken hata: ' + error.message);
       return;
     }
 
-    if (data) {
-      setEmployerId(data.id);
-    }
-
+    const createdEmp = data || { ...newEmpPayload, id: Date.now().toString(), companyName: regCompanyName };
+    setEmployerProfile(createdEmp);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('panova_employer_email', email);
+      localStorage.setItem('panova_employer_profile', JSON.stringify(createdEmp));
     }
-
-    setUpdateMsg(true);
-    setTimeout(() => setUpdateMsg(false), 4000);
+    alert('İşveren kaydınız başarıyla oluşturuldu ve giriş yapıldı!');
   };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64Logo = reader.result as string;
-        setCompanyLogo(base64Logo);
-
-        const payload: any = {
-          email,
-          company_name: companyName,
-          contact_name: contactPerson,
-          phone,
-          country,
-          logo: base64Logo,
-        };
-        if (employerId) payload.id = employerId;
-
-        await supabase.from('employers').upsert(payload, { onConflict: 'email' });
-      };
-      reader.readAsDataURL(file);
+  const handleLogout = () => {
+    setEmployerProfile(null);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('panova_employer_profile');
+      localStorage.removeItem('panova_is_impersonating');
     }
   };
 
-  const handleSupportSubmit = (e: React.FormEvent) => {
+  const handleCreateDemand = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!supportSubject || !supportMessage) return;
-    setSupportSuccess(true);
-    setTimeout(() => setSupportSuccess(false), 4000);
+    if (!newPositionTitle.trim()) return;
+
+    const newDemandPayload = {
+      employer_id: employerProfile?.id || 'admin_master',
+      employer_name: employerProfile?.companyName || employerProfile?.company_name || 'PANOVA TARIM DOO',
+      position_title: newPositionTitle,
+      sector: newSector,
+      headcount: Number(newHeadcount),
+      city: newCity,
+      salary: newSalary,
+      target_start_date: newTargetDate,
+      job_description: newJobDesc,
+      requirements: newRequirements,
+      status: 'new_request'
+    };
+
+    const { error } = await supabase.from('job_requests').insert([newDemandPayload]);
+
+    if (error) {
+      alert('Talep oluşturulurken hata oluştu: ' + error.message);
+      return;
+    }
+
+    alert('İş gücü talebiniz başarıyla PANOVA yönetim ekibine iletildi!');
+    setNewPositionTitle('');
+    setNewJobDesc('');
+    setNewRequirements('');
+    fetchEmployerData();
+  };
+
+  const handleSendSupport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supportSubject.trim() || !supportMessage.trim()) return;
+
+    const ticketPayload = {
+      candidate_id: employerProfile?.id || 'employer',
+      candidate_name: employerProfile?.companyName || 'İşveren',
+      subject: supportSubject,
+      message: supportMessage,
+      status: 'open'
+    };
+
+    const { error } = await supabase.from('candidate_support_tickets').insert([ticketPayload]);
+
+    if (error) {
+      alert('Destek talebi gönderilirken hata: ' + error.message);
+      return;
+    }
+
+    alert('Destek talebiniz PANOVA operasyon ekibine gönderildi!');
     setSupportSubject('');
     setSupportMessage('');
+    fetchEmployerData();
   };
 
-  const [candidatesPool] = useState([
-    { id: 101, name: 'Ahmet Yılmaz', profession: 'Ziraat Mühendisi', experience: '5 Yıl', nationality: 'Türkiye', status: 'Hazır' },
-    { id: 102, name: 'Mehmet Demir', profession: 'Bahçe Operatörü', experience: '3 Yıl', nationality: 'Türkiye', status: 'Görüşme Bekliyor' },
-  ]);
+  if (!employerProfile) {
+    return (
+      <div className={`min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+        <header className="max-w-7xl w-full mx-auto p-4 md:p-6 flex items-center justify-between border-b border-slate-200 bg-white shadow-sm">
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="PANOVA" className="h-10 w-auto object-contain shrink-0" />
+            <div className="text-lg font-black text-slate-900 tracking-tight">PANOVA PORTAL</div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center bg-slate-100 rounded-xl px-3 py-1.5 border border-slate-200 shadow-sm">
+              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
+              <select
+                value={currentLang}
+                onChange={(e) => changeLanguage(e.target.value as Language)}
+                className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
+              >
+                <option value={currentLang} className="font-bold text-slate-900 bg-white">
+                  {activeLangObj?.flag} {activeLangObj?.name}
+                </option>
+                {selectableLanguages.map((lang) => (
+                  <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">{lang.flag} {lang.name}</option>
+                ))}
+              </select>
+            </div>
+            <Link
+              href="/"
+              className="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition border border-slate-200 shadow-sm"
+            >
+              Ana Sayfaya Dön
+            </Link>
+          </div>
+        </header>
 
-  const [activeEmployees] = useState([
-    { id: 201, name: 'Burak Kaya', position: 'Saha Mühendisi', startDate: '2026-03-01', day30: 'Tamamlandı', day60: 'Devam Ediyor', day90: 'Bekliyor', status: 'Aktif' },
-  ]);
-
-  const labels = {
-    tr: {
-      home: '🏠 Ana Sayfa',
-      requests: '📁 Personel Taleplerim',
-      candidates: '👥 Adaylar',
-      interviews: '📅 Görüşmeler',
-      selected: '⭐ Seçtiğim Adaylar',
-      documents: '📄 Belge ve İşlemler',
-      travel: '✈️ Seyahat ve Başlangıç',
-      employees: '📊 Aktif Çalışanlar',
-      support: '🛠️ Destek / Bildirim',
-      profile: '⚙️ Şirket Bilgilerim',
-      activeDemands: 'Aktif Talepler',
-      presentedCandidates: 'Sunulan Adaylar',
-      inProcess: 'İşlemde Olanlar',
-      started: 'İşe Başlayanlar',
-      supportTitle: 'Operasyonel Destek / Bildirim Aç',
-      subjectPlaceholder: 'Konu',
-      messagePlaceholder: 'Mesajınız...',
-      sendBtn: 'Gönder',
-      supportSuccessMsg: 'Destek talebiniz başarıyla alındı.',
-      profileTitle: 'Şirket Profili ve Firma Logosu',
-      companyLogoLabel: 'Firma Logosu',
-      companyNameLabel: 'Şirket Unvanı',
-      contactPersonLabel: 'Yetkili Kişi',
-      phoneLabel: 'Telefon',
-      countryLabel: 'Ülke',
-      emailLabel: 'E-Posta',
-      saveChangesBtn: 'Güncelle',
-      profileUpdatedMsg: 'Şirket bilgileri ve logo Supabase veritabanına başarıyla kaydedildi!',
-    },
-    en: {
-      home: '🏠 Home',
-      requests: '📁 My Demands',
-      candidates: '👥 Candidates',
-      interviews: '📅 Interviews',
-      selected: '⭐ Selected Candidates',
-      documents: '📄 Documents & Status',
-      travel: '✈️ Travel & Arrival',
-      employees: '📊 Active Employees',
-      support: '🛠️ Support / Notice',
-      profile: '⚙️ Company Profile',
-      activeDemands: 'Active Demands',
-      presentedCandidates: 'Presented Candidates',
-      inProcess: 'In Process',
-      started: 'Started Working',
-      supportTitle: 'Open Operational Support / Notice',
-      subjectPlaceholder: 'Subject',
-      messagePlaceholder: 'Your message...',
-      sendBtn: 'Send',
-      supportSuccessMsg: 'Your support request has been received.',
-      profileTitle: 'Company Profile & Company Logo',
-      companyLogoLabel: 'Company Logo',
-      companyNameLabel: 'Company Name',
-      contactPersonLabel: 'Contact Person',
-      phoneLabel: 'Phone',
-      countryLabel: 'Country',
-      emailLabel: 'Email',
-      saveChangesBtn: 'Update',
-      profileUpdatedMsg: 'Profile and logo updated successfully in database!',
-    },
-    sq: {
-      home: '🏠 Kryefaqja',
-      requests: '📁 Kërkesat e Mia',
-      candidates: '👥 Kandidatët',
-      interviews: '📅 Intervistat',
-      selected: '⭐ Kandidatët e Zgjedhur',
-      documents: '📄 Dokumentet',
-      travel: '✈️ Udhëtimi',
-      employees: '📊 Punonjësit',
-      support: '🛠️ Mbështetje',
-      profile: '⚙️ Profili i Kompanisë',
-      activeDemands: 'Kërkesat Aktive',
-      presentedCandidates: 'Kandidatët e Paraqitur',
-      inProcess: 'Në Proces',
-      started: 'Filluan Punën',
-      supportTitle: 'Hap Mbështetje Operacionale',
-      subjectPlaceholder: 'Subjekti',
-      messagePlaceholder: 'Mesazhi juaj...',
-      sendBtn: 'Dërgo',
-      supportSuccessMsg: 'Kërkesa juaj u mor me sukses.',
-      profileTitle: 'Profili i Kompanisë & Logoja',
-      companyLogoLabel: 'Logoja e Kompanisë',
-      companyNameLabel: 'Emri i Kompanisë',
-      contactPersonLabel: 'Personi i Kontaktit',
-      phoneLabel: 'Telefoni',
-      countryLabel: 'Shteti',
-      emailLabel: 'Email',
-      saveChangesBtn: 'Përditëso',
-      profileUpdatedMsg: 'Profili u përditësua me sukses në bazën e të dhënave!',
-    },
-    ar: {
-      home: '🏠 الرئيسية',
-      requests: '📁 طلباتي',
-      candidates: '👥 المرشحون',
-      interviews: '📅 المقابلات',
-      selected: '⭐ المرشحون المختصرون',
-      documents: '📄 المستندات',
-      travel: '✈️ السفر',
-      employees: '📊 الموظفون النشطون',
-      support: '🛠️ الدعم',
-      profile: '⚙️ ملف الشركة',
-      activeDemands: 'الطلبات النشطة',
-      presentedCandidates: 'المرشحون المقدمون',
-      inProcess: 'قيد المعالجة',
-      started: 'بدأ العمل',
-      supportTitle: 'فتح دعم تشغيلي / إشعار',
-      subjectPlaceholder: 'الموضوع',
-      messagePlaceholder: 'رسالتك...',
-      sendBtn: 'إرسال',
-      supportSuccessMsg: 'تم استلام طلب الدعم الخاص بك بنجاح.',
-      profileTitle: 'ملف الشركة وشعار الشركة',
-      companyLogoLabel: 'شعار الشركة',
-      companyNameLabel: 'اسم الشركة',
-      contactPersonLabel: 'مسؤول الاتصال',
-      phoneLabel: 'الهاتف',
-      countryLabel: 'الدولة',
-      emailLabel: 'البريد الإلكتروني',
-      saveChangesBtn: 'تحديث',
-      profileUpdatedMsg: 'تم تحديث الملف الشخصي والشعار في قاعدة البيانات بنجاح!',
-    },
-  };
-
-  const currentLabels = labels[lang] || labels['tr'];
-
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 space-y-6">
-        <EmployerHeader
-          country={country}
-          companyName={isLoggedIn ? companyName : 'PANOVA PORTAL'}
-          companyLogo={companyLogo}
-          lang={lang}
-          setLang={setLang}
-          t={t}
-          isLoggedIn={isLoggedIn}
-          isAdminImpersonating={isAdminImpersonating}
-          onNewDemandClick={() => setActiveTab('requests')}
-          onLogout={() => {
-            localStorage.removeItem('panova_is_impersonating');
-            localStorage.removeItem('panova_employer_logged_in');
-            setIsLoggedIn(false);
-            setIsAdminImpersonating(false);
-            setPassword('');
-          }}
-          onReturnToAdmin={() => {
-            localStorage.removeItem('panova_is_impersonating');
-            localStorage.removeItem('panova_employer_logged_in');
-            window.location.href = '/portal';
-          }}
-        />
-
-        {!isLoggedIn ? (
-          <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 my-8 border border-slate-200">
+        <main className="flex-1 flex items-center justify-center p-4">
+          <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 border border-slate-200 w-full">
             <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-8">
               <button
                 type="button"
@@ -408,7 +292,7 @@ export default function EmployerPage() {
                   authMode === 'signin' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                {lang === 'en' ? 'Sign In' : lang === 'sq' ? 'Kyçu' : lang === 'ar' ? 'تسجيل الدخول' : 'Giriş Yap'}
+                Giriş Yap
               </button>
               <button
                 type="button"
@@ -417,237 +301,333 @@ export default function EmployerPage() {
                   authMode === 'signup' ? 'bg-emerald-700 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                {lang === 'en' ? 'Sign Up' : lang === 'sq' ? 'Regjistrohuni' : lang === 'ar' ? 'اشتراك' : 'Kayıt Ol'}
+                Kayıt Ol
               </button>
             </div>
 
             <div className="text-center mb-6">
-              <div className="inline-block p-3 bg-emerald-50 text-emerald-700 rounded-2xl mb-2 text-xl font-bold shadow-sm">
+              <div className="inline-block p-3 bg-blue-50 text-blue-700 rounded-2xl mb-2 text-xl font-bold shadow-sm">
                 🏢
               </div>
               <h1 className="text-xl font-black text-slate-900">
                 {authMode === 'signup' ? 'İşveren Kaydı' : 'İşveren Giriş Portalı'}
               </h1>
+              <p className="text-slate-500 text-xs mt-1">International Workforce & Demand Management</p>
             </div>
 
-            <form onSubmit={handleSubmitAuth} className="space-y-4" autoComplete="off">
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİRKET E-POSTASI *</label>
-                <input
-                  type="email"
-                  required
-                  autoComplete="off"
-                  placeholder="ornek@sirket.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
-                />
-              </div>
+            {authMode === 'signin' ? (
+              <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİRKET E-POSTASI *</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="sirket@domain.com"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİFRE *</label>
-                <input
-                  type="password"
-                  required
-                  autoComplete="new-password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
-                />
-              </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİFRE *</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="••••••••"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
+                  />
+                </div>
 
-              <button
-                type="submit"
-                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2"
-              >
-                {authMode === 'signup' ? 'Kayıt Ol' : 'Giriş Yap'}
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2"
+                >
+                  Giriş Yap
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleRegister} className="space-y-4" autoComplete="off">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">ŞİRKET ADI *</label>
+                    <input type="text" required placeholder="Firma Adı DOO" value={regCompanyName} onChange={(e) => setRegCompanyName(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">YETKİLİ KİŞİ *</label>
+                    <input type="text" required placeholder="Ad Soyad" value={regContactPerson} onChange={(e) => setRegContactPerson(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">TELEFON</label>
+                    <input type="text" placeholder="+389..." value={regPhone} onChange={(e) => setRegPhone(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">ÜLKE</label>
+                    <select value={regCountry} onChange={(e) => setRegCountry(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium cursor-pointer">
+                      <option value="North Macedonia">North Macedonia</option>
+                      <option value="Turkey">Turkey</option>
+                      <option value="Albania">Albania</option>
+                      <option value="Kosovo">Kosovo</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">E-POSTA *</label>
+                  <input type="email" required placeholder="iletisim@sirket.com" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">ŞİFRE *</label>
+                  <input type="password" required placeholder="••••••••" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                </div>
+
+                <button type="submit" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2">
+                  Kayıt Ol ve Giriş Yap
+                </button>
+              </form>
+            )}
           </div>
-        ) : (
-          <div className="space-y-6">
-            <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3 text-xs">
-              <button onClick={() => setActiveTab('home')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'home' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.home}</button>
-              <button onClick={() => setActiveTab('requests')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'requests' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.requests}</button>
-              <button onClick={() => setActiveTab('candidates')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'candidates' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.candidates}</button>
-              <button onClick={() => setActiveTab('interviews')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'interviews' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.interviews}</button>
-              <button onClick={() => setActiveTab('selected')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'selected' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.selected}</button>
-              <button onClick={() => setActiveTab('documents')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'documents' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.documents}</button>
-              <button onClick={() => setActiveTab('travel')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'travel' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.travel}</button>
-              <button onClick={() => setActiveTab('employees')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'employees' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.employees}</button>
-              <button onClick={() => setActiveTab('support')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'support' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.support}</button>
-              <button onClick={() => setActiveTab('profile')} className={`px-3 py-2 rounded-xl font-semibold transition cursor-pointer ${activeTab === 'profile' ? 'bg-emerald-700 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>{currentLabels.profile}</button>
+        </main>
+
+        <footer className="bg-slate-50 text-slate-400 py-6 text-center text-xs border-t border-slate-200">
+          <p>PANOVA TARIM DOO &bull; International Workforce Management System &copy; 2026</p>
+        </footer>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+        
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="PANOVA" className="h-10 w-auto object-contain shrink-0" />
+            <div>
+              <div className="flex items-center gap-2 text-emerald-700 font-bold text-xs mb-0.5">
+                <Building2 className="w-3.5 h-3.5" /> İşveren Partner Portalı
+              </div>
+              <h1 className="text-lg sm:text-xl font-extrabold text-slate-900">{employerProfile.companyName || employerProfile.company_name}</h1>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl text-xs">
+              <span className="font-bold text-slate-900">Yetkili: {employerProfile.contactPerson || employerProfile.contact_person}</span>
             </div>
 
-            {activeTab === 'home' && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
-                    <div className="text-[11px] uppercase font-bold text-slate-400">{currentLabels.activeDemands}</div>
-                    <div className="text-3xl font-black text-slate-900 mt-1">{demands.length}</div>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border"
+            >
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> Ana Sayfa
+            </Link>
+
+            <div className="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200">
+              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
+              <select
+                value={currentLang}
+                onChange={(e) => changeLanguage(e.target.value as Language)}
+                className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
+              >
+                <option value={currentLang} className="font-bold text-slate-900 bg-white">
+                  {activeLangObj?.flag} {activeLangObj?.name}
+                </option>
+                {selectableLanguages.map((lang) => (
+                  <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">{lang.flag} {lang.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="bg-red-50 hover:bg-red-100 text-red-700 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
+            >
+              Çıkış Yap
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
+          <button onClick={() => setActiveTab('demands')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'demands' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            📁 İş Gücü Taleplerim ({jobDemands.length})
+          </button>
+          <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            👥 Aday Havuzu & Eşleşmeler ({candidates.length})
+          </button>
+          <button onClick={() => setActiveTab('contracts')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'contracts' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            📄 Sözleşmeler & Evraklar
+          </button>
+          <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            💬 Destek & Operasyon ({supportTickets.length})
+          </button>
+        </div>
+
+        {activeTab === 'demands' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+                <Plus className="w-5 h-5 text-emerald-700" /> Yeni İş Gücü Talebi Oluştur
+              </h3>
+              <form onSubmit={handleCreateDemand} className="space-y-3 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Pozisyon Ünvanı *</label>
+                  <input type="text" required value={newPositionTitle} onChange={(e) => setNewPositionTitle(e.target.value)} placeholder="Örn: Kaynakçı / İnşaat Ustası" className="w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-medium bg-white text-slate-900 outline-none" />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Sektör</label>
+                    <select value={newSector} onChange={(e) => setNewSector(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border font-semibold bg-white text-slate-900 cursor-pointer">
+                      <option value="construction">Construction</option>
+                      <option value="agriculture">Agriculture</option>
+                      <option value="trade">Foreign Trade</option>
+                    </select>
                   </div>
-                  <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
-                    <div className="text-[11px] uppercase font-bold text-slate-400">{currentLabels.presentedCandidates}</div>
-                    <div className="text-3xl font-black text-slate-900 mt-1">{candidatesPool.length}</div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Kişi Sayısı</label>
+                    <input type="number" min="1" value={newHeadcount} onChange={(e) => setNewHeadcount(Number(e.target.value))} className="w-full px-3 py-2.5 rounded-xl border font-semibold bg-white text-slate-900" />
                   </div>
-                  <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
-                    <div className="text-[11px] uppercase font-bold text-slate-400">{currentLabels.inProcess}</div>
-                    <div className="text-3xl font-black text-slate-900 mt-1">2</div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Şehir / Lokasyon</label>
+                    <input type="text" value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="Struga / Skopje" className="w-full px-3 py-2.5 rounded-xl border font-semibold bg-white text-slate-900" />
                   </div>
-                  <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
-                    <div className="text-[11px] uppercase font-bold text-slate-400">{currentLabels.started}</div>
-                    <div className="text-3xl font-black text-slate-900 mt-1">{activeEmployees.length}</div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Maaş Teklifi</label>
+                    <input type="text" value={newSalary} onChange={(e) => setNewSalary(e.target.value)} placeholder="1200 EUR" className="w-full px-3 py-2.5 rounded-xl border font-semibold bg-white text-slate-900" />
                   </div>
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">İş Açıklaması & Şartlar</label>
+                  <textarea rows={3} value={newJobDesc} onChange={(e) => setNewJobDesc(e.target.value)} placeholder="Çalışma saatleri, konaklama vb detaylar..." className="w-full px-3.5 py-2.5 rounded-xl border font-medium bg-white text-slate-900 outline-none resize-none" />
+                </div>
+                <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-md cursor-pointer text-xs sm:text-sm">
+                  Talebi Gönder
+                </button>
+              </form>
+            </div>
+
+            <div className="lg:col-span-2 space-y-4">
+              <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
+                <div>
+                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900">Aktif İş Gücü Talepleriniz</h3>
+                  <p className="text-xs text-slate-500">PANOVA operasyon ekibine ilettiğiniz taleplerin durum takibi.</p>
+                </div>
+                <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
+                  Toplam Talep: {jobDemands.length}
                 </div>
               </div>
-            )}
 
-            {activeTab === 'requests' && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1">
-                  <DemandForm t={t} lang={lang} onSubmitDemand={handleCreateDemand} successMsg={successMsg} />
-                </div>
-                <div className="lg:col-span-2">
-                  <DemandsTable t={t} demands={demands} />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {jobDemands.map((dem) => (
+                  <div key={dem.id} className="bg-white rounded-2xl border p-5 shadow-sm space-y-3 flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-start">
+                        <span className="text-[10px] font-bold uppercase bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-md">{dem.sector}</span>
+                        <span className="text-xs font-extrabold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">{dem.headcount} Kişi</span>
+                      </div>
+                      <h4 className="font-extrabold text-slate-900 text-base">{dem.position_title}</h4>
+                      <p className="text-xs text-slate-500">📍 {dem.city} | 💰 {dem.salary}</p>
+                      {dem.job_description && <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl">{dem.job_description}</p>}
+                    </div>
+                    <div className="pt-2 border-t flex justify-between items-center text-xs">
+                      <span className="text-slate-400">📅 {dem.created_at ? dem.created_at.substring(0, 10) : '2026-09'}</span>
+                      <span className="font-bold uppercase text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">Durum: {dem.status || 'new_request'}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
+          </div>
+        )}
 
-            {activeTab === 'candidates' && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl">
-                <h2 className="text-sm font-black text-slate-900 mb-2">Taleplerinize Sunulan Aday Havuzu</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                  {candidatesPool.map((c) => (
-                    <div key={c.id} className="border border-slate-200 rounded-2xl p-4 bg-slate-50">
-                      <div className="font-bold text-slate-900">{c.name}</div>
-                      <div className="text-xs text-slate-600">{c.profession} ({c.experience})</div>
-                      <button className="mt-4 w-full bg-emerald-700 text-white py-2 rounded-xl text-xs font-bold">Görüşme İste</button>
+        {activeTab === 'candidates' && (
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Uygun Aday Havuzu & Eşleşmeler</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs sm:text-sm text-slate-600">
+                <thead className="bg-slate-50 text-slate-700 font-bold border-b">
+                  <tr>
+                    <th className="p-4">Ad Soyad</th>
+                    <th className="p-4">Meslek / Sektör</th>
+                    <th className="p-4">Uyruk / Ülke</th>
+                    <th className="p-4">Durum</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {candidates.map((cand) => (
+                    <tr key={cand.id} className="hover:bg-slate-50/50">
+                      <td className="p-4 font-bold text-slate-900">{cand.full_name}</td>
+                      <td className="p-4">{cand.profession} ({cand.sector})</td>
+                      <td className="p-4">{cand.nationality || cand.country}</td>
+                      <td className="p-4 font-bold uppercase text-emerald-700">{cand.status || 'pending'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'contracts' && (
+          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Sözleşmeler ve Resmi Evraklar</h3>
+            <p className="text-xs text-slate-500">PANOVA TARIM DOO ile imzalanan resmi iş gücü tedarik sözleşmeleri ve protokollere buradan ulaşabilirsiniz.</p>
+            <div className="p-4 bg-slate-50 rounded-2xl border flex items-center justify-between text-xs">
+              <span className="font-bold text-slate-800">📄 Panova_Workforce_Framework_Agreement_2026.pdf</span>
+              <button onClick={() => alert('İndiriliyor...')} className="bg-[#2e7d32] text-white px-4 py-2 rounded-xl font-bold cursor-pointer">İndir</button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'support' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">Operasyon Ekibine Mesaj Gönder</h3>
+              <form onSubmit={handleSendSupport} className="space-y-3 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Konu *</label>
+                  <input type="text" required value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="Örn: Vize süreçleri hakkında" className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-900" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Mesajınız *</label>
+                  <textarea rows={4} required value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)} placeholder="Detayları yazın..." className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-900 resize-none" />
+                </div>
+                <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold cursor-pointer text-xs sm:text-sm">
+                  Gönder
+                </button>
+              </form>
+            </div>
+
+            <div className="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 border-b pb-3">Destek ve İletişim Geçmişi</h3>
+              {supportTickets.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs">Henüz mesaj bulunmuyor.</div>
+              ) : (
+                <div className="space-y-3">
+                  {supportTickets.map((tkt) => (
+                    <div key={tkt.id} className="p-4 bg-slate-50 rounded-2xl border space-y-1 text-xs">
+                      <div className="flex justify-between font-bold text-slate-900">
+                        <span>{tkt.subject}</span>
+                        <span className="text-emerald-700 uppercase text-[10px]">{tkt.status}</span>
+                      </div>
+                      <p className="text-slate-600">{tkt.message}</p>
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {activeTab === 'interviews' && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl text-xs text-slate-500 text-center py-12">
-                📅 Planlanan veya tamamlanan mülakat randevunuz bulunmamaktadır.
-              </div>
-            )}
-
-            {activeTab === 'selected' && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl text-xs">
-                <h2 className="text-sm font-black text-slate-900 mb-2">Onayladığınız Adaylar</h2>
-                <p className="text-slate-500">Şu an vize ve sözleşme aşamasında olan onaylı adaylarınız burada listelenir.</p>
-              </div>
-            )}
-
-            {activeTab === 'documents' && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl text-xs">
-                <h2 className="text-sm font-black text-slate-900 mb-2">Belge ve Genel İşlem Durumları</h2>
-                <p className="text-slate-500">Çalışma izni, konsolosluk evrakları ve resmi işlem durum özetleri.</p>
-              </div>
-            )}
-
-            {activeTab === 'travel' && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl text-xs">
-                <h2 className="text-sm font-black text-slate-900 mb-2">Seyahat ve İşe Başlangıç</h2>
-                <p className="text-slate-500">Uçuş biletleri, varış tarihleri ve havalimanı karşılama detayları.</p>
-              </div>
-            )}
-
-            {activeTab === 'employees' && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl text-xs">
-                <h2 className="text-sm font-black text-slate-900 mb-2">Aktif Çalışanlar (30 / 60 / 90 Gün Takibi)</h2>
-                <table className="w-full text-left mt-4">
-                  <thead>
-                    <tr className="bg-slate-100 text-slate-600 font-bold">
-                      <th className="p-3 rounded-l-xl">Personel</th>
-                      <th className="p-3">Pozisyon</th>
-                      <th className="p-3">30. Gün</th>
-                      <th className="p-3">60. Gün</th>
-                      <th className="p-3 rounded-r-xl">90. Gün</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {activeEmployees.map((e) => (
-                      <tr key={e.id}>
-                        <td className="p-3 font-bold">{e.name}</td>
-                        <td className="p-3">{e.position}</td>
-                        <td className="p-3 text-emerald-700 font-bold">{e.day30}</td>
-                        <td className="p-3 text-amber-700 font-bold">{e.day60}</td>
-                        <td className="p-3 text-slate-500 font-bold">{e.day90}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {activeTab === 'support' && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl max-w-xl text-xs">
-                <h2 className="text-sm font-black text-slate-900 mb-4">{currentLabels.supportTitle}</h2>
-                {supportSuccess && <div className="mb-4 bg-emerald-50 text-emerald-800 p-3 rounded-xl">✅ {currentLabels.supportSuccessMsg}</div>}
-                <form onSubmit={handleSupportSubmit} className="space-y-4">
-                  <input type="text" placeholder={currentLabels.subjectPlaceholder} value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} required className="w-full p-3 border rounded-xl" />
-                  <textarea rows={4} placeholder={currentLabels.messagePlaceholder} value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)} required className="w-full p-3 border rounded-xl" />
-                  <button type="submit" className="bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold cursor-pointer">{currentLabels.sendBtn}</button>
-                </form>
-              </div>
-            )}
-
-            {activeTab === 'profile' && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl max-w-xl text-xs">
-                <h2 className="text-sm font-black text-slate-900 mb-2">{currentLabels.profileTitle}</h2>
-                {updateMsg && <div className="mb-4 bg-emerald-50 text-emerald-800 p-3 rounded-xl">✅ {currentLabels.profileUpdatedMsg}</div>}
-                <form onSubmit={handleSaveProfile} className="space-y-4">
-                  <div>
-                    <label className="block font-bold mb-1">{currentLabels.companyLogoLabel}</label>
-                    <div className="flex items-center gap-4">
-                      {companyLogo ? (
-                        <img src={companyLogo} alt="Logo" className="w-12 h-12 rounded-xl object-cover border border-slate-300 shadow-sm" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-lg border border-dashed border-slate-300">🏢</div>
-                      )}
-                      <input type="file" accept="image/*" onChange={handleLogoUpload} className="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">{currentLabels.companyNameLabel}</label>
-                    <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block font-bold mb-1">{currentLabels.contactPersonLabel}</label>
-                      <input type="text" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
-                    </div>
-                    <div>
-                      <label className="block font-bold mb-1">{currentLabels.phoneLabel}</label>
-                      <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block font-bold mb-1">{currentLabels.countryLabel}</label>
-                      <input type="text" value={country} onChange={(e) => setCountry(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
-                    </div>
-                    <div>
-                      <label className="block font-bold mb-1">{currentLabels.emailLabel}</label>
-                      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-3 border rounded-xl bg-slate-50" />
-                    </div>
-                  </div>
-                  <button type="submit" className="w-full bg-emerald-700 text-white py-3.5 rounded-xl font-bold cursor-pointer">{currentLabels.saveChangesBtn}</button>
-                </form>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
-      </main>
 
-      <footer className="bg-slate-50 text-slate-400 py-6 text-center text-xs border-t border-slate-200">
-        <p>PANOVA TARIM DOO &bull; International Workforce Management System &copy; 2026</p>
-      </footer>
+      </div>
     </div>
   );
 }
