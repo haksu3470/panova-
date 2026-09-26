@@ -106,13 +106,14 @@ export default function EmployerPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 space-y-6">
-        {/* Üst Bar: Giriş yapılmış olsun veya olmasın her zaman en üstte yer alır */}
+        {/* Üst Bar: Oturum durumuna göre butonları dinamik yönetir */}
         <EmployerHeader
           country={country}
           companyName={isLoggedIn ? companyName : 'PANOVA PORTAL'}
           lang={lang}
           setLang={setLang}
           t={t}
+          isLoggedIn={isLoggedIn}
           onNewDemandClick={() => setActiveTab('requests')}
           onLogout={() => {
             setIsLoggedIn(false);
