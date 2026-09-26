@@ -27,16 +27,19 @@ export default function EmployerHeader({
   return (
     <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
       <div>
-        <div className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full inline-block mb-1 uppercase tracking-wider">
-          {country}
-        </div>
+        {/* Ülke rozeti sadece kullanıcı giriş yaptığında görünür */}
+        {isLoggedIn && (
+          <div className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full inline-block mb-1 uppercase tracking-wider">
+            {country}
+          </div>
+        )}
         <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
           {companyName}
         </h1>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        {/* Dil Seçimi */}
+        {/* 4 Resmi Dil Seçeneği: Türkçe, İngilizce, Arnavutça, Arapça */}
         <select
           value={lang}
           onChange={(e) => setLang(e.target.value as Language)}
@@ -44,7 +47,8 @@ export default function EmployerHeader({
         >
           <option value="tr">🇹🇷 Türkçe</option>
           <option value="en">🇬🇧 English</option>
-          <option value="mk">🇲🇰 Македонски</option>
+          <option value="sq">🇦🇱 Shqip</option>
+          <option value="ar">🇸🇦 العربية</option>
         </select>
 
         {/* Ana Sayfaya Dön Butonu */}

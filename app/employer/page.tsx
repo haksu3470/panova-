@@ -13,12 +13,12 @@ export default function EmployerPage() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Şirket ve Profil State'leri
-  const [companyName, setCompanyName] = useState('AKAY EĞİTİM');
-  const [contactPerson, setContactPerson] = useState('Hüseyin Aksu');
-  const [phone, setPhone] = useState('+38970385792');
+  // Default olarak içi boş başlatıldı
+  const [companyName, setCompanyName] = useState('');
+  const [contactPerson, setContactPerson] = useState('');
+  const [phone, setPhone] = useState('');
   const [country, setCountry] = useState('North Macedonia');
-  const [email, setEmail] = useState('huseyinaksu@gmail.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
   const [activeTab, setActiveTab] = useState<'requests' | 'candidates' | 'interviews' | 'selected' | 'travel' | 'employees' | 'support' | 'profile'>('requests');
@@ -69,6 +69,7 @@ export default function EmployerPage() {
     e.preventDefault();
     if (email) {
       setIsLoggedIn(true);
+      if (!companyName) setCompanyName('AKAY EĞİTİM');
     }
   };
 
@@ -106,7 +107,6 @@ export default function EmployerPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 space-y-6">
-        {/* Üst Bar: Oturum durumuna göre butonları dinamik yönetir */}
         <EmployerHeader
           country={country}
           companyName={isLoggedIn ? companyName : 'PANOVA PORTAL'}
@@ -163,6 +163,7 @@ export default function EmployerPage() {
                     <input
                       type="text"
                       required
+                      placeholder="Şirket unvanınızı girin"
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
@@ -176,6 +177,7 @@ export default function EmployerPage() {
                       <input
                         type="text"
                         required
+                        placeholder="Ad Soyad"
                         value={contactPerson}
                         onChange={(e) => setContactPerson(e.target.value)}
                         className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
@@ -188,6 +190,7 @@ export default function EmployerPage() {
                       <input
                         type="tel"
                         required
+                        placeholder="+389..."
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
@@ -204,6 +207,7 @@ export default function EmployerPage() {
                 <input
                   type="email"
                   required
+                  placeholder="ornek@sirket.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
@@ -217,6 +221,7 @@ export default function EmployerPage() {
                 <input
                   type="password"
                   required
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50"
