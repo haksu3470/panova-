@@ -67,6 +67,7 @@ export default function PortalPage() {
   const [tasks, setTasks] = useState<any[]>([]);
 
   const [selectedDemandDetail, setSelectedDemandDetail] = useState<any | null>(null);
+  const [selectedEmployerDetail, setSelectedEmployerDetail] = useState<any | null>(null);
 
   const [auditLogs, setAuditLogs] = useState<any[]>([
     { id: '1', actionKey: 'initialAuditLog', performer: 'Hüseyin Aksu', time: '2026-09-22 12:00' }
@@ -199,6 +200,7 @@ export default function PortalPage() {
   const handleLogout = () => {
     setAuthenticated(false);
     setCurrentUser(null);
+    setSelectedEmployerDetail(null);
     if (typeof window !== 'undefined') {
       localStorage.removeItem('panova_admin_auth');
       localStorage.removeItem('panova_current_user');
@@ -486,6 +488,22 @@ export default function PortalPage() {
 
   return (
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* Admin Modu İşveren Dosyası Görüntüleme Köprüsü */}
+      {selectedEmployerDetail && (
+        <div className="bg-amber-100 border border-amber-300 px-4 py-3 rounded-2xl mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-center gap-2 text-amber-900 text-xs sm:text-sm font-bold">
+            <ShieldAlert className="w-5 h-5 text-amber-700 shrink-0" />
+            <span>Admin Modu: Şu an <strong>{selectedEmployerDetail.company_name}</strong> işveren dosyasını görüntülüyorsunuz.</span>
+          </div>
+          <button
+            onClick={() => setSelectedEmployerDetail(null)}
+            className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer shadow"
+          >
+            ← Yönetim Paneline Geri Dön
+          </button>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm">
@@ -798,7 +816,6 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* Tab 3: Personel Talebi Dosyası (Tamamen Dinamik Çevrili) */}
         {activeTab === 'requests' && (
           <div className="space-y-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -1118,7 +1135,15 @@ export default function PortalPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {employers.map((emp) => (
                   <div key={emp.id} className="p-4 bg-slate-50 rounded-2xl border space-y-2 text-xs sm:text-sm">
-                    <h4 className="font-extrabold text-slate-900">{emp.company_name}</h4>
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-extrabold text-slate-900">{emp.company_name}</h4>
+                      <button
+                        onClick={() => setSelectedEmployerDetail(emp)}
+                        className="px-3 py-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm"
+                      >
+                        İşveren Dosyasını Aç & İncele
+                      </button>
+                    </div>
                     <p className="text-slate-500">Contact: <strong>{emp.contact_person}</strong> | Country: {emp.country}</p>
                   </div>
                 ))}
