@@ -15,10 +15,10 @@ export default function PortalPage() {
       const saved = localStorage.getItem('panova_portal_lang') as Language;
       if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
     }
-    return 'tr';
+    return 'en';
   });
 
-  const t = translations[currentLang] || translations.tr;
+  const t = translations[currentLang] || translations.en;
   const isRtl = currentLang === 'ar';
 
   useEffect(() => {
@@ -139,7 +139,7 @@ export default function PortalPage() {
       }
     } else {
       const defaultStaff = [
-        { id: '1', name: 'Hüseyin Aksu', email: 'huseyinaksu@gmail.com', password: 'panova2026', role_level: 'upper_management' },
+        { id: '1', name: 'Hüseyin Aksu', email: 'admin@panova.com', password: 'panova2026', role_level: 'upper_management' },
         { id: '2', name: 'Mehmet Çitil', email: 'mehmet@panova.com', password: '123', role_level: 'target_country' }
       ];
       setStaffMembers(defaultStaff);
@@ -170,24 +170,16 @@ export default function PortalPage() {
     setAuditLogs([newLog, ...auditLogs]);
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password) return;
-
+    const matchedStaff = staffMembers.find(s => (s.email === username || s.name.toLowerCase() === username.toLowerCase()) && s.password === password);
+    
     let loggedUser = null;
 
-    if ((username === 'admin' || username === 'huseyinaksu@gmail.com') && password === 'panova2026') {
-      loggedUser = { name: 'Hüseyin Aksu (Master Admin)', email: 'huseyinaksu@gmail.com', role_level: 'upper_management', isAdmin: true };
-    } else {
-      const { data: dbStaff, error } = await supabase
-        .from('staff_members')
-        .select('*')
-        .or(`email.eq.${username},name.ilike.%${username}%`)
-        .maybeSingle();
-
-      if (dbStaff && dbStaff.password === password) {
-        loggedUser = dbStaff;
-      }
+    if (username === 'admin' && password === 'panova2026') {
+      loggedUser = { name: 'Hüseyin Aksu (Master Admin)', email: 'admin@panova.com', role_level: 'upper_management', isAdmin: true };
+    } else if (matchedStaff) {
+      loggedUser = matchedStaff;
     }
 
     if (loggedUser) {
@@ -200,7 +192,7 @@ export default function PortalPage() {
       logAudit('Sisteme Giriş Yapıldı', loggedUser.name);
       fetchAllData();
     } else {
-      alert('Geçersiz kullanıcı adı/e-posta veya şifre!');
+      alert('Geçersiz kullanıcı adı veya şifre!');
     }
   };
 
@@ -211,21 +203,6 @@ export default function PortalPage() {
       localStorage.removeItem('panova_admin_auth');
       localStorage.removeItem('panova_current_user');
     }
-  };
-
-  const handleImpersonateEmployer = (emp: any) => {
-    const profileData = {
-      id: emp.id,
-      companyName: emp.company_name || emp.name,
-      contactPerson: emp.contact_person || emp.contact_name,
-      phone: emp.phone || '+38970385792',
-      country: emp.country || 'North Macedonia',
-      email: emp.email || 'huseyinaksu@gmail.com',
-      companyLogo: emp.logo || '',
-    };
-    localStorage.setItem('panova_employer_profile', JSON.stringify(profileData));
-    localStorage.setItem('panova_is_impersonating', 'true');
-    window.location.href = '/employer';
   };
 
   const updateCandidateStatus = async (id: string, newStatus: string) => {
@@ -294,6 +271,35 @@ export default function PortalPage() {
     fetchAllData();
   };
 
+  const handleSaveStaffEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isUpperManagement || !editingStaff) return;
+
+    try {
+      const { error } = await supabase.from('staff_members').update({
+        name: editingStaff.name,
+        email: editingStaff.email,
+        password: editingStaff.password,
+        role_level: editingStaff.role_level
+      }).eq('id', editingStaff.id);
+
+      if (error) {
+        await supabase.from('staff_members').update({
+          name: editingStaff.name,
+          password: editingStaff.password,
+          role_level: editingStaff.role_level
+        }).eq('email', editingStaff.email);
+      }
+
+      logAudit(`Personel Bilgileri ve Şifresi Düzenlendi: ${editingStaff.name}`, currentUser?.name);
+      setEditingStaff(null);
+      alert('Personel bilgileri başarıyla güncellendi!');
+      fetchAllData();
+    } catch (err: any) {
+      alert('Güncelleme hatası: ' + err.message);
+    }
+  };
+
   const handleDeleteStaff = async (staffId: string) => {
     if (!isUpperManagement) {
       alert('Bu işlem için Üst Yönetim yetkisi gereklidir!');
@@ -328,10 +334,28 @@ export default function PortalPage() {
       return;
     }
 
-    logAudit(`Yeni Görev Atandı: ${newTaskTitle} (${newTaskPayload.assignee})`, currentUser?.name);
+    if (assignedStaffObj?.email) {
+      try {
+        await fetch('/api/send-task-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: assignedStaffObj.email,
+            title: newTaskTitle,
+            assigneeName: assignedStaffObj.name,
+            dueDate: newTaskPayload.due_date,
+            backupAssignee: newTaskPayload.backup_assignee
+          })
+        });
+      } catch (mailErr) {
+        console.error('Mail gönderilemedi:', mailErr);
+      }
+    }
+
+    logAudit(`Yeni Görev Atandı ve Mail İletildi: ${newTaskTitle} (${newTaskPayload.assignee})`, currentUser?.name);
     setNewTaskTitle('');
     setNewTaskDueDate('');
-    alert('Görev başarıyla kaydedildi!');
+    alert('Görev kaydedildi ve sorumlu personele e-posta bildirimi iletildi!');
     fetchAllData();
   };
 
@@ -398,86 +422,64 @@ export default function PortalPage() {
 
   if (!authenticated) {
     return (
-      <div className={`min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-        <header className="max-w-7xl w-full mx-auto p-4 md:p-6 flex items-center justify-between border-b border-slate-200">
-          <div className="text-lg font-black text-slate-900 tracking-tight">PANOVA PORTAL</div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center bg-white rounded-xl px-3 py-1.5 border border-slate-200 shadow-sm">
-              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
-              <select
-                value={currentLang}
-                onChange={(e) => changeLanguage(e.target.value as Language)}
-                className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
-              >
-                <option value={currentLang} className="font-bold text-slate-900 bg-white">
-                  {activeLangObj?.flag} {activeLangObj?.name}
-                </option>
-                {selectableLanguages.map((lang) => (
-                  <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">{lang.flag} {lang.name}</option>
-                ))}
-              </select>
+      <div className={`min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center bg-slate-800 rounded-lg px-2.5 py-1.5 border border-slate-700 shadow-sm">
+          <Languages className="w-4 h-4 text-slate-300 mr-1.5 rtl:ml-1.5" />
+          <select
+            value={currentLang}
+            onChange={(e) => changeLanguage(e.target.value as Language)}
+            className="bg-transparent text-xs sm:text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer"
+          >
+            <option value={currentLang} className="text-slate-900 font-bold">
+              {activeLangObj?.flag} {activeLangObj?.name}
+            </option>
+            {selectableLanguages.map((lang) => (
+              <option key={lang.code} value={lang.code} className="text-slate-900">{lang.flag} {lang.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
+          <div className="w-14 h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Lock className="w-7 h-7" />
+          </div>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1">{t.portalTitle}</h1>
+          <p className="text-slate-500 text-xs sm:text-sm mb-6">{t.portalSub}</p>
+
+          <form onSubmit={handleLogin} className="space-y-4 text-left rtl:text-right">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.usernameLabel || 'E-Posta veya Kullanıcı Adı'}</label>
+              <input
+                type="text"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
+                placeholder="admin veya ahmet@panova.com"
+              />
             </div>
-            <Link
-              href="/"
-              className="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition border border-slate-200 shadow-sm"
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.passwordLabel}</label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
+                placeholder="••••••••"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 cursor-pointer text-sm"
             >
-              Ana Sayfaya Dön
-            </Link>
-          </div>
-        </header>
-
-        <main className="flex-1 flex items-center justify-center p-4">
-          <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 border border-slate-200 w-full">
-            <div className="text-center mb-6">
-              <div className="inline-block p-3 bg-emerald-50 text-emerald-700 rounded-2xl mb-2 text-xl font-bold shadow-sm">
-                🛡️
-              </div>
-              <h1 className="text-xl font-black text-slate-900">
-                Yönetim Portal Girişi
-              </h1>
-              <p className="text-slate-500 text-xs mt-1">Manage system operations & workforce</p>
-            </div>
-
-            <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">KULLANICI ADI VEYA E-POSTA *</label>
-                <input
-                  type="text"
-                  required
-                  autoComplete="off"
-                  placeholder="admin veya e-posta"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİFRE *</label>
-                <input
-                  type="password"
-                  required
-                  autoComplete="new-password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2"
-              >
-                Giriş Yap
-              </button>
-            </form>
-          </div>
-        </main>
-
-        <footer className="bg-slate-50 text-slate-400 py-6 text-center text-xs border-t border-slate-200">
-          <p>PANOVA TARIM DOO &bull; International Workforce Management System &copy; 2026</p>
-        </footer>
+              {t.signInBtn}
+            </button>
+          </form>
+          <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-xs sm:text-sm text-slate-500 hover:underline">
+            <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
+          </Link>
+        </div>
       </div>
     );
   }
@@ -796,6 +798,7 @@ export default function PortalPage() {
           </div>
         )}
 
+        {/* Tab 3: Personel Talebi Dosyası (Tamamen Dinamik Çevrili) */}
         {activeTab === 'requests' && (
           <div className="space-y-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -977,18 +980,60 @@ export default function PortalPage() {
               <form onSubmit={handleCreateTask} className="space-y-3 text-xs">
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskDescLabel}</label>
-                  <input
-                    type="text"
-                    required
-                    value={newTaskTitle}
-                    onChange={(e) => setNewTaskTitle(e.target.value)}
-                    placeholder="Görev başlığı yazın..."
-                    className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#2e7d32]"
-                  />
+                  <select 
+                    required 
+                    value={newTaskTitle} 
+                    onChange={(e) => setNewTaskTitle(e.target.value)} 
+                    className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm"
+                  >
+                    <option value="" disabled>{t.selectTaskPrompt || 'Select Task...'}</option>
+                    
+                    {(isUpperManagement || userRole === 'source_country') && (
+                      <optgroup label={t.taskGroupSource}>
+                        <option value="Pasaportu kontrol et">{t.taskPassportCheck}</option>
+                        <option value="Aday ön görüşmesi planla">{t.taskInterviewPlan}</option>
+                        <option value="Aday bilgilerini güncelle">{t.taskUpdateCandidate}</option>
+                        <option value="Eksik evrak talep et">{t.taskRequestDocs}</option>
+                      </optgroup>
+                    )}
+
+                    {(isUpperManagement || userRole === 'target_country') && (
+                      <optgroup label={t.taskGroupTarget}>
+                        <option value="İşveren talebini kaydet">{t.taskSaveDemand}</option>
+                        <option value="Aday eşleştirme yap">{t.taskMatchCandidate}</option>
+                        <option value="İş teklifi hazırla">{t.taskPrepareOffer}</option>
+                        <option value="Performans ve uyum takibi yap">{t.taskTrackPerformance}</option>
+                      </optgroup>
+                    )}
+
+                    {(isUpperManagement || userRole === 'field_officer') && (
+                      <optgroup label={t.taskGroupField}>
+                        <option value="Seyahat tarihini gir">{t.taskEnterTravelDate}</option>
+                        <option value="Konaklama ve karşılama planla">{t.taskPlanAccommodation}</option>
+                        <option value="Destek taleplerini yönet">{t.taskManageSupport}</option>
+                        <option value="Saha görev durumunu güncelle">{t.taskUpdateFieldStatus}</option>
+                      </optgroup>
+                    )}
+
+                    {isUpperManagement && (
+                      <optgroup label={t.taskGroupManagement}>
+                        <option value="Sistem ve logları denetle">{t.taskAuditSystem}</option>
+                        <option value="Mali ve stratejik kararları onayla">{t.taskApproveStrategic}</option>
+                      </optgroup>
+                    )}
+                  </select>
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskAssigneeLabel}</label>
                   <select value={newTaskAssignee} onChange={(e) => setNewTaskAssignee(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm">
+                    {Array.from(new Set(staffMembers.map(s => s.name))).map((name, idx) => (
+                      <option key={idx} value={name} className="text-slate-900 bg-white">{name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskBackupAssigneeLabel}</label>
+                  <select value={newTaskBackup} onChange={(e) => setNewTaskBackup(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm">
                     {Array.from(new Set(staffMembers.map(s => s.name))).map((name, idx) => (
                       <option key={idx} value={name} className="text-slate-900 bg-white">{name}</option>
                     ))}
@@ -1000,7 +1045,7 @@ export default function PortalPage() {
                     type="text" 
                     value={newTaskDueDate} 
                     onChange={(e) => setNewTaskDueDate(e.target.value)} 
-                    placeholder="2026-10-15"
+                    placeholder={t.dateFormatPlaceholder}
                     className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#2e7d32]" 
                   />
                 </div>
@@ -1019,7 +1064,7 @@ export default function PortalPage() {
                       <input type="checkbox" checked={task.status === 'completed'} onChange={() => toggleTaskStatus(task.id, task.status)} className="w-5 h-5 accent-[#2e7d32] cursor-pointer mt-0.5 sm:mt-0 shrink-0" />
                       <div>
                         <h4 className={`font-bold text-xs sm:text-sm ${task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-900'}`}>{task.title}</h4>
-                        <p className="text-[11px] text-slate-500 mt-0.5">{t.assigneeText}: <strong>{task.assignee}</strong> | {t.dueDateText}: {task.due_date}</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">{t.assigneeText}: <strong>{task.assignee}</strong> | {t.backupText}: <strong>{task.backup_assignee}</strong> | {t.dueDateText}: {task.due_date}</p>
                       </div>
                     </div>
                     <span className={`px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold uppercase w-fit ${task.status === 'completed' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>
@@ -1066,24 +1111,15 @@ export default function PortalPage() {
 
         {activeTab === 'employers' && (
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden p-4 sm:p-6 space-y-4">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">🏢 Registered Employers & Management Access</h3>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.employersTab}</h3>
             {employers.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-xs">{t.noEmployers}</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {employers.map((emp) => (
-                  <div key={emp.id} className="p-5 bg-slate-50 rounded-2xl border space-y-3 text-xs sm:text-sm flex flex-col justify-between">
-                    <div>
-                      <h4 className="font-extrabold text-slate-900 text-base">{emp.company_name || emp.name}</h4>
-                      <p className="text-slate-500 mt-1">Contact: <strong>{emp.contact_person || emp.contact_name}</strong> | Country: {emp.country}</p>
-                      <p className="text-slate-500 text-xs mt-0.5">Email: {emp.email} | Phone: {emp.phone}</p>
-                    </div>
-                    <button
-                      onClick={() => handleImpersonateEmployer(emp)}
-                      className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-2.5 rounded-xl text-xs font-bold transition shadow-md cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      <span>🔍</span> İşveren Paneline Git (Giriş Yap)
-                    </button>
+                  <div key={emp.id} className="p-4 bg-slate-50 rounded-2xl border space-y-2 text-xs sm:text-sm">
+                    <h4 className="font-extrabold text-slate-900">{emp.company_name}</h4>
+                    <p className="text-slate-500">Contact: <strong>{emp.contact_person}</strong> | Country: {emp.country}</p>
                   </div>
                 ))}
               </div>
@@ -1113,6 +1149,158 @@ export default function PortalPage() {
         )}
 
       </div>
+
+      {selectedDemandDetail && (
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 z-50 overflow-y-auto">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-4xl w-full shadow-2xl border space-y-6 my-8 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b pb-4">
+              <div>
+                <span className="text-xs font-bold text-emerald-700 uppercase bg-emerald-50 px-2.5 py-1 rounded-lg">
+                  Personnel Demand Dossier (ID: {selectedDemandDetail.id})
+                </span>
+                <h3 className="text-xl font-extrabold text-slate-900 mt-1">{selectedDemandDetail.position_title} - {selectedDemandDetail.employer_name}</h3>
+              </div>
+              <button onClick={() => setSelectedDemandDetail(null)} className="text-slate-400 hover:text-slate-600 font-bold text-xl cursor-pointer p-2">✕</button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
+              <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
+                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">📌 Demand Summary</h4>
+                <div className="grid grid-cols-2 gap-2 text-slate-700">
+                  <div><strong>Employer:</strong> {selectedDemandDetail.employer_name}</div>
+                  <div><strong>Country / City:</strong> {selectedDemandDetail.country} / {selectedDemandDetail.city || 'Center'}</div>
+                  <div><strong>Sector:</strong> {selectedDemandDetail.sector}</div>
+                  <div><strong>Position:</strong> {selectedDemandDetail.position_title}</div>
+                  <div><strong>Headcount:</strong> {selectedDemandDetail.headcount}</div>
+                  <div><strong>Created Date:</strong> {selectedDemandDetail.created_at ? selectedDemandDetail.created_at.substring(0, 10) : 'N/A'}</div>
+                  <div><strong>Target Start:</strong> {selectedDemandDetail.target_start_date || '2026-10-15'}</div>
+                  <div><strong>Status:</strong> <span className="uppercase font-bold text-emerald-700">{selectedDemandDetail.status}</span></div>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
+                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">💼 Working Conditions & Benefits</h4>
+                <div className="grid grid-cols-2 gap-2 text-slate-700">
+                  <div><strong>Salary:</strong> {selectedDemandDetail.salary || 'Negotiable'}</div>
+                  <div><strong>Working Hours:</strong> {selectedDemandDetail.working_hours || '40-45 hrs/week'}</div>
+                  <div><strong>Weekly Days:</strong> {selectedDemandDetail.weekly_days || '5-6 Days'}</div>
+                  <div><strong>Overtime:</strong> {selectedDemandDetail.overtime_policy || 'Standard Legal'}</div>
+                  <div><strong>Accommodation:</strong> {selectedDemandDetail.accommodation ? '✅ Provided' : '❌ Not Provided'}</div>
+                  <div><strong>Food / Transport:</strong> {selectedDemandDetail.food_allowance ? '✅ Yes' : '❌ No'} / {selectedDemandDetail.transportation ? '✅ Yes' : '❌ No'}</div>
+                  <div><strong>Flight Ticket:</strong> {selectedDemandDetail.flight_ticket ? '✅ Employer Covers' : 'Candidate'}</div>
+                  <div><strong>Contract Term:</strong> {selectedDemandDetail.contract_term || '1 Year'}</div>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
+                <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">🎯 Candidate Criteria & Qualifications</h4>
+                <div className="space-y-1 text-slate-700">
+                  <div><strong>Experience:</strong> {selectedDemandDetail.experience_required || 'Min 2 years'}</div>
+                  <div><strong>Certificate:</strong> {selectedDemandDetail.certificate_required || 'Professional Certificate Required'}</div>
+                  <div><strong>Language:</strong> {selectedDemandDetail.language_required || 'Basic English or Local Language'}</div>
+                  <div><strong>Special Req:</strong> {selectedDemandDetail.special_requirements || selectedDemandDetail.special_reqs || 'Shift suitability.'}</div>
+                </div>
+              </div>
+
+              <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 space-y-2">
+                <h4 className="font-extrabold text-emerald-900 uppercase text-xs border-b border-emerald-200 pb-1">📊 Process Counts & Metrics</h4>
+                <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                  <div className="bg-white p-2 rounded-xl border">
+                    <span className="block text-slate-500 text-[10px]">Requested</span>
+                    <strong className="text-base text-slate-900">{selectedDemandDetail.headcount}</strong>
+                  </div>
+                  <div className="bg-white p-2 rounded-xl border">
+                    <span className="block text-slate-500 text-[10px]">Connected</span>
+                    <strong className="text-base text-blue-600">{candidates.length}</strong>
+                  </div>
+                  <div className="bg-white p-2 rounded-xl border">
+                    <span className="block text-slate-500 text-[10px]">Approved</span>
+                    <strong className="text-base text-emerald-700">{candidates.filter(c => c.status === 'approved').length}</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 border-t pt-4">
+              <h4 className="font-extrabold text-slate-900 text-sm">👥 Candidates Connected & Offered to This Demand</h4>
+              <div className="bg-slate-50 rounded-2xl p-4 border max-h-48 overflow-y-auto space-y-2">
+                {candidates.slice(0, 3).map((cand) => (
+                  <div key={cand.id} className="flex items-center justify-between bg-white p-3 rounded-xl border text-xs">
+                    <div>
+                      <strong>{cand.full_name}</strong> ({cand.profession}) - <span className="text-slate-400">{cand.nationality || cand.country}</span>
+                    </div>
+                    <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-lg font-bold uppercase text-[10px]">
+                      {cand.status}
+                    </span>
+                  </div>
+                ))}
+                {candidates.length === 0 && (
+                  <p className="text-xs text-slate-400 text-center py-2">No candidates assigned yet.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2 border-t pt-4 text-xs">
+              <h4 className="font-extrabold text-slate-900 uppercase">📝 Internal Notes & Timeline</h4>
+              <div className="bg-slate-50 p-3 rounded-xl border text-slate-600 space-y-1">
+                <p>• {selectedDemandDetail.created_at ? selectedDemandDetail.created_at.substring(0, 10) : '2026-09-22'}: Employer demand registered in system and dossier opened.</p>
+                <p>• Candidate sourcing and preliminary interviews initiated in source country.</p>
+                {selectedDemandDetail.cancellation_reason && (
+                  <p className="text-red-600 font-bold">• Cancellation Info: {selectedDemandDetail.cancellation_reason}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t">
+              <button
+                onClick={() => setSelectedDemandDetail(null)}
+                className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-6 py-2.5 rounded-xl text-xs font-bold transition shadow cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingStaff && isUpperManagement && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 z-50">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border space-y-4">
+            <div className="flex justify-between items-center border-b pb-3">
+              <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                <Key className="w-4 h-4 text-emerald-700" /> Edit Staff & Password
+              </h3>
+              <button onClick={() => setEditingStaff(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
+            </div>
+            <form onSubmit={handleSaveStaffEdit} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Full Name</label>
+                <input type="text" required value={editingStaff.name} onChange={(e) => setEditingStaff({ ...editingStaff, name: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
+              </div>
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Email (For Login)</label>
+                <input type="email" required value={editingStaff.email} onChange={(e) => setEditingStaff({ ...editingStaff, email: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
+              </div>
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">New Password</label>
+                <input type="text" required value={editingStaff.password || ''} onChange={(e) => setEditingStaff({ ...editingStaff, password: e.target.value })} placeholder="Enter new password" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
+              </div>
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Role / Permission Level</label>
+                <select value={editingStaff.role_level} onChange={(e) => setEditingStaff({ ...editingStaff, role_level: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer">
+                  <option value="upper_management" className="text-slate-900 bg-white">👑 {t.roleUpperManagement}</option>
+                  <option value="source_country" className="text-slate-900 bg-white">🌍 {t.roleSourceCountry}</option>
+                  <option value="target_country" className="text-slate-900 bg-white">🏢 {t.roleTargetCountry}</option>
+                  <option value="field_officer" className="text-slate-900 bg-white">✈️ {t.roleFieldOfficer}</option>
+                </select>
+              </div>
+              <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs">
+                Save Changes and Password
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
