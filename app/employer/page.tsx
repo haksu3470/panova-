@@ -67,6 +67,33 @@ export default function EmployerPortal() {
   const [editCountry, setEditCountry] = useState('North Macedonia');
   const [editCompanyLogo, setEditCompanyLogo] = useState('');
 
+  // Sayfa açıldığında Supabase'ten en güncel veriyi (logo dahil) çekiyoruz
+  useEffect(() => {
+    async function fetchLatestFromDB() {
+      const targetEmail = employerProfile?.email || 'huseyinaksu@gmail.com';
+      const { data, error } = await supabase
+        .from('employers')
+        .select('*')
+        .eq('email', targetEmail)
+        .maybeSingle();
+
+      if (data) {
+        const synced = {
+          id: data.id,
+          companyName: data.company_name || 'AKAY EĞİTİM',
+          contactPerson: data.contact_person || 'Hüseyin Aksu',
+          email: data.email || targetEmail,
+          phone: data.phone || '+38970385792',
+          country: data.country || 'North Macedonia',
+          companyLogo: data.logo || ''
+        };
+        setEmployerProfile(synced);
+        localStorage.setItem('panova_employer_profile', JSON.stringify(synced));
+      }
+    }
+    fetchLatestFromDB();
+  }, []);
+
   useEffect(() => {
     if (employerProfile) {
       setEditCompanyName(employerProfile.companyName || employerProfile.company_name || 'AKAY EĞİTİM');
@@ -138,13 +165,40 @@ export default function EmployerPortal() {
     if (ticketData) setSupportTickets(ticketData);
   };
 
+  // Logo yükleme: Görseli optimize ederek base64 formatına çeviriyoruz
   const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setEditCompanyLogo(base64String);
+        const img = new Image();
+        img.src = reader.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 300;
+          const MAX_HEIGHT = 300;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          setEditCompanyLogo(compressedDataUrl);
+        };
       };
       reader.readAsDataURL(file);
     }
@@ -163,17 +217,36 @@ export default function EmployerPortal() {
     };
 
     try {
-      if (employerProfile.id && employerProfile.id !== 'admin_master') {
+      const targetEmail = editEmail || employerProfile.email || 'huseyinaksu@gmail.com';
+      
+      const { data: existing } = await supabase
+        .from('employers')
+        .select('id')
+        .eq('email', targetEmail)
+        .maybeSingle();
+
+      if (existing) {
         await supabase.from('employers').update({
           company_name: editCompanyName,
           contact_person: editContactPerson,
-          email: editEmail,
           phone: editPhone,
           country: editCountry,
           logo: editCompanyLogo
-        }).eq('id', employerProfile.id);
+        }).eq('email', targetEmail);
+      } else {
+        await supabase.from('employers').insert([{
+          company_name: editCompanyName,
+          contact_person: editContactPerson,
+          email: targetEmail,
+          phone: editPhone,
+          country: editCountry,
+          logo: editCompanyLogo,
+          password: 'panova2026'
+        }]);
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error('DB Update Error:', err);
+    }
 
     setEmployerProfile(updated);
     if (typeof window !== 'undefined') {
