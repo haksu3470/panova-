@@ -486,7 +486,7 @@ export default function PortalPage() {
     );
   }
 
-  // EĞER BİR İŞVEREN DOSYASI SEÇİLDİYSE: Doğrudan o işverenin tam dosya / panel görünümüne geçiş yap
+  // EĞER BİR İŞVEREN DOSYASI SEÇİLDİYSE: Doğrudan o işverenin tam dosya / panel görünümüne geçiş yap ve ana admin paneli render edilmesini engelle
   if (selectedEmployerDetail) {
     return (
       <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -1367,10 +1367,10 @@ export default function PortalPage() {
               </div>
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">New Password</label>
-                <input type="text" required value={editingStaff.password || ''} onChange={(e) => setEditingStaff({ ...editingStaff, password: e.target.value })} placeholder="Enter new password" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
+                <input type="text" required value={editingStaff.password || ''} onChange={(e) => setEditingStaff({ ...editingStaff, password: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
               </div>
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Role / Permission Level</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Role Level</label>
                 <select value={editingStaff.role_level} onChange={(e) => setEditingStaff({ ...editingStaff, role_level: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer">
                   <option value="upper_management" className="text-slate-900 bg-white">👑 {t.roleUpperManagement}</option>
                   <option value="source_country" className="text-slate-900 bg-white">🌍 {t.roleSourceCountry}</option>
