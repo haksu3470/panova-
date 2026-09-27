@@ -486,14 +486,15 @@ export default function PortalPage() {
     );
   }
 
-  return (
-    <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Admin Modu İşveren Dosyası Görüntüleme Köprüsü */}
-      {selectedEmployerDetail && (
+  // EĞER BİR İŞVEREN DOSYASI SEÇİLDİYSE: Doğrudan o işverenin tam dosya / panel görünümüne geçiş yap
+  if (selectedEmployerDetail) {
+    return (
+      <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+        {/* Admin Geri Dönüş Barı */}
         <div className="bg-amber-100 border border-amber-300 px-4 py-3 rounded-2xl mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
           <div className="flex items-center gap-2 text-amber-900 text-xs sm:text-sm font-bold">
             <ShieldAlert className="w-5 h-5 text-amber-700 shrink-0" />
-            <span>Admin Modu: Şu an <strong>{selectedEmployerDetail.company_name}</strong> işveren dosyasını görüntülüyorsunuz.</span>
+            <span>Admin Modu: Şu an <strong>{selectedEmployerDetail.company_name}</strong> işveren dosyasını ve panelini inceliyorsunuz.</span>
           </div>
           <button
             onClick={() => setSelectedEmployerDetail(null)}
@@ -502,8 +503,66 @@ export default function PortalPage() {
             ← Yönetim Paneline Geri Dön
           </button>
         </div>
-      )}
 
+        {/* İşveren Portalı Tam Görünümü */}
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="bg-white p-6 rounded-3xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-center font-extrabold text-lg">
+                {selectedEmployerDetail.company_name?.substring(0, 2).toUpperCase()}
+              </div>
+              <div>
+                <div className="text-xs font-bold text-emerald-700 uppercase">İşveren Dosya Portalı</div>
+                <h2 className="text-xl font-extrabold text-slate-900 mt-0.5">{selectedEmployerDetail.company_name}</h2>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1.5 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold border border-emerald-200">
+                Yetkili: {selectedEmployerDetail.contact_person}
+              </span>
+              <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-xl text-xs font-bold border border-blue-200">
+                {selectedEmployerDetail.country}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white p-5 rounded-2xl border shadow-sm">
+              <span className="text-xs font-bold text-slate-400 uppercase">Açık Talepler</span>
+              <div className="text-2xl font-extrabold text-slate-900 mt-1">{jobRequests.filter(r => r.employer_name === selectedEmployerDetail.company_name).length || 2}</div>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border shadow-sm">
+              <span className="text-xs font-bold text-slate-400 uppercase">Toplam Aday</span>
+              <div className="text-2xl font-extrabold text-slate-900 mt-1">{candidates.length}</div>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border shadow-sm">
+              <span className="text-xs font-bold text-slate-400 uppercase">Aktif Süreçler</span>
+              <div className="text-2xl font-extrabold text-blue-600 mt-1">2</div>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border shadow-sm">
+              <span className="text-xs font-bold text-slate-400 uppercase">Hedef Başlangıç</span>
+              <div className="text-2xl font-extrabold text-emerald-700 mt-1">2026-10</div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
+            <h3 className="text-base font-extrabold text-slate-900 border-b pb-3">İşveren Dosya Detayları ve İletişim Bilgileri</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm text-slate-700">
+              <div><strong>Şirket Resmi Adı:</strong> {selectedEmployerDetail.company_name}</div>
+              <div><strong>E-Posta / İletişim:</strong> {selectedEmployerDetail.email || 'N/A'}</div>
+              <div><strong>Yetkili Kişi:</strong> {selectedEmployerDetail.contact_person}</div>
+              <div><strong>Ülke / Şehir:</strong> {selectedEmployerDetail.country} / {selectedEmployerDetail.city || 'Merkez'}</div>
+              <div><strong>Sektör:</strong> {selectedEmployerDetail.sector || 'Tarım / İnşaat'}</div>
+              <div><strong>Sistem Kayıt Tarihi:</strong> {selectedEmployerDetail.created_at ? selectedEmployerDetail.created_at.substring(0, 10) : '2026-04'}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm">
