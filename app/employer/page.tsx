@@ -74,7 +74,7 @@ export default function EmployerPortal() {
       setEditEmail(employerProfile.email || 'huseyinaksu@gmail.com');
       setEditPhone(employerProfile.phone || '+38970385792');
       setEditCountry(employerProfile.country || 'North Macedonia');
-      setEditCompanyLogo(employerProfile.companyLogo || employerProfile.company_logo || '');
+      setEditCompanyLogo(employerProfile.companyLogo || employerProfile.company_logo || employerProfile.logo || '');
     }
   }, [employerProfile]);
 
@@ -170,7 +170,7 @@ export default function EmployerPortal() {
           email: editEmail,
           phone: editPhone,
           country: editCountry,
-          company_logo: editCompanyLogo
+          logo: editCompanyLogo
         }).eq('id', employerProfile.id);
       }
     } catch (err) {}
@@ -183,7 +183,6 @@ export default function EmployerPortal() {
   };
 
   const handleLogout = () => {
-    // Çıkışta profil asla silinmez, korunur.
     window.location.href = '/employer-login';
   };
 
