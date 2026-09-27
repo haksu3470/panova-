@@ -67,7 +67,6 @@ export default function PortalPage() {
   const [tasks, setTasks] = useState<any[]>([]);
 
   const [selectedDemandDetail, setSelectedDemandDetail] = useState<any | null>(null);
-  const [selectedEmployerDetail, setSelectedEmployerDetail] = useState<any | null>(null);
 
   const [auditLogs, setAuditLogs] = useState<any[]>([
     { id: '1', actionKey: 'initialAuditLog', performer: 'Hüseyin Aksu', time: '2026-09-22 12:00' }
@@ -200,7 +199,6 @@ export default function PortalPage() {
   const handleLogout = () => {
     setAuthenticated(false);
     setCurrentUser(null);
-    setSelectedEmployerDetail(null);
     if (typeof window !== 'undefined') {
       localStorage.removeItem('panova_admin_auth');
       localStorage.removeItem('panova_current_user');
@@ -481,81 +479,6 @@ export default function PortalPage() {
           <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-xs sm:text-sm text-slate-500 hover:underline">
             <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
           </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // EĞER BİR İŞVEREN DOSYASI SEÇİLDİYSE: Doğrudan o işverenin tam dosya / panel görünümüne geçiş yap ve ana admin paneli render edilmesini engelle
-  if (selectedEmployerDetail) {
-    return (
-      <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-        {/* Admin Geri Dönüş Barı */}
-        <div className="bg-amber-100 border border-amber-300 px-4 py-3 rounded-2xl mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
-          <div className="flex items-center gap-2 text-amber-900 text-xs sm:text-sm font-bold">
-            <ShieldAlert className="w-5 h-5 text-amber-700 shrink-0" />
-            <span>Admin Modu: Şu an <strong>{selectedEmployerDetail.company_name}</strong> işveren dosyasını ve panelini inceliyorsunuz.</span>
-          </div>
-          <button
-            onClick={() => setSelectedEmployerDetail(null)}
-            className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer shadow"
-          >
-            ← Yönetim Paneline Geri Dön
-          </button>
-        </div>
-
-        {/* İşveren Portalı Tam Görünümü */}
-        <div className="max-w-7xl mx-auto space-y-6">
-          <div className="bg-white p-6 rounded-3xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-center font-extrabold text-lg">
-                {selectedEmployerDetail.company_name?.substring(0, 2).toUpperCase()}
-              </div>
-              <div>
-                <div className="text-xs font-bold text-emerald-700 uppercase">İşveren Dosya Portalı</div>
-                <h2 className="text-xl font-extrabold text-slate-900 mt-0.5">{selectedEmployerDetail.company_name}</h2>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1.5 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold border border-emerald-200">
-                Yetkili: {selectedEmployerDetail.contact_person}
-              </span>
-              <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-xl text-xs font-bold border border-blue-200">
-                {selectedEmployerDetail.country}
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-2xl border shadow-sm">
-              <span className="text-xs font-bold text-slate-400 uppercase">Açık Talepler</span>
-              <div className="text-2xl font-extrabold text-slate-900 mt-1">{jobRequests.filter(r => r.employer_name === selectedEmployerDetail.company_name).length || 2}</div>
-            </div>
-            <div className="bg-white p-5 rounded-2xl border shadow-sm">
-              <span className="text-xs font-bold text-slate-400 uppercase">Toplam Aday</span>
-              <div className="text-2xl font-extrabold text-slate-900 mt-1">{candidates.length}</div>
-            </div>
-            <div className="bg-white p-5 rounded-2xl border shadow-sm">
-              <span className="text-xs font-bold text-slate-400 uppercase">Aktif Süreçler</span>
-              <div className="text-2xl font-extrabold text-blue-600 mt-1">2</div>
-            </div>
-            <div className="bg-white p-5 rounded-2xl border shadow-sm">
-              <span className="text-xs font-bold text-slate-400 uppercase">Hedef Başlangıç</span>
-              <div className="text-2xl font-extrabold text-emerald-700 mt-1">2026-10</div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
-            <h3 className="text-base font-extrabold text-slate-900 border-b pb-3">İşveren Dosya Detayları ve İletişim Bilgileri</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm text-slate-700">
-              <div><strong>Şirket Resmi Adı:</strong> {selectedEmployerDetail.company_name}</div>
-              <div><strong>E-Posta / İletişim:</strong> {selectedEmployerDetail.email || 'N/A'}</div>
-              <div><strong>Yetkili Kişi:</strong> {selectedEmployerDetail.contact_person}</div>
-              <div><strong>Ülke / Şehir:</strong> {selectedEmployerDetail.country} / {selectedEmployerDetail.city || 'Merkez'}</div>
-              <div><strong>Sektör:</strong> {selectedEmployerDetail.sector || 'Tarım / İnşaat'}</div>
-              <div><strong>Sistem Kayıt Tarihi:</strong> {selectedEmployerDetail.created_at ? selectedEmployerDetail.created_at.substring(0, 10) : '2026-04'}</div>
-            </div>
-          </div>
         </div>
       </div>
     );
@@ -1197,7 +1120,20 @@ export default function PortalPage() {
                     <div className="flex items-center justify-between">
                       <h4 className="font-extrabold text-slate-900">{emp.company_name}</h4>
                       <button
-                        onClick={() => setSelectedEmployerDetail(emp)}
+                        onClick={() => {
+                          const employerSessionData = {
+                            id: emp.id,
+                            company_name: emp.company_name,
+                            email: emp.email || 'huseyinaksu@gmail.com',
+                            contact_person: emp.contact_person,
+                            country: emp.country,
+                            sector: emp.sector || 'Tarım / İnşaat',
+                            isAdminImpersonation: true
+                          };
+                          localStorage.setItem('panova_employer_auth', 'true');
+                          localStorage.setItem('panova_employer_user', JSON.stringify(employerSessionData));
+                          window.location.href = '/employer';
+                        }}
                         className="px-3 py-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm"
                       >
                         İşveren Dosyasını Aç & İncele
