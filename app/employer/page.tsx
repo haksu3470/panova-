@@ -343,6 +343,20 @@ export default function EmployerPortal() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            {/* Admin Tarafından Açıldıysa Gösterilecek Geri Dönüş Butonu */}
+            {typeof window !== 'undefined' && JSON.parse(localStorage.getItem('panova_employer_user') || '{}')?.isAdminImpersonation && (
+              <button
+                onClick={() => {
+                  localStorage.removeItem('panova_employer_auth');
+                  localStorage.removeItem('panova_employer_user');
+                  window.location.href = '/portal';
+                }}
+                className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer"
+              >
+                ← Admin Paneline Dön
+              </button>
+            )}
+
             <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl text-xs">
               <span className="font-bold text-slate-900">Yetkili: {editContactPerson || employerProfile.contactPerson}</span>
             </div>
