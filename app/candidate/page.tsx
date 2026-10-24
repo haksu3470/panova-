@@ -72,7 +72,6 @@ export default function CandidateDashboard() {
   const [newPhoto, setNewPhoto] = useState('');
   const [newVideoUrl, setNewVideoUrl] = useState('');
   
-  // Acil Durum İletişimi State'leri
   const [newEmergencyName, setNewEmergencyName] = useState('');
   const [newEmergencyRelation, setNewEmergencyRelation] = useState('');
   const [newEmergencyPhone, setNewEmergencyPhone] = useState('');
@@ -85,9 +84,6 @@ export default function CandidateDashboard() {
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMsg, setSupportMsg] = useState('');
   const [supportSending, setSupportSending] = useState(false);
-
-  const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
-  const [previewVideo, setPreviewVideo] = useState<string | null>(null);
 
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
@@ -250,15 +246,6 @@ export default function CandidateDashboard() {
     } else {
       alert('Hata: ' + error.message);
     }
-  };
-
-  const markNotificationAsRead = async (notifId: string) => {
-    await supabase
-      .from('candidate_notifications')
-      .update({ is_read: true })
-      .eq('id', notifId);
-
-    setNotifications(notifications.map(n => n.id === notifId ? { ...n, is_read: true } : n));
   };
 
   const handleSendSupport = async (e: React.FormEvent) => {
@@ -582,18 +569,6 @@ export default function CandidateDashboard() {
   ];
   const candidateDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : defaultDocs;
   const currentLangTitles = docTitlesByLang[currentLang] || docTitlesByLang.tr;
-  const unreadNotifsCount = notifications.filter(n => !n.is_read).length;
-  const pendingOffersCount = jobOffers.filter(o => o.status === 'pending').length;
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'pending': return t.pendingStatus;
-      case 'reviewing': return t.reviewingStatus;
-      case 'visa_processing': return t.visaProcessingStatus;
-      case 'approved': return t.approvedStatus;
-      default: return status;
-    }
-  };
 
   return (
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -647,26 +622,25 @@ export default function CandidateDashboard() {
           </div>
         </div>
 
-        {/* Navigasyon Sekmeleri */}
+        {/* Navigasyon Sekmeleri (Sözlükteki 'profile', 'documents', 'offers' kullanıldı) */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
           <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📊 {t.overviewTab || 'Genel Bakış'}
+            📊 {t.overview || 'Genel Bakış'}
           </button>
           <button onClick={() => setActiveTab('profile')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            👤 {t.profileTab || 'Profilim'}
+            👤 {t.profile || 'Profilim'}
           </button>
           <button onClick={() => setActiveTab('documents')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'documents' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📁 {t.documentsTab || 'Belgelerim'}
+            📁 {t.documents || 'Belgelerim'}
           </button>
           <button onClick={() => setActiveTab('offers')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'offers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            💼 {t.offersTab || 'İş Tekliflerim'} ({jobOffers.length})
+            💼 {t.offers || 'İş Tekliflerim'} ({jobOffers.length})
           </button>
           <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            💬 {t.supportTab || 'Destek'} ({supportTickets.length})
+            💬 {t.support || 'Destek'} ({supportTickets.length})
           </button>
         </div>
 
-        {/* Profil Sekmesi (Acil Durum İletişimi Entegre Edilmiş Hali) */}
         {activeTab === 'profile' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-6">
             <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">👤 Profil Bilgileri & Acil Durum İletişimi</h3>
@@ -693,7 +667,6 @@ export default function CandidateDashboard() {
                 </div>
               </div>
 
-              {/* Acil Durum İletişim Alanları (Bangladeş Standardı Entegrasyonu) */}
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-3">
                 <h4 className="font-extrabold text-slate-900 text-xs text-emerald-800 uppercase border-b pb-1">🚨 Acil Durum İletişim Bilgileri (Emergency Contact)</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -751,7 +724,6 @@ export default function CandidateDashboard() {
           </div>
         )}
 
-        {/* Diğer Sekmeler (Genel Bakış, Belgeler, Teklifler, Destek vb.) standart yüklenir */}
         {activeTab === 'overview' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
             <h3 className="text-lg font-extrabold text-slate-900">📊 Aday Durum Özeti</h3>
@@ -818,7 +790,7 @@ export default function CandidateDashboard() {
                 <label className="block font-bold text-slate-700 uppercase mb-1">Mesajınız</label>
                 <textarea value={supportMsg} onChange={(e) => setSupportMsg(e.target.value)} required rows={3} placeholder="Sorununuzu detaylı yazın..." className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white" />
               </div>
-              <button type="submit" disabled={supportSending} className="bg-[#2e7d32] text-white px-6 py-2.5 rounded-xl font-bold cursor-pointer">{supportSending ? 'Gönderiliyor...' : 'Destek Talebi Gönder'}</button>
+              <button type="submit" className="bg-[#2e7d32] text-white px-6 py-2.5 rounded-xl font-bold cursor-pointer">Destek Talebi Gönder</button>
             </form>
           </div>
         )}
