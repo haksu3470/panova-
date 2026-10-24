@@ -398,7 +398,7 @@ export default function EmployerPortal() {
             )}
 
             <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl text-xs">
-              <span className="font-bold text-slate-900">Yetkili: {editContactPerson || employerProfile.contactPerson}</span>
+              <span className="font-bold text-slate-950">Yetkili: {editContactPerson || employerProfile.contactPerson}</span>
             </div>
 
             <Link
@@ -740,7 +740,7 @@ export default function EmployerPortal() {
           </div>
         )}
 
-        {/* 4. GÖRÜŞMELER (YENİ VE EKSİKSİZ) */}
+        {/* 4. GÖRÜŞMELER (DİNAMİK ÇEVİRİ DESTEKLİ) */}
         {activeTab === 'interviews' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <div className="flex justify-between items-center border-b pb-3">
@@ -748,7 +748,7 @@ export default function EmployerPortal() {
                 <Video className="w-5 h-5 text-emerald-700" /> {t.interviewsTitle || 'Planlanan ve Tamamlanan Görüşmeler'}
               </h3>
               <span className="bg-amber-50 text-amber-800 text-xs font-bold px-3 py-1 rounded-xl border border-amber-200">
-                Aktif Randevular: {interviews.length}
+                {t.activeAppointments || 'Aktif Randevular'}: {interviews.length}
               </span>
             </div>
 
@@ -769,10 +769,10 @@ export default function EmployerPortal() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-xl uppercase">
-                        {item.status || 'Planlandı'}
+                        {t[item.status as keyof typeof t] || item.status || 'Planlandı'}
                       </span>
                       <a href="#video-call" onClick={(e) => { e.preventDefault(); alert('Canlı mülakat odasına bağlanılıyor...'); }} className="bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-                        <Video className="w-3.5 h-3.5" /> Mülakata Katıl
+                        <Video className="w-3.5 h-3.5" /> {t.joinInterviewBtn || 'Mülakata Katıl'}
                       </a>
                     </div>
                   </div>
@@ -782,7 +782,7 @@ export default function EmployerPortal() {
           </div>
         )}
 
-        {/* 5. SEÇTİĞİM ADAYLAR (YENİ VE EKSİKSİZ) */}
+        {/* 5. SEÇTİĞİM ADAYLAR */}
         {activeTab === 'selected' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <div className="flex justify-between items-center border-b pb-3">
@@ -790,7 +790,7 @@ export default function EmployerPortal() {
                 <Star className="w-5 h-5 text-purple-600" /> {t.selectedCandidatesTitle || 'Onayladığınız / Seçtiğiniz Adaylar'}
               </h3>
               <span className="bg-purple-50 text-purple-800 text-xs font-bold px-3 py-1 rounded-xl border border-purple-200">
-                Toplam Seçilen: {selectedCandidates.length}
+                {t.totalSelected || 'Toplam Seçilen'}: {selectedCandidates.length}
               </span>
             </div>
 
@@ -810,12 +810,8 @@ export default function EmployerPortal() {
                         <p className="text-xs text-slate-500">{cand.profession || 'Uzman'} • {cand.nationality || 'Makedonya'}</p>
                       </div>
                       <span className="bg-emerald-50 text-emerald-800 text-[10px] font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Onaylandı & İşlemde
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" /> {t.approvedAndProcessing || 'Onaylandı & İşlemde'}
                       </span>
-                    </div>
-                    <div className="bg-slate-50 p-2.5 rounded-xl text-[11px] text-slate-600 space-y-1">
-                      <div>📋 Vize Durumu: <span className="font-bold text-slate-900">Çalışma İzni Başvurusu Yapıldı</span></div>
-                      <div>✈️ Tahmini Varış: <span className="font-bold text-slate-900">Kasım 2026</span></div>
                     </div>
                   </div>
                 ))}

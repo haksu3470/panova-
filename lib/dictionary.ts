@@ -420,6 +420,11 @@ export interface Translation {
 
   richDemandWizardTitle?: string;
   richDemandWizardDesc?: string;
+
+  activeAppointments?: string;
+  joinInterviewBtn?: string;
+  totalSelected?: string;
+  approvedAndProcessing?: string;
 }
 
 export const languages = [
@@ -848,7 +853,12 @@ export const translations: Record<Language, Translation> = {
     demandSelected: 'SEÇİLEN',
     demandInProcess: 'İŞLEMDE',
     demandTravelReady: 'SEYAHAT HAZIR',
-    demandStarted: 'İŞE BAŞLAYAN'
+    demandStarted: 'İŞE BAŞLAYAN',
+
+    activeAppointments: 'Aktif Randevular',
+    joinInterviewBtn: 'Mülakata Katıl',
+    totalSelected: 'Toplam Seçilen',
+    approvedAndProcessing: 'Onaylandı & İşlemde'
   },
   en: {
     returnHome: 'Return to Home',
@@ -1267,7 +1277,12 @@ export const translations: Record<Language, Translation> = {
     demandSelected: 'SELECTED',
     demandInProcess: 'IN PROCESS',
     demandTravelReady: 'TRAVEL READY',
-    demandStarted: 'STARTED WORK'
+    demandStarted: 'STARTED WORK',
+
+    activeAppointments: 'Active Appointments',
+    joinInterviewBtn: 'Join Interview',
+    totalSelected: 'Total Selected',
+    approvedAndProcessing: 'Approved & In Process'
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -1686,7 +1701,12 @@ export const translations: Record<Language, Translation> = {
     demandSelected: 'ZGJIDHUR',
     demandInProcess: 'NË PROCES',
     demandTravelReady: 'GATI PËR UDHËTIM',
-    demandStarted: 'FILLUAR PUNËN'
+    demandStarted: 'FILLUAR PUNËN',
+
+    activeAppointments: 'Takimet Aktive',
+    joinInterviewBtn: 'Bashkohu në Intervistë',
+    totalSelected: 'Totali i Zgjedhur',
+    approvedAndProcessing: 'Miratuar & Në Proçes'
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -1914,6 +1934,11 @@ export const translations: Record<Language, Translation> = {
     demandSelected: 'المختار',
     demandInProcess: 'قيد المعالجة',
     demandTravelReady: 'جاهز للسفر',
-    demandStarted: 'بدء العمل'
+    demandStarted: 'بدء العمل',
+
+    activeAppointments: 'المواعيد النشطة',
+    joinInterviewBtn: 'الانضمام للمقابلة',
+    totalSelected: 'إجمالي المختارين',
+    approvedAndProcessing: 'تم الموافقة وقيد المعالجة'
   }
 };
