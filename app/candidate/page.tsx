@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { 
   User, CheckCircle2, LogOut, Lock, Camera, 
   FileText, Eye, X, Briefcase, Calendar, 
-  Plane, Languages, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, Video, ShieldAlert, ShieldCheck
+  Plane, Languages, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, Video, ShieldAlert, ShieldCheck, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
@@ -582,6 +582,13 @@ export default function CandidateDashboard() {
   const candidateDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : defaultDocs;
   const currentLangTitles = docTitlesByLang[currentLang] || docTitlesByLang.tr;
 
+  // Eksik belge ve profil analizi hesaplamaları
+  const missingDocs = candidateDocs.filter((d: any) => d.status !== 'uploaded');
+  const missingProfileFields = [];
+  if (!candidate.photo_url) missingProfileFields.push('Profil Fotoğrafı');
+  if (!candidate.video_url) missingProfileFields.push('Çalışma/Tanıtım Videosu');
+  if (!candidate.emergency_name || !candidate.emergency_phone) missingProfileFields.push('Acil Durum İletişim Bilgileri');
+
   return (
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
@@ -774,10 +781,66 @@ export default function CandidateDashboard() {
           </div>
         )}
 
+        {/* GENEL BAKIŞ (ÖZET) - EKSİKLİKLERİN LİSTELENDİĞİ AKILLI BÖLÜM */}
         {activeTab === 'overview' && (
-          <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-extrabold text-slate-900">📊 Aday Durum Özeti</h3>
-            <p className="text-xs text-slate-600">Başvurunuz ve resmî süreçleriniz PANOVA sisteminde başarıyla takip edilmektedir.</p>
+          <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-6">
+            <div className="border-b pb-4 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-extrabold text-slate-900">📊 Aday Durum ve Eksiklik Özeti</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Başvurunuzun ve profilinizin onay alabilmesi için tamamlanması gereken eksikler aşağıda listelenmiştir.</p>
+              </div>
+              <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase ${missingDocs.length === 0 && missingProfileFields.length === 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                {missingDocs.length === 0 && missingProfileFields.length === 0 ? '✓ Her Şey Tamam' : '⚠️ Eksikler Var'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Profil Eksikleri Kutusu */}
+              <div className="bg-slate-50 p-4 rounded-2xl border space-y-3">
+                <div className="flex items-center gap-2 font-extrabold text-slate-900 text-xs">
+                  <User className="w-4 h-4 text-emerald-700" />
+                  <span>Profil & Bilgi Eksikleri</span>
+                </div>
+                {missingProfileFields.length === 0 ? (
+                  <p className="text-xs text-emerald-700 font-medium">✓ Profil bilgileriniz ve fotoğraflarınız eksiksiz.</p>
+                ) : (
+                  <ul className="space-y-1.5 text-xs text-amber-800">
+                    {missingProfileFields.map((field, i) => (
+                      <li key={i} className="flex items-center gap-1.5 bg-amber-50 p-2 rounded-xl border border-amber-200">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span><strong>{field}</strong> eklenmedi.</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <button onClick={() => setActiveTab('profile')} className="w-full mt-2 py-2 bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-xl border text-xs transition cursor-pointer">
+                  Profili Düzenle & Eksikleri Tamamla →
+                </button>
+              </div>
+
+              {/* Belge Eksikleri Kutusu */}
+              <div className="bg-slate-50 p-4 rounded-2xl border space-y-3">
+                <div className="flex items-center gap-2 font-extrabold text-slate-900 text-xs">
+                  <FileText className="w-4 h-4 text-emerald-700" />
+                  <span>Belge Eksikleri ({missingDocs.length} Belge Bekleniyor)</span>
+                </div>
+                {missingDocs.length === 0 ? (
+                  <p className="text-xs text-emerald-700 font-medium">✓ Tüm zorunlu belgeler yüklendi.</p>
+                ) : (
+                  <ul className="space-y-1.5 text-xs text-red-800">
+                    {missingDocs.map((doc: any, i: number) => (
+                      <li key={i} className="flex items-center gap-1.5 bg-red-50 p-2 rounded-xl border border-red-200">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span><strong>{doc.name}</strong> henüz yüklenmedi.</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <button onClick={() => setActiveTab('documents')} className="w-full mt-2 py-2 bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-xl border text-xs transition cursor-pointer">
+                  Belgeleri Yükle →
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
