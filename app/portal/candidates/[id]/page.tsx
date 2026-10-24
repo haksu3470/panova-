@@ -77,7 +77,7 @@ export default function CandidateDetailPage() {
   const [pnrCode, setPnrCode] = useState('');
   const [accommodationDetails, setAccommodationDetails] = useState('');
 
-  // Vazgeçme ve Süreç Kapatma State'leri
+  // Vazgeçme ve Süreç Kapatma State'leri (JSON içinde güvenle saklanır)
   const [closureReason, setClosureReason] = useState('');
   const [isClosed, setIsClosed] = useState(false);
 
@@ -107,7 +107,6 @@ export default function CandidateDetailPage() {
     fetchCandidateDetail();
   }, [candidateId]);
 
-  // Dil değiştiğinde ilk 4 varsayılan belgenin isimlerini güncel dile göre dinamik çevir
   useEffect(() => {
     if (documents.length > 0) {
       setDocuments(prevDocs => 
@@ -150,8 +149,14 @@ export default function CandidateDetailPage() {
       setPnrCode(data.pnr_code || '');
       setAccommodationDetails(data.accommodation_details || '');
 
-      setIsClosed(data.is_closed || false);
-      setClosureReason(data.closure_reason || '');
+      // JSON içinden closure/kapanış verilerini güvenli okuma
+      try {
+        const parsedMeta = data.documents_json ? JSON.parse(data.documents_json) : {};
+        if (parsedMeta && parsedMeta.closure_meta) {
+          setIsClosed(parsedMeta.closure_meta.is_closed || false);
+          setClosureReason(parsedMeta.closure_meta.closure_reason || '');
+        }
+      } catch (e) {}
 
       const defaultDocs: CandidateDocument[] = [
         { id: '1', name: t.docPassportScan || 'Pasaport Taraması', status: data.passport_number ? 'approved' : 'pending' },
@@ -161,8 +166,8 @@ export default function CandidateDetailPage() {
       ];
       
       try {
-        const parsedDocs = data.documents_json ? JSON.parse(data.documents_json) : defaultDocs;
-        // Eğer veritabanındaki ilk 4 belge eski Türkçe isimlerse, güncel dil sözlüğü ile map et
+        const parsed = data.documents_json ? JSON.parse(data.documents_json) : {};
+        const parsedDocs = Array.isArray(parsed) ? parsed : (parsed.docs || defaultDocs);
         const normalizedDocs = parsedDocs.map((doc: CandidateDocument, idx: number) => {
           if (idx === 0) return { ...doc, name: t.docPassportScan || doc.name };
           if (idx === 1) return { ...doc, name: t.docProfessionalCert || doc.name };
@@ -231,6 +236,23 @@ export default function CandidateDetailPage() {
 
   const handleSaveDetail = async () => {
     setSaving(true);
+
+    // Veritabanı şemasını bozmamak için closure ve belgeleri JSON paketinde saklıyoruz
+    let existingMeta = {};
+    try {
+      const parsed = candidate?.documents_json ? JSON.parse(candidate.documents_json) : {};
+      if (!Array.isArray(parsed)) existingMeta = parsed;
+    } catch (e) {}
+
+    const payloadDocumentsJson = JSON.stringify({
+      docs: documents,
+      closure_meta: {
+        is_closed: isClosed,
+        closure_reason: closureReason
+      },
+      ...existingMeta
+    });
+
     const { error } = await supabase
       .from('job_candidates')
       .update({
@@ -243,7 +265,7 @@ export default function CandidateDetailPage() {
         certificate_no: certificateNo,
         issuing_body: issuingBody,
         video_url: videoUrl,
-        documents_json: JSON.stringify(documents),
+        documents_json: payloadDocumentsJson,
         travel_status: travelStatus,
         flight_date: flightDate,
         flight_number: flightNumber,
@@ -251,8 +273,6 @@ export default function CandidateDetailPage() {
         arrival_city: arrivalCity,
         pnr_code: pnrCode,
         accommodation_details: accommodationDetails,
-        is_closed: isClosed,
-        closure_reason: closureReason,
       })
       .eq('id', candidateId);
 
