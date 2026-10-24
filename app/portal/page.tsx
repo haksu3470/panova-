@@ -3,11 +3,17 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
-  Lock, ShieldCheck, Search, Filter, Languages, ArrowLeft, Award, Video, 
-  CheckCircle, Clock, Star, Calendar, Building2, Users, FileText, Plane, AlertCircle, Briefcase, UserCheck, User, CheckSquare, Plus, UserPlus, Settings, History, ShieldAlert, Trash2, Key, RefreshCw 
+  Lock, ShieldCheck, Languages, ArrowLeft, Building2, Users, FileText, 
+  UserCheck, CheckSquare, History, ShieldAlert, Key, RefreshCw, Trash2 
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
+
+// Modüler Bileşenlerimiz
+import CandidatesTab from '@/app/components/portal/CandidatesTab';
+import RequestsTab from '@/app/components/portal/RequestsTab';
+import StaffTab from '@/app/components/portal/StaffTab';
+import TasksTab from '@/app/components/portal/TasksTab';
 
 export default function PortalPage() {
   const [currentLang, setCurrentLang] = useState<Language>(() => {
@@ -57,7 +63,7 @@ export default function PortalPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   
-  const [activeTab, setActiveTab] = useState<'overview' | 'candidates' | 'requests' | 'staff' | 'tasks' | 'audit' | 'employers' | 'matching' | 'travel' | 'employees' | 'support'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'candidates' | 'requests' | 'staff' | 'tasks' | 'audit' | 'employers' | 'support'>('overview');
   
   const [candidates, setCandidates] = useState<any[]>([]);
   const [jobRequests, setJobRequests] = useState<any[]>([]);
@@ -73,15 +79,6 @@ export default function PortalPage() {
   ]);
 
   const [loading, setLoading] = useState(false);
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSector, setSelectedSector] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedCountry, setSelectedCountry] = useState('all');
-
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [bulkStatus, setBulkStatus] = useState('reviewing');
-  const [updatingBulk, setUpdatingBulk] = useState(false);
 
   const [newStaffName, setNewStaffName] = useState('');
   const [newStaffEmail, setNewStaffEmail] = useState('');
@@ -382,60 +379,6 @@ export default function PortalPage() {
     logAudit('Görev durumu güncellendi', currentUser?.name);
   };
 
-  const filteredCandidates = candidates.filter((cand) => {
-    const matchesSearch = 
-      (cand.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (cand.profession?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (cand.passport_no?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (cand.passport_number?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (cand.email?.toLowerCase() || '').includes(searchTerm.toLowerCase());
-
-    const matchesSector = selectedSector === 'all' || cand.sector === selectedSector;
-    const matchesStatus = selectedStatus === 'all' || cand.status === selectedStatus;
-    const matchesCountry = selectedCountry === 'all' || (cand.country && cand.country.toLowerCase() === selectedCountry.toLowerCase());
-
-    return matchesSearch && matchesSector && matchesStatus && matchesCountry;
-  });
-
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setSelectedIds(filteredCandidates.map(c => c.id));
-    } else {
-      setSelectedIds([]);
-    }
-  };
-
-  const handleSelectOne = (id: string) => {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter(item => item !== id));
-    } else {
-      setSelectedIds([...selectedIds, id]);
-    }
-  };
-
-  const handleBulkStatusUpdate = async () => {
-    if (selectedIds.length === 0) return;
-    setUpdatingBulk(true);
-
-    try {
-      const { error } = await supabase
-        .from('job_candidates')
-        .update({ status: bulkStatus })
-        .in('id', selectedIds);
-
-      if (error) throw error;
-
-      alert(`Başarıyla ${selectedIds.length} adayın durumu güncellendi!`);
-      logAudit(`Toplu Aday Durumu Güncellendi -> ${bulkStatus} (${selectedIds.length} aday)`, currentUser?.name);
-      setSelectedIds([]);
-      fetchAllData();
-    } catch (err: any) {
-      alert('Toplu Güncelleme Hatası: ' + err.message);
-    } finally {
-      setUpdatingBulk(false);
-    }
-  };
-
   if (!authenticated) {
     return (
       <div className={`min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -645,454 +588,71 @@ export default function PortalPage() {
           </div>
         )}
 
+        {/* 1. Modüler Adaylar Sekmesi */}
         {activeTab === 'candidates' && (
-          <div className="space-y-4">
-            <div className="bg-white p-4 rounded-2xl border shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
-                <input
-                  type="text"
-                  placeholder={t.searchPlaceholder || 'Search...'}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs sm:text-sm outline-none text-slate-900 font-medium bg-white focus:ring-2 focus:ring-[#2e7d32]"
-                />
-              </div>
-
-              <div>
-                <select
-                  value={selectedSector}
-                  onChange={(e) => setSelectedSector(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 bg-white cursor-pointer outline-none focus:ring-2 focus:ring-[#2e7d32]"
-                >
-                  <option value="all">📁 All Sectors</option>
-                  <option value="construction">Construction</option>
-                  <option value="agriculture">Agriculture</option>
-                  <option value="hr">General HR</option>
-                  <option value="trade">Foreign Trade</option>
-                </select>
-              </div>
-
-              <div>
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 bg-white cursor-pointer outline-none focus:ring-2 focus:ring-[#2e7d32]"
-                >
-                  <option value="all">{t.allstatuses}</option>
-                  <option value="pending">{t.pendingStatus}</option>
-                  <option value="reviewing">{t.reviewingStatus}</option>
-                  <option value="visa_processing">{t.visaProcessingStatus}</option>
-                  <option value="approved">{t.approvedStatus}</option>
-                </select>
-              </div>
-
-              <div>
-                <select
-                  value={selectedCountry}
-                  onChange={(e) => setSelectedCountry(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 bg-white cursor-pointer outline-none focus:ring-2 focus:ring-[#2e7d32]"
-                >
-                  <option value="all">🌍 All Countries</option>
-                  <option value="North Macedonia">North Macedonia</option>
-                  <option value="Turkey">Turkey</option>
-                  <option value="Albania">Albania</option>
-                  <option value="Kosovo">Kosovo</option>
-                </select>
-              </div>
-            </div>
-
-            {selectedIds.length > 0 && (
-              <div className="bg-emerald-900 text-white p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg animate-fadeIn">
-                <div className="text-xs sm:text-sm font-bold">
-                  Selected Candidates: <span className="bg-emerald-800 px-2.5 py-1 rounded-lg ml-1">{selectedIds.length}</span>
-                </div>
-                <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-                  <select
-                    value={bulkStatus}
-                    onChange={(e) => setBulkStatus(e.target.value)}
-                    className="bg-emerald-800 text-white border border-emerald-700 px-3 py-2 rounded-xl text-xs font-bold outline-none cursor-pointer"
-                  >
-                    <option value="pending">Set Status: {t.pendingStatus}</option>
-                    <option value="reviewing">Set Status: {t.reviewingStatus}</option>
-                    <option value="visa_processing">Set Status: {t.visaProcessingStatus}</option>
-                    <option value="approved">Set Status: {t.approvedStatus}</option>
-                  </select>
-                  <button
-                    onClick={handleBulkStatusUpdate}
-                    disabled={updatingBulk}
-                    className="bg-white text-emerald-900 hover:bg-emerald-50 px-4 py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer shrink-0"
-                  >
-                    {updatingBulk ? 'Updating...' : 'Update Bulk Status'}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between text-xs sm:text-sm font-bold text-slate-900">
-                <span>Candidate List ({filteredCandidates.length} / {candidates.length})</span>
-                <button
-                  onClick={fetchAllData}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 px-3 py-1.5 rounded-xl cursor-pointer transition"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" /> Refresh
-                </button>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs sm:text-sm text-slate-600">
-                  <thead className="bg-slate-50 text-slate-700 font-bold border-b">
-                    <tr>
-                      <th className="p-4 w-12 text-center">
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.length > 0 && selectedIds.length === filteredCandidates.length}
-                          onChange={handleSelectAll}
-                          className="w-4 h-4 accent-[#2e7d32] cursor-pointer"
-                        />
-                      </th>
-                      <th className="p-4">{t.colCandidate}</th>
-                      <th className="p-4">{t.colPassportNat}</th>
-                      <th className="p-4">{t.colProfSector}</th>
-                      <th className="p-4">🛡️ {t.assigneeText}</th>
-                      <th className="p-4">{t.colVisaStatus}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredCandidates.map((candidate) => {
-                      const isSelected = selectedIds.includes(candidate.id);
-                      return (
-                        <tr key={candidate.id} className={`hover:bg-slate-50 ${isSelected ? 'bg-emerald-50' : ''}`}>
-                          <td className="p-4 text-center">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => handleSelectOne(candidate.id)}
-                              className="w-4 h-4 accent-[#2e7d32] cursor-pointer"
-                            />
-                          </td>
-                          <td className="p-4 font-bold text-slate-900">
-                            <Link href={`/portal/candidates/${candidate.id}`} className="hover:text-[#2e7d32] hover:underline">
-                              {candidate.full_name}
-                            </Link>
-                          </td>
-                          <td className="p-4">
-                            <div>{candidate.passport_number || candidate.passport_no || 'N/A'}</div>
-                            <div className="text-[11px] text-slate-400">{candidate.nationality || candidate.country}</div>
-                          </td>
-                          <td className="p-4">
-                            <span className="font-semibold text-slate-800">{candidate.profession}</span>
-                            <div className="text-[11px] text-slate-400 uppercase">{candidate.sector}</div>
-                          </td>
-                          <td className="p-4">
-                            <select
-                              value={candidate.assigned_to || staffMembers[0]?.name}
-                              onChange={(e) => updateCandidateAssignee(candidate.id, e.target.value)}
-                              className="px-3 py-1.5 rounded-lg border text-xs font-bold bg-emerald-50 text-emerald-900 cursor-pointer outline-none"
-                            >
-                              {staffMembers.map((staff) => (
-                                <option key={staff.id} value={staff.name} className="text-slate-900 bg-white">{staff.name}</option>
-                              ))}
-                            </select>
-                          </td>
-                          <td className="p-4">
-                            <select
-                              value={candidate.status || 'pending'}
-                              onChange={(e) => updateCandidateStatus(candidate.id, e.target.value)}
-                              className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer bg-slate-50 text-slate-900"
-                            >
-                              <option value="pending" className="text-slate-900 bg-white">🟡 {t.pendingStatus}</option>
-                              <option value="reviewing" className="text-slate-900 bg-white">🔵 {t.reviewingStatus}</option>
-                              <option value="visa_processing" className="text-slate-900 bg-white">🟣 {t.visaProcessingStatus}</option>
-                              <option value="approved" className="text-slate-900 bg-white">🟢 {t.approvedStatus}</option>
-                            </select>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+          <CandidatesTab 
+            candidates={candidates}
+            staffMembers={staffMembers}
+            currentLang={currentLang}
+            t={t}
+            fetchAllData={fetchAllData}
+            updateCandidateAssignee={updateCandidateAssignee}
+            updateCandidateStatus={updateCandidateStatus}
+            logAudit={logAudit}
+            currentUser={currentUser}
+          />
         )}
 
+        {/* 2. Modüler Talepler Sekmesi */}
         {activeTab === 'requests' && (
-          <div className="space-y-6">
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-base sm:text-lg font-extrabold text-slate-900">📁 {t.demandFilesTitle}</h3>
-                <p className="text-xs text-slate-500 mt-0.5">{t.demandFilesSub}</p>
-              </div>
-              <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
-                {t.openRequestsCard}: {jobRequests.length}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {jobRequests.map((req) => (
-                <div key={req.id} className="bg-white rounded-2xl border p-5 shadow-sm space-y-4 flex flex-col justify-between hover:shadow-md transition">
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-                          {req.sector || 'General Sector'}
-                        </span>
-                        <h4 className="font-extrabold text-slate-900 text-base mt-1.5">{req.position_title}</h4>
-                        <p className="text-xs font-bold text-slate-600 flex items-center gap-1 mt-0.5">
-                          <Building2 className="w-3.5 h-3.5 text-slate-400" /> {req.employer_name}
-                        </p>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <span className="text-xs font-extrabold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg block">
-                          {req.headcount} {t.personCount}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t text-[11px] text-slate-500">
-                      <div>📍 {req.city || 'N/A'}, {req.country || 'International'}</div>
-                      <div>📅 {t.createdDate}: {req.created_at ? req.created_at.substring(0, 10) : '2026-09'}</div>
-                      <div>🎯 {t.colTargetStart}: {req.target_start_date || '2026-10-15'}</div>
-                      <div>💰 {t.colSalary}: {req.salary || 'Negotiable'}</div>
-                    </div>
-
-                    <div className="pt-2 border-t space-y-1.5">
-                      <label className="block text-[10px] font-bold text-slate-600 uppercase">{t.lifecycleStatusLabel}</label>
-                      <select
-                        value={req.status || 'new_request'}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === 'cancelled') {
-                            const reason = prompt('Please enter cancellation reason:', 'Employer cancelled demand');
-                            if (reason !== null) {
-                              updateRequestStatus(req.id, val, reason);
-                            }
-                          } else {
-                            updateRequestStatus(req.id, val);
-                          }
-                        }}
-                        className={`w-full px-3 py-2 rounded-xl border text-xs font-bold uppercase cursor-pointer outline-none ${
-                          req.status === 'completed' ? 'bg-emerald-50 text-emerald-800' :
-                          req.status === 'cancelled' ? 'bg-red-50 text-red-700' :
-                          'bg-slate-50 text-slate-900'
-                        }`}
-                      >
-                        <option value="new_request">🟡 {t.stageNewRequest}</option>
-                        <option value="reviewing">🔵 {t.stageReviewing}</option>
-                        <option value="searching_candidates">🌍 {t.stageSearchingCandidates}</option>
-                        <option value="presenting_candidates">📤 {t.stagePresentingCandidates}</option>
-                        <option value="interviews">🤝 {t.stageInterviews}</option>
-                        <option value="selection_completed">⭐ {t.stageSelectionCompleted}</option>
-                        <option value="official_process">📋 {t.stageOfficialProcess}</option>
-                        <option value="travel_planning">✈️ {t.stageTravelPlanning}</option>
-                        <option value="completed">🟢 {t.stageCompleted}</option>
-                        <option value="cancelled">🔴 {t.stageCancelled}</option>
-                      </select>
-                      {req.cancellation_reason && (
-                        <p className="text-[10px] text-red-600 font-medium">Cancellation Reason: {req.cancellation_reason}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="pt-3 border-t flex items-center justify-between">
-                    <button
-                      onClick={() => setSelectedDemandDetail(req)}
-                      className="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer flex items-center justify-center gap-1.5"
-                    >
-                      <FileText className="w-4 h-4" /> {t.openDemandFilesBtn}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <RequestsTab 
+            jobRequests={jobRequests}
+            t={t}
+            updateRequestStatus={updateRequestStatus}
+            setSelectedDemandDetail={setSelectedDemandDetail}
+          />
         )}
 
+        {/* 3. Modüler Personel Matrisi Sekmesi */}
         {activeTab === 'staff' && isUpperManagement && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-emerald-700" /> {t.addStaffTitle}
-              </h3>
-              <form onSubmit={handleAddStaff} className="space-y-3 text-xs">
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.staffNameLabel}</label>
-                  <input type="text" required value={newStaffName} onChange={(e) => setNewStaffName(e.target.value)} placeholder="Ahmet Yilmaz" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white text-xs sm:text-sm" />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.staffEmailLabel}</label>
-                  <input type="email" required value={newStaffEmail} onChange={(e) => setNewStaffEmail(e.target.value)} placeholder="ahmet@panova.com" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white text-xs sm:text-sm" />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Login Password *</label>
-                  <input type="password" required value={newStaffPassword} onChange={(e) => setNewStaffPassword(e.target.value)} placeholder="••••••••" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white text-xs sm:text-sm" />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.staffPermLabel}</label>
-                  <select 
-                    value={newStaffRoleLevel} 
-                    onChange={(e) => setNewStaffRoleLevel(e.target.value)} 
-                    className="w-full px-3.5 py-3 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm shadow-sm"
-                  >
-                    <option value="upper_management" className="text-slate-900 bg-white">👑 {t.roleUpperManagement}</option>
-                    <option value="source_country" className="text-slate-900 bg-white">🌍 {t.roleSourceCountry}</option>
-                    <option value="target_country" className="text-slate-900 bg-white">🏢 {t.roleTargetCountry}</option>
-                    <option value="field_officer" className="text-slate-900 bg-white">✈️ {t.roleFieldOfficer}</option>
-                  </select>
-                </div>
-                <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-xs sm:text-sm">
-                  {t.saveStaffBtn}
-                </button>
-              </form>
-            </div>
-
-            <div className="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                <span>{t.staffMatrixTitle}</span>
-                <span className="text-[11px] font-normal text-slate-500">{t.staffMatrixSub}</span>
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {staffMembers.map((staff) => (
-                  <div key={staff.id} className="p-4 bg-slate-50 rounded-2xl border space-y-3 flex flex-col justify-between">
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-extrabold text-slate-900 text-sm">{staff.name}</h4>
-                        <div className="flex items-center gap-1">
-                          <button onClick={() => setEditingStaff(staff)} className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-[11px] font-bold transition cursor-pointer">Edit / Pwd</button>
-                          <button onClick={() => handleDeleteStaff(staff.id)} className="p-1 text-slate-400 hover:text-red-600 transition cursor-pointer"><Trash2 className="w-4 h-4" /></button>
-                        </div>
-                      </div>
-                      <p className="text-xs text-slate-500">{staff.email}</p>
-                      <p className="text-[11px] text-slate-400 font-mono">Password: ••••••••</p>
-                    </div>
-
-                    <div className="pt-2 border-t space-y-1.5">
-                      <span className="text-[11px] font-bold text-slate-600 block">
-                        {t.permLevelText}
-                      </span>
-                      <select
-                        value={staff.role_level || 'source_country'}
-                        onChange={(e) => updateStaffRoleLevel(staff.id, e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl border text-xs font-bold bg-white text-slate-900 cursor-pointer outline-none shadow-sm"
-                      >
-                        <option value="upper_management" className="text-slate-900 bg-white">👑 {t.roleUpperManagement}</option>
-                        <option value="source_country" className="text-slate-900 bg-white">🌍 {t.roleSourceCountry}</option>
-                        <option value="target_country" className="text-slate-900 bg-white">🏢 {t.roleTargetCountry}</option>
-                        <option value="field_officer" className="text-slate-900 bg-white">✈️ {t.roleFieldOfficer}</option>
-                      </select>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <StaffTab 
+            staffMembers={staffMembers}
+            isUpperManagement={isUpperManagement}
+            t={t}
+            newStaffName={newStaffName}
+            setNewStaffName={setNewStaffName}
+            newStaffEmail={newStaffEmail}
+            setNewStaffEmail={setNewStaffEmail}
+            newStaffPassword={newStaffPassword}
+            setNewStaffPassword={setNewStaffPassword}
+            newStaffRoleLevel={newStaffRoleLevel}
+            setNewStaffRoleLevel={setNewStaffRoleLevel}
+            handleAddStaff={handleAddStaff}
+            updateStaffRoleLevel={updateStaffRoleLevel}
+            setEditingStaff={setEditingStaff}
+            handleDeleteStaff={handleDeleteStaff}
+          />
         )}
 
+        {/* 4. Modüler Görevler Sekmesi */}
         {activeTab === 'tasks' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-                <Plus className="w-5 h-5 text-emerald-700" /> {t.newTaskTitleHeader}
-              </h3>
-              <form onSubmit={handleCreateTask} className="space-y-3 text-xs">
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskDescLabel}</label>
-                  <select 
-                    required 
-                    value={newTaskTitle} 
-                    onChange={(e) => setNewTaskTitle(e.target.value)} 
-                    className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm"
-                  >
-                    <option value="" disabled>{t.selectTaskPrompt || 'Select Task...'}</option>
-                    
-                    {(isUpperManagement || userRole === 'source_country') && (
-                      <optgroup label={t.taskGroupSource}>
-                        <option value="Pasaportu kontrol et">{t.taskPassportCheck}</option>
-                        <option value="Aday ön görüşmesi planla">{t.taskInterviewPlan}</option>
-                        <option value="Aday bilgilerini güncelle">{t.taskUpdateCandidate}</option>
-                        <option value="Eksik evrak talep et">{t.taskRequestDocs}</option>
-                      </optgroup>
-                    )}
-
-                    {(isUpperManagement || userRole === 'target_country') && (
-                      <optgroup label={t.taskGroupTarget}>
-                        <option value="İşveren talebini kaydet">{t.taskSaveDemand}</option>
-                        <option value="Aday eşleştirme yap">{t.taskMatchCandidate}</option>
-                        <option value="İş teklifi hazırla">{t.taskPrepareOffer}</option>
-                        <option value="Performans ve uyum takibi yap">{t.taskTrackPerformance}</option>
-                      </optgroup>
-                    )}
-
-                    {(isUpperManagement || userRole === 'field_officer') && (
-                      <optgroup label={t.taskGroupField}>
-                        <option value="Seyahat tarihini gir">{t.taskEnterTravelDate}</option>
-                        <option value="Konaklama ve karşılama planla">{t.taskPlanAccommodation}</option>
-                        <option value="Destek taleplerini yönet">{t.taskManageSupport}</option>
-                        <option value="Saha görev durumunu güncelle">{t.taskUpdateFieldStatus}</option>
-                      </optgroup>
-                    )}
-
-                    {isUpperManagement && (
-                      <optgroup label={t.taskGroupManagement}>
-                        <option value="Sistem ve logları denetle">{t.taskAuditSystem}</option>
-                        <option value="Mali ve stratejik kararları onayla">{t.taskApproveStrategic}</option>
-                      </optgroup>
-                    )}
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskAssigneeLabel}</label>
-                  <select value={newTaskAssignee} onChange={(e) => setNewTaskAssignee(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm">
-                    {Array.from(new Set(staffMembers.map(s => s.name))).map((name, idx) => (
-                      <option key={idx} value={name} className="text-slate-900 bg-white">{name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskBackupAssigneeLabel}</label>
-                  <select value={newTaskBackup} onChange={(e) => setNewTaskBackup(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border font-bold text-slate-900 bg-white cursor-pointer text-xs sm:text-sm">
-                    {Array.from(new Set(staffMembers.map(s => s.name))).map((name, idx) => (
-                      <option key={idx} value={name} className="text-slate-900 bg-white">{name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.taskDueDateLabel}</label>
-                  <input 
-                    type="text" 
-                    value={newTaskDueDate} 
-                    onChange={(e) => setNewTaskDueDate(e.target.value)} 
-                    placeholder={t.dateFormatPlaceholder}
-                    className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#2e7d32]" 
-                  />
-                </div>
-                <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-xs sm:text-sm">
-                  {t.saveTaskBtn}
-                </button>
-              </form>
-            </div>
-
-            <div className="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.taskListHeader}</h3>
-              <div className="space-y-3">
-                {tasks.map((task) => (
-                  <div key={task.id} className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${task.status === 'completed' ? 'bg-slate-50 opacity-60' : 'bg-white shadow-sm'}`}>
-                    <div className="flex items-start sm:items-center gap-3">
-                      <input type="checkbox" checked={task.status === 'completed'} onChange={() => toggleTaskStatus(task.id, task.status)} className="w-5 h-5 accent-[#2e7d32] cursor-pointer mt-0.5 sm:mt-0 shrink-0" />
-                      <div>
-                        <h4 className={`font-bold text-xs sm:text-sm ${task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-900'}`}>{task.title}</h4>
-                        <p className="text-[11px] text-slate-500 mt-0.5">{t.assigneeText}: <strong>{task.assignee}</strong> | {t.backupText}: <strong>{task.backup_assignee}</strong> | {t.dueDateText}: {task.due_date}</p>
-                      </div>
-                    </div>
-                    <span className={`px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold uppercase w-fit ${task.status === 'completed' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>
-                      {task.status === 'completed' ? t.statusCompleted : t.statusPending}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <TasksTab 
+            tasks={tasks}
+            staffMembers={staffMembers}
+            isUpperManagement={isUpperManagement}
+            userRole={userRole}
+            t={t}
+            newTaskTitle={newTaskTitle}
+            setNewTaskTitle={setNewTaskTitle}
+            newTaskAssignee={newTaskAssignee}
+            setNewTaskAssignee={setNewTaskAssignee}
+            newTaskBackup={newTaskBackup}
+            setNewTaskBackup={setNewTaskBackup}
+            newTaskDueDate={newTaskDueDate}
+            setNewTaskDueDate={setNewTaskDueDate}
+            handleCreateTask={handleCreateTask}
+            toggleTaskStatus={toggleTaskStatus}
+          />
         )}
 
         {activeTab === 'audit' && (
@@ -1153,7 +713,7 @@ export default function PortalPage() {
                           localStorage.setItem('panova_employer_user', JSON.stringify(employerSessionData));
                           window.location.href = '/employer';
                         }}
-                        className="px-3 py-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white rounded-xl text-xs font-bold transition shadow-sm"
+                        className="px-3 py-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm"
                       >
                         İşveren Dosyasını Aç & İncele
                       </button>
@@ -1322,7 +882,7 @@ export default function PortalPage() {
               </div>
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">New Password</label>
-                <input type="text" required value={editingStaff.password || ''} onChange={(e) => setEditingStaff({ ...editingStaff, password: e.target.value })} className="w-full px-3.5 font-medium text-slate-900 bg-white" />
+                <input type="text" required value={editingStaff.password || ''} onChange={(e) => setEditingStaff({ ...editingStaff, password: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
               </div>
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">Role Level</label>
