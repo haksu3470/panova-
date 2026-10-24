@@ -9,11 +9,11 @@ import {
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
-// Modüler Bileşenlerimiz (Kök dizindeki components klasörüne göre)
-import CandidatesTab from '@/app/components/portal/CandidatesTab';
-import RequestsTab from '@/app/components/portal/RequestsTab';
-import StaffTab from '@/app/components/portal/StaffTab';
-import TasksTab from '@/app/components/portal/TasksTab';
+// Modüler Bileşenlerimiz (Kök dizindeki components klasörüne göre göreceli yol)
+import CandidatesTab from '../../components/portal/CandidatesTab';
+import RequestsTab from '../../components/portal/RequestsTab';
+import StaffTab from '../../components/portal/StaffTab';
+import TasksTab from '../../components/portal/TasksTab';
 
 export default function PortalPage() {
   const [currentLang, setCurrentLang] = useState<Language>('en');
@@ -376,7 +376,6 @@ export default function PortalPage() {
   if (!authenticated) {
     return (
       <div className={`min-h-screen bg-slate-50 flex flex-col justify-between ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-        {/* Üst Header */}
         <header className="w-full bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="PANOVA PORTAL" className="h-8 w-auto object-contain" />
@@ -406,7 +405,6 @@ export default function PortalPage() {
           </div>
         </header>
 
-        {/* Ana İçerik / Form Kartı */}
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 max-w-md w-full text-center">
             <div className="w-14 h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
@@ -449,7 +447,6 @@ export default function PortalPage() {
           </div>
         </main>
 
-        {/* Alt Footer */}
         <footer className="w-full py-4 text-center text-xs text-slate-500 border-t border-slate-200 bg-white">
           PANOVA TARIM DOO • International Workforce Management System © 2026
         </footer>
@@ -601,7 +598,6 @@ export default function PortalPage() {
           </div>
         )}
 
-        {/* 1. Modüler Adaylar Sekmesi */}
         {activeTab === 'candidates' && (
           <CandidatesTab 
             candidates={candidates}
@@ -616,7 +612,6 @@ export default function PortalPage() {
           />
         )}
 
-        {/* 2. Modüler Talepler Sekmesi */}
         {activeTab === 'requests' && (
           <RequestsTab 
             jobRequests={jobRequests}
@@ -626,7 +621,6 @@ export default function PortalPage() {
           />
         )}
 
-        {/* 3. Modüler Personel Matrisi Sekmesi */}
         {activeTab === 'staff' && isUpperManagement && (
           <StaffTab 
             staffMembers={staffMembers}
@@ -647,7 +641,6 @@ export default function PortalPage() {
           />
         )}
 
-        {/* 4. Modüler Görevler Sekmesi */}
         {activeTab === 'tasks' && (
           <TasksTab 
             tasks={tasks}
