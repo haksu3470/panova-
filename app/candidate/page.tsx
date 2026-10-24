@@ -86,6 +86,7 @@ export default function CandidateDashboard() {
   const [supportSending, setSupportSending] = useState(false);
 
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
 
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
@@ -326,7 +327,7 @@ export default function CandidateDashboard() {
         if (typeof window !== 'undefined') {
           localStorage.setItem('panova_current_candidate', JSON.stringify(updatedCandidate));
         }
-        alert(currentLang === 'tr' ? 'Belge yüklendi!' : 'Document uploaded!');
+        alert(currentLang === 'tr' ? 'Belge yüklendi ve veritabanına kaydedildi!' : 'Document uploaded and saved to DB!');
       } else {
         alert('Hata: ' + error.message);
       }
@@ -370,7 +371,9 @@ export default function CandidateDashboard() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('panova_current_candidate', JSON.stringify(updatedCandidate));
       }
-      alert(currentLang === 'tr' ? 'Profil, fotoğraf, video ve acil durum bilgileri güncellendi!' : 'Profile updated!');
+      alert(currentLang === 'tr' ? 'Profil, fotoğraf, video, acil durum bilgileri ve şifreniz veritabanına kaydedildi!' : 'Profile and all data saved to database!');
+    } else {
+      alert('Hata: ' + error.message);
     }
   };
 
@@ -582,7 +585,6 @@ export default function CandidateDashboard() {
   const candidateDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : defaultDocs;
   const currentLangTitles = docTitlesByLang[currentLang] || docTitlesByLang.tr;
 
-  // Eksik belge ve profil analizi hesaplamaları
   const missingDocs = candidateDocs.filter((d: any) => d.status !== 'uploaded');
   const missingProfileFields = [];
   if (!candidate.photo_url) missingProfileFields.push('Profil Fotoğrafı');
@@ -775,7 +777,7 @@ export default function CandidateDashboard() {
                 disabled={updatingProfile}
                 className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-6 py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs"
               >
-                {updatingProfile ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
+                {updatingProfile ? 'Kaydediliyor...' : 'Değişiklikleri Veritabanına Kaydet'}
               </button>
             </form>
           </div>
@@ -795,14 +797,13 @@ export default function CandidateDashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Profil Eksikleri Kutusu */}
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-3">
                 <div className="flex items-center gap-2 font-extrabold text-slate-900 text-xs">
                   <User className="w-4 h-4 text-emerald-700" />
                   <span>Profil & Bilgi Eksikleri</span>
                 </div>
                 {missingProfileFields.length === 0 ? (
-                  <p className="text-xs text-emerald-700 font-medium">✓ Profil bilgileriniz ve fotoğraflarınız eksiksiz.</p>
+                  <p className="text-xs text-emerald-700 font-medium">✓ Profil bilgileriniz, fotoğraf ve acil durum eksiksiz.</p>
                 ) : (
                   <ul className="space-y-1.5 text-xs text-amber-800">
                     {missingProfileFields.map((field, i) => (
@@ -818,7 +819,6 @@ export default function CandidateDashboard() {
                 </button>
               </div>
 
-              {/* Belge Eksikleri Kutusu */}
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-3">
                 <div className="flex items-center gap-2 font-extrabold text-slate-900 text-xs">
                   <FileText className="w-4 h-4 text-emerald-700" />
@@ -844,6 +844,7 @@ export default function CandidateDashboard() {
           </div>
         )}
 
+        {/* Belgelerim Sekmesi & Önizleme Desteği */}
         {activeTab === 'documents' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
             <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">📁 Belgelerim & e-Apostil Takibi</h3>
@@ -856,11 +857,22 @@ export default function CandidateDashboard() {
                       {doc.status === 'uploaded' ? 'Yüklendi' : 'Bekleniyor'}
                     </span>
                   </div>
-                  <input 
-                    type="file" 
-                    onChange={(e) => handleDocUpload(idx, e)}
-                    className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#2e7d32] hover:file:bg-emerald-100 cursor-pointer"
-                  />
+                  
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="file" 
+                      onChange={(e) => handleDocUpload(idx, e)}
+                      className="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#2e7d32] hover:file:bg-emerald-100 cursor-pointer"
+                    />
+                    {doc.file_url && (
+                      <button 
+                        onClick={() => setPreviewDoc({ name: currentLangTitles[idx] || doc.name, url: doc.file_url })}
+                        className="px-3 py-1.5 bg-emerald-100 text-[#2e7d32] font-bold rounded-xl text-xs hover:bg-emerald-200 transition shrink-0 cursor-pointer"
+                      >
+                        Önizle
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -910,6 +922,7 @@ export default function CandidateDashboard() {
 
       </div>
 
+      {/* Video Önizleme Modalı */}
       {previewVideo && (
         <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 z-50">
           <div className="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl border space-y-4">
@@ -919,6 +932,30 @@ export default function CandidateDashboard() {
             </div>
             <div className="aspect-video bg-slate-900 rounded-2xl flex items-center justify-center overflow-hidden">
               <iframe src={previewVideo.replace('watch?v=', 'embed/')} className="w-full h-full" allowFullScreen></iframe>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Belge Önizleme Modalı */}
+      {previewDoc && (
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 z-50">
+          <div className="bg-white rounded-3xl p-6 max-w-3xl w-full shadow-2xl border space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center border-b pb-3">
+              <h3 className="font-bold text-slate-900 text-sm">📁 Belge Önizlemesi: {previewDoc.name}</h3>
+              <button onClick={() => setPreviewDoc(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
+            </div>
+            <div className="flex-1 bg-slate-100 rounded-2xl p-4 flex items-center justify-center overflow-auto">
+              {previewDoc.url.startsWith('data:image') ? (
+                <img src={previewDoc.url} alt={previewDoc.name} className="max-h-[60vh] object-contain rounded-xl shadow" />
+              ) : (
+                <iframe src={previewDoc.url} className="w-full h-[60vh] rounded-xl border bg-white" title={previewDoc.name} />
+              )}
+            </div>
+            <div className="flex justify-end">
+              <button onClick={() => setPreviewDoc(null)} className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-xl text-xs cursor-pointer">
+                Kapat
+              </button>
             </div>
           </div>
         </div>
