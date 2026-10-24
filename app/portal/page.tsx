@@ -170,13 +170,12 @@ export default function PortalPage() {
     setAuditLogs([newLog, ...auditLogs]);
   };
 
-  // NİHAİ DÜZELTME: Supabase Auth Entegrasyonu (auth.users + staff_members senkronizasyonu)
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const loginEmail = username.includes('@') ? username : `${username}@panova.com`;
+      const loginEmail = username.includes('@') ? username.trim() : `${username.trim()}@panova.com`;
       
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: loginEmail,
@@ -209,8 +208,7 @@ export default function PortalPage() {
         return;
       }
 
-      // Fallback Master Admin
-      if (username === 'admin' && password === 'Panova2026!') {
+      if ((username === 'admin' || username === 'admin@panova.com') && password === 'Panova2026!') {
         const loggedUser = { name: 'Hüseyin Aksu (Master Admin)', email: 'admin@panova.com', role_level: 'upper_management', isAdmin: true };
         setAuthenticated(true);
         setCurrentUser(loggedUser);
@@ -466,18 +464,18 @@ export default function PortalPage() {
 
           <form onSubmit={handleLogin} className="space-y-4 text-left rtl:text-right">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.usernameLabel || 'E-Posta veya Kullanıcı Adı'}</label>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Kullanıcı Adı veya E-Posta</label>
               <input
                 type="text"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
-                placeholder="admin@panova.com"
+                placeholder="admin veya admin@panova.com"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.passwordLabel}</label>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.passwordLabel || 'Şifre'}</label>
               <input
                 type="password"
                 required
@@ -492,7 +490,7 @@ export default function PortalPage() {
               disabled={loading}
               className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 cursor-pointer text-sm"
             >
-              {loading ? 'Giriş Yapılıyor...' : t.signInBtn}
+              {loading ? 'Giriş Yapılıyor...' : (t.signInBtn || 'Giriş Yap')}
             </button>
           </form>
           <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-xs sm:text-sm text-slate-500 hover:underline">
@@ -547,7 +545,9 @@ export default function PortalPage() {
                   {activeLangObj?.flag} {activeLangObj?.name}
                 </option>
                 {selectableLanguages.map((lang) => (
-                  <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">{lang.flag} {lang.name}</option>
+                  <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">
+                    {lang.flag} {lang.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -762,7 +762,7 @@ export default function PortalPage() {
                     {filteredCandidates.map((candidate) => {
                       const isSelected = selectedIds.includes(candidate.id);
                       return (
-                        <tr key={candidate.id} className={`hover:bg-slate-50/50 ${isSelected ? 'bg-emerald-50/40' : ''}`}>
+                        <tr key={candidate.id} className={`hover:bg-slate-50 ${isSelected ? 'bg-emerald-50' : ''}`}>
                           <td className="p-4 text-center">
                             <input
                               type="checkbox"
@@ -1036,7 +1036,7 @@ export default function PortalPage() {
                     {isUpperManagement && (
                       <optgroup label={t.taskGroupManagement}>
                         <option value="Sistem ve logları denetle">{t.taskAuditSystem}</option>
-                        <option value="Mali ve stratejik kararları onayla">{t.taskApprovStrategic}</option>
+                        <option value="Mali ve stratejik kararları onayla">{t.taskApproveStrategic}</option>
                       </optgroup>
                     )}
                   </select>
@@ -1113,7 +1113,7 @@ export default function PortalPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {auditLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50/50">
+                    <tr key={log.id} className="hover:bg-slate-50">
                       <td className="p-4 font-bold text-slate-900">
                         {log.actionKey ? (t as any)[log.actionKey] || log.actionKey : log.action}
                       </td>
@@ -1153,7 +1153,7 @@ export default function PortalPage() {
                           localStorage.setItem('panova_employer_user', JSON.stringify(employerSessionData));
                           window.location.href = '/employer';
                         }}
-                        className="px-3 py-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm"
+                        className="px-3 py-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white rounded-xl text-xs font-bold transition shadow-sm"
                       >
                         İşveren Dosyasını Aç & İncele
                       </button>
@@ -1322,7 +1322,7 @@ export default function PortalPage() {
               </div>
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">New Password</label>
-                <input type="text" required value={editingStaff.password || ''} onChange={(e) => setEditingStaff({ ...editingStaff, password: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
+                <input type="text" required value={editingStaff.password || ''} onChange={(e) => setEditingStaff({ ...editingStaff, password: e.target.value })} className="w-full px-3.5 font-medium text-slate-900 bg-white" />
               </div>
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">Role Level</label>
