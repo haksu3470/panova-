@@ -408,7 +408,15 @@ export interface Translation {
   logoPreview?: string;
   saveCompanyBtn?: string;
 
-  // Build hatasını çözen eksik property'ler
+  demandRequested?: string;
+  demandBound?: string;
+  demandOffered?: string;
+  demandInterviewing?: string;
+  demandSelected?: string;
+  demandInProcess?: string;
+  demandTravelReady?: string;
+  demandStarted?: string;
+
   richDemandWizardTitle?: string;
   richDemandWizardDesc?: string;
 }
@@ -829,7 +837,16 @@ export const translations: Record<Language, Translation> = {
     countryLabel: 'Ülke',
     uploadLogoLabel: 'Şirket Logosu Yükle (Dosya Seç)',
     logoPreview: 'Logo Önizleme',
-    saveCompanyBtn: 'Bilgileri ve Logoyu Kalıcı Olarak Kaydet'
+    saveCompanyBtn: 'Bilgileri ve Logoyu Kalıcı Olarak Kaydet',
+
+    demandRequested: 'TALEP EDİLEN',
+    demandBound: 'BAĞLANAN',
+    demandOffered: 'SUNULAN',
+    demandInterviewing: 'GÖRÜŞÜLEN',
+    demandSelected: 'SEÇİLEN',
+    demandInProcess: 'İŞLEMDE',
+    demandTravelReady: 'SEYAHAT HAZIR',
+    demandStarted: 'İŞE BAŞLAYAN'
   },
   en: {
     returnHome: 'Return to Home',
@@ -1238,7 +1255,16 @@ export const translations: Record<Language, Translation> = {
     countryLabel: 'Country',
     uploadLogoLabel: 'Upload Company Logo (Select File)',
     logoPreview: 'Logo Preview',
-    saveCompanyBtn: 'Save Company Info & Logo Permanently'
+    saveCompanyBtn: 'Save Company Info & Logo Permanently',
+
+    demandRequested: 'REQUESTED',
+    demandBound: 'LINKED',
+    demandOffered: 'OFFERED',
+    demandInterviewing: 'INTERVIEWING',
+    demandSelected: 'SELECTED',
+    demandInProcess: 'IN PROCESS',
+    demandTravelReady: 'TRAVEL READY',
+    demandStarted: 'STARTED WORK'
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -1647,7 +1673,16 @@ export const translations: Record<Language, Translation> = {
     countryLabel: 'Vendi',
     uploadLogoLabel: 'Ngarko Logom e Kompanisë (Zgjidh Skedar)',
     logoPreview: 'Pamja Paraprake e Logos',
-    saveCompanyBtn: 'Ruaj Të Dhënat e Kompanisë dhe Logom Përgjithmonë'
+    saveCompanyBtn: 'Ruaj Të Dhënat e Kompanisë dhe Logom Përgjithmonë',
+
+    demandRequested: 'KËRKUAR',
+    demandBound: 'LIDHUR',
+    demandOffered: 'OFRUAR',
+    demandInterviewing: 'NË INTERVISTË',
+    demandSelected: 'ZGJIDHUR',
+    demandInProcess: 'NË PROCES',
+    demandTravelReady: 'GATI PËR UDHËTIM',
+    demandStarted: 'FILLUAR PUNËN'
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -1866,6 +1901,15 @@ export const translations: Record<Language, Translation> = {
     countryLabel: 'الدولة',
     uploadLogoLabel: 'تحميل شعار الشركة (اختر ملف)',
     logoPreview: 'معاينة الشعار',
-    saveCompanyBtn: 'حفظ معلومات الشركة والشعار بشكل دائم'
+    saveCompanyBtn: 'حفظ معلومات الشركة والشعار بشكل دائم',
+
+    demandRequested: 'المطلوب',
+    demandBound: 'المترابط',
+    demandOffered: 'المعروض',
+    demandInterviewing: 'قيد المقابلة',
+    demandSelected: 'المختار',
+    demandInProcess: 'قيد المعالجة',
+    demandTravelReady: 'جاهز للسفر',
+    demandStarted: 'بدء العمل'
   }
 };

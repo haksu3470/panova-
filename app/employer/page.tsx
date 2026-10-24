@@ -249,7 +249,7 @@ export default function EmployerPortal() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('panova_employer_profile', JSON.stringify(updated));
     }
-    alert('Şirket bilgileriniz ve logonuz başarıyla kaydedildi!');
+    alert('Şirket bilgileriniz and logonuz başarıyla kaydedildi!');
   };
 
   const handleLogout = () => {
@@ -318,7 +318,6 @@ export default function EmployerPortal() {
     trade: ['Depo Sorumlusu', 'Forklift Operatörü', 'Dış Ticaret Uzmanı', 'Lojistik Sorumlusu', 'Ön Muhasebe', 'Satış Temsilcisi']
   };
 
-  // Manifesto Uyumu: Talep Bazlı Dinamik Süreç Metrikleri Hesaplama
   const getDemandMetrics = (demand: any) => {
     const headcount = demand.headcount || 5;
     const bound = candidates.length;
@@ -327,7 +326,7 @@ export default function EmployerPortal() {
     const selected = candidates.filter(c => c.status === 'approved').length;
     const inProcess = candidates.filter(c => c.status === 'visa_processing' || c.status === 'reviewing').length;
     const travelReady = candidates.filter(c => c.travel_status === 'ticketed' || c.travel_status === 'completed').length;
-    const started = 0; // Aktif çalışanlar tablosu veya seyahat tamamlananlar baz alınabilir
+    const started = 0;
 
     return {
       headcount,
@@ -609,7 +608,7 @@ export default function EmployerPortal() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.durationLabel || 'Çalışma Süresi'}</label>
-                    <input type="text" value={demandDuration} onChange={(e) => setDemandDuration(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
+                    <input type="text" value={demandDuration} onChange={(e) => setDemandDuration(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
                   </div>
                 </div>
 
@@ -666,38 +665,38 @@ export default function EmployerPortal() {
 
                       {dem.job_description && <p className="text-xs text-slate-700 bg-slate-50 p-3 rounded-xl">{dem.job_description}</p>}
 
-                      {/* Manifestoya Göre Talep Bazlı Dinamik Süreç Metrikleri Paneli */}
+                      {/* Manifestoya Göre Talep Bazlı Dinamik Süreç Metrikleri Paneli (4 Dilli Altyapıya Tam Uyumlu) */}
                       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 bg-slate-50/80 p-3 rounded-xl border text-center text-xs">
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-slate-400 uppercase">Talep Edilen</div>
+                          <div className="text-[9px] font-bold text-slate-400 uppercase">{t.headcountLabel || 'TALEP EDİLEN'}</div>
                           <div className="text-sm font-black text-slate-900">{metrics.headcount}</div>
                         </div>
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-indigo-500 uppercase">Bağlanan</div>
+                          <div className="text-[9px] font-bold text-indigo-500 uppercase">{t.colHeadcount || 'BAĞLANAN'}</div>
                           <div className="text-sm font-black text-indigo-700">{metrics.bound}</div>
                         </div>
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-blue-500 uppercase">Sunulan</div>
+                          <div className="text-[9px] font-bold text-blue-500 uppercase">{t.totalCandidatesCard || 'SUNULAN'}</div>
                           <div className="text-sm font-black text-blue-700">{metrics.offered}</div>
                         </div>
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-amber-500 uppercase">Görüşülen</div>
+                          <div className="text-[9px] font-bold text-amber-500 uppercase">{t.interviewsTitle || 'GÖRÜŞÜLEN'}</div>
                           <div className="text-sm font-black text-amber-600">{metrics.interviewing}</div>
                         </div>
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-emerald-500 uppercase">Seçilen</div>
+                          <div className="text-[9px] font-bold text-emerald-500 uppercase">{t.selectedCandidatesTitle || 'SEÇİLEN'}</div>
                           <div className="text-sm font-black text-emerald-700">{metrics.selected}</div>
                         </div>
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-purple-500 uppercase">İşlemde</div>
+                          <div className="text-[9px] font-bold text-purple-500 uppercase">{t.visaProcessingStatus || 'İŞLEMDE'}</div>
                           <div className="text-sm font-black text-purple-700">{metrics.inProcess}</div>
                         </div>
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-sky-500 uppercase">Seyahat Hazır</div>
+                          <div className="text-[9px] font-bold text-sky-500 uppercase">{t.travel || 'SEYAHAT HAZIR'}</div>
                           <div className="text-sm font-black text-sky-700">{metrics.travelReady}</div>
                         </div>
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-teal-500 uppercase">İşe Başlayan</div>
+                          <div className="text-[9px] font-bold text-teal-500 uppercase">{t.overviewTab || 'İŞE BAŞLAYAN'}</div>
                           <div className="text-sm font-black text-teal-700">{metrics.started}</div>
                         </div>
                       </div>
