@@ -98,17 +98,217 @@ export default function CandidateDashboard() {
     ar: ['مسح جواز السفر', 'الشهادة المهنية / التصريح', 'السجل الجنائي', 'التقرير الطبي / الأشعة', 'أبوستيل الكتروني / تصديق وزارة الخارجية']
   };
 
+  // Dile duyarlı dinamik metin sözlüğü
+  const candidateTexts: Record<Language, any> = {
+    tr: {
+      overviewTitle: 'Aday Durum ve Eksiklik Özeti',
+      overviewDesc: 'Başvurunuzun ve profilinizin onay alabilmesi için tamamlanması gereken eksikler aşağıda listelenmiştir.',
+      allComplete: 'Her Şey Tamam',
+      hasMissing: 'Eksikler Var',
+      profileMissingTitle: 'Profil & Bilgi Eksikleri',
+      profileCompleteText: 'Profil bilgileriniz, fotoğraf ve acil durum eksiksiz.',
+      missingPhoto: 'Profil Fotoğrafı',
+      missingVideo: 'Çalışma/Tanıtım Videosu',
+      missingEmergency: 'Acil Durum İletişim Bilgileri',
+      notAdded: 'eklenmedi.',
+      editProfileBtn: 'Profili Düzenle & Eksikleri Tamamla →',
+      docMissingTitle: 'Belge Eksikleri',
+      docCompleteText: 'Tüm zorunlu belgeler yüklendi.',
+      notUploaded: 'henüz yüklenmedi.',
+      uploadDocsBtn: 'Belgeleri Yükle →',
+      profileHeader: 'Profil Bilgileri, Fotoğraf, Video & Acil Durum',
+      photoLabel: 'Aday Profil Fotoğrafı',
+      photoDesc: 'Net ve profesyonel bir vesikalık fotoğraf yükleyin.',
+      videoLabel: 'Çalışma / Tanıtım Videosu URL (YouTube / Drive vb.)',
+      previewBtn: 'Önizle',
+      emailLabel: 'E-Posta Adresi',
+      phoneLabel: 'Telefon Numarası',
+      emergencyHeader: 'Acil Durum İletişim Bilgileri (Emergency Contact)',
+      emergName: 'İlgili Kişi Adı (Name)',
+      emergRel: 'Yakınlık Derecesi (Relationship)',
+      emergPhone: 'Acil Durum Telefonu (Phone)',
+      portalPass: 'Portal Şifresi',
+      saveProfileBtn: 'Değişiklikleri Veritabanına Kaydet',
+      docsHeader: 'Belgelerim & e-Apostil Takibi',
+      uploadedStatus: 'Yüklendi',
+      pendingStatus: 'Bekleniyor',
+      previewDocBtn: 'Önizle',
+      offersHeader: 'İş Tekliflerim',
+      noOffers: 'Henüz tarafınıza iletilen aktif bir iş teklifi bulunmamaktadır.',
+      acceptBtn: 'Kabul Et',
+      rejectBtn: 'Reddet',
+      supportHeader: 'PANOVA Destek Talepleri',
+      supportSub: 'Konu',
+      supportMsg: 'Mesajınız',
+      sendSupportBtn: 'Destek Talebi Gönder',
+      closeModal: 'Kapat',
+      videoPreviewTitle: 'Aday Video Önizlemesi',
+      docPreviewTitle: 'Belge Önizlemesi',
+      savedSuccess: 'Tüm profil, acil durum ve video bilgileri veritabanına başarıyla kaydedildi!',
+      docUploaded: 'Belge yüklendi ve veritabanına kaydedildi!'
+    },
+    en: {
+      overviewTitle: 'Candidate Status & Missing Items Summary',
+      overviewDesc: 'The items that need to be completed for your application and profile approval are listed below.',
+      allComplete: 'All Complete',
+      hasMissing: 'Missing Items',
+      profileMissingTitle: 'Profile & Info Missing',
+      profileCompleteText: 'Your profile, photo, and emergency info are complete.',
+      missingPhoto: 'Profile Photo',
+      missingVideo: 'Work/Intro Video',
+      missingEmergency: 'Emergency Contact Information',
+      notAdded: 'is missing.',
+      editProfileBtn: 'Edit Profile & Complete Missing →',
+      docMissingTitle: 'Document Missing',
+      docCompleteText: 'All required documents uploaded.',
+      notUploaded: 'not uploaded yet.',
+      uploadDocsBtn: 'Upload Documents →',
+      profileHeader: 'Profile Info, Photo, Video & Emergency',
+      photoLabel: 'Candidate Profile Photo',
+      photoDesc: 'Upload a clear and professional passport-style photo.',
+      videoLabel: 'Work / Intro Video URL (YouTube / Drive etc.)',
+      previewBtn: 'Preview',
+      emailLabel: 'Email Address',
+      phoneLabel: 'Phone Number',
+      emergencyHeader: 'Emergency Contact Information',
+      emergName: 'Contact Name',
+      emergRel: 'Relationship',
+      emergPhone: 'Emergency Phone',
+      portalPass: 'Portal Password',
+      saveProfileBtn: 'Save Changes to Database',
+      docsHeader: 'My Documents & e-Apostille Tracking',
+      uploadedStatus: 'Uploaded',
+      pendingStatus: 'Pending',
+      previewDocBtn: 'Preview',
+      offersHeader: 'My Job Offers',
+      noOffers: 'No active job offers sent to you yet.',
+      acceptBtn: 'Accept',
+      rejectBtn: 'Reject',
+      supportHeader: 'PANOVA Support Tickets',
+      supportSub: 'Subject',
+      supportMsg: 'Your Message',
+      sendSupportBtn: 'Send Support Ticket',
+      closeModal: 'Close',
+      videoPreviewTitle: 'Candidate Video Preview',
+      docPreviewTitle: 'Document Preview',
+      savedSuccess: 'All profile and emergency data saved successfully!',
+      docUploaded: 'Document uploaded and saved to DB!'
+    },
+    sq: {
+      overviewTitle: 'Përmbledhja e Statusit dhe Mungesave të Kandidatit',
+      overviewDesc: 'Artikujt që duhet të plotësohen për miratimin e aplikimit dhe profilit tuaj janë listuar më poshtë.',
+      allComplete: 'Çdo Gjë në Rregull',
+      hasMissing: 'Ka Mungesa',
+      profileMissingTitle: 'Mungesat në Profil & Informacion',
+      profileCompleteText: 'Profili, fotoja dhe informacioni i urgjencës janë të plota.',
+      missingPhoto: 'Foto e Profilit',
+      missingVideo: 'Video e Punës / Prezantimit',
+      missingEmergency: 'Informacioni i Kontaktit të Urgjencës',
+      notAdded: 'nuk është shtuar.',
+      editProfileBtn: 'Ndrysho Profilin & Plotëso Mungesat →',
+      docMissingTitle: 'Mungesat e Dokumenteve',
+      docCompleteText: 'Të gjitha dokumentet e detyrueshme janë ngarkuar.',
+      notUploaded: 'ende nuk është ngarkuar.',
+      uploadDocsBtn: 'Ngarko Dokumentet →',
+      profileHeader: 'Informacioni i Profilit, Fotos, Videos & Urgjencës',
+      photoLabel: 'Foto e Profilit të Kandidatit',
+      photoDesc: 'Ngarkoni një foto të qartë dhe profesionale.',
+      videoLabel: 'URL e Videos së Punës / Prezantimit (YouTube / Drive etj.)',
+      previewBtn: 'Parapamje',
+      emailLabel: 'Adresa e Emailit',
+      phoneLabel: 'Numri i Telefonit',
+      emergencyHeader: 'Informacioni i Kontaktit të Urgjencës',
+      emergName: 'Emri i Personit',
+      emergRel: 'Lidhja (Përkatësia)',
+      emergPhone: 'Telefoni i Urgjencës',
+      portalPass: 'Fjalëkalimi i Portalit',
+      saveProfileBtn: 'Ruaj Ndryshimet në Bazën e të Dhënave',
+      docsHeader: 'Dokumentet e Mia & Gjurmimi e-Apostille',
+      uploadedStatus: 'Ngarkuar',
+      pendingStatus: 'Në pritje',
+      previewDocBtn: 'Parapamje',
+      offersHeader: 'Ofertat e Mia të Punës',
+      noOffers: 'Ende nuk keni oferta pune aktive të dërguara për ju.',
+      acceptBtn: 'Prano',
+      rejectBtn: 'Refuzo',
+      supportHeader: 'Kërkesat e Mbështetjes PANOVA',
+      supportSub: 'Subjekti',
+      supportMsg: 'Mesazhi Juaj',
+      sendSupportBtn: 'Dërgo Kërkesën e Mbështetjes',
+      closeModal: 'Mbyll',
+      videoPreviewTitle: 'Parapamje e Videos së Kandidatit',
+      docPreviewTitle: 'Parapamje e Dokumentit',
+      savedSuccess: 'Të gjitha të dhënat e profilit u ruajtën me sukses!',
+      docUploaded: 'Dokumenti u ngarkua dhe u ruajt!'
+    },
+    ar: {
+      overviewTitle: 'ملخص حالة المرشح والعناصر المفقودة',
+      overviewDesc: 'العناصر التي يجب استكمالها للموافقة على طلبك وملفك الشخصي مدرجة أدناه.',
+      allComplete: 'كل شيء مكتمل',
+      hasMissing: 'هناك نواقص',
+      profileMissingTitle: 'نواقص الملف الشخصي والمعلومات',
+      profileCompleteText: 'ملفك الشخصي والصورة ومعلومات الطوارئ مكتملة.',
+      missingPhoto: 'صورة الملف الشخصي',
+      missingVideo: 'فيديو العمل / التعريف',
+      missingEmergency: 'معلومات الاتصال في حالات الطوارئ',
+      notAdded: 'لم تتم إضافته.',
+      editProfileBtn: 'تعديل الملف الشخصي وإكمال النواقص ←',
+      docMissingTitle: 'المستندات المفقودة',
+      docCompleteText: 'تم تحميل جميع المستندات المطلوبة.',
+      notUploaded: 'لم يتم تحميله بعد.',
+      uploadDocsBtn: 'تحميل المستندات ←',
+      profileHeader: 'معلومات الملف الشخصي، الصورة، الفيديو والطوارئ',
+      photoLabel: 'صورة ملف المرشح الشخصي',
+      photoDesc: 'قم بتحميل صورة واضحة واحترافية.',
+      videoLabel: 'رابط فيديو العمل / التعريف (يوتيوب / درايف الخ)',
+      previewBtn: 'معاينة',
+      emailLabel: 'البريد الإلكتروني',
+      phoneLabel: 'رقم الهاتف',
+      emergencyHeader: 'معلومات الاتصال في حالات الطوارئ',
+      emergName: 'اسم الشخص المعني',
+      emergRel: 'درجة القرابة',
+      emergPhone: 'هاتف الطوارئ',
+      portalPass: 'كلمة مرور البوابة',
+      saveProfileBtn: 'حفظ التغييرات في قاعدة البيانات',
+      docsHeader: 'مستنداتي ومتابعة الأبوستيل',
+      uploadedStatus: 'تم التحميل',
+      pendingStatus: 'قيد الانتظار',
+      previewDocBtn: 'معاينة',
+      offersHeader: 'عروض العمل الخاصة بي',
+      noOffers: 'لا توجد عروض عمل نشطة مرسلة إليك حتى الآن.',
+      acceptBtn: 'قبول',
+      rejectBtn: 'رفض',
+      supportHeader: 'طلبات دعم بانوفا',
+      supportSub: 'الموضوع',
+      supportMsg: 'رسالتك',
+      sendSupportBtn: 'إرسال طلب الدعم',
+      closeModal: 'إغلاق',
+      videoPreviewTitle: 'معاينة فيديو المرشح',
+      docPreviewTitle: 'معاينة المستند',
+      savedSuccess: 'تم حفظ كافة بيانات الملف الشخصي والطوارئ بنجاح!',
+      docUploaded: 'تم تحميل المستند وحفظه في قاعدة البيانات!'
+    }
+  };
+
+  const ct = candidateTexts[currentLang] || candidateTexts.tr;
+
   useEffect(() => {
-    if (authenticated && candidate?.id) {
+    if (authenticated && candidate) {
       fetchCandidateData(candidate.id);
       setNewPhone(candidate.phone || '');
       setNewEmail(candidate.email || '');
       setNewPassword(candidate.password || '123456');
       setNewPhoto(candidate.photo_url || '');
       setNewVideoUrl(candidate.video_url || '');
-      setNewEmergencyName(candidate.emergency_name || '');
-      setNewEmergencyRelation(candidate.emergency_relation || '');
-      setNewEmergencyPhone(candidate.emergency_phone || '');
+
+      try {
+        const extra = candidate.documents_json ? JSON.parse(candidate.documents_json) : {};
+        if (extra && extra.profile_meta) {
+          setNewEmergencyName(extra.profile_meta.emergency_name || '');
+          setNewEmergencyRelation(extra.profile_meta.emergency_relation || '');
+          setNewEmergencyPhone(extra.profile_meta.emergency_phone || '');
+        }
+      } catch (e) {}
     }
   }, [authenticated]);
 
@@ -135,11 +335,17 @@ export default function CandidateDashboard() {
         setNewPassword(data.password || '123456');
         setNewPhoto(data.photo_url || '');
         setNewVideoUrl(data.video_url || '');
-        setNewEmergencyName(data.emergency_name || '');
-        setNewEmergencyRelation(data.emergency_relation || '');
-        setNewEmergencyPhone(data.emergency_phone || '');
         setAuthenticated(true);
         
+        try {
+          const extra = data.documents_json ? JSON.parse(data.documents_json) : {};
+          if (extra && extra.profile_meta) {
+            setNewEmergencyName(extra.profile_meta.emergency_name || '');
+            setNewEmergencyRelation(extra.profile_meta.emergency_relation || '');
+            setNewEmergencyPhone(extra.profile_meta.emergency_phone || '');
+          }
+        } catch (e) {}
+
         if (typeof window !== 'undefined') {
           localStorage.setItem('panova_candidate_auth', 'true');
           localStorage.setItem('panova_current_candidate', JSON.stringify(data));
@@ -299,17 +505,26 @@ export default function CandidateDashboard() {
     const reader = new FileReader();
     reader.onload = async (e) => {
       const fileUrl = e.target?.result as string;
-      const defaultDocs = [
+      let currentData = { docs: [
         { id: '1', name: 'Pasaport Taraması', status: 'pending' },
         { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
         { id: '3', name: 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
         { id: '4', name: 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
         { id: '5', name: 'e-Apostil / Dışişleri Bakanlığı Tasdiki', status: 'pending' },
-      ];
+      ], profile_meta: {} };
 
-      const currentDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : defaultDocs;
-      
-      const updatedDocs = currentDocs.map((doc: any, idx: number) => {
+      try {
+        if (candidate?.documents_json) {
+          const parsed = JSON.parse(candidate.documents_json);
+          if (Array.isArray(parsed)) {
+            currentData.docs = parsed;
+          } else if (parsed.docs) {
+            currentData = parsed;
+          }
+        }
+      } catch (err) {}
+
+      currentData.docs = currentData.docs.map((doc: any, idx: number) => {
         if (idx === docIndex) {
           return { ...doc, file_url: fileUrl, file_name: file.name, status: 'uploaded' };
         }
@@ -318,16 +533,16 @@ export default function CandidateDashboard() {
 
       const { error } = await supabase
         .from('job_candidates')
-        .update({ documents_json: JSON.stringify(updatedDocs) })
+        .update({ documents_json: JSON.stringify(currentData) })
         .eq('id', candidate.id);
 
       if (!error) {
-        const updatedCandidate = { ...candidate, documents_json: JSON.stringify(updatedDocs) };
+        const updatedCandidate = { ...candidate, documents_json: JSON.stringify(currentData) };
         setCandidate(updatedCandidate);
         if (typeof window !== 'undefined') {
           localStorage.setItem('panova_current_candidate', JSON.stringify(updatedCandidate));
         }
-        alert(currentLang === 'tr' ? 'Belge yüklendi ve veritabanına kaydedildi!' : 'Document uploaded and saved to DB!');
+        alert(ct.docUploaded);
       } else {
         alert('Hata: ' + error.message);
       }
@@ -339,18 +554,43 @@ export default function CandidateDashboard() {
     e.preventDefault();
     setUpdatingProfile(true);
 
+    let currentData = { docs: [
+      { id: '1', name: 'Pasaport Taraması', status: 'pending' },
+      { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
+      { id: '3', name: 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
+      { id: '4', name: 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
+      { id: '5', name: 'e-Apostil / Dışişleri Bakanlığı Tasdiki', status: 'pending' },
+    ], profile_meta: {} };
+
+    try {
+      if (candidate?.documents_json) {
+        const parsed = JSON.parse(candidate.documents_json);
+        if (Array.isArray(parsed)) {
+          currentData.docs = parsed;
+        } else if (parsed.docs) {
+          currentData = parsed;
+        }
+      }
+    } catch (err) {}
+
+    currentData.profile_meta = {
+      emergency_name: newEmergencyName,
+      emergency_relation: newEmergencyRelation,
+      emergency_phone: newEmergencyPhone
+    };
+
+    const updatePayload: any = {
+      phone: newPhone,
+      email: newEmail,
+      password: newPassword,
+      photo_url: newPhoto,
+      video_url: newVideoUrl,
+      documents_json: JSON.stringify(currentData)
+    };
+
     const { error } = await supabase
       .from('job_candidates')
-      .update({
-        phone: newPhone,
-        email: newEmail,
-        password: newPassword,
-        photo_url: newPhoto,
-        video_url: newVideoUrl,
-        emergency_name: newEmergencyName,
-        emergency_relation: newEmergencyRelation,
-        emergency_phone: newEmergencyPhone,
-      })
+      .update(updatePayload)
       .eq('id', candidate.id);
 
     setUpdatingProfile(false);
@@ -358,20 +598,13 @@ export default function CandidateDashboard() {
     if (!error) {
       const updatedCandidate = {
         ...candidate,
-        phone: newPhone,
-        email: newEmail,
-        password: newPassword,
-        photo_url: newPhoto,
-        video_url: newVideoUrl,
-        emergency_name: newEmergencyName,
-        emergency_relation: newEmergencyRelation,
-        emergency_phone: newEmergencyPhone,
+        ...updatePayload
       };
       setCandidate(updatedCandidate);
       if (typeof window !== 'undefined') {
         localStorage.setItem('panova_current_candidate', JSON.stringify(updatedCandidate));
       }
-      alert(currentLang === 'tr' ? 'Profil, fotoğraf, video, acil durum bilgileri ve şifreniz veritabanına kaydedildi!' : 'Profile and all data saved to database!');
+      alert(ct.savedSuccess);
     } else {
       alert('Hata: ' + error.message);
     }
@@ -420,7 +653,7 @@ export default function CandidateDashboard() {
                   authMode === 'login' ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <LogIn className="w-4 h-4" /> {currentLang === 'tr' ? 'Giriş Yap' : 'Sign In'}
+                <LogIn className="w-4 h-4" /> {t.signInMenu || 'Giriş Yap'}
               </button>
               <button
                 type="button"
@@ -429,7 +662,7 @@ export default function CandidateDashboard() {
                   authMode === 'signup' ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <UserPlus className="w-4 h-4" /> {currentLang === 'tr' ? 'Kayıt Ol' : 'Sign Up'}
+                <UserPlus className="w-4 h-4" /> {t.signUpMenu || 'Kayıt Ol'}
               </button>
             </div>
 
@@ -438,10 +671,10 @@ export default function CandidateDashboard() {
                 {authMode === 'login' ? <Lock className="w-6 h-6" /> : <UserPlus className="w-6 h-6" />}
               </div>
               <h1 className="text-xl font-extrabold text-slate-900">
-                {authMode === 'login' ? t.candidatePortal : (currentLang === 'tr' ? 'Aday Kayıt' : 'Candidate Registration')}
+                {authMode === 'login' ? t.candidatePortal : t.candidateRegister}
               </h1>
               <p className="text-slate-500 text-xs mt-1">
-                {authMode === 'login' ? t.loginDesc : (currentLang === 'tr' ? 'Formu doldurarak anında aday havuzuna katılın.' : 'Fill out the form to join.')}
+                {authMode === 'login' ? t.loginDesc : t.regFormSub}
               </p>
             </div>
 
@@ -582,14 +815,23 @@ export default function CandidateDashboard() {
     { id: '4', name: 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
     { id: '5', name: 'e-Apostil / Dışişleri Bakanlığı Tasdiki', status: 'pending' },
   ];
-  const candidateDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : defaultDocs;
+
+  let candidateDocs = defaultDocs;
+  try {
+    if (candidate?.documents_json) {
+      const parsed = JSON.parse(candidate.documents_json);
+      if (Array.isArray(parsed)) candidateDocs = parsed;
+      else if (parsed.docs) candidateDocs = parsed.docs;
+    }
+  } catch (e) {}
+
   const currentLangTitles = docTitlesByLang[currentLang] || docTitlesByLang.tr;
 
   const missingDocs = candidateDocs.filter((d: any) => d.status !== 'uploaded');
   const missingProfileFields = [];
-  if (!candidate.photo_url) missingProfileFields.push('Profil Fotoğrafı');
-  if (!candidate.video_url) missingProfileFields.push('Çalışma/Tanıtım Videosu');
-  if (!candidate.emergency_name || !candidate.emergency_phone) missingProfileFields.push('Acil Durum İletişim Bilgileri');
+  if (!newPhoto) missingProfileFields.push(ct.missingPhoto);
+  if (!newVideoUrl) missingProfileFields.push(ct.missingVideo);
+  if (!newEmergencyName || !newEmergencyPhone) missingProfileFields.push(ct.missingEmergency);
 
   return (
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -643,29 +885,29 @@ export default function CandidateDashboard() {
           </div>
         </div>
 
-        {/* Navigasyon Sekmeleri */}
+        {/* Navigasyon Sekmeleri (Tüm diller destekli) */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
           <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📊 {t.overview || 'Genel Bakış'}
+            📊 {t.overview}
           </button>
           <button onClick={() => setActiveTab('profile')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            👤 {t.profile || 'Profilim'}
+            👤 {t.profile}
           </button>
           <button onClick={() => setActiveTab('documents')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'documents' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            📁 {t.documents || 'Belgelerim'}
+            📁 {t.documents}
           </button>
           <button onClick={() => setActiveTab('offers')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'offers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            💼 {t.offers || 'İş Tekliflerim'} ({jobOffers.length})
+            💼 {t.offers} ({jobOffers.length})
           </button>
           <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            💬 {t.support || 'Destek'} ({supportTickets.length})
+            💬 {t.support} ({supportTickets.length})
           </button>
         </div>
 
         {/* Profil Sekmesi */}
         {activeTab === 'profile' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-6">
-            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">👤 Profil Bilgileri, Fotoğraf, Video & Acil Durum</h3>
+            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">👤 {ct.profileHeader}</h3>
             
             <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs">
               <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border">
@@ -677,14 +919,14 @@ export default function CandidateDashboard() {
                   </div>
                 )}
                 <div className="space-y-1 text-center sm:text-left">
-                  <label className="block font-extrabold text-slate-900 uppercase">Aday Profil Fotoğrafı</label>
-                  <p className="text-slate-500 text-[11px]">Net ve profesyonel bir vesikalık fotoğraf yükleyin.</p>
+                  <label className="block font-extrabold text-slate-900 uppercase">{ct.photoLabel}</label>
+                  <p className="text-slate-500 text-[11px]">{ct.photoDesc}</p>
                   <input type="file" accept="image/*" onChange={handlePhotoUpload} className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#2e7d32] hover:file:bg-emerald-100 cursor-pointer mt-1" />
                 </div>
               </div>
 
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
-                <label className="block font-extrabold text-slate-900 uppercase">📹 Çalışma / Tanıtım Videosu URL (YouTube / Drive vb.)</label>
+                <label className="block font-extrabold text-slate-900 uppercase">📹 {ct.videoLabel}</label>
                 <div className="flex gap-2">
                   <input 
                     type="url" 
@@ -699,7 +941,7 @@ export default function CandidateDashboard() {
                       onClick={() => setPreviewVideo(newVideoUrl)}
                       className="bg-emerald-100 text-[#2e7d32] px-4 py-2 rounded-xl font-bold hover:bg-emerald-200 transition cursor-pointer shrink-0"
                     >
-                      Önizle
+                      {ct.previewBtn}
                     </button>
                   )}
                 </div>
@@ -707,7 +949,7 @@ export default function CandidateDashboard() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">E-Posta Adresi</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{ct.emailLabel}</label>
                   <input 
                     type="email" 
                     value={newEmail} 
@@ -716,7 +958,7 @@ export default function CandidateDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Telefon Numarası</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{ct.phoneLabel}</label>
                   <input 
                     type="text" 
                     value={newPhone} 
@@ -727,10 +969,10 @@ export default function CandidateDashboard() {
               </div>
 
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-3">
-                <h4 className="font-extrabold text-slate-900 text-xs text-emerald-800 uppercase border-b pb-1">🚨 Acil Durum İletişim Bilgileri (Emergency Contact)</h4>
+                <h4 className="font-extrabold text-slate-900 text-xs text-emerald-800 uppercase border-b pb-1">🚨 {ct.emergencyHeader}</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">İlgili Kişi Adı (Name)</label>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{ct.emergName}</label>
                     <input 
                       type="text" 
                       value={newEmergencyName} 
@@ -740,7 +982,7 @@ export default function CandidateDashboard() {
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">Yakınlık Derecesi (Relationship)</label>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{ct.emergRel}</label>
                     <input 
                       type="text" 
                       value={newEmergencyRelation} 
@@ -750,7 +992,7 @@ export default function CandidateDashboard() {
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">Acil Durum Telefonu (Phone)</label>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{ct.emergPhone}</label>
                     <input 
                       type="text" 
                       value={newEmergencyPhone} 
@@ -763,7 +1005,7 @@ export default function CandidateDashboard() {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Portal Şifresi</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">{ct.portalPass}</label>
                 <input 
                   type="text" 
                   value={newPassword} 
@@ -777,22 +1019,22 @@ export default function CandidateDashboard() {
                 disabled={updatingProfile}
                 className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-6 py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs"
               >
-                {updatingProfile ? 'Kaydediliyor...' : 'Değişiklikleri Veritabanına Kaydet'}
+                {updatingProfile ? '...' : ct.saveProfileBtn}
               </button>
             </form>
           </div>
         )}
 
-        {/* GENEL BAKIŞ (ÖZET) - EKSİKLİKLERİN LİSTELENDİĞİ AKILLI BÖLÜM */}
+        {/* GENEL BAKIŞ (ÖZET) - DİL DESTEKLİ */}
         {activeTab === 'overview' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-6">
             <div className="border-b pb-4 flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-extrabold text-slate-900">📊 Aday Durum ve Eksiklik Özeti</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Başvurunuzun ve profilinizin onay alabilmesi için tamamlanması gereken eksikler aşağıda listelenmiştir.</p>
+                <h3 className="text-lg font-extrabold text-slate-900">📊 {ct.overviewTitle}</h3>
+                <p className="text-xs text-slate-500 mt-0.5">{ct.overviewDesc}</p>
               </div>
               <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase ${missingDocs.length === 0 && missingProfileFields.length === 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                {missingDocs.length === 0 && missingProfileFields.length === 0 ? '✓ Her Şey Tamam' : '⚠️ Eksikler Var'}
+                {missingDocs.length === 0 && missingProfileFields.length === 0 ? `✓ ${ct.allComplete}` : `⚠️ ${ct.hasMissing}`}
               </span>
             </div>
 
@@ -800,61 +1042,61 @@ export default function CandidateDashboard() {
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-3">
                 <div className="flex items-center gap-2 font-extrabold text-slate-900 text-xs">
                   <User className="w-4 h-4 text-emerald-700" />
-                  <span>Profil & Bilgi Eksikleri</span>
+                  <span>{ct.profileMissingTitle}</span>
                 </div>
                 {missingProfileFields.length === 0 ? (
-                  <p className="text-xs text-emerald-700 font-medium">✓ Profil bilgileriniz, fotoğraf ve acil durum eksiksiz.</p>
+                  <p className="text-xs text-emerald-700 font-medium">✓ {ct.profileCompleteText}</p>
                 ) : (
                   <ul className="space-y-1.5 text-xs text-amber-800">
                     {missingProfileFields.map((field, i) => (
                       <li key={i} className="flex items-center gap-1.5 bg-amber-50 p-2 rounded-xl border border-amber-200">
                         <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        <span><strong>{field}</strong> eklenmedi.</span>
+                        <span><strong>{field}</strong> {ct.notAdded}</span>
                       </li>
                     ))}
                   </ul>
                 )}
                 <button onClick={() => setActiveTab('profile')} className="w-full mt-2 py-2 bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-xl border text-xs transition cursor-pointer">
-                  Profili Düzenle & Eksikleri Tamamla →
+                  {ct.editProfileBtn}
                 </button>
               </div>
 
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-3">
                 <div className="flex items-center gap-2 font-extrabold text-slate-900 text-xs">
                   <FileText className="w-4 h-4 text-emerald-700" />
-                  <span>Belge Eksikleri ({missingDocs.length} Belge Bekleniyor)</span>
+                  <span>{ct.docMissingTitle} ({missingDocs.length})</span>
                 </div>
                 {missingDocs.length === 0 ? (
-                  <p className="text-xs text-emerald-700 font-medium">✓ Tüm zorunlu belgeler yüklendi.</p>
+                  <p className="text-xs text-emerald-700 font-medium">✓ {ct.docCompleteText}</p>
                 ) : (
                   <ul className="space-y-1.5 text-xs text-red-800">
                     {missingDocs.map((doc: any, i: number) => (
                       <li key={i} className="flex items-center gap-1.5 bg-red-50 p-2 rounded-xl border border-red-200">
                         <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        <span><strong>{doc.name}</strong> henüz yüklenmedi.</span>
+                        <span><strong>{doc.name}</strong> {ct.notUploaded}</span>
                       </li>
                     ))}
                   </ul>
                 )}
                 <button onClick={() => setActiveTab('documents')} className="w-full mt-2 py-2 bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-xl border text-xs transition cursor-pointer">
-                  Belgeleri Yükle →
+                  {ct.uploadDocsBtn}
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Belgelerim Sekmesi & Önizleme Desteği */}
+        {/* Belgelerim Sekmesi */}
         {activeTab === 'documents' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">📁 Belgelerim & e-Apostil Takibi</h3>
+            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">📁 {ct.docsHeader}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {candidateDocs.map((doc: any, idx: number) => (
                 <div key={doc.id || idx} className="p-4 bg-slate-50 rounded-2xl border space-y-2">
                   <div className="flex justify-between items-center font-bold text-slate-900 text-xs">
                     <span>{currentLangTitles[idx] || doc.name}</span>
                     <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${doc.status === 'uploaded' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                      {doc.status === 'uploaded' ? 'Yüklendi' : 'Bekleniyor'}
+                      {doc.status === 'uploaded' ? ct.uploadedStatus : ct.pendingStatus}
                     </span>
                   </div>
                   
@@ -869,7 +1111,7 @@ export default function CandidateDashboard() {
                         onClick={() => setPreviewDoc({ name: currentLangTitles[idx] || doc.name, url: doc.file_url })}
                         className="px-3 py-1.5 bg-emerald-100 text-[#2e7d32] font-bold rounded-xl text-xs hover:bg-emerald-200 transition shrink-0 cursor-pointer"
                       >
-                        Önizle
+                        {ct.previewDocBtn}
                       </button>
                     )}
                   </div>
@@ -879,11 +1121,12 @@ export default function CandidateDashboard() {
           </div>
         )}
 
+        {/* İş Tekliflerim Sekmesi */}
         {activeTab === 'offers' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">💼 İş Tekliflerim</h3>
+            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">💼 {ct.offersHeader}</h3>
             {jobOffers.length === 0 ? (
-              <p className="text-xs text-slate-400">Henüz tarafınıza iletilen aktif bir iş teklifi bulunmamaktadır.</p>
+              <p className="text-xs text-slate-400">{ct.noOffers}</p>
             ) : (
               jobOffers.map((offer) => (
                 <div key={offer.id} className="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center text-xs">
@@ -893,8 +1136,8 @@ export default function CandidateDashboard() {
                   </div>
                   {offer.status === 'pending' && (
                     <div className="flex gap-2">
-                      <button onClick={() => handleUpdateOfferStatus(offer.id, 'accepted')} className="px-3 py-1.5 bg-[#2e7d32] text-white rounded-xl font-bold cursor-pointer">Kabul Et</button>
-                      <button onClick={() => handleUpdateOfferStatus(offer.id, 'rejected')} className="px-3 py-1.5 bg-red-600 text-white rounded-xl font-bold cursor-pointer">Reddet</button>
+                      <button onClick={() => handleUpdateOfferStatus(offer.id, 'accepted')} className="px-3 py-1.5 bg-[#2e7d32] text-white rounded-xl font-bold cursor-pointer">{ct.acceptBtn}</button>
+                      <button onClick={() => handleUpdateOfferStatus(offer.id, 'rejected')} className="px-3 py-1.5 bg-red-600 text-white rounded-xl font-bold cursor-pointer">{ct.rejectBtn}</button>
                     </div>
                   )}
                 </div>
@@ -903,19 +1146,20 @@ export default function CandidateDashboard() {
           </div>
         )}
 
+        {/* Destek Sekmesi */}
         {activeTab === 'support' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">💬 PANOVA Destek Talepleri</h3>
+            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">💬 {ct.supportHeader}</h3>
             <form onSubmit={handleSendSupport} className="space-y-3 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Konu</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">{ct.supportSub}</label>
                 <input type="text" value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} required placeholder="Örn: Belge Güncellemesi Hakkında" className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white" />
               </div>
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Mesajınız</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">{ct.supportMsg}</label>
                 <textarea value={supportMsg} onChange={(e) => setSupportMsg(e.target.value)} required rows={3} placeholder="Sorununuzu detaylı yazın..." className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white" />
               </div>
-              <button type="submit" className="bg-[#2e7d32] text-white px-6 py-2.5 rounded-xl font-bold cursor-pointer">Destek Talebi Gönder</button>
+              <button type="submit" className="bg-[#2e7d32] text-white px-6 py-2.5 rounded-xl font-bold cursor-pointer">{ct.sendSupportBtn}</button>
             </form>
           </div>
         )}
@@ -927,7 +1171,7 @@ export default function CandidateDashboard() {
         <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 z-50">
           <div className="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl border space-y-4">
             <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="font-bold text-slate-900 text-sm">📹 Aday Video Önizlemesi</h3>
+              <h3 className="font-bold text-slate-900 text-sm">📹 {ct.videoPreviewTitle}</h3>
               <button onClick={() => setPreviewVideo(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
             </div>
             <div className="aspect-video bg-slate-900 rounded-2xl flex items-center justify-center overflow-hidden">
@@ -942,7 +1186,7 @@ export default function CandidateDashboard() {
         <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 z-50">
           <div className="bg-white rounded-3xl p-6 max-w-3xl w-full shadow-2xl border space-y-4 max-h-[90vh] flex flex-col">
             <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="font-bold text-slate-900 text-sm">📁 Belge Önizlemesi: {previewDoc.name}</h3>
+              <h3 className="font-bold text-slate-900 text-sm">📁 {ct.docPreviewTitle}: {previewDoc.name}</h3>
               <button onClick={() => setPreviewDoc(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
             </div>
             <div className="flex-1 bg-slate-100 rounded-2xl p-4 flex items-center justify-center overflow-auto">
@@ -954,7 +1198,7 @@ export default function CandidateDashboard() {
             </div>
             <div className="flex justify-end">
               <button onClick={() => setPreviewDoc(null)} className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-xl text-xs cursor-pointer">
-                Kapat
+                {ct.closeModal}
               </button>
             </div>
           </div>
