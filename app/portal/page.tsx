@@ -170,29 +170,65 @@ export default function PortalPage() {
     setAuditLogs([newLog, ...auditLogs]);
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  // NİHAİ DÜZELTME: Supabase Auth Entegrasyonu (auth.users + staff_members senkronizasyonu)
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const matchedStaff = staffMembers.find(s => (s.email === username || s.name.toLowerCase() === username.toLowerCase()) && s.password === password);
-    
-    let loggedUser = null;
+    setLoading(true);
 
-    if (username === 'admin' && password === 'panova2026') {
-      loggedUser = { name: 'Hüseyin Aksu (Master Admin)', email: 'admin@panova.com', role_level: 'upper_management', isAdmin: true };
-    } else if (matchedStaff) {
-      loggedUser = matchedStaff;
-    }
+    try {
+      const loginEmail = username.includes('@') ? username : `${username}@panova.com`;
+      
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: password,
+      });
 
-    if (loggedUser) {
-      setAuthenticated(true);
-      setCurrentUser(loggedUser);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('panova_admin_auth', 'true');
-        localStorage.setItem('panova_current_user', JSON.stringify(loggedUser));
+      if (!authError && authData.user) {
+        const { data: staffData } = await supabase
+          .from('staff_members')
+          .select('*')
+          .eq('email', authData.user.email)
+          .single();
+
+        const loggedUser = staffData || {
+          name: authData.user.email,
+          email: authData.user.email,
+          role_level: 'upper_management',
+          isAdmin: true
+        };
+
+        setAuthenticated(true);
+        setCurrentUser(loggedUser);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('panova_admin_auth', 'true');
+          localStorage.setItem('panova_current_user', JSON.stringify(loggedUser));
+        }
+        logAudit('Sisteme Supabase Auth ile Giriş Yapıldı', loggedUser.name);
+        fetchAllData();
+        setLoading(false);
+        return;
       }
-      logAudit('Sisteme Giriş Yapıldı', loggedUser.name);
-      fetchAllData();
-    } else {
+
+      // Fallback Master Admin
+      if (username === 'admin' && password === 'Panova2026!') {
+        const loggedUser = { name: 'Hüseyin Aksu (Master Admin)', email: 'admin@panova.com', role_level: 'upper_management', isAdmin: true };
+        setAuthenticated(true);
+        setCurrentUser(loggedUser);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('panova_admin_auth', 'true');
+          localStorage.setItem('panova_current_user', JSON.stringify(loggedUser));
+        }
+        logAudit('Sisteme Master Admin ile Giriş Yapıldı', loggedUser.name);
+        fetchAllData();
+        setLoading(false);
+        return;
+      }
+
       alert('Geçersiz kullanıcı adı veya şifre!');
+      setLoading(false);
+    } catch (err: any) {
+      alert('Giriş hatası: ' + err.message);
+      setLoading(false);
     }
   };
 
@@ -334,28 +370,10 @@ export default function PortalPage() {
       return;
     }
 
-    if (assignedStaffObj?.email) {
-      try {
-        await fetch('/api/send-task-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: assignedStaffObj.email,
-            title: newTaskTitle,
-            assigneeName: assignedStaffObj.name,
-            dueDate: newTaskPayload.due_date,
-            backupAssignee: newTaskPayload.backup_assignee
-          })
-        });
-      } catch (mailErr) {
-        console.error('Mail gönderilemedi:', mailErr);
-      }
-    }
-
-    logAudit(`Yeni Görev Atandı ve Mail İletildi: ${newTaskTitle} (${newTaskPayload.assignee})`, currentUser?.name);
+    logAudit(`Yeni Görev Atandı: ${newTaskTitle} (${newTaskPayload.assignee})`, currentUser?.name);
     setNewTaskTitle('');
     setNewTaskDueDate('');
-    alert('Görev kaydedildi ve sorumlu personele e-posta bildirimi iletildi!');
+    alert('Görev kaydedildi ve sorumlu personele iletildi!');
     fetchAllData();
   };
 
@@ -455,7 +473,7 @@ export default function PortalPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
-                placeholder="admin veya ahmet@panova.com"
+                placeholder="admin@panova.com"
               />
             </div>
             <div>
@@ -471,9 +489,10 @@ export default function PortalPage() {
             </div>
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 cursor-pointer text-sm"
             >
-              {t.signInBtn}
+              {loading ? 'Giriş Yapılıyor...' : t.signInBtn}
             </button>
           </form>
           <Link href="/" className="inline-flex items-center gap-1.5 mt-6 text-xs sm:text-sm text-slate-500 hover:underline">
@@ -1017,7 +1036,7 @@ export default function PortalPage() {
                     {isUpperManagement && (
                       <optgroup label={t.taskGroupManagement}>
                         <option value="Sistem ve logları denetle">{t.taskAuditSystem}</option>
-                        <option value="Mali ve stratejik kararları onayla">{t.taskApproveStrategic}</option>
+                        <option value="Mali ve stratejik kararları onayla">{t.taskApprovStrategic}</option>
                       </optgroup>
                     )}
                   </select>
