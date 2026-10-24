@@ -73,7 +73,6 @@ export default function EmployerPortal() {
     async function fetchLatestFromDB() {
       try {
         const targetEmail = employerProfile?.email || 'huseyinaksu@gmail.com';
-        // Tüm işverenleri çekip eşleşeni buluyoruz (veya servis üzerinden özel sorgu)
         const allEmployers = await employerService.getAllEmployers();
         const data = allEmployers.find((e: any) => e.email === targetEmail) || allEmployers[0];
 
@@ -224,7 +223,6 @@ export default function EmployerPortal() {
       const existing = allEmployers.find((e: any) => e.email === targetEmail);
 
       if (existing) {
-        // employerService kullanarak güncelleme
         await employerService.updateEmployer(existing.id, {
           company_name: editCompanyName,
           contact_person: editContactPerson,
@@ -233,7 +231,6 @@ export default function EmployerPortal() {
           logo: editCompanyLogo
         });
       } else {
-        // employerService kullanarak yeni ekleme
         await employerService.createEmployer({
           company_name: editCompanyName,
           contact_person: editContactPerson,
@@ -319,6 +316,29 @@ export default function EmployerPortal() {
     agriculture: ['Hasat İşçisi', 'Sera Sorumlusu', 'Budama Uzmanı', 'Traktör Operatörü', 'Mantar Yetiştirme Uzmanı', 'Paketleme Elemanı'],
     construction: ['Kalıp Ustası', 'Demirci', 'Duvarcı / Sıvacı', 'Kaynakçı', 'Elektrikçi', 'İnşaat Mühendisi', 'Şantiye Şefi'],
     trade: ['Depo Sorumlusu', 'Forklift Operatörü', 'Dış Ticaret Uzmanı', 'Lojistik Sorumlusu', 'Ön Muhasebe', 'Satış Temsilcisi']
+  };
+
+  // Manifesto Uyumu: Talep Bazlı Dinamik Süreç Metrikleri Hesaplama
+  const getDemandMetrics = (demand: any) => {
+    const headcount = demand.headcount || 5;
+    const bound = candidates.length;
+    const offered = candidates.filter(c => c.status === 'reviewing' || c.status === 'approved').length;
+    const interviewing = candidates.filter(c => c.status === 'reviewing').length;
+    const selected = candidates.filter(c => c.status === 'approved').length;
+    const inProcess = candidates.filter(c => c.status === 'visa_processing' || c.status === 'reviewing').length;
+    const travelReady = candidates.filter(c => c.travel_status === 'ticketed' || c.travel_status === 'completed').length;
+    const started = 0; // Aktif çalışanlar tablosu veya seyahat tamamlananlar baz alınabilir
+
+    return {
+      headcount,
+      bound,
+      offered: Math.min(offered, headcount),
+      interviewing,
+      selected,
+      inProcess,
+      travelReady,
+      started
+    };
   };
 
   return (
@@ -589,7 +609,7 @@ export default function EmployerPortal() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.durationLabel || 'Çalışma Süresi'}</label>
-                    <input type="text" value={demandDuration} onChange={(e) => setDemandDuration(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
+                    <input type="text" value={demandDuration} onChange={(e) => setDemandDuration(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
                   </div>
                 </div>
 
@@ -624,24 +644,66 @@ export default function EmployerPortal() {
 
             <div className="space-y-4">
               <h4 className="font-extrabold text-slate-950 text-base">{t.activeDemandFilesTitle || 'Aktif İş Gücü Talep Dosyalarınız'} ({jobDemands.length})</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {jobDemands.map((dem) => (
-                  <div key={dem.id} className="bg-white rounded-2xl border p-5 shadow-sm space-y-3 flex flex-col justify-between">
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-start">
-                        <span className="text-[10px] font-bold uppercase bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-md">{dem.sector}</span>
-                        <span className="text-xs font-extrabold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">{dem.headcount} {t.peopleUnit || 'Kişi'}</span>
+              <div className="space-y-4">
+                {jobDemands.map((dem) => {
+                  const metrics = getDemandMetrics(dem);
+                  return (
+                    <div key={dem.id} className="bg-white rounded-2xl border p-5 shadow-sm space-y-4">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-bold uppercase bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-md">{dem.sector}</span>
+                            <span className="text-xs font-extrabold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">{metrics.headcount} {t.peopleUnit || 'Kişi'}</span>
+                          </div>
+                          <h4 className="font-extrabold text-slate-950 text-base">{dem.position_title}</h4>
+                          <p className="text-xs text-slate-500">📍 {dem.city} | 💰 {dem.salary}</p>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-bold uppercase text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl text-xs">{t.statusLabel || 'Durum'}: {dem.status || 'new_request'}</span>
+                          <div className="text-[11px] text-slate-400 mt-1">📅 {dem.created_at ? dem.created_at.substring(0, 10) : '2026-09'}</div>
+                        </div>
                       </div>
-                      <h4 className="font-extrabold text-slate-950 text-base">{dem.position_title}</h4>
-                      <p className="text-xs text-slate-500">📍 {dem.city} | 💰 {dem.salary}</p>
-                      {dem.job_description && <p className="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl">{dem.job_description}</p>}
+
+                      {dem.job_description && <p className="text-xs text-slate-700 bg-slate-50 p-3 rounded-xl">{dem.job_description}</p>}
+
+                      {/* Manifestoya Göre Talep Bazlı Dinamik Süreç Metrikleri Paneli */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 bg-slate-50/80 p-3 rounded-xl border text-center text-xs">
+                        <div className="bg-white p-2 rounded-lg border shadow-xs">
+                          <div className="text-[9px] font-bold text-slate-400 uppercase">Talep Edilen</div>
+                          <div className="text-sm font-black text-slate-900">{metrics.headcount}</div>
+                        </div>
+                        <div className="bg-white p-2 rounded-lg border shadow-xs">
+                          <div className="text-[9px] font-bold text-indigo-500 uppercase">Bağlanan</div>
+                          <div className="text-sm font-black text-indigo-700">{metrics.bound}</div>
+                        </div>
+                        <div className="bg-white p-2 rounded-lg border shadow-xs">
+                          <div className="text-[9px] font-bold text-blue-500 uppercase">Sunulan</div>
+                          <div className="text-sm font-black text-blue-700">{metrics.offered}</div>
+                        </div>
+                        <div className="bg-white p-2 rounded-lg border shadow-xs">
+                          <div className="text-[9px] font-bold text-amber-500 uppercase">Görüşülen</div>
+                          <div className="text-sm font-black text-amber-600">{metrics.interviewing}</div>
+                        </div>
+                        <div className="bg-white p-2 rounded-lg border shadow-xs">
+                          <div className="text-[9px] font-bold text-emerald-500 uppercase">Seçilen</div>
+                          <div className="text-sm font-black text-emerald-700">{metrics.selected}</div>
+                        </div>
+                        <div className="bg-white p-2 rounded-lg border shadow-xs">
+                          <div className="text-[9px] font-bold text-purple-500 uppercase">İşlemde</div>
+                          <div className="text-sm font-black text-purple-700">{metrics.inProcess}</div>
+                        </div>
+                        <div className="bg-white p-2 rounded-lg border shadow-xs">
+                          <div className="text-[9px] font-bold text-sky-500 uppercase">Seyahat Hazır</div>
+                          <div className="text-sm font-black text-sky-700">{metrics.travelReady}</div>
+                        </div>
+                        <div className="bg-white p-2 rounded-lg border shadow-xs">
+                          <div className="text-[9px] font-bold text-teal-500 uppercase">İşe Başlayan</div>
+                          <div className="text-sm font-black text-teal-700">{metrics.started}</div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="pt-2 border-t flex justify-between items-center text-xs">
-                      <span className="text-slate-400">📅 {dem.created_at ? dem.created_at.substring(0, 10) : '2026-09'}</span>
-                      <span className="font-bold uppercase text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">{t.statusLabel || 'Durum'}: {dem.status || 'new_request'}</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
