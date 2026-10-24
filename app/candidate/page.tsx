@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { 
   User, CheckCircle2, LogOut, Lock, Camera, 
   FileText, Eye, X, Briefcase, Calendar, 
-  Plane, Languages, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, Video, ShieldAlert
+  Plane, Languages, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, Video, ShieldAlert, ShieldCheck
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
@@ -71,6 +71,12 @@ export default function CandidateDashboard() {
   const [newPassword, setNewPassword] = useState('');
   const [newPhoto, setNewPhoto] = useState('');
   const [newVideoUrl, setNewVideoUrl] = useState('');
+  
+  // Acil Durum İletişimi State'leri
+  const [newEmergencyName, setNewEmergencyName] = useState('');
+  const [newEmergencyRelation, setNewEmergencyRelation] = useState('');
+  const [newEmergencyPhone, setNewEmergencyPhone] = useState('');
+  
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -87,10 +93,10 @@ export default function CandidateDashboard() {
   const isRtl = currentLang === 'ar';
 
   const docTitlesByLang: Record<Language, string[]> = {
-    tr: ['Pasaport Taraması', 'Mesleki Sertifika / İzin Belgesi', 'Adli Sicil Kaydı (Sabıka Kaydı)', 'Sağlık Raporu / Akciğer Grafisi'],
-    en: ['Passport Scan', 'Professional Certificate / Permit', 'Criminal Record', 'Health Report / X-Ray'],
-    sq: ['Skanimi i Pasaportës', 'Certifikata Profesionale / Leja', 'Dëshmi Penaliteti', 'Raporti Shëndetësor / Rrezet X'],
-    ar: ['مسح جواز السفر', 'الشهادة المهنية / التصريح', 'السجل الجنائي', 'التقرير الطبي / الأشعة']
+    tr: ['Pasaport Taraması', 'Mesleki Sertifika / İzin Belgesi', 'Adli Sicil Kaydı (Sabıka Kaydı)', 'Sağlık Raporu / Akciğer Grafisi', 'e-Apostil / Dışişleri Bakanlığı Tasdiki'],
+    en: ['Passport Scan', 'Professional Certificate / Permit', 'Criminal Record', 'Health Report / X-Ray', 'e-Apostille / MoFA Legalization'],
+    sq: ['Skanimi i Pasaportës', 'Certifikata Profesionale / Leja', 'Dëshmi Penaliteti', 'Raporti Shëndetësor / Rrezet X', 'e-Apostille / Legalizimi i Ministrisë së Jashtme'],
+    ar: ['مسح جواز السفر', 'الشهادة المهنية / التصريح', 'السجل الجنائي', 'التقرير الطبي / الأشعة', 'أبوستيل الكتروني / تصديق وزارة الخارجية']
   };
 
   useEffect(() => {
@@ -101,6 +107,9 @@ export default function CandidateDashboard() {
       setNewPassword(candidate.password || '123456');
       setNewPhoto(candidate.photo_url || '');
       setNewVideoUrl(candidate.video_url || '');
+      setNewEmergencyName(candidate.emergency_name || '');
+      setNewEmergencyRelation(candidate.emergency_relation || '');
+      setNewEmergencyPhone(candidate.emergency_phone || '');
     }
   }, [authenticated]);
 
@@ -127,6 +136,9 @@ export default function CandidateDashboard() {
         setNewPassword(data.password || '123456');
         setNewPhoto(data.photo_url || '');
         setNewVideoUrl(data.video_url || '');
+        setNewEmergencyName(data.emergency_name || '');
+        setNewEmergencyRelation(data.emergency_relation || '');
+        setNewEmergencyPhone(data.emergency_phone || '');
         setAuthenticated(true);
         
         if (typeof window !== 'undefined') {
@@ -280,16 +292,6 @@ export default function CandidateDashboard() {
     }
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setNewPhoto(event.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
   const handleDocUpload = async (docIndex: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -302,6 +304,7 @@ export default function CandidateDashboard() {
         { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
         { id: '3', name: 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
         { id: '4', name: 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
+        { id: '5', name: 'e-Apostil / Dışişleri Bakanlığı Tasdiki', status: 'pending' },
       ];
 
       const currentDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : defaultDocs;
@@ -344,6 +347,9 @@ export default function CandidateDashboard() {
         password: newPassword,
         photo_url: newPhoto,
         video_url: newVideoUrl,
+        emergency_name: newEmergencyName,
+        emergency_relation: newEmergencyRelation,
+        emergency_phone: newEmergencyPhone,
       })
       .eq('id', candidate.id);
 
@@ -357,20 +363,21 @@ export default function CandidateDashboard() {
         password: newPassword,
         photo_url: newPhoto,
         video_url: newVideoUrl,
+        emergency_name: newEmergencyName,
+        emergency_relation: newEmergencyRelation,
+        emergency_phone: newEmergencyPhone,
       };
       setCandidate(updatedCandidate);
       if (typeof window !== 'undefined') {
         localStorage.setItem('panova_current_candidate', JSON.stringify(updatedCandidate));
       }
-      alert(currentLang === 'tr' ? 'Profil güncellendi!' : 'Profile updated!');
+      alert(currentLang === 'tr' ? 'Profil ve acil durum bilgileri güncellendi!' : 'Profile and emergency contact updated!');
     }
   };
 
-  // Employer-login Şablonuna Uyarlanmış Giriş Ekranı
   if (!authenticated || !candidate) {
     return (
       <div className={`min-h-screen bg-slate-50 flex flex-col justify-between ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-        {/* Üst Header */}
         <header className="w-full bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="PANOVA PORTAL" className="h-8 w-auto object-contain" />
@@ -401,7 +408,6 @@ export default function CandidateDashboard() {
           </div>
         </header>
 
-        {/* Ana İçerik / Form Kartı */}
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 max-w-md w-full">
             <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border">
@@ -560,7 +566,6 @@ export default function CandidateDashboard() {
           </div>
         </main>
 
-        {/* Alt Footer */}
         <footer className="w-full py-4 text-center text-xs text-slate-500 border-t border-slate-200 bg-white">
           PANOVA TARIM DOO • International Workforce Management System © 2026
         </footer>
@@ -568,12 +573,12 @@ export default function CandidateDashboard() {
     );
   }
 
-  // Oturum açıldığında görünen Dashboard (Aynen korunmuştur)
   const defaultDocs = [
     { id: '1', name: 'Pasaport Taraması', status: 'pending' },
     { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
     { id: '3', name: 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
     { id: '4', name: 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
+    { id: '5', name: 'e-Apostil / Dışişleri Bakanlığı Tasdiki', status: 'pending' },
   ];
   const candidateDocs = candidate?.documents_json ? JSON.parse(candidate.documents_json) : defaultDocs;
   const currentLangTitles = docTitlesByLang[currentLang] || docTitlesByLang.tr;
@@ -592,9 +597,7 @@ export default function CandidateDashboard() {
 
   return (
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* (Dashboard içeriği ve sekmeler buradadır) */}
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
-        {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm">
           <div className="flex items-center gap-3 sm:gap-4">
             {newPhoto ? (
@@ -627,7 +630,7 @@ export default function CandidateDashboard() {
                 className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
               >
                 {languages.map((lang) => (
-                  <option key={lang.code} value={lang.code} className="text-slate-900">
+                  <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">
                     {lang.flag} {lang.name}
                   </option>
                 ))}
@@ -644,8 +647,182 @@ export default function CandidateDashboard() {
           </div>
         </div>
 
-        {/* Sekmeler ve içerik akışı standart çalışır... */}
-        {/* ... (Devam eden tab içerikleri) ... */}
+        {/* Navigasyon Sekmeleri */}
+        <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
+          <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            📊 {t.overviewTab || 'Genel Bakış'}
+          </button>
+          <button onClick={() => setActiveTab('profile')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            👤 {t.profileTab || 'Profilim'}
+          </button>
+          <button onClick={() => setActiveTab('documents')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'documents' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            📁 {t.documentsTab || 'Belgelerim'}
+          </button>
+          <button onClick={() => setActiveTab('offers')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'offers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            💼 {t.offersTab || 'İş Tekliflerim'} ({jobOffers.length})
+          </button>
+          <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            💬 {t.supportTab || 'Destek'} ({supportTickets.length})
+          </button>
+        </div>
+
+        {/* Profil Sekmesi (Acil Durum İletişimi Entegre Edilmiş Hali) */}
+        {activeTab === 'profile' && (
+          <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-6">
+            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">👤 Profil Bilgileri & Acil Durum İletişimi</h3>
+            
+            <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">E-Posta Adresi</label>
+                  <input 
+                    type="email" 
+                    value={newEmail} 
+                    onChange={(e) => setNewEmail(e.target.value)} 
+                    className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Telefon Numarası</label>
+                  <input 
+                    type="text" 
+                    value={newPhone} 
+                    onChange={(e) => setNewPhone(e.target.value)} 
+                    className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
+                  />
+                </div>
+              </div>
+
+              {/* Acil Durum İletişim Alanları (Bangladeş Standardı Entegrasyonu) */}
+              <div className="bg-slate-50 p-4 rounded-2xl border space-y-3">
+                <h4 className="font-extrabold text-slate-900 text-xs text-emerald-800 uppercase border-b pb-1">🚨 Acil Durum İletişim Bilgileri (Emergency Contact)</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">İlgili Kişi Adı (Name)</label>
+                    <input 
+                      type="text" 
+                      value={newEmergencyName} 
+                      onChange={(e) => setNewEmergencyName(e.target.value)} 
+                      placeholder="Örn: Md Samad Bepary" 
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Yakınlık Derecesi (Relationship)</label>
+                    <input 
+                      type="text" 
+                      value={newEmergencyRelation} 
+                      onChange={(e) => setNewEmergencyRelation(e.target.value)} 
+                      placeholder="Örn: Father / Baba" 
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Acil Durum Telefonu (Phone)</label>
+                    <input 
+                      type="text" 
+                      value={newEmergencyPhone} 
+                      onChange={(e) => setNewEmergencyPhone(e.target.value)} 
+                      placeholder="+880..." 
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Portal Şifresi</label>
+                <input 
+                  type="text" 
+                  value={newPassword} 
+                  onChange={(e) => setNewPassword(e.target.value)} 
+                  className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={updatingProfile}
+                className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-6 py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs"
+              >
+                {updatingProfile ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Diğer Sekmeler (Genel Bakış, Belgeler, Teklifler, Destek vb.) standart yüklenir */}
+        {activeTab === 'overview' && (
+          <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-extrabold text-slate-900">📊 Aday Durum Özeti</h3>
+            <p className="text-xs text-slate-600">Başvurunuz ve resmî süreçleriniz PANOVA sisteminde başarıyla takip edilmektedir.</p>
+          </div>
+        )}
+
+        {activeTab === 'documents' && (
+          <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">📁 Belgelerim & e-Apostil Takibi</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {candidateDocs.map((doc: any, idx: number) => (
+                <div key={doc.id || idx} className="p-4 bg-slate-50 rounded-2xl border space-y-2">
+                  <div className="flex justify-between items-center font-bold text-slate-900 text-xs">
+                    <span>{currentLangTitles[idx] || doc.name}</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${doc.status === 'uploaded' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                      {doc.status === 'uploaded' ? 'Yüklendi' : 'Bekleniyor'}
+                    </span>
+                  </div>
+                  <input 
+                    type="file" 
+                    onChange={(e) => handleDocUpload(idx, e)}
+                    className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#2e7d32] hover:file:bg-emerald-100 cursor-pointer"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'offers' && (
+          <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">💼 İş Tekliflerim</h3>
+            {jobOffers.length === 0 ? (
+              <p className="text-xs text-slate-400">Henüz tarafınıza iletilen aktif bir iş teklifi bulunmamaktadır.</p>
+            ) : (
+              jobOffers.map((offer) => (
+                <div key={offer.id} className="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center text-xs">
+                  <div>
+                    <strong>{offer.position_title}</strong> - {offer.employer_name} ({offer.country})
+                    <div className="text-[11px] text-slate-500 mt-0.5">Ücret: {offer.salary} | Durum: <strong>{offer.status}</strong></div>
+                  </div>
+                  {offer.status === 'pending' && (
+                    <div className="flex gap-2">
+                      <button onClick={() => handleUpdateOfferStatus(offer.id, 'accepted')} className="px-3 py-1.5 bg-[#2e7d32] text-white rounded-xl font-bold cursor-pointer">Kabul Et</button>
+                      <button onClick={() => handleUpdateOfferStatus(offer.id, 'rejected')} className="px-3 py-1.5 bg-red-600 text-white rounded-xl font-bold cursor-pointer">Reddet</button>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {activeTab === 'support' && (
+          <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
+            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">💬 PANOVA Destek Talepleri</h3>
+            <form onSubmit={handleSendSupport} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Konu</label>
+                <input type="text" value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} required placeholder="Örn: Belge Güncellemesi Hakkında" className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white" />
+              </div>
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Mesajınız</label>
+                <textarea value={supportMsg} onChange={(e) => setSupportMsg(e.target.value)} required rows={3} placeholder="Sorununuzu detaylı yazın..." className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white" />
+              </div>
+              <button type="submit" disabled={supportSending} className="bg-[#2e7d32] text-white px-6 py-2.5 rounded-xl font-bold cursor-pointer">{supportSending ? 'Gönderiliyor...' : 'Destek Talebi Gönder'}</button>
+            </form>
+          </div>
+        )}
+
       </div>
     </div>
   );
