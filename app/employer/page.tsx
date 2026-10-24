@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { employerService } from '@/lib/services/employerService';
 import { 
   Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, Languages, 
   Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, Plane, ShieldCheck, HeartHandshake, UploadCloud, Check
@@ -67,28 +68,30 @@ export default function EmployerPortal() {
   const [editCountry, setEditCountry] = useState('North Macedonia');
   const [editCompanyLogo, setEditCompanyLogo] = useState('');
 
-  // Sayfa açıldığında Supabase'ten en güncel veriyi (logo dahil) çekiyoruz
+  // Sayfa açıldığında employerService üzerinden en güncel veriyi çekiyoruz
   useEffect(() => {
     async function fetchLatestFromDB() {
-      const targetEmail = employerProfile?.email || 'huseyinaksu@gmail.com';
-      const { data, error } = await supabase
-        .from('employers')
-        .select('*')
-        .eq('email', targetEmail)
-        .maybeSingle();
+      try {
+        const targetEmail = employerProfile?.email || 'huseyinaksu@gmail.com';
+        // Tüm işverenleri çekip eşleşeni buluyoruz (veya servis üzerinden özel sorgu)
+        const allEmployers = await employerService.getAllEmployers();
+        const data = allEmployers.find((e: any) => e.email === targetEmail) || allEmployers[0];
 
-      if (data) {
-        const synced = {
-          id: data.id,
-          companyName: data.company_name || 'AKAY EĞİTİM',
-          contactPerson: data.contact_person || 'Hüseyin Aksu',
-          email: data.email || targetEmail,
-          phone: data.phone || '+38970385792',
-          country: data.country || 'North Macedonia',
-          companyLogo: data.logo || ''
-        };
-        setEmployerProfile(synced);
-        localStorage.setItem('panova_employer_profile', JSON.stringify(synced));
+        if (data) {
+          const synced = {
+            id: data.id,
+            companyName: data.company_name || 'AKAY EĞİTİM',
+            contactPerson: data.contact_person || 'Hüseyin Aksu',
+            email: data.email || targetEmail,
+            phone: data.phone || '+38970385792',
+            country: data.country || 'North Macedonia',
+            companyLogo: data.logo || ''
+          };
+          setEmployerProfile(synced);
+          localStorage.setItem('panova_employer_profile', JSON.stringify(synced));
+        }
+      } catch (err) {
+        console.error('Veri çekme hatası:', err);
       }
     }
     fetchLatestFromDB();
@@ -165,7 +168,6 @@ export default function EmployerPortal() {
     if (ticketData) setSupportTickets(ticketData);
   };
 
-  // Logo yükleme: Görseli optimize ederek base64 formatına çeviriyoruz
   const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -218,23 +220,21 @@ export default function EmployerPortal() {
 
     try {
       const targetEmail = editEmail || employerProfile.email || 'huseyinaksu@gmail.com';
-      
-      const { data: existing } = await supabase
-        .from('employers')
-        .select('id')
-        .eq('email', targetEmail)
-        .maybeSingle();
+      const allEmployers = await employerService.getAllEmployers();
+      const existing = allEmployers.find((e: any) => e.email === targetEmail);
 
       if (existing) {
-        await supabase.from('employers').update({
+        // employerService kullanarak güncelleme
+        await employerService.updateEmployer(existing.id, {
           company_name: editCompanyName,
           contact_person: editContactPerson,
           phone: editPhone,
           country: editCountry,
           logo: editCompanyLogo
-        }).eq('email', targetEmail);
+        });
       } else {
-        await supabase.from('employers').insert([{
+        // employerService kullanarak yeni ekleme
+        await employerService.createEmployer({
           company_name: editCompanyName,
           contact_person: editContactPerson,
           email: targetEmail,
@@ -242,10 +242,10 @@ export default function EmployerPortal() {
           country: editCountry,
           logo: editCompanyLogo,
           password: 'panova2026'
-        }]);
+        });
       }
     } catch (err) {
-      console.error('DB Update Error:', err);
+      console.error('Servis Güncelleme Hatası:', err);
     }
 
     setEmployerProfile(updated);
@@ -343,7 +343,6 @@ export default function EmployerPortal() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            {/* Admin Tarafından Açıldıysa Gösterilecek Geri Dönüş Butonu */}
             {typeof window !== 'undefined' && JSON.parse(localStorage.getItem('panova_employer_user') || '{}')?.isAdminImpersonation && (
               <button
                 onClick={() => {
@@ -511,7 +510,6 @@ export default function EmployerPortal() {
                   </div>
                 </div>
 
-                {/* Üniversal Pozisyon Seçimi ve Diğer İnput */}
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">2. {t.selectPositionsLabel || 'Pozisyonları İşaretleyin veya Üniversal Dropdown ile Seçin'} *</label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 mb-3">
@@ -555,7 +553,6 @@ export default function EmployerPortal() {
                   </div>
                 </div>
 
-                {/* Tecrübe ve Dil Becerileri */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-700 mb-1">⏱️ {t.experienceLabel || 'Aranan Tecrübe Süresi'}</label>
