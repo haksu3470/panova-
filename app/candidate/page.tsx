@@ -85,6 +85,8 @@ export default function CandidateDashboard() {
   const [supportMsg, setSupportMsg] = useState('');
   const [supportSending, setSupportSending] = useState(false);
 
+  const [previewVideo, setPreviewVideo] = useState<string | null>(null);
+
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
 
@@ -279,6 +281,16 @@ export default function CandidateDashboard() {
     }
   };
 
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setNewPhoto(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleDocUpload = async (docIndex: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -358,7 +370,7 @@ export default function CandidateDashboard() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('panova_current_candidate', JSON.stringify(updatedCandidate));
       }
-      alert(currentLang === 'tr' ? 'Profil ve acil durum bilgileri güncellendi!' : 'Profile and emergency contact updated!');
+      alert(currentLang === 'tr' ? 'Profil, fotoğraf, video ve acil durum bilgileri güncellendi!' : 'Profile updated!');
     }
   };
 
@@ -622,7 +634,7 @@ export default function CandidateDashboard() {
           </div>
         </div>
 
-        {/* Navigasyon Sekmeleri (Sözlükteki 'profile', 'documents', 'offers' kullanıldı) */}
+        {/* Navigasyon Sekmeleri */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
           <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overview || 'Genel Bakış'}
@@ -641,11 +653,49 @@ export default function CandidateDashboard() {
           </button>
         </div>
 
+        {/* Profil Sekmesi */}
         {activeTab === 'profile' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-6">
-            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">👤 Profil Bilgileri & Acil Durum İletişimi</h3>
+            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">👤 Profil Bilgileri, Fotoğraf, Video & Acil Durum</h3>
             
             <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs">
+              <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border">
+                {newPhoto ? (
+                  <img src={newPhoto} alt="Önizleme" className="w-20 h-20 rounded-2xl object-cover border shadow-sm" />
+                ) : (
+                  <div className="w-20 h-20 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center font-bold text-2xl">
+                    {candidate.full_name?.charAt(0)}
+                  </div>
+                )}
+                <div className="space-y-1 text-center sm:text-left">
+                  <label className="block font-extrabold text-slate-900 uppercase">Aday Profil Fotoğrafı</label>
+                  <p className="text-slate-500 text-[11px]">Net ve profesyonel bir vesikalık fotoğraf yükleyin.</p>
+                  <input type="file" accept="image/*" onChange={handlePhotoUpload} className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#2e7d32] hover:file:bg-emerald-100 cursor-pointer mt-1" />
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
+                <label className="block font-extrabold text-slate-900 uppercase">📹 Çalışma / Tanıtım Videosu URL (YouTube / Drive vb.)</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="url" 
+                    value={newVideoUrl} 
+                    onChange={(e) => setNewVideoUrl(e.target.value)} 
+                    placeholder="https://www.youtube.com/watch?v=..." 
+                    className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
+                  />
+                  {newVideoUrl && (
+                    <button 
+                      type="button" 
+                      onClick={() => setPreviewVideo(newVideoUrl)}
+                      className="bg-emerald-100 text-[#2e7d32] px-4 py-2 rounded-xl font-bold hover:bg-emerald-200 transition cursor-pointer shrink-0"
+                    >
+                      Önizle
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">E-Posta Adresi</label>
@@ -796,6 +846,20 @@ export default function CandidateDashboard() {
         )}
 
       </div>
+
+      {previewVideo && (
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 z-50">
+          <div className="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl border space-y-4">
+            <div className="flex justify-between items-center border-b pb-3">
+              <h3 className="font-bold text-slate-900 text-sm">📹 Aday Video Önizlemesi</h3>
+              <button onClick={() => setPreviewVideo(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
+            </div>
+            <div className="aspect-video bg-slate-900 rounded-2xl flex items-center justify-center overflow-hidden">
+              <iframe src={previewVideo.replace('watch?v=', 'embed/')} className="w-full h-full" allowFullScreen></iframe>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
