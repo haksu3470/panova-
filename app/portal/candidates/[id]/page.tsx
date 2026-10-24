@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft, User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, Video, Trash2, Upload, Eye, X, Plus, Languages, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { candidateService } from '@/lib/services/candidateService';
+import { ArrowLeft, User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, Video, Trash2, Upload, Eye, X, Plus, Languages, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
@@ -77,7 +78,7 @@ export default function CandidateDetailPage() {
   const [pnrCode, setPnrCode] = useState('');
   const [accommodationDetails, setAccommodationDetails] = useState('');
 
-  // Vazgeçme ve Süreç Kapatma State'leri (JSON içinde güvenle saklanır)
+  // Vazgeçme ve Süreç Kapatma State'leri
   const [closureReason, setClosureReason] = useState('');
   const [isClosed, setIsClosed] = useState(false);
 
@@ -123,62 +124,60 @@ export default function CandidateDetailPage() {
 
   const fetchCandidateDetail = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('job_candidates')
-      .select('*')
-      .eq('id', candidateId)
-      .single();
+    try {
+      const data = await candidateService.getCandidateById(candidateId);
+      if (data) {
+        setCandidate(data);
+        setStatus(data.status || 'pending');
+        setCandidatePassword(data.password || '123456');
+        setCandidatePhoto(data.photo_url || '');
+        setCandidatePhone(data.phone || '');
+        setCandidateEmail(data.email || '');
+        setInternalNotes(data.notes || '');
+        setCertificateNo(data.certificate_no || '');
+        setIssuingBody(data.issuing_body || '');
+        setVideoUrl(data.video_url || '');
 
-    if (!error && data) {
-      setCandidate(data);
-      setStatus(data.status || 'pending');
-      setCandidatePassword(data.password || '123456');
-      setCandidatePhoto(data.photo_url || '');
-      setCandidatePhone(data.phone || '');
-      setCandidateEmail(data.email || '');
-      setInternalNotes(data.notes || '');
-      setCertificateNo(data.certificate_no || '');
-      setIssuingBody(data.issuing_body || '');
-      setVideoUrl(data.video_url || '');
+        setTravelStatus(data.travel_status || 'planned');
+        setFlightDate(data.flight_date || '');
+        setFlightNumber(data.flight_number || '');
+        setDepartureCity(data.departure_city || '');
+        setArrivalCity(data.arrival_city || '');
+        setPnrCode(data.pnr_code || '');
+        setAccommodationDetails(data.accommodation_details || '');
 
-      setTravelStatus(data.travel_status || 'planned');
-      setFlightDate(data.flight_date || '');
-      setFlightNumber(data.flight_number || '');
-      setDepartureCity(data.departure_city || '');
-      setArrivalCity(data.arrival_city || '');
-      setPnrCode(data.pnr_code || '');
-      setAccommodationDetails(data.accommodation_details || '');
+        try {
+          const parsedMeta = data.documents_json ? JSON.parse(data.documents_json) : {};
+          if (parsedMeta && parsedMeta.closure_meta) {
+            setIsClosed(parsedMeta.closure_meta.is_closed || false);
+            setClosureReason(parsedMeta.closure_meta.closure_reason || '');
+          }
+        } catch (e) {}
 
-      // JSON içinden closure/kapanış verilerini güvenli okuma
-      try {
-        const parsedMeta = data.documents_json ? JSON.parse(data.documents_json) : {};
-        if (parsedMeta && parsedMeta.closure_meta) {
-          setIsClosed(parsedMeta.closure_meta.is_closed || false);
-          setClosureReason(parsedMeta.closure_meta.closure_reason || '');
+        const defaultDocs: CandidateDocument[] = [
+          { id: '1', name: t.docPassportScan || 'Pasaport Taraması', status: data.passport_number ? 'approved' : 'pending' },
+          { id: '2', name: t.docProfessionalCert || 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
+          { id: '3', name: t.docCriminalRecord || 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
+          { id: '4', name: t.docHealthReport || 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
+        ];
+        
+        try {
+          const parsed = data.documents_json ? JSON.parse(data.documents_json) : {};
+          const parsedDocs = Array.isArray(parsed) ? parsed : (parsed.docs || defaultDocs);
+          const normalizedDocs = parsedDocs.map((doc: CandidateDocument, idx: number) => {
+            if (idx === 0) return { ...doc, name: t.docPassportScan || doc.name };
+            if (idx === 1) return { ...doc, name: t.docProfessionalCert || doc.name };
+            if (idx === 2) return { ...doc, name: t.docCriminalRecord || doc.name };
+            if (idx === 3) return { ...doc, name: t.docHealthReport || doc.name };
+            return doc;
+          });
+          setDocuments(normalizedDocs);
+        } catch {
+          setDocuments(defaultDocs);
         }
-      } catch (e) {}
-
-      const defaultDocs: CandidateDocument[] = [
-        { id: '1', name: t.docPassportScan || 'Pasaport Taraması', status: data.passport_number ? 'approved' : 'pending' },
-        { id: '2', name: t.docProfessionalCert || 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
-        { id: '3', name: t.docCriminalRecord || 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
-        { id: '4', name: t.docHealthReport || 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
-      ];
-      
-      try {
-        const parsed = data.documents_json ? JSON.parse(data.documents_json) : {};
-        const parsedDocs = Array.isArray(parsed) ? parsed : (parsed.docs || defaultDocs);
-        const normalizedDocs = parsedDocs.map((doc: CandidateDocument, idx: number) => {
-          if (idx === 0) return { ...doc, name: t.docPassportScan || doc.name };
-          if (idx === 1) return { ...doc, name: t.docProfessionalCert || doc.name };
-          if (idx === 2) return { ...doc, name: t.docCriminalRecord || doc.name };
-          if (idx === 3) return { ...doc, name: t.docHealthReport || doc.name };
-          return doc;
-        });
-        setDocuments(normalizedDocs);
-      } catch {
-        setDocuments(defaultDocs);
       }
+    } catch (err: any) {
+      console.error('Aday detay yükleme hatası:', err.message);
     }
     setLoading(false);
   };
@@ -237,7 +236,6 @@ export default function CandidateDetailPage() {
   const handleSaveDetail = async () => {
     setSaving(true);
 
-    // Veritabanı şemasını bozmamak için closure ve belgeleri JSON paketinde saklıyoruz
     let existingMeta = {};
     try {
       const parsed = candidate?.documents_json ? JSON.parse(candidate.documents_json) : {};
@@ -253,9 +251,8 @@ export default function CandidateDetailPage() {
       ...existingMeta
     });
 
-    const { error } = await supabase
-      .from('job_candidates')
-      .update({
+    try {
+      await candidateService.updateCandidateDetail(candidateId, {
         status: status,
         password: candidatePassword,
         photo_url: candidatePhoto,
@@ -273,14 +270,12 @@ export default function CandidateDetailPage() {
         arrival_city: arrivalCity,
         pnr_code: pnrCode,
         accommodation_details: accommodationDetails,
-      })
-      .eq('id', candidateId);
+      });
 
-    setSaving(false);
-
-    if (!error) {
+      setSaving(false);
       alert(t.savedSuccess || 'Başarıyla kaydedildi!');
-    } else {
+    } catch (error: any) {
+      setSaving(false);
       alert('Hata: ' + error.message);
     }
   };
