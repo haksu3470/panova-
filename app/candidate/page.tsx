@@ -643,7 +643,7 @@ export default function CandidateDashboard() {
       <div className={`min-h-screen bg-slate-50 flex flex-col justify-between ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
         <header className="w-full bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="PANOVA PORTAL" className="h-8 w-auto object-contain" />
+            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
             <span className="font-extrabold text-slate-800 text-sm tracking-wide">PANOVA PORTAL</span>
           </div>
           <div className="flex items-center gap-3">

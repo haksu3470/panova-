@@ -16,7 +16,10 @@ export default function KvkkView() {
     <div className={`min-h-screen bg-slate-50 text-slate-900 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
-          <Link href="/" className="font-black tracking-tight text-slate-900">PANOVA</Link>
+          <Link href="/" className="inline-flex items-center gap-2 font-black tracking-tight text-slate-900">
+            <img src="/logo.png" alt="" width={1051} height={725} className="h-9 w-auto object-contain" />
+            PANOVA
+          </Link>
           <div className="flex items-center gap-3">
             <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
             <Link href="/" className="text-sm font-semibold text-[#1b5e20]">{k.home}</Link>
