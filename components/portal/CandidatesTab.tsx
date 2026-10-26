@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Search, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import DemoBadge from './DemoBadge';
+import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
+import { toLanguage } from '@/lib/europeanCountries';
 
 interface CandidatesTabProps {
   candidates: any[];
@@ -116,10 +118,7 @@ export default function CandidatesTab({
             className="w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 bg-white cursor-pointer outline-none focus:ring-2 focus:ring-[#2e7d32]"
           >
             <option value="all">🌍 All Countries</option>
-            <option value="North Macedonia">North Macedonia</option>
-            <option value="Turkey">Turkey</option>
-            <option value="Albania">Albania</option>
-            <option value="Kosovo">Kosovo</option>
+            <EuropeanCountryOptions lang={toLanguage(currentLang)} />
           </select>
         </div>
       </div>

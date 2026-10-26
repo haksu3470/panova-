@@ -21,6 +21,7 @@ import { Language, languages, translations } from '@/lib/dictionary';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { AuthFooter } from '@/components/site/AuthFooter';
+import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
 
 export default function EmployerLoginPage() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
@@ -309,10 +310,7 @@ export default function EmployerLoginPage() {
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.countryLabel}</label>
                   <select value={regCountry} onChange={(e) => setRegCountry(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium cursor-pointer">
-                    <option value="North Macedonia">North Macedonia</option>
-                    <option value="Turkey">Turkey</option>
-                    <option value="Albania">Albania</option>
-                    <option value="Kosovo">Kosovo</option>
+                    <EuropeanCountryOptions lang={currentLang} currentValue={regCountry} />
                   </select>
                 </div>
               </div>

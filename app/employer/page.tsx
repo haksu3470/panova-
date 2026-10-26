@@ -12,6 +12,7 @@ import {
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
+import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
 
 function EmployerPortalInner() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
@@ -931,10 +932,7 @@ function EmployerPortalInner() {
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">{t.countryLabel || 'Ülke'}</label>
                 <select value={editCountry} onChange={(e) => setEditCountry(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-950 font-semibold cursor-pointer">
-                  <option value="North Macedonia">North Macedonia</option>
-                  <option value="Turkey">Turkey</option>
-                  <option value="Albania">Albania</option>
-                  <option value="Kosovo">Kosovo</option>
+                  <EuropeanCountryOptions lang={currentLang} currentValue={editCountry} />
                 </select>
               </div>
 
