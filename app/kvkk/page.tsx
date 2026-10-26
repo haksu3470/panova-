@@ -31,10 +31,9 @@ export default function KvkkPage() {
           <p>{company.legalName}</p>
           <p>Kısa unvan: {company.shortName} / {company.shortNameMk}</p>
           <p>Adres: {company.address}</p>
-          <p>E-posta: <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.email}`}>{company.email}</a></p>
           <ul>
             {company.phones.map((p) => (
-              <li key={p.tel}>{p.name} ({p.place}): <a className="text-[#1b5e20] font-semibold" href={`tel:${p.tel}`}>{p.display}</a></li>
+              <li key={p.tel}><a className="text-[#1b5e20] font-semibold" href={`tel:${p.tel}`}>{p.display}</a></li>
             ))}
           </ul>
           <p>EMBS: {company.embs} · Vergi kimlik no: {company.taxId}</p>
@@ -52,8 +51,8 @@ export default function KvkkPage() {
         <section className="space-y-2">
           <h2 className="font-extrabold text-slate-900">Haklar</h2>
           <p>
-            KVKK madde 11 kapsamındaki taleplerinizi {company.email} adresine iletebilirsiniz.
-            Avrupa Birliği’nde bulunan kişiler, GDPR kapsamındaki erişim, düzeltme ve silme taleplerini aynı adrese yazabilir.
+            KVKK madde 11 kapsamındaki taleplerinizi sitedeki iletişim formu veya yukarıdaki telefon numaraları üzerinden iletebilirsiniz.
+            Avrupa Birliği’nde bulunan kişiler, GDPR kapsamındaki erişim, düzeltme ve silme taleplerini aynı kanallardan iletebilir.
           </p>
         </section>
       </main>

@@ -13,11 +13,12 @@ export function AuthFooter({ tone = 'light' }: { tone?: 'light' | 'slate' | 'dar
       <p className="font-semibold">{company.shortName}</p>
       <p className="mt-1">{company.address}</p>
       <p className="mt-1">
-        <a className="hover:underline" href={`mailto:${company.email}`}>{company.email}</a>
-        {' · '}
-        <a className="hover:underline" href={`tel:${company.phones[0].tel}`}>{company.phones[0].name} {company.phones[0].display}</a>
-        {' · '}
-        <a className="hover:underline" href={`tel:${company.phones[1].tel}`}>{company.phones[1].name} {company.phones[1].display}</a>
+        {company.phones.map((p, i) => (
+          <span key={p.tel}>
+            {i > 0 ? ' · ' : null}
+            <a className="hover:underline" href={`tel:${p.tel}`}>{p.display}</a>
+          </span>
+        ))}
       </p>
     </footer>
   );
