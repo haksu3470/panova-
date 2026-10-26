@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Building2, FileText, Link2 } from 'lucide-react';
+import Link from 'next/link';
 import MatchPanel from './MatchPanel';
 import DemoBadge from './DemoBadge';
 
@@ -105,6 +106,12 @@ export default function RequestsTab({
               >
                 <Link2 className="w-4 h-4" /> Aday Eşleştir
               </button>
+              <Link
+                href={`/portal/requests/${req.id}`}
+                className="w-full bg-white border hover:bg-slate-50 text-slate-800 py-2 rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-1.5"
+              >
+                📂 Talep Dosyası
+              </Link>
               <button
                 onClick={() => setSelectedDemandDetail(req)}
                 className="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer flex items-center justify-center gap-1.5"
