@@ -16,6 +16,7 @@ import { Language, languages, translations } from '@/lib/dictionary';
 import CandidatesTab from '../../components/portal/CandidatesTab';
 import RequestsTab from '../../components/portal/RequestsTab';
 import { writeAudit } from '@/lib/audit';
+import DemoBadge from '@/components/portal/DemoBadge';
 import StaffTab from '../../components/portal/StaffTab';
 import TasksTab from '../../components/portal/TasksTab';
 
@@ -708,7 +709,9 @@ export default function PortalPage() {
                 {employers.map((emp) => (
                   <div key={emp.id} className="p-4 bg-slate-50 rounded-2xl border space-y-2 text-xs sm:text-sm">
                     <div className="flex items-center justify-between">
-                      <h4 className="font-extrabold text-slate-900">{emp.company_name}</h4>
+                      <h4 className="font-extrabold text-slate-900">{emp.company_name}<DemoBadge show={emp.is_demo} /></h4>
+                      <div className="flex flex-wrap gap-1.5 justify-end">
+                      <Link href={`/portal/employers/${emp.id}`} className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm">📂 İşveren Dosyası</Link>
                       <button
                         onClick={() => {
                           const employerSessionData = {
@@ -726,8 +729,9 @@ export default function PortalPage() {
                         }}
                         className="px-3 py-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm"
                       >
-                        İşveren Dosyasını Aç & İncele
+                        İşveren Portalını Gör
                       </button>
+                      </div>
                     </div>
                     <p className="text-slate-500">Contact: <strong>{emp.contact_person}</strong> | Country: {emp.country}</p>
                   </div>
