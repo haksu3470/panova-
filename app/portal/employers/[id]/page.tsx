@@ -8,7 +8,6 @@ import DemoBadge from '@/components/portal/DemoBadge';
 import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
 import { Card, Stat, Field, REQUEST_STATUS, RESULT_LABEL, fmtDate } from '@/components/portal/file/ui';
-import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { translations } from '@/lib/dictionary';
 import { useSiteLanguage } from '@/lib/site-language';
 
@@ -32,7 +31,7 @@ function EmployerFileInner() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
-  const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
+  const { currentLang, isRtl } = useSiteLanguage('tr');
   const t = translations[currentLang] || translations.tr;
 
   const load = async () => {
@@ -110,12 +109,9 @@ function EmployerFileInner() {
               <span>📅 Kayıt: {fmtDate(emp.created_at)}</span>
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
-            <button onClick={save} disabled={saving} className="w-full sm:w-auto bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">
-              {saving ? (t.saving || '...') : (t.saveChanges || t.saveBtn)}
-            </button>
-          </div>
+          <button onClick={save} disabled={saving} className="w-full sm:w-auto bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">
+            {saving ? (t.saving || '...') : (t.saveChanges || t.saveBtn)}
+          </button>
         </div>
         {msg && <div className="text-xs font-bold text-slate-700">{msg}</div>}
 

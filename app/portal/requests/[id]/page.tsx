@@ -9,7 +9,6 @@ import MatchPanel from '@/components/portal/MatchPanel';
 import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
 import { Card, Stat, Field, REQUEST_STATUS, RESULT_LABEL, fmtDate } from '@/components/portal/file/ui';
-import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { translations } from '@/lib/dictionary';
 import { useSiteLanguage } from '@/lib/site-language';
 
@@ -38,7 +37,7 @@ function RequestFileInner() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
-  const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
+  const { currentLang, isRtl } = useSiteLanguage('tr');
   const t = translations[currentLang] || translations.tr;
 
   const load = async () => {
@@ -111,7 +110,6 @@ function RequestFileInner() {
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <button onClick={() => setShowMatch(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">🔗 Aday eşleştir</button>
-            <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
             <button onClick={save} disabled={saving} className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">{saving ? (t.saving || '...') : (t.saveBtn || 'Kaydet')}</button>
           </div>
         </div>

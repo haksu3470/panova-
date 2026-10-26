@@ -59,6 +59,11 @@ export type HomeCopy = {
   passwordMin: string;
   signUpAndIn: string;
   formSectors: { value: string; label: string }[];
+  supplier: {
+    title: string; subtitle: string; success: string; another: string;
+    company: string; companyPh: string; name: string; passport: string;
+    phone: string; email: string; save: string; saving: string;
+  };
   gate: {
     checking: string; loginRequired: string; noAccess: string; loginBody: string;
     noAccessBody: string; staffLogin: string; sessionChecking: string; unauthorized: string;
@@ -186,6 +191,20 @@ export const homeCopy: Record<Language, HomeCopy> = {
       { value: 'manufacturing', label: 'Üretim & Sanayi' },
       { value: 'hospitality', label: 'Turizm & Otelcilik' },
     ],
+    supplier: {
+      title: 'Yetkili Tedarikçi Aday Kayıt Paneli',
+      subtitle: 'Partner ve tedarikçi firmalar üzerinden havuza aday ekleyin.',
+      success: 'Aday başarıyla tedarikçi havuzuna eklendi.',
+      another: 'Yeni aday kaydet',
+      company: 'Tedarikçi / partner firma adınız',
+      companyPh: 'Örn: Balkan Global İK',
+      name: 'Aday ad soyad',
+      passport: 'Pasaport no',
+      phone: 'GSM (telefon)',
+      email: 'E-posta',
+      save: 'Tedarikçi adayını sisteme kaydet',
+      saving: 'Kaydediliyor...',
+    },
     gate: {
       checking: 'Yetki kontrol ediliyor…',
       loginRequired: 'Giriş gerekli',
@@ -318,6 +337,20 @@ export const homeCopy: Record<Language, HomeCopy> = {
       { value: 'manufacturing', label: 'Manufacturing & industry' },
       { value: 'hospitality', label: 'Tourism & hospitality' },
     ],
+    supplier: {
+      title: 'Authorised supplier candidate registration',
+      subtitle: 'Add candidates to the pool on behalf of a partner or supplier company.',
+      success: 'The candidate was added to the supplier pool.',
+      another: 'Register another candidate',
+      company: 'Your supplier / partner company',
+      companyPh: 'e.g. Balkan Global HR',
+      name: 'Candidate full name',
+      passport: 'Passport no.',
+      phone: 'Mobile phone',
+      email: 'Email',
+      save: 'Save supplier candidate',
+      saving: 'Saving...',
+    },
     gate: {
       checking: 'Checking access…',
       loginRequired: 'Sign-in required',
@@ -450,6 +483,20 @@ export const homeCopy: Record<Language, HomeCopy> = {
       { value: 'manufacturing', label: 'Prodhim & industri' },
       { value: 'hospitality', label: 'Turizëm & hoteleri' },
     ],
+    supplier: {
+      title: 'Paneli i regjistrimit të kandidatëve për furnitorë',
+      subtitle: 'Shtoni kandidatë në grup përmes kompanive partnere dhe furnitore.',
+      success: 'Kandidati u shtua në grupin e furnitorit.',
+      another: 'Regjistro një kandidat tjetër',
+      company: 'Emri i kompanisë suaj furnitore / partnere',
+      companyPh: 'P.sh. Balkan Global HR',
+      name: 'Emri i plotë i kandidatit',
+      passport: 'Nr. i pasaportës',
+      phone: 'Telefoni',
+      email: 'E-mail',
+      save: 'Ruaj kandidatin e furnitorit',
+      saving: 'Po ruhet...',
+    },
     gate: {
       checking: 'Po kontrollohet qasja…',
       loginRequired: 'Kërkohet hyrja',
@@ -582,6 +629,20 @@ export const homeCopy: Record<Language, HomeCopy> = {
       { value: 'manufacturing', label: 'الإنتاج والصناعة' },
       { value: 'hospitality', label: 'السياحة والفنادق' },
     ],
+    supplier: {
+      title: 'تسجيل مرشحي الموردين المعتمدين',
+      subtitle: 'أضيفوا مرشحين إلى المجموعة عبر شركات الشركاء والموردين.',
+      success: 'أُضيف المرشح إلى مجموعة الموردين.',
+      another: 'تسجيل مرشح آخر',
+      company: 'اسم شركة المورد / الشريك',
+      companyPh: 'مثال: Balkan Global HR',
+      name: 'الاسم الكامل للمرشح',
+      passport: 'رقم الجواز',
+      phone: 'الهاتف',
+      email: 'البريد',
+      save: 'حفظ مرشح المورد',
+      saving: 'جارٍ الحفظ...',
+    },
     gate: {
       checking: 'جارٍ التحقق من الصلاحية…',
       loginRequired: 'يلزم تسجيل الدخول',

@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { ArrowLeft, CheckCircle2, UserPlus, Send, Building, Languages } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
+import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 
 export default function SupplierCandidateRegister() {
@@ -31,6 +32,7 @@ export default function SupplierCandidateRegister() {
   const [supplierName, setSupplierName] = useState('');
 
   const t = translations[currentLang] || translations.tr;
+  const s = homeCopy[currentLang].supplier;
   const isRtl = currentLang === 'ar';
   
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
@@ -102,48 +104,48 @@ export default function SupplierCandidateRegister() {
               <Building className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-lg sm:text-2xl font-black text-white">Yetkili Tedarikçi Aday Kayıt Paneli</h1>
-              <p className="text-slate-400 text-xs mt-0.5">Partner ve tedarikçi firmalar üzerinden havuza aday ekleyin.</p>
+              <h1 className="text-lg sm:text-2xl font-black text-white">{s.title}</h1>
+              <p className="text-slate-400 text-xs mt-0.5">{s.subtitle}</p>
             </div>
           </div>
 
           {submitted ? (
             <div className="bg-emerald-950 p-6 sm:p-8 rounded-2xl text-center space-y-3">
               <CheckCircle2 className="w-14 h-14 sm:w-16 sm:h-16 text-emerald-400 mx-auto" />
-              <h2 className="text-base sm:text-lg font-bold text-white">Aday Başarıyla Tedarikçi Havuzuna Eklendi!</h2>
-              <button onClick={() => setSubmitted(false)} className="bg-[#2e7d32] text-white px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition hover:bg-[#1b5e20]">Yeni Aday Kaydet</button>
+              <h2 className="text-base sm:text-lg font-bold text-white">{s.success}</h2>
+              <button onClick={() => setSubmitted(false)} className="bg-[#2e7d32] text-white px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition hover:bg-[#1b5e20]">{s.another}</button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4 text-xs sm:text-sm">
               <div>
-                <label className="block font-bold text-slate-300 uppercase mb-1">Tedarikçi / Partner Firma Adınız *</label>
-                <input type="text" required value={supplierName} onChange={(e) => setSupplierName(e.target.value)} placeholder="Örn: Balkan Global İK" className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none" />
+                <label className="block font-bold text-slate-300 uppercase mb-1">{s.company} *</label>
+                <input type="text" required value={supplierName} onChange={(e) => setSupplierName(e.target.value)} placeholder={s.companyPh} className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none" />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-300 uppercase mb-1">Aday Ad Soyad *</label>
+                  <label className="block font-bold text-slate-300 uppercase mb-1">{s.name} *</label>
                   <input type="text" required value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-300 uppercase mb-1">Pasaport No</label>
+                  <label className="block font-bold text-slate-300 uppercase mb-1">{s.passport}</label>
                   <input type="text" value={formData.passportNumber} onChange={(e) => setFormData({ ...formData, passportNumber: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-300 uppercase mb-1">GSM (Telefon) *</label>
+                  <label className="block font-bold text-slate-300 uppercase mb-1">{s.phone} *</label>
                   <input type="tel" required value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="+389..." className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-300 uppercase mb-1">E-Posta *</label>
+                  <label className="block font-bold text-slate-300 uppercase mb-1">{s.email} *</label>
                   <input type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none" />
                 </div>
               </div>
 
               <button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 sm:py-4 rounded-xl font-bold transition text-xs sm:text-sm cursor-pointer mt-4 shadow-lg">
-                {loading ? 'Kaydediliyor...' : 'Tedarikçi Adayını Sisteme Kaydet'}
+                {loading ? s.saving : s.save}
               </button>
             </form>
           )}
