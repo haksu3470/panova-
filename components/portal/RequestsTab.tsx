@@ -1,6 +1,8 @@
 'use client';
 
-import { Building2, FileText } from 'lucide-react';
+import { useState } from 'react';
+import { Building2, FileText, Link2 } from 'lucide-react';
+import MatchPanel from './MatchPanel';
 import DemoBadge from './DemoBadge';
 
 interface RequestsTabProps {
@@ -16,8 +18,10 @@ export default function RequestsTab({
   updateRequestStatus,
   setSelectedDemandDetail
 }: RequestsTabProps) {
+  const [matchReq, setMatchReq] = useState<any | null>(null);
   return (
     <div className="space-y-6">
+      {matchReq && <MatchPanel request={matchReq} onClose={() => setMatchReq(null)} />}
       <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-base sm:text-lg font-extrabold text-slate-900">📁 {t.demandFilesTitle}</h3>
@@ -94,7 +98,13 @@ export default function RequestsTab({
               </div>
             </div>
 
-            <div className="pt-3 border-t flex items-center justify-between">
+            <div className="pt-3 border-t flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={() => setMatchReq(req)}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <Link2 className="w-4 h-4" /> Aday Eşleştir
+              </button>
               <button
                 onClick={() => setSelectedDemandDetail(req)}
                 className="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer flex items-center justify-center gap-1.5"

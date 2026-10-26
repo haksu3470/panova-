@@ -15,6 +15,7 @@ import { Language, languages, translations } from '@/lib/dictionary';
 // Modüler Bileşenlerimiz (Kök dizindeki components klasörüne göre göreceli yol)
 import CandidatesTab from '../../components/portal/CandidatesTab';
 import RequestsTab from '../../components/portal/RequestsTab';
+import { writeAudit } from '@/lib/audit';
 import StaffTab from '../../components/portal/StaffTab';
 import TasksTab from '../../components/portal/TasksTab';
 
@@ -159,6 +160,7 @@ export default function PortalPage() {
       time: new Date().toISOString().replace('T', ' ').substring(0, 16)
     };
     setAuditLogs([newLog, ...auditLogs]);
+    writeAudit(actionText);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
