@@ -176,7 +176,7 @@ export default function PortalPage() {
     if (!staffOk) {
       if (announce) {
         await signOut();
-        alert('Bu hesap personel yetkisine sahip değil. Davet e-postasındaki adresle kayıt olun.');
+        alert(t.staffNotInvited);
       }
       return false;
     }
@@ -235,7 +235,7 @@ export default function PortalPage() {
           setAuthMode('verify');
           return;
         }
-        alert('Geçersiz e-posta veya şifre!');
+        alert(t.authInvalidCredentials);
         return;
       }
 
@@ -247,7 +247,7 @@ export default function PortalPage() {
       }
       await enterStaff(authData.user.id, authData.user.email || loginEmail, undefined, true);
     } catch (err: any) {
-      alert('Giriş hatası: ' + err.message);
+      alert((t.loginError || '{message}').replace('{message}', err.message));
     } finally {
       resume();
       setLoading(false);
@@ -257,7 +257,7 @@ export default function PortalPage() {
   const handleStaffSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!regName.trim() || !regEmail.trim() || regPassword.length < 8) {
-      alert('Ad, e-posta ve en az 8 karakterlik şifre zorunludur.');
+      alert(t.staffSignupFieldsRequired);
       return;
     }
     setLoading(true);
@@ -271,7 +271,7 @@ export default function PortalPage() {
         metadata: { role: 'staff', full_name: regName.trim() },
       });
       if (result.status === 'error') {
-        alert('Kayıt hatası: ' + result.message);
+        alert((t.signupError || '{message}').replace('{message}', result.message));
         return;
       }
       setVerifyEmail(result.email);
@@ -521,11 +521,11 @@ export default function PortalPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
-                  placeholder="ornek@panova.com"
+                  placeholder={t.staffEmailPlaceholder}
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.passwordLabel || 'Şifre'}</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.passwordLabel}</label>
                 <input
                   type="password"
                   required
@@ -540,7 +540,7 @@ export default function PortalPage() {
                 disabled={loading}
                 className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 cursor-pointer text-sm"
               >
-                {loading ? (t.submitting || t.signInBtn) : (t.signInBtn || 'Giriş Yap')}
+                {loading ? (t.submitting || t.signInBtn) : t.signInBtn}
               </button>
             </form>
             )}
@@ -553,7 +553,7 @@ export default function PortalPage() {
           </div>
         </main>
 
-        <AuthFooter />
+        <AuthFooter lang={currentLang} />
       </div>
     );
   }

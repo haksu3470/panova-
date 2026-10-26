@@ -22,6 +22,7 @@ import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { AuthFooter } from '@/components/site/AuthFooter';
 import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
+import { phoneForStorage, phoneWithCountryDial } from '@/lib/europeanCountries';
 
 export default function EmployerLoginPage() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
@@ -53,8 +54,8 @@ export default function EmployerLoginPage() {
 
   const [regCompanyName, setRegCompanyName] = useState('');
   const [regContactPerson, setRegContactPerson] = useState('');
-  const [regPhone, setRegPhone] = useState('');
   const [regCountry, setRegCountry] = useState('North Macedonia');
+  const [regPhone, setRegPhone] = useState(() => phoneWithCountryDial('', 'North Macedonia'));
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
 
@@ -128,7 +129,7 @@ export default function EmployerLoginPage() {
           showVerify(email);
           return;
         }
-        alert('Geçersiz şirket e-postası veya şifre!');
+        alert(t.invalidCompanyCredentials);
         return;
       }
       const gate = await gateSession();
@@ -139,7 +140,7 @@ export default function EmployerLoginPage() {
       const opened = await openEmployer(email);
       if (!opened) {
         await signOut();
-        alert('Bu e-posta ile eşleşen bir işveren kaydı bulunamadı. Lütfen Panova ekibiyle iletişime geçin.');
+        alert(t.employerRecordMissing);
       }
     } finally {
       resume();
@@ -160,13 +161,13 @@ export default function EmployerLoginPage() {
           role: 'employer',
           full_name: regContactPerson || regCompanyName,
           company_name: regCompanyName,
-          contact_person: regContactPerson || 'Yetkili',
-          phone: regPhone,
+          contact_person: regContactPerson,
+          phone: phoneForStorage(regPhone, regCountry),
           country: regCountry,
         },
       });
       if (result.status === 'error') {
-        alert('Kayıt oluşturulurken hata: ' + result.message);
+        alert((t.signupError || '{message}').replace('{message}', result.message));
         return;
       }
       showVerify(result.email);
@@ -248,7 +249,7 @@ export default function EmployerLoginPage() {
                 redirectPath="/employer-login"
                 onVerified={async () => {
                   const opened = await openEmployer(verifyEmail);
-                  if (!opened) alert('E-posta doğrulandı. İşveren kaydı bağlanamadı; Panova ekibiyle iletişime geçin.');
+                  if (!opened) alert(t.employerVerifiedUnlinked);
                 }}
               />
               <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-slate-500 cursor-pointer">
@@ -262,7 +263,6 @@ export default function EmployerLoginPage() {
                 <input
                   type="email"
                   required
-                  placeholder="sirket@domain.com"
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
@@ -294,22 +294,39 @@ export default function EmployerLoginPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.companyNameLabel} *</label>
-                  <input type="text" required placeholder="Firma Adı DOO" value={regCompanyName} onChange={(e) => setRegCompanyName(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                  <input type="text" required value={regCompanyName} onChange={(e) => setRegCompanyName(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.contactPersonLabel} *</label>
-                  <input type="text" required placeholder="Ad Soyad" value={regContactPerson} onChange={(e) => setRegContactPerson(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                  <input type="text" required value={regContactPerson} onChange={(e) => setRegContactPerson(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.phoneLabel}</label>
-                  <input type="text" placeholder="+389..." value={regPhone} onChange={(e) => setRegPhone(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                  <input
+                    type="tel"
+                    dir="ltr"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    value={regPhone}
+                    onChange={(e) => setRegPhone(e.target.value)}
+                    onBlur={() => setRegPhone((current) => phoneWithCountryDial(current, regCountry))}
+                    className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium text-left"
+                  />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.countryLabel}</label>
-                  <select value={regCountry} onChange={(e) => setRegCountry(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium cursor-pointer">
+                  <select
+                    value={regCountry}
+                    onChange={(e) => {
+                      const next = e.target.value;
+                      setRegCountry(next);
+                      setRegPhone((current) => phoneWithCountryDial(current, next));
+                    }}
+                    className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium cursor-pointer"
+                  >
                     <EuropeanCountryOptions lang={currentLang} currentValue={regCountry} />
                   </select>
                 </div>
@@ -317,7 +334,7 @@ export default function EmployerLoginPage() {
 
               <div>
                 <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.emailLabel} *</label>
-                <input type="email" required placeholder="iletisim@sirket.com" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                <input type="email" required placeholder={t.contactEmailPlaceholder} value={regEmail} onChange={(e) => setRegEmail(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
               </div>
 
               <div>
@@ -333,7 +350,7 @@ export default function EmployerLoginPage() {
         </div>
       </main>
 
-      <AuthFooter tone="slate" />
+      <AuthFooter tone="slate" lang={currentLang} />
     </div>
   );
 }

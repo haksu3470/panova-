@@ -332,12 +332,12 @@ export const homeCopy: Record<Language, HomeCopy> = {
       presenceDesc: 'Panova operates in Bangladesh (Dhaka), Türkiye (Sivas) and North Macedonia (Struga). The registry belongs to PANOVA TARIM DOO Struga.',
       countries: ['Bangladesh', 'Türkiye', 'North Macedonia'],
       northMacedonia: 'North Macedonia',
-      turkeyOffice: 'Türkiye office',
-      bangladeshOffice: 'Bangladesh office',
+      turkeyOffice: 'Türkiye Office',
+      bangladeshOffice: 'Bangladesh Office',
       address: 'Address', email: 'Email', phone: 'Phone', registry: 'Registry',
       taxNo: 'Tax no', established: 'Founded', establishedValue: '27 April 2024',
       managers: 'Managers', mkShort: 'Macedonian short name',
-      vkn: 'TIN', siteTaxOffice: 'Site Tax Office',
+      vkn: 'VAT ID', siteTaxOffice: 'Site Tax Office',
     },
     kvkk: {
       title: 'Privacy notice (KVKK)',
@@ -493,7 +493,7 @@ export const homeCopy: Record<Language, HomeCopy> = {
       address: 'Adresa', email: 'E-mail', phone: 'Telefon', registry: 'Regjistri',
       taxNo: 'Nr. tatimor', established: 'Themelimi', establishedValue: '27 prill 2024',
       managers: 'Drejtuesit', mkShort: 'Emri i shkurtër në maqedonisht',
-      vkn: 'VKN', siteTaxOffice: 'Zyra tatimore Site',
+      vkn: 'Nr. i TVSH-së', siteTaxOffice: 'Zyra tatimore Site',
     },
     kvkk: {
       title: 'Njoftim privatësie (KVKK)',
@@ -649,7 +649,7 @@ export const homeCopy: Record<Language, HomeCopy> = {
       address: 'العنوان', email: 'البريد', phone: 'الهاتف', registry: 'السجل',
       taxNo: 'الرقم الضريبي', established: 'التأسيس', establishedValue: '27 أبريل 2024',
       managers: 'المديرون', mkShort: 'الاسم المختصر بالمقدونية',
-      vkn: 'الرقم الضريبي', siteTaxOffice: 'دائرة الضرائب Site',
+      vkn: 'رقم ضريبة القيمة المضافة', siteTaxOffice: 'دائرة الضرائب Site',
     },
     kvkk: {
       title: 'إشعار الخصوصية (KVKK)',
