@@ -8,6 +8,8 @@ import DemoBadge from '@/components/portal/DemoBadge';
 import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
 import { Card, Stat, Field, REQUEST_STATUS, RESULT_LABEL, fmtDate } from '@/components/portal/file/ui';
+import { translations } from '@/lib/dictionary';
+import { useSiteLanguage } from '@/lib/site-language';
 
 const EDITABLE = ['contact_person', 'contact_name', 'email', 'phone', 'country', 'city', 'website', 'address', 'tax_id', 'assigned_sector', 'compliance_status', 'suitability_status', 'notes'] as const;
 const LABELS: Record<string, string> = {
@@ -29,6 +31,8 @@ function EmployerFileInner() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
+  const { currentLang, isRtl } = useSiteLanguage('tr');
+  const t = translations[currentLang] || translations.tr;
 
   const load = async () => {
     setLoading(true);
@@ -92,11 +96,11 @@ function EmployerFileInner() {
   const reqTitle = Object.fromEntries(requests.map((r) => [r.id, r.position_title]));
 
   return (
-    <div className="min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8">
+    <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
-            <Link href="/portal" className="text-xs font-bold text-slate-500 hover:text-slate-800">← Yönetim paneline dön</Link>
+            <Link href="/portal" className="text-xs font-bold text-slate-500 hover:text-slate-800">← {t.returnToPortal || t.returnHome}</Link>
             <h1 className="text-lg sm:text-2xl font-extrabold text-slate-900">🏢 {emp.company_name}<DemoBadge show={emp.is_demo} /></h1>
             <div className="text-[11px] text-slate-500 flex flex-wrap gap-2">
               <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">PNV-EMP-{emp.id.substring(0, 6)}</span>
@@ -106,7 +110,7 @@ function EmployerFileInner() {
             </div>
           </div>
           <button onClick={save} disabled={saving} className="w-full sm:w-auto bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">
-            {saving ? 'Kaydediliyor...' : 'Değişiklikleri kaydet'}
+            {saving ? (t.saving || '...') : (t.saveChanges || t.saveBtn)}
           </button>
         </div>
         {msg && <div className="text-xs font-bold text-slate-700">{msg}</div>}

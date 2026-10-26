@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
+import { homeCopy } from '@/lib/home-copy';
+import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 
 
 // Aday belge slotları -> candidate_documents.doc_type
@@ -20,29 +22,17 @@ const DOC_SLOT_TYPES = ['passport', 'certificate', 'criminal_record', 'health_re
 const DONE_STATUSES = ['uploaded', 'reviewing', 'approved'];
 
 export default function CandidateDashboard() {
-  const [currentLang, setCurrentLang] = useState<Language>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('panova_candidate_lang') as Language;
-      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
-    }
-    return 'tr';
-  });
+  const [currentLang, setCurrentLang] = useState<Language>('tr');
 
   useEffect(() => {
     const handleStorageChange = () => {
-      const saved = localStorage.getItem('panova_candidate_lang') as Language;
-      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
-        setCurrentLang(saved);
-      }
+      const next = readStoredLanguage('tr');
+      setCurrentLang(next);
+      syncDocumentLanguage(next);
     };
-
+    handleStorageChange();
     window.addEventListener('storage', handleStorageChange);
-    const timer = setInterval(handleStorageChange, 200);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(timer);
-    };
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const [authenticated, setAuthenticated] = useState(false);
@@ -632,7 +622,7 @@ export default function CandidateDashboard() {
                 onChange={(e) => {
                   const newLang = e.target.value as Language;
                   setCurrentLang(newLang);
-                  localStorage.setItem('panova_candidate_lang', newLang);
+                  writeStoredLanguage(newLang);
                 }} 
                 className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
               >
@@ -719,7 +709,7 @@ export default function CandidateDashboard() {
                   {loading ? '...' : t.loginBtn}
                 </button>
               </form>
-              <div className="mt-4"><OAuthButtons redirectPath="/candidate" /></div></>
+              <div className="mt-4"><OAuthButtons redirectPath="/candidate" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} /></div></>
             ) : (
               <form onSubmit={handleCandidateSignup} className="space-y-3 text-left rtl:text-right text-xs">
                 <div>
@@ -768,7 +758,7 @@ export default function CandidateDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{currentLang === 'tr' ? 'Şifre (en az 8 karakter)' : 'Password (min 8 chars)'} *</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{homeCopy[currentLang].passwordMin} *</label>
                   <input
                     type="password"
                     required
@@ -797,10 +787,9 @@ export default function CandidateDashboard() {
                       onChange={(e) => setRegSector(e.target.value)}
                       className="w-full px-3.5 py-3 rounded-xl border text-slate-900 bg-white font-medium outline-none cursor-pointer text-sm"
                     >
-                      <option value="construction">İnşaat & Yapı</option>
-                      <option value="agriculture">Tarım ve Hayvancılık</option>
-                      <option value="manufacturing">Üretim & Sanayi</option>
-                      <option value="hospitality">Turizm & Otelcilik</option>
+                      {homeCopy[currentLang].formSectors.map((sector) => (
+                        <option key={sector.value} value={sector.value}>{sector.label}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -885,7 +874,7 @@ export default function CandidateDashboard() {
                 onChange={(e) => {
                   const newLang = e.target.value as Language;
                   setCurrentLang(newLang);
-                  localStorage.setItem('panova_candidate_lang', newLang);
+                  writeStoredLanguage(newLang);
                 }}
                 className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
               >

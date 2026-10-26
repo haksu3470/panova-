@@ -9,6 +9,8 @@ import MatchPanel from '@/components/portal/MatchPanel';
 import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
 import { Card, Stat, Field, REQUEST_STATUS, RESULT_LABEL, fmtDate } from '@/components/portal/file/ui';
+import { translations } from '@/lib/dictionary';
+import { useSiteLanguage } from '@/lib/site-language';
 
 const TEXT_FIELDS: [string, string, string?][] = [
   ['position_title', 'Pozisyon'], ['sector', 'Sektör'], ['headcount', 'Kişi sayısı', 'number'],
@@ -35,6 +37,8 @@ function RequestFileInner() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
+  const { currentLang, isRtl } = useSiteLanguage('tr');
+  const t = translations[currentLang] || translations.tr;
 
   const load = async () => {
     const { data: r } = await supabase.from('job_requests').select('*').eq('id', id).maybeSingle();
@@ -88,12 +92,12 @@ function RequestFileInner() {
   const accepted = offers.filter((o) => o.status === 'accepted').length;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8">
+    <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       {showMatch && <MatchPanel request={req} onClose={() => { setShowMatch(false); load(); }} />}
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
-            <Link href="/portal" className="text-xs font-bold text-slate-500 hover:text-slate-800">← Yönetim paneline dön</Link>
+            <Link href="/portal" className="text-xs font-bold text-slate-500 hover:text-slate-800">← {t.returnToPortal || t.returnHome}</Link>
             <h1 className="text-lg sm:text-2xl font-extrabold text-slate-900">📋 {req.position_title}<DemoBadge show={req.is_demo} /></h1>
             <div className="text-[11px] text-slate-500 flex flex-wrap gap-2">
               <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">PNV-REQ-{req.id.substring(0, 6)}</span>
@@ -106,7 +110,7 @@ function RequestFileInner() {
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <button onClick={() => setShowMatch(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">🔗 Aday eşleştir</button>
-            <button onClick={save} disabled={saving} className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">{saving ? 'Kaydediliyor...' : 'Kaydet'}</button>
+            <button onClick={save} disabled={saving} className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">{saving ? (t.saving || '...') : (t.saveBtn || 'Kaydet')}</button>
           </div>
         </div>
         {msg && <div className="text-xs font-bold text-slate-700">{msg}</div>}

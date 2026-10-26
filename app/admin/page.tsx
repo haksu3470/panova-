@@ -2,13 +2,18 @@
 
 import AuthGuard from '@/components/auth/AuthGuard';
 import { AuthFooter } from '@/components/site/AuthFooter';
+import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 
 import React, { useState } from 'react';
-import { translations, Language } from '@/lib/dictionary';
+import { translations } from '@/lib/dictionary';
+import { homeCopy } from '@/lib/home-copy';
+import { useSiteLanguage } from '@/lib/site-language';
+import { company } from '@/lib/company';
 
 function AdminDashboardPageInner() {
-  const [lang, setLang] = useState<Language>('tr');
-  const t = translations[lang] || translations['tr'];
+  const { currentLang: lang, changeLanguage, isRtl } = useSiteLanguage('tr');
+  const t = translations[lang] || translations.tr;
+  const a = homeCopy[lang].admin;
 
   // 14 Yönetim Paneli Sekmesi
   const [activeTab, setActiveTab] = useState<
@@ -52,36 +57,25 @@ function AdminDashboardPageInner() {
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans">
-      {/* Üst Bar */}
+    <div className={`min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <header className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-3">
           <div className="bg-emerald-600 text-white font-black p-2.5 rounded-2xl text-sm shadow-md">
             🛡️ PANOVA
           </div>
           <div>
-            <h1 className="text-lg font-black tracking-tight text-white">Yönetim Paneli (Admin Hub)</h1>
-            <p className="text-[11px] text-slate-400">PANOVA TARIM DOO Struga &bull; Merkez Kontrol</p>
+            <h1 className="text-lg font-black tracking-tight text-white">{a.title}</h1>
+            <p className="text-[11px] text-slate-400">{company.shortName} &bull; {a.sub}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <select
-            value={lang}
-            onChange={(e) => setLang(e.target.value as Language)}
-            className="px-3 py-2 border border-slate-700 rounded-xl text-xs bg-slate-900 font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-          >
-            <option value="tr">🇹🇷 Türkçe</option>
-            <option value="en">🇬🇧 English</option>
-            <option value="sq">🇦🇱 Shqip</option>
-            <option value="ar">🇸🇦 العربية</option>
-          </select>
-
+          <LanguageSwitcher currentLang={lang} onChange={changeLanguage} tone="dark" />
           <button
             onClick={() => window.location.href = '/'}
             className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold rounded-xl text-xs transition cursor-pointer"
           >
-            Ana Sayfaya Dön
+            {t.returnHome || a.home}
           </button>
         </div>
       </header>
@@ -89,20 +83,14 @@ function AdminDashboardPageInner() {
       {/* Navigasyon Sekmeleri */}
       <nav className="bg-slate-800/60 border-b border-slate-700/60 px-6 py-3 overflow-x-auto">
         <div className="flex gap-2 text-xs whitespace-nowrap">
-          <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === 'overview' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>📊 Genel Durum</button>
-          <button onClick={() => setActiveTab('employers')} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === 'employers' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>🏢 İşverenler</button>
-          <button onClick={() => setActiveTab('demands')} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === 'demands' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>📁 Personel Talepleri</button>
-          <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === 'candidates' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>👥 Adaylar</button>
-          <button onClick={() => setActiveTab('matching')} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === 'matching' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>🔗 Eşleştirmeler</button>
-          <button onClick={() => setActiveTab('documents')} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === 'documents' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>📄 Belgeler</button>
-          <button onClick={() => setActiveTab('official')} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === 'official' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>🏛️ Resmî Süreçler</button>
-          <button onClick={() => setActiveTab('travel')} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === 'travel' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>✈️ Seyahatler</button>
-          <button onClick={() => setActiveTab('employees')} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === 'employees' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>👷 Aktif Çalışanlar</button>
-          <button onClick={() => setActiveTab('followup')} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === 'followup' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>📈 30-60-90 Gün</button>
-          <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === 'support' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>🛠️ Sorunlar / Görevler</button>
-          <button onClick={() => setActiveTab('reports')} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === 'reports' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>📈 Raporlar</button>
-          <button onClick={() => setActiveTab('team')} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === 'team' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>👥 Kullanıcılar & Yetkiler</button>
-          <button onClick={() => setActiveTab('settings')} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === 'settings' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>⚙️ Ayarlar</button>
+          {([
+            ['overview', '📊'], ['employers', '🏢'], ['demands', '📁'], ['candidates', '👥'],
+            ['matching', '🔗'], ['documents', '📄'], ['official', '🏛️'], ['travel', '✈️'],
+            ['employees', '👷'], ['followup', '📈'], ['support', '🛠️'], ['reports', '📈'],
+            ['team', '👥'], ['settings', '⚙️'],
+          ] as const).map(([id, icon]) => (
+            <button key={id} onClick={() => setActiveTab(id)} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === id ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>{icon} {a.tabs[id]}</button>
+          ))}
         </div>
       </nav>
 
@@ -113,19 +101,19 @@ function AdminDashboardPageInner() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-slate-800 border border-slate-700 rounded-3xl p-5 shadow-md">
-                <div className="text-xs uppercase font-bold text-slate-400">Toplam Aday</div>
+                <div className="text-xs uppercase font-bold text-slate-400">{a.totalCandidates}</div>
                 <div className="text-3xl font-black text-white mt-1">248</div>
               </div>
               <div className="bg-slate-800 border border-slate-700 rounded-3xl p-5 shadow-md">
-                <div className="text-xs uppercase font-bold text-slate-400">Aktif İşveren</div>
+                <div className="text-xs uppercase font-bold text-slate-400">{a.activeEmployers}</div>
                 <div className="text-3xl font-black text-white mt-1">{employers.length}</div>
               </div>
               <div className="bg-slate-800 border border-slate-700 rounded-3xl p-5 shadow-md">
-                <div className="text-xs uppercase font-bold text-slate-400">Açık Talepler</div>
+                <div className="text-xs uppercase font-bold text-slate-400">{a.openRequests}</div>
                 <div className="text-3xl font-black text-emerald-400 mt-1">{demandsList.length}</div>
               </div>
               <div className="bg-slate-800 border border-slate-700 rounded-3xl p-5 shadow-md">
-                <div className="text-xs uppercase font-bold text-slate-400">Seyahate Hazır</div>
+                <div className="text-xs uppercase font-bold text-slate-400">{a.travelReady}</div>
                 <div className="text-3xl font-black text-emerald-400 mt-1">12</div>
               </div>
             </div>
@@ -135,15 +123,15 @@ function AdminDashboardPageInner() {
         {/* İşverenler */}
         {activeTab === 'employers' && (
           <div className="bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-xl space-y-4">
-            <h2 className="text-sm font-black text-white">İşveren Şirketler ve Sorumlu Atamaları</h2>
+            <h2 className="text-sm font-black text-white">{a.employersTitle}</h2>
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="bg-slate-900 text-slate-400 font-bold">
-                  <th className="p-3 rounded-l-xl">Şirket Unvanı</th>
-                  <th className="p-3">Yetkili Kişi</th>
-                  <th className="p-3">Ülke</th>
-                  <th className="p-3">Aktif Talep</th>
-                  <th className="p-3 rounded-r-xl">PANOVA Sorumlusu</th>
+                  <th className="p-3 rounded-l-xl">{a.colCompany}</th>
+                  <th className="p-3">{a.colContact}</th>
+                  <th className="p-3">{a.colCountry}</th>
+                  <th className="p-3">{a.colDemands}</th>
+                  <th className="p-3 rounded-r-xl">{a.colOwner}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700">
@@ -165,17 +153,17 @@ function AdminDashboardPageInner() {
         {activeTab === 'support' && (
           <div className="bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-xl space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-sm font-black text-white">Ekip Görevleri ve Operasyon Takibi (Task Manager)</h2>
+              <h2 className="text-sm font-black text-white">{a.tasksTitle}</h2>
               <span className="text-xs bg-emerald-600/20 text-emerald-400 px-3 py-1 rounded-full font-bold">Sorumlu: Ahmet Uzman & Yedek: Zeynep Kaya</span>
             </div>
 
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="bg-slate-900 text-slate-400 font-bold">
-                  <th className="p-3 rounded-l-xl">Görev Başlığı</th>
-                  <th className="p-3">Atanan Kişi</th>
-                  <th className="p-3">Son Tarih</th>
-                  <th className="p-3 rounded-r-xl">Durum</th>
+                  <th className="p-3 rounded-l-xl">{a.colTask}</th>
+                  <th className="p-3">{a.colAssignee}</th>
+                  <th className="p-3">{a.colDue}</th>
+                  <th className="p-3 rounded-r-xl">{a.colStatus}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700">
@@ -195,8 +183,8 @@ function AdminDashboardPageInner() {
         {/* Diğer sekmeler için placeholder */}
         {['demands', 'candidates', 'matching', 'documents', 'official', 'travel', 'employees', 'followup', 'reports', 'team', 'settings'].includes(activeTab) && activeTab !== 'overview' && activeTab !== 'employers' && activeTab !== 'support' && (
           <div className="bg-slate-800 border border-slate-700 rounded-3xl p-12 text-center text-slate-400 shadow-xl">
-            <h2 className="text-base font-black text-white mb-2 uppercase tracking-wide">{activeTab} Modülü Aktif</h2>
-            <p className="text-xs">Bu modül üzerinden tüm operasyonel filtreleme, toplu durum güncellemesi ve dosya yönetimi sağlanmaktadır.</p>
+            <h2 className="text-base font-black text-white mb-2 uppercase tracking-wide">{a.tabs[activeTab]} — {a.moduleOn}</h2>
+            <p className="text-xs">{a.moduleDesc}</p>
           </div>
         )}
       </main>

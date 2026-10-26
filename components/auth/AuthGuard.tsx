@@ -3,6 +3,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import { isStaff, linkMyEmployer } from '@/lib/auth';
+import { homeCopy } from '@/lib/home-copy';
+import { useSiteLanguage } from '@/lib/site-language';
 
 type Role = 'staff' | 'employer';
 
@@ -13,6 +15,8 @@ type Role = 'staff' | 'employer';
  */
 export default function AuthGuard({ role, children }: { role: Role; children: ReactNode }) {
   const [state, setState] = useState<'loading' | 'ok' | 'denied'>('loading');
+  const { currentLang } = useSiteLanguage('tr');
+  const g = homeCopy[currentLang].gate;
   const loginPath = role === 'staff' ? '/portal' : '/employer-login';
 
   useEffect(() => {
@@ -45,7 +49,7 @@ export default function AuthGuard({ role, children }: { role: Role; children: Re
   if (state !== 'ok') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-600 text-sm">
-        {state === 'loading' ? 'Oturum doğrulanıyor...' : 'Yetkisiz erişim. Giriş sayfasına yönlendiriliyorsunuz...'}
+        {state === 'loading' ? g.sessionChecking : g.unauthorized}
       </div>
     );
   }

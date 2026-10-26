@@ -11,35 +11,28 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
+import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 
 function EmployerPortalInner() {
-  const [currentLang, setCurrentLang] = useState<Language>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('panova_employer_lang') as Language;
-      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
-    }
-    return 'tr';
-  });
+  const [currentLang, setCurrentLang] = useState<Language>('tr');
 
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
 
   useEffect(() => {
-    const handleStorage = () => {
-      const saved = localStorage.getItem('panova_employer_lang') as Language;
-      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
-        setCurrentLang(saved);
-      }
+    const apply = () => {
+      const next = readStoredLanguage('tr');
+      setCurrentLang(next);
+      syncDocumentLanguage(next);
     };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    apply();
+    window.addEventListener('storage', apply);
+    return () => window.removeEventListener('storage', apply);
   }, []);
 
   const changeLanguage = (lang: Language) => {
     setCurrentLang(lang);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('panova_employer_lang', lang);
-    }
+    writeStoredLanguage(lang);
   };
 
   const [employerProfile, setEmployerProfile] = useState<any>(() => {

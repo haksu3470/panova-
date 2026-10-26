@@ -8,36 +8,31 @@ import { linkMyEmployer, signOut } from '@/lib/auth';
 import { Languages, ArrowLeft, Building2, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
+import { homeCopy } from '@/lib/home-copy';
+import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { AuthFooter } from '@/components/site/AuthFooter';
 
 export default function EmployerLoginPage() {
-  const [currentLang, setCurrentLang] = useState<Language>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('panova_employer_lang') as Language;
-      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
-    }
-    return 'tr';
-  });
+  const [currentLang, setCurrentLang] = useState<Language>('tr');
 
   const t = translations[currentLang] || translations.tr;
+  const ui = homeCopy[currentLang];
   const isRtl = currentLang === 'ar';
 
   useEffect(() => {
-    const handleStorage = () => {
-      const saved = localStorage.getItem('panova_employer_lang') as Language;
-      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
-        setCurrentLang(saved);
-      }
+    const apply = () => {
+      const next = readStoredLanguage('tr');
+      setCurrentLang(next);
+      syncDocumentLanguage(next);
     };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    apply();
+    window.addEventListener('storage', apply);
+    return () => window.removeEventListener('storage', apply);
   }, []);
 
   const changeLanguage = (lang: Language) => {
     setCurrentLang(lang);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('panova_employer_lang', lang);
-    }
+    writeStoredLanguage(lang);
   };
 
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
@@ -172,7 +167,7 @@ export default function EmployerLoginPage() {
             href="/"
             className="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition border border-slate-200 shadow-sm"
           >
-            Ana Sayfaya Dön
+            {t.returnHome}
           </Link>
         </div>
       </header>
@@ -187,7 +182,7 @@ export default function EmployerLoginPage() {
                 authMode === 'signin' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              Giriş Yap
+              {t.signInMenu || t.signInBtn}
             </button>
             <button
               type="button"
@@ -196,7 +191,7 @@ export default function EmployerLoginPage() {
                 authMode === 'signup' ? 'bg-emerald-700 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              Kayıt Ol
+              {t.signUpMenu || t.signUpBtn}
             </button>
           </div>
 
@@ -205,15 +200,15 @@ export default function EmployerLoginPage() {
               🏢
             </div>
             <h1 className="text-xl font-black text-slate-900">
-              {authMode === 'signup' ? 'Yeni İşveren Kaydı' : 'İşveren Giriş Portalı'}
+              {authMode === 'signup' ? (t.employerRegTitle || t.signUpPortalTitle) : (t.loginPortalTitle || t.empPortalTitle)}
             </h1>
-            <p className="text-slate-500 text-xs mt-1">Şirket e-postanızla giriş yapın veya kayıt olun.</p>
+            <p className="text-slate-500 text-xs mt-1">{authMode === 'signup' ? (t.employerRegSub || t.signUpPortalSub) : (t.loginPortalSub || t.empPortalSub)}</p>
           </div>
 
           {authMode === 'signin' ? (
             <><form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİRKET E-POSTASI *</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t.companyEmailLabel} *</label>
                 <input
                   type="email"
                   required
@@ -225,7 +220,7 @@ export default function EmployerLoginPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİFRE *</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">{t.passwordLabel} *</label>
                 <input
                   type="password"
                   required
@@ -240,30 +235,30 @@ export default function EmployerLoginPage() {
                 type="submit"
                 className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2"
               >
-                Giriş Yap
+                {t.signInBtn}
               </button>
             </form>
-              <div className="mt-4"><OAuthButtons redirectPath="/employer-login" /></div></>
+              <div className="mt-4"><OAuthButtons redirectPath="/employer-login" orLabel={ui.oauthOr} googleLabel={ui.oauthGoogle} /></div></>
           ) : (
             <form onSubmit={handleRegister} className="space-y-4" autoComplete="off">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">ŞİRKET ADI *</label>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.companyNameLabel} *</label>
                   <input type="text" required placeholder="Firma Adı DOO" value={regCompanyName} onChange={(e) => setRegCompanyName(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">YETKİLİ KİŞİ *</label>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.contactPersonLabel} *</label>
                   <input type="text" required placeholder="Ad Soyad" value={regContactPerson} onChange={(e) => setRegContactPerson(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">TELEFON</label>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.phoneLabel}</label>
                   <input type="text" placeholder="+389..." value={regPhone} onChange={(e) => setRegPhone(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">ÜLKE</label>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.countryLabel}</label>
                   <select value={regCountry} onChange={(e) => setRegCountry(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium cursor-pointer">
                     <option value="North Macedonia">North Macedonia</option>
                     <option value="Turkey">Turkey</option>
@@ -274,17 +269,17 @@ export default function EmployerLoginPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">E-POSTA *</label>
+                <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.emailLabel} *</label>
                 <input type="email" required placeholder="iletisim@sirket.com" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">ŞİFRE *</label>
+                <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.passwordLabel} *</label>
                 <input type="password" required placeholder="••••••••" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
               </div>
 
               <button type="submit" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2">
-                Kayıt Ol ve Giriş Yap
+                {ui.signUpAndIn}
               </button>
             </form>
           )}

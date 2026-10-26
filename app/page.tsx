@@ -1,43 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Users, Globe2, Sprout, HardHat, Building2, Languages, CheckCircle2, Lock, Send, User, LogIn } from 'lucide-react';
+import { Users, Globe2, Sprout, HardHat, Building2, CheckCircle2, Lock, Send, User, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { StatsBar, AudienceSections, TrustSections, CompanyAbout, SiteFooter } from '@/components/home/HomeSections';
-import { Language, languages, translations } from '@/lib/dictionary';
-import { company as registry, presenceLabel } from '@/lib/company';
+import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
+import { translations } from '@/lib/dictionary';
+import { fill, homeCopy } from '@/lib/home-copy';
+import { useSiteLanguage } from '@/lib/site-language';
+import { company as registry } from '@/lib/company';
 
 export default function HomePage() {
-  const [currentLang, setCurrentLang] = useState<Language>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('panova_portal_lang') as Language;
-      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
-    }
-    return 'tr';
-  });
-
-  useEffect(() => {
-    const handleStorage = () => {
-      const saved = localStorage.getItem('panova_portal_lang') as Language;
-      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
-        setCurrentLang(saved);
-      }
-    };
-    window.addEventListener('storage', handleStorage);
-    const interval = setInterval(handleStorage, 150);
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-      clearInterval(interval);
-    };
-  }, []);
-
-  const changeLanguage = (lang: Language) => {
-    setCurrentLang(lang);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('panova_portal_lang', lang);
-    }
-  };
+  const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
 
   const [selectedCompanyKey, setSelectedCompanyKey] = useState<'hr' | 'trade' | 'agriculture' | 'construction'>('hr');
   const [submitted, setSubmitted] = useState(false);
@@ -50,12 +25,9 @@ export default function HomePage() {
     notes: '',
   });
 
-  const t = translations[currentLang] || translations.en;
+  const t = translations[currentLang] || translations.tr;
   const company = t.companies[selectedCompanyKey];
-  const isRtl = currentLang === 'ar';
-  
-  const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
-  const activeLangObj = languages.find((l) => l.code === currentLang);
+  const h = homeCopy[currentLang];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,21 +76,7 @@ export default function HomePage() {
 
           <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3 w-full sm:w-auto">
             {/* Multi-Language Selector */}
-            <div className="relative flex items-center bg-slate-100 rounded-xl px-2.5 py-2 border border-slate-200 shadow-sm">
-              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
-              <select
-                value={currentLang}
-                onChange={(e) => changeLanguage(e.target.value as Language)}
-                className="bg-transparent text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer"
-              >
-                <option value={currentLang} className="font-bold">
-                  {activeLangObj?.flag} {activeLangObj?.name}
-                </option>
-                {selectableLanguages.map((lang) => (
-                  <option key={lang.code} value={lang.code} className="text-slate-900">{lang.flag} {lang.name}</option>
-                ))}
-              </select>
-            </div>
+            <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
 
             {/* Şirket Seçimine Göre Dinamik Butonlar */}
             {selectedCompanyKey === 'hr' ? (
@@ -142,7 +100,7 @@ export default function HomePage() {
                 href="#contact-form"
                 className="inline-flex items-center gap-1.5 bg-[#2e7d32] text-white px-3.5 py-2.5 rounded-xl text-xs font-bold hover:bg-[#1b5e20] transition shadow-md z-10 cursor-pointer"
               >
-                <Send className="w-3.5 h-3.5" /> Kurumsal Teklif Al
+                <Send className="w-3.5 h-3.5" /> {h.ctaQuote}
               </a>
             )}
 
@@ -165,28 +123,30 @@ export default function HomePage() {
           </span>
           <h1 className="text-3xl sm:text-6xl font-black mb-4 sm:mb-6 tracking-tight leading-tight">{company.tagline}</h1>
           <p className="text-slate-300 text-sm sm:text-xl max-w-2xl mx-auto leading-relaxed">{company.desc}</p>
-          <p className="text-emerald-200 text-xs sm:text-sm mt-4 font-semibold">{presenceLabel()}</p>
+          <p className="text-emerald-200 text-xs sm:text-sm mt-4 font-semibold">
+            {registry.presence.map((place, i) => `${h.about.countries[i]} (${place.city})`).join(' · ')}
+          </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3 mt-8">
             <Link href="/employer-login" className="inline-flex justify-center items-center gap-2 bg-[#2e7d32] hover:bg-[#1b5e20] px-6 py-3.5 rounded-xl font-bold text-sm">
-              <Building2 className="w-4 h-4" /> Personel arıyorum
+              <Building2 className="w-4 h-4" /> {h.ctaHire}
             </Link>
             <Link href="/candidate" className="inline-flex justify-center items-center gap-2 bg-white text-slate-900 hover:bg-slate-100 px-6 py-3.5 rounded-xl font-bold text-sm">
-              <User className="w-4 h-4" /> İş arıyorum
+              <User className="w-4 h-4" /> {h.ctaJob}
             </Link>
           </div>
           <nav className="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-8 text-xs sm:text-sm text-slate-300 font-semibold">
-            <a href="#isverenler" className="hover:text-white">İşverenler</a>
-            <a href="#adaylar" className="hover:text-white">Adaylar</a>
-            <a href="#sektorler" className="hover:text-white">Sektörler</a>
-            <a href="#nasil-calisir" className="hover:text-white">Nasıl Çalışır</a>
-            <a href="#grup" className="hover:text-white">Grup Şirketleri</a>
-            <a href="#kurumsal" className="hover:text-white">Kurumsal</a>
-            <a href="#sss" className="hover:text-white">SSS</a>
+            <a href="#isverenler" className="hover:text-white">{h.nav.employers}</a>
+            <a href="#adaylar" className="hover:text-white">{h.nav.candidates}</a>
+            <a href="#sektorler" className="hover:text-white">{h.nav.sectors}</a>
+            <a href="#nasil-calisir" className="hover:text-white">{h.nav.how}</a>
+            <a href="#grup" className="hover:text-white">{h.nav.group}</a>
+            <a href="#kurumsal" className="hover:text-white">{h.nav.about}</a>
+            <a href="#sss" className="hover:text-white">{h.nav.faq}</a>
           </nav>
         </div>
       </section>
-      <StatsBar />
-      <AudienceSections />
+      <StatsBar lang={currentLang} />
+      <AudienceSections lang={currentLang} />
 
       {/* Main Content */}
       <main id="grup" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
@@ -260,7 +220,8 @@ export default function HomePage() {
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xl lg:sticky lg:top-28">
               <div className="mb-6 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 space-y-3">
                 <div className="space-y-1.5">
-                  <p className="font-extrabold text-slate-900">{registry.shortName}</p>
+                  <p className="font-extrabold text-slate-900">{h.about.northMacedonia} · Struga</p>
+                  <p>{registry.shortName}</p>
                   <p>{registry.address}</p>
                   <p>
                     <a className="font-semibold text-[#1b5e20]" href={`mailto:${registry.email}`}>{registry.email}</a>
@@ -272,7 +233,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 <div className="space-y-1.5 border-t border-slate-200 pt-3">
-                  <p className="font-extrabold text-slate-900">{registry.turkey.label} · {registry.turkey.city}</p>
+                  <p className="font-extrabold text-slate-900">{h.about.turkeyOffice} · {registry.turkey.city}</p>
                   {registry.turkey.addressLines.map((line) => <p key={line}>{line}</p>)}
                   <p>
                     <a className="font-semibold text-[#1b5e20]" href={`mailto:${registry.turkey.email}`}>{registry.turkey.email}</a>
@@ -280,10 +241,10 @@ export default function HomePage() {
                   <p>
                     <a className="font-semibold text-[#1b5e20]" href={`tel:${registry.turkey.phone.tel}`}>{registry.turkey.phone.display}</a>
                   </p>
-                  <p className="text-xs text-slate-500">{registry.turkey.taxOffice} · VKN {registry.turkey.vkn}</p>
+                  <p className="text-xs text-slate-500">{h.about.siteTaxOffice} · {h.about.vkn} {registry.turkey.vkn}</p>
                 </div>
                 <div className="space-y-1.5 border-t border-slate-200 pt-3">
-                  <p className="font-extrabold text-slate-900">{registry.bangladesh.label} · {registry.bangladesh.city}</p>
+                  <p className="font-extrabold text-slate-900">{h.about.bangladeshOffice} · {registry.bangladesh.city}</p>
                   {registry.bangladesh.addressLines.map((line) => <p key={line}>{line}</p>)}
                   <p>
                     <a className="font-semibold text-[#1b5e20]" href={`mailto:${registry.bangladesh.email}`}>{registry.bangladesh.email}</a>
@@ -294,7 +255,7 @@ export default function HomePage() {
                 </div>
               </div>
               <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1">{t.formTitle}</h3>
-              <p className="text-slate-500 text-xs mb-6">{company.name} ile doğrudan iletişime geçin.</p>
+              <p className="text-slate-500 text-xs mb-6">{fill(h.contactDirect, { name: company.name })}</p>
 
               {submitted ? (
                 <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center">
@@ -361,9 +322,9 @@ export default function HomePage() {
 
         </div>
       </main>
-      <TrustSections />
-      <CompanyAbout />
-      <SiteFooter />
+      <TrustSections lang={currentLang} />
+      <CompanyAbout lang={currentLang} />
+      <SiteFooter lang={currentLang} />
     </div>
   );
 }
