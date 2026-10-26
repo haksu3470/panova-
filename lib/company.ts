@@ -2,7 +2,11 @@
  * Kuzey Makedonya’daki tüzel kişi: PANOVA TARIM DOO Struga (EMBS 7758812).
  * Panova Bangladeş (Dhaka), Türkiye (Sivas) ve Kuzey Makedonya’da (Struga) faaliyet gösterir.
  * Telefonlarda kişi adı yok. Sermaye ve pay oranları kamuya açık değildir.
+ *
+ * Türkiye (Sivas) hattı tek sabittir. Ekranda ve tel: bağlantısında aynı E.164 yazılır.
  */
+export const turkeyOfficePhone = '+905453644930';
+
 export const company = {
   shortName: 'PANOVA TARIM DOO Struga',
   shortNameMk: 'ПАНОВА ТАРИМ ДОО Струга',
@@ -24,7 +28,7 @@ export const company = {
       'Gültepe Mahallesi 17. Sanayi Sokak No:14/7',
       'Merkez / Sivas, Türkiye',
     ] as const,
-    phone: { display: '0545 364 4930', tel: '+905453644930' },
+    phone: { display: turkeyOfficePhone, tel: turkeyOfficePhone },
     taxOffice: 'Site Vergi Dairesi',
     vkn: '1021016624',
     email: 'turkiye@panovagroup.org',
