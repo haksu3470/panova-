@@ -8,6 +8,7 @@ import { linkMyEmployer, signOut } from '@/lib/auth';
 import { Languages, ArrowLeft, Building2, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
+import { AuthFooter } from '@/components/site/AuthFooter';
 
 export default function EmployerLoginPage() {
   const [currentLang, setCurrentLang] = useState<Language>(() => {
@@ -70,7 +71,7 @@ export default function EmployerLoginPage() {
     }
   };
 
-  // OAuth (Google/Apple) dönüşü veya mevcut oturum: işverene bağla ve yönlendir
+  // OAuth (Google) dönüşü veya mevcut oturum: işverene bağla ve yönlendir
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getSession();
@@ -206,7 +207,7 @@ export default function EmployerLoginPage() {
             <h1 className="text-xl font-black text-slate-900">
               {authMode === 'signup' ? 'Yeni İşveren Kaydı' : 'İşveren Giriş Portalı'}
             </h1>
-            <p className="text-slate-500 text-xs mt-1">International Workforce & Demand Management</p>
+            <p className="text-slate-500 text-xs mt-1">Şirket e-postanızla giriş yapın veya kayıt olun.</p>
           </div>
 
           {authMode === 'signin' ? (
@@ -290,9 +291,7 @@ export default function EmployerLoginPage() {
         </div>
       </main>
 
-      <footer className="bg-slate-50 text-slate-400 py-6 text-center text-xs border-t border-slate-200">
-        <p>PANOVA TARIM DOO &bull; International Workforce Management System &copy; 2026</p>
-      </footer>
+      <AuthFooter tone="slate" />
     </div>
   );
 }
