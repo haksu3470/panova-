@@ -75,6 +75,44 @@ const LOCALE: Record<Language, string> = {
   ar: 'ar',
 };
 
+// Albanian treats these as single letters. Browser Intl data often ignores them,
+// so Shqip and SQ options are ordered with this alphabet instead of localeCompare.
+const ALBANIAN_DIGRAPHS = ['dh', 'gj', 'll', 'nj', 'rr', 'sh', 'th', 'xh', 'zh'] as const;
+const ALBANIAN_LETTERS = [
+  'a', 'b', 'c', 'ç', 'd', 'dh', 'e', 'ë', 'f', 'g', 'gj', 'h', 'i', 'j', 'k', 'l', 'll',
+  'm', 'n', 'nj', 'o', 'p', 'q', 'r', 'rr', 's', 'sh', 't', 'th', 'u', 'v', 'x', 'xh', 'y', 'z', 'zh',
+];
+const ALBANIAN_RANK = new Map(ALBANIAN_LETTERS.map((letter, index) => [letter, index]));
+
+function albanianTokens(label: string): string[] {
+  const compact = label.toLocaleLowerCase('sq').replace(/[^a-zçë]+/g, '');
+  const tokens: string[] = [];
+  for (let i = 0; i < compact.length; i += 1) {
+    const pair = compact.slice(i, i + 2);
+    if ((ALBANIAN_DIGRAPHS as readonly string[]).includes(pair)) {
+      tokens.push(pair);
+      i += 1;
+    } else {
+      tokens.push(compact[i]);
+    }
+  }
+  return tokens;
+}
+
+function compareAlbanian(a: string, b: string): number {
+  const left = albanianTokens(a);
+  const right = albanianTokens(b);
+  const length = Math.max(left.length, right.length);
+  for (let i = 0; i < length; i += 1) {
+    if (left[i] === undefined) return -1;
+    if (right[i] === undefined) return 1;
+    const rankA = ALBANIAN_RANK.get(left[i]) ?? left[i].codePointAt(0)! + ALBANIAN_LETTERS.length;
+    const rankB = ALBANIAN_RANK.get(right[i]) ?? right[i].codePointAt(0)! + ALBANIAN_LETTERS.length;
+    if (rankA !== rankB) return rankA - rankB;
+  }
+  return 0;
+}
+
 export function toLanguage(lang: string | null | undefined): Language {
   if (lang === 'tr' || lang === 'en' || lang === 'sq' || lang === 'ar') return lang;
   return 'en';
@@ -93,5 +131,9 @@ export function europeanCountryOptions(lang: Language): EuropeanCountryOption[] 
     code: country.code,
     value: country.value,
     label: country.names[lang],
-  })).sort((a, b) => a.label.localeCompare(b.label, locale, { sensitivity: 'base' }));
+  })).sort((a, b) => (
+    lang === 'sq'
+      ? compareAlbanian(a.label, b.label)
+      : a.label.localeCompare(b.label, locale, { sensitivity: 'base' })
+  ));
 }
