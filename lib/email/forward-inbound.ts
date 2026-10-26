@@ -46,7 +46,7 @@ export function isCompanyMailbox(email: string): boolean {
   return at > 0 && email.slice(at + 1) === COMPANY_DOMAIN;
 }
 
-/** True when any recipient is on panovagroup.org (panova@, turkiye@, baglades@, or another mailbox). */
+/** True when any recipient is on panovagroup.org (panova@, turkiye@, bangladesh@, or another mailbox). */
 export function isAddressedToCompany(input: {
   to?: unknown;
   cc?: unknown;

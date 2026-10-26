@@ -35,7 +35,7 @@ The public site shows three company mailboxes (see `lib/company.ts`):
 
 - `panova@panovagroup.org` — general / North Macedonia
 - `turkiye@panovagroup.org` — Türkiye, Sivas
-- `baglades@panovagroup.org` — Bangladesh, Dhaka
+- `bangladesh@panovagroup.org` — Bangladesh, Dhaka
 
 Mail sent to any address on `panovagroup.org` is forwarded to the company owner by `POST /api/webhooks/resend`. The route checks the Resend webhook signature, loads the message with the Receiving API, and sends one forward. Retries use the idempotency key `inbound-forward/<email_id>`.
 
@@ -57,7 +57,7 @@ Domain verification and the receiving MX record are added separately on Vercel D
 1. In Resend, verify `panovagroup.org` for sending (SPF and DKIM records Resend shows).
 2. Enable receiving for that domain and add the MX record Resend shows. Its priority number must be the lowest one on the host, or mail will not arrive.
 3. Create a webhook for `email.received` pointing at `https://panovagroup.org/api/webhooks/resend`, and store the signing secret as `RESEND_WEBHOOK_SECRET`.
-4. Send a test message to `panova@panovagroup.org`, `turkiye@panovagroup.org`, and `baglades@panovagroup.org` and confirm each forward. Resend can replay a failed delivery from the webhook dashboard.
+4. Send a test message to `panova@panovagroup.org`, `turkiye@panovagroup.org`, and `bangladesh@panovagroup.org` and confirm each forward. Resend can replay a failed delivery from the webhook dashboard.
 
 ## Deploy on Vercel
 

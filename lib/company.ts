@@ -37,7 +37,7 @@ export const company = {
       'Dhaka, Bangladesh',
     ] as const,
     phone: { display: '+880 1805 511473', tel: '+8801805511473' },
-    email: 'baglades@panovagroup.org',
+    email: 'bangladesh@panovagroup.org',
   },
   presence: [
     { country: 'Bangladeş', city: 'Dhaka' },
