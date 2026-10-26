@@ -58,7 +58,7 @@ export default function CandidateDashboard() {
   const [regPassport, setRegPassport] = useState('');
   const [regPhone, setRegPhone] = useState('');
   const [regEmail, setRegEmail] = useState('');
-  const [regProfession, setRegProfession] = useState('Elektrik Mühendisi / Teknisyeni');
+  const [regProfession, setRegProfession] = useState('');
   const [regSector, setRegSector] = useState('construction');
 
   const [candidate, setCandidate] = useState<any | null>(null);
