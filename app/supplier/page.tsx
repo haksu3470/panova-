@@ -6,6 +6,7 @@ import { ArrowLeft, CheckCircle2, UserPlus, Send, Building, Languages } from 'lu
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 import { homeCopy } from '@/lib/home-copy';
+import { isGmailAddress } from '@/lib/emailAddress';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 
 export default function SupplierCandidateRegister() {
@@ -113,6 +114,7 @@ export default function SupplierCandidateRegister() {
             <div className="bg-emerald-950 p-6 sm:p-8 rounded-2xl text-center space-y-3">
               <CheckCircle2 className="w-14 h-14 sm:w-16 sm:h-16 text-emerald-400 mx-auto" />
               <h2 className="text-base sm:text-lg font-bold text-white">{s.success}</h2>
+              {!isGmailAddress(formData.email) ? <p className="text-xs text-emerald-100 leading-relaxed">{t.supplierNonGmailHint}</p> : null}
               <button onClick={() => setSubmitted(false)} className="bg-[#2e7d32] text-white px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition hover:bg-[#1b5e20]">{s.another}</button>
             </div>
           ) : (

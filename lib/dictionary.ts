@@ -425,6 +425,21 @@ export interface Translation {
   joinInterviewBtn?: string;
   totalSelected?: string;
   approvedAndProcessing?: string;
+
+  verifyEmailTitle?: string;
+  verifyEmailBody?: string;
+  verifyEmailResend?: string;
+  verifyEmailResent?: string;
+  verifyEmailResendFail?: string;
+  verifyEmailCodeLabel?: string;
+  verifyEmailCodeBtn?: string;
+  verifyEmailCodeFail?: string;
+  verifyEmailBanner?: string;
+  verifyEmailBack?: string;
+  staffSignupTitle?: string;
+  staffSignupSub?: string;
+  staffSignupBtn?: string;
+  supplierNonGmailHint?: string;
 }
 
 export const languages = [
@@ -882,7 +897,22 @@ export const translations: Record<Language, Translation> = {
     activeAppointments: 'Aktif Randevular',
     joinInterviewBtn: 'Mülakata Katıl',
     totalSelected: 'Toplam Seçilen',
-    approvedAndProcessing: 'Onaylandı & İşlemde'
+    approvedAndProcessing: 'Onaylandı & İşlemde',
+
+    verifyEmailTitle: 'Gelen kutunuzu kontrol edin',
+    verifyEmailBody: 'Bu adres doğrulanmadan portala giremezsiniz. E-postadaki bağlantıya tıklayın veya kodu girin. Google ile giriş yaptıysanız bu adım gerekmez.',
+    verifyEmailResend: 'Doğrulama e-postasını yeniden gönder',
+    verifyEmailResent: 'Doğrulama e-postası yeniden gönderildi.',
+    verifyEmailResendFail: 'E-posta gönderilemedi. Biraz sonra tekrar deneyin.',
+    verifyEmailCodeLabel: 'E-postadaki kod',
+    verifyEmailCodeBtn: 'Kodu doğrula',
+    verifyEmailCodeFail: 'Kod kabul edilmedi. Bağlantıyı kullanın veya yeni kod isteyin.',
+    verifyEmailBanner: 'E-posta doğrulaması tamamlanmadan portal açılmaz.',
+    verifyEmailBack: 'Giriş ekranına dön',
+    staffSignupTitle: 'Davetli personel kaydı',
+    staffSignupSub: 'Davet e-postasındaki adresle kayıt olun. Google ile girişte ek doğrulama istenmez.',
+    staffSignupBtn: 'Kayıt ol ve e-postayı doğrula',
+    supplierNonGmailHint: 'Bu aday Gmail kullanmıyor. Aday portalına kendi hesabıyla girmeden önce e-postasındaki doğrulamayı tamamlamalıdır.'
   },
   en: {
     returnHome: 'Return to Home',
@@ -1331,7 +1361,22 @@ export const translations: Record<Language, Translation> = {
     activeAppointments: 'Active Appointments',
     joinInterviewBtn: 'Join Interview',
     totalSelected: 'Total Selected',
-    approvedAndProcessing: 'Approved & In Process'
+    approvedAndProcessing: 'Approved & In Process',
+
+    verifyEmailTitle: 'Check your inbox',
+    verifyEmailBody: 'You cannot open the portal until this address is verified. Use the link in the email or enter the code. Google sign-in does not need this extra step.',
+    verifyEmailResend: 'Resend verification email',
+    verifyEmailResent: 'Verification email sent again.',
+    verifyEmailResendFail: 'The email could not be sent. Try again shortly.',
+    verifyEmailCodeLabel: 'Code from the email',
+    verifyEmailCodeBtn: 'Verify code',
+    verifyEmailCodeFail: 'That code was not accepted. Use the link or request a new code.',
+    verifyEmailBanner: 'The portal stays closed until the email is verified.',
+    verifyEmailBack: 'Back to sign in',
+    staffSignupTitle: 'Invited staff registration',
+    staffSignupSub: 'Register with the invited address. Google sign-in does not ask for another confirmation.',
+    staffSignupBtn: 'Register and verify email',
+    supplierNonGmailHint: 'This candidate is not using Gmail. They must confirm the email before they can sign in to the candidate portal.'
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -1780,7 +1825,22 @@ export const translations: Record<Language, Translation> = {
     activeAppointments: 'Takimet Aktive',
     joinInterviewBtn: 'Bashkohu në Intervistë',
     totalSelected: 'Totali i Zgjedhur',
-    approvedAndProcessing: 'Miratuar & Në Proçes'
+    approvedAndProcessing: 'Miratuar & Në Proçes',
+
+    verifyEmailTitle: 'Kontrolloni kutinë tuaj',
+    verifyEmailBody: 'Nuk mund të hyni në portal pa e verifikuar këtë adresë. Hapni lidhjen në e-mail ose vendosni kodin. Hyrja me Google nuk e kërkon këtë hap.',
+    verifyEmailResend: 'Ridërgo e-mailin e verifikimit',
+    verifyEmailResent: 'E-maili i verifikimit u dërgua përsëri.',
+    verifyEmailResendFail: 'E-maili nuk u dërgua. Provoni përsëri pas pak.',
+    verifyEmailCodeLabel: 'Kodi nga e-maili',
+    verifyEmailCodeBtn: 'Verifiko kodin',
+    verifyEmailCodeFail: 'Kodi nuk u pranua. Përdorni lidhjen ose kërkoni një kod të ri.',
+    verifyEmailBanner: 'Portali nuk hapet pa verifikimin e e-mailit.',
+    verifyEmailBack: 'Kthehu te hyrja',
+    staffSignupTitle: 'Regjistrimi i personelit të ftuar',
+    staffSignupSub: 'Regjistrohuni me adresën e ftesës. Hyrja me Google nuk kërkon verifikim shtesë.',
+    staffSignupBtn: 'Regjistrohu dhe verifiko e-mailin',
+    supplierNonGmailHint: 'Ky kandidat nuk përdor Gmail. Duhet ta konfirmojë e-mailin para se të hyjë në portalin e kandidatit.'
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -2220,5 +2280,20 @@ export const translations: Record<Language, Translation> = {
     sectorTrade: 'التجارة الخارجية والخدمات اللوجستية',
     sectorHR: 'الموارد البشرية',
     colPosSecTitle: 'المنصب / القطاع',
+
+    verifyEmailTitle: 'تحقق من بريدك الوارد',
+    verifyEmailBody: 'لا يمكن فتح البوابة قبل تأكيد هذا العنوان. افتح الرابط في الرسالة أو أدخل الرمز. تسجيل الدخول عبر Google لا يحتاج هذه الخطوة.',
+    verifyEmailResend: 'إعادة إرسال رسالة التحقق',
+    verifyEmailResent: 'أُعيد إرسال رسالة التحقق.',
+    verifyEmailResendFail: 'تعذر إرسال الرسالة. حاول مرة أخرى بعد قليل.',
+    verifyEmailCodeLabel: 'الرمز الوارد في البريد',
+    verifyEmailCodeBtn: 'تأكيد الرمز',
+    verifyEmailCodeFail: 'لم يُقبل الرمز. استخدم الرابط أو اطلب رمزًا جديدًا.',
+    verifyEmailBanner: 'تبقى البوابة مغلقة حتى يتم تأكيد البريد.',
+    verifyEmailBack: 'العودة لتسجيل الدخول',
+    staffSignupTitle: 'تسجيل موظف مدعو',
+    staffSignupSub: 'سجّل بالعنوان الوارد في الدعوة. دخول Google لا يطلب تأكيدًا إضافيًا.',
+    staffSignupBtn: 'سجّل وأكّد البريد',
+    supplierNonGmailHint: 'هذا المرشح لا يستخدم Gmail. يجب أن يؤكد بريده قبل الدخول إلى بوابة المرشحين.'
   }
 };
