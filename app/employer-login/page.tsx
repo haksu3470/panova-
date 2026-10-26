@@ -179,7 +179,7 @@ export default function EmployerLoginPage() {
     <div className={`min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <header className="max-w-7xl w-full mx-auto p-4 md:p-6 flex items-center justify-between border-b border-slate-200 bg-white shadow-sm">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="PANOVA" className="h-10 w-auto object-contain shrink-0" />
+          <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
           <div className="text-lg font-black text-slate-900 tracking-tight">PANOVA PORTAL</div>
         </div>
         <div className="flex items-center gap-3">

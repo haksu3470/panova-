@@ -62,10 +62,12 @@ export default function HomePage() {
           {/* Logo */}
           <div className="flex items-center space-x-3 rtl:space-x-reverse w-full sm:w-auto justify-between sm:justify-start">
             <div className="flex items-center space-x-3 rtl:space-x-reverse">
-              <img 
-                src="/logo.png" 
-                alt="PANOVA Group" 
-                className="h-9 sm:h-10 w-auto object-contain"
+              <img
+                src="/logo.png"
+                alt="PANOVA"
+                width={1051}
+                height={725}
+                className="h-12 sm:h-14 w-auto object-contain shrink-0"
               />
               <div>
                 <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 block leading-none">PANOVA</span>

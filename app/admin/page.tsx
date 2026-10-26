@@ -60,11 +60,10 @@ function AdminDashboardPageInner() {
     <div className={`min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <header className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-3">
-          <div className="bg-emerald-600 text-white font-black p-2.5 rounded-2xl text-sm shadow-md">
-            🛡️ PANOVA
-          </div>
+          <img src="/logo.png" alt="" width={1051} height={725} className="h-12 w-auto rounded-xl bg-white object-contain shrink-0" />
           <div>
-            <h1 className="text-lg font-black tracking-tight text-white">{a.title}</h1>
+            <p className="text-sm font-black tracking-tight text-white leading-none">PANOVA</p>
+            <h1 className="text-lg font-black tracking-tight text-white mt-1">{a.title}</h1>
             <p className="text-[11px] text-slate-400">{company.shortName} &bull; {a.sub}</p>
           </div>
         </div>

@@ -368,7 +368,7 @@ function EmployerPortalInner() {
         {/* ÜST HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="PANOVA" className="h-10 w-auto object-contain shrink-0" />
+            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
             <div className="border-l pl-3 border-slate-200">
               <div className="flex items-center gap-2 text-emerald-700 font-bold text-[11px] uppercase tracking-wider mb-0.5">
                 <Building2 className="w-3.5 h-3.5" /> {t.empPortalTitle || 'İşveren Partner Portalı'}

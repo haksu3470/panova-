@@ -439,7 +439,7 @@ export default function PortalPage() {
       <div className={`min-h-screen bg-slate-50 flex flex-col justify-between ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
         <header className="w-full bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="PANOVA PORTAL" className="h-8 w-auto object-contain" />
+            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
             <span className="font-extrabold text-slate-800 text-sm tracking-wide">PANOVA PORTAL</span>
           </div>
           <div className="flex items-center gap-3">
@@ -564,7 +564,7 @@ export default function PortalPage() {
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="PANOVA" className="h-10 w-auto object-contain shrink-0" />
+            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
             <div>
               <div className="flex items-center gap-2 text-emerald-700 font-bold text-xs mb-0.5">
                 <ShieldCheck className="w-3.5 h-3.5" /> {t.authSystem}
