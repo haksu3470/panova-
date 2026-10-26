@@ -440,6 +440,25 @@ export interface Translation {
   staffSignupSub?: string;
   staffSignupBtn?: string;
   supplierNonGmailHint?: string;
+
+  contactEmailPlaceholder?: string;
+  invalidCompanyCredentials?: string;
+  employerRecordMissing?: string;
+  signupError?: string;
+  employerVerifiedUnlinked?: string;
+  authInvalidCredentials?: string;
+  candidateRecordMissing?: string;
+  fillRequiredFields?: string;
+  passwordTooShort?: string;
+  candidateVerifiedUnlinked?: string;
+  examplePersonName?: string;
+  exampleProfession?: string;
+  exampleEmail?: string;
+  exampleGmail?: string;
+  staffEmailPlaceholder?: string;
+  staffNotInvited?: string;
+  loginError?: string;
+  staffSignupFieldsRequired?: string;
 }
 
 export const languages = [
@@ -912,7 +931,26 @@ export const translations: Record<Language, Translation> = {
     staffSignupTitle: 'Davetli personel kaydı',
     staffSignupSub: 'Davet e-postasındaki adresle kayıt olun. Google ile girişte ek doğrulama istenmez.',
     staffSignupBtn: 'Kayıt ol ve e-postayı doğrula',
-    supplierNonGmailHint: 'Bu aday Gmail kullanmıyor. Aday portalına kendi hesabıyla girmeden önce e-postasındaki doğrulamayı tamamlamalıdır.'
+    supplierNonGmailHint: 'Bu aday Gmail kullanmıyor. Aday portalına kendi hesabıyla girmeden önce e-postasındaki doğrulamayı tamamlamalıdır.',
+
+    contactEmailPlaceholder: 'iletisim@sirket.com',
+    invalidCompanyCredentials: 'Geçersiz şirket e-postası veya şifre!',
+    employerRecordMissing: 'Bu e-posta ile eşleşen bir işveren kaydı bulunamadı. Lütfen Panova ekibiyle iletişime geçin.',
+    signupError: 'Kayıt oluşturulurken hata: {message}',
+    employerVerifiedUnlinked: 'E-posta doğrulandı. İşveren kaydı bağlanamadı; Panova ekibiyle iletişime geçin.',
+    authInvalidCredentials: 'Hatalı e-posta veya şifre!',
+    candidateRecordMissing: 'Bu e-posta ile eşleşen aday kaydı bulunamadı!',
+    fillRequiredFields: 'Lütfen zorunlu alanları doldurun.',
+    passwordTooShort: 'Şifre en az 8 karakter olmalıdır.',
+    candidateVerifiedUnlinked: 'E-posta doğrulandı. Aday kaydınız ekip tarafından bağlanacak.',
+    examplePersonName: 'Ayşe Yılmaz',
+    exampleProfession: 'Elektrik Mühendisi',
+    exampleEmail: 'ornek@mail.com',
+    exampleGmail: 'ornek@gmail.com',
+    staffEmailPlaceholder: 'ornek@panova.com',
+    staffNotInvited: 'Bu hesap personel yetkisine sahip değil. Davet e-postasındaki adresle kayıt olun.',
+    loginError: 'Giriş hatası: {message}',
+    staffSignupFieldsRequired: 'Ad, e-posta ve en az 8 karakterlik şifre zorunludur.',
   },
   en: {
     returnHome: 'Return to Home',
@@ -1376,7 +1414,26 @@ export const translations: Record<Language, Translation> = {
     staffSignupTitle: 'Invited staff registration',
     staffSignupSub: 'Register with the invited address. Google sign-in does not ask for another confirmation.',
     staffSignupBtn: 'Register and verify email',
-    supplierNonGmailHint: 'This candidate is not using Gmail. They must confirm the email before they can sign in to the candidate portal.'
+    supplierNonGmailHint: 'This candidate is not using Gmail. They must confirm the email before they can sign in to the candidate portal.',
+
+    contactEmailPlaceholder: 'contact@company.com',
+    invalidCompanyCredentials: 'Invalid company email or password.',
+    employerRecordMissing: 'No employer record matches this email. Please contact the Panova team.',
+    signupError: 'Could not create the account: {message}',
+    employerVerifiedUnlinked: 'Email verified. The employer record could not be linked. Please contact the Panova team.',
+    authInvalidCredentials: 'Incorrect email or password.',
+    candidateRecordMissing: 'No candidate record is linked to this email.',
+    fillRequiredFields: 'Please fill in the required fields.',
+    passwordTooShort: 'Password must be at least 8 characters.',
+    candidateVerifiedUnlinked: 'Email verified. Your candidate record will be linked by our team.',
+    examplePersonName: 'Anna Smith',
+    exampleProfession: 'Electrical Engineer',
+    exampleEmail: 'name@email.com',
+    exampleGmail: 'name@gmail.com',
+    staffEmailPlaceholder: 'name@panova.com',
+    staffNotInvited: 'This account does not have staff access. Register with the address from the invitation email.',
+    loginError: 'Sign-in error: {message}',
+    staffSignupFieldsRequired: 'Name, email, and a password of at least 8 characters are required.',
   },
   sq: {
     returnHome: 'Kthehu në Faqen Kryesore',
@@ -1840,7 +1897,26 @@ export const translations: Record<Language, Translation> = {
     staffSignupTitle: 'Regjistrimi i personelit të ftuar',
     staffSignupSub: 'Regjistrohuni me adresën e ftesës. Hyrja me Google nuk kërkon verifikim shtesë.',
     staffSignupBtn: 'Regjistrohu dhe verifiko e-mailin',
-    supplierNonGmailHint: 'Ky kandidat nuk përdor Gmail. Duhet ta konfirmojë e-mailin para se të hyjë në portalin e kandidatit.'
+    supplierNonGmailHint: 'Ky kandidat nuk përdor Gmail. Duhet ta konfirmojë e-mailin para se të hyjë në portalin e kandidatit.',
+
+    contactEmailPlaceholder: 'kontakt@kompania.com',
+    invalidCompanyCredentials: 'Email-i ose fjalëkalimi i kompanisë është i pasaktë.',
+    employerRecordMissing: 'Nuk u gjet një regjistrim punëdhënësi për këtë email. Ju lutemi kontaktoni ekipin e Panova.',
+    signupError: 'Gabim gjatë regjistrimit: {message}',
+    employerVerifiedUnlinked: 'E-maili u verifikua. Regjistrimi i punëdhënësit nuk u lidh. Kontaktoni ekipin e Panova.',
+    authInvalidCredentials: 'Email-i ose fjalëkalimi është i pasaktë.',
+    candidateRecordMissing: 'Nuk u gjet një regjistrim kandidati për këtë email.',
+    fillRequiredFields: 'Ju lutemi plotësoni fushat e detyrueshme.',
+    passwordTooShort: 'Fjalëkalimi duhet të ketë të paktën 8 karaktere.',
+    candidateVerifiedUnlinked: 'E-maili u verifikua. Ekipi ynë do ta lidhë regjistrimin tuaj si kandidat.',
+    examplePersonName: 'Ana Hoxha',
+    exampleProfession: 'Inxhinier elektrik',
+    exampleEmail: 'emer@email.com',
+    exampleGmail: 'emer@gmail.com',
+    staffEmailPlaceholder: 'emer@panova.com',
+    staffNotInvited: 'Kjo llogari nuk ka akses personeli. Regjistrohuni me adresën e e-mailit të ftesës.',
+    loginError: 'Gabim gjatë hyrjes: {message}',
+    staffSignupFieldsRequired: 'Emri, e-maili dhe një fjalëkalim me të paktën 8 karaktere janë të detyrueshëm.',
   },
   ar: {
     returnHome: 'العودة إلى الرئيسية',
@@ -2294,6 +2370,25 @@ export const translations: Record<Language, Translation> = {
     staffSignupTitle: 'تسجيل موظف مدعو',
     staffSignupSub: 'سجّل بالعنوان الوارد في الدعوة. دخول Google لا يطلب تأكيدًا إضافيًا.',
     staffSignupBtn: 'سجّل وأكّد البريد',
-    supplierNonGmailHint: 'هذا المرشح لا يستخدم Gmail. يجب أن يؤكد بريده قبل الدخول إلى بوابة المرشحين.'
+    supplierNonGmailHint: 'هذا المرشح لا يستخدم Gmail. يجب أن يؤكد بريده قبل الدخول إلى بوابة المرشحين.',
+
+    contactEmailPlaceholder: 'contact@company.com',
+    invalidCompanyCredentials: 'البريد الإلكتروني للشركة أو كلمة المرور غير صحيحة.',
+    employerRecordMissing: 'لا يوجد سجل صاحب عمل يطابق هذا البريد. يرجى التواصل مع فريق بانوفا.',
+    signupError: 'تعذر إنشاء الحساب: {message}',
+    employerVerifiedUnlinked: 'تم تأكيد البريد. تعذر ربط سجل صاحب العمل. يرجى التواصل مع فريق بانوفا.',
+    authInvalidCredentials: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+    candidateRecordMissing: 'لا يوجد سجل مرشح مرتبط بهذا البريد.',
+    fillRequiredFields: 'يرجى ملء الحقول المطلوبة.',
+    passwordTooShort: 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.',
+    candidateVerifiedUnlinked: 'تم تأكيد البريد. سيربط فريقنا سجل المرشح الخاص بك.',
+    examplePersonName: 'أحمد علي',
+    exampleProfession: 'مهندس كهرباء',
+    exampleEmail: 'name@email.com',
+    exampleGmail: 'name@gmail.com',
+    staffEmailPlaceholder: 'name@panova.com',
+    staffNotInvited: 'هذا الحساب لا يملك صلاحية الموظفين. سجّل بالعنوان الوارد في رسالة الدعوة.',
+    loginError: 'خطأ في تسجيل الدخول: {message}',
+    staffSignupFieldsRequired: 'الاسم والبريد وكلمة مرور من 8 أحرف على الأقل حقول مطلوبة.',
   }
 };

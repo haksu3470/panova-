@@ -1,11 +1,19 @@
 'use client';
 
 import { company } from '@/lib/company';
+import type { Language } from '@/lib/dictionary';
 import { homeCopy } from '@/lib/home-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 
-export function AuthFooter({ tone = 'light' }: { tone?: 'light' | 'slate' | 'dark' }) {
-  const { currentLang } = useSiteLanguage('tr');
+export function AuthFooter({
+  tone = 'light',
+  lang,
+}: {
+  tone?: 'light' | 'slate' | 'dark';
+  lang?: Language;
+}) {
+  const { currentLang: storedLang } = useSiteLanguage(lang ?? 'tr');
+  const currentLang = lang ?? storedLang;
   const a = homeCopy[currentLang].about;
   const cls =
     tone === 'dark'

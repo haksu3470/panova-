@@ -58,7 +58,7 @@ export default function CandidateDashboard() {
   const [regPassport, setRegPassport] = useState('');
   const [regPhone, setRegPhone] = useState('');
   const [regEmail, setRegEmail] = useState('');
-  const [regProfession, setRegProfession] = useState('Elektrik Mühendisi / Teknisyeni');
+  const [regProfession, setRegProfession] = useState('');
   const [regSector, setRegSector] = useState('construction');
 
   const [candidate, setCandidate] = useState<any | null>(null);
@@ -386,7 +386,7 @@ export default function CandidateDashboard() {
           showVerify(email);
           return;
         }
-        alert(currentLang === 'tr' ? 'Hatalı e-posta veya şifre!' : 'Incorrect email or password!');
+        alert(t.authInvalidCredentials);
         return;
       }
       const gate = await gateSession();
@@ -397,7 +397,7 @@ export default function CandidateDashboard() {
       const ok = await loadLinkedCandidate();
       if (!ok) {
         await signOut();
-        alert(currentLang === 'tr' ? 'Bu e-posta ile eşleşen aday kaydı bulunamadı!' : 'No candidate record linked to this email!');
+        alert(t.candidateRecordMissing);
       }
     } finally {
       resume();
@@ -408,11 +408,11 @@ export default function CandidateDashboard() {
   const handleCandidateSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!regFullName || !regPassport || !regEmail || !regPassword) {
-      alert(currentLang === 'tr' ? 'Lütfen zorunlu alanları doldurun.' : 'Please fill in required fields.');
+      alert(t.fillRequiredFields);
       return;
     }
     if (regPassword.length < 8) {
-      alert(currentLang === 'tr' ? 'Şifre en az 8 karakter olmalıdır.' : 'Password must be at least 8 characters.');
+      alert(t.passwordTooShort);
       return;
     }
 
@@ -435,7 +435,7 @@ export default function CandidateDashboard() {
         },
       });
       if (result.status === 'error') {
-        alert((currentLang === 'tr' ? 'Kayıt hatası: ' : 'Signup error: ') + result.message);
+        alert((t.signupError || '{message}').replace('{message}', result.message));
         return;
       }
       showVerify(result.email);
@@ -681,7 +681,7 @@ export default function CandidateDashboard() {
                   authMode === 'login' ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <LogIn className="w-4 h-4" /> {t.signInMenu || 'Giriş Yap'}
+                <LogIn className="w-4 h-4" /> {t.signInMenu}
               </button>
               <button
                 type="button"
@@ -690,7 +690,7 @@ export default function CandidateDashboard() {
                   authMode === 'signup' ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <UserPlus className="w-4 h-4" /> {t.signUpMenu || 'Kayıt Ol'}
+                <UserPlus className="w-4 h-4" /> {t.signUpMenu}
               </button>
             </div>}
 
@@ -715,9 +715,7 @@ export default function CandidateDashboard() {
                   onVerified={async () => {
                     const ok = await loadLinkedCandidate();
                     if (!ok) {
-                      alert(currentLang === 'tr'
-                        ? 'E-posta doğrulandı. Aday kaydınız ekip tarafından bağlanacak.'
-                        : 'Email verified. Your candidate record will be linked by our team.');
+                      alert(t.candidateVerifiedUnlinked);
                     }
                   }}
                 />
@@ -729,12 +727,12 @@ export default function CandidateDashboard() {
             ) : authMode === 'login' ? (
               <><form onSubmit={handleCandidateLogin} className="space-y-4 text-left rtl:text-right">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.emailLabel || 'E-posta'}</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.emailLabel}</label>
                   <input 
                     type="email" 
                     value={loginInput} 
                     onChange={(e) => setLoginInput(e.target.value)} 
-                    placeholder="omer@gmail.com" 
+                    placeholder={t.exampleGmail} 
                     required 
                     className="w-full px-4 py-3 rounded-xl border text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm font-medium" 
                   />
@@ -771,7 +769,7 @@ export default function CandidateDashboard() {
                     required
                     value={regFullName}
                     onChange={(e) => setRegFullName(e.target.value)}
-                    placeholder="Hüseyin Aksu"
+                    placeholder={t.examplePersonName}
                     className="w-full px-3.5 py-3 rounded-xl border text-slate-900 bg-white font-medium outline-none text-sm"
                   />
                 </div>
@@ -805,7 +803,7 @@ export default function CandidateDashboard() {
                     required
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
-                    placeholder="ornek@mail.com"
+                    placeholder={t.exampleEmail}
                     className="w-full px-3.5 py-3 rounded-xl border text-slate-900 bg-white font-medium outline-none text-sm"
                   />
                 </div>
@@ -828,7 +826,7 @@ export default function CandidateDashboard() {
                       type="text"
                       value={regProfession}
                       onChange={(e) => setRegProfession(e.target.value)}
-                      placeholder="Elektrik Mühendisi"
+                      placeholder={t.exampleProfession}
                       className="w-full px-3.5 py-3 rounded-xl border text-slate-900 bg-white font-medium outline-none text-sm"
                     />
                   </div>
@@ -858,7 +856,7 @@ export default function CandidateDashboard() {
           </div>
         </main>
 
-        <AuthFooter />
+        <AuthFooter lang={currentLang} />
       </div>
     );
   }

@@ -189,7 +189,7 @@ function AdminDashboardPageInner() {
         )}
       </main>
 
-      <AuthFooter tone="dark" />
+      <AuthFooter tone="dark" lang={lang} />
     </div>
   );
 }
