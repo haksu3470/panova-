@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
+import { homeCopy } from '@/lib/home-copy';
+import { readStoredLanguage, writeStoredLanguage } from '@/lib/site-language';
 
 // Modüler Bileşenlerimiz (Kök dizindeki components klasörüne göre göreceli yol)
 import CandidatesTab from '../../components/portal/CandidatesTab';
@@ -25,12 +27,10 @@ export default function PortalPage() {
   const [currentLang, setCurrentLang] = useState<Language>('en');
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('panova_portal_lang') as Language;
-      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
-        setCurrentLang(saved);
-      }
-    }
+    setCurrentLang(readStoredLanguage('en'));
+    const onStorage = () => setCurrentLang(readStoredLanguage('en'));
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
   const t = translations[currentLang] || translations.en;
@@ -38,9 +38,7 @@ export default function PortalPage() {
 
   const changeLanguage = (lang: Language) => {
     setCurrentLang(lang);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('panova_portal_lang', lang);
-    }
+    writeStoredLanguage(lang);
   };
 
   const [authenticated, setAuthenticated] = useState(false);
@@ -441,7 +439,7 @@ export default function PortalPage() {
                 {loading ? 'Giriş Yapılıyor...' : (t.signInBtn || 'Giriş Yap')}
               </button>
             </form>
-              <div className="mt-4"><OAuthButtons redirectPath="/portal" /></div>
+              <div className="mt-4"><OAuthButtons redirectPath="/portal" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} /></div>
           </div>
         </main>
 

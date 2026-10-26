@@ -12,6 +12,7 @@ import { candidateService } from '@/lib/services/candidateService';
 import { ArrowLeft, User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, Video, Trash2, Upload, Eye, X, Plus, Languages, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
+import { readStoredLanguage, writeStoredLanguage } from '@/lib/site-language';
 
 interface CandidateDocument {
   id: string;
@@ -25,36 +26,18 @@ function CandidateDetailPageInner() {
   const params = useParams();
   const candidateId = params.id as string;
 
-  const [currentLang, setCurrentLang] = useState<Language>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('panova_portal_lang') as Language;
-      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
-    }
-    return 'en';
-  });
+  const [currentLang, setCurrentLang] = useState<Language>('en');
 
   useEffect(() => {
-    const handleStorageChange = () => {
-      const saved = localStorage.getItem('panova_portal_lang') as Language;
-      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
-        setCurrentLang(saved);
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    const timer = setInterval(handleStorageChange, 150);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(timer);
-    };
+    const apply = () => setCurrentLang(readStoredLanguage('en'));
+    apply();
+    window.addEventListener('storage', apply);
+    return () => window.removeEventListener('storage', apply);
   }, []);
 
   const changeLanguage = (lang: Language) => {
     setCurrentLang(lang);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('panova_portal_lang', lang);
-    }
+    writeStoredLanguage(lang);
   };
 
   const [candidate, setCandidate] = useState<any | null>(null);

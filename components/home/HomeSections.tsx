@@ -5,61 +5,13 @@ import {
   Award, Globe2, Clock, BadgeCheck, ArrowRight, Briefcase, GraduationCap, HeartHandshake,
 } from 'lucide-react';
 import { company } from '@/lib/company';
+import type { Language } from '@/lib/dictionary';
+import { homeCopy } from '@/lib/home-copy';
 
-const stats = [
-  { value: '4', label: 'Grup şirketi' },
-  { value: 'TR + AB', label: 'Hizmet koridoru' },
-  { value: '8+', label: 'Ana sektör' },
-  { value: '30/60/90', label: 'Gün işe uyum takibi' },
-];
-
-const employerServices = [
-  { icon: Search, title: 'Yurt Dışı Personel Temini', desc: 'AB ve Türkiye için sertifikalı, akredite yetkinliğe sahip aday havuzundan hızlı kısa liste.' },
-  { icon: Users, title: 'Toplu & Proje Bazlı İşe Alım', desc: 'İnşaat, tarım ve üretim projeleri için ekip bazlı planlama ve dalga dalga yerleştirme.' },
-  { icon: FileCheck2, title: 'Belge & Sertifika Doğrulama', desc: 'Diploma, ustalık belgesi, sağlık ve sabıka kayıtlarının dijital takibi ve kontrolü.' },
-  { icon: ClipboardCheck, title: 'Resmî Süreç Yönetimi', desc: 'Çalışma izni, vize ve konsolosluk adımlarının uçtan uca takibi.' },
-  { icon: Plane, title: 'Seyahat & Karşılama', desc: 'Bilet, transfer, konaklama ve işe ilk gün organizasyonu.' },
-  { icon: HeartHandshake, title: 'İşe Uyum & Takip', desc: '30/60/90 gün değerlendirmeleriyle kalıcılığı ölçen yerleştirme sonrası destek.' },
-];
-
-const candidateItems = [
-  { icon: Briefcase, title: 'Yurt dışı iş fırsatları', desc: 'AB ve Türkiye’deki doğrulanmış işverenlerin açık pozisyonları.' },
-  { icon: GraduationCap, title: 'Sertifika & kariyer desteği', desc: 'Belgelerinizi tek profilde toplayın, eksiklerinizi görün.' },
-  { icon: ShieldCheck, title: 'Ücretsiz ve güvenli başvuru', desc: 'Kişisel verileriniz KVKK/GDPR ilkelerine uygun korunur.' },
-];
-
-const sectors = [
-  { icon: HardHat, name: 'İnşaat & Altyapı' },
-  { icon: Sprout, name: 'Tarım & Seracılık' },
-  { icon: Factory, name: 'Üretim & Sanayi' },
-  { icon: Wrench, name: 'Kaynak & Teknik Ustalık' },
-  { icon: Truck, name: 'Lojistik & Depo' },
-  { icon: Hotel, name: 'Turizm & Otelcilik' },
-  { icon: Stethoscope, name: 'Sağlık & Bakım' },
-  { icon: ShoppingBag, name: 'Perakende & Hizmet' },
-];
-
-const steps = [
-  { title: 'Talep', desc: 'İşveren pozisyon, adet ve yetkinlik ihtiyacını iletir.' },
-  { title: 'Eşleştirme', desc: 'Sertifikalı havuzdan uygun adaylar kısa listelenir.' },
-  { title: 'Görüşme', desc: 'Online veya yüz yüze mülakat; iş teklifi hazırlanır.' },
-  { title: 'Resmî Süreç', desc: 'İzin, vize ve belgeler dijital olarak takip edilir.' },
-  { title: 'Yerleştirme', desc: 'Seyahat, karşılama ve 30/60/90 gün uyum takibi.' },
-];
-
-const trust = [
-  { icon: Award, title: 'Akredite yetkinlik odağı', desc: 'Adaylar mesleki belge ve sertifikalarıyla değerlendirilir.' },
-  { icon: ShieldCheck, title: 'Veri güvenliği', desc: 'Rol bazlı erişim, denetim kaydı (audit log) ve şifreli giriş.' },
-  { icon: Globe2, title: 'Çok dilli iletişim', desc: 'Türkçe, İngilizce, Arnavutça ve Arapça destek.' },
-  { icon: Clock, title: 'Şeffaf süreç', desc: 'İşveren ve aday her adımı portaldan anlık izler.' },
-];
-
-const faqs = [
-  { q: 'Adaylar başvuru için ücret öder mi?', a: 'Hayır. Aday başvurusu ve profil oluşturma ücretsizdir.' },
-  { q: 'Hangi ülkelere personel temin ediyorsunuz?', a: 'Öncelikli olarak Türkiye ve Avrupa Birliği ülkelerindeki işverenlere hizmet veriyoruz.' },
-  { q: 'Bir işe alım süreci ne kadar sürer?', a: 'Pozisyon ve ülkeye göre değişir; resmî süreç adımları portaldan takip edilebilir.' },
-  { q: 'Google hesabımla giriş yapabilir miyim?', a: 'Evet. Aday, işveren ve personel portallarında Google ile güvenli giriş desteklenir.' },
-];
+const employerIcons = [Search, Users, FileCheck2, ClipboardCheck, Plane, HeartHandshake];
+const candidateIcons = [Briefcase, GraduationCap, ShieldCheck];
+const sectorIcons = [HardHat, Sprout, Factory, Wrench, Truck, Hotel, Stethoscope, ShoppingBag];
+const trustIcons = [Award, ShieldCheck, Globe2, Clock];
 
 function SectionTitle({ eyebrow, title, desc }: { eyebrow: string; title: string; desc?: string }) {
   return (
@@ -71,7 +23,8 @@ function SectionTitle({ eyebrow, title, desc }: { eyebrow: string; title: string
   );
 }
 
-export function StatsBar() {
+export function StatsBar({ lang }: { lang: Language }) {
+  const stats = homeCopy[lang].stats;
   return (
     <section className="bg-white border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -86,23 +39,27 @@ export function StatsBar() {
   );
 }
 
-export function AudienceSections() {
+export function AudienceSections({ lang }: { lang: Language }) {
+  const c = homeCopy[lang];
   return (
     <>
       <section id="isverenler" className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 bg-slate-50">
-        <SectionTitle eyebrow="İşverenler için" title="Doğru personel, doğru zamanda" desc="Talebinizden işe uyuma kadar tüm insan kaynakları sürecini tek elden yönetiyoruz." />
+        <SectionTitle eyebrow={c.employersEyebrow} title={c.employersTitle} desc={c.employersDesc} />
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {employerServices.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg hover:border-emerald-200 transition">
-              <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center mb-4"><Icon className="w-6 h-6 text-[#2e7d32]" /></div>
-              <h3 className="font-extrabold text-slate-900 text-lg">{title}</h3>
-              <p className="text-slate-600 text-sm mt-2 leading-relaxed">{desc}</p>
-            </div>
-          ))}
+          {c.employerServices.map(({ title, desc }, i) => {
+            const Icon = employerIcons[i];
+            return (
+              <div key={title} className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg hover:border-emerald-200 transition">
+                <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center mb-4"><Icon className="w-6 h-6 text-[#2e7d32]" /></div>
+                <h3 className="font-extrabold text-slate-900 text-lg">{title}</h3>
+                <p className="text-slate-600 text-sm mt-2 leading-relaxed">{desc}</p>
+              </div>
+            );
+          })}
         </div>
         <div className="text-center mt-8">
           <Link href="/employer-login" className="inline-flex items-center gap-2 bg-slate-900 text-white px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-slate-800">
-            <Building2 className="w-4 h-4" /> Personel talebi oluştur <ArrowRight className="w-4 h-4" />
+            <Building2 className="w-4 h-4" /> {c.createDemand} <ArrowRight className="w-4 h-4 rtl:rotate-180" />
           </Link>
         </div>
       </section>
@@ -110,41 +67,47 @@ export function AudienceSections() {
       <section id="adaylar" className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#1b5e20] to-emerald-700 text-white">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div>
-            <span className="font-bold text-xs uppercase tracking-widest text-emerald-200">Adaylar için</span>
-            <h2 className="text-2xl sm:text-4xl font-black mt-2 tracking-tight">Kariyerinizi Avrupa ve Türkiye’ye taşıyın</h2>
-            <p className="text-emerald-50 mt-4 text-sm sm:text-base">Profilinizi oluşturun, belgelerinizi yükleyin; size uygun pozisyonlar açıldığında ilk siz haberdar olun.</p>
+            <span className="font-bold text-xs uppercase tracking-widest text-emerald-200">{c.candidatesEyebrow}</span>
+            <h2 className="text-2xl sm:text-4xl font-black mt-2 tracking-tight">{c.candidatesTitle}</h2>
+            <p className="text-emerald-50 mt-4 text-sm sm:text-base">{c.candidatesDesc}</p>
             <div className="flex flex-col sm:flex-row gap-3 mt-6">
-              <Link href="/candidate" className="inline-flex justify-center items-center gap-2 bg-white text-[#1b5e20] px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-50">Hemen başvur <ArrowRight className="w-4 h-4" /></Link>
-              <Link href="/candidate" className="inline-flex justify-center items-center gap-2 border border-white/40 px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-white/10">Aday girişi</Link>
+              <Link href="/candidate" className="inline-flex justify-center items-center gap-2 bg-white text-[#1b5e20] px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-50">{c.applyNow} <ArrowRight className="w-4 h-4 rtl:rotate-180" /></Link>
+              <Link href="/candidate" className="inline-flex justify-center items-center gap-2 border border-white/40 px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-white/10">{c.candidateLogin}</Link>
             </div>
           </div>
           <div className="grid gap-4">
-            {candidateItems.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="flex gap-4 bg-white/10 rounded-2xl p-5 border border-white/15">
-                <Icon className="w-7 h-7 text-emerald-200 flex-shrink-0" />
-                <div><div className="font-extrabold">{title}</div><div className="text-sm text-emerald-50/90 mt-1">{desc}</div></div>
-              </div>
-            ))}
+            {c.candidateItems.map(({ title, desc }, i) => {
+              const Icon = candidateIcons[i];
+              return (
+                <div key={title} className="flex gap-4 bg-white/10 rounded-2xl p-5 border border-white/15">
+                  <Icon className="w-7 h-7 text-emerald-200 flex-shrink-0" />
+                  <div><div className="font-extrabold">{title}</div><div className="text-sm text-emerald-50/90 mt-1">{desc}</div></div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       <section id="sektorler" className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <SectionTitle eyebrow="Sektörler" title="Uzmanlaştığımız alanlar" desc="Grup şirketlerimizin saha deneyimiyle, her sektörün yetkinlik ihtiyacını tanıyoruz." />
+        <SectionTitle eyebrow={c.sectorsEyebrow} title={c.sectorsTitle} desc={c.sectorsDesc} />
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
-          {sectors.map(({ icon: Icon, name }) => (
-            <div key={name} className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-center hover:bg-emerald-50 transition">
-              <Icon className="w-8 h-8 mx-auto text-[#2e7d32]" />
-              <div className="font-bold text-slate-800 text-sm mt-3">{name}</div>
-            </div>
-          ))}
+          {c.sectorNames.map((name, i) => {
+            const Icon = sectorIcons[i];
+            return (
+              <div key={name} className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-center hover:bg-emerald-50 transition">
+                <Icon className="w-8 h-8 mx-auto text-[#2e7d32]" />
+                <div className="font-bold text-slate-800 text-sm mt-3">{name}</div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
       <section id="nasil-calisir" className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 bg-slate-50">
-        <SectionTitle eyebrow="Nasıl çalışır" title="5 adımda yerleştirme" />
+        <SectionTitle eyebrow={c.howEyebrow} title={c.howTitle} />
         <ol className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-4">
-          {steps.map((s, i) => (
+          {c.steps.map((s, i) => (
             <li key={s.title} className="bg-white rounded-2xl border border-slate-200 p-5">
               <div className="w-9 h-9 rounded-full bg-[#2e7d32] text-white font-black flex items-center justify-center">{i + 1}</div>
               <div className="font-extrabold text-slate-900 mt-3">{s.title}</div>
@@ -157,30 +120,34 @@ export function AudienceSections() {
   );
 }
 
-export function TrustSections() {
+export function TrustSections({ lang }: { lang: Language }) {
+  const c = homeCopy[lang];
   return (
     <>
       <section className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <SectionTitle eyebrow="Neden Panova" title="Güven üzerine kurulu insan kaynakları" />
+        <SectionTitle eyebrow={c.trustEyebrow} title={c.trustTitle} />
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {trust.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="p-6 rounded-2xl border border-slate-200">
-              <Icon className="w-8 h-8 text-[#2e7d32]" />
-              <div className="font-extrabold text-slate-900 mt-3">{title}</div>
-              <p className="text-sm text-slate-600 mt-1">{desc}</p>
-            </div>
-          ))}
+          {c.trust.map(({ title, desc }, i) => {
+            const Icon = trustIcons[i];
+            return (
+              <div key={title} className="p-6 rounded-2xl border border-slate-200">
+                <Icon className="w-8 h-8 text-[#2e7d32]" />
+                <div className="font-extrabold text-slate-900 mt-3">{title}</div>
+                <p className="text-sm text-slate-600 mt-1">{desc}</p>
+              </div>
+            );
+          })}
         </div>
         <div className="max-w-5xl mx-auto mt-10 rounded-2xl bg-slate-50 border border-dashed border-slate-300 p-6 text-center">
           <BadgeCheck className="w-6 h-6 mx-auto text-slate-400" />
-          <p className="text-sm text-slate-500 mt-2">Referans işverenler ve iş ortakları — logolar izinleri alındıktan sonra burada yer alacaktır.</p>
+          <p className="text-sm text-slate-500 mt-2">{c.partnersNote}</p>
         </div>
       </section>
 
       <section id="sss" className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 bg-slate-50">
-        <SectionTitle eyebrow="SSS" title="Sık sorulan sorular" />
+        <SectionTitle eyebrow={c.faqEyebrow} title={c.faqTitle} />
         <div className="max-w-3xl mx-auto space-y-3">
-          {faqs.map((f) => (
+          {c.faqs.map((f) => (
             <details key={f.q} className="group bg-white rounded-2xl border border-slate-200 p-5">
               <summary className="font-bold text-slate-900 cursor-pointer list-none flex justify-between gap-4">{f.q}<span className="text-[#2e7d32] group-open:rotate-45 transition">+</span></summary>
               <p className="text-sm text-slate-600 mt-3">{f.a}</p>
@@ -192,12 +159,12 @@ export function TrustSections() {
       <section className="px-4 sm:px-6 lg:px-8 py-12 bg-slate-50">
         <div className="max-w-7xl mx-auto rounded-3xl bg-slate-900 text-white p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black">Ekibinizi birlikte kuralım</h2>
-            <p className="text-slate-300 mt-2 text-sm sm:text-base">Personel ihtiyacınızı iletin, uzman ekibimiz 1 iş günü içinde dönüş yapsın.</p>
+            <h2 className="text-2xl sm:text-3xl font-black">{c.bandTitle}</h2>
+            <p className="text-slate-300 mt-2 text-sm sm:text-base">{c.bandDesc}</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <a href="#contact-form" className="inline-flex justify-center items-center gap-2 bg-[#2e7d32] px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-[#1b5e20]"><Handshake className="w-4 h-4" /> Teklif al</a>
-            <Link href="/candidate" className="inline-flex justify-center items-center gap-2 bg-white text-slate-900 px-6 py-3.5 rounded-xl font-bold text-sm">İş arıyorum</Link>
+            <a href="#contact-form" className="inline-flex justify-center items-center gap-2 bg-[#2e7d32] px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-[#1b5e20]"><Handshake className="w-4 h-4" /> {c.getQuote}</a>
+            <Link href="/candidate" className="inline-flex justify-center items-center gap-2 bg-white text-slate-900 px-6 py-3.5 rounded-xl font-bold text-sm">{c.ctaJob}</Link>
           </div>
         </div>
       </section>
@@ -205,53 +172,51 @@ export function TrustSections() {
   );
 }
 
-export function CompanyAbout() {
+export function CompanyAbout({ lang }: { lang: Language }) {
+  const a = homeCopy[lang].about;
   return (
     <section id="kurumsal" className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-t border-slate-200">
-      <SectionTitle
-        eyebrow="Kurumsal"
-        title={company.shortName}
-        desc={company.legalName}
-      />
+      <SectionTitle eyebrow={a.eyebrow} title={company.shortName} desc={company.legalName} />
       <dl className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
         <div className="rounded-2xl border border-slate-200 p-4 sm:col-span-2">
-          <dt className="text-xs font-bold uppercase text-slate-400">Adres</dt>
+          <dt className="text-xs font-bold uppercase text-slate-400">{a.address}</dt>
           <dd className="font-semibold text-slate-900 mt-1">{company.address}</dd>
         </div>
         <div className="rounded-2xl border border-slate-200 p-4">
-          <dt className="text-xs font-bold uppercase text-slate-400">E-posta</dt>
+          <dt className="text-xs font-bold uppercase text-slate-400">{a.email}</dt>
           <dd className="mt-1"><a className="font-semibold text-[#1b5e20]" href={`mailto:${company.email}`}>{company.email}</a></dd>
         </div>
         <div className="rounded-2xl border border-slate-200 p-4">
-          <dt className="text-xs font-bold uppercase text-slate-400">Telefon</dt>
+          <dt className="text-xs font-bold uppercase text-slate-400">{a.phone}</dt>
           <dd className="mt-1 space-y-1">
             {company.phones.map((p) => (
               <div key={p.tel}>
                 <a className="font-semibold text-[#1b5e20]" href={`tel:${p.tel}`}>{p.display}</a>
-                <span className="text-slate-500"> · {p.name} ({p.place})</span>
+                <span className="text-slate-500"> · {p.name} ({a.macedonia})</span>
               </div>
             ))}
           </dd>
         </div>
         <div className="rounded-2xl border border-slate-200 p-4">
-          <dt className="text-xs font-bold uppercase text-slate-400">Sicil</dt>
-          <dd className="mt-1 text-slate-800">EMBS {company.embs}<br />Vergi no {company.taxId}</dd>
+          <dt className="text-xs font-bold uppercase text-slate-400">{a.registry}</dt>
+          <dd className="mt-1 text-slate-800">EMBS {company.embs}<br />{a.taxNo} {company.taxId}</dd>
         </div>
         <div className="rounded-2xl border border-slate-200 p-4">
-          <dt className="text-xs font-bold uppercase text-slate-400">Kuruluş ve sermaye</dt>
-          <dd className="mt-1 text-slate-800">{company.established}<br />Sermaye {company.capital}</dd>
+          <dt className="text-xs font-bold uppercase text-slate-400">{a.established}</dt>
+          <dd className="mt-1 text-slate-800">{a.establishedValue}<br />{a.capital} {company.capital}</dd>
         </div>
         <div className="rounded-2xl border border-slate-200 p-4 sm:col-span-2">
-          <dt className="text-xs font-bold uppercase text-slate-400">Yöneticiler ve eşit paylı ortaklar</dt>
+          <dt className="text-xs font-bold uppercase text-slate-400">{a.managers}</dt>
           <dd className="mt-1 font-semibold text-slate-900">{company.managers.join(' · ')} (%50 / %50)</dd>
-          <dd className="text-slate-500 text-xs mt-2">Makedonca kısa unvan: {company.shortNameMk}</dd>
+          <dd className="text-slate-500 text-xs mt-2">{a.mkShort}: {company.shortNameMk}</dd>
         </div>
       </dl>
     </section>
   );
 }
 
-export function SiteFooter() {
+export function SiteFooter({ lang }: { lang: Language }) {
+  const f = homeCopy[lang].footer;
   return (
     <footer className="bg-slate-950 text-slate-400 px-4 sm:px-6 lg:px-8 pt-14 pb-8">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -273,34 +238,34 @@ export function SiteFooter() {
           </ul>
         </div>
         <div>
-          <div className="text-white font-bold mb-3">İşverenler</div>
+          <div className="text-white font-bold mb-3">{f.employers}</div>
           <ul className="space-y-2 text-sm">
-            <li><a href="/#isverenler" className="hover:text-white">Hizmetler</a></li>
-            <li><Link href="/employer-login" className="hover:text-white">İşveren girişi</Link></li>
-            <li><a href="/#contact-form" className="hover:text-white">Teklif al</a></li>
+            <li><a href="/#isverenler" className="hover:text-white">{f.services}</a></li>
+            <li><Link href="/employer-login" className="hover:text-white">{f.employerLogin}</Link></li>
+            <li><a href="/#contact-form" className="hover:text-white">{f.quote}</a></li>
           </ul>
         </div>
         <div>
-          <div className="text-white font-bold mb-3">Adaylar</div>
+          <div className="text-white font-bold mb-3">{f.candidates}</div>
           <ul className="space-y-2 text-sm">
-            <li><Link href="/candidate" className="hover:text-white">Başvuru & giriş</Link></li>
-            <li><a href="/#sektorler" className="hover:text-white">Sektörler</a></li>
-            <li><a href="/#sss" className="hover:text-white">SSS</a></li>
+            <li><Link href="/candidate" className="hover:text-white">{f.apply}</Link></li>
+            <li><a href="/#sektorler" className="hover:text-white">{f.sectors}</a></li>
+            <li><a href="/#sss" className="hover:text-white">{f.faq}</a></li>
           </ul>
         </div>
         <div>
-          <div className="text-white font-bold mb-3">Kurumsal</div>
+          <div className="text-white font-bold mb-3">{f.corporate}</div>
           <ul className="space-y-2 text-sm">
-            <li><a href="/#kurumsal" className="hover:text-white">Sicil bilgileri</a></li>
-            <li><a href="/#nasil-calisir" className="hover:text-white">Nasıl çalışır</a></li>
-            <li><Link href="/portal" className="hover:text-white">Personel portalı</Link></li>
-            <li><Link href="/kvkk" className="hover:text-white">KVKK Aydınlatma Metni</Link></li>
+            <li><a href="/#kurumsal" className="hover:text-white">{f.registry}</a></li>
+            <li><a href="/#nasil-calisir" className="hover:text-white">{f.how}</a></li>
+            <li><Link href="/portal" className="hover:text-white">{f.staffPortal}</Link></li>
+            <li><Link href="/kvkk" className="hover:text-white">{f.kvkk}</Link></li>
           </ul>
         </div>
       </div>
       <div className="max-w-7xl mx-auto border-t border-slate-800 mt-10 pt-6 text-xs flex flex-col sm:flex-row justify-between gap-2">
-        <span>© {new Date().getFullYear()} {company.shortName}. Tüm hakları saklıdır.</span>
-        <span>EMBS {company.embs} · Vergi no {company.taxId}</span>
+        <span>© {new Date().getFullYear()} {company.shortName}. {f.rights}</span>
+        <span>EMBS {company.embs} · {f.taxNo} {company.taxId}</span>
       </div>
     </footer>
   );

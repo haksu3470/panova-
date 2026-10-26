@@ -5,36 +5,21 @@ import { supabase } from '@/lib/supabase';
 import { ArrowLeft, CheckCircle2, UserPlus, Send, Building, Languages } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
+import { readStoredLanguage, writeStoredLanguage } from '@/lib/site-language';
 
 export default function SupplierCandidateRegister() {
-  const [currentLang, setCurrentLang] = useState<Language>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('panova_portal_lang') as Language;
-      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
-    }
-    return 'tr';
-  });
+  const [currentLang, setCurrentLang] = useState<Language>('tr');
 
   useEffect(() => {
-    const handleStorage = () => {
-      const saved = localStorage.getItem('panova_portal_lang') as Language;
-      if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) {
-        setCurrentLang(saved);
-      }
-    };
-    window.addEventListener('storage', handleStorage);
-    const interval = setInterval(handleStorage, 150);
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-      clearInterval(interval);
-    };
+    const apply = () => setCurrentLang(readStoredLanguage('tr'));
+    apply();
+    window.addEventListener('storage', apply);
+    return () => window.removeEventListener('storage', apply);
   }, []);
 
   const changeLanguage = (lang: Language) => {
     setCurrentLang(lang);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('panova_portal_lang', lang);
-    }
+    writeStoredLanguage(lang);
   };
 
   const [submitted, setSubmitted] = useState(false);
