@@ -31,12 +31,29 @@ export default function KvkkPage() {
           <p>{company.legalName}</p>
           <p>Kısa unvan: {company.shortName} / {company.shortNameMk}</p>
           <p>Adres: {company.address}</p>
+          <p>
+            E-posta:{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.email}`}>{company.email}</a>
+          </p>
           <ul>
             {company.phones.map((p) => (
               <li key={p.tel}><a className="text-[#1b5e20] font-semibold" href={`tel:${p.tel}`}>{p.display}</a></li>
             ))}
           </ul>
           <p>EMBS: {company.embs} · Vergi kimlik no: {company.taxId}</p>
+          <p className="pt-2">
+            Türkiye ofisi: {company.turkey.addressLines.join(', ')}. Tel:{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`tel:${company.turkey.phone.tel}`}>{company.turkey.phone.display}</a>
+            . E-posta:{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.turkey.email}`}>{company.turkey.email}</a>
+            . {company.turkey.taxOffice}, VKN {company.turkey.vkn}.
+          </p>
+          <p>
+            Bangladeş ofisi: {company.bangladesh.addressLines.join(', ')}. Tel:{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`tel:${company.bangladesh.phone.tel}`}>{company.bangladesh.phone.display}</a>
+            . E-posta:{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.bangladesh.email}`}>{company.bangladesh.email}</a>.
+          </p>
         </section>
 
         <section className="space-y-2">
@@ -51,7 +68,12 @@ export default function KvkkPage() {
         <section className="space-y-2">
           <h2 className="font-extrabold text-slate-900">Haklar</h2>
           <p>
-            KVKK madde 11 kapsamındaki taleplerinizi sitedeki iletişim formu veya yukarıdaki telefon numaraları üzerinden iletebilirsiniz.
+            KVKK madde 11 kapsamındaki taleplerinizi{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.email}`}>{company.email}</a>,{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.turkey.email}`}>{company.turkey.email}</a>
+            {' '}veya{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.bangladesh.email}`}>{company.bangladesh.email}</a>
+            {' '}adresine, sitedeki iletişim formuna veya yukarıdaki telefon numaralarına iletebilirsiniz.
             Avrupa Birliği’nde bulunan kişiler, GDPR kapsamındaki erişim, düzeltme ve silme taleplerini aynı kanallardan iletebilir.
           </p>
         </section>
