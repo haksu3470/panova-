@@ -1,7 +1,10 @@
 'use client';
 
+import OAuthButtons from '@/components/auth/OAuthButtons';
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { linkMyEmployer, signOut } from '@/lib/auth';
 import { Languages, ArrowLeft, Building2, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
@@ -50,95 +53,93 @@ export default function EmployerLoginPage() {
   const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
   const activeLangObj = languages.find((l) => l.code === currentLang);
 
+  const loadEmployerProfile = async (employerId: string, fallbackEmail: string) => {
+    const { data: emp } = await supabase.from('employers').select('*').eq('id', employerId).maybeSingle();
+    const formattedEmp = {
+      id: employerId,
+      companyName: emp?.company_name || '',
+      contactPerson: emp?.contact_person || '',
+      email: emp?.email || fallbackEmail,
+      phone: emp?.phone || '',
+      country: emp?.country || '',
+      companyLogo: emp?.logo || ''
+    };
+    if (typeof window !== 'undefined') {
+      // Sadece görüntü önbelleği; yetki kontrolü Supabase Auth oturumu ile yapılır
+      localStorage.setItem('panova_employer_profile', JSON.stringify(formattedEmp));
+    }
+  };
+
+  // OAuth (Google/Apple) dönüşü veya mevcut oturum: işverene bağla ve yönlendir
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+      const employerId = await linkMyEmployer();
+      if (employerId) {
+        await loadEmployerProfile(employerId, data.session.user.email || '');
+        window.location.href = '/employer';
+      }
+    })();
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginEmail || !loginPassword) return;
 
-    const { data: emp, error } = await supabase
-      .from('employers')
-      .select('*')
-      .eq('email', loginEmail)
-      .maybeSingle();
-
-    if (emp && (emp.password === loginPassword || loginPassword === 'panova2026')) {
-      // Veritabanından gelen verileri standart formata mapliyoruz
-      const formattedEmp = {
-        id: emp.id,
-        companyName: emp.company_name || emp.companyName || 'AKAY EĞİTİM',
-        contactPerson: emp.contact_person || emp.contactPerson || 'Hüseyin Aksu',
-        email: emp.email || loginEmail,
-        phone: emp.phone || '+38970385792',
-        country: emp.country || 'North Macedonia',
-        companyLogo: emp.company_logo || emp.companyLogo || ''
-      };
-
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('panova_employer_profile', JSON.stringify(formattedEmp));
-      }
-      window.location.href = '/employer';
-    } else if (loginEmail === 'huseyinaksu@gmail.com' || loginEmail === 'admin') {
-      // Eğer localStorage'da daha önce kaydedilmiş güncel profil varsa onu koru, yoksa default kullan
-      let existingProfile = null;
-      if (typeof window !== 'undefined') {
-        const savedProfile = localStorage.getItem('panova_employer_profile');
-        if (savedProfile) {
-          try { existingProfile = JSON.parse(savedProfile); } catch(e) {}
-        }
-      }
-
-      const defaultEmp = existingProfile || {
-        id: 'admin_master',
-        companyName: 'AKAY EĞİTİM',
-        contactPerson: 'Hüseyin Aksu',
-        email: 'huseyinaksu@gmail.com',
-        phone: '+38970385792',
-        country: 'North Macedonia',
-        companyLogo: ''
-      };
-
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('panova_employer_profile', JSON.stringify(defaultEmp));
-      }
-      window.location.href = '/employer';
-    } else {
+    const email = loginEmail.trim().toLowerCase();
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password: loginPassword });
+    if (error || !data.user) {
       alert('Geçersiz şirket e-postası veya şifre!');
+      return;
     }
+
+    const employerId = await linkMyEmployer();
+    if (!employerId) {
+      await signOut();
+      alert('Bu e-posta ile eşleşen bir işveren kaydı bulunamadı. Lütfen Panova ekibiyle iletişime geçin.');
+      return;
+    }
+    await loadEmployerProfile(employerId, email);
+    window.location.href = '/employer';
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!regCompanyName || !regEmail || !regPassword) return;
 
-    const newEmpPayload = {
-      company_name: regCompanyName,
-      contact_person: regContactPerson || 'Yetkili',
-      phone: regPhone || '+38970000000',
-      country: regCountry,
-      email: regEmail,
+    const email = regEmail.trim().toLowerCase();
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email,
       password: regPassword,
-      company_logo: ''
-    };
-
-    const { data, error } = await supabase.from('employers').insert([newEmpPayload]).select().maybeSingle();
-
-    if (error) {
-      alert('Kayıt oluşturulurken hata: ' + error.message);
+      options: { data: { full_name: regContactPerson || regCompanyName, role: 'employer' } }
+    });
+    if (signUpError) {
+      alert('Kayıt oluşturulurken hata: ' + signUpError.message);
+      return;
+    }
+    if (!signUpData.session) {
+      alert('Kayıt alındı! Lütfen e-postanıza gelen doğrulama bağlantısına tıklayın, ardından giriş yapın.');
       return;
     }
 
-    const createdEmp = {
-      id: data?.id || Date.now().toString(),
-      companyName: regCompanyName,
-      contactPerson: regContactPerson || 'Yetkili',
-      email: regEmail,
-      phone: regPhone || '+38970000000',
+    // Oturum açıkken işveren kaydını oluştur (şifre tabloya YAZILMAZ)
+    const { error } = await supabase.from('employers').insert([{
+      company_name: regCompanyName,
+      contact_person: regContactPerson || 'Yetkili',
+      phone: regPhone || null,
       country: regCountry,
-      companyLogo: ''
-    };
+      email,
+      auth_user_id: signUpData.user?.id
+    }]);
+    if (error) console.error('İşveren kaydı oluşturulamadı:', error.message);
 
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('panova_employer_profile', JSON.stringify(createdEmp));
+    const employerId = await linkMyEmployer();
+    if (!employerId) {
+      alert('Hesabınız oluşturuldu; işveren kaydınız Panova ekibi tarafından onaylandıktan sonra giriş yapabilirsiniz.');
+      return;
     }
+    await loadEmployerProfile(employerId, email);
     alert('İşveren kaydınız başarıyla oluşturuldu ve giriş yapıldı!');
     window.location.href = '/employer';
   };
@@ -209,7 +210,7 @@ export default function EmployerLoginPage() {
           </div>
 
           {authMode === 'signin' ? (
-            <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
+            <><form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">ŞİRKET E-POSTASI *</label>
                 <input
@@ -241,6 +242,7 @@ export default function EmployerLoginPage() {
                 Giriş Yap
               </button>
             </form>
+              <div className="mt-4"><OAuthButtons redirectPath="/employer-login" /></div></>
           ) : (
             <form onSubmit={handleRegister} className="space-y-4" autoComplete="off">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

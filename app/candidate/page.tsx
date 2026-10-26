@@ -1,7 +1,10 @@
 'use client';
 
+import OAuthButtons from '@/components/auth/OAuthButtons';
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { linkMyCandidate, signOut } from '@/lib/auth';
 import { 
   User, CheckCircle2, LogOut, Lock, Camera, 
   FileText, Eye, X, Briefcase, Calendar, 
@@ -36,12 +39,7 @@ export default function CandidateDashboard() {
     };
   }, []);
 
-  const [authenticated, setAuthenticated] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('panova_candidate_auth') === 'true';
-    }
-    return false;
-  });
+  const [authenticated, setAuthenticated] = useState(false);
 
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   
@@ -55,13 +53,23 @@ export default function CandidateDashboard() {
   const [regProfession, setRegProfession] = useState('Elektrik Mühendisi / Teknisyeni');
   const [regSector, setRegSector] = useState('construction');
 
-  const [candidate, setCandidate] = useState<any | null>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('panova_current_candidate');
-      return saved ? JSON.parse(saved) : null;
-    }
-    return null;
-  });
+  const [candidate, setCandidate] = useState<any | null>(null);
+  const [regPassword, setRegPassword] = useState('');
+
+  // Supabase Auth oturumu varsa adayı bağla ve yükle
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+      const candidateId = await linkMyCandidate();
+      if (!candidateId) return;
+      const { data: cand } = await supabase.from('job_candidates').select('*').eq('id', candidateId).maybeSingle();
+      if (cand) {
+        setCandidate(cand);
+        setAuthenticated(true);
+      }
+    })();
+  }, []);
 
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'documents' | 'jobs' | 'interviews' | 'offers' | 'process' | 'travel' | 'notifications' | 'support'>('overview');
@@ -297,7 +305,7 @@ export default function CandidateDashboard() {
       fetchCandidateData(candidate.id);
       setNewPhone(candidate.phone || '');
       setNewEmail(candidate.email || '');
-      setNewPassword(candidate.password || '123456');
+      setNewPassword('');
       setNewPhoto(candidate.photo_url || '');
       setNewVideoUrl(candidate.video_url || '');
 
@@ -312,103 +320,104 @@ export default function CandidateDashboard() {
     }
   }, [authenticated]);
 
+  const applyCandidate = (data: any) => {
+    setCandidate(data);
+    setNewPhone(data.phone || '');
+    setNewEmail(data.email || '');
+    setNewPassword('');
+    setNewPhoto(data.photo_url || '');
+    setNewVideoUrl(data.video_url || '');
+    setAuthenticated(true);
+    try {
+      const extra = data.documents_json ? JSON.parse(data.documents_json) : {};
+      if (extra && extra.profile_meta) {
+        setNewEmergencyName(extra.profile_meta.emergency_name || '');
+        setNewEmergencyRelation(extra.profile_meta.emergency_relation || '');
+        setNewEmergencyPhone(extra.profile_meta.emergency_phone || '');
+      }
+    } catch (e) {}
+    fetchCandidateData(data.id);
+  };
+
+  const loadLinkedCandidate = async (): Promise<boolean> => {
+    const candidateId = await linkMyCandidate();
+    if (!candidateId) return false;
+    const { data } = await supabase.from('job_candidates').select('*').eq('id', candidateId).maybeSingle();
+    if (!data) return false;
+    applyCandidate(data);
+    return true;
+  };
+
   const handleCandidateLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const cleanInput = loginInput.trim().toLowerCase();
-    const cleanPass = password.trim();
-
-    const { data, error } = await supabase
-      .from('job_candidates')
-      .select('*')
-      .or(`email.eq.${cleanInput},phone.eq.${cleanInput},passport_number.eq.${cleanInput}`)
-      .single();
-
+    const email = loginInput.trim().toLowerCase();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setLoading(false);
+      alert(currentLang === 'tr' ? 'Hatalı e-posta veya şifre!' : 'Incorrect email or password!');
+      return;
+    }
+    const ok = await loadLinkedCandidate();
     setLoading(false);
-
-    if (!error && data) {
-      if (data.password === cleanPass || (!data.password && cleanPass === '123456')) {
-        setCandidate(data);
-        setNewPhone(data.phone || '');
-        setNewEmail(data.email || '');
-        setNewPassword(data.password || '123456');
-        setNewPhoto(data.photo_url || '');
-        setNewVideoUrl(data.video_url || '');
-        setAuthenticated(true);
-        
-        try {
-          const extra = data.documents_json ? JSON.parse(data.documents_json) : {};
-          if (extra && extra.profile_meta) {
-            setNewEmergencyName(extra.profile_meta.emergency_name || '');
-            setNewEmergencyRelation(extra.profile_meta.emergency_relation || '');
-            setNewEmergencyPhone(extra.profile_meta.emergency_phone || '');
-          }
-        } catch (e) {}
-
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('panova_candidate_auth', 'true');
-          localStorage.setItem('panova_current_candidate', JSON.stringify(data));
-        }
-
-        fetchCandidateData(data.id);
-      } else {
-        alert(currentLang === 'tr' ? 'Hatalı şifre!' : 'Incorrect password!');
-      }
-    } else {
-      alert(currentLang === 'tr' ? 'Kayıt bulunamadı!' : 'Candidate not found!');
+    if (!ok) {
+      await signOut();
+      alert(currentLang === 'tr' ? 'Bu e-posta ile eşleşen aday kaydı bulunamadı!' : 'No candidate record linked to this email!');
     }
   };
 
   const handleCandidateSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!regFullName || !regPassport || !regEmail) {
+    if (!regFullName || !regPassport || !regEmail || !regPassword) {
       alert(currentLang === 'tr' ? 'Lütfen zorunlu alanları doldurun.' : 'Please fill in required fields.');
+      return;
+    }
+    if (regPassword.length < 8) {
+      alert(currentLang === 'tr' ? 'Şifre en az 8 karakter olmalıdır.' : 'Password must be at least 8 characters.');
       return;
     }
 
     setLoading(true);
-    const defaultPassword = '123456';
-
-    const { data, error } = await supabase
-      .from('job_candidates')
-      .insert([
-        {
-          full_name: regFullName,
-          passport_number: regPassport.toUpperCase(),
-          phone: regPhone,
-          email: regEmail.toLowerCase(),
-          profession: regProfession,
-          sector: regSector,
-          password: defaultPassword,
-          status: 'pending'
-        }
-      ])
-      .select()
-      .single();
-
-    setLoading(false);
-
-    if (!error && data) {
-      alert(currentLang === 'tr' ? 'Başvurunuz başarıyla oluşturuldu! Şifreniz: 123456' : 'Registration successful! Default password: 123456');
-      setCandidate(data);
-      setNewPhone(data.phone || '');
-      setNewEmail(data.email || '');
-      setNewPassword(defaultPassword);
-      setAuthenticated(true);
-
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('panova_candidate_auth', 'true');
-        localStorage.setItem('panova_current_candidate', JSON.stringify(data));
-      }
-
-      fetchCandidateData(data.id);
-    } else {
-      alert('Hata: ' + (error?.message || 'Kayıt oluşturulamadı.'));
+    const email = regEmail.trim().toLowerCase();
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password: regPassword,
+      options: { data: { full_name: regFullName, role: 'candidate' } }
+    });
+    if (signUpError) {
+      setLoading(false);
+      alert((currentLang === 'tr' ? 'Kayıt hatası: ' : 'Signup error: ') + signUpError.message);
+      return;
     }
+    if (!signUpData.session) {
+      setLoading(false);
+      alert(currentLang === 'tr' ? 'Kayıt alındı! E-postanızdaki doğrulama bağlantısına tıklayıp giriş yapın.' : 'Signup received! Confirm your email, then sign in.');
+      return;
+    }
+
+    // Şifre tabloya YAZILMAZ; kimlik doğrulama Supabase Auth'tadır
+    const { error } = await supabase.from('job_candidates').insert([{
+      full_name: regFullName,
+      passport_number: regPassport.toUpperCase(),
+      phone: regPhone,
+      email,
+      profession: regProfession,
+      sector: regSector,
+      status: 'pending',
+      auth_user_id: signUpData.user?.id
+    }]);
+    if (error) console.error('Aday kaydı oluşturulamadı:', error.message);
+
+    const ok = await loadLinkedCandidate();
+    setLoading(false);
+    alert(ok
+      ? (currentLang === 'tr' ? 'Başvurunuz başarıyla oluşturuldu!' : 'Registration successful!')
+      : (currentLang === 'tr' ? 'Hesabınız oluşturuldu; aday kaydınız ekip tarafından bağlanacak.' : 'Account created; your candidate record will be linked by our team.'));
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOut();
     setAuthenticated(false);
     setCandidate(null);
     if (typeof window !== 'undefined') {
@@ -582,7 +591,6 @@ export default function CandidateDashboard() {
     const updatePayload: any = {
       phone: newPhone,
       email: newEmail,
-      password: newPassword,
       photo_url: newPhoto,
       video_url: newVideoUrl,
       documents_json: JSON.stringify(currentData)
@@ -593,7 +601,19 @@ export default function CandidateDashboard() {
       .update(updatePayload)
       .eq('id', candidate.id);
 
+    // Şifre değişikliği yalnızca Supabase Auth üzerinden
+    let passError: any = null;
+    if (newPassword && newPassword.length >= 8) {
+      const res = await supabase.auth.updateUser({ password: newPassword });
+      passError = res.error;
+      if (!passError) setNewPassword('');
+    }
+
     setUpdatingProfile(false);
+
+    if (passError) {
+      alert('Şifre güncellenemedi: ' + passError.message);
+    }
 
     if (!error) {
       const updatedCandidate = {
@@ -679,11 +699,11 @@ export default function CandidateDashboard() {
             </div>
 
             {authMode === 'login' ? (
-              <form onSubmit={handleCandidateLogin} className="space-y-4 text-left rtl:text-right">
+              <><form onSubmit={handleCandidateLogin} className="space-y-4 text-left rtl:text-right">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.emailOrPhone}</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.emailLabel || 'E-posta'}</label>
                   <input 
-                    type="text" 
+                    type="email" 
                     value={loginInput} 
                     onChange={(e) => setLoginInput(e.target.value)} 
                     placeholder="omer@gmail.com" 
@@ -704,9 +724,6 @@ export default function CandidateDashboard() {
                   />
                 </div>
 
-                <div className="text-xs text-slate-500">
-                  {currentLang === 'tr' ? 'Varsayılan Şifre: 123456' : 'Default Password: 123456'}
-                </div>
 
                 <button 
                   type="submit" 
@@ -716,6 +733,7 @@ export default function CandidateDashboard() {
                   {loading ? '...' : t.loginBtn}
                 </button>
               </form>
+              <div className="mt-4"><OAuthButtons redirectPath="/candidate" /></div></>
             ) : (
               <form onSubmit={handleCandidateSignup} className="space-y-3 text-left rtl:text-right text-xs">
                 <div>
@@ -760,6 +778,18 @@ export default function CandidateDashboard() {
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     placeholder="ornek@mail.com"
+                    className="w-full px-3.5 py-3 rounded-xl border text-slate-900 bg-white font-medium outline-none text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{currentLang === 'tr' ? 'Şifre (en az 8 karakter)' : 'Password (min 8 chars)'} *</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={8}
+                    value={regPassword}
+                    onChange={(e) => setRegPassword(e.target.value)}
+                    placeholder="••••••••"
                     className="w-full px-3.5 py-3 rounded-xl border text-slate-900 bg-white font-medium outline-none text-sm"
                   />
                 </div>

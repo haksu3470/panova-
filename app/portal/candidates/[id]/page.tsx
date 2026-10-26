@@ -1,5 +1,7 @@
 'use client';
 
+import AuthGuard from '@/components/auth/AuthGuard';
+
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -16,7 +18,7 @@ interface CandidateDocument {
   file_name?: string;
 }
 
-export default function CandidateDetailPage() {
+function CandidateDetailPageInner() {
   const params = useParams();
   const candidateId = params.id as string;
 
@@ -58,7 +60,6 @@ export default function CandidateDetailPage() {
   const [saving, setSaving] = useState(false);
 
   const [status, setStatus] = useState('pending');
-  const [candidatePassword, setCandidatePassword] = useState('123456');
   const [candidatePhoto, setCandidatePhoto] = useState('');
   const [candidatePhone, setCandidatePhone] = useState('');
   const [candidateEmail, setCandidateEmail] = useState('');
@@ -129,7 +130,7 @@ export default function CandidateDetailPage() {
       if (data) {
         setCandidate(data);
         setStatus(data.status || 'pending');
-        setCandidatePassword(data.password || '123456');
+        
         setCandidatePhoto(data.photo_url || '');
         setCandidatePhone(data.phone || '');
         setCandidateEmail(data.email || '');
@@ -254,7 +255,6 @@ export default function CandidateDetailPage() {
     try {
       await candidateService.updateCandidateDetail(candidateId, {
         status: status,
-        password: candidatePassword,
         photo_url: candidatePhoto,
         phone: candidatePhone,
         email: candidateEmail,
@@ -472,7 +472,7 @@ export default function CandidateDetailPage() {
                     <label className="font-bold text-slate-400 uppercase flex items-center gap-1 mb-1">
                       <KeyRound className="w-3 h-3" /> {t.portalPassword || 'Aday Portalı Şifresi'}
                     </label>
-                    <input type="text" value={candidatePassword} onChange={(e) => setCandidatePassword(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white font-bold text-slate-900 outline-none text-xs sm:text-sm" />
+                    <p className="text-[11px] text-slate-500">Şifreler Supabase Auth ile yönetilir; aday kendi şifresini portaldan belirler/sıfırlar.</p>
                   </div>
                 </div>
               </div>
@@ -818,5 +818,13 @@ export default function CandidateDetailPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CandidateDetailPage() {
+  return (
+    <AuthGuard role="staff">
+      <CandidateDetailPageInner />
+    </AuthGuard>
   );
 }

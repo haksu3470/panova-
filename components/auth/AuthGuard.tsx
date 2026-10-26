@@ -1,0 +1,53 @@
+'use client';
+
+import { useEffect, useState, type ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
+import { isStaff, linkMyEmployer } from '@/lib/auth';
+
+type Role = 'staff' | 'employer';
+
+/**
+ * Sayfayı Supabase Auth oturumuna bağlar.
+ * - staff: oturum + is_staff() zorunlu, aksi halde /portal girişine yönlendirir.
+ * - employer: oturum + bağlı işveren kaydı (veya personel yetkisi) zorunlu, aksi halde /employer-login.
+ */
+export default function AuthGuard({ role, children }: { role: Role; children: ReactNode }) {
+  const [state, setState] = useState<'loading' | 'ok' | 'denied'>('loading');
+  const loginPath = role === 'staff' ? '/portal' : '/employer-login';
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        if (!cancelled) setState('denied');
+        window.location.replace(loginPath);
+        return;
+      }
+      // Personel, işveren dosyasını inceleyebilir (portal 'İşveren Dosyasını Aç')
+      const ok = role === 'staff' ? await isStaff() : (await isStaff()) || !!(await linkMyEmployer());
+      if (cancelled) return;
+      if (ok) setState('ok');
+      else {
+        setState('denied');
+        window.location.replace(loginPath);
+      }
+    })();
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (!session) window.location.replace(loginPath);
+    });
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, [role, loginPath]);
+
+  if (state !== 'ok') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-600 text-sm">
+        {state === 'loading' ? 'Oturum doğrulanıyor...' : 'Yetkisiz erişim. Giriş sayfasına yönlendiriliyorsunuz...'}
+      </div>
+    );
+  }
+  return <>{children}</>;
+}

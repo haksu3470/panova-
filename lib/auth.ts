@@ -1,0 +1,57 @@
+import { supabase } from '@/lib/supabase';
+
+/**
+ * Supabase Auth yardımcıları.
+ * RLS etkin olduğundan eski "tabloda şifre karşılaştırma" girişi artık çalışmaz;
+ * tüm girişler Supabase Auth oturumu üzerinden yapılır.
+ */
+
+export async function getSessionUser() {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.user ?? null;
+}
+
+export async function isStaff(): Promise<boolean> {
+  const { data, error } = await supabase.rpc('is_staff');
+  if (error) return false;
+  return data === true;
+}
+
+/**
+ * Personel girişi sonrası: kullanıcı personel değilse ve sistemde hiç personel yoksa
+ * claim_first_staff ile ilk yönetici profili oluşturulur (RPC sunucu tarafında kontrol eder).
+ */
+export async function ensureStaff(fullName?: string): Promise<boolean> {
+  if (await isStaff()) return true;
+  const { error } = await supabase.rpc('claim_first_staff', {
+    p_full_name: fullName || 'Yönetici',
+    p_staff_role: 'upper_management',
+  });
+  if (error) return false;
+  return isStaff();
+}
+
+/** Aday portalı: auth kullanıcısını job_candidates kaydına bağlar, aday id döner. */
+export async function linkMyCandidate(): Promise<string | null> {
+  const { data, error } = await supabase.rpc('link_my_candidate');
+  if (error) return null;
+  return (data as string) ?? null;
+}
+
+/** İşveren portalı: auth kullanıcısını employers kaydına bağlar, işveren id döner. */
+export async function linkMyEmployer(): Promise<string | null> {
+  const { data, error } = await supabase.rpc('link_my_employer');
+  if (error) return null;
+  return (data as string) ?? null;
+}
+
+export async function signOut() {
+  await supabase.auth.signOut();
+  if (typeof window !== 'undefined') {
+    [
+      'panova_admin_auth', 'panova_current_user',
+      'panova_candidate_auth', 'panova_current_candidate',
+      'panova_employer_auth', 'panova_employer_user', 'panova_employer_profile',
+    ].forEach((k) => localStorage.removeItem(k));
+  }
+}

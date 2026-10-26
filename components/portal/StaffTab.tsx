@@ -61,8 +61,7 @@ export default function StaffTab({
             <input type="email" required value={newStaffEmail} onChange={(e) => setNewStaffEmail(e.target.value)} placeholder="ahmet@panova.com" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white text-xs sm:text-sm" />
           </div>
           <div>
-            <label className="block font-bold text-slate-700 uppercase mb-1">Login Password *</label>
-            <input type="password" required value={newStaffPassword} onChange={(e) => setNewStaffPassword(e.target.value)} placeholder="••••••••" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white text-xs sm:text-sm" />
+            <p className="text-[11px] text-slate-500 leading-snug">Şifre burada belirlenmez. Personel bu e-posta ile Supabase Auth hesabı oluşturup giriş yapar.</p>
           </div>
           <div>
             <label className="block font-bold text-slate-700 uppercase mb-1">{t.staffPermLabel}</label>
