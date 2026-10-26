@@ -1,6 +1,7 @@
 'use client';
 
 import { UserPlus, Trash2, Key } from 'lucide-react';
+import DemoBadge from './DemoBadge';
 
 interface StaffTabProps {
   staffMembers: any[];
@@ -92,7 +93,7 @@ export default function StaffTab({
             <div key={staff.id} className="p-4 bg-slate-50 rounded-2xl border space-y-3 flex flex-col justify-between">
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-extrabold text-slate-900 text-sm">{staff.name}</h4>
+                  <h4 className="font-extrabold text-slate-900 text-sm">{staff.name}<DemoBadge show={staff.is_demo} /></h4>
                   <div className="flex items-center gap-1">
                     <button onClick={() => setEditingStaff(staff)} className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-[11px] font-bold transition cursor-pointer">Edit / Pwd</button>
                     <button onClick={() => handleDeleteStaff(staff.id)} className="p-1 text-slate-400 hover:text-red-600 transition cursor-pointer"><Trash2 className="w-4 h-4" /></button>

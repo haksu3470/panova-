@@ -1,6 +1,7 @@
 'use client';
 
 import { Plus } from 'lucide-react';
+import DemoBadge from './DemoBadge';
 
 interface TasksTabProps {
   tasks: any[];
@@ -129,7 +130,7 @@ export default function TasksTab({
               <div className="flex items-start sm:items-center gap-3">
                 <input type="checkbox" checked={task.status === 'completed'} onChange={() => toggleTaskStatus(task.id, task.status)} className="w-5 h-5 accent-[#2e7d32] cursor-pointer mt-0.5 sm:mt-0 shrink-0" />
                 <div>
-                  <h4 className={`font-bold text-xs sm:text-sm ${task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-900'}`}>{task.title}</h4>
+                  <h4 className={`font-bold text-xs sm:text-sm ${task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-900'}`}>{task.title}<DemoBadge show={task.is_demo} /></h4>
                   <p className="text-[11px] text-slate-500 mt-0.5">{t.assigneeText}: <strong>{task.assignee}</strong> | {t.backupText}: <strong>{task.backup_assignee}</strong> | {t.dueDateText}: {task.due_date}</p>
                 </div>
               </div>

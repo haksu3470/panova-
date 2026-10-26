@@ -1,6 +1,7 @@
 'use client';
 
 import { Building2, FileText } from 'lucide-react';
+import DemoBadge from './DemoBadge';
 
 interface RequestsTabProps {
   jobRequests: any[];
@@ -36,7 +37,7 @@ export default function RequestsTab({
                   <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
                     {req.sector || 'General Sector'}
                   </span>
-                  <h4 className="font-extrabold text-slate-900 text-base mt-1.5">{req.position_title}</h4>
+                  <h4 className="font-extrabold text-slate-900 text-base mt-1.5">{req.position_title}<DemoBadge show={req.is_demo} /></h4>
                   <p className="text-xs font-bold text-slate-600 flex items-center gap-1 mt-0.5">
                     <Building2 className="w-3.5 h-3.5 text-slate-400" /> {req.employer_name}
                   </p>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Search, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
+import DemoBadge from './DemoBadge';
 
 interface CandidatesTabProps {
   candidates: any[];
@@ -167,7 +168,7 @@ export default function CandidatesTab({
                     </td>
                     <td className="p-4 font-bold text-slate-900">
                       <Link href={`/portal/candidates/${candidate.id}`} className="hover:text-[#2e7d32] hover:underline">
-                        {candidate.full_name}
+                        {candidate.full_name}<DemoBadge show={candidate.is_demo} />
                       </Link>
                     </td>
                     <td className="p-4">
