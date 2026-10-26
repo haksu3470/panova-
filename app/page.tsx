@@ -260,11 +260,9 @@ export default function HomePage() {
               <div className="mb-6 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 space-y-1.5">
                 <p className="font-extrabold text-slate-900">{registry.shortName}</p>
                 <p>{registry.address}</p>
-                <p><a className="font-semibold text-[#1b5e20]" href={`mailto:${registry.email}`}>{registry.email}</a></p>
                 {registry.phones.map((p) => (
                   <p key={p.tel}>
                     <a className="font-semibold text-[#1b5e20]" href={`tel:${p.tel}`}>{p.display}</a>
-                    <span className="text-slate-500"> · {p.name} ({p.place})</span>
                   </p>
                 ))}
               </div>

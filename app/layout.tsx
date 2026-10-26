@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "PANOVA TARIM DOO Struga",
-  description: "PANOVA TARIM DOO Struga — Ul. PARTIZANSKA Br. 2/1-30, Struga, North Macedonia. İletişim: panovatarim@gmail.com",
+  description: "PANOVA TARIM DOO Struga — Ul. PARTIZANSKA Br. 2/1-30, Struga, North Macedonia.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

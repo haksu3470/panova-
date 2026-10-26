@@ -218,17 +218,12 @@ export function CompanyAbout() {
           <dt className="text-xs font-bold uppercase text-slate-400">Adres</dt>
           <dd className="font-semibold text-slate-900 mt-1">{company.address}</dd>
         </div>
-        <div className="rounded-2xl border border-slate-200 p-4">
-          <dt className="text-xs font-bold uppercase text-slate-400">E-posta</dt>
-          <dd className="mt-1"><a className="font-semibold text-[#1b5e20]" href={`mailto:${company.email}`}>{company.email}</a></dd>
-        </div>
-        <div className="rounded-2xl border border-slate-200 p-4">
+        <div className="rounded-2xl border border-slate-200 p-4 sm:col-span-2">
           <dt className="text-xs font-bold uppercase text-slate-400">Telefon</dt>
           <dd className="mt-1 space-y-1">
             {company.phones.map((p) => (
               <div key={p.tel}>
                 <a className="font-semibold text-[#1b5e20]" href={`tel:${p.tel}`}>{p.display}</a>
-                <span className="text-slate-500"> · {p.name} ({p.place})</span>
               </div>
             ))}
           </dd>
@@ -260,14 +255,10 @@ export function SiteFooter() {
           <p className="text-sm text-white mt-3">{company.shortName}</p>
           <p className="text-xs mt-1">{company.shortNameMk}</p>
           <p className="text-sm mt-3">{company.address}</p>
-          <p className="text-sm mt-2">
-            <a className="hover:text-white" href={`mailto:${company.email}`}>{company.email}</a>
-          </p>
           <ul className="text-sm mt-2 space-y-1">
             {company.phones.map((p) => (
               <li key={p.tel}>
                 <a className="hover:text-white" href={`tel:${p.tel}`}>{p.display}</a>
-                <span className="text-slate-500"> · {p.name}</span>
               </li>
             ))}
           </ul>
