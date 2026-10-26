@@ -173,8 +173,8 @@ function EmployerPortalInner() {
       setInterviews(intData);
     } else {
       setInterviews([
-        { id: '1', candidate_name: 'Ahmet Yılmaz', position: 'Kalıp Ustası', date: '2026-11-10 14:00', platform: 'Online Video Konferans', status: 'planned' },
-        { id: '2', candidate_name: 'Mehmet Demir', position: 'Hasat Sorumlusu', date: '2026-11-12 10:30', platform: 'PANOVA Canlı Görüşme', status: 'planned' }
+        { id: '1', candidate_name: 'Ahmet Yılmaz', position: 'Kalıp Ustası', scheduled_at: '2026-11-10T11:00:00Z', status: 'scheduled' },
+        { id: '2', candidate_name: 'Mehmet Demir', position: 'Hasat Sorumlusu', scheduled_at: '2026-11-12T07:30:00Z', status: 'scheduled' }
       ]);
     }
 
@@ -324,14 +324,19 @@ function EmployerPortalInner() {
   };
 
   const handleRequestInterview = async (candidate: any) => {
+    const isUuid = (v: any) => typeof v === 'string' && /^[0-9a-f-]{36}$/i.test(v);
+    // interviews şeması: candidate_id, employer_id, request_id, scheduled_at, status, panova_notes
     const newInt = {
-      candidate_name: candidate.full_name || candidate.name,
-      position: candidate.profession || 'Genel Pozisyon',
-      date: new Date(Date.now() + 86400000 * 3).toISOString().replace('T', ' ').substring(0, 16),
-      platform: 'PANOVA Online Video Mülakat',
-      status: 'planned'
+      candidate_id: candidate.id,
+      employer_id: isUuid(employerProfile?.id) ? employerProfile.id : null,
+      request_id: isUuid(candidate.active_request_id) ? candidate.active_request_id : null,
+      scheduled_at: new Date(Date.now() + 86400000 * 3).toISOString(),
+      status: 'scheduled',
+      panova_notes: `İşveren portalından talep: ${candidate.profession || 'Genel Pozisyon'} · PANOVA Online Video Mülakat`,
+      is_demo: !!candidate.is_demo,
     };
-    await supabase.from('interviews').insert([newInt]);
+    const { error: intErr } = await supabase.from('interviews').insert([newInt]);
+    if (intErr) console.error('interview request failed', intErr);
     alert(`"${candidate.full_name || candidate.name}" için mülakat talebi operasyon ekibimize iletildi.`);
     fetchEmployerData();
     setActiveTab('interviews');
@@ -761,11 +766,11 @@ function EmployerPortalInner() {
                   <div key={item.id || idx} className="p-4 bg-slate-50 rounded-2xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-slate-950 text-sm">{item.candidate_name}</span>
-                        <span className="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded">{item.position}</span>
+                        <span className="font-extrabold text-slate-950 text-sm">{item.candidate_name || candidates.find((x: any) => x.id === item.candidate_id)?.full_name || 'Aday'}</span>
+                        <span className="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded">{item.position || candidates.find((x: any) => x.id === item.candidate_id)?.profession || 'Pozisyon'}</span>
                       </div>
                       <p className="text-xs text-slate-500 flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" /> {item.date} | 💻 {item.platform || 'Online Video Konferans'}
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" /> {item.scheduled_at ? new Date(item.scheduled_at).toLocaleString('tr-TR') : '—'} | 💻 {item.platform || 'Online Video Konferans'}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">

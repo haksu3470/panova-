@@ -3,6 +3,7 @@
 import AuthGuard from '@/components/auth/AuthGuard';
 import DocumentStatusPanel from '@/components/portal/DocumentStatusPanel';
 import InterviewOfferPanel from '@/components/portal/InterviewOfferPanel';
+import PlacementPanel from '@/components/portal/PlacementPanel';
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -671,6 +672,7 @@ function CandidateDetailPageInner() {
               <button onClick={() => setShowIO(true)} className="text-xs font-bold px-4 py-2 rounded-lg bg-amber-500 text-white">Aç</button>
             </div>
             {showIO && candidate && <InterviewOfferPanel candidate={{ ...candidate, id: candidateId }} onClose={() => setShowIO(false)} />}
+            <PlacementPanel candidateId={candidateId} />
 
             {/* Vazgeçme ve Süreçten Çıkış Paneli */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3 border-amber-200">
