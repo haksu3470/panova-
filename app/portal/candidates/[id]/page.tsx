@@ -2,6 +2,7 @@
 
 import AuthGuard from '@/components/auth/AuthGuard';
 import DocumentStatusPanel from '@/components/portal/DocumentStatusPanel';
+import InterviewOfferPanel from '@/components/portal/InterviewOfferPanel';
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -56,6 +57,7 @@ function CandidateDetailPageInner() {
   };
 
   const [candidate, setCandidate] = useState<any | null>(null);
+  const [showIO, setShowIO] = useState(false);
   const [documents, setDocuments] = useState<CandidateDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -295,7 +297,8 @@ function CandidateDetailPageInner() {
         monthly_net_salary: Number(offerSalary),
         start_date: offerDate,
         terms_details: offerTerms,
-        status: 'pending'
+        status: 'pending',
+        is_demo: !!candidate?.is_demo
       }
     ]);
 
@@ -660,6 +663,14 @@ function CandidateDetailPageInner() {
             </div>
 
             <DocumentStatusPanel candidateId={candidateId} />
+            <div className="bg-white border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <p className="font-bold text-slate-900 text-sm">🤝 Görüşme & İş Teklifi</p>
+                <p className="text-xs text-slate-500">Görüşme planla, sonucu kaydet, adaya teklif gönder.</p>
+              </div>
+              <button onClick={() => setShowIO(true)} className="text-xs font-bold px-4 py-2 rounded-lg bg-amber-500 text-white">Aç</button>
+            </div>
+            {showIO && candidate && <InterviewOfferPanel candidate={{ ...candidate, id: candidateId }} onClose={() => setShowIO(false)} />}
 
             {/* Vazgeçme ve Süreçten Çıkış Paneli */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3 border-amber-200">
