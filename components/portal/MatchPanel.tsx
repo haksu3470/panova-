@@ -5,6 +5,7 @@ import { X, UserPlus, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
 import DemoBadge from './DemoBadge';
+import InterviewOfferPanel from './InterviewOfferPanel';
 
 const RESULTS: { value: string; label: string }[] = [
   { value: '', label: '— Sonuç yok —' },
@@ -27,6 +28,7 @@ export default function MatchPanel({ request, onClose }: Props) {
   const [search, setSearch] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [ioMatch, setIoMatch] = useState<any | null>(null);
 
   const load = async () => {
     const [m, c] = await Promise.all([
@@ -106,6 +108,15 @@ export default function MatchPanel({ request, onClose }: Props) {
   const selectedCount = matches.filter((m) => m.employer_result === 'selected').length;
 
   return (
+    <>
+    {ioMatch && (
+      <InterviewOfferPanel
+        candidate={{ id: ioMatch.candidate_id, ...(byId[ioMatch.candidate_id] || {}) }}
+        request={request}
+        match={ioMatch}
+        onClose={() => { setIoMatch(null); load(); }}
+      />
+    )}
     <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
       <div className="bg-white w-full sm:max-w-3xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 space-y-5" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3">
@@ -140,6 +151,11 @@ export default function MatchPanel({ request, onClose }: Props) {
                   <select disabled={busy} value={m.employer_result || ''} onChange={(e) => setResult(m, e.target.value)} className="text-xs border rounded-lg px-2 py-2 bg-slate-50">
                     {RESULTS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
                   </select>
+                  {(m.employer_result === 'interview' || m.employer_result === 'selected') && (
+                    <button disabled={busy} onClick={() => setIoMatch(m)} className="text-xs font-bold px-3 py-2 rounded-lg bg-amber-500 text-white whitespace-nowrap">
+                      {m.employer_result === 'selected' ? '📄 Teklif' : '📅 Görüşme'}
+                    </button>
+                  )}
                   <button disabled={busy} onClick={() => remove(m)} className="p-2 rounded-lg text-red-600 hover:bg-red-50" aria-label="Kaldır"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </div>
@@ -164,5 +180,6 @@ export default function MatchPanel({ request, onClose }: Props) {
         </section>
       </div>
     </div>
+    </>
   );
 }
