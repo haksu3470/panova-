@@ -1,9 +1,11 @@
 'use client';
 
+import AuthGuard from '@/components/auth/AuthGuard';
+
 import React, { useState } from 'react';
 import { translations, Language } from '@/lib/dictionary';
 
-export default function AdminDashboardPage() {
+function AdminDashboardPageInner() {
   const [lang, setLang] = useState<Language>('tr');
   const t = translations[lang] || translations['tr'];
 
@@ -202,5 +204,13 @@ export default function AdminDashboardPage() {
         <p>PANOVA TARIM DOO &bull; Central Administration & Control Hub &copy; 2026</p>
       </footer>
     </div>
+  );
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <AuthGuard role="staff">
+      <AdminDashboardPageInner />
+    </AuthGuard>
   );
 }

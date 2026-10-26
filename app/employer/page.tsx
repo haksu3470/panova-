@@ -1,5 +1,7 @@
 'use client';
 
+import AuthGuard from '@/components/auth/AuthGuard';
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { employerService } from '@/lib/services/employerService';
@@ -10,7 +12,7 @@ import {
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
-export default function EmployerPortal() {
+function EmployerPortalInner() {
   const [currentLang, setCurrentLang] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('panova_employer_lang') as Language;
@@ -250,8 +252,7 @@ export default function EmployerPortal() {
           email: targetEmail,
           phone: editPhone,
           country: editCountry,
-          logo: editCompanyLogo,
-          password: 'panova2026'
+          logo: editCompanyLogo
         });
       }
     } catch (err) {
@@ -966,5 +967,13 @@ export default function EmployerPortal() {
 
       </div>
     </div>
+  );
+}
+
+export default function EmployerPortal() {
+  return (
+    <AuthGuard role="employer">
+      <EmployerPortalInner />
+    </AuthGuard>
   );
 }

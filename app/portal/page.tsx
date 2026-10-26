@@ -1,7 +1,10 @@
 'use client';
 
+import OAuthButtons from '@/components/auth/OAuthButtons';
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { getSessionUser, isStaff, ensureStaff, signOut } from '@/lib/auth';
 import { 
   Lock, ShieldCheck, Languages, ArrowLeft, Building2, Users, FileText, 
   UserCheck, CheckSquare, History, ShieldAlert, Key, RefreshCw, Trash2 
@@ -41,18 +44,21 @@ export default function PortalPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const isAuth = localStorage.getItem('panova_admin_auth') === 'true';
-      setAuthenticated(isAuth);
+      // Yerel bayrak yerine gerçek Supabase Auth oturumu + personel kontrolü
+      (async () => {
+        const user = await getSessionUser();
+        if (user && (await ensureStaff(user.email || undefined))) {
+          const { data: staffData } = await supabase.from('staff_members').select('*').eq('auth_user_id', user.id).maybeSingle();
+          setCurrentUser(staffData || { name: user.email, email: user.email, role_level: 'upper_management' });
+          setAuthenticated(true);
+        } else {
+          setAuthenticated(false);
+        }
+      })();
     }
   }, []);
 
-  const [currentUser, setCurrentUser] = useState<any>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('panova_current_user');
-      return saved ? JSON.parse(saved) : null;
-    }
-    return null;
-  });
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -129,13 +135,7 @@ export default function PortalPage() {
         setNewTaskBackup(staffData[1]?.name || staffData[0].name);
       }
     } else {
-      const defaultStaff = [
-        { id: '1', name: 'Hüseyin Aksu', email: 'admin@panova.com', password: 'panova2026', role_level: 'upper_management' },
-        { id: '2', name: 'Mehmet Çitil', email: 'mehmet@panova.com', password: '123', role_level: 'target_country' }
-      ];
-      setStaffMembers(defaultStaff);
-      setNewTaskAssignee(defaultStaff[0].name);
-      setNewTaskBackup(defaultStaff[1].name);
+      setStaffMembers([]);
     }
 
     const { data: taskData } = await supabase.from('tasks').select('*').order('created_at', { ascending: false });
@@ -166,54 +166,42 @@ export default function PortalPage() {
     setLoading(true);
 
     try {
-      const loginEmail = username.includes('@') ? username.trim() : `${username.trim()}@panova.com`;
-      
+      const loginEmail = username.trim().toLowerCase();
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: password,
       });
 
-      if (!authError && authData.user) {
-        const { data: staffData } = await supabase
-          .from('staff_members')
-          .select('*')
-          .eq('email', authData.user.email)
-          .single();
-
-        const loggedUser = staffData || {
-          name: authData.user.email,
-          email: authData.user.email,
-          role_level: 'upper_management',
-          isAdmin: true
-        };
-
-        setAuthenticated(true);
-        setCurrentUser(loggedUser);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('panova_admin_auth', 'true');
-          localStorage.setItem('panova_current_user', JSON.stringify(loggedUser));
-        }
-        logAudit('Sisteme Supabase Auth ile Giriş Yapıldı', loggedUser.name);
-        fetchAllData();
+      if (authError || !authData.user) {
+        alert('Geçersiz e-posta veya şifre!');
         setLoading(false);
         return;
       }
 
-      if ((username === 'admin' || username === 'admin@panova.com') && password === 'Panova2026!') {
-        const loggedUser = { name: 'Hüseyin Aksu (Master Admin)', email: 'admin@panova.com', role_level: 'upper_management', isAdmin: true };
-        setAuthenticated(true);
-        setCurrentUser(loggedUser);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('panova_admin_auth', 'true');
-          localStorage.setItem('panova_current_user', JSON.stringify(loggedUser));
-        }
-        logAudit('Sisteme Master Admin ile Giriş Yapıldı', loggedUser.name);
-        fetchAllData();
+      // Personel değilse ve sistemde hiç personel yoksa ilk yönetici olarak claim_first_staff çağrılır
+      const staffOk = await ensureStaff(authData.user.email || undefined);
+      if (!staffOk) {
+        await signOut();
+        alert('Bu hesap personel yetkisine sahip değil.');
         setLoading(false);
         return;
       }
 
-      alert('Geçersiz kullanıcı adı veya şifre!');
+      const { data: staffData } = await supabase
+        .from('staff_members')
+        .select('*')
+        .eq('auth_user_id', authData.user.id)
+        .maybeSingle();
+
+      const loggedUser = staffData || {
+        name: authData.user.email,
+        email: authData.user.email,
+        role_level: 'upper_management',
+      };
+
+      setAuthenticated(true);
+      setCurrentUser(loggedUser);
+      logAudit('Sisteme Supabase Auth ile Giriş Yapıldı', loggedUser.name);
       setLoading(false);
     } catch (err: any) {
       alert('Giriş hatası: ' + err.message);
@@ -221,13 +209,10 @@ export default function PortalPage() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOut();
     setAuthenticated(false);
     setCurrentUser(null);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('panova_admin_auth');
-      localStorage.removeItem('panova_current_user');
-    }
   };
 
   const updateCandidateStatus = async (id: string, newStatus: string) => {
@@ -272,13 +257,12 @@ export default function PortalPage() {
       alert('Bu işlem için Üst Yönetim yetkisi gereklidir!');
       return;
     }
-    if (!newStaffName.trim() || !newStaffEmail.trim() || !newStaffPassword.trim()) return;
+    if (!newStaffName.trim() || !newStaffEmail.trim()) return;
 
     const { error } = await supabase.from('staff_members').insert([
       {
         name: newStaffName,
-        email: newStaffEmail,
-        password: newStaffPassword,
+        email: newStaffEmail.trim().toLowerCase(),
         role_level: newStaffRoleLevel
       }
     ]);
@@ -292,7 +276,7 @@ export default function PortalPage() {
     setNewStaffName('');
     setNewStaffEmail('');
     setNewStaffPassword('');
-    alert('Yeni ekip üyesi ve şifresi başarıyla kaydedildi!');
+    alert('Yeni ekip üyesi kaydedildi! Personel, bu e-posta ile Supabase Auth üzerinden hesap oluşturup giriş yapmalıdır.');
     fetchAllData();
   };
 
@@ -304,19 +288,17 @@ export default function PortalPage() {
       const { error } = await supabase.from('staff_members').update({
         name: editingStaff.name,
         email: editingStaff.email,
-        password: editingStaff.password,
         role_level: editingStaff.role_level
       }).eq('id', editingStaff.id);
 
       if (error) {
         await supabase.from('staff_members').update({
           name: editingStaff.name,
-          password: editingStaff.password,
           role_level: editingStaff.role_level
         }).eq('email', editingStaff.email);
       }
 
-      logAudit(`Personel Bilgileri ve Şifresi Düzenlendi: ${editingStaff.name}`, currentUser?.name);
+      logAudit(`Personel Bilgileri Düzenlendi: ${editingStaff.name}`, currentUser?.name);
       setEditingStaff(null);
       alert('Personel bilgileri başarıyla güncellendi!');
       fetchAllData();
@@ -417,12 +399,12 @@ export default function PortalPage() {
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Kullanıcı Adı veya E-Posta</label>
                 <input
-                  type="text"
+                  type="email"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
-                  placeholder="admin veya admin@panova.com"
+                  placeholder="ornek@panova.com"
                 />
               </div>
               <div>
@@ -444,6 +426,7 @@ export default function PortalPage() {
                 {loading ? 'Giriş Yapılıyor...' : (t.signInBtn || 'Giriş Yap')}
               </button>
             </form>
+              <div className="mt-4"><OAuthButtons redirectPath="/portal" /></div>
           </div>
         </main>
 
@@ -885,10 +868,6 @@ export default function PortalPage() {
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">Email (For Login)</label>
                 <input type="email" required value={editingStaff.email} onChange={(e) => setEditingStaff({ ...editingStaff, email: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
-              </div>
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">New Password</label>
-                <input type="text" required value={editingStaff.password || ''} onChange={(e) => setEditingStaff({ ...editingStaff, password: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white" />
               </div>
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">Role Level</label>
