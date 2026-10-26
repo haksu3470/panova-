@@ -45,14 +45,22 @@ export type HomeCopy = {
     rights: string; taxNo: string;
   };
   about: {
-    eyebrow: string; address: string; email: string; phone: string; registry: string;
-    taxNo: string; established: string; establishedValue: string; capital: string;
-    managers: string; mkShort: string; macedonia: string;
+    eyebrow: string;
+    presenceTitle: string;
+    presenceDesc: string;
+    countries: [string, string, string];
+    northMacedonia: string;
+    turkeyOffice: string;
+    bangladeshOffice: string;
+    address: string; email: string; phone: string; registry: string;
+    taxNo: string; established: string; establishedValue: string;
+    managers: string; mkShort: string;
+    vkn: string; siteTaxOffice: string;
   };
   kvkk: {
     title: string; home: string; intro: string; controller: string; shortName: string;
     address: string; email: string; taxId: string; purposeTitle: string; purpose: string;
-    rightsTitle: string; rights: string;
+    rightsTitle: string; rightsBefore: string; rightsOr: string; rightsAfter: string;
   };
   oauthOr: string;
   oauthGoogle: string;
@@ -96,8 +104,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
     ctaQuote: 'Kurumsal Teklif Al',
     contactDirect: '{name} ile doğrudan iletişime geçin.',
     stats: [
+      { value: '3', label: 'Ülkede faaliyet' },
       { value: '4', label: 'Grup şirketi' },
-      { value: 'TR + AB', label: 'Hizmet koridoru' },
       { value: '8+', label: 'Ana sektör' },
       { value: '30/60/90', label: 'Gün işe uyum takibi' },
     ],
@@ -163,9 +171,17 @@ export const homeCopy: Record<Language, HomeCopy> = {
       kvkk: 'KVKK Aydınlatma Metni', rights: 'Tüm hakları saklıdır.', taxNo: 'Vergi no',
     },
     about: {
-      eyebrow: 'Kurumsal', address: 'Adres', email: 'E-posta', phone: 'Telefon', registry: 'Sicil',
-      taxNo: 'Vergi no', established: 'Kuruluş ve sermaye', establishedValue: '27 Nisan 2024', capital: 'Sermaye',
-      managers: 'Yöneticiler ve eşit paylı ortaklar', mkShort: 'Makedonca kısa unvan', macedonia: 'Makedonya',
+      eyebrow: 'Kurumsal',
+      presenceTitle: 'Bangladeş, Türkiye ve Kuzey Makedonya',
+      presenceDesc: 'Panova Bangladeş (Dhaka), Türkiye (Sivas) ve Kuzey Makedonya’da (Struga) faaliyet gösterir. Sicil kaydı PANOVA TARIM DOO Struga’ya aittir.',
+      countries: ['Bangladeş', 'Türkiye', 'Kuzey Makedonya'],
+      northMacedonia: 'Kuzey Makedonya',
+      turkeyOffice: 'Türkiye Ofisi',
+      bangladeshOffice: 'Bangladeş Ofisi',
+      address: 'Adres', email: 'E-posta', phone: 'Telefon', registry: 'Sicil',
+      taxNo: 'Vergi no', established: 'Kuruluş', establishedValue: '27 Nisan 2024',
+      managers: 'Yöneticiler', mkShort: 'Makedonca kısa unvan',
+      vkn: 'VKN', siteTaxOffice: 'Site Vergi Dairesi',
     },
     kvkk: {
       title: 'KVKK Aydınlatma Metni',
@@ -179,7 +195,9 @@ export const homeCopy: Record<Language, HomeCopy> = {
       purposeTitle: 'İşlenen veriler ve amaç',
       purpose: 'İletişim formunda ad soyad, e-posta, telefon ve mesaj; aday kaydında kimlik, pasaport, telefon, e-posta ve meslek bilgileri; işveren kaydında şirket unvanı, yetkili, telefon ve e-posta işlenir. Amaç, taleplere dönüş yapmak ve personel ile işveren süreçlerini yürütmektir.',
       rightsTitle: 'Haklar',
-      rights: 'KVKK madde 11 kapsamındaki taleplerinizi {email} adresine iletebilirsiniz. Avrupa Birliği’nde bulunan kişiler, GDPR kapsamındaki erişim, düzeltme ve silme taleplerini aynı adrese yazabilir.',
+      rightsBefore: 'KVKK madde 11 kapsamındaki taleplerinizi',
+      rightsOr: 'veya',
+      rightsAfter: 'adresine, sitedeki iletişim formuna veya yukarıdaki telefon numaralarına iletebilirsiniz. Avrupa Birliği’nde bulunan kişiler, GDPR kapsamındaki erişim, düzeltme ve silme taleplerini aynı kanallardan iletebilir.',
     },
     oauthOr: 'veya',
     oauthGoogle: 'Google ile devam et',
@@ -242,8 +260,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
     ctaQuote: 'Request a corporate quote',
     contactDirect: 'Contact {name} directly.',
     stats: [
+      { value: '3', label: 'Countries' },
       { value: '4', label: 'Group companies' },
-      { value: 'TR + EU', label: 'Service corridor' },
       { value: '8+', label: 'Core sectors' },
       { value: '30/60/90', label: 'Day onboarding follow-up' },
     ],
@@ -309,9 +327,17 @@ export const homeCopy: Record<Language, HomeCopy> = {
       kvkk: 'Privacy notice', rights: 'All rights reserved.', taxNo: 'Tax no',
     },
     about: {
-      eyebrow: 'Company', address: 'Address', email: 'Email', phone: 'Phone', registry: 'Registry',
-      taxNo: 'Tax no', established: 'Founded and capital', establishedValue: '27 April 2024', capital: 'Capital',
-      managers: 'Managers and equal shareholders', mkShort: 'Macedonian short name', macedonia: 'Macedonia',
+      eyebrow: 'Company',
+      presenceTitle: 'Bangladesh, Türkiye and North Macedonia',
+      presenceDesc: 'Panova operates in Bangladesh (Dhaka), Türkiye (Sivas) and North Macedonia (Struga). The registry belongs to PANOVA TARIM DOO Struga.',
+      countries: ['Bangladesh', 'Türkiye', 'North Macedonia'],
+      northMacedonia: 'North Macedonia',
+      turkeyOffice: 'Türkiye office',
+      bangladeshOffice: 'Bangladesh office',
+      address: 'Address', email: 'Email', phone: 'Phone', registry: 'Registry',
+      taxNo: 'Tax no', established: 'Founded', establishedValue: '27 April 2024',
+      managers: 'Managers', mkShort: 'Macedonian short name',
+      vkn: 'TIN', siteTaxOffice: 'Site Tax Office',
     },
     kvkk: {
       title: 'Privacy notice (KVKK)',
@@ -325,7 +351,9 @@ export const homeCopy: Record<Language, HomeCopy> = {
       purposeTitle: 'Data we process and why',
       purpose: 'The contact form collects name, email, phone and message. Candidate registration collects identity, passport, phone, email and occupation. Employer registration collects company name, contact person, phone and email. The purpose is to reply to requests and to run staffing and employer processes.',
       rightsTitle: 'Your rights',
-      rights: 'You can send requests under KVKK article 11 to {email}. People in the European Union can send GDPR access, correction and deletion requests to the same address.',
+      rightsBefore: 'You can send requests under KVKK article 11 to',
+      rightsOr: 'or',
+      rightsAfter: ', the contact form on this site, or the phone numbers above. People in the European Union can send GDPR access, correction and deletion requests through the same channels.',
     },
     oauthOr: 'or',
     oauthGoogle: 'Continue with Google',
@@ -388,8 +416,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
     ctaQuote: 'Merr ofertë korporative',
     contactDirect: 'Kontaktoni drejtpërdrejt {name}.',
     stats: [
+      { value: '3', label: 'Vende ku veprojmë' },
       { value: '4', label: 'Kompani të grupit' },
-      { value: 'TR + BE', label: 'Korridori i shërbimit' },
       { value: '8+', label: 'Sektorë kryesorë' },
       { value: '30/60/90', label: 'Ditë ndjekjeje në punë' },
     ],
@@ -455,9 +483,17 @@ export const homeCopy: Record<Language, HomeCopy> = {
       kvkk: 'Njoftimi i privatësisë', rights: 'Të gjitha të drejtat e rezervuara.', taxNo: 'Nr. tatimor',
     },
     about: {
-      eyebrow: 'Kompania', address: 'Adresa', email: 'E-mail', phone: 'Telefon', registry: 'Regjistri',
-      taxNo: 'Nr. tatimor', established: 'Themelimi dhe kapitali', establishedValue: '27 prill 2024', capital: 'Kapitali',
-      managers: 'Drejtuesit dhe ortakët me pjesë të barabarta', mkShort: 'Emri i shkurtër në maqedonisht', macedonia: 'Maqedoni',
+      eyebrow: 'Kompania',
+      presenceTitle: 'Bangladesh, Turqia dhe Maqedonia e Veriut',
+      presenceDesc: 'Panova vepron në Bangladesh (Dhaka), Turqi (Sivas) dhe Maqedoninë e Veriut (Struga). Regjistri i takon PANOVA TARIM DOO Struga.',
+      countries: ['Bangladesh', 'Turqia', 'Maqedonia e Veriut'],
+      northMacedonia: 'Maqedonia e Veriut',
+      turkeyOffice: 'Zyra e Turqisë',
+      bangladeshOffice: 'Zyra e Bangladeshit',
+      address: 'Adresa', email: 'E-mail', phone: 'Telefon', registry: 'Regjistri',
+      taxNo: 'Nr. tatimor', established: 'Themelimi', establishedValue: '27 prill 2024',
+      managers: 'Drejtuesit', mkShort: 'Emri i shkurtër në maqedonisht',
+      vkn: 'VKN', siteTaxOffice: 'Zyra tatimore Site',
     },
     kvkk: {
       title: 'Njoftim privatësie (KVKK)',
@@ -471,7 +507,9 @@ export const homeCopy: Record<Language, HomeCopy> = {
       purposeTitle: 'Të dhënat që përpunohen dhe qëllimi',
       purpose: 'Formulari i kontaktit merr emrin, e-mailin, telefonin dhe mesazhin. Regjistrimi i kandidatit merr identitetin, pasaportën, telefonin, e-mailin dhe profesionin. Regjistrimi i punëdhënësit merr emrin e kompanisë, personin e kontaktit, telefonin dhe e-mailin. Qëllimi është t’u përgjigjemi kërkesave dhe të zhvillojmë proceset e personelit dhe të punëdhënësve.',
       rightsTitle: 'Të drejtat',
-      rights: 'Kërkesat sipas nenit 11 të KVKK mund t’i dërgoni te {email}. Personat në Bashkimin Evropian mund të dërgojnë në të njëjtën adresë kërkesat GDPR për qasje, korrigjim dhe fshirje.',
+      rightsBefore: 'Kërkesat sipas nenit 11 të KVKK mund t’i dërgoni te',
+      rightsOr: 'ose',
+      rightsAfter: ', formularin e kontaktit në këtë faqe ose numrat e telefonit më sipër. Personat në Bashkimin Evropian mund të dërgojnë në të njëjtat kanale kërkesat GDPR për qasje, korrigjim dhe fshirje.',
     },
     oauthOr: 'ose',
     oauthGoogle: 'Vazhdo me Google',
@@ -534,8 +572,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
     ctaQuote: 'اطلب عرضاً مؤسسياً',
     contactDirect: 'تواصلوا مباشرة مع {name}.',
     stats: [
+      { value: '3', label: 'بلدان النشاط' },
       { value: '4', label: 'شركات المجموعة' },
-      { value: 'TR + EU', label: 'ممر الخدمة' },
       { value: '8+', label: 'قطاعات رئيسية' },
       { value: '30/60/90', label: 'يوم متابعة بعد الالتحاق' },
     ],
@@ -601,9 +639,17 @@ export const homeCopy: Record<Language, HomeCopy> = {
       kvkk: 'إشعار الخصوصية', rights: 'جميع الحقوق محفوظة.', taxNo: 'الرقم الضريبي',
     },
     about: {
-      eyebrow: 'الشركة', address: 'العنوان', email: 'البريد', phone: 'الهاتف', registry: 'السجل',
-      taxNo: 'الرقم الضريبي', established: 'التأسيس ورأس المال', establishedValue: '27 أبريل 2024', capital: 'رأس المال',
-      managers: 'المديرون والشركاء بحصص متساوية', mkShort: 'الاسم المختصر بالمقدونية', macedonia: 'مقدونيا',
+      eyebrow: 'الشركة',
+      presenceTitle: 'بنغلاديش وتركيا ومقدونيا الشمالية',
+      presenceDesc: 'تعمل بانوفا في بنغلاديش (دكا) وتركيا (سيواس) ومقدونيا الشمالية (ستروغا). السجل التجاري يعود إلى PANOVA TARIM DOO Struga.',
+      countries: ['بنغلاديش', 'تركيا', 'مقدونيا الشمالية'],
+      northMacedonia: 'مقدونيا الشمالية',
+      turkeyOffice: 'مكتب تركيا',
+      bangladeshOffice: 'مكتب بنغلاديش',
+      address: 'العنوان', email: 'البريد', phone: 'الهاتف', registry: 'السجل',
+      taxNo: 'الرقم الضريبي', established: 'التأسيس', establishedValue: '27 أبريل 2024',
+      managers: 'المديرون', mkShort: 'الاسم المختصر بالمقدونية',
+      vkn: 'الرقم الضريبي', siteTaxOffice: 'دائرة الضرائب Site',
     },
     kvkk: {
       title: 'إشعار الخصوصية (KVKK)',
@@ -617,7 +663,9 @@ export const homeCopy: Record<Language, HomeCopy> = {
       purposeTitle: 'البيانات المعالجة والغرض',
       purpose: 'يجمع نموذج الاتصال الاسم والبريد والهاتف والرسالة. ويجمع تسجيل المرشح الهوية وجواز السفر والهاتف والبريد والمهنة. ويجمع تسجيل صاحب العمل اسم الشركة والمسؤول والهاتف والبريد. الغرض هو الرد على الطلبات وإدارة عمليات الموظفين وأصحاب العمل.',
       rightsTitle: 'الحقوق',
-      rights: 'يمكنكم إرسال طلبات المادة 11 من KVKK إلى {email}. ويمكن للأشخاص في الاتحاد الأوروبي إرسال طلبات الوصول والتصحيح والحذف بموجب GDPR إلى العنوان نفسه.',
+      rightsBefore: 'يمكنكم إرسال طلبات المادة 11 من KVKK إلى',
+      rightsOr: 'أو',
+      rightsAfter: '، أو عبر نموذج الاتصال في الموقع، أو أرقام الهاتف أعلاه. ويمكن للأشخاص في الاتحاد الأوروبي إرسال طلبات الوصول والتصحيح والحذف بموجب GDPR عبر القنوات نفسها.',
     },
     oauthOr: 'أو',
     oauthGoogle: 'المتابعة باستخدام Google',

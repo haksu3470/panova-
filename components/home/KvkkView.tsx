@@ -4,12 +4,13 @@ import Link from 'next/link';
 import { company } from '@/lib/company';
 import { SiteFooter } from '@/components/home/HomeSections';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
-import { fill, homeCopy } from '@/lib/home-copy';
+import { homeCopy } from '@/lib/home-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 
 export default function KvkkView() {
   const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
   const k = homeCopy[currentLang].kvkk;
+  const a = homeCopy[currentLang].about;
 
   return (
     <div className={`min-h-screen bg-slate-50 text-slate-900 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -33,13 +34,31 @@ export default function KvkkView() {
           <p>{company.legalName}</p>
           <p>{k.shortName}: {company.shortName} / {company.shortNameMk}</p>
           <p>{k.address}: {company.address}</p>
-          <p>{k.email}: <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.email}`}>{company.email}</a></p>
+          <p>
+            {k.email}:{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.email}`}>{company.email}</a>
+          </p>
           <ul>
             {company.phones.map((p) => (
-              <li key={p.tel}>{p.name} ({homeCopy[currentLang].about.macedonia}): <a className="text-[#1b5e20] font-semibold" href={`tel:${p.tel}`}>{p.display}</a></li>
+              <li key={p.tel}>
+                <a className="text-[#1b5e20] font-semibold" href={`tel:${p.tel}`}>{p.display}</a>
+              </li>
             ))}
           </ul>
           <p>EMBS: {company.embs} · {k.taxId}: {company.taxId}</p>
+          <p className="pt-2">
+            {a.turkeyOffice}: {company.turkey.addressLines.join(', ')}. {a.phone}:{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`tel:${company.turkey.phone.tel}`}>{company.turkey.phone.display}</a>
+            . {k.email}:{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.turkey.email}`}>{company.turkey.email}</a>
+            . {a.siteTaxOffice}, {a.vkn} {company.turkey.vkn}.
+          </p>
+          <p>
+            {a.bangladeshOffice}: {company.bangladesh.addressLines.join(', ')}. {a.phone}:{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`tel:${company.bangladesh.phone.tel}`}>{company.bangladesh.phone.display}</a>
+            . {k.email}:{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.bangladesh.email}`}>{company.bangladesh.email}</a>.
+          </p>
         </section>
 
         <section className="space-y-2">
@@ -49,7 +68,15 @@ export default function KvkkView() {
 
         <section className="space-y-2">
           <h2 className="font-extrabold text-slate-900">{k.rightsTitle}</h2>
-          <p>{fill(k.rights, { email: company.email })}</p>
+          <p>
+            {k.rightsBefore}{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.email}`}>{company.email}</a>
+            {', '}
+            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.turkey.email}`}>{company.turkey.email}</a>
+            {' '}{k.rightsOr}{' '}
+            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.bangladesh.email}`}>{company.bangladesh.email}</a>
+            {' '}{k.rightsAfter}
+          </p>
         </section>
       </main>
       <SiteFooter lang={currentLang} />

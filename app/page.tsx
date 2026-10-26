@@ -123,6 +123,9 @@ export default function HomePage() {
           </span>
           <h1 className="text-3xl sm:text-6xl font-black mb-4 sm:mb-6 tracking-tight leading-tight">{company.tagline}</h1>
           <p className="text-slate-300 text-sm sm:text-xl max-w-2xl mx-auto leading-relaxed">{company.desc}</p>
+          <p className="text-emerald-200 text-xs sm:text-sm mt-4 font-semibold">
+            {registry.presence.map((place, i) => `${h.about.countries[i]} (${place.city})`).join(' · ')}
+          </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3 mt-8">
             <Link href="/employer-login" className="inline-flex justify-center items-center gap-2 bg-[#2e7d32] hover:bg-[#1b5e20] px-6 py-3.5 rounded-xl font-bold text-sm">
               <Building2 className="w-4 h-4" /> {h.ctaHire}
@@ -215,16 +218,41 @@ export default function HomePage() {
           {/* Contact Form */}
           <div className="lg:col-span-5" id="contact-form">
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xl lg:sticky lg:top-28">
-              <div className="mb-6 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 space-y-1.5">
-                <p className="font-extrabold text-slate-900">{registry.shortName}</p>
-                <p>{registry.address}</p>
-                <p><a className="font-semibold text-[#1b5e20]" href={`mailto:${registry.email}`}>{registry.email}</a></p>
-                {registry.phones.map((p) => (
-                  <p key={p.tel}>
-                    <a className="font-semibold text-[#1b5e20]" href={`tel:${p.tel}`}>{p.display}</a>
-                    <span className="text-slate-500"> · {p.name} ({h.about.macedonia})</span>
+              <div className="mb-6 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 space-y-3">
+                <div className="space-y-1.5">
+                  <p className="font-extrabold text-slate-900">{h.about.northMacedonia} · Struga</p>
+                  <p>{registry.shortName}</p>
+                  <p>{registry.address}</p>
+                  <p>
+                    <a className="font-semibold text-[#1b5e20]" href={`mailto:${registry.email}`}>{registry.email}</a>
                   </p>
-                ))}
+                  {registry.phones.map((p) => (
+                    <p key={p.tel}>
+                      <a className="font-semibold text-[#1b5e20]" href={`tel:${p.tel}`}>{p.display}</a>
+                    </p>
+                  ))}
+                </div>
+                <div className="space-y-1.5 border-t border-slate-200 pt-3">
+                  <p className="font-extrabold text-slate-900">{h.about.turkeyOffice} · {registry.turkey.city}</p>
+                  {registry.turkey.addressLines.map((line) => <p key={line}>{line}</p>)}
+                  <p>
+                    <a className="font-semibold text-[#1b5e20]" href={`mailto:${registry.turkey.email}`}>{registry.turkey.email}</a>
+                  </p>
+                  <p>
+                    <a className="font-semibold text-[#1b5e20]" href={`tel:${registry.turkey.phone.tel}`}>{registry.turkey.phone.display}</a>
+                  </p>
+                  <p className="text-xs text-slate-500">{h.about.siteTaxOffice} · {h.about.vkn} {registry.turkey.vkn}</p>
+                </div>
+                <div className="space-y-1.5 border-t border-slate-200 pt-3">
+                  <p className="font-extrabold text-slate-900">{h.about.bangladeshOffice} · {registry.bangladesh.city}</p>
+                  {registry.bangladesh.addressLines.map((line) => <p key={line}>{line}</p>)}
+                  <p>
+                    <a className="font-semibold text-[#1b5e20]" href={`mailto:${registry.bangladesh.email}`}>{registry.bangladesh.email}</a>
+                  </p>
+                  <p>
+                    <a className="font-semibold text-[#1b5e20]" href={`tel:${registry.bangladesh.phone.tel}`}>{registry.bangladesh.phone.display}</a>
+                  </p>
+                </div>
               </div>
               <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1">{t.formTitle}</h3>
               <p className="text-slate-500 text-xs mb-6">{fill(h.contactDirect, { name: company.name })}</p>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { company } from "@/lib/company";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "PANOVA TARIM DOO Struga",
-  description: "PANOVA TARIM DOO Struga — Ul. PARTIZANSKA Br. 2/1-30, Struga, North Macedonia. İletişim: panovatarim@gmail.com",
+  description: `Panova — Bangladeş, Türkiye ve Kuzey Makedonya. ${company.shortName}, ${company.address}. İletişim: ${company.email}`,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
