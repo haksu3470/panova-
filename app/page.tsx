@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Users, Globe2, Sprout, HardHat, Building2, Languages, CheckCircle2, Lock, Send, User, LogIn } from 'lucide-react';
 import Link from 'next/link';
+import { StatsBar, AudienceSections, TrustSections, SiteFooter } from '@/components/home/HomeSections';
 import { Language, languages, translations } from '@/lib/dictionary';
 
 export default function HomePage() {
@@ -12,7 +13,7 @@ export default function HomePage() {
       const saved = localStorage.getItem('panova_portal_lang') as Language;
       if (saved && ['tr', 'en', 'sq', 'ar'].includes(saved)) return saved;
     }
-    return 'en';
+    return 'tr';
   });
 
   useEffect(() => {
@@ -155,18 +156,37 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-slate-900 text-white py-12 sm:py-20 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
-        <div className="max-w-4xl mx-auto relative z-10">
+      <section className="bg-slate-900 text-white py-14 sm:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,125,50,0.45),transparent_60%)]" />
+        <div className="max-w-5xl mx-auto relative z-10 text-center">
           <span className="text-emerald-400 font-bold text-xs uppercase tracking-widest bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-800/50 inline-block mb-4">
             {company.name}
           </span>
           <h1 className="text-3xl sm:text-6xl font-black mb-4 sm:mb-6 tracking-tight leading-tight">{company.tagline}</h1>
           <p className="text-slate-300 text-sm sm:text-xl max-w-2xl mx-auto leading-relaxed">{company.desc}</p>
+          <div className="flex flex-col sm:flex-row justify-center gap-3 mt-8">
+            <Link href="/employer-login" className="inline-flex justify-center items-center gap-2 bg-[#2e7d32] hover:bg-[#1b5e20] px-6 py-3.5 rounded-xl font-bold text-sm">
+              <Building2 className="w-4 h-4" /> Personel arıyorum
+            </Link>
+            <Link href="/candidate" className="inline-flex justify-center items-center gap-2 bg-white text-slate-900 hover:bg-slate-100 px-6 py-3.5 rounded-xl font-bold text-sm">
+              <User className="w-4 h-4" /> İş arıyorum
+            </Link>
+          </div>
+          <nav className="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-8 text-xs sm:text-sm text-slate-300 font-semibold">
+            <a href="#isverenler" className="hover:text-white">İşverenler</a>
+            <a href="#adaylar" className="hover:text-white">Adaylar</a>
+            <a href="#sektorler" className="hover:text-white">Sektörler</a>
+            <a href="#nasil-calisir" className="hover:text-white">Nasıl Çalışır</a>
+            <a href="#grup" className="hover:text-white">Grup Şirketleri</a>
+            <a href="#sss" className="hover:text-white">SSS</a>
+          </nav>
         </div>
       </section>
+      <StatsBar />
+      <AudienceSections />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
+      <main id="grup" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           
           {/* Company Selector Cards (Mobilde Tek Sütun, Tablet/Masaüstünde İki Sütun) */}
@@ -303,6 +323,8 @@ export default function HomePage() {
 
         </div>
       </main>
+      <TrustSections />
+      <SiteFooter />
     </div>
   );
 }
