@@ -6,6 +6,16 @@ import { AuthFooter } from '@/components/site/AuthFooter';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { linkMyCandidate, signOut } from '@/lib/auth';
+import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
+import {
+  beginPasswordSignup,
+  emailGateListenerPaused,
+  gateSession,
+  isEmailNotConfirmedMessage,
+  pauseEmailGateListener,
+  rememberVerifyEmail,
+  storedVerifyEmail,
+} from '@/lib/emailVerification';
 import { 
   User, CheckCircle2, LogOut, Lock, Camera, 
   FileText, Eye, X, Briefcase, Calendar, 
@@ -37,7 +47,8 @@ export default function CandidateDashboard() {
 
   const [authenticated, setAuthenticated] = useState(false);
 
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'verify'>('login');
+  const [verifyEmail, setVerifyEmail] = useState('');
   
   const [loginInput, setLoginInput] = useState('');
   const [password, setPassword] = useState('');
@@ -52,21 +63,6 @@ export default function CandidateDashboard() {
 
   const [candidate, setCandidate] = useState<any | null>(null);
   const [regPassword, setRegPassword] = useState('');
-
-  // Supabase Auth oturumu varsa adayı bağla ve yükle
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) return;
-      const candidateId = await linkMyCandidate();
-      if (!candidateId) return;
-      const { data: cand } = await supabase.from('job_candidates').select('*').eq('id', candidateId).maybeSingle();
-      if (cand) {
-        setCandidate(cand);
-        setAuthenticated(true);
-      }
-    })();
-  }, []);
 
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'documents' | 'jobs' | 'interviews' | 'offers' | 'process' | 'travel' | 'notifications' | 'support'>('overview');
@@ -345,22 +341,67 @@ export default function CandidateDashboard() {
     return true;
   };
 
+  const showVerify = (email: string) => {
+    setVerifyEmail(email);
+    setAuthMode('verify');
+  };
+
+  useEffect(() => {
+    const pending = storedVerifyEmail();
+    if (pending && new URLSearchParams(window.location.search).get('verify') === '1') {
+      showVerify(pending);
+    }
+    let alive = true;
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event !== 'INITIAL_SESSION' && event !== 'SIGNED_IN') return;
+      setTimeout(async () => {
+        if (!alive || emailGateListenerPaused() || !session) return;
+        const gate = await gateSession();
+        if (!alive) return;
+        if (gate.status === 'verify') {
+          showVerify(gate.email);
+          setLoading(false);
+          return;
+        }
+        if (gate.status === 'ready') await loadLinkedCandidate();
+        setLoading(false);
+      }, 0);
+    });
+    return () => {
+      alive = false;
+      data.subscription.unsubscribe();
+    };
+  }, []);
+
   const handleCandidateLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
+    const resume = pauseEmailGateListener();
     const email = loginInput.trim().toLowerCase();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        if (isEmailNotConfirmedMessage(error.message)) {
+          rememberVerifyEmail(email, 'signup');
+          showVerify(email);
+          return;
+        }
+        alert(currentLang === 'tr' ? 'Hatalı e-posta veya şifre!' : 'Incorrect email or password!');
+        return;
+      }
+      const gate = await gateSession();
+      if (gate.status === 'verify') {
+        showVerify(gate.email || email);
+        return;
+      }
+      const ok = await loadLinkedCandidate();
+      if (!ok) {
+        await signOut();
+        alert(currentLang === 'tr' ? 'Bu e-posta ile eşleşen aday kaydı bulunamadı!' : 'No candidate record linked to this email!');
+      }
+    } finally {
+      resume();
       setLoading(false);
-      alert(currentLang === 'tr' ? 'Hatalı e-posta veya şifre!' : 'Incorrect email or password!');
-      return;
-    }
-    const ok = await loadLinkedCandidate();
-    setLoading(false);
-    if (!ok) {
-      await signOut();
-      alert(currentLang === 'tr' ? 'Bu e-posta ile eşleşen aday kaydı bulunamadı!' : 'No candidate record linked to this email!');
     }
   };
 
@@ -376,41 +417,32 @@ export default function CandidateDashboard() {
     }
 
     setLoading(true);
+    const resume = pauseEmailGateListener();
     const email = regEmail.trim().toLowerCase();
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password: regPassword,
-      options: { data: { full_name: regFullName, role: 'candidate' } }
-    });
-    if (signUpError) {
+    try {
+      const result = await beginPasswordSignup({
+        email,
+        password: regPassword,
+        redirectPath: '/candidate',
+        metadata: {
+          role: 'candidate',
+          full_name: regFullName,
+          passport_number: regPassport.toUpperCase(),
+          phone: regPhone,
+          profession: regProfession,
+          sector: regSector,
+          nationality: 'Belirtilmedi',
+        },
+      });
+      if (result.status === 'error') {
+        alert((currentLang === 'tr' ? 'Kayıt hatası: ' : 'Signup error: ') + result.message);
+        return;
+      }
+      showVerify(result.email);
+    } finally {
+      resume();
       setLoading(false);
-      alert((currentLang === 'tr' ? 'Kayıt hatası: ' : 'Signup error: ') + signUpError.message);
-      return;
     }
-    if (!signUpData.session) {
-      setLoading(false);
-      alert(currentLang === 'tr' ? 'Kayıt alındı! E-postanızdaki doğrulama bağlantısına tıklayıp giriş yapın.' : 'Signup received! Confirm your email, then sign in.');
-      return;
-    }
-
-    // Şifre tabloya YAZILMAZ; kimlik doğrulama Supabase Auth'tadır
-    const { error } = await supabase.from('job_candidates').insert([{
-      full_name: regFullName,
-      passport_number: regPassport.toUpperCase(),
-      phone: regPhone,
-      email,
-      profession: regProfession,
-      sector: regSector,
-      status: 'pending',
-      auth_user_id: signUpData.user?.id
-    }]);
-    if (error) console.error('Aday kaydı oluşturulamadı:', error.message);
-
-    const ok = await loadLinkedCandidate();
-    setLoading(false);
-    alert(ok
-      ? (currentLang === 'tr' ? 'Başvurunuz başarıyla oluşturuldu!' : 'Registration successful!')
-      : (currentLang === 'tr' ? 'Hesabınız oluşturuldu; aday kaydınız ekip tarafından bağlanacak.' : 'Account created; your candidate record will be linked by our team.'));
   };
 
   const handleLogout = async () => {
@@ -641,7 +673,7 @@ export default function CandidateDashboard() {
 
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 max-w-md w-full">
-            <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border">
+            {authMode !== 'verify' && <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border">
               <button
                 type="button"
                 onClick={() => setAuthMode('login')}
@@ -660,9 +692,9 @@ export default function CandidateDashboard() {
               >
                 <UserPlus className="w-4 h-4" /> {t.signUpMenu || 'Kayıt Ol'}
               </button>
-            </div>
+            </div>}
 
-            <div className="text-center mb-6">
+            {authMode !== 'verify' && <div className="text-center mb-6">
               <div className="w-12 h-12 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-3">
                 {authMode === 'login' ? <Lock className="w-6 h-6" /> : <UserPlus className="w-6 h-6" />}
               </div>
@@ -672,9 +704,29 @@ export default function CandidateDashboard() {
               <p className="text-slate-500 text-xs mt-1">
                 {authMode === 'login' ? t.loginDesc : t.regFormSub}
               </p>
-            </div>
+            </div>}
 
-            {authMode === 'login' ? (
+            {authMode === 'verify' ? (
+              <div className="space-y-4">
+                <EmailVerifyNotice
+                  email={verifyEmail}
+                  lang={currentLang}
+                  redirectPath="/candidate"
+                  onVerified={async () => {
+                    const ok = await loadLinkedCandidate();
+                    if (!ok) {
+                      alert(currentLang === 'tr'
+                        ? 'E-posta doğrulandı. Aday kaydınız ekip tarafından bağlanacak.'
+                        : 'Email verified. Your candidate record will be linked by our team.');
+                    }
+                  }}
+                />
+                <button type="button" onClick={() => setAuthMode('login')} className="w-full text-xs font-bold text-slate-500 cursor-pointer">
+                  {t.verifyEmailBack}
+                </button>
+                <OAuthButtons redirectPath="/candidate" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} />
+              </div>
+            ) : authMode === 'login' ? (
               <><form onSubmit={handleCandidateLogin} className="space-y-4 text-left rtl:text-right">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.emailLabel || 'E-posta'}</label>

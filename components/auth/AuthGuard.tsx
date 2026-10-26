@@ -2,7 +2,8 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
-import { isStaff, linkMyEmployer } from '@/lib/auth';
+import { isStaff, linkMyEmployer, signOut } from '@/lib/auth';
+import { emailAccessOk, rememberVerifyEmail } from '@/lib/emailVerification';
 import { homeCopy } from '@/lib/home-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 
@@ -25,7 +26,15 @@ export default function AuthGuard({ role, children }: { role: Role; children: Re
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
         if (!cancelled) setState('denied');
-        window.location.replace(loginPath);
+        const pending = typeof window !== 'undefined' && sessionStorage.getItem('panova_verify_email');
+        window.location.replace(pending ? `${loginPath}?verify=1` : loginPath);
+        return;
+      }
+      if (!(await emailAccessOk())) {
+        if (data.session.user.email) rememberVerifyEmail(data.session.user.email);
+        await signOut();
+        if (!cancelled) setState('denied');
+        window.location.replace(`${loginPath}?verify=1`);
         return;
       }
       // Personel, işveren dosyasını inceleyebilir (portal 'İşveren Dosyasını Aç')
@@ -38,7 +47,10 @@ export default function AuthGuard({ role, children }: { role: Role; children: Re
       }
     })();
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (!session) window.location.replace(loginPath);
+      if (!session) {
+        const pending = sessionStorage.getItem('panova_verify_email');
+        window.location.replace(pending ? `${loginPath}?verify=1` : loginPath);
+      }
     });
     return () => {
       cancelled = true;

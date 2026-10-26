@@ -63,7 +63,7 @@ export async function POST(request: Request) {
   <p>Merhaba <strong>${esc(name || email)}</strong>,</p>
   <p>PANOVA ekibine <strong>${esc(roleTr)}</strong> rolüyle eklendiniz.</p>
   <p>Hesabınızı etkinleştirmek için aşağıdaki bağlantıya gidin ve <strong>bu e-posta adresiyle (${esc(email)})</strong>
-     Google ile giriş yapın veya e-posta + şifre ile kayıt olun. Farklı bir adres kullanırsanız hesabınız bağlanamaz.</p>
+     Google ile giriş yapın veya e-posta + şifre ile kayıt olun. Google dışı (ve şifreyle açılan Gmail) hesaplar, portala girmeden önce e-postadaki doğrulamayı tamamlamalıdır. Farklı bir adres kullanırsanız hesabınız bağlanamaz.</p>
   <p style="text-align:center;margin:28px 0">
     <a href="${PORTAL_URL}" style="background:#2e7d32;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold">Portala Git</a>
   </p>

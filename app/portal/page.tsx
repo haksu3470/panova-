@@ -5,7 +5,17 @@ import { AuthFooter } from '@/components/site/AuthFooter';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { getSessionUser, isStaff, ensureStaff, signOut } from '@/lib/auth';
+import { ensureStaff, signOut } from '@/lib/auth';
+import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
+import {
+  beginPasswordSignup,
+  emailGateListenerPaused,
+  gateSession,
+  isEmailNotConfirmedMessage,
+  pauseEmailGateListener,
+  rememberVerifyEmail,
+  storedVerifyEmail,
+} from '@/lib/emailVerification';
 import { 
   Lock, ShieldCheck, Languages, ArrowLeft, Building2, Users, FileText, 
   UserCheck, CheckSquare, History, ShieldAlert, Key, RefreshCw, Trash2 
@@ -46,22 +56,11 @@ export default function PortalPage() {
   };
 
   const [authenticated, setAuthenticated] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Yerel bayrak yerine gerçek Supabase Auth oturumu + personel kontrolü
-      (async () => {
-        const user = await getSessionUser();
-        if (user && (await ensureStaff(user.email || undefined))) {
-          const { data: staffData } = await supabase.from('staff_members').select('*').eq('auth_user_id', user.id).maybeSingle();
-          setCurrentUser(staffData || { name: user.email, email: user.email, role_level: 'upper_management' });
-          setAuthenticated(true);
-        } else {
-          setAuthenticated(false);
-        }
-      })();
-    }
-  }, []);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify'>('signin');
+  const [verifyEmail, setVerifyEmail] = useState('');
+  const [regName, setRegName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
 
   const [currentUser, setCurrentUser] = useState<any>(null);
 
@@ -172,10 +171,56 @@ export default function PortalPage() {
     writeAudit(actionText);
   };
 
+  const enterStaff = async (userId: string, email: string | undefined, fullName?: string, announce = false) => {
+    const staffOk = await ensureStaff(fullName || email || undefined);
+    if (!staffOk) {
+      if (announce) {
+        await signOut();
+        alert('Bu hesap personel yetkisine sahip değil. Davet e-postasındaki adresle kayıt olun.');
+      }
+      return false;
+    }
+    const { data: staffData } = await supabase.from('staff_members').select('*').eq('auth_user_id', userId).maybeSingle();
+    const loggedUser = staffData || { name: fullName || email, email, role_level: 'upper_management' };
+    setAuthenticated(true);
+    setCurrentUser(loggedUser);
+    if (announce) logAudit('Sisteme Supabase Auth ile Giriş Yapıldı', loggedUser.name);
+    return true;
+  };
+
+  useEffect(() => {
+    const pending = storedVerifyEmail();
+    if (pending && new URLSearchParams(window.location.search).get('verify') === '1') {
+      setVerifyEmail(pending);
+      setAuthMode('verify');
+    }
+    let alive = true;
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event !== 'INITIAL_SESSION' && event !== 'SIGNED_IN') return;
+      setTimeout(async () => {
+        if (!alive || emailGateListenerPaused() || !session) return;
+        const gate = await gateSession();
+        if (!alive) return;
+        if (gate.status === 'verify') {
+          setVerifyEmail(gate.email);
+          setAuthMode('verify');
+          setAuthenticated(false);
+          return;
+        }
+        if (gate.status !== 'ready') return;
+        await enterStaff(session.user.id, session.user.email || undefined);
+      }, 0);
+    });
+    return () => {
+      alive = false;
+      data.subscription.unsubscribe();
+    };
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
+    const resume = pauseEmailGateListener();
     try {
       const loginEmail = username.trim().toLowerCase();
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
@@ -184,38 +229,55 @@ export default function PortalPage() {
       });
 
       if (authError || !authData.user) {
+        if (isEmailNotConfirmedMessage(authError?.message)) {
+          rememberVerifyEmail(loginEmail, 'signup');
+          setVerifyEmail(loginEmail);
+          setAuthMode('verify');
+          return;
+        }
         alert('Geçersiz e-posta veya şifre!');
-        setLoading(false);
         return;
       }
 
-      // Personel değilse ve sistemde hiç personel yoksa ilk yönetici olarak claim_first_staff çağrılır
-      const staffOk = await ensureStaff(authData.user.email || undefined);
-      if (!staffOk) {
-        await signOut();
-        alert('Bu hesap personel yetkisine sahip değil.');
-        setLoading(false);
+      const gate = await gateSession();
+      if (gate.status === 'verify') {
+        setVerifyEmail(gate.email || loginEmail);
+        setAuthMode('verify');
         return;
       }
-
-      const { data: staffData } = await supabase
-        .from('staff_members')
-        .select('*')
-        .eq('auth_user_id', authData.user.id)
-        .maybeSingle();
-
-      const loggedUser = staffData || {
-        name: authData.user.email,
-        email: authData.user.email,
-        role_level: 'upper_management',
-      };
-
-      setAuthenticated(true);
-      setCurrentUser(loggedUser);
-      logAudit('Sisteme Supabase Auth ile Giriş Yapıldı', loggedUser.name);
-      setLoading(false);
+      await enterStaff(authData.user.id, authData.user.email || loginEmail, undefined, true);
     } catch (err: any) {
       alert('Giriş hatası: ' + err.message);
+    } finally {
+      resume();
+      setLoading(false);
+    }
+  };
+
+  const handleStaffSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!regName.trim() || !regEmail.trim() || regPassword.length < 8) {
+      alert('Ad, e-posta ve en az 8 karakterlik şifre zorunludur.');
+      return;
+    }
+    setLoading(true);
+    const resume = pauseEmailGateListener();
+    const email = regEmail.trim().toLowerCase();
+    try {
+      const result = await beginPasswordSignup({
+        email,
+        password: regPassword,
+        redirectPath: '/portal',
+        metadata: { role: 'staff', full_name: regName.trim() },
+      });
+      if (result.status === 'error') {
+        alert('Kayıt hatası: ' + result.message);
+        return;
+      }
+      setVerifyEmail(result.email);
+      setAuthMode('verify');
+    } finally {
+      resume();
       setLoading(false);
     }
   };
@@ -409,9 +471,47 @@ export default function PortalPage() {
             <div className="w-14 h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
               <Lock className="w-7 h-7" />
             </div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1">{t.portalTitle}</h1>
-            <p className="text-slate-500 text-xs sm:text-sm mb-6">{t.portalSub}</p>
+            {authMode !== 'verify' && <>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1">{authMode === 'signup' ? t.staffSignupTitle : t.portalTitle}</h1>
+            <p className="text-slate-500 text-xs sm:text-sm mb-6">{authMode === 'signup' ? t.staffSignupSub : t.portalSub}</p>
+            </>}
 
+            {authMode === 'verify' ? (
+              <div className="space-y-4 text-left rtl:text-right">
+                <EmailVerifyNotice
+                  email={verifyEmail}
+                  lang={currentLang}
+                  redirectPath="/portal"
+                  onVerified={async () => {
+                    const { data } = await supabase.auth.getSession();
+                    const user = data.session?.user;
+                    if (!user) return;
+                    await enterStaff(user.id, user.email || verifyEmail, regName || undefined, true);
+                  }}
+                />
+                <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-slate-500 cursor-pointer">{t.verifyEmailBack}</button>
+                <OAuthButtons redirectPath="/portal" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} />
+              </div>
+            ) : authMode === 'signup' ? (
+              <form onSubmit={handleStaffSignup} className="space-y-4 text-left rtl:text-right">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.staffNameLabel}</label>
+                  <input required value={regName} onChange={(e) => setRegName(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium outline-none text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.staffEmailLabel}</label>
+                  <input type="email" required value={regEmail} onChange={(e) => setRegEmail(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium outline-none text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.passwordLabel}</label>
+                  <input type="password" required minLength={8} value={regPassword} onChange={(e) => setRegPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium outline-none text-sm" />
+                </div>
+                <button type="submit" disabled={loading} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold text-sm cursor-pointer">
+                  {t.staffSignupBtn}
+                </button>
+                <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-slate-500 cursor-pointer">{t.verifyEmailBack}</button>
+              </form>
+            ) : (
             <form onSubmit={handleLogin} className="space-y-4 text-left rtl:text-right">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.usernameLabel} / {t.emailLabel}</label>
@@ -443,7 +543,13 @@ export default function PortalPage() {
                 {loading ? (t.submitting || t.signInBtn) : (t.signInBtn || 'Giriş Yap')}
               </button>
             </form>
-              <div className="mt-4"><OAuthButtons redirectPath="/portal" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} /></div>
+            )}
+            {authMode === 'signin' && (
+              <div className="mt-4 space-y-3">
+                <OAuthButtons redirectPath="/portal" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} />
+                <button type="button" onClick={() => setAuthMode('signup')} className="w-full text-xs font-bold text-[#1b5e20] cursor-pointer">{t.staffSignupTitle}</button>
+              </div>
+            )}
           </div>
         </main>
 
