@@ -8,6 +8,7 @@ import DemoBadge from './DemoBadge';
 const DOC_TYPES: Record<string, string> = {
   passport: 'Pasaport', cv: 'CV', certificate: 'Sertifika', diploma: 'Diploma',
   criminal_record: 'Sabıka kaydı', health_report: 'Sağlık raporu', photo: 'Fotoğraf', contract: 'Sözleşme',
+  apostille: 'e-Apostil', other: 'Diğer',
 };
 const STATUSES: Record<string, string> = {
   pending: '🟡 Bekleniyor', uploaded: '📥 Yüklendi', reviewing: '🔵 İnceleniyor', approved: '🟢 Onaylandı',

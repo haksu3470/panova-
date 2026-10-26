@@ -13,6 +13,11 @@ import {
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 
+
+// Aday belge slotları -> candidate_documents.doc_type
+const DOC_SLOT_TYPES = ['passport', 'certificate', 'criminal_record', 'health_report', 'apostille'];
+const DONE_STATUSES = ['uploaded', 'reviewing', 'approved'];
+
 export default function CandidateDashboard() {
   const [currentLang, setCurrentLang] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
@@ -45,6 +50,7 @@ export default function CandidateDashboard() {
   
   const [loginInput, setLoginInput] = useState('');
   const [password, setPassword] = useState('');
+  const [docRows, setDocRows] = useState<any[]>([]);
 
   const [regFullName, setRegFullName] = useState('');
   const [regPassport, setRegPassport] = useState('');
@@ -427,6 +433,13 @@ export default function CandidateDashboard() {
   };
 
   const fetchCandidateData = async (candId: string) => {
+    const { data: docRowsData } = await supabase
+      .from('candidate_documents')
+      .select('*')
+      .eq('candidate_id', candId)
+      .order('created_at', { ascending: false });
+    setDocRows(docRowsData || []);
+
     const { data: notifs } = await supabase
       .from('candidate_notifications')
       .select('*')
@@ -509,48 +522,20 @@ export default function CandidateDashboard() {
 
   const handleDocUpload = async (docIndex: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file || !candidate) return;
+    const docType = DOC_SLOT_TYPES[docIndex] || 'other';
 
     const reader = new FileReader();
     reader.onload = async (e) => {
       const fileUrl = e.target?.result as string;
-      let currentData = { docs: [
-        { id: '1', name: 'Pasaport Taraması', status: 'pending' },
-        { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
-        { id: '3', name: 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
-        { id: '4', name: 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
-        { id: '5', name: 'e-Apostil / Dışişleri Bakanlığı Tasdiki', status: 'pending' },
-      ], profile_meta: {} };
-
-      try {
-        if (candidate?.documents_json) {
-          const parsed = JSON.parse(candidate.documents_json);
-          if (Array.isArray(parsed)) {
-            currentData.docs = parsed;
-          } else if (parsed.docs) {
-            currentData = parsed;
-          }
-        }
-      } catch (err) {}
-
-      currentData.docs = currentData.docs.map((doc: any, idx: number) => {
-        if (idx === docIndex) {
-          return { ...doc, file_url: fileUrl, file_name: file.name, status: 'uploaded' };
-        }
-        return doc;
-      });
-
-      const { error } = await supabase
-        .from('job_candidates')
-        .update({ documents_json: JSON.stringify(currentData) })
-        .eq('id', candidate.id);
+      const payload = { file_url: fileUrl, status: 'uploaded', uploaded_at: new Date().toISOString(), notes: file.name };
+      const existing = docRows.find((r) => r.doc_type === docType && ['pending', 'uploaded', 'rerequested', 'rejected'].includes(r.status));
+      const { error } = existing
+        ? await supabase.from('candidate_documents').update(payload).eq('id', existing.id)
+        : await supabase.from('candidate_documents').insert({ ...payload, candidate_id: candidate.id, doc_type: docType });
 
       if (!error) {
-        const updatedCandidate = { ...candidate, documents_json: JSON.stringify(currentData) };
-        setCandidate(updatedCandidate);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('panova_current_candidate', JSON.stringify(updatedCandidate));
-        }
+        await fetchCandidateData(candidate.id);
         alert(ct.docUploaded);
       } else {
         alert('Hata: ' + error.message);
@@ -846,18 +831,26 @@ export default function CandidateDashboard() {
     { id: '5', name: 'e-Apostil / Dışişleri Bakanlığı Tasdiki', status: 'pending' },
   ];
 
-  let candidateDocs = defaultDocs;
-  try {
-    if (candidate?.documents_json) {
-      const parsed = JSON.parse(candidate.documents_json);
-      if (Array.isArray(parsed)) candidateDocs = parsed;
-      else if (parsed.docs) candidateDocs = parsed.docs;
-    }
-  } catch (e) {}
+  // Öncelik candidate_documents tablosu; tablo boşsa eski documents_json okunur (salt okuma yedeği).
+  let candidateDocs: any[] = defaultDocs;
+  if (docRows.length > 0) {
+    candidateDocs = defaultDocs.map((d, i) => {
+      const row = docRows.find((r) => r.doc_type === DOC_SLOT_TYPES[i]);
+      return row ? { ...d, status: row.status, file_url: row.file_url } : d;
+    });
+  } else {
+    try {
+      if (candidate?.documents_json) {
+        const parsed = JSON.parse(candidate.documents_json);
+        if (Array.isArray(parsed)) candidateDocs = parsed;
+        else if (parsed.docs) candidateDocs = parsed.docs;
+      }
+    } catch (e) {}
+  }
 
   const currentLangTitles = docTitlesByLang[currentLang] || docTitlesByLang.tr;
 
-  const missingDocs = candidateDocs.filter((d: any) => d.status !== 'uploaded');
+  const missingDocs = candidateDocs.filter((d: any) => !DONE_STATUSES.includes(d.status));
   const missingProfileFields = [];
   if (!newPhoto) missingProfileFields.push(ct.missingPhoto);
   if (!newVideoUrl) missingProfileFields.push(ct.missingVideo);
@@ -1125,8 +1118,8 @@ export default function CandidateDashboard() {
                 <div key={doc.id || idx} className="p-4 bg-slate-50 rounded-2xl border space-y-2">
                   <div className="flex justify-between items-center font-bold text-slate-900 text-xs">
                     <span>{currentLangTitles[idx] || doc.name}</span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${doc.status === 'uploaded' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                      {doc.status === 'uploaded' ? ct.uploadedStatus : ct.pendingStatus}
+                    <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${DONE_STATUSES.includes(doc.status) ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                      {DONE_STATUSES.includes(doc.status) ? ct.uploadedStatus : ct.pendingStatus}
                     </span>
                   </div>
                   
