@@ -23,6 +23,9 @@ export async function isStaff(): Promise<boolean> {
  */
 export async function ensureStaff(fullName?: string): Promise<boolean> {
   if (await isStaff()) return true;
+  // Davet edilmiş personel: doğrulanmış e-posta eşleşirse kayda bağlanır
+  const linked = await supabase.rpc('link_my_staff');
+  if (!linked.error && (await isStaff())) return true;
   const { error } = await supabase.rpc('claim_first_staff', {
     p_full_name: fullName || 'Yönetici',
     p_staff_role: 'upper_management',
