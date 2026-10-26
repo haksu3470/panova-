@@ -12,7 +12,7 @@ import { candidateService } from '@/lib/services/candidateService';
 import { ArrowLeft, User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, Video, Trash2, Upload, Eye, X, Plus, Languages, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
-import { readStoredLanguage, writeStoredLanguage } from '@/lib/site-language';
+import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 
 interface CandidateDocument {
   id: string;
@@ -29,7 +29,11 @@ function CandidateDetailPageInner() {
   const [currentLang, setCurrentLang] = useState<Language>('en');
 
   useEffect(() => {
-    const apply = () => setCurrentLang(readStoredLanguage('en'));
+    const apply = () => {
+      const next = readStoredLanguage('en');
+      setCurrentLang(next);
+      syncDocumentLanguage(next);
+    };
     apply();
     window.addEventListener('storage', apply);
     return () => window.removeEventListener('storage', apply);

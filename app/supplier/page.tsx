@@ -5,13 +5,17 @@ import { supabase } from '@/lib/supabase';
 import { ArrowLeft, CheckCircle2, UserPlus, Send, Building, Languages } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
-import { readStoredLanguage, writeStoredLanguage } from '@/lib/site-language';
+import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 
 export default function SupplierCandidateRegister() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
 
   useEffect(() => {
-    const apply = () => setCurrentLang(readStoredLanguage('tr'));
+    const apply = () => {
+      const next = readStoredLanguage('tr');
+      setCurrentLang(next);
+      syncDocumentLanguage(next);
+    };
     apply();
     window.addEventListener('storage', apply);
     return () => window.removeEventListener('storage', apply);

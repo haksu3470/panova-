@@ -13,7 +13,7 @@ import {
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 import { homeCopy } from '@/lib/home-copy';
-import { readStoredLanguage, writeStoredLanguage } from '@/lib/site-language';
+import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 
 // Modüler Bileşenlerimiz (Kök dizindeki components klasörüne göre göreceli yol)
 import CandidatesTab from '../../components/portal/CandidatesTab';
@@ -27,8 +27,12 @@ export default function PortalPage() {
   const [currentLang, setCurrentLang] = useState<Language>('en');
 
   useEffect(() => {
-    setCurrentLang(readStoredLanguage('en'));
-    const onStorage = () => setCurrentLang(readStoredLanguage('en'));
+    const onStorage = () => {
+      const next = readStoredLanguage('en');
+      setCurrentLang(next);
+      syncDocumentLanguage(next);
+    };
+    onStorage();
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
   }, []);
@@ -410,7 +414,7 @@ export default function PortalPage() {
 
             <form onSubmit={handleLogin} className="space-y-4 text-left rtl:text-right">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Kullanıcı Adı veya E-Posta</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.usernameLabel} / {t.emailLabel}</label>
                 <input
                   type="email"
                   required
@@ -436,7 +440,7 @@ export default function PortalPage() {
                 disabled={loading}
                 className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 cursor-pointer text-sm"
               >
-                {loading ? 'Giriş Yapılıyor...' : (t.signInBtn || 'Giriş Yap')}
+                {loading ? (t.submitting || t.signInBtn) : (t.signInBtn || 'Giriş Yap')}
               </button>
             </form>
               <div className="mt-4"><OAuthButtons redirectPath="/portal" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} /></div>

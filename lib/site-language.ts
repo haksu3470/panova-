@@ -19,10 +19,15 @@ export function readStoredLanguage(fallback: Language = 'tr'): Language {
   return fallback;
 }
 
-export function writeStoredLanguage(lang: Language) {
-  for (const key of STORAGE_KEYS) localStorage.setItem(key, lang);
+export function syncDocumentLanguage(lang: Language) {
+  if (typeof document === 'undefined') return;
   document.documentElement.lang = lang;
   document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+}
+
+export function writeStoredLanguage(lang: Language) {
+  for (const key of STORAGE_KEYS) localStorage.setItem(key, lang);
+  syncDocumentLanguage(lang);
 }
 
 export function useSiteLanguage(fallback: Language = 'tr') {
@@ -32,8 +37,7 @@ export function useSiteLanguage(fallback: Language = 'tr') {
     const apply = () => {
       const next = readStoredLanguage(fallback);
       setCurrentLang(next);
-      document.documentElement.lang = next;
-      document.documentElement.dir = next === 'ar' ? 'rtl' : 'ltr';
+      syncDocumentLanguage(next);
     };
     apply();
     const onStorage = (event: StorageEvent) => {

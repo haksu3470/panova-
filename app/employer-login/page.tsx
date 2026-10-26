@@ -9,7 +9,7 @@ import { Languages, ArrowLeft, Building2, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 import { homeCopy } from '@/lib/home-copy';
-import { readStoredLanguage, writeStoredLanguage } from '@/lib/site-language';
+import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { AuthFooter } from '@/components/site/AuthFooter';
 
 export default function EmployerLoginPage() {
@@ -20,7 +20,11 @@ export default function EmployerLoginPage() {
   const isRtl = currentLang === 'ar';
 
   useEffect(() => {
-    const apply = () => setCurrentLang(readStoredLanguage('tr'));
+    const apply = () => {
+      const next = readStoredLanguage('tr');
+      setCurrentLang(next);
+      syncDocumentLanguage(next);
+    };
     apply();
     window.addEventListener('storage', apply);
     return () => window.removeEventListener('storage', apply);

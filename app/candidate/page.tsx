@@ -14,7 +14,7 @@ import {
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
 import { homeCopy } from '@/lib/home-copy';
-import { readStoredLanguage, writeStoredLanguage } from '@/lib/site-language';
+import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 
 
 // Aday belge slotları -> candidate_documents.doc_type
@@ -25,7 +25,11 @@ export default function CandidateDashboard() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
 
   useEffect(() => {
-    const handleStorageChange = () => setCurrentLang(readStoredLanguage('tr'));
+    const handleStorageChange = () => {
+      const next = readStoredLanguage('tr');
+      setCurrentLang(next);
+      syncDocumentLanguage(next);
+    };
     handleStorageChange();
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);

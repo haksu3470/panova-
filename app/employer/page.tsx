@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, languages, translations } from '@/lib/dictionary';
-import { readStoredLanguage, writeStoredLanguage } from '@/lib/site-language';
+import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 
 function EmployerPortalInner() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
@@ -20,7 +20,11 @@ function EmployerPortalInner() {
   const isRtl = currentLang === 'ar';
 
   useEffect(() => {
-    const apply = () => setCurrentLang(readStoredLanguage('tr'));
+    const apply = () => {
+      const next = readStoredLanguage('tr');
+      setCurrentLang(next);
+      syncDocumentLanguage(next);
+    };
     apply();
     window.addEventListener('storage', apply);
     return () => window.removeEventListener('storage', apply);
