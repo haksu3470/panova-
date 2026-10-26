@@ -75,9 +75,9 @@ export default function PortalPage() {
 
   const [selectedDemandDetail, setSelectedDemandDetail] = useState<any | null>(null);
 
-  const [auditLogs, setAuditLogs] = useState<any[]>([
-    { id: '1', actionKey: 'initialAuditLog', performer: 'Hüseyin Aksu', time: '2026-09-22 12:00' }
-  ]);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [newTaskLinkType, setNewTaskLinkType] = useState('');
+  const [newTaskLinkId, setNewTaskLinkId] = useState('');
 
   const [loading, setLoading] = useState(false);
 
@@ -139,6 +139,11 @@ export default function PortalPage() {
       setStaffMembers([]);
     }
 
+    const { data: auditData } = await supabase.from('audit_logs').select('id, action, actor_name, entity_type, created_at, is_demo').order('created_at', { ascending: false }).limit(200);
+    if (auditData) {
+      setAuditLogs(auditData.map((a: any) => ({ id: a.id, action: a.action, performer: a.actor_name || '—', entity: a.entity_type, is_demo: a.is_demo, time: new Date(a.created_at).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' }) })));
+    }
+
     const { data: taskData } = await supabase.from('tasks').select('*').order('created_at', { ascending: false });
     if (taskData && taskData.length > 0) {
       setTasks(taskData);
@@ -159,7 +164,7 @@ export default function PortalPage() {
       performer: performerName,
       time: new Date().toISOString().replace('T', ' ').substring(0, 16)
     };
-    setAuditLogs([newLog, ...auditLogs]);
+    setAuditLogs(prev => [newLog, ...prev]);
     writeAudit(actionText);
   };
 
@@ -333,7 +338,10 @@ export default function PortalPage() {
       assignee: assignedStaffObj?.name || 'Hüseyin Aksu',
       backup_assignee: newTaskBackup || staffMembers[1]?.name || staffMembers[0]?.name || 'Hüseyin Aksu',
       due_date: newTaskDueDate || '2026-10-15',
-      status: 'pending'
+      status: 'pending',
+      related_entity_type: newTaskLinkType && newTaskLinkId ? newTaskLinkType : null,
+      related_entity_id: newTaskLinkType && newTaskLinkId ? newTaskLinkId : null,
+      created_by: (await supabase.auth.getUser()).data.user?.id ?? null,
     };
 
     const { error } = await supabase.from('tasks').insert([newTaskPayload]);
@@ -346,6 +354,8 @@ export default function PortalPage() {
     logAudit(`Yeni Görev Atandı: ${newTaskTitle} (${newTaskPayload.assignee})`, currentUser?.name);
     setNewTaskTitle('');
     setNewTaskDueDate('');
+    setNewTaskLinkType('');
+    setNewTaskLinkId('');
     alert('Görev kaydedildi ve sorumlu personele iletildi!');
     fetchAllData();
   };
@@ -643,6 +653,15 @@ export default function PortalPage() {
             setNewTaskDueDate={setNewTaskDueDate}
             handleCreateTask={handleCreateTask}
             toggleTaskStatus={toggleTaskStatus}
+            linkType={newTaskLinkType}
+            setLinkType={(v: string) => { setNewTaskLinkType(v); setNewTaskLinkId(''); }}
+            linkId={newTaskLinkId}
+            setLinkId={setNewTaskLinkId}
+            linkOptions={{
+              candidate: candidates.map((c: any) => ({ id: c.id, label: c.full_name || c.name || c.id })),
+              request: jobRequests.map((r: any) => ({ id: r.id, label: `${r.position_title || 'Talep'} · ${r.employer_name || ''}` })),
+              employer: employers.map((e: any) => ({ id: e.id, label: e.company_name || e.name || e.id })),
+            }}
           />
         )}
 
@@ -663,12 +682,13 @@ export default function PortalPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
+                  {auditLogs.length === 0 && (<tr><td colSpan={3} className="p-4 text-center text-slate-400">Henüz kayıt yok.</td></tr>)}
                   {auditLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50">
                       <td className="p-4 font-bold text-slate-900">
                         {log.actionKey ? (t as any)[log.actionKey] || log.actionKey : log.action}
                       </td>
-                      <td className="p-4">{log.performer}</td>
+                      <td className="p-4">{log.performer}{log.entity ? <span className="ml-1 text-[10px] text-slate-400">({log.entity})</span> : null}{log.is_demo ? <span className="ml-1 text-[10px] px-1 rounded bg-amber-100 text-amber-700">demo</span> : null}</td>
                       <td className="p-4 text-[11px] text-slate-400">{log.time}</td>
                     </tr>
                   ))}

@@ -325,18 +325,17 @@ function EmployerPortalInner() {
 
   const handleRequestInterview = async (candidate: any) => {
     const isUuid = (v: any) => typeof v === 'string' && /^[0-9a-f-]{36}$/i.test(v);
-    // interviews şeması: candidate_id, employer_id, request_id, scheduled_at, status, panova_notes
-    const newInt = {
-      candidate_id: candidate.id,
-      employer_id: isUuid(employerProfile?.id) ? employerProfile.id : null,
-      request_id: isUuid(candidate.active_request_id) ? candidate.active_request_id : null,
-      scheduled_at: new Date(Date.now() + 86400000 * 3).toISOString(),
-      status: 'scheduled',
-      panova_notes: `İşveren portalından talep: ${candidate.profession || 'Genel Pozisyon'} · PANOVA Online Video Mülakat`,
-      is_demo: !!candidate.is_demo,
-    };
-    const { error: intErr } = await supabase.from('interviews').insert([newInt]);
-    if (intErr) console.error('interview request failed', intErr);
+    // Güvenli RPC: yalnızca bu işverenin talebine sunulmuş adaylar için görüşme açar (RLS bypass yok).
+    const { error: intErr } = await supabase.rpc('employer_request_interview', {
+      p_candidate_id: candidate.id,
+      p_request_id: isUuid(candidate.active_request_id) ? candidate.active_request_id : null,
+      p_notes: `İşveren portalından talep: ${candidate.profession || 'Genel Pozisyon'} · PANOVA Online Video Mülakat`,
+    });
+    if (intErr) {
+      console.error('interview request failed', intErr);
+      alert(intErr.message?.includes('not_presented') ? 'Bu aday henüz talebinize sunulmamış; görüşme talebi oluşturulamadı.' : 'Görüşme talebi oluşturulamadı: ' + intErr.message);
+      return;
+    }
     alert(`"${candidate.full_name || candidate.name}" için mülakat talebi operasyon ekibimize iletildi.`);
     fetchEmployerData();
     setActiveTab('interviews');

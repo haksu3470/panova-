@@ -19,7 +19,15 @@ interface TasksTabProps {
   setNewTaskDueDate: (val: string) => void;
   handleCreateTask: (e: React.FormEvent) => void;
   toggleTaskStatus: (taskId: string, currentStatus: string) => void;
+  linkType?: string;
+  setLinkType?: (v: string) => void;
+  linkId?: string;
+  setLinkId?: (v: string) => void;
+  linkOptions?: Record<string, { id: string; label: string }[]>;
 }
+
+const LINK_LABELS: Record<string, string> = { candidate: 'Aday', request: 'Talep', employer: 'İşveren' };
+const isUuid = (v: any) => typeof v === 'string' && /^[0-9a-f-]{36}$/i.test(v);
 
 export default function TasksTab({
   tasks,
@@ -36,8 +44,14 @@ export default function TasksTab({
   newTaskDueDate,
   setNewTaskDueDate,
   handleCreateTask,
-  toggleTaskStatus
+  toggleTaskStatus,
+  linkType = '',
+  setLinkType,
+  linkId = '',
+  setLinkId,
+  linkOptions = {},
 }: TasksTabProps) {
+  const findLabel = (type?: string, id?: string) => (type && id ? (linkOptions[type] || []).find(o => o.id === id)?.label : undefined);
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
@@ -116,6 +130,25 @@ export default function TasksTab({
               className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#2e7d32]" 
             />
           </div>
+          {setLinkType && setLinkId && (
+            <div>
+              <label className="block font-bold text-slate-700 uppercase mb-1">Bağlı Kayıt (opsiyonel)</label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <select value={linkType} onChange={(e) => setLinkType(e.target.value)} className="sm:w-1/3 px-3 py-2.5 rounded-xl border bg-white text-xs sm:text-sm text-slate-900">
+                  <option value="">— Yok —</option>
+                  <option value="candidate">Aday</option>
+                  <option value="request">Talep</option>
+                  <option value="employer">İşveren</option>
+                </select>
+                {linkType && (
+                  <select value={linkId} onChange={(e) => setLinkId(e.target.value)} className="flex-1 min-w-0 px-3 py-2.5 rounded-xl border bg-white text-xs sm:text-sm text-slate-900">
+                    <option value="">Seçin…</option>
+                    {(linkOptions[linkType] || []).filter(o => isUuid(o.id)).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
+                  </select>
+                )}
+              </div>
+            </div>
+          )}
           <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-xs sm:text-sm">
             {t.saveTaskBtn}
           </button>
@@ -132,6 +165,9 @@ export default function TasksTab({
                 <div>
                   <h4 className={`font-bold text-xs sm:text-sm ${task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-900'}`}>{task.title}<DemoBadge show={task.is_demo} /></h4>
                   <p className="text-[11px] text-slate-500 mt-0.5">{t.assigneeText}: <strong>{task.assignee}</strong> | {t.backupText}: <strong>{task.backup_assignee}</strong> | {t.dueDateText}: {task.due_date}</p>
+                  {task.related_entity_type && (
+                    <p className="text-[11px] text-emerald-700 mt-0.5">🔗 {LINK_LABELS[task.related_entity_type] || task.related_entity_type}: {findLabel(task.related_entity_type, task.related_entity_id) || String(task.related_entity_id || '').slice(0, 8)}</p>
+                  )}
                 </div>
               </div>
               <span className={`px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold uppercase w-fit ${task.status === 'completed' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>
