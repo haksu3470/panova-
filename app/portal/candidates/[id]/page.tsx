@@ -1,6 +1,7 @@
 'use client';
 
 import AuthGuard from '@/components/auth/AuthGuard';
+import DocumentStatusPanel from '@/components/portal/DocumentStatusPanel';
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -657,6 +658,8 @@ function CandidateDetailPageInner() {
                 <option value="approved" className="bg-white text-slate-900">🟢 {t.approved || 'Onaylandı'}</option>
               </select>
             </div>
+
+            <DocumentStatusPanel candidateId={candidateId} />
 
             {/* Vazgeçme ve Süreçten Çıkış Paneli */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3 border-amber-200">
