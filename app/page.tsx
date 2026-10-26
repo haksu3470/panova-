@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Users, Globe2, Sprout, HardHat, Building2, Languages, CheckCircle2, Lock, Send, User, LogIn } from 'lucide-react';
 import Link from 'next/link';
-import { StatsBar, AudienceSections, TrustSections, SiteFooter } from '@/components/home/HomeSections';
+import { StatsBar, AudienceSections, TrustSections, CompanyAbout, SiteFooter } from '@/components/home/HomeSections';
 import { Language, languages, translations } from '@/lib/dictionary';
+import { company as registry } from '@/lib/company';
 
 export default function HomePage() {
   const [currentLang, setCurrentLang] = useState<Language>(() => {
@@ -178,6 +179,7 @@ export default function HomePage() {
             <a href="#sektorler" className="hover:text-white">Sektörler</a>
             <a href="#nasil-calisir" className="hover:text-white">Nasıl Çalışır</a>
             <a href="#grup" className="hover:text-white">Grup Şirketleri</a>
+            <a href="#kurumsal" className="hover:text-white">Kurumsal</a>
             <a href="#sss" className="hover:text-white">SSS</a>
           </nav>
         </div>
@@ -255,6 +257,17 @@ export default function HomePage() {
           {/* Contact Form */}
           <div className="lg:col-span-5" id="contact-form">
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xl lg:sticky lg:top-28">
+              <div className="mb-6 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 space-y-1.5">
+                <p className="font-extrabold text-slate-900">{registry.shortName}</p>
+                <p>{registry.address}</p>
+                <p><a className="font-semibold text-[#1b5e20]" href={`mailto:${registry.email}`}>{registry.email}</a></p>
+                {registry.phones.map((p) => (
+                  <p key={p.tel}>
+                    <a className="font-semibold text-[#1b5e20]" href={`tel:${p.tel}`}>{p.display}</a>
+                    <span className="text-slate-500"> · {p.name} ({p.place})</span>
+                  </p>
+                ))}
+              </div>
               <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1">{t.formTitle}</h3>
               <p className="text-slate-500 text-xs mb-6">{company.name} ile doğrudan iletişime geçin.</p>
 
@@ -324,6 +337,7 @@ export default function HomePage() {
         </div>
       </main>
       <TrustSections />
+      <CompanyAbout />
       <SiteFooter />
     </div>
   );

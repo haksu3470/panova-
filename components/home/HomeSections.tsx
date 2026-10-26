@@ -4,6 +4,7 @@ import {
   HardHat, Sprout, Factory, Truck, Hotel, Stethoscope, Wrench, ShoppingBag,
   Award, Globe2, Clock, BadgeCheck, ArrowRight, Briefcase, GraduationCap, HeartHandshake,
 } from 'lucide-react';
+import { company } from '@/lib/company';
 
 const stats = [
   { value: '4', label: 'Grup şirketi' },
@@ -204,42 +205,102 @@ export function TrustSections() {
   );
 }
 
+export function CompanyAbout() {
+  return (
+    <section id="kurumsal" className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-t border-slate-200">
+      <SectionTitle
+        eyebrow="Kurumsal"
+        title={company.shortName}
+        desc={company.legalName}
+      />
+      <dl className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+        <div className="rounded-2xl border border-slate-200 p-4 sm:col-span-2">
+          <dt className="text-xs font-bold uppercase text-slate-400">Adres</dt>
+          <dd className="font-semibold text-slate-900 mt-1">{company.address}</dd>
+        </div>
+        <div className="rounded-2xl border border-slate-200 p-4">
+          <dt className="text-xs font-bold uppercase text-slate-400">E-posta</dt>
+          <dd className="mt-1"><a className="font-semibold text-[#1b5e20]" href={`mailto:${company.email}`}>{company.email}</a></dd>
+        </div>
+        <div className="rounded-2xl border border-slate-200 p-4">
+          <dt className="text-xs font-bold uppercase text-slate-400">Telefon</dt>
+          <dd className="mt-1 space-y-1">
+            {company.phones.map((p) => (
+              <div key={p.tel}>
+                <a className="font-semibold text-[#1b5e20]" href={`tel:${p.tel}`}>{p.display}</a>
+                <span className="text-slate-500"> · {p.name} ({p.place})</span>
+              </div>
+            ))}
+          </dd>
+        </div>
+        <div className="rounded-2xl border border-slate-200 p-4">
+          <dt className="text-xs font-bold uppercase text-slate-400">Sicil</dt>
+          <dd className="mt-1 text-slate-800">EMBS {company.embs}<br />Vergi no {company.taxId}</dd>
+        </div>
+        <div className="rounded-2xl border border-slate-200 p-4">
+          <dt className="text-xs font-bold uppercase text-slate-400">Kuruluş ve sermaye</dt>
+          <dd className="mt-1 text-slate-800">{company.established}<br />Sermaye {company.capital}</dd>
+        </div>
+        <div className="rounded-2xl border border-slate-200 p-4 sm:col-span-2">
+          <dt className="text-xs font-bold uppercase text-slate-400">Yöneticiler ve eşit paylı ortaklar</dt>
+          <dd className="mt-1 font-semibold text-slate-900">{company.managers.join(' · ')} (%50 / %50)</dd>
+          <dd className="text-slate-500 text-xs mt-2">Makedonca kısa unvan: {company.shortNameMk}</dd>
+        </div>
+      </dl>
+    </section>
+  );
+}
+
 export function SiteFooter() {
   return (
     <footer className="bg-slate-950 text-slate-400 px-4 sm:px-6 lg:px-8 pt-14 pb-8">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <div>
           <div className="text-white font-black text-xl">PANOVA</div>
-          <p className="text-sm mt-3">İnşaat, tarım, insan kaynakları ve dış ticarette faaliyet gösteren şirketler grubu.</p>
+          <p className="text-sm text-white mt-3">{company.shortName}</p>
+          <p className="text-xs mt-1">{company.shortNameMk}</p>
+          <p className="text-sm mt-3">{company.address}</p>
+          <p className="text-sm mt-2">
+            <a className="hover:text-white" href={`mailto:${company.email}`}>{company.email}</a>
+          </p>
+          <ul className="text-sm mt-2 space-y-1">
+            {company.phones.map((p) => (
+              <li key={p.tel}>
+                <a className="hover:text-white" href={`tel:${p.tel}`}>{p.display}</a>
+                <span className="text-slate-500"> · {p.name}</span>
+              </li>
+            ))}
+          </ul>
         </div>
         <div>
           <div className="text-white font-bold mb-3">İşverenler</div>
           <ul className="space-y-2 text-sm">
-            <li><a href="#isverenler" className="hover:text-white">Hizmetler</a></li>
+            <li><a href="/#isverenler" className="hover:text-white">Hizmetler</a></li>
             <li><Link href="/employer-login" className="hover:text-white">İşveren girişi</Link></li>
-            <li><a href="#contact-form" className="hover:text-white">Teklif al</a></li>
+            <li><a href="/#contact-form" className="hover:text-white">Teklif al</a></li>
           </ul>
         </div>
         <div>
           <div className="text-white font-bold mb-3">Adaylar</div>
           <ul className="space-y-2 text-sm">
             <li><Link href="/candidate" className="hover:text-white">Başvuru & giriş</Link></li>
-            <li><a href="#sektorler" className="hover:text-white">Sektörler</a></li>
-            <li><a href="#sss" className="hover:text-white">SSS</a></li>
+            <li><a href="/#sektorler" className="hover:text-white">Sektörler</a></li>
+            <li><a href="/#sss" className="hover:text-white">SSS</a></li>
           </ul>
         </div>
         <div>
           <div className="text-white font-bold mb-3">Kurumsal</div>
           <ul className="space-y-2 text-sm">
-            <li><a href="#nasil-calisir" className="hover:text-white">Nasıl çalışır</a></li>
+            <li><a href="/#kurumsal" className="hover:text-white">Sicil bilgileri</a></li>
+            <li><a href="/#nasil-calisir" className="hover:text-white">Nasıl çalışır</a></li>
             <li><Link href="/portal" className="hover:text-white">Personel portalı</Link></li>
-            <li><span>KVKK Aydınlatma Metni (yakında)</span></li>
+            <li><Link href="/kvkk" className="hover:text-white">KVKK Aydınlatma Metni</Link></li>
           </ul>
         </div>
       </div>
       <div className="max-w-7xl mx-auto border-t border-slate-800 mt-10 pt-6 text-xs flex flex-col sm:flex-row justify-between gap-2">
-        <span>© {new Date().getFullYear()} PANOVA Group. Tüm hakları saklıdır.</span>
-        <span>Türkiye · Avrupa Birliği</span>
+        <span>© {new Date().getFullYear()} {company.shortName}. Tüm hakları saklıdır.</span>
+        <span>EMBS {company.embs} · Vergi no {company.taxId}</span>
       </div>
     </footer>
   );

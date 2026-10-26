@@ -1,6 +1,7 @@
 'use client';
 
 import AuthGuard from '@/components/auth/AuthGuard';
+import { AuthFooter } from '@/components/site/AuthFooter';
 
 import React, { useState } from 'react';
 import { translations, Language } from '@/lib/dictionary';
@@ -30,7 +31,7 @@ function AdminDashboardPageInner() {
   // Örnek Veri Setleri (Admin Merkezi)
   const [employers] = useState([
     { id: 1, name: 'AKAY EĞİTİM', contact: 'Hüseyin Aksu', phone: '+38970385792', country: 'North Macedonia', activeDemands: 2, responsible: 'Ahmet Uzman' },
-    { id: 2, name: 'PANOVA TARIM DOO', contact: 'Mehmet Çitil', phone: '+38970111223', country: 'North Macedonia', activeDemands: 1, responsible: 'Zeynep Kaya' },
+    { id: 2, name: 'PANOVA TARIM DOO', contact: 'Mehmet Çitil', phone: '+389 75 818 697', country: 'North Macedonia', activeDemands: 1, responsible: 'Zeynep Kaya' },
   ]);
 
   const [demandsList] = useState([
@@ -60,7 +61,7 @@ function AdminDashboardPageInner() {
           </div>
           <div>
             <h1 className="text-lg font-black tracking-tight text-white">Yönetim Paneli (Admin Hub)</h1>
-            <p className="text-[11px] text-slate-400">International Workforce Management &bull; Merkez Kontrol</p>
+            <p className="text-[11px] text-slate-400">PANOVA TARIM DOO Struga &bull; Merkez Kontrol</p>
           </div>
         </div>
 
@@ -200,9 +201,7 @@ function AdminDashboardPageInner() {
         )}
       </main>
 
-      <footer className="bg-slate-800 text-slate-400 py-6 text-center text-xs border-t border-slate-700">
-        <p>PANOVA TARIM DOO &bull; Central Administration & Control Hub &copy; 2026</p>
-      </footer>
+      <AuthFooter tone="dark" />
     </div>
   );
 }

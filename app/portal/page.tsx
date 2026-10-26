@@ -1,6 +1,7 @@
 'use client';
 
 import OAuthButtons from '@/components/auth/OAuthButtons';
+import { AuthFooter } from '@/components/site/AuthFooter';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -444,9 +445,7 @@ export default function PortalPage() {
           </div>
         </main>
 
-        <footer className="w-full py-4 text-center text-xs text-slate-500 border-t border-slate-200 bg-white">
-          PANOVA TARIM DOO • International Workforce Management System © 2026
-        </footer>
+        <AuthFooter />
       </div>
     );
   }
