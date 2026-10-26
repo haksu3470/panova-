@@ -267,24 +267,25 @@ export default function PortalPage() {
     }
     if (!newStaffName.trim() || !newStaffEmail.trim()) return;
 
-    const { error } = await supabase.from('staff_members').insert([
-      {
-        name: newStaffName,
-        email: newStaffEmail.trim().toLowerCase(),
-        role_level: newStaffRoleLevel
-      }
-    ]);
-
-    if (error) {
-      alert('Hata: ' + error.message);
+    const { data: sess } = await supabase.auth.getSession();
+    const res = await fetch('/api/staff-invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sess.session?.access_token || ''}` },
+      body: JSON.stringify({ name: newStaffName, email: newStaffEmail.trim().toLowerCase(), role: newStaffRoleLevel }),
+    });
+    const result = await res.json().catch(() => ({ error: 'Sunucu yanıtı okunamadı.' }));
+    if (!res.ok || result.error) {
+      alert('Hata: ' + (result.error || res.statusText));
       return;
     }
 
-    logAudit(`Yeni Ekip Üyesi Eklendi: ${newStaffName}`, currentUser?.name);
+    logAudit(`Personel Davet Edildi: ${newStaffName} (${newStaffEmail})`, currentUser?.name);
     setNewStaffName('');
     setNewStaffEmail('');
     setNewStaffPassword('');
-    alert('Yeni ekip üyesi kaydedildi! Personel, bu e-posta ile Supabase Auth üzerinden hesap oluşturup giriş yapmalıdır.');
+    alert(result.emailSent
+      ? 'Davet e-postası gönderildi. Personel bu e-posta ile Google veya e-posta kaydıyla portala giriş yaptığında hesabı otomatik bağlanır.'
+      : result.warning);
     fetchAllData();
   };
 
