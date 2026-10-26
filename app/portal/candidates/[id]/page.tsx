@@ -95,6 +95,11 @@ function CandidateDetailPageInner() {
 
   // Yeni Belge & Önizleme / Video Önizleme
   const [newDocName, setNewDocName] = useState('');
+  const [hasTableDocs, setHasTableDocs] = useState<boolean | null>(null);
+  useEffect(() => {
+    supabase.from('candidate_documents').select('id', { count: 'exact', head: true }).eq('candidate_id', candidateId)
+      .then(({ count }) => setHasTableDocs((count ?? 0) > 0));
+  }, [candidateId]);
   const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
 
@@ -532,7 +537,9 @@ function CandidateDetailPageInner() {
             </div>
 
             {/* Evrak & Belge Takip Mekanizması */}
+            {hasTableDocs === false && (
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+              <p className="text-[11px] text-amber-700 bg-amber-50 rounded-lg px-2 py-1">Eski JSON belge kaydı (geçiş öncesi). Yeni belgeler aşağıdaki Belge Durumu panelinden yönetilir.</p>
               <div className="flex items-center justify-between border-b pb-3">
                 <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
                   <FileCheck className="w-5 h-5 text-indigo-600" /> {t.documentTrackingMechanism || 'Evrak & Belge Takip Mekanizması'}
@@ -608,6 +615,8 @@ function CandidateDetailPageInner() {
                 </button>
               </div>
             </div>
+
+            )}
 
             {/* Sertifika, Video ve Değerlendirme */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
