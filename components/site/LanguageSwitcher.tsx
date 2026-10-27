@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboard
 import { ChevronDown } from 'lucide-react';
 import { languages, type Language } from '@/lib/dictionary';
 import { homeCopy } from '@/lib/home-copy';
+import { FlagIcon } from '@/components/site/FlagIcon';
 
 export function LanguageSwitcher({
   currentLang,
@@ -78,12 +79,12 @@ export function LanguageSwitcher({
         aria-label={`${groupLabel}: ${current.label}`}
         onClick={() => setOpen((value) => !value)}
         className={dark
-          ? 'inline-flex items-center gap-1 rounded-xl border border-slate-600 bg-slate-900 px-2 py-1.5 text-xs font-bold tracking-wide text-slate-100 hover:bg-slate-800'
-          : 'inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-100 px-2 py-1.5 text-xs font-bold tracking-wide text-slate-800 shadow-sm hover:bg-slate-200 sm:px-2.5 sm:py-2'}
+          ? 'inline-flex items-center gap-1.5 rounded-xl border border-slate-600 bg-slate-900 px-2 py-1.5 text-xs font-bold tracking-wide text-slate-100 hover:bg-slate-800'
+          : 'inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-2 py-1.5 text-xs font-bold tracking-wide text-slate-800 shadow-sm hover:bg-slate-200 sm:px-2.5 sm:py-2'}
       >
-        <span aria-hidden className="text-sm leading-none">{current.flag}</span>
+        <span aria-hidden className="inline-flex"><FlagIcon code={current.name} /></span>
         <span aria-hidden>{current.name}</span>
-        <ChevronDown aria-hidden className={`h-3 w-3 opacity-70 ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown aria-hidden className={`h-3 w-3 shrink-0 opacity-70 ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
         <ul
@@ -103,15 +104,16 @@ export function LanguageSwitcher({
                   type="button"
                   role="option"
                   aria-selected={selected}
+                  aria-label={lang.label}
                   autoFocus={selected}
                   onClick={() => choose(lang.code)}
                   className={selected
-                    ? 'flex w-full items-center gap-2 rounded-lg bg-emerald-700 px-2 py-1.5 text-start text-xs font-semibold text-white'
+                    ? 'flex w-full items-center gap-2 whitespace-nowrap rounded-lg bg-emerald-700 px-2 py-1.5 text-start text-xs font-semibold text-white'
                     : dark
-                      ? 'flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-start text-xs font-semibold text-slate-100 hover:bg-slate-800'
-                      : 'flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-start text-xs font-semibold text-slate-800 hover:bg-slate-100'}
+                      ? 'flex w-full items-center gap-2 whitespace-nowrap rounded-lg px-2 py-1.5 text-start text-xs font-semibold text-slate-100 hover:bg-slate-800'
+                      : 'flex w-full items-center gap-2 whitespace-nowrap rounded-lg px-2 py-1.5 text-start text-xs font-semibold text-slate-800 hover:bg-slate-100'}
                 >
-                  <span aria-hidden className="text-sm leading-none">{lang.flag}</span>
+                  <span aria-hidden className="inline-flex"><FlagIcon code={lang.name} /></span>
                   <span aria-hidden className="w-6 shrink-0 tracking-wide">{lang.name}</span>
                   <span className={selected ? 'text-emerald-50' : dark ? 'font-medium text-slate-300' : 'font-medium text-slate-500'}>{lang.label}</span>
                 </button>
