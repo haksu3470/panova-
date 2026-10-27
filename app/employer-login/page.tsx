@@ -15,9 +15,10 @@ import {
   rememberVerifyEmail,
   storedVerifyEmail,
 } from '@/lib/emailVerification';
-import { Languages, ArrowLeft, Building2, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Building2, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
-import { Language, languages, translations } from '@/lib/dictionary';
+import { Language, translations } from '@/lib/dictionary';
+import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { AuthFooter } from '@/components/site/AuthFooter';
@@ -182,18 +183,7 @@ export default function EmployerLoginPage() {
           <div className="text-lg font-black text-slate-900 tracking-tight">PANOVA PORTAL</div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center bg-slate-100 rounded-xl px-3 py-1.5 border border-slate-200 shadow-sm">
-            <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
-            <select
-              value={currentLang}
-              onChange={(e) => changeLanguage(e.target.value as Language)}
-              className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
-            >
-              {languages.map((lang) => (
-                <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">{lang.flag} {lang.name}</option>
-              ))}
-            </select>
-          </div>
+          <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
           <Link
             href="/"
             className="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition border border-slate-200 shadow-sm"

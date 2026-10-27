@@ -25,6 +25,7 @@ function sameKeys(left: unknown, right: unknown, label: string) {
 test('the switcher lists TR, GB, MK, AL, SA in that order', () => {
   assert.deepEqual(languages.map((lang) => lang.code), LOCALES);
   assert.deepEqual(languages.map((lang) => lang.name), ['TR', 'GB', 'MK', 'AL', 'SA']);
+  assert.deepEqual(languages.map((lang) => lang.label), ['Türkçe', 'English', 'Македонски', 'Shqip', 'العربية']);
   assert.deepEqual(languages.map((lang) => lang.flag), ['🇹🇷', '🇬🇧', '🇲🇰', '🇦🇱', '🇸🇦']);
   assert.equal(isLanguage('mk'), true);
   assert.equal(toLanguage('mk'), 'mk');

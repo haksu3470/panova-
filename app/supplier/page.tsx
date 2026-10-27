@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft, CheckCircle2, UserPlus, Send, Building, Languages } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, UserPlus, Send, Building } from 'lucide-react';
 import Link from 'next/link';
-import { Language, languages, translations } from '@/lib/dictionary';
+import { Language, translations } from '@/lib/dictionary';
+import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { homeCopy } from '@/lib/home-copy';
 import { isGmailAddress } from '@/lib/emailAddress';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
@@ -79,18 +80,7 @@ export default function SupplierCandidateRegister() {
             <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
           </Link>
 
-          <div className="flex items-center bg-slate-800 rounded-xl px-2.5 py-1.5 border border-slate-700 shadow-sm">
-            <Languages className="w-4 h-4 text-slate-300 mr-1.5 rtl:ml-1.5" />
-            <select
-              value={currentLang}
-              onChange={(e) => changeLanguage(e.target.value as Language)}
-              className="bg-transparent text-xs sm:text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer"
-            >
-              {languages.map((lang) => (
-                <option key={lang.code} value={lang.code} className="text-slate-900">{lang.flag} {lang.name}</option>
-              ))}
-            </select>
-          </div>
+          <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} tone="dark" />
         </div>
 
         <div className="bg-slate-800 p-4 sm:p-8 rounded-3xl border border-slate-700 shadow-2xl">

@@ -462,11 +462,11 @@ export interface Translation {
 }
 
 export const languages = [
-  { code: 'tr' as Language, name: 'TR', flag: '🇹🇷' },
-  { code: 'en' as Language, name: 'GB', flag: '🇬🇧' },
-  { code: 'mk' as Language, name: 'MK', flag: '🇲🇰' },
-  { code: 'sq' as Language, name: 'AL', flag: '🇦🇱' },
-  { code: 'ar' as Language, name: 'SA', flag: '🇸🇦' },
+  { code: 'tr' as Language, name: 'TR', label: 'Türkçe', flag: '🇹🇷' },
+  { code: 'en' as Language, name: 'GB', label: 'English', flag: '🇬🇧' },
+  { code: 'mk' as Language, name: 'MK', label: 'Македонски', flag: '🇲🇰' },
+  { code: 'sq' as Language, name: 'AL', label: 'Shqip', flag: '🇦🇱' },
+  { code: 'ar' as Language, name: 'SA', label: 'العربية', flag: '🇸🇦' },
 ];
 
 export const translations: Record<Language, Translation> = {

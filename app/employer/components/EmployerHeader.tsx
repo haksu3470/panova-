@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Language, languages } from '@/lib/dictionary';
+import { Language } from '@/lib/dictionary';
+import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 
 interface EmployerHeaderProps {
   country: string;
@@ -62,17 +63,7 @@ export default function EmployerHeader({
           </button>
         )}
 
-        <select
-          value={lang}
-          onChange={(e) => setLang(e.target.value as Language)}
-          className="px-3 py-2 border border-slate-300 rounded-xl text-xs bg-slate-50 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-        >
-          {languages.map((item) => (
-            <option key={item.code} value={item.code}>
-              {item.flag} {item.name}
-            </option>
-          ))}
-        </select>
+        <LanguageSwitcher currentLang={lang} onChange={setLang} />
 
         <button
           onClick={() => window.location.href = '/'}

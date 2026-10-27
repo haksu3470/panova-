@@ -19,10 +19,11 @@ import {
 import { 
   User, CheckCircle2, LogOut, Lock, Camera, 
   FileText, Eye, X, Briefcase, Calendar, 
-  Plane, Languages, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, Video, ShieldAlert, ShieldCheck, AlertCircle
+  Plane, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, Video, ShieldAlert, ShieldCheck, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
-import { Language, languages, translations } from '@/lib/dictionary';
+import { Language, translations } from '@/lib/dictionary';
+import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 
@@ -705,24 +706,7 @@ export default function CandidateDashboard() {
             <span className="font-extrabold text-slate-800 text-sm tracking-wide">PANOVA PORTAL</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200">
-              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
-              <select 
-                value={currentLang} 
-                onChange={(e) => {
-                  const newLang = e.target.value as Language;
-                  setCurrentLang(newLang);
-                  writeStoredLanguage(newLang);
-                }} 
-                className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
-              >
-                {languages.map((lang) => (
-                  <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">
-                    {lang.flag} {lang.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <LanguageSwitcher currentLang={currentLang} onChange={(lang) => { setCurrentLang(lang); writeStoredLanguage(lang); }} />
             <Link href="/" className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border border-slate-200">
               <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" /> {t.returnHome}
             </Link>
@@ -975,24 +959,7 @@ export default function CandidateDashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <div className="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200">
-              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
-              <select 
-                value={currentLang}
-                onChange={(e) => {
-                  const newLang = e.target.value as Language;
-                  setCurrentLang(newLang);
-                  writeStoredLanguage(newLang);
-                }}
-                className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
-              >
-                {languages.map((lang) => (
-                  <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">
-                    {lang.flag} {lang.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <LanguageSwitcher currentLang={currentLang} onChange={(lang) => { setCurrentLang(lang); writeStoredLanguage(lang); }} />
 
             <Link href="/" className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border">
               <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" /> {t.returnHome}
