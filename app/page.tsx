@@ -49,7 +49,8 @@ export default function HomePage() {
     if (!error) {
       setSubmitted(true);
     } else {
-      alert('Error submitting form: ' + error.message);
+      console.error('contact form submit failed', error);
+      alert(t.formSubmitError || 'Mesajınız gönderilemedi. Lütfen tekrar deneyin.');
     }
   };
 
