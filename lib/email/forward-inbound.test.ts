@@ -7,12 +7,17 @@ import { company } from '../company.ts';
 register(new URL('./resolve-at.mjs', import.meta.url).href, import.meta.url);
 
 const {
+  buildForwardContent,
+  contactFormSubmissionId,
+  forwardReplyAddress,
   isAddressedToCompany,
   isCompanyMailbox,
   isPersonalInbox,
   isSharedCompanyMailbox,
   skipReason,
 } = await import('./forward-inbound.ts');
+
+const contactHeader = { 'X-Panova-Contact-Form': '11111111-1111-4111-8111-111111111111' };
 
 const external = 'visitor@example.com';
 
@@ -102,4 +107,97 @@ test('loop prevention still drops self, auto-submitted, and already-forwarded ma
     }),
     null,
   );
+});
+
+test('a homepage contact notification from the company domain is forwarded', () => {
+  assert.equal(contactFormSubmissionId(contactHeader), '11111111-1111-4111-8111-111111111111');
+  assert.equal(contactFormSubmissionId({ 'X-Panova-Contact-Form': 'not-a-uuid' }), null);
+  assert.equal(
+    skipReason({ from: company.email, to: company.email, headers: contactHeader }),
+    null,
+  );
+  assert.equal(
+    skipReason({ from: 'Panova <panova@panovagroup.org>', to: company.email, headers: contactHeader }),
+    null,
+  );
+  assert.equal(
+    skipReason({
+      from: company.email,
+      to: company.email,
+      subject: 'Yeni iletişim formu: Ada — Panova HR',
+    }),
+    null,
+  );
+  assert.equal(
+    skipReason({
+      from: company.email,
+      to: company.email,
+      subject: '[Panova] Yeni iletişim formu: Ada',
+    }),
+    'from-self',
+  );
+  assert.equal(
+    skipReason({
+      from: company.email,
+      to: company.email,
+      headers: { ...contactHeader, 'Auto-Submitted': 'auto-generated' },
+    }),
+    'auto-submitted',
+  );
+  assert.equal(
+    skipReason({
+      from: company.email,
+      to: company.email,
+      headers: { ...contactHeader, 'X-Panova-Forwarded': 'email_123' },
+    }),
+    'already-forwarded',
+  );
+  assert.equal(
+    forwardReplyAddress({
+      from: `Panova <${company.email}>`,
+      headers: contactHeader,
+      replyTo: ['Visitor <Ada@Example.com>'],
+    }),
+    'ada@example.com',
+  );
+  assert.equal(
+    forwardReplyAddress({
+      from: company.email,
+      headers: contactHeader,
+      replyTo: [company.email],
+    }),
+    company.email,
+  );
+  assert.equal(
+    forwardReplyAddress({
+      from: external,
+      headers: contactHeader,
+      replyTo: ['other@example.com'],
+    }),
+    external,
+  );
+  assert.equal(
+    forwardReplyAddress({
+      from: company.email,
+      subject: 'Yeni iletişim formu: Ada',
+      replyTo: ['Ada@Example.com'],
+    }),
+    'ada@example.com',
+  );
+  const notice = buildForwardContent({
+    from: company.email,
+    to: company.email,
+    subject: 'Yeni iletişim formu',
+    text: 'Not',
+    intro: 'Panova iletişim formu. Yanıt, formu dolduran kişiye gider.',
+  });
+  assert.match(notice.text, /^Panova iletişim formu/);
+  assert.match(notice.html, /formu dolduran kişiye gider/);
+  const ordinary = buildForwardContent({
+    from: external,
+    to: company.email,
+    subject: 'Merhaba',
+    text: 'Gövde',
+  });
+  assert.match(ordinary.text, /^Panova gelen kutusu iletisi/);
 });

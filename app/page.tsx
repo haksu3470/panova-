@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { Users, Globe2, Sprout, HardHat, Building2, CheckCircle2, Lock, Send, User, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { StatsBar, AudienceSections, TrustSections, CompanyAbout, SiteFooter } from '@/components/home/HomeSections';
@@ -33,25 +32,29 @@ export default function HomePage() {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.from('contact_submissions').insert([
-      {
-        company_key: selectedCompanyKey,
-        company_name: company.name,
-        full_name: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        notes: formData.notes,
-      },
-    ]);
+    let ok = false;
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          companyKey: selectedCompanyKey,
+          companyName: company.name,
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          notes: formData.notes,
+        }),
+      });
+      ok = response.ok;
+      if (!ok) console.error('contact form submit failed', response.status);
+    } catch (error) {
+      console.error('contact form submit failed', error instanceof Error ? error.name : 'error');
+    }
 
     setLoading(false);
-
-    if (!error) {
-      setSubmitted(true);
-    } else {
-      console.error('contact form submit failed', error);
-      alert(t.formSubmitError || 'Mesajınız gönderilemedi. Lütfen tekrar deneyin.');
-    }
+    if (ok) setSubmitted(true);
+    else alert(t.formSubmitError || 'Mesajınız gönderilemedi. Lütfen tekrar deneyin.');
   };
 
   return (

@@ -148,10 +148,56 @@ export function normalizeHeaders(headers: unknown): Record<string, string> {
 
 export type SkipReason = 'not-company' | 'auto-submitted' | 'already-forwarded' | 'from-self';
 
+/** Homepage contact notification. Lets that one company-sent message through from-self. */
+export const CONTACT_FORM_HEADER = 'x-panova-contact-form';
+
+const CONTACT_FORM_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Submission id from X-Panova-Contact-Form, or null when the header is missing or not a UUID. */
+export function contactFormSubmissionId(headers: unknown): string | null {
+  const value = normalizeHeaders(headers)[CONTACT_FORM_HEADER]?.trim() ?? '';
+  return CONTACT_FORM_ID.test(value) ? value.toLowerCase() : null;
+}
+
+const CONTACT_FORM_SUBJECT = 'yeni iletişim formu:';
+
+/**
+ * True for the homepage notification. The header is the primary mark.
+ * The Turkish subject is a fallback when a receiver drops custom headers.
+ */
+export function isHomepageContactNotice(input: { headers?: unknown; subject?: unknown }): boolean {
+  if (contactFormSubmissionId(input.headers)) return true;
+  const subject = String(input.subject ?? '').replace(/[\r\n]+/g, ' ').trim().toLowerCase();
+  return subject.startsWith(CONTACT_FORM_SUBJECT);
+}
+
+/**
+ * Reply target for a forward.
+ * Ordinary mail replies to the original From address.
+ * A homepage contact notification is sent from the company domain, so From would
+ * point the reply back at ourselves. Those messages carry X-Panova-Contact-Form
+ * and the visitor's Reply-To; use that address instead.
+ */
+export function forwardReplyAddress(input: {
+  from?: unknown;
+  headers?: unknown;
+  replyTo?: unknown;
+  subject?: unknown;
+}): string | undefined {
+  const fromAddress = extractEmails(input.from)[0];
+  if (fromAddress && isCompanyMailbox(fromAddress) && isHomepageContactNotice(input)) {
+    const headers = normalizeHeaders(input.headers);
+    const hinted = extractEmails(input.replyTo)[0] || extractEmails(headers['reply-to'])[0];
+    if (hinted && !isCompanyMailbox(hinted)) return hinted;
+  }
+  return fromAddress;
+}
+
 /**
  * Drop mail that would loop, or that was not sent to a shared company mailbox.
  * Personal inboxes return `not-company` (they are not forwarded).
- * from-self still treats every panovagroup.org sender as our own mail.
+ * from-self still treats every panovagroup.org sender as our own mail, except a
+ * homepage contact notification (X-Panova-Contact-Form, or the Turkish subject).
  */
 export function skipReason(input: {
   from?: unknown;
@@ -160,6 +206,7 @@ export function skipReason(input: {
   bcc?: unknown;
   received_for?: unknown;
   headers?: unknown;
+  subject?: unknown;
 }): SkipReason | null {
   if (!isAddressedToCompany(input)) return 'not-company';
 
@@ -173,7 +220,9 @@ export function skipReason(input: {
     return 'auto-submitted';
   }
 
-  if (froms.some(isCompanyMailbox)) return 'from-self';
+  if (froms.some(isCompanyMailbox) && !isHomepageContactNotice({ headers, subject: input.subject })) {
+    return 'from-self';
+  }
 
   return null;
 }
@@ -218,10 +267,12 @@ export function buildForwardContent(input: {
   text?: string | null;
   html?: string | null;
   attachmentNote?: string;
+  intro?: string;
 }): { text: string; html: string } {
+  const intro = input.intro?.trim() || 'Panova gelen kutusu iletisi. Yanıt, özgün gönderene gider.';
   const plainBody = (input.text || '').trim() || (input.html ? htmlToText(input.html) : '') || '(gövde yok)';
   const text = [
-    'Panova gelen kutusu iletisi. Yanıt, özgün gönderene gider.',
+    intro,
     '',
     `Kimden: ${input.from || '—'}`,
     `Kime: ${input.to || '—'}`,
@@ -237,7 +288,7 @@ export function buildForwardContent(input: {
 
   const html = `
 <div style="font-family:Arial,sans-serif;color:#333;font-size:14px;line-height:1.5">
-  <p style="margin:0 0 12px"><strong>Panova gelen kutusu iletisi.</strong> Yanıt, özgün gönderene gider.</p>
+  <p style="margin:0 0 12px"><strong>${escapeHtml(intro)}</strong></p>
   <p style="margin:0">Kimden: ${escapeHtml(input.from || '—')}</p>
   <p style="margin:0">Kime: ${escapeHtml(input.to || '—')}</p>
   ${input.cc ? `<p style="margin:0">Cc: ${escapeHtml(input.cc)}</p>` : ''}

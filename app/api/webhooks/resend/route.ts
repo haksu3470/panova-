@@ -4,8 +4,9 @@ import {
   FORWARD_TO,
   MAX_ATTACHMENT_BYTES,
   buildForwardContent,
-  extractEmails,
   forwardFromAddress,
+  isHomepageContactNotice,
+  forwardReplyAddress,
   headerValue,
   isAddressedToCompany,
   joinAddresses,
@@ -131,6 +132,7 @@ export async function POST(request: Request) {
     bcc: email.bcc,
     received_for: email.received_for,
     headers: email.headers,
+    subject: email.subject,
   });
   if (reason) {
     console.info('Inbound forward skipped', inbound.email_id, reason);
@@ -151,7 +153,13 @@ export async function POST(request: Request) {
   }
 
   const fromHeader = joinAddresses(email.from);
-  const replyTo = extractEmails(fromHeader)[0];
+  const contactNotice = isHomepageContactNotice({ headers: email.headers, subject: email.subject });
+  const replyTo = forwardReplyAddress({
+    from: fromHeader,
+    headers: email.headers,
+    replyTo: email.reply_to,
+    subject: email.subject,
+  });
   const content = buildForwardContent({
     from: fromHeader,
     to: joinAddresses(email.to),
@@ -161,6 +169,7 @@ export async function POST(request: Request) {
     text: email.text,
     html: email.html,
     attachmentNote,
+    ...(contactNotice ? { intro: 'Panova iletişim formu. Yanıt, formu dolduran kişiye gider.' } : {}),
   });
 
   const { error: sendError } = await resend.emails.send(
