@@ -3,7 +3,7 @@
 import OAuthButtons from '@/components/auth/OAuthButtons';
 import { AuthFooter } from '@/components/site/AuthFooter';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ensureStaff, signOut } from '@/lib/auth';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
@@ -36,6 +36,8 @@ import TasksTab from '../../components/portal/TasksTab';
 
 export default function PortalPage() {
   const [currentLang, setCurrentLang] = useState<Language>('en');
+  const langRef = useRef(currentLang);
+  langRef.current = currentLang;
 
   useEffect(() => {
     const onStorage = () => {
@@ -169,12 +171,19 @@ export default function PortalPage() {
     writeAudit(actionText);
   };
 
-  const enterStaff = async (userId: string, email: string | undefined, fullName?: string, announce = false) => {
+  const enterStaff = async (
+    userId: string,
+    email: string | undefined,
+    fullName?: string,
+    announce = false,
+    audit = announce,
+  ) => {
     const staffOk = await ensureStaff(fullName || email || undefined);
     if (!staffOk) {
       if (announce) {
         await signOut();
-        alert(t.staffNotInvited);
+        const copy = translations[langRef.current] || translations.en;
+        alert(copy.staffNotInvited);
       }
       return false;
     }
@@ -182,7 +191,7 @@ export default function PortalPage() {
     const loggedUser = staffData || { name: fullName || email, email, role_level: 'upper_management' };
     setAuthenticated(true);
     setCurrentUser(loggedUser);
-    if (announce) logAudit('Sisteme Supabase Auth ile Giriş Yapıldı', loggedUser.name);
+    if (audit) logAudit('Sisteme Supabase Auth ile Giriş Yapıldı', loggedUser.name);
     return true;
   };
 
@@ -193,6 +202,7 @@ export default function PortalPage() {
       setAuthMode('verify');
     }
     let alive = true;
+    let handledUserId: string | null = null;
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event !== 'INITIAL_SESSION' && event !== 'SIGNED_IN') return;
       setTimeout(async () => {
@@ -206,7 +216,19 @@ export default function PortalPage() {
           return;
         }
         if (gate.status !== 'ready') return;
-        await enterStaff(session.user.id, session.user.email || undefined);
+        // Google dönüşü INITIAL_SESSION veya SIGNED_IN olabilir. Personel değilse
+        // ikisinde de uyarı göster; sessiz dönüş giriş formunda kalmasın.
+        // Denetim kaydı yalnız yeni oturumda yazılır, sayfa yenilemesinde değil.
+        if (handledUserId === session.user.id) return;
+        handledUserId = session.user.id;
+        const opened = await enterStaff(
+          session.user.id,
+          session.user.email || undefined,
+          undefined,
+          true,
+          event === 'SIGNED_IN',
+        );
+        if (!opened) handledUserId = null;
       }, 0);
     });
     return () => {

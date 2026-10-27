@@ -18,14 +18,24 @@ export async function isStaff(): Promise<boolean> {
 }
 
 /**
- * Personel girişi sonrası: kullanıcı personel değilse ve sistemde hiç personel yoksa
- * claim_first_staff ile ilk yönetici profili oluşturulur (RPC sunucu tarafında kontrol eder).
+ * Daveti bağlar veya staff_members.auth_user_id'si bu oturum olan kayıttan
+ * profili role=staff yapar. Personel satırı yoksa RPC hata verir ve profil değişmez.
+ */
+async function syncLinkedStaff(): Promise<boolean> {
+  const linked = await supabase.rpc('link_my_staff');
+  if (linked.error) return false;
+  return isStaff();
+}
+
+/**
+ * Personel oturumu:
+ * 1. syncLinkedStaff — daveti bağlar veya role'ü ezilmiş profili onarır.
+ * 2. isStaff — profil zaten personel (bağlı satır yeniden yazılamasa da).
+ * 3. claim_first_staff — yalnızca sistemde hiç personel yokken ilk yöneticiyi açar.
  */
 export async function ensureStaff(fullName?: string): Promise<boolean> {
+  if (await syncLinkedStaff()) return true;
   if (await isStaff()) return true;
-  // Davet edilmiş personel: doğrulanmış e-posta eşleşirse kayda bağlanır
-  const linked = await supabase.rpc('link_my_staff');
-  if (!linked.error && (await isStaff())) return true;
   const { error } = await supabase.rpc('claim_first_staff', {
     p_full_name: fullName || 'Yönetici',
     p_staff_role: 'upper_management',
