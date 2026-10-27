@@ -2,9 +2,10 @@
 
 import AuthGuard from '@/components/auth/AuthGuard';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { signOut } from '@/lib/auth';
+import { EmployerWriteError, toEmployerProfileView, type EmployerRow } from '@/lib/employerProfile';
 import { employerService } from '@/lib/services/employerService';
 import { 
   Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, 
@@ -38,71 +39,62 @@ function EmployerPortalInner() {
     writeStoredLanguage(lang);
   };
 
-  const [employerProfile, setEmployerProfile] = useState<any>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('panova_employer_profile');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (parsed && parsed.companyName) return parsed;
-        } catch (e) {}
-      }
-    }
-    return {
-      id: 'admin_master',
-      companyName: 'AKAY EĞİTİM',
-      contactPerson: 'Hüseyin Aksu',
-      phone: '+38970385792',
-      country: 'North Macedonia',
-      email: 'huseyinaksu@gmail.com',
-      companyLogo: ''
-    };
-  });
+  const [employerProfile, setEmployerProfile] = useState<ReturnType<typeof toEmployerProfileView> | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileErrorCode, setProfileErrorCode] = useState('');
+  const [profileErrorDetail, setProfileErrorDetail] = useState('');
+  const [profileSaving, setProfileSaving] = useState(false);
 
   const [editCompanyName, setEditCompanyName] = useState('');
   const [editContactPerson, setEditContactPerson] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [editPhone, setEditPhone] = useState('');
-  const [editCountry, setEditCountry] = useState('North Macedonia');
+  const [editCountry, setEditCountry] = useState('');
   const [editCompanyLogo, setEditCompanyLogo] = useState('');
 
-  useEffect(() => {
-    async function fetchLatestFromDB() {
-      try {
-        const targetEmail = employerProfile?.email || 'huseyinaksu@gmail.com';
-        const allEmployers = await employerService.getAllEmployers();
-        const data = allEmployers.find((e: any) => e.email === targetEmail) || allEmployers[0];
-
-        if (data) {
-          const synced = {
-            id: data.id,
-            companyName: data.company_name || 'AKAY EĞİTİM',
-            contactPerson: data.contact_person || 'Hüseyin Aksu',
-            email: data.email || targetEmail,
-            phone: data.phone || '+38970385792',
-            country: data.country || 'North Macedonia',
-            companyLogo: data.logo || ''
-          };
-          setEmployerProfile(synced);
-          localStorage.setItem('panova_employer_profile', JSON.stringify(synced));
-        }
-      } catch (err) {
-        console.error('Veri çekme hatası:', err);
-      }
-    }
-    fetchLatestFromDB();
+  const rememberEmployer = useCallback((row: EmployerRow) => {
+    const synced = toEmployerProfileView(row);
+    setEmployerProfile(synced);
+    setEditCompanyName(synced.companyName);
+    setEditContactPerson(synced.contactPerson);
+    setEditEmail(synced.email);
+    setEditPhone(synced.phone);
+    setEditCountry(synced.country);
+    setEditCompanyLogo(synced.companyLogo);
+    setProfileErrorCode('');
+    setProfileErrorDetail('');
+    localStorage.setItem('panova_employer_profile', JSON.stringify(synced));
   }, []);
 
+  const profileMessage = (code: string, fallback = '') => {
+    if (code === 'email_taken') return t.profileEmailTaken || fallback;
+    if (code === 'not_linked') return t.profileNotLinked || fallback;
+    const failed = t.profileSaveFailed || 'Şirket profili kaydedilemedi. Veritabanına yazılmadı.';
+    if ((code === 'invalid' || code === 'write_failed') && fallback) return `${failed} ${fallback}`;
+    return failed;
+  };
+
   useEffect(() => {
-    if (employerProfile) {
-      setEditCompanyName(employerProfile.companyName || employerProfile.company_name || 'AKAY EĞİTİM');
-      setEditContactPerson(employerProfile.contactPerson || employerProfile.contact_person || 'Hüseyin Aksu');
-      setEditEmail(employerProfile.email || 'huseyinaksu@gmail.com');
-      setEditPhone(employerProfile.phone || '+38970385792');
-      setEditCountry(employerProfile.country || 'North Macedonia');
-      setEditCompanyLogo(employerProfile.companyLogo || employerProfile.company_logo || employerProfile.logo || '');
-    }
-  }, [employerProfile]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const row = await employerService.getMyEmployer();
+        if (cancelled) return;
+        rememberEmployer(row);
+      } catch (err) {
+        console.error('Veri çekme hatası:', err);
+        if (cancelled) return;
+        setEmployerProfile(null);
+        setProfileErrorCode(err instanceof EmployerWriteError ? err.code : 'write_failed');
+        setProfileErrorDetail(err instanceof Error ? err.message : '');
+      } finally {
+        if (!cancelled) setProfileLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [rememberEmployer]);
 
   const [activeTab, setActiveTab] = useState<
     'home' | 'demands' | 'candidates' | 'interviews' | 'selected' | 'status' | 'travel' | 'employees' | 'support' | 'company'
@@ -131,19 +123,17 @@ function EmployerPortalInner() {
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMessage, setSupportMessage] = useState('');
 
-  useEffect(() => {
-    if (employerProfile) {
-      fetchEmployerData();
-    }
-  }, [employerProfile]);
+  const fetchEmployerData = useCallback(async () => {
+    if (!employerProfile?.id) return;
+    const compName = employerProfile.companyName;
+    const filter = compName
+      ? `employer_name.ilike.%${compName}%,employer_id.eq.${employerProfile.id}`
+      : `employer_id.eq.${employerProfile.id}`;
 
-  const fetchEmployerData = async () => {
-    const compName = employerProfile?.companyName || employerProfile?.company_name || 'AKAY EĞİTİM';
-    
     const { data: demData } = await supabase
       .from('job_requests')
       .select('*')
-      .or(`employer_name.ilike.%${compName}%,employer_id.eq.${employerProfile?.id || 'none'}`)
+      .or(filter)
       .order('created_at', { ascending: false });
 
     if (demData && demData.length > 0) {
@@ -173,7 +163,13 @@ function EmployerPortalInner() {
 
     const { data: ticketData } = await supabase.from('candidate_support_tickets').select('*').order('created_at', { ascending: false });
     if (ticketData) setSupportTickets(ticketData);
-  };
+  }, [employerProfile]);
+
+  useEffect(() => {
+    if (employerProfile) {
+      fetchEmployerData();
+    }
+  }, [employerProfile, fetchEmployerData]);
 
   const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -215,48 +211,31 @@ function EmployerPortalInner() {
 
   const handleUpdateCompanyInfo = async (e: React.FormEvent) => {
     e.preventDefault();
-    const updated = {
-      ...employerProfile,
-      companyName: editCompanyName,
-      contactPerson: editContactPerson,
-      email: editEmail,
-      phone: editPhone,
-      country: editCountry,
-      companyLogo: editCompanyLogo
-    };
-
+    if (!employerProfile?.id || profileSaving || profileLoading) return;
+    setProfileSaving(true);
+    setProfileErrorCode('');
+    setProfileErrorDetail('');
     try {
-      const targetEmail = editEmail || employerProfile.email || 'huseyinaksu@gmail.com';
-      const allEmployers = await employerService.getAllEmployers();
-      const existing = allEmployers.find((e: any) => e.email === targetEmail);
-
-      if (existing) {
-        await employerService.updateEmployer(existing.id, {
-          company_name: editCompanyName,
-          contact_person: editContactPerson,
-          phone: editPhone,
-          country: editCountry,
-          logo: editCompanyLogo
-        });
-      } else {
-        await employerService.createEmployer({
-          company_name: editCompanyName,
-          contact_person: editContactPerson,
-          email: targetEmail,
-          phone: editPhone,
-          country: editCountry,
-          logo: editCompanyLogo
-        });
-      }
+      const saved = await employerService.saveMyCompanyProfile({
+        companyName: editCompanyName,
+        contactPerson: editContactPerson,
+        email: editEmail,
+        phone: editPhone,
+        country: editCountry,
+        logo: editCompanyLogo,
+      }, employerProfile.id);
+      rememberEmployer(saved);
+      alert(t.profileUpdatedSuccess || 'Şirket profili başarıyla güncellendi!');
     } catch (err) {
       console.error('Servis Güncelleme Hatası:', err);
+      const code = err instanceof EmployerWriteError ? err.code : 'write_failed';
+      const detail = err instanceof Error ? err.message : '';
+      setProfileErrorCode(code);
+      setProfileErrorDetail(detail);
+      alert(profileMessage(code, detail));
+    } finally {
+      setProfileSaving(false);
     }
-
-    setEmployerProfile(updated);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('panova_employer_profile', JSON.stringify(updated));
-    }
-    alert(t.profileUpdatedSuccess || 'Şirket bilgileriniz başarıyla kaydedildi!');
   };
 
   const handleLogout = async () => {
@@ -274,14 +253,15 @@ function EmployerPortalInner() {
 
   const handleCreateCorporateDemand = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!employerProfile?.id) return;
     if (selectedPositions.length === 0 && !customPosition.trim()) return;
 
     const finalPositions = [...selectedPositions];
     if (customPosition.trim()) finalPositions.push(customPosition.trim());
 
     const newDemandPayload = {
-      employer_id: employerProfile?.id || 'admin_master',
-      employer_name: employerProfile?.companyName || employerProfile?.company_name || 'AKAY EĞİTİM',
+      employer_id: employerProfile.id,
+      employer_name: employerProfile.companyName,
       position_title: finalPositions.join(', '),
       sector: selectedSector,
       headcount: Number(demandHeadcount),
@@ -301,11 +281,11 @@ function EmployerPortalInner() {
 
   const handleSendSupport = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!supportSubject.trim() || !supportMessage.trim()) return;
+    if (!employerProfile?.id || !supportSubject.trim() || !supportMessage.trim()) return;
 
     const ticketPayload = {
-      candidate_id: employerProfile?.id || 'employer',
-      candidate_name: employerProfile?.companyName || employerProfile?.company_name || 'AKAY EĞİTİM',
+      candidate_id: employerProfile.id,
+      candidate_name: employerProfile.companyName,
       subject: supportSubject,
       message: supportMessage,
       status: 'open'
@@ -377,7 +357,7 @@ function EmployerPortalInner() {
                 {editCompanyLogo && (
                   <img src={editCompanyLogo} alt="Şirket Logosu" className="h-7 w-auto object-contain rounded border bg-white p-0.5" />
                 )}
-                <h1 className="text-lg sm:text-xl font-extrabold text-slate-900">{editCompanyName || employerProfile.companyName}</h1>
+                <h1 className="text-lg sm:text-xl font-extrabold text-slate-900">{editCompanyName || employerProfile?.companyName || ''}</h1>
               </div>
             </div>
           </div>
@@ -399,7 +379,7 @@ function EmployerPortalInner() {
             )}
 
             <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl text-xs">
-              <span className="font-bold text-slate-950">Yetkili: {editContactPerson || employerProfile.contactPerson}</span>
+              <span className="font-bold text-slate-950">Yetkili: {editContactPerson || employerProfile?.contactPerson || ''}</span>
             </div>
 
             <Link
@@ -419,6 +399,12 @@ function EmployerPortalInner() {
             </button>
           </div>
         </div>
+
+        {profileErrorCode && !employerProfile?.id && (
+          <p className="text-sm font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            {profileMessage(profileErrorCode, profileErrorDetail)}
+          </p>
+        )}
 
         {/* 10 SEKME */}
         <div className="bg-white p-3 rounded-2xl border shadow-sm">
@@ -941,8 +927,16 @@ function EmployerPortalInner() {
                 </div>
               )}
 
-              <button type="submit" className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-6 py-3 rounded-xl font-bold transition shadow cursor-pointer">
-                {t.saveCompanyBtn || 'Bilgileri ve Logoyu Kalıcı Olarak Kaydet'}
+              {profileErrorCode && (
+                <p className="text-sm font-bold text-red-700">{profileMessage(profileErrorCode, profileErrorDetail)}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={!employerProfile?.id || profileSaving || profileLoading}
+                className="bg-[#2e7d32] hover:bg-[#1b5e20] disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-bold transition shadow cursor-pointer"
+              >
+                {profileSaving ? (t.updatingBtn || 'Güncelleniyor...') : (t.saveCompanyBtn || 'Bilgileri ve Logoyu Kalıcı Olarak Kaydet')}
               </button>
             </form>
           </div>
