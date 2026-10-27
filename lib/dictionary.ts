@@ -96,6 +96,7 @@ export interface Translation {
   formTitle?: string;
   successTitle?: string;
   successDesc?: string;
+  formSubmitError?: string;
   notesLabel?: string;
   notesPlaceholder?: string;
   certAndVideo: string;
@@ -569,6 +570,7 @@ export const translations: Record<Language, Translation> = {
     formTitle: 'Bize yazın',
     successTitle: 'Mesajınız alındı',
     successDesc: 'talebinizi aldı. En kısa sürede dönüş yapacağız.',
+    formSubmitError: 'Mesajınız gönderilemedi. Lütfen tekrar deneyin veya bize e-posta ile ulaşın.',
     notesLabel: 'Not',
     companies: {
       hr: {
@@ -1052,6 +1054,7 @@ export const translations: Record<Language, Translation> = {
     formTitle: 'Write to us',
     successTitle: 'Message received',
     successDesc: 'has received your request. We will reply shortly.',
+    formSubmitError: 'Your message could not be sent. Please try again or email us directly.',
     notesLabel: 'Note',
     companies: {
       hr: {
@@ -1535,6 +1538,7 @@ export const translations: Record<Language, Translation> = {
     formTitle: 'Na shkruani',
     successTitle: 'Mesazhi u mor',
     successDesc: 'e mori kërkesën tuaj. Do t’ju përgjigjemi së shpejti.',
+    formSubmitError: 'Mesazhi nuk u dërgua. Ju lutemi provoni përsëri ose na shkruani me email.',
     notesLabel: 'Shënim',
     notesPlaceholder: 'P.sh. orari i punës, detajet e turnit...',
     companies: {
@@ -2018,6 +2022,7 @@ export const translations: Record<Language, Translation> = {
     formTitle: 'راسلنا',
     successTitle: 'تم استلام الرسالة',
     successDesc: 'استلم طلبكم. سنرد في أقرب وقت.',
+    formSubmitError: 'تعذر إرسال رسالتكم. يرجى المحاولة مرة أخرى أو مراسلتنا بالبريد.',
     notesLabel: 'ملاحظة',
     companies: {
       hr: {
@@ -2491,6 +2496,7 @@ export const translations: Record<Language, Translation> = {
     formTitle: 'Пишете ни',
     successTitle: 'Пораката е примена',
     successDesc: 'го прими вашето барање. Ќе одговориме наскоро.',
+    formSubmitError: 'Пораката не можеше да се испрати. Обидете се повторно или пишете ни на е-пошта.',
     notesLabel: 'Белешка',
     companies: {
       hr: {
