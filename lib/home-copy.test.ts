@@ -26,4 +26,11 @@ test('auth footer place names and tax line follow the locale', () => {
   assert.equal(homeCopy.ar.about.siteTaxOffice, 'دائرة الضرائب Site');
   assert.equal(homeCopy.ar.about.vkn, 'رقم ضريبة القيمة المضافة');
   assert.equal(homeCopy.ar.about.vkn.includes('VKN'), false);
+
+  assert.equal(homeCopy.mk.about.countries[2], 'Северна Македонија');
+  assert.equal(homeCopy.mk.about.turkeyOffice, 'Канцеларија во Турција');
+  assert.equal(homeCopy.mk.about.siteTaxOffice, 'Даночна управа Site');
+  assert.equal(homeCopy.mk.about.vkn, 'ДДВ број');
+  assert.equal(homeCopy.mk.about.vkn.includes('VKN'), false);
+  assert.equal(homeCopy.mk.langLabel, 'Јазик');
 });

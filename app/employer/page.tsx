@@ -129,9 +129,6 @@ function EmployerPortalInner() {
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMessage, setSupportMessage] = useState('');
 
-  const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
-  const activeLangObj = languages.find((l) => l.code === currentLang);
-
   useEffect(() => {
     if (employerProfile) {
       fetchEmployerData();
@@ -414,10 +411,7 @@ function EmployerPortalInner() {
                 onChange={(e) => changeLanguage(e.target.value as Language)}
                 className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
               >
-                <option value={currentLang} className="font-bold text-slate-900 bg-white">
-                  {activeLangObj?.flag} {activeLangObj?.name}
-                </option>
-                {selectableLanguages.map((lang) => (
+                {languages.map((lang) => (
                   <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">{lang.flag} {lang.name}</option>
                 ))}
               </select>

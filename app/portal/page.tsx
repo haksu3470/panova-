@@ -96,9 +96,6 @@ export default function PortalPage() {
   const [newTaskBackup, setNewTaskBackup] = useState('');
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
   
-  const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
-  const activeLangObj = languages.find((l) => l.code === currentLang);
-
   const userRole = currentUser?.role_level?.toLowerCase() || '';
   const isUpperManagement = userRole === 'upper_management' || currentUser?.isAdmin || currentUser?.email === 'admin';
 
@@ -450,10 +447,7 @@ export default function PortalPage() {
                 onChange={(e) => changeLanguage(e.target.value as Language)}
                 className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
               >
-                <option value={currentLang} className="font-bold text-slate-900 bg-white">
-                  {activeLangObj?.flag} {activeLangObj?.name}
-                </option>
-                {selectableLanguages.map((lang) => (
+                {languages.map((lang) => (
                   <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">
                     {lang.flag} {lang.name}
                   </option>
@@ -598,10 +592,7 @@ export default function PortalPage() {
                 onChange={(e) => changeLanguage(e.target.value as Language)}
                 className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
               >
-                <option value={currentLang} className="font-bold text-slate-900 bg-white">
-                  {activeLangObj?.flag} {activeLangObj?.name}
-                </option>
-                {selectableLanguages.map((lang) => (
+                {languages.map((lang) => (
                   <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">
                     {lang.flag} {lang.name}
                   </option>

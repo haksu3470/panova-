@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Language } from '@/lib/dictionary';
+import { Language, languages } from '@/lib/dictionary';
 
 interface EmployerHeaderProps {
   country: string;
@@ -67,10 +67,11 @@ export default function EmployerHeader({
           onChange={(e) => setLang(e.target.value as Language)}
           className="px-3 py-2 border border-slate-300 rounded-xl text-xs bg-slate-50 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
         >
-          <option value="tr">🇹🇷 Türkçe</option>
-          <option value="en">🇬🇧 English</option>
-          <option value="sq">🇦🇱 Shqip</option>
-          <option value="ar">🇸🇦 العربية</option>
+          {languages.map((item) => (
+            <option key={item.code} value={item.code}>
+              {item.flag} {item.name}
+            </option>
+          ))}
         </select>
 
         <button

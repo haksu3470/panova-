@@ -36,9 +36,6 @@ export default function SupplierCandidateRegister() {
   const s = homeCopy[currentLang].supplier;
   const isRtl = currentLang === 'ar';
   
-  const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
-  const activeLangObj = languages.find((l) => l.code === currentLang);
-
   const [formData, setFormData] = useState({
     fullName: '',
     passportNumber: '',
@@ -89,10 +86,7 @@ export default function SupplierCandidateRegister() {
               onChange={(e) => changeLanguage(e.target.value as Language)}
               className="bg-transparent text-xs sm:text-sm font-semibold text-slate-200 focus:outline-none cursor-pointer"
             >
-              <option value={currentLang} className="text-slate-900 font-bold">
-                {activeLangObj?.flag} {activeLangObj?.name}
-              </option>
-              {selectableLanguages.map((lang) => (
+              {languages.map((lang) => (
                 <option key={lang.code} value={lang.code} className="text-slate-900">{lang.flag} {lang.name}</option>
               ))}
             </select>

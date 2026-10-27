@@ -2,6 +2,35 @@
 
 import React, { useState } from 'react';
 import { PlusCircle, CheckCircle, Video, Award } from 'lucide-react';
+import type { Language } from '@/lib/dictionary';
+
+const demandCopy: Record<Language, { title: string; hint: string; submit: string }> = {
+  tr: {
+    title: 'Yeni Personel Talep Et',
+    hint: 'Personel temini için detaylı kriterler belirleyin',
+    submit: 'Talep Oluştur',
+  },
+  en: {
+    title: 'New Personnel Demand',
+    hint: 'Specify criteria for workforce recruitment',
+    submit: 'Create Demand',
+  },
+  sq: {
+    title: 'Kërkesë e Re',
+    hint: 'Përcaktoni kriteret për sigurimin e personelit',
+    submit: 'Krijo Kërkesën',
+  },
+  ar: {
+    title: 'طلب موظف جديد',
+    hint: 'حدّدوا معايير توفير القوى العاملة',
+    submit: 'إنشاء الطلب',
+  },
+  mk: {
+    title: 'Ново барање за персонал',
+    hint: 'Наведете критериуми за обезбедување работна сила',
+    submit: 'Креирај барање',
+  },
+};
 
 interface DemandFormProps {
   t: any;
@@ -11,6 +40,7 @@ interface DemandFormProps {
 }
 
 export default function DemandForm({ t, lang, onSubmitDemand, successMsg }: DemandFormProps) {
+  const copy = demandCopy[lang as Language] ?? demandCopy.tr;
   const [sector, setSector] = useState('Tarım ve Hayvancılık');
   const [position, setPosition] = useState('');
   const [headcount, setHeadcount] = useState(1);
@@ -62,10 +92,10 @@ export default function DemandForm({ t, lang, onSubmitDemand, successMsg }: Dema
         </div>
         <div>
           <h2 className="text-base font-black text-slate-900">
-            {lang === 'en' ? 'New Personnel Demand' : lang === 'sq' ? 'Kërkesë e Re' : lang === 'ar' ? 'طلب موظف جديد' : 'Yeni Personel Talep Et'}
+            {copy.title}
           </h2>
           <p className="text-xs text-slate-500">
-            {lang === 'en' ? 'Specify criteria for workforce recruitment' : 'Personel temini için detaylı kriterler belirleyin'}
+            {copy.hint}
           </p>
         </div>
       </div>
@@ -187,7 +217,7 @@ export default function DemandForm({ t, lang, onSubmitDemand, successMsg }: Dema
           type="submit"
           className="w-full bg-emerald-700 hover:bg-emerald-800 text-white py-3.5 rounded-xl font-bold transition shadow-lg cursor-pointer mt-4"
         >
-          {lang === 'en' ? 'Create Demand' : lang === 'sq' ? 'Krijo Kërkesën' : lang === 'ar' ? 'إنشاء الطلب' : 'Talep Oluştur'}
+          {copy.submit}
         </button>
       </form>
     </div>

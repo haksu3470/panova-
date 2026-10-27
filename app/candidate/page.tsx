@@ -96,7 +96,8 @@ export default function CandidateDashboard() {
     tr: ['Pasaport Taraması', 'Mesleki Sertifika / İzin Belgesi', 'Adli Sicil Kaydı (Sabıka Kaydı)', 'Sağlık Raporu / Akciğer Grafisi', 'e-Apostil / Dışişleri Bakanlığı Tasdiki'],
     en: ['Passport Scan', 'Professional Certificate / Permit', 'Criminal Record', 'Health Report / X-Ray', 'e-Apostille / MoFA Legalization'],
     sq: ['Skanimi i Pasaportës', 'Certifikata Profesionale / Leja', 'Dëshmi Penaliteti', 'Raporti Shëndetësor / Rrezet X', 'e-Apostille / Legalizimi i Ministrisë së Jashtme'],
-    ar: ['مسح جواز السفر', 'الشهادة المهنية / التصريح', 'السجل الجنائي', 'التقرير الطبي / الأشعة', 'أبوستيل الكتروني / تصديق وزارة الخارجية']
+    ar: ['مسح جواز السفر', 'الشهادة المهنية / التصريح', 'السجل الجنائي', 'التقرير الطبي / الأشعة', 'أبوستيل الكتروني / تصديق وزارة الخارجية'],
+    mk: ['Скен на пасош', 'Професионален сертификат / дозвола', 'Уверение за неосудуваност', 'Здравствен извештај / рендген', 'е-апостил / легализација од Министерството за надворешни работи'],
   };
 
   // Dile duyarlı dinamik metin sözlüğü
@@ -146,7 +147,9 @@ export default function CandidateDashboard() {
       videoPreviewTitle: 'Aday Video Önizlemesi',
       docPreviewTitle: 'Belge Önizlemesi',
       savedSuccess: 'Tüm profil, acil durum ve video bilgileri veritabanına başarıyla kaydedildi!',
-      docUploaded: 'Belge yüklendi ve veritabanına kaydedildi!'
+      docUploaded: 'Belge yüklendi ve veritabanına kaydedildi!',
+      offerUpdated: 'İş teklifi durumu güncellendi!',
+      supportCreated: 'Destek talebiniz oluşturuldu!',
     },
     en: {
       overviewTitle: 'Candidate Status & Missing Items Summary',
@@ -193,7 +196,9 @@ export default function CandidateDashboard() {
       videoPreviewTitle: 'Candidate Video Preview',
       docPreviewTitle: 'Document Preview',
       savedSuccess: 'All profile and emergency data saved successfully!',
-      docUploaded: 'Document uploaded and saved to DB!'
+      docUploaded: 'Document uploaded and saved to DB!',
+      offerUpdated: 'Job offer status updated.',
+      supportCreated: 'Support ticket created successfully!',
     },
     sq: {
       overviewTitle: 'Përmbledhja e Statusit dhe Mungesave të Kandidatit',
@@ -240,7 +245,9 @@ export default function CandidateDashboard() {
       videoPreviewTitle: 'Parapamje e Videos së Kandidatit',
       docPreviewTitle: 'Parapamje e Dokumentit',
       savedSuccess: 'Të gjitha të dhënat e profilit u ruajtën me sukses!',
-      docUploaded: 'Dokumenti u ngarkua dhe u ruajt!'
+      docUploaded: 'Dokumenti u ngarkua dhe u ruajt!',
+      offerUpdated: 'Statusi i ofertës së punës u përditësua!',
+      supportCreated: 'Kërkesa për mbështetje u krijua me sukses!',
     },
     ar: {
       overviewTitle: 'ملخص حالة المرشح والعناصر المفقودة',
@@ -287,8 +294,59 @@ export default function CandidateDashboard() {
       videoPreviewTitle: 'معاينة فيديو المرشح',
       docPreviewTitle: 'معاينة المستند',
       savedSuccess: 'تم حفظ كافة بيانات الملف الشخصي والطوارئ بنجاح!',
-      docUploaded: 'تم تحميل المستند وحفظه في قاعدة البيانات!'
-    }
+      docUploaded: 'تم تحميل المستند وحفظه في قاعدة البيانات!',
+      offerUpdated: 'تم تحديث حالة عرض العمل!',
+      supportCreated: 'تم إنشاء طلب الدعم بنجاح!',
+    },
+    mk: {
+      overviewTitle: 'Преглед на статус и недостатоци на кандидатот',
+      overviewDesc: 'Подолу се наведени работите што треба да се дополнат за пријавата и профилот да бидат одобрени.',
+      allComplete: 'Сè е целосно',
+      hasMissing: 'Има недостатоци',
+      profileMissingTitle: 'Недостатоци во профилот и податоците',
+      profileCompleteText: 'Профилот, фотографијата и податоците за итни случаи се целосни.',
+      missingPhoto: 'Фотографија на профилот',
+      missingVideo: 'Видео за работа / претставување',
+      missingEmergency: 'Контакт за итни случаи',
+      notAdded: 'не е додадено.',
+      editProfileBtn: 'Уреди го профилот и дополни ги недостатоците →',
+      docMissingTitle: 'Недостасувачки документи',
+      docCompleteText: 'Сите задолжителни документи се прикачени.',
+      notUploaded: 'сè уште не е прикачено.',
+      uploadDocsBtn: 'Прикачи документи →',
+      profileHeader: 'Профил, фотографија, видео и итни случаи',
+      photoLabel: 'Фотографија на профилот на кандидатот',
+      photoDesc: 'Прикачете јасна и професионална фотографија за документ.',
+      videoLabel: 'URL на видео за работа / претставување (YouTube / Drive и сл.)',
+      previewBtn: 'Преглед',
+      emailLabel: 'Е-пошта',
+      phoneLabel: 'Телефонски број',
+      emergencyHeader: 'Контакт за итни случаи',
+      emergName: 'Име на лицето',
+      emergRel: 'Сродство',
+      emergPhone: 'Телефон за итни случаи',
+      portalPass: 'Лозинка за порталот',
+      saveProfileBtn: 'Зачувај ги промените во базата',
+      docsHeader: 'Мои документи и следење на е-апостил',
+      uploadedStatus: 'Прикачено',
+      pendingStatus: 'Во чекање',
+      previewDocBtn: 'Преглед',
+      offersHeader: 'Мои понуди за работа',
+      noOffers: 'Сè уште нема активна понуда за работа испратена до вас.',
+      acceptBtn: 'Прифати',
+      rejectBtn: 'Одбиј',
+      supportHeader: 'Барања за поддршка до PANOVA',
+      supportSub: 'Предмет',
+      supportMsg: 'Вашата порака',
+      sendSupportBtn: 'Испрати барање за поддршка',
+      closeModal: 'Затвори',
+      videoPreviewTitle: 'Преглед на видеото на кандидатот',
+      docPreviewTitle: 'Преглед на документ',
+      savedSuccess: 'Профилот и податоците за итни случаи се успешно зачувани!',
+      docUploaded: 'Документот е прикачен и зачуван!',
+      offerUpdated: 'Статусот на понудата за работа е ажуриран!',
+      supportCreated: 'Барањето за поддршка е успешно создадено!',
+    },
   };
 
   const ct = candidateTexts[currentLang] || candidateTexts.tr;
@@ -496,7 +554,7 @@ export default function CandidateDashboard() {
 
     if (!error) {
       setJobOffers(jobOffers.map(o => o.id === offerId ? { ...o, status: newStatus } : o));
-      alert(currentLang === 'tr' ? 'İş teklifi durumu güncellendi!' : 'Job offer status updated.');
+      alert(ct.offerUpdated);
     } else {
       alert('Hata: ' + error.message);
     }
@@ -527,7 +585,7 @@ export default function CandidateDashboard() {
       setSupportTickets([data, ...supportTickets]);
       setSupportSubject('');
       setSupportMsg('');
-      alert(currentLang === 'tr' ? 'Destek talebiniz oluşturuldu!' : 'Support ticket created successfully!');
+      alert(ct.supportCreated);
     } else {
       alert('Hata: ' + (error?.message || 'Bilinmeyen hata'));
     }

@@ -9,7 +9,7 @@ const STORAGE_KEYS = ['panova_lang', 'panova_portal_lang', 'panova_candidate_lan
 export const LANGUAGE_EVENT = 'panova-language';
 
 export function isLanguage(value: string | null): value is Language {
-  return value === 'tr' || value === 'en' || value === 'sq' || value === 'ar';
+  return value === 'tr' || value === 'en' || value === 'sq' || value === 'ar' || value === 'mk';
 }
 
 /** Shared preference. Older pages stored the choice under different keys; any of them still counts. */

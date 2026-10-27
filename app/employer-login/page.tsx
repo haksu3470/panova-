@@ -59,8 +59,6 @@ export default function EmployerLoginPage() {
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
 
-  const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
-  const activeLangObj = languages.find((l) => l.code === currentLang);
 
   const loadEmployerProfile = async (employerId: string, fallbackEmail: string) => {
     const { data: emp } = await supabase.from('employers').select('*').eq('id', employerId).maybeSingle();
@@ -191,10 +189,7 @@ export default function EmployerLoginPage() {
               onChange={(e) => changeLanguage(e.target.value as Language)}
               className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
             >
-              <option value={currentLang} className="font-bold text-slate-900 bg-white">
-                {activeLangObj?.flag} {activeLangObj?.name}
-              </option>
-              {selectableLanguages.map((lang) => (
+              {languages.map((lang) => (
                 <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">{lang.flag} {lang.name}</option>
               ))}
             </select>
