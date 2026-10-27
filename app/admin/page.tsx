@@ -64,7 +64,7 @@ function AdminDashboardPageInner() {
           <div>
             <p className="text-sm font-black tracking-tight text-white leading-none">PANOVA</p>
             <h1 className="text-lg font-black tracking-tight text-white mt-1">{a.title}</h1>
-            <p className="text-[11px] text-slate-400">{company.shortName} &bull; {a.sub}</p>
+            <p className="text-[11px] text-slate-400">{company.brandName} &bull; {a.sub}</p>
           </div>
         </div>
 
