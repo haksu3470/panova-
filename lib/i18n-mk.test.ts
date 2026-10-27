@@ -34,6 +34,14 @@ test('the switcher lists TR, GB, MK, AL, SA in that order', () => {
   assert.equal(toLanguage('xx'), 'en');
 });
 
+test('the HR hero names Panova Group in every locale', () => {
+  for (const lang of LOCALES) {
+    const desc = String(translations[lang].companies.hr.desc);
+    assert.match(desc, /Panova Group/);
+    assert.equal(desc.includes('PANOVA TARIM DOO Struga'), false);
+  }
+});
+
 test('mk dictionaries contain every key used by the other locales', () => {
   for (const lang of LOCALES) {
     if (lang === 'mk') continue;

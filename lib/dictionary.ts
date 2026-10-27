@@ -572,7 +572,7 @@ export const translations: Record<Language, Translation> = {
       hr: {
         name: 'Panova HR',
         tagline: 'İnsan Kaynakları ve İstihdam',
-        desc: 'PANOVA TARIM DOO Struga, yurt dışındaki işverenler için personel bulma, belge kontrolü ve yerleştirme süreçlerini Struga merkezinden yürütür.',
+        desc: 'Panova Group, yurt dışındaki işverenler için personel bulma, belge kontrolü ve yerleştirme süreçlerini Struga merkezinden yürütür.',
         services: ['Yurt dışı personel temini', 'Belge ve sertifika takibi', 'Vize ve çalışma izni takibi', 'İşe uyum desteği'],
       },
       trade: {
@@ -1055,7 +1055,7 @@ export const translations: Record<Language, Translation> = {
       hr: {
         name: 'Panova HR',
         tagline: 'Human Resources & Employment',
-        desc: 'PANOVA TARIM DOO Struga handles overseas recruitment, document checks and placement from its Struga office.',
+        desc: 'Panova Group handles overseas recruitment, document checks and placement from its Struga office.',
         services: ['Overseas recruitment', 'Document and certificate tracking', 'Visa and work-permit follow-up', 'Onboarding support'],
       },
       trade: {
@@ -1539,7 +1539,7 @@ export const translations: Record<Language, Translation> = {
       hr: {
         name: 'Panova HR',
         tagline: 'Burimet Njerëzore dhe Punësimi',
-        desc: 'PANOVA TARIM DOO Struga merret me rekrutimin jashtë vendit, kontrollin e dokumenteve dhe vendosjen në punë nga Struga.',
+        desc: 'Panova Group merret me rekrutimin jashtë vendit, kontrollin e dokumenteve dhe vendosjen në punë nga Struga.',
         services: ['Rekrutim jashtë vendit', 'Ndjekja e dokumenteve', 'Viza dhe leja e punës', 'Mbështetje në punë'],
       },
       trade: {
@@ -2021,7 +2021,7 @@ export const translations: Record<Language, Translation> = {
       hr: {
         name: 'Panova HR',
         tagline: 'الموارد البشرية والتوظيف',
-        desc: 'تتولى PANOVA TARIM DOO Struga التوظيف الخارجي ومتابعة الوثائق من مقرها في ستروغا.',
+        desc: 'تتولى Panova Group التوظيف الخارجي ومتابعة الوثائق من مقرها في ستروغا.',
         services: ['توظيف خارجي', 'متابعة الوثائق', 'التأشيرة وتصريح العمل', 'دعم الالتحاق بالعمل'],
       },
       trade: {
@@ -2494,7 +2494,7 @@ export const translations: Record<Language, Translation> = {
       hr: {
         name: 'Panova HR',
         tagline: 'Човечки ресурси и вработување',
-        desc: 'PANOVA TARIM DOO Struga го води регрутирањето во странство, проверката на документи и распоредувањето од канцеларијата во Струга.',
+        desc: 'Panova Group го води регрутирањето во странство, проверката на документи и распоредувањето од канцеларијата во Струга.',
         services: [
           'Регрутирање во странство',
           'Следење на документи и сертификати',
