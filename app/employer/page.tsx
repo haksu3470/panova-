@@ -4,6 +4,7 @@ import AuthGuard from '@/components/auth/AuthGuard';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { signOut } from '@/lib/auth';
 import { employerService } from '@/lib/services/employerService';
 import { 
   Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, 
@@ -258,7 +259,8 @@ function EmployerPortalInner() {
     alert(t.profileUpdatedSuccess || 'Şirket bilgileriniz başarıyla kaydedildi!');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOut();
     window.location.href = '/employer-login';
   };
 
@@ -384,6 +386,8 @@ function EmployerPortalInner() {
             {typeof window !== 'undefined' && JSON.parse(localStorage.getItem('panova_employer_user') || '{}')?.isAdminImpersonation && (
               <button
                 onClick={() => {
+                  // Staff impersonation return. Keep the Supabase session so /portal
+                  // stays signed in; only the employer view flags are dropped.
                   localStorage.removeItem('panova_employer_auth');
                   localStorage.removeItem('panova_employer_user');
                   window.location.href = '/portal';
