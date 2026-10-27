@@ -225,6 +225,9 @@ export interface Translation {
   updatingBtn?: string;
   saveChangesBtn?: string;
   profileUpdatedSuccess?: string;
+  profileSaveFailed?: string;
+  profileEmailTaken?: string;
+  profileNotLinked?: string;
 
   completed?: string;
   approved?: string;
@@ -724,6 +727,9 @@ export const translations: Record<Language, Translation> = {
     updatingBtn: 'Güncelleniyor...',
     saveChangesBtn: 'Değişiklikleri Kaydet',
     profileUpdatedSuccess: 'Şirket profili başarıyla güncellendi!',
+    profileSaveFailed: 'Şirket profili kaydedilemedi. Veritabanına yazılmadı.',
+    profileEmailTaken: 'Bu e-posta başka bir işveren kaydında kullanılıyor. Değişiklik yazılmadı.',
+    profileNotLinked: 'Bu hesaba bağlı bir işveren kaydı yok. Profil kaydedilmedi.',
 
     completed: 'Tamamlandı',
     approved: 'Onaylandı',
@@ -1208,6 +1214,9 @@ export const translations: Record<Language, Translation> = {
     updatingBtn: 'Updating...',
     saveChangesBtn: 'Save Changes',
     profileUpdatedSuccess: 'Changes successfully saved!',
+    profileSaveFailed: 'Company profile was not saved. The database was not updated.',
+    profileEmailTaken: 'This email is already used by another employer. Nothing was written.',
+    profileNotLinked: 'This account has no linked employer. The profile was not saved.',
 
     completed: 'Completed',
     approved: 'Approved',
@@ -1692,6 +1701,9 @@ export const translations: Record<Language, Translation> = {
     updatingBtn: 'Duke përditësuar...',
     saveChangesBtn: 'Ruaj Ndryshimet',
     profileUpdatedSuccess: 'Ndryshimet u ruajtën me sukses!',
+    profileSaveFailed: 'Profili i kompanisë nuk u ruajt. Baza e të dhënave nuk u përditësua.',
+    profileEmailTaken: 'Ky email është tashmë te një punëdhënës tjetër. Asgjë nuk u shkrua.',
+    profileNotLinked: 'Kjo llogari nuk ka një punëdhënës të lidhur. Profili nuk u ruajt.',
 
     completed: 'Përfunduar',
     approved: 'Miratuar',
@@ -2235,6 +2247,9 @@ export const translations: Record<Language, Translation> = {
     updatingBtn: 'جاري التحديث...',
     saveChangesBtn: 'حفظ التغييرات',
     profileUpdatedSuccess: 'تم تحديث ملف الشركة بنجاح!',
+    profileSaveFailed: 'لم يتم حفظ ملف الشركة. لم تُحدَّث قاعدة البيانات.',
+    profileEmailTaken: 'هذا البريد مستخدم في سجل صاحب عمل آخر. لم يُكتب أي تغيير.',
+    profileNotLinked: 'لا يوجد صاحب عمل مرتبط بهذا الحساب. لم يُحفظ الملف.',
     completed: 'مكتمل',
     approved: 'تم الموافقة',
     pending: 'قيد الانتظار',
@@ -2667,6 +2682,9 @@ export const translations: Record<Language, Translation> = {
     updatingBtn: 'Се ажурира...',
     saveChangesBtn: 'Зачувај промени',
     profileUpdatedSuccess: 'Промените се успешно зачувани!',
+    profileSaveFailed: 'Профилот на компанијата не е зачуван. Базата не е ажурирана.',
+    profileEmailTaken: 'Оваа е-пошта веќе е на друг работодавач. Ништо не е запишано.',
+    profileNotLinked: 'Оваа сметка нема поврзан работодавач. Профилот не е зачуван.',
     completed: 'Завршено',
     approved: 'Одобрено',
     pending: 'Во чекање',
