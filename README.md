@@ -39,13 +39,17 @@ The public site shows three company mailboxes (see `lib/company.ts`):
 
 Mail sent to those shared mailboxes is forwarded to the company owner by `POST /api/webhooks/resend`. Personal Resend Inboxes (`haksu@panovagroup.org`, `mcitil@panovagroup.org`) are not forwarded; they are read in the Resend Inbox UI. The route checks the Resend webhook signature, loads the message with the Receiving API, and sends one forward. Retries use the idempotency key `inbound-forward/<email_id>`.
 
+The homepage form (“Bize yazın”) posts to `POST /api/contact`. The route inserts `public.contact_submissions`, then sends one Turkish notification to `panova@panovagroup.org`. Reply-To is the visitor. The idempotency key is `contact-form/<submission id>`. If that send fails, the visitor still sees success and the error is logged. No new environment variables: the route uses `RESEND_API_KEY` and `RESEND_FROM`.
+
+That notification is sent from the company domain, which the forwarder normally drops as `from-self`. A message with a UUID in `X-Panova-Contact-Form`, or whose subject starts with `Yeni iletişim formu:`, is still forwarded. The forward keeps the visitor as Reply-To so a reply from the owner’s mailbox goes to the person who filled in the form. The forwarded copy is prefixed with `[Panova]`, so it does not match that subject rule again.
+
 ### Environment variables
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `RESEND_API_KEY` | yes | Sending and receiving. A send-only key cannot call `emails.receiving.get`. |
 | `RESEND_WEBHOOK_SECRET` | yes | Signing secret (`whsec_…`) for `/api/webhooks/resend`. Returned once when the webhook is created. |
-| `RESEND_FROM` | yes in production | `Panova <panova@panovagroup.org>`. Forwarding uses this when it is an address on `panovagroup.org`; otherwise it falls back to that same mailbox. A `noreply@` address on the verified domain is also fine. Staff invites use this value as-is when it is set. |
+| `RESEND_FROM` | yes in production | `Panova <panova@panovagroup.org>`. Forwarding and the homepage contact notification use this when it is an address on `panovagroup.org`; otherwise they fall back to that same mailbox. A `noreply@` address on the verified domain is also fine. Staff invites use this value as-is when it is set. |
 | `SITE_URL` | no | Not read by the app. Canonical site is `https://panovagroup.org`. Webhook URL: `https://panovagroup.org/api/webhooks/resend`. Staff invites use `NEXT_PUBLIC_SITE_URL`. |
 
 Set the three Resend variables in the Vercel project. Do not commit secrets.
