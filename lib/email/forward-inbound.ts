@@ -41,25 +41,81 @@ export function forwardFromAddress(): string {
   return `Panova <${INBOX_ADDRESS}>`;
 }
 
-export function isCompanyMailbox(email: string): boolean {
-  const at = email.lastIndexOf('@');
-  return at > 0 && email.slice(at + 1) === COMPANY_DOMAIN;
+/**
+ * Personal Resend Inboxes (Hüseyin, Mehmet Çitil).
+ * Read in the Resend Inbox UI. Never auto-forward these to FORWARD_TO,
+ * even if a recipient rule matches every address on the company domain.
+ * Plus-tags (haksu+foo@) stay with the same inbox.
+ */
+const PERSONAL_INBOX_LOCAL_PARTS = new Set(['haksu', 'mcitil']);
+
+/** Every `email` field on lib/company.ts: panova@, turkiye@, bangladesh@, and later shared aliases. */
+function collectSharedMailboxes(value: unknown, found: Set<string>, seen: Set<unknown>): void {
+  if (!value || typeof value !== 'object' || seen.has(value)) return;
+  seen.add(value);
+  if (Array.isArray(value)) {
+    for (const item of value) collectSharedMailboxes(item, found, seen);
+    return;
+  }
+  for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+    if (key === 'email' && typeof child === 'string') {
+      for (const address of extractEmails(child)) found.add(address);
+    } else {
+      collectSharedMailboxes(child, found, seen);
+    }
+  }
 }
 
-/** True when any recipient is on panovagroup.org (panova@, turkiye@, bangladesh@, or another mailbox). */
+const SHARED_COMPANY_MAILBOXES = new Set<string>();
+collectSharedMailboxes(company, SHARED_COMPANY_MAILBOXES, new Set());
+
+/** haksu@ or mcitil@ on panovagroup.org, case-insensitive. */
+export function isPersonalInbox(email: string): boolean {
+  const normalized = email.trim().toLowerCase();
+  const at = normalized.lastIndexOf('@');
+  if (at <= 0 || normalized.slice(at + 1) !== COMPANY_DOMAIN) return false;
+  const local = normalized.slice(0, at).split('+', 1)[0];
+  return PERSONAL_INBOX_LOCAL_PARTS.has(local);
+}
+
+/**
+ * Any mailbox on panovagroup.org.
+ * Used for from-self loop prevention, not as the forward gate.
+ */
+export function isCompanyMailbox(email: string): boolean {
+  const normalized = email.trim().toLowerCase();
+  const at = normalized.lastIndexOf('@');
+  return at > 0 && normalized.slice(at + 1) === COMPANY_DOMAIN;
+}
+
+/**
+ * Shared company alias that should be copied to FORWARD_TO.
+ * Personal inboxes are excluded even when they sit on the company domain.
+ */
+export function isSharedCompanyMailbox(email: string): boolean {
+  const normalized = email.trim().toLowerCase();
+  if (isPersonalInbox(normalized)) return false;
+  return SHARED_COMPANY_MAILBOXES.has(normalized);
+}
+
+/**
+ * True when a shared company mailbox is among the recipients.
+ * Personal inboxes are removed first, so mail only to haksu@ or mcitil@
+ * does not forward. Mail that also reaches panova@, turkiye@, or bangladesh@ still does.
+ */
 export function isAddressedToCompany(input: {
   to?: unknown;
   cc?: unknown;
   bcc?: unknown;
   received_for?: unknown;
 }): boolean {
-  const all = [
+  const recipients = [
     ...extractEmails(input.to),
     ...extractEmails(input.cc),
     ...extractEmails(input.bcc),
     ...extractEmails(input.received_for),
-  ];
-  return all.some(isCompanyMailbox);
+  ].filter((email) => !isPersonalInbox(email));
+  return recipients.some(isSharedCompanyMailbox);
 }
 
 /** Header values cannot contain CR/LF. */
@@ -92,7 +148,11 @@ export function normalizeHeaders(headers: unknown): Record<string, string> {
 
 export type SkipReason = 'not-company' | 'auto-submitted' | 'already-forwarded' | 'from-self';
 
-/** Drop mail that would loop or that was not sent to a panovagroup.org mailbox. */
+/**
+ * Drop mail that would loop, or that was not sent to a shared company mailbox.
+ * Personal inboxes return `not-company` (they are not forwarded).
+ * from-self still treats every panovagroup.org sender as our own mail.
+ */
 export function skipReason(input: {
   from?: unknown;
   to?: unknown;

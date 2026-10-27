@@ -111,6 +111,7 @@ export async function POST(request: Request) {
   }
 
   const inbound = event.data;
+  // Shared aliases only (panova@, turkiye@, bangladesh@). haksu@ and mcitil@ stay in Resend Inbox.
   if (!isAddressedToCompany(inbound)) {
     return NextResponse.json({ ok: true, skipped: 'not-company' });
   }

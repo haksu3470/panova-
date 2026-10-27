@@ -37,7 +37,7 @@ The public site shows three company mailboxes (see `lib/company.ts`):
 - `turkiye@panovagroup.org` — Türkiye, Sivas
 - `bangladesh@panovagroup.org` — Bangladesh, Dhaka
 
-Mail sent to any address on `panovagroup.org` is forwarded to the company owner by `POST /api/webhooks/resend`. The route checks the Resend webhook signature, loads the message with the Receiving API, and sends one forward. Retries use the idempotency key `inbound-forward/<email_id>`.
+Mail sent to those shared mailboxes is forwarded to the company owner by `POST /api/webhooks/resend`. Personal Resend Inboxes (`haksu@panovagroup.org`, `mcitil@panovagroup.org`) are not forwarded; they are read in the Resend Inbox UI. The route checks the Resend webhook signature, loads the message with the Receiving API, and sends one forward. Retries use the idempotency key `inbound-forward/<email_id>`.
 
 ### Environment variables
 
