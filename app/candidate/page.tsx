@@ -19,10 +19,11 @@ import {
 import { 
   User, CheckCircle2, LogOut, Lock, Camera, 
   FileText, Eye, X, Briefcase, Calendar, 
-  Plane, Languages, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, Video, ShieldAlert, ShieldCheck, AlertCircle
+  Plane, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, Video, ShieldAlert, ShieldCheck, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
-import { Language, languages, translations } from '@/lib/dictionary';
+import { Language, translations } from '@/lib/dictionary';
+import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 
@@ -96,7 +97,8 @@ export default function CandidateDashboard() {
     tr: ['Pasaport Taraması', 'Mesleki Sertifika / İzin Belgesi', 'Adli Sicil Kaydı (Sabıka Kaydı)', 'Sağlık Raporu / Akciğer Grafisi', 'e-Apostil / Dışişleri Bakanlığı Tasdiki'],
     en: ['Passport Scan', 'Professional Certificate / Permit', 'Criminal Record', 'Health Report / X-Ray', 'e-Apostille / MoFA Legalization'],
     sq: ['Skanimi i Pasaportës', 'Certifikata Profesionale / Leja', 'Dëshmi Penaliteti', 'Raporti Shëndetësor / Rrezet X', 'e-Apostille / Legalizimi i Ministrisë së Jashtme'],
-    ar: ['مسح جواز السفر', 'الشهادة المهنية / التصريح', 'السجل الجنائي', 'التقرير الطبي / الأشعة', 'أبوستيل الكتروني / تصديق وزارة الخارجية']
+    ar: ['مسح جواز السفر', 'الشهادة المهنية / التصريح', 'السجل الجنائي', 'التقرير الطبي / الأشعة', 'أبوستيل الكتروني / تصديق وزارة الخارجية'],
+    mk: ['Скен на пасош', 'Професионален сертификат / дозвола', 'Уверение за неосудуваност', 'Здравствен извештај / рендген', 'е-апостил / легализација од Министерството за надворешни работи'],
   };
 
   // Dile duyarlı dinamik metin sözlüğü
@@ -146,7 +148,9 @@ export default function CandidateDashboard() {
       videoPreviewTitle: 'Aday Video Önizlemesi',
       docPreviewTitle: 'Belge Önizlemesi',
       savedSuccess: 'Tüm profil, acil durum ve video bilgileri veritabanına başarıyla kaydedildi!',
-      docUploaded: 'Belge yüklendi ve veritabanına kaydedildi!'
+      docUploaded: 'Belge yüklendi ve veritabanına kaydedildi!',
+      offerUpdated: 'İş teklifi durumu güncellendi!',
+      supportCreated: 'Destek talebiniz oluşturuldu!',
     },
     en: {
       overviewTitle: 'Candidate Status & Missing Items Summary',
@@ -193,7 +197,9 @@ export default function CandidateDashboard() {
       videoPreviewTitle: 'Candidate Video Preview',
       docPreviewTitle: 'Document Preview',
       savedSuccess: 'All profile and emergency data saved successfully!',
-      docUploaded: 'Document uploaded and saved to DB!'
+      docUploaded: 'Document uploaded and saved to DB!',
+      offerUpdated: 'Job offer status updated.',
+      supportCreated: 'Support ticket created successfully!',
     },
     sq: {
       overviewTitle: 'Përmbledhja e Statusit dhe Mungesave të Kandidatit',
@@ -240,7 +246,9 @@ export default function CandidateDashboard() {
       videoPreviewTitle: 'Parapamje e Videos së Kandidatit',
       docPreviewTitle: 'Parapamje e Dokumentit',
       savedSuccess: 'Të gjitha të dhënat e profilit u ruajtën me sukses!',
-      docUploaded: 'Dokumenti u ngarkua dhe u ruajt!'
+      docUploaded: 'Dokumenti u ngarkua dhe u ruajt!',
+      offerUpdated: 'Statusi i ofertës së punës u përditësua!',
+      supportCreated: 'Kërkesa për mbështetje u krijua me sukses!',
     },
     ar: {
       overviewTitle: 'ملخص حالة المرشح والعناصر المفقودة',
@@ -287,8 +295,59 @@ export default function CandidateDashboard() {
       videoPreviewTitle: 'معاينة فيديو المرشح',
       docPreviewTitle: 'معاينة المستند',
       savedSuccess: 'تم حفظ كافة بيانات الملف الشخصي والطوارئ بنجاح!',
-      docUploaded: 'تم تحميل المستند وحفظه في قاعدة البيانات!'
-    }
+      docUploaded: 'تم تحميل المستند وحفظه في قاعدة البيانات!',
+      offerUpdated: 'تم تحديث حالة عرض العمل!',
+      supportCreated: 'تم إنشاء طلب الدعم بنجاح!',
+    },
+    mk: {
+      overviewTitle: 'Преглед на статус и недостатоци на кандидатот',
+      overviewDesc: 'Подолу се наведени работите што треба да се дополнат за пријавата и профилот да бидат одобрени.',
+      allComplete: 'Сè е целосно',
+      hasMissing: 'Има недостатоци',
+      profileMissingTitle: 'Недостатоци во профилот и податоците',
+      profileCompleteText: 'Профилот, фотографијата и податоците за итни случаи се целосни.',
+      missingPhoto: 'Фотографија на профилот',
+      missingVideo: 'Видео за работа / претставување',
+      missingEmergency: 'Контакт за итни случаи',
+      notAdded: 'не е додадено.',
+      editProfileBtn: 'Уреди го профилот и дополни ги недостатоците →',
+      docMissingTitle: 'Недостасувачки документи',
+      docCompleteText: 'Сите задолжителни документи се прикачени.',
+      notUploaded: 'сè уште не е прикачено.',
+      uploadDocsBtn: 'Прикачи документи →',
+      profileHeader: 'Профил, фотографија, видео и итни случаи',
+      photoLabel: 'Фотографија на профилот на кандидатот',
+      photoDesc: 'Прикачете јасна и професионална фотографија за документ.',
+      videoLabel: 'URL на видео за работа / претставување (YouTube / Drive и сл.)',
+      previewBtn: 'Преглед',
+      emailLabel: 'Е-пошта',
+      phoneLabel: 'Телефонски број',
+      emergencyHeader: 'Контакт за итни случаи',
+      emergName: 'Име на лицето',
+      emergRel: 'Сродство',
+      emergPhone: 'Телефон за итни случаи',
+      portalPass: 'Лозинка за порталот',
+      saveProfileBtn: 'Зачувај ги промените во базата',
+      docsHeader: 'Мои документи и следење на е-апостил',
+      uploadedStatus: 'Прикачено',
+      pendingStatus: 'Во чекање',
+      previewDocBtn: 'Преглед',
+      offersHeader: 'Мои понуди за работа',
+      noOffers: 'Сè уште нема активна понуда за работа испратена до вас.',
+      acceptBtn: 'Прифати',
+      rejectBtn: 'Одбиј',
+      supportHeader: 'Барања за поддршка до PANOVA',
+      supportSub: 'Предмет',
+      supportMsg: 'Вашата порака',
+      sendSupportBtn: 'Испрати барање за поддршка',
+      closeModal: 'Затвори',
+      videoPreviewTitle: 'Преглед на видеото на кандидатот',
+      docPreviewTitle: 'Преглед на документ',
+      savedSuccess: 'Профилот и податоците за итни случаи се успешно зачувани!',
+      docUploaded: 'Документот е прикачен и зачуван!',
+      offerUpdated: 'Статусот на понудата за работа е ажуриран!',
+      supportCreated: 'Барањето за поддршка е успешно создадено!',
+    },
   };
 
   const ct = candidateTexts[currentLang] || candidateTexts.tr;
@@ -496,7 +555,7 @@ export default function CandidateDashboard() {
 
     if (!error) {
       setJobOffers(jobOffers.map(o => o.id === offerId ? { ...o, status: newStatus } : o));
-      alert(currentLang === 'tr' ? 'İş teklifi durumu güncellendi!' : 'Job offer status updated.');
+      alert(ct.offerUpdated);
     } else {
       alert('Hata: ' + error.message);
     }
@@ -527,7 +586,7 @@ export default function CandidateDashboard() {
       setSupportTickets([data, ...supportTickets]);
       setSupportSubject('');
       setSupportMsg('');
-      alert(currentLang === 'tr' ? 'Destek talebiniz oluşturuldu!' : 'Support ticket created successfully!');
+      alert(ct.supportCreated);
     } else {
       alert('Hata: ' + (error?.message || 'Bilinmeyen hata'));
     }
@@ -647,24 +706,7 @@ export default function CandidateDashboard() {
             <span className="font-extrabold text-slate-800 text-sm tracking-wide">PANOVA PORTAL</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200">
-              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
-              <select 
-                value={currentLang} 
-                onChange={(e) => {
-                  const newLang = e.target.value as Language;
-                  setCurrentLang(newLang);
-                  writeStoredLanguage(newLang);
-                }} 
-                className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
-              >
-                {languages.map((lang) => (
-                  <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">
-                    {lang.flag} {lang.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <LanguageSwitcher currentLang={currentLang} onChange={(lang) => { setCurrentLang(lang); writeStoredLanguage(lang); }} />
             <Link href="/" className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border border-slate-200">
               <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" /> {t.returnHome}
             </Link>
@@ -917,24 +959,7 @@ export default function CandidateDashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <div className="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200">
-              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
-              <select 
-                value={currentLang}
-                onChange={(e) => {
-                  const newLang = e.target.value as Language;
-                  setCurrentLang(newLang);
-                  writeStoredLanguage(newLang);
-                }}
-                className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
-              >
-                {languages.map((lang) => (
-                  <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">
-                    {lang.flag} {lang.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <LanguageSwitcher currentLang={currentLang} onChange={(lang) => { setCurrentLang(lang); writeStoredLanguage(lang); }} />
 
             <Link href="/" className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border">
               <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" /> {t.returnHome}

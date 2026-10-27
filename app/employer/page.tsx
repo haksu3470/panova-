@@ -6,11 +6,12 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { employerService } from '@/lib/services/employerService';
 import { 
-  Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, Languages, 
+  Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, 
   Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, Plane, ShieldCheck, HeartHandshake, UploadCloud, Check, Video, Star, CheckCircle2
 } from 'lucide-react';
 import Link from 'next/link';
-import { Language, languages, translations } from '@/lib/dictionary';
+import { Language, translations } from '@/lib/dictionary';
+import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
 
@@ -128,9 +129,6 @@ function EmployerPortalInner() {
 
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMessage, setSupportMessage] = useState('');
-
-  const selectableLanguages = languages.filter((lang) => lang.code !== currentLang);
-  const activeLangObj = languages.find((l) => l.code === currentLang);
 
   useEffect(() => {
     if (employerProfile) {
@@ -407,21 +405,7 @@ function EmployerPortalInner() {
               <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome || 'Ana Sayfa'}
             </Link>
 
-            <div className="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200">
-              <Languages className="w-4 h-4 text-slate-600 mr-1.5 rtl:ml-1.5" />
-              <select
-                value={currentLang}
-                onChange={(e) => changeLanguage(e.target.value as Language)}
-                className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
-              >
-                <option value={currentLang} className="font-bold text-slate-900 bg-white">
-                  {activeLangObj?.flag} {activeLangObj?.name}
-                </option>
-                {selectableLanguages.map((lang) => (
-                  <option key={lang.code} value={lang.code} className="text-slate-900 bg-white">{lang.flag} {lang.name}</option>
-                ))}
-              </select>
-            </div>
+            <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
 
             <button
               onClick={handleLogout}

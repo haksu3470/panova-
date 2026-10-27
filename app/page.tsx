@@ -60,8 +60,8 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-auto sm:h-20 py-3 sm:py-0 flex flex-col sm:flex-row items-center justify-between gap-3">
           
           {/* Logo */}
-          <div className="flex items-center space-x-3 rtl:space-x-reverse w-full sm:w-auto justify-between sm:justify-start">
-            <div className="flex items-center space-x-3 rtl:space-x-reverse">
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+            <div className="flex items-center space-x-3 rtl:space-x-reverse min-w-0">
               <img
                 src="/logo.png"
                 alt="PANOVA"
@@ -69,16 +69,20 @@ export default function HomePage() {
                 height={725}
                 className="h-12 sm:h-14 w-auto object-contain shrink-0"
               />
-              <div>
+              <div className="min-w-0">
                 <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 block leading-none">PANOVA</span>
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate max-w-[180px] sm:max-w-none block">{company.name}</span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate max-w-[140px] sm:max-w-none block">{company.name}</span>
               </div>
+            </div>
+            <div className="sm:hidden">
+              <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
             </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3 w-full sm:w-auto">
-            {/* Multi-Language Selector */}
-            <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
+            <div className="hidden sm:block">
+              <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
+            </div>
 
             {/* Şirket Seçimine Göre Dinamik Butonlar */}
             {selectedCompanyKey === 'hr' ? (
