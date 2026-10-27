@@ -461,6 +461,8 @@ export interface Translation {
   staffSignupFieldsRequired?: string;
 }
 
+// `name` is the one short code shown beside the flag. `flag` is only data:
+// do not render it. Windows draws those emoji as the same two letters as `name`.
 export const languages = [
   { code: 'tr' as Language, name: 'TR', label: 'Türkçe', flag: '🇹🇷' },
   { code: 'en' as Language, name: 'GB', label: 'English', flag: '🇬🇧' },
