@@ -28,7 +28,7 @@ export function AuthFooter({
 
   return (
     <footer className={cls}>
-      <p className="font-semibold">{company.shortName}</p>
+      <p className="font-semibold">{company.brandName}</p>
       <p className="mt-1">{presence}</p>
       <p className="mt-1">{company.address}</p>
       <p className="mt-1">

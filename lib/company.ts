@@ -8,6 +8,8 @@
 export const turkeyOfficePhone = '+905453644930';
 
 export const company = {
+  /** Public brand, same in every locale. Registry names stay on legal surfaces. */
+  brandName: 'Panova Group',
   shortName: 'PANOVA TARIM DOO Struga',
   shortNameMk: 'ПАНОВА ТАРИМ ДОО Струга',
   legalName: 'Друштво за производство трговија и услуги ПАНОВА ТАРИМ ДОО Струга',
