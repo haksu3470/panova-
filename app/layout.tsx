@@ -13,9 +13,25 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const description = `Panova Group — Bangladeş, Türkiye ve Kuzey Makedonya. ${company.address}. İletişim: ${company.email}`;
+
 export const metadata: Metadata = {
-  title: "PANOVA TARIM DOO Struga",
-  description: `Panova — Bangladeş, Türkiye ve Kuzey Makedonya. ${company.shortName}, ${company.address}. İletişim: ${company.email}`,
+  title: {
+    default: "Panova Group",
+    template: "%s | Panova Group",
+  },
+  description,
+  openGraph: {
+    title: "Panova Group",
+    description,
+    siteName: "Panova Group",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Panova Group",
+    description,
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
