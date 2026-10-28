@@ -1,3 +1,4 @@
+import { classifyCandidateLinkError, type CandidateLinkFailure } from '@/lib/emailConfirmation';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -44,11 +45,15 @@ export async function ensureStaff(fullName?: string): Promise<boolean> {
   return isStaff();
 }
 
-/** Aday portalı: auth kullanıcısını job_candidates kaydına bağlar, aday id döner. */
-export async function linkMyCandidate(): Promise<string | null> {
+export type CandidateLinkResult =
+  | { ok: true; id: string }
+  | { ok: false; failure: CandidateLinkFailure };
+
+/** Aday portalı: auth kullanıcısını job_candidates kaydına bağlar. */
+export async function linkMyCandidate(): Promise<CandidateLinkResult> {
   const { data, error } = await supabase.rpc('link_my_candidate');
-  if (error) return null;
-  return (data as string) ?? null;
+  if (error || !data) return { ok: false, failure: classifyCandidateLinkError(error?.message) };
+  return { ok: true, id: data as string };
 }
 
 /** İşveren portalı: auth kullanıcısını employers kaydına bağlar, işveren id döner. */
@@ -58,8 +63,8 @@ export async function linkMyEmployer(): Promise<string | null> {
   return (data as string) ?? null;
 }
 
-export async function signOut() {
-  await supabase.auth.signOut();
+export async function signOut(scope: 'global' | 'local' = 'global') {
+  await supabase.auth.signOut({ scope });
   if (typeof window !== 'undefined') {
     [
       'panova_admin_auth', 'panova_current_user',

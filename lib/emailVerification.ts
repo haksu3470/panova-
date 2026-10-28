@@ -2,6 +2,7 @@ import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { signOut } from '@/lib/auth';
 import { isGoogleProvedUser } from '@/lib/emailAddress';
+import { parseVerificationInput, type OtpType } from '@/lib/emailConfirmation';
 
 export type VerifyChannel = 'signup' | 'otp';
 
@@ -148,26 +149,53 @@ export async function resendVerification(email: string, redirectPath: string): P
   return { ok: true };
 }
 
-export async function confirmEmailCode(email: string, token: string): Promise<{ ok: boolean; message?: string }> {
-  const clean = token.trim();
-  if (!clean) return { ok: false, message: 'Kod gerekli.' };
-  const order: Array<'signup' | 'email' | 'magiclink'> =
-    storedVerifyChannel() === 'otp' ? ['email', 'magiclink', 'signup'] : ['signup', 'email', 'magiclink'];
-  let last = 'Kod kabul edilmedi.';
-  for (const type of order) {
-    const { error } = await supabase.auth.verifyOtp({ email: email.trim().toLowerCase(), token: clean, type });
-    if (!error) {
-      const proved = await recordEmailProof();
-      if (!proved) {
-        await signOut();
-        return { ok: false, message: 'Doğrulama oturumu kanıtlanamadı. Bağlantıyı yeniden isteyin.' };
-      }
-      clearVerifyEmail();
-      return { ok: true };
-    }
-    last = error.message;
+/**
+ * Signup mail is Supabase's Confirm signup template (and Magic Link on resend).
+ * The numeric field needs `{{ .Token }}` in that template. The HTML to paste is
+ * `supabase/templates/confirmation.html` and `supabase/templates/magic_link.html`,
+ * with subject `{{ .Token }} · Panova`. The link in the same message still
+ * confirms the address; a pasted verify URL is accepted as a token hash.
+ */
+export type ConfirmEmailResult =
+  | { ok: true }
+  | { ok: false; reason: 'required' | 'rejected' | 'proof' };
+
+async function finishConfirmedSession(): Promise<ConfirmEmailResult> {
+  const proved = await recordEmailProof();
+  if (!proved) {
+    await signOut('local');
+    return { ok: false, reason: 'proof' };
   }
-  return { ok: false, message: last };
+  clearVerifyEmail();
+  return { ok: true };
+}
+
+async function verifyHashedToken(tokenHash: string, types: OtpType[]): Promise<ConfirmEmailResult | null> {
+  for (const type of types) {
+    const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+    if (!error) return finishConfirmedSession();
+  }
+  return null;
+}
+
+export async function confirmEmailCode(email: string, token: string): Promise<ConfirmEmailResult> {
+  const parsed = parseVerificationInput(token);
+  if (parsed.kind === 'empty') return { ok: false, reason: 'required' };
+
+  if (parsed.kind === 'hash') {
+    const hashed = await verifyHashedToken(parsed.tokenHash, parsed.types);
+    if (hashed) return hashed;
+    return { ok: false, reason: 'rejected' };
+  }
+
+  const order: OtpType[] =
+    storedVerifyChannel() === 'otp' ? ['email', 'magiclink', 'signup'] : ['signup', 'email', 'magiclink'];
+  const target = email.trim().toLowerCase();
+  for (const type of order) {
+    const { error } = await supabase.auth.verifyOtp({ email: target, token: parsed.token, type });
+    if (!error) return finishConfirmedSession();
+  }
+  return { ok: false, reason: 'rejected' };
 }
 
 async function gateSessionImpl(): Promise<GateResult> {

@@ -43,7 +43,7 @@ export default function EmailVerifyNotice({
     const result = await confirmEmailCode(email, code);
     setBusy(false);
     if (!result.ok) {
-      setInfo(result.message || t.verifyEmailCodeFail || '');
+      setInfo(result.reason === 'proof' ? (t.verifyEmailProofFail || '') : (t.verifyEmailCodeFail || ''));
       return;
     }
     await onVerified();
@@ -57,6 +57,7 @@ export default function EmailVerifyNotice({
         </div>
         <div>
           <h2 className="text-lg font-extrabold text-slate-900">{t.verifyEmailTitle}</h2>
+          <p className="text-sm font-semibold text-slate-800 mt-1 leading-relaxed">{t.verifyEmailLinkLead}</p>
           <p className="text-xs text-slate-600 mt-1 leading-relaxed">{t.verifyEmailBody}</p>
         </div>
       </div>
