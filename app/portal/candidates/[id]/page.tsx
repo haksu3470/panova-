@@ -609,7 +609,7 @@ function CandidateDetailPageInner() {
 
                 {/* Kurumsal YouTube 3'lü Video Alanı */}
                 <div className="p-4 bg-slate-50 rounded-xl border space-y-3">
-                  <span className="font-extrabold text-slate-900 uppercase block text-[11px] text-emerald-800">📹 Kurumsal YouTube Videoları (3 Hak)</span>
+                  <span className="font-extrabold text-slate-900 uppercase block text-[11px] text-emerald-800">📹 Kurumsal YouTube Videoları </span>
                   
                   {/* 1. Video */}
                   <div className="space-y-1">

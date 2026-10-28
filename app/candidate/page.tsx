@@ -127,7 +127,7 @@ export default function CandidateDashboard() {
       profileHeader: 'Profil Bilgileri, Fotoğraf, YouTube Videoları & Acil Durum',
       photoLabel: 'Aday Profil Fotoğrafı',
       photoDesc: 'Net ve profesyonel bir vesikalık fotoğraf yükleyin.',
-      videoHeader: 'Kurumsal YouTube Kanalı Mülakat / Tanıtım Videoları (3 Hak)',
+      videoHeader: 'Kurumsal YouTube Kanalı Mülakat / Tanıtım Videoları ',
       video1Label: '1. Video: Genel Tanıtım ve Özgeçmiş Videosu',
       video2Label: '2. Video: Mesleki Beceri / Uygulama Videosu',
       video3Label: '3. Video: Saha Mülakatı / Ek Değerlendirme Videosu',
