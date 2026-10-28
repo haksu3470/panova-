@@ -74,7 +74,11 @@ export default function CandidateDashboard() {
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newPhoto, setNewPhoto] = useState('');
-  const [newVideoUrl, setNewVideoUrl] = useState('');
+  
+  // 3 Ayrı YouTube Video Linki State'i
+  const [newVideoUrl1, setNewVideoUrl1] = useState('');
+  const [newVideoUrl2, setNewVideoUrl2] = useState('');
+  const [newVideoUrl3, setNewVideoUrl3] = useState('');
   
   const [newEmergencyName, setNewEmergencyName] = useState('');
   const [newEmergencyRelation, setNewEmergencyRelation] = useState('');
@@ -103,7 +107,6 @@ export default function CandidateDashboard() {
     mk: ['Скен на пасош', 'Професионален сертификат / дозвола', 'Уверение за неосудуваност', 'Здравствен извештај / рендген', 'е-апостил / легализација од Министерството за надворешни работи'],
   };
 
-  // Dile duyarlı dinamik metin sözlüğü
   const candidateTexts: Record<Language, any> = {
     tr: {
       overviewTitle: 'Aday Durum ve Eksiklik Özeti',
@@ -113,7 +116,7 @@ export default function CandidateDashboard() {
       profileMissingTitle: 'Profil & Bilgi Eksikleri',
       profileCompleteText: 'Profil bilgileriniz, fotoğraf ve acil durum eksiksiz.',
       missingPhoto: 'Profil Fotoğrafı',
-      missingVideo: 'Çalışma/Tanıtım Videosu',
+      missingVideo: 'Tanıtım / Mülakat Videoları',
       missingEmergency: 'Acil Durum İletişim Bilgileri',
       notAdded: 'eklenmedi.',
       editProfileBtn: 'Profili Düzenle & Eksikleri Tamamla →',
@@ -121,10 +124,14 @@ export default function CandidateDashboard() {
       docCompleteText: 'Tüm zorunlu belgeler yüklendi.',
       notUploaded: 'henüz yüklenmedi.',
       uploadDocsBtn: 'Belgeleri Yükle →',
-      profileHeader: 'Profil Bilgileri, Fotoğraf, Video & Acil Durum',
+      profileHeader: 'Profil Bilgileri, Fotoğraf, YouTube Videoları & Acil Durum',
       photoLabel: 'Aday Profil Fotoğrafı',
       photoDesc: 'Net ve profesyonel bir vesikalık fotoğraf yükleyin.',
-      videoLabel: 'Çalışma / Tanıtım Videosu URL (YouTube / Drive vb.)',
+      videoHeader: 'Kurumsal YouTube Kanalı Mülakat / Tanıtım Videoları (3 Hak)',
+      video1Label: '1. Video: Genel Tanıtım ve Özgeçmiş Videosu',
+      video2Label: '2. Video: Mesleki Beceri / Uygulama Videosu',
+      video3Label: '3. Video: Saha Mülakatı / Ek Değerlendirme Videosu',
+      videoPlaceholder: 'https://www.youtube.com/watch?v=...',
       previewBtn: 'Önizle',
       emailLabel: 'E-Posta Adresi',
       phoneLabel: 'Telefon Numarası',
@@ -149,7 +156,7 @@ export default function CandidateDashboard() {
       closeModal: 'Kapat',
       videoPreviewTitle: 'Aday Video Önizlemesi',
       docPreviewTitle: 'Belge Önizlemesi',
-      savedSuccess: 'Tüm profil, acil durum ve video bilgileri veritabanına başarıyla kaydedildi!',
+      savedSuccess: 'Tüm profil, acil durum ve YouTube video bilgileri veritabanına başarıyla kaydedildi!',
       docUploaded: 'Belge yüklendi ve veritabanına kaydedildi!',
       offerUpdated: 'İş teklifi durumu güncellendi!',
       supportCreated: 'Destek talebiniz oluşturuldu!',
@@ -162,7 +169,7 @@ export default function CandidateDashboard() {
       profileMissingTitle: 'Profile & Info Missing',
       profileCompleteText: 'Your profile, photo, and emergency info are complete.',
       missingPhoto: 'Profile Photo',
-      missingVideo: 'Work/Intro Video',
+      missingVideo: 'Interview / Intro Videos',
       missingEmergency: 'Emergency Contact Information',
       notAdded: 'is missing.',
       editProfileBtn: 'Edit Profile & Complete Missing →',
@@ -170,10 +177,14 @@ export default function CandidateDashboard() {
       docCompleteText: 'All required documents uploaded.',
       notUploaded: 'not uploaded yet.',
       uploadDocsBtn: 'Upload Documents →',
-      profileHeader: 'Profile Info, Photo, Video & Emergency',
+      profileHeader: 'Profile Info, Photo, YouTube Videos & Emergency',
       photoLabel: 'Candidate Profile Photo',
       photoDesc: 'Upload a clear and professional passport-style photo.',
-      videoLabel: 'Work / Intro Video URL (YouTube / Drive etc.)',
+      videoHeader: 'Corporate YouTube Channel Interview / Intro Videos (3 Slots)',
+      video1Label: '1. Video: General Intro & Resume Video',
+      video2Label: '2. Video: Professional Skill / Practice Video',
+      video3Label: '3. Video: Field Interview / Extra Assessment Video',
+      videoPlaceholder: 'https://www.youtube.com/watch?v=...',
       previewBtn: 'Preview',
       emailLabel: 'Email Address',
       phoneLabel: 'Phone Number',
@@ -198,7 +209,7 @@ export default function CandidateDashboard() {
       closeModal: 'Close',
       videoPreviewTitle: 'Candidate Video Preview',
       docPreviewTitle: 'Document Preview',
-      savedSuccess: 'All profile and emergency data saved successfully!',
+      savedSuccess: 'All profile, emergency and YouTube video data saved successfully!',
       docUploaded: 'Document uploaded and saved to DB!',
       offerUpdated: 'Job offer status updated.',
       supportCreated: 'Support ticket created successfully!',
@@ -211,7 +222,7 @@ export default function CandidateDashboard() {
       profileMissingTitle: 'Mungesat në Profil & Informacion',
       profileCompleteText: 'Profili, fotoja dhe informacioni i urgjencës janë të plota.',
       missingPhoto: 'Foto e Profilit',
-      missingVideo: 'Video e Punës / Prezantimit',
+      missingVideo: 'Videot e Intervistës / Prezantimit',
       missingEmergency: 'Informacioni i Kontaktit të Urgjencës',
       notAdded: 'nuk është shtuar.',
       editProfileBtn: 'Ndrysho Profilin & Plotëso Mungesat →',
@@ -219,10 +230,14 @@ export default function CandidateDashboard() {
       docCompleteText: 'Të gjitha dokumentet e detyrueshme janë ngarkuar.',
       notUploaded: 'ende nuk është ngarkuar.',
       uploadDocsBtn: 'Ngarko Dokumentet →',
-      profileHeader: 'Informacioni i Profilit, Fotos, Videos & Urgjencës',
+      profileHeader: 'Informacioni i Profilit, Fotos, Videove YouTube & Urgjencës',
       photoLabel: 'Foto e Profilit të Kandidatit',
       photoDesc: 'Ngarkoni një foto të qartë dhe profesionale.',
-      videoLabel: 'URL e Videos së Punës / Prezantimit (YouTube / Drive etj.)',
+      videoHeader: 'Videot e Kanalit Zyrtar YouTube (3 Slotet)',
+      video1Label: '1. Video: Prezantimi i Përgjithshëm',
+      video2Label: '2. Video: Aftësia Profesionale / Praktika',
+      video3Label: '3. Video: Intervista në Terren / Vlerësim Shtesë',
+      videoPlaceholder: 'https://www.youtube.com/watch?v=...',
       previewBtn: 'Parapamje',
       emailLabel: 'Adresa e Emailit',
       phoneLabel: 'Numri i Telefonit',
@@ -247,7 +262,7 @@ export default function CandidateDashboard() {
       closeModal: 'Mbyll',
       videoPreviewTitle: 'Parapamje e Videos së Kandidatit',
       docPreviewTitle: 'Parapamje e Dokumentit',
-      savedSuccess: 'Të gjitha të dhënat e profilit u ruajtën me sukses!',
+      savedSuccess: 'Të dhënat e profilit dhe videot u ruajtën me sukses!',
       docUploaded: 'Dokumenti u ngarkua dhe u ruajt!',
       offerUpdated: 'Statusi i ofertës së punës u përditësua!',
       supportCreated: 'Kërkesa për mbështetje u krijua me sukses!',
@@ -260,7 +275,7 @@ export default function CandidateDashboard() {
       profileMissingTitle: 'نواقص الملف الشخصي والمعلومات',
       profileCompleteText: 'ملفك الشخصي والصورة ومعلومات الطوارئ مكتملة.',
       missingPhoto: 'صورة الملف الشخصي',
-      missingVideo: 'فيديو العمل / التعريف',
+      missingVideo: 'فيديوهات المقابلة / التعريف',
       missingEmergency: 'معلومات الاتصال في حالات الطوارئ',
       notAdded: 'لم تتم إضافته.',
       editProfileBtn: 'تعديل الملف الشخصي وإكمال النواقص ←',
@@ -268,10 +283,14 @@ export default function CandidateDashboard() {
       docCompleteText: 'تم تحميل جميع المستندات المطلوبة.',
       notUploaded: 'لم يتم تحميله بعد.',
       uploadDocsBtn: 'تحميل المستندات ←',
-      profileHeader: 'معلومات الملف الشخصي، الصورة، الفيديو والطوارئ',
+      profileHeader: 'معلومات الملف الشخصي، الصورة، فيديوهات يوتيوب والطوارئ',
       photoLabel: 'صورة ملف المرشح الشخصي',
       photoDesc: 'قم بتحميل صورة واضحة واحترافية.',
-      videoLabel: 'رابط فيديو العمل / التعريف (يوتيوب / درايف الخ)',
+      videoHeader: 'فيديوهات قناة يوتيوب الرسمية (3 خانات)',
+      video1Label: '1. فيديو: التعريف العام والسيرة الذاتية',
+      video2Label: '2. فيديو: المهارة المهنية / التطبيق',
+      video3Label: '3. فيديو: المقابلة الميدانية / التقييم الإضافي',
+      videoPlaceholder: 'https://www.youtube.com/watch?v=...',
       previewBtn: 'معاينة',
       emailLabel: 'البريد الإلكتروني',
       phoneLabel: 'رقم الهاتف',
@@ -296,7 +315,7 @@ export default function CandidateDashboard() {
       closeModal: 'إغلاق',
       videoPreviewTitle: 'معاينة فيديو المرشح',
       docPreviewTitle: 'معاينة المستند',
-      savedSuccess: 'تم حفظ كافة بيانات الملف الشخصي والطوارئ بنجاح!',
+      savedSuccess: 'تم حفظ كافة بيانات الملف الشخصي وفيديوهات يوتيوب بنجاح!',
       docUploaded: 'تم تحميل المستند وحفظه في قاعدة البيانات!',
       offerUpdated: 'تم تحديث حالة عرض العمل!',
       supportCreated: 'تم إنشاء طلب الدعم بنجاح!',
@@ -309,7 +328,7 @@ export default function CandidateDashboard() {
       profileMissingTitle: 'Недостатоци во профилот и податоците',
       profileCompleteText: 'Профилот, фотографијата и податоците за итни случаи се целосни.',
       missingPhoto: 'Фотографија на профилот',
-      missingVideo: 'Видео за работа / претставување',
+      missingVideo: 'Видео интервјуа / претставувања',
       missingEmergency: 'Контакт за итни случаи',
       notAdded: 'не е додадено.',
       editProfileBtn: 'Уреди го профилот и дополни ги недостатоците →',
@@ -317,10 +336,14 @@ export default function CandidateDashboard() {
       docCompleteText: 'Сите задолжителни документи се прикачени.',
       notUploaded: 'сè уште не е прикачено.',
       uploadDocsBtn: 'Прикачи документи →',
-      profileHeader: 'Профил, фотографија, видео и итни случаи',
+      profileHeader: 'Профил, фотографија, YouTube видеа и итни случаи',
       photoLabel: 'Фотографија на профилот на кандидатот',
       photoDesc: 'Прикачете јасна и професионална фотографија за документ.',
-      videoLabel: 'URL на видео за работа / претставување (YouTube / Drive и сл.)',
+      videoHeader: 'YouTube видео интервјуa од официјалниот канал (3 места)',
+      video1Label: '1. Видео: Општо претставување',
+      video2Label: '2. Видео: Професионална вештина / практична работа',
+      video3Label: '3. Видео: Теренско интервју / дополнителна оценка',
+      videoPlaceholder: 'https://www.youtube.com/watch?v=...',
       previewBtn: 'Преглед',
       emailLabel: 'Е-пошта',
       phoneLabel: 'Телефонски број',
@@ -345,7 +368,7 @@ export default function CandidateDashboard() {
       closeModal: 'Затвори',
       videoPreviewTitle: 'Преглед на видеото на кандидатот',
       docPreviewTitle: 'Преглед на документ',
-      savedSuccess: 'Профилот и податоците за итни случаи се успешно зачувани!',
+      savedSuccess: 'Профилот, податоците и YouTube видеата се успешно зачувани!',
       docUploaded: 'Документот е прикачен и зачуван!',
       offerUpdated: 'Статусот на понудата за работа е ажуриран!',
       supportCreated: 'Барањето за поддршка е успешно создадено!',
@@ -361,7 +384,11 @@ export default function CandidateDashboard() {
       setNewEmail(candidate.email || '');
       setNewPassword('');
       setNewPhoto(candidate.photo_url || '');
-      setNewVideoUrl(candidate.video_url || '');
+      
+      // 3 Ayrı video alanını doldur (veritabanından veya documents_json içinden okunabilir)
+      setNewVideoUrl1(candidate.video_url_1 || candidate.video_url || '');
+      setNewVideoUrl2(candidate.video_url_2 || '');
+      setNewVideoUrl3(candidate.video_url_3 || '');
 
       try {
         const extra = candidate.documents_json ? JSON.parse(candidate.documents_json) : {};
@@ -380,7 +407,9 @@ export default function CandidateDashboard() {
     setNewEmail(data.email || '');
     setNewPassword('');
     setNewPhoto(data.photo_url || '');
-    setNewVideoUrl(data.video_url || '');
+    setNewVideoUrl1(data.video_url_1 || data.video_url || '');
+    setNewVideoUrl2(data.video_url_2 || '');
+    setNewVideoUrl3(data.video_url_3 || '');
     setAuthenticated(true);
     try {
       const extra = data.documents_json ? JSON.parse(data.documents_json) : {};
@@ -712,7 +741,10 @@ export default function CandidateDashboard() {
       phone: newPhone,
       email: newEmail,
       photo_url: newPhoto,
-      video_url: newVideoUrl,
+      video_url: newVideoUrl1, // Geriye dönük uyumluluk için
+      video_url_1: newVideoUrl1,
+      video_url_2: newVideoUrl2,
+      video_url_3: newVideoUrl3,
       documents_json: JSON.stringify(currentData)
     };
 
@@ -721,7 +753,6 @@ export default function CandidateDashboard() {
       .update(updatePayload)
       .eq('id', candidate.id);
 
-    // Şifre değişikliği yalnızca Supabase Auth üzerinden
     let passError: any = null;
     if (newPassword && newPassword.length >= 8) {
       const res = await supabase.auth.updateUser({ password: newPassword });
@@ -989,7 +1020,6 @@ export default function CandidateDashboard() {
     { id: '5', name: 'e-Apostil / Dışişleri Bakanlığı Tasdiki', status: 'pending' },
   ];
 
-  // Öncelik candidate_documents tablosu; tablo boşsa eski documents_json okunur (salt okuma yedeği).
   let candidateDocs: any[] = defaultDocs;
   if (docRows.length > 0) {
     candidateDocs = defaultDocs.map((d, i) => {
@@ -1011,7 +1041,7 @@ export default function CandidateDashboard() {
   const missingDocs = candidateDocs.filter((d: any) => !DONE_STATUSES.includes(d.status));
   const missingProfileFields = [];
   if (!newPhoto) missingProfileFields.push(ct.missingPhoto);
-  if (!newVideoUrl) missingProfileFields.push(ct.missingVideo);
+  if (!newVideoUrl1 && !newVideoUrl2 && !newVideoUrl3) missingProfileFields.push(ct.missingVideo);
   if (!newEmergencyName || !newEmergencyPhone) missingProfileFields.push(ct.missingEmergency);
 
   return (
@@ -1049,7 +1079,7 @@ export default function CandidateDashboard() {
           </div>
         </div>
 
-        {/* Navigasyon Sekmeleri (Tüm diller destekli) */}
+        {/* Navigasyon Sekmeleri */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
           <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overview}
@@ -1089,25 +1119,65 @@ export default function CandidateDashboard() {
                 </div>
               </div>
 
-              <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
-                <label className="block font-extrabold text-slate-900 uppercase">📹 {ct.videoLabel}</label>
-                <div className="flex gap-2">
-                  <input 
-                    type="url" 
-                    value={newVideoUrl} 
-                    onChange={(e) => setNewVideoUrl(e.target.value)} 
-                    placeholder="https://www.youtube.com/watch?v=..." 
-                    className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
-                  />
-                  {newVideoUrl && (
-                    <button 
-                      type="button" 
-                      onClick={() => setPreviewVideo(newVideoUrl)}
-                      className="bg-emerald-100 text-[#2e7d32] px-4 py-2 rounded-xl font-bold hover:bg-emerald-200 transition cursor-pointer shrink-0"
-                    >
-                      {ct.previewBtn}
-                    </button>
-                  )}
+              {/* Kurumsal YouTube 3'lü Video Alanı */}
+              <div className="bg-slate-50 p-4 rounded-2xl border space-y-3">
+                <h4 className="font-extrabold text-slate-900 text-xs text-emerald-800 uppercase border-b pb-1">📹 {ct.videoHeader}</h4>
+                
+                {/* 1. Video */}
+                <div className="space-y-1">
+                  <label className="block font-bold text-slate-700">{ct.video1Label}</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="url" 
+                      value={newVideoUrl1} 
+                      onChange={(e) => setNewVideoUrl1(e.target.value)} 
+                      placeholder={ct.videoPlaceholder} 
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
+                    />
+                    {newVideoUrl1 && (
+                      <button type="button" onClick={() => setPreviewVideo(newVideoUrl1)} className="bg-emerald-100 text-[#2e7d32] px-4 py-2 rounded-xl font-bold hover:bg-emerald-200 transition cursor-pointer shrink-0">
+                        {ct.previewBtn}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. Video */}
+                <div className="space-y-1">
+                  <label className="block font-bold text-slate-700">{ct.video2Label}</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="url" 
+                      value={newVideoUrl2} 
+                      onChange={(e) => setNewVideoUrl2(e.target.value)} 
+                      placeholder={ct.videoPlaceholder} 
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
+                    />
+                    {newVideoUrl2 && (
+                      <button type="button" onClick={() => setPreviewVideo(newVideoUrl2)} className="bg-emerald-100 text-[#2e7d32] px-4 py-2 rounded-xl font-bold hover:bg-emerald-200 transition cursor-pointer shrink-0">
+                        {ct.previewBtn}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* 3. Video */}
+                <div className="space-y-1">
+                  <label className="block font-bold text-slate-700">{ct.video3Label}</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="url" 
+                      value={newVideoUrl3} 
+                      onChange={(e) => setNewVideoUrl3(e.target.value)} 
+                      placeholder={ct.videoPlaceholder} 
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
+                    />
+                    {newVideoUrl3 && (
+                      <button type="button" onClick={() => setPreviewVideo(newVideoUrl3)} className="bg-emerald-100 text-[#2e7d32] px-4 py-2 rounded-xl font-bold hover:bg-emerald-200 transition cursor-pointer shrink-0">
+                        {ct.previewBtn}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1189,7 +1259,7 @@ export default function CandidateDashboard() {
           </div>
         )}
 
-        {/* GENEL BAKIŞ (ÖZET) - DİL DESTEKLİ */}
+        {/* GENEL BAKIŞ (ÖZET) */}
         {activeTab === 'overview' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-6">
             <div className="border-b pb-4 flex justify-between items-center">
