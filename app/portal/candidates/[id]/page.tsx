@@ -57,10 +57,12 @@ function CandidateDetailPageInner() {
   const [candidateEmail, setCandidateEmail] = useState('');
   const [internalNotes, setInternalNotes] = useState('');
 
-  // Sertifika & Video
+  // Sertifika & 3'lü YouTube Video State'leri
   const [certificateNo, setCertificateNo] = useState('');
   const [issuingBody, setIssuingBody] = useState('');
-  const [videoUrl, setVideoUrl] = useState('');
+  const [videoUrl1, setVideoUrl1] = useState('');
+  const [videoUrl2, setVideoUrl2] = useState('');
+  const [videoUrl3, setVideoUrl3] = useState('');
 
   // Seyahat ve Uçuş Lojistik State'leri
   const [travelStatus, setTravelStatus] = useState('planned');
@@ -131,7 +133,11 @@ function CandidateDetailPageInner() {
         setInternalNotes(data.notes || '');
         setCertificateNo(data.certificate_no || '');
         setIssuingBody(data.issuing_body || '');
-        setVideoUrl(data.video_url || '');
+        
+        // 3'lü Video Linklerini Yükle
+        setVideoUrl1(data.video_url_1 || data.video_url || '');
+        setVideoUrl2(data.video_url_2 || '');
+        setVideoUrl3(data.video_url_3 || '');
 
         setTravelStatus(data.travel_status || 'planned');
         setFlightDate(data.flight_date || '');
@@ -255,7 +261,10 @@ function CandidateDetailPageInner() {
         notes: internalNotes,
         certificate_no: certificateNo,
         issuing_body: issuingBody,
-        video_url: videoUrl,
+        video_url: videoUrl1, // Geriye dönük uyumluluk
+        video_url_1: videoUrl1,
+        video_url_2: videoUrl2,
+        video_url_3: videoUrl3,
         documents_json: payloadDocumentsJson,
         travel_status: travelStatus,
         flight_date: flightDate,
@@ -584,10 +593,9 @@ function CandidateDetailPageInner() {
                 </button>
               </div>
             </div>
-
             )}
 
-            {/* Sertifika, Video ve Değerlendirme */}
+            {/* Sertifika, 3'lü YouTube Video ve Değerlendirme */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
               <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
                 <Award className="w-5 h-5 text-amber-500" /> {t.professionalEvaluationCertificate || 'Mesleki Değerlendirme & Sertifika'}
@@ -598,20 +606,49 @@ function CandidateDetailPageInner() {
                   <input type="text" value={certificateNo} onChange={(e) => setCertificateNo(e.target.value)} placeholder={t.certificateNo || 'Sertifika No'} className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
                   <input type="text" value={issuingBody} onChange={(e) => setIssuingBody(e.target.value)} placeholder={t.issuingBody || 'Veren Kurum'} className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
                 </div>
-                <div className="p-4 bg-slate-50 rounded-xl border space-y-2 flex flex-col justify-between">
-                  <div>
-                    <span className="font-bold text-slate-500 uppercase block mb-1">{t.workVideoUrl || 'Çalışma Videosu URL'}</span>
-                    <input type="url" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
+
+                {/* Kurumsal YouTube 3'lü Video Alanı */}
+                <div className="p-4 bg-slate-50 rounded-xl border space-y-3">
+                  <span className="font-extrabold text-slate-900 uppercase block text-[11px] text-emerald-800">📹 Kurumsal YouTube Videoları (3 Hak)</span>
+                  
+                  {/* 1. Video */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">1. Video: Genel Tanıtım</label>
+                    <div className="flex gap-1.5">
+                      <input type="url" value={videoUrl1} onChange={(e) => setVideoUrl1(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white font-medium text-slate-800 text-xs" />
+                      {videoUrl1 && (
+                        <button type="button" onClick={() => setPreviewVideo(videoUrl1)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] hover:bg-emerald-200 transition shrink-0 cursor-pointer">
+                          Önizle
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  {videoUrl && (
-                    <button 
-                      type="button" 
-                      onClick={() => setPreviewVideo(videoUrl)} 
-                      className="mt-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer border border-indigo-200"
-                    >
-                      <Video className="w-4 h-4" /> {t.previewPlayVideo || 'Videoyu Önizle / Oynat'}
-                    </button>
-                  )}
+
+                  {/* 2. Video */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">2. Video: Mesleki Beceri</label>
+                    <div className="flex gap-1.5">
+                      <input type="url" value={videoUrl2} onChange={(e) => setVideoUrl2(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white font-medium text-slate-800 text-xs" />
+                      {videoUrl2 && (
+                        <button type="button" onClick={() => setPreviewVideo(videoUrl2)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] hover:bg-emerald-200 transition shrink-0 cursor-pointer">
+                          Önizle
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 3. Video */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">3. Video: Saha Mülakatı</label>
+                    <div className="flex gap-1.5">
+                      <input type="url" value={videoUrl3} onChange={(e) => setVideoUrl3(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white font-medium text-slate-800 text-xs" />
+                      {videoUrl3 && (
+                        <button type="button" onClick={() => setPreviewVideo(videoUrl3)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] hover:bg-emerald-200 transition shrink-0 cursor-pointer">
+                          Önizle
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
