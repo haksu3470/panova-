@@ -385,7 +385,6 @@ export default function CandidateDashboard() {
       setNewPassword('');
       setNewPhoto(candidate.photo_url || '');
       
-      // 3 Ayrı video alanını doldur (veritabanından veya documents_json içinden okunabilir)
       setNewVideoUrl1(candidate.video_url_1 || candidate.video_url || '');
       setNewVideoUrl2(candidate.video_url_2 || '');
       setNewVideoUrl3(candidate.video_url_3 || '');
@@ -712,6 +711,14 @@ export default function CandidateDashboard() {
     e.preventDefault();
     setUpdatingProfile(true);
 
+    // LOG TUTMA (Console Debug)
+    console.log("Panova HR Log - Aday Profil Güncelleme Başlıyor:", {
+      candidate_id: candidate?.id,
+      video_1: newVideoUrl1,
+      video_2: newVideoUrl2,
+      video_3: newVideoUrl3
+    });
+
     let currentData = { docs: [
       { id: '1', name: 'Pasaport Taraması', status: 'pending' },
       { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
@@ -741,7 +748,7 @@ export default function CandidateDashboard() {
       phone: newPhone,
       email: newEmail,
       photo_url: newPhoto,
-      video_url: newVideoUrl1, // Geriye dönük uyumluluk için
+      video_url: newVideoUrl1,
       video_url_1: newVideoUrl1,
       video_url_2: newVideoUrl2,
       video_url_3: newVideoUrl3,
@@ -763,6 +770,7 @@ export default function CandidateDashboard() {
     setUpdatingProfile(false);
 
     if (passError) {
+      console.error("Panova HR Log - Şifre Güncelleme Hatası:", passError);
       alert('Şifre güncellenemedi: ' + passError.message);
     }
 
@@ -775,8 +783,10 @@ export default function CandidateDashboard() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('panova_current_candidate', JSON.stringify(updatedCandidate));
       }
+      console.log("Panova HR Log - Profil ve 3'lü Videolar Başarıyla Kaydedildi!");
       alert(ct.savedSuccess);
     } else {
+      console.error("Panova HR Log - Veritabanı Kayıt Hatası:", error);
       alert('Hata: ' + error.message);
     }
   };
@@ -1119,7 +1129,7 @@ export default function CandidateDashboard() {
                 </div>
               </div>
 
-              {/* Kurumsal YouTube 3'lü Video Alanı */}
+              {/* Kurumsal YouTube 3'lü Video Alanı (Tümü Önizleme Butonlu) */}
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-3">
                 <h4 className="font-extrabold text-slate-900 text-xs text-emerald-800 uppercase border-b pb-1">📹 {ct.videoHeader}</h4>
                 
