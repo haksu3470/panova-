@@ -431,6 +431,7 @@ export interface Translation {
   approvedAndProcessing?: string;
 
   verifyEmailTitle?: string;
+  verifyEmailLinkLead?: string;
   verifyEmailBody?: string;
   verifyEmailResend?: string;
   verifyEmailResent?: string;
@@ -438,6 +439,7 @@ export interface Translation {
   verifyEmailCodeLabel?: string;
   verifyEmailCodeBtn?: string;
   verifyEmailCodeFail?: string;
+  verifyEmailProofFail?: string;
   verifyEmailBanner?: string;
   verifyEmailBack?: string;
   staffSignupTitle?: string;
@@ -455,6 +457,13 @@ export interface Translation {
   fillRequiredFields?: string;
   passwordTooShort?: string;
   candidateVerifiedUnlinked?: string;
+  candidatePhoneTaken?: string;
+  candidatePassportTaken?: string;
+  candidateEmailTaken?: string;
+  candidateFixPhoneLabel?: string;
+  candidateFixPhoneBtn?: string;
+  candidateFixPassportLabel?: string;
+  candidateFixPassportBtn?: string;
   examplePersonName?: string;
   exampleProfession?: string;
   exampleEmail?: string;
@@ -930,13 +939,15 @@ export const translations: Record<Language, Translation> = {
     approvedAndProcessing: 'Onaylandı & İşlemde',
 
     verifyEmailTitle: 'Gelen kutunuzu kontrol edin',
-    verifyEmailBody: 'Bu adres doğrulanmadan portala giremezsiniz. E-postadaki bağlantıya tıklayın veya kodu girin. Google ile giriş yaptıysanız bu adım gerekmez.',
+    verifyEmailLinkLead: 'E-postadaki bağlantıyı açın. Sayısal kod varsa onu da yazın.',
+    verifyEmailBody: 'Bağlantı bu cihazda kaydı tamamlar. İletideki kısa kodu aşağıya da yazabilirsiniz. Google ile girişte bu adım yoktur.',
     verifyEmailResend: 'Doğrulama e-postasını yeniden gönder',
     verifyEmailResent: 'Doğrulama e-postası yeniden gönderildi.',
     verifyEmailResendFail: 'E-posta gönderilemedi. Biraz sonra tekrar deneyin.',
-    verifyEmailCodeLabel: 'E-postadaki kod',
+    verifyEmailCodeLabel: 'Sayısal kod',
     verifyEmailCodeBtn: 'Kodu doğrula',
-    verifyEmailCodeFail: 'Kod kabul edilmedi. Bağlantıyı kullanın veya yeni kod isteyin.',
+    verifyEmailCodeFail: 'Kod kabul edilmedi. Bağlantıyı açın veya yeni bir ileti isteyin.',
+    verifyEmailProofFail: 'Doğrulama oturumu kaydedilemedi. Yeni bir e-posta isteyip tekrar deneyin.',
     verifyEmailBanner: 'E-posta doğrulaması tamamlanmadan portal açılmaz.',
     verifyEmailBack: 'Giriş ekranına dön',
     staffSignupTitle: 'Davetli personel kaydı',
@@ -954,6 +965,13 @@ export const translations: Record<Language, Translation> = {
     fillRequiredFields: 'Lütfen zorunlu alanları doldurun.',
     passwordTooShort: 'Şifre en az 8 karakter olmalıdır.',
     candidateVerifiedUnlinked: 'E-posta doğrulandı. Aday kaydınız ekip tarafından bağlanacak.',
+    candidatePhoneTaken: 'Bu telefon numarası başka bir adaya kayıtlı. Bitirmek için farklı bir numara girin.',
+    candidatePassportTaken: 'Bu pasaport numarası başka bir adaya kayıtlı. Bitirmek için farklı bir pasaport numarası girin.',
+    candidateEmailTaken: 'Bu e-posta zaten bir aday kaydına bağlı. O hesapla giriş yapın veya Panova ile iletişime geçin.',
+    candidateFixPhoneLabel: 'Yeni telefon numarası',
+    candidateFixPhoneBtn: 'Numarayı kaydet ve devam et',
+    candidateFixPassportLabel: 'Yeni pasaport numarası',
+    candidateFixPassportBtn: 'Pasaportu kaydet ve devam et',
     examplePersonName: 'Ayşe Yılmaz',
     exampleProfession: 'Elektrik Mühendisi',
     exampleEmail: 'ornek@mail.com',
@@ -1417,13 +1435,15 @@ export const translations: Record<Language, Translation> = {
     approvedAndProcessing: 'Approved & In Process',
 
     verifyEmailTitle: 'Check your inbox',
-    verifyEmailBody: 'You cannot open the portal until this address is verified. Use the link in the email or enter the code. Google sign-in does not need this extra step.',
+    verifyEmailLinkLead: 'Open the link in the email. If it also shows a numeric code, enter it below.',
+    verifyEmailBody: 'The link finishes registration on this device. You can also type the short code from that message. Google sign-in does not need this step.',
     verifyEmailResend: 'Resend verification email',
     verifyEmailResent: 'Verification email sent again.',
     verifyEmailResendFail: 'The email could not be sent. Try again shortly.',
-    verifyEmailCodeLabel: 'Code from the email',
+    verifyEmailCodeLabel: 'Numeric code',
     verifyEmailCodeBtn: 'Verify code',
-    verifyEmailCodeFail: 'That code was not accepted. Use the link or request a new code.',
+    verifyEmailCodeFail: 'That code was not accepted. Open the link or request a new message.',
+    verifyEmailProofFail: 'The verification session could not be saved. Request a new email and try again.',
     verifyEmailBanner: 'The portal stays closed until the email is verified.',
     verifyEmailBack: 'Back to sign in',
     staffSignupTitle: 'Invited staff registration',
@@ -1441,6 +1461,13 @@ export const translations: Record<Language, Translation> = {
     fillRequiredFields: 'Please fill in the required fields.',
     passwordTooShort: 'Password must be at least 8 characters.',
     candidateVerifiedUnlinked: 'Email verified. Your candidate record will be linked by our team.',
+    candidatePhoneTaken: 'This phone number is already registered to another candidate. Enter a different number to finish.',
+    candidatePassportTaken: 'This passport number is already registered. Enter a different passport number to finish.',
+    candidateEmailTaken: 'This email is already linked to a candidate record. Sign in with that account or contact Panova.',
+    candidateFixPhoneLabel: 'New phone number',
+    candidateFixPhoneBtn: 'Save number and continue',
+    candidateFixPassportLabel: 'New passport number',
+    candidateFixPassportBtn: 'Save passport and continue',
     examplePersonName: 'Anna Smith',
     exampleProfession: 'Electrical Engineer',
     exampleEmail: 'name@email.com',
@@ -1904,13 +1931,15 @@ export const translations: Record<Language, Translation> = {
     approvedAndProcessing: 'Miratuar & Në Proçes',
 
     verifyEmailTitle: 'Kontrolloni kutinë tuaj',
-    verifyEmailBody: 'Nuk mund të hyni në portal pa e verifikuar këtë adresë. Hapni lidhjen në e-mail ose vendosni kodin. Hyrja me Google nuk e kërkon këtë hap.',
+    verifyEmailLinkLead: 'Hapni lidhjen në e-mail. Nëse shfaqet edhe një kod numerik, shkruajeni më poshtë.',
+    verifyEmailBody: 'Lidhja e përfundon regjistrimin në këtë pajisje. Mund të shkruani edhe kodin e shkurtër nga ajo letër. Hyrja me Google nuk e kërkon këtë hap.',
     verifyEmailResend: 'Ridërgo e-mailin e verifikimit',
     verifyEmailResent: 'E-maili i verifikimit u dërgua përsëri.',
     verifyEmailResendFail: 'E-maili nuk u dërgua. Provoni përsëri pas pak.',
-    verifyEmailCodeLabel: 'Kodi nga e-maili',
+    verifyEmailCodeLabel: 'Kodi numerik',
     verifyEmailCodeBtn: 'Verifiko kodin',
-    verifyEmailCodeFail: 'Kodi nuk u pranua. Përdorni lidhjen ose kërkoni një kod të ri.',
+    verifyEmailCodeFail: 'Kodi nuk u pranua. Hapni lidhjen ose kërkoni një letër të re.',
+    verifyEmailProofFail: 'Sesioni i verifikimit nuk u ruajt. Kërkoni një email të ri dhe provoni përsëri.',
     verifyEmailBanner: 'Portali nuk hapet pa verifikimin e e-mailit.',
     verifyEmailBack: 'Kthehu te hyrja',
     staffSignupTitle: 'Regjistrimi i personelit të ftuar',
@@ -1928,6 +1957,13 @@ export const translations: Record<Language, Translation> = {
     fillRequiredFields: 'Ju lutemi plotësoni fushat e detyrueshme.',
     passwordTooShort: 'Fjalëkalimi duhet të ketë të paktën 8 karaktere.',
     candidateVerifiedUnlinked: 'E-maili u verifikua. Ekipi ynë do ta lidhë regjistrimin tuaj si kandidat.',
+    candidatePhoneTaken: 'Ky numër telefoni është i regjistruar te një kandidat tjetër. Vendosni një numër tjetër për të përfunduar.',
+    candidatePassportTaken: 'Ky numër pasaporte është i regjistruar. Vendosni një numër tjetër pasaporte për të përfunduar.',
+    candidateEmailTaken: 'Ky email është i lidhur me një regjistrim kandidati. Hyni me atë llogari ose kontaktoni Panova.',
+    candidateFixPhoneLabel: 'Numër i ri telefoni',
+    candidateFixPhoneBtn: 'Ruaj numrin dhe vazhdo',
+    candidateFixPassportLabel: 'Numër i ri pasaporte',
+    candidateFixPassportBtn: 'Ruaj pasaportën dhe vazhdo',
     examplePersonName: 'Ana Hoxha',
     exampleProfession: 'Inxhinier elektrik',
     exampleEmail: 'emer@email.com',
@@ -2381,13 +2417,15 @@ export const translations: Record<Language, Translation> = {
     colPosSecTitle: 'المنصب / القطاع',
 
     verifyEmailTitle: 'تحقق من بريدك الوارد',
-    verifyEmailBody: 'لا يمكن فتح البوابة قبل تأكيد هذا العنوان. افتح الرابط في الرسالة أو أدخل الرمز. تسجيل الدخول عبر Google لا يحتاج هذه الخطوة.',
+    verifyEmailLinkLead: 'افتح الرابط في البريد. إذا ظهر رمز رقمي، أدخله أدناه.',
+    verifyEmailBody: 'الرابط يُكمل التسجيل على هذا الجهاز. يمكنك أيضًا كتابة الرمز القصير من الرسالة. تسجيل الدخول عبر Google لا يحتاج هذه الخطوة.',
     verifyEmailResend: 'إعادة إرسال رسالة التحقق',
     verifyEmailResent: 'أُعيد إرسال رسالة التحقق.',
     verifyEmailResendFail: 'تعذر إرسال الرسالة. حاول مرة أخرى بعد قليل.',
-    verifyEmailCodeLabel: 'الرمز الوارد في البريد',
+    verifyEmailCodeLabel: 'الرمز الرقمي',
     verifyEmailCodeBtn: 'تأكيد الرمز',
-    verifyEmailCodeFail: 'لم يُقبل الرمز. استخدم الرابط أو اطلب رمزًا جديدًا.',
+    verifyEmailCodeFail: 'لم يُقبل الرمز. افتح الرابط أو اطلب رسالة جديدة.',
+    verifyEmailProofFail: 'تعذر حفظ جلسة التحقق. اطلب رسالة جديدة وحاول مرة أخرى.',
     verifyEmailBanner: 'تبقى البوابة مغلقة حتى يتم تأكيد البريد.',
     verifyEmailBack: 'العودة لتسجيل الدخول',
     staffSignupTitle: 'تسجيل موظف مدعو',
@@ -2405,6 +2443,13 @@ export const translations: Record<Language, Translation> = {
     fillRequiredFields: 'يرجى ملء الحقول المطلوبة.',
     passwordTooShort: 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.',
     candidateVerifiedUnlinked: 'تم تأكيد البريد. سيربط فريقنا سجل المرشح الخاص بك.',
+    candidatePhoneTaken: 'رقم الهاتف هذا مسجل لمرشح آخر. أدخل رقمًا مختلفًا للإكمال.',
+    candidatePassportTaken: 'رقم جواز السفر هذا مسجل بالفعل. أدخل رقم جواز مختلف للإكمال.',
+    candidateEmailTaken: 'هذا البريد مرتبط بسجل مرشح. سجّل الدخول بذلك الحساب أو تواصل مع بانوفا.',
+    candidateFixPhoneLabel: 'رقم هاتف جديد',
+    candidateFixPhoneBtn: 'احفظ الرقم وتابع',
+    candidateFixPassportLabel: 'رقم جواز جديد',
+    candidateFixPassportBtn: 'احفظ الجواز وتابع',
     examplePersonName: 'أحمد علي',
     exampleProfession: 'مهندس كهرباء',
     exampleEmail: 'name@email.com',
@@ -2874,13 +2919,15 @@ export const translations: Record<Language, Translation> = {
     totalSelected: 'Вкупно избрани',
     approvedAndProcessing: 'Одобрени и во постапка',
     verifyEmailTitle: 'Проверете ја е-поштата',
-    verifyEmailBody: 'Порталот не може да се отвори додека оваа адреса не се потврди. Користете ја врската од е-поштата или внесете го кодот. Најавата со Google не бара дополнителен чекор.',
+    verifyEmailLinkLead: 'Отворете ја врската во е-поштата. Ако има и бројчен код, внесете го подолу.',
+    verifyEmailBody: 'Врската ја завршува регистрацијата на овој уред. Можете и да го внесете краткиот код од пораката. Најавата со Google не бара дополнителен чекор.',
     verifyEmailResend: 'Испрати повторно е-пошта за потврда',
     verifyEmailResent: 'Е-поштата за потврда е испратена повторно.',
     verifyEmailResendFail: 'Е-поштата не можеше да се испрати. Обидете се повторно наскоро.',
-    verifyEmailCodeLabel: 'Код од е-поштата',
+    verifyEmailCodeLabel: 'Бројчен код',
     verifyEmailCodeBtn: 'Потврди го кодот',
-    verifyEmailCodeFail: 'Кодот не е прифатен. Користете ја врската или побарајте нов код.',
+    verifyEmailCodeFail: 'Кодот не е прифатен. Отворете ја врската или побарајте нова порака.',
+    verifyEmailProofFail: 'Сесијата за потврда не можеше да се зачува. Побарајте нова е-пошта и обидете се повторно.',
     verifyEmailBanner: 'Порталот останува затворен додека е-поштата не се потврди.',
     verifyEmailBack: 'Назад на најава',
     staffSignupTitle: 'Регистрација на поканет персонал',
@@ -2897,6 +2944,13 @@ export const translations: Record<Language, Translation> = {
     fillRequiredFields: 'Пополнете ги задолжителните полиња.',
     passwordTooShort: 'Лозинката мора да има најмалку 8 знаци.',
     candidateVerifiedUnlinked: 'Е-поштата е потврдена. Нашиот тим ќе го поврзе вашиот запис за кандидат.',
+    candidatePhoneTaken: 'Овој телефонски број е веќе регистриран кај друг кандидат. Внесете друг број за да завршите.',
+    candidatePassportTaken: 'Овој број на пасош е веќе регистриран. Внесете друг број на пасош за да завршите.',
+    candidateEmailTaken: 'Оваа е-пошта е веќе поврзана со запис за кандидат. Најавете се со таа сметка или контактирајте ја Panova.',
+    candidateFixPhoneLabel: 'Нов телефонски број',
+    candidateFixPhoneBtn: 'Зачувај го бројот и продолжи',
+    candidateFixPassportLabel: 'Нов број на пасош',
+    candidateFixPassportBtn: 'Зачувај го пасошот и продолжи',
     examplePersonName: 'Ана Стојановска',
     exampleProfession: 'Електроинженер',
     exampleEmail: 'name@email.com',

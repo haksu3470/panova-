@@ -5,7 +5,7 @@ import { AuthFooter } from '@/components/site/AuthFooter';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { linkMyCandidate, signOut } from '@/lib/auth';
+import { linkMyCandidate, signOut, type CandidateLinkResult } from '@/lib/auth';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
 import {
   beginPasswordSignup,
@@ -22,7 +22,7 @@ import {
   Plane, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, Video, ShieldAlert, ShieldCheck, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
-import { Language, translations } from '@/lib/dictionary';
+import { Language, translations, type Translation } from '@/lib/dictionary';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
@@ -50,6 +50,8 @@ export default function CandidateDashboard() {
 
   const [authMode, setAuthMode] = useState<'login' | 'signup' | 'verify'>('login');
   const [verifyEmail, setVerifyEmail] = useState('');
+  const [linkIssue, setLinkIssue] = useState<'phone' | 'passport' | null>(null);
+  const [fixValue, setFixValue] = useState('');
   
   const [loginInput, setLoginInput] = useState('');
   const [password, setPassword] = useState('');
@@ -391,13 +393,40 @@ export default function CandidateDashboard() {
     fetchCandidateData(data.id);
   };
 
-  const loadLinkedCandidate = async (): Promise<boolean> => {
-    const candidateId = await linkMyCandidate();
-    if (!candidateId) return false;
-    const { data } = await supabase.from('job_candidates').select('*').eq('id', candidateId).maybeSingle();
-    if (!data) return false;
+  const explainLinkFailure = (failure: Exclude<CandidateLinkResult, { ok: true }>['failure'], copy: Translation) => {
+    if (failure === 'phone') return copy.candidatePhoneTaken || '';
+    if (failure === 'passport') return copy.candidatePassportTaken || '';
+    if (failure === 'email') return copy.candidateEmailTaken || '';
+    if (failure === 'unconfirmed') return copy.verifyEmailBanner || '';
+    return copy.candidateRecordMissing || '';
+  };
+
+  const loadLinkedCandidate = async (): Promise<'ok' | Exclude<CandidateLinkResult, { ok: true }>['failure']> => {
+    const linked = await linkMyCandidate();
+    if (!linked.ok) {
+      setLinkIssue(linked.failure === 'phone' || linked.failure === 'passport' ? linked.failure : null);
+      return linked.failure;
+    }
+    const { data } = await supabase.from('job_candidates').select('*').eq('id', linked.id).maybeSingle();
+    if (!data) {
+      setLinkIssue(null);
+      return 'missing';
+    }
+    setLinkIssue(null);
+    setFixValue('');
     applyCandidate(data);
-    return true;
+    return 'ok';
+  };
+
+  const handleLinkResult = async (
+    result: 'ok' | Exclude<CandidateLinkResult, { ok: true }>['failure'],
+    announce: boolean,
+  ) => {
+    if (result === 'ok' || result === 'phone' || result === 'passport') return;
+    if (!announce) return;
+    const lang = readStoredLanguage('tr');
+    alert(explainLinkFailure(result, translations[lang] || translations.tr));
+    await signOut('local');
   };
 
   const showVerify = (email: string) => {
@@ -422,7 +451,7 @@ export default function CandidateDashboard() {
           setLoading(false);
           return;
         }
-        if (gate.status === 'ready') await loadLinkedCandidate();
+        if (gate.status === 'ready') await handleLinkResult(await loadLinkedCandidate(), false);
         setLoading(false);
       }, 0);
     });
@@ -453,11 +482,7 @@ export default function CandidateDashboard() {
         showVerify(gate.email || email);
         return;
       }
-      const ok = await loadLinkedCandidate();
-      if (!ok) {
-        await signOut();
-        alert(t.candidateRecordMissing);
-      }
+      await handleLinkResult(await loadLinkedCandidate(), true);
     } finally {
       resume();
       setLoading(false);
@@ -502,6 +527,34 @@ export default function CandidateDashboard() {
       resume();
       setLoading(false);
     }
+  };
+
+  const saveCandidateFix = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!linkIssue) return;
+    const value = fixValue.trim();
+    if (!value) return;
+    setLoading(true);
+    const resume = pauseEmailGateListener();
+    try {
+      const data = linkIssue === 'phone' ? { phone: value } : { passport_number: value.toUpperCase() };
+      const { error } = await supabase.auth.updateUser({ data });
+      if (error) {
+        alert(error.message);
+        return;
+      }
+      await handleLinkResult(await loadLinkedCandidate(), true);
+    } finally {
+      resume();
+      setLoading(false);
+    }
+  };
+
+  const cancelCandidateFix = async () => {
+    setLinkIssue(null);
+    setFixValue('');
+    await signOut('local');
+    setAuthMode('login');
   };
 
   const handleLogout = async () => {
@@ -715,7 +768,7 @@ export default function CandidateDashboard() {
 
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 max-w-md w-full">
-            {authMode !== 'verify' && <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border">
+            {authMode !== 'verify' && !linkIssue && <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border">
               <button
                 type="button"
                 onClick={() => setAuthMode('login')}
@@ -736,7 +789,7 @@ export default function CandidateDashboard() {
               </button>
             </div>}
 
-            {authMode !== 'verify' && <div className="text-center mb-6">
+            {authMode !== 'verify' && !linkIssue && <div className="text-center mb-6">
               <div className="w-12 h-12 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-3">
                 {authMode === 'login' ? <Lock className="w-6 h-6" /> : <UserPlus className="w-6 h-6" />}
               </div>
@@ -748,17 +801,42 @@ export default function CandidateDashboard() {
               </p>
             </div>}
 
-            {authMode === 'verify' ? (
+            {linkIssue ? (
+              <form onSubmit={saveCandidateFix} className="space-y-4 text-left rtl:text-right">
+                <p className="text-sm font-semibold text-slate-800 leading-relaxed">
+                  {linkIssue === 'phone' ? t.candidatePhoneTaken : t.candidatePassportTaken}
+                </p>
+                <div>
+                  <label htmlFor="candidate-fix-value" className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    {linkIssue === 'phone' ? t.candidateFixPhoneLabel : t.candidateFixPassportLabel}
+                  </label>
+                  <input
+                    id="candidate-fix-value"
+                    value={fixValue}
+                    onChange={(e) => setFixValue(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 rounded-xl border text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm font-medium"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading || !fixValue.trim()}
+                  className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] disabled:opacity-60 text-white font-bold py-3.5 rounded-xl text-sm cursor-pointer"
+                >
+                  {linkIssue === 'phone' ? t.candidateFixPhoneBtn : t.candidateFixPassportBtn}
+                </button>
+                <button type="button" onClick={cancelCandidateFix} className="w-full text-xs font-bold text-slate-500 cursor-pointer">
+                  {t.verifyEmailBack}
+                </button>
+              </form>
+            ) : authMode === 'verify' ? (
               <div className="space-y-4">
                 <EmailVerifyNotice
                   email={verifyEmail}
                   lang={currentLang}
                   redirectPath="/candidate"
                   onVerified={async () => {
-                    const ok = await loadLinkedCandidate();
-                    if (!ok) {
-                      alert(t.candidateVerifiedUnlinked);
-                    }
+                    await handleLinkResult(await loadLinkedCandidate(), true);
                   }}
                 />
                 <button type="button" onClick={() => setAuthMode('login')} className="w-full text-xs font-bold text-slate-500 cursor-pointer">
