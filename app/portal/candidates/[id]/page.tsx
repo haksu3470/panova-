@@ -1,271 +1,797 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import AuthGuard from '../../../../components/auth/AuthGuard';
-import { translations, Language } from '../../../../lib/dictionary';
+import AuthGuard from '@/components/auth/AuthGuard';
+import DocumentStatusPanel from '@/components/portal/DocumentStatusPanel';
+import InterviewOfferPanel from '@/components/portal/InterviewOfferPanel';
+import PlacementPanel from '@/components/portal/PlacementPanel';
+
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import { candidateService } from '@/lib/services/candidateService';
+import { ArrowLeft, User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, Video, Trash2, Upload, Eye, X, Plus, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert } from 'lucide-react';
+import Link from 'next/link';
+import { Language, translations } from '@/lib/dictionary';
+import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
+import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
+
+interface CandidateDocument {
+  id: string;
+  name: string;
+  status: 'pending' | 'uploaded' | 'reviewing' | 'approved' | 'rejected' | 're_requested';
+  file_url?: string;
+  file_name?: string;
+}
 
 function CandidateDetailPageInner() {
   const params = useParams();
-  const router = useRouter();
-  const candidateId = params?.id;
+  const candidateId = params.id as string;
 
-  // Sözlük nesnesi güvenli tanımlama
-  const t = translations?.tr || {};
+  const [currentLang, setCurrentLang] = useState<Language>('en');
 
+  useEffect(() => {
+    const apply = () => {
+      const next = readStoredLanguage('en');
+      setCurrentLang(next);
+      syncDocumentLanguage(next);
+    };
+    apply();
+    window.addEventListener('storage', apply);
+    return () => window.removeEventListener('storage', apply);
+  }, []);
+
+  const changeLanguage = (lang: Language) => {
+    setCurrentLang(lang);
+    writeStoredLanguage(lang);
+  };
+
+  const [candidate, setCandidate] = useState<any | null>(null);
+  const [showIO, setShowIO] = useState(false);
+  const [documents, setDocuments] = useState<CandidateDocument[]>([]);
   const [loading, setLoading] = useState(true);
-  const [previewVideo, setPreviewVideo] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  // 3'lü Video Alanı State'leri
+  const [status, setStatus] = useState('pending');
+  const [candidatePhoto, setCandidatePhoto] = useState('');
+  const [candidatePhone, setCandidatePhone] = useState('');
+  const [candidateEmail, setCandidateEmail] = useState('');
+  const [internalNotes, setInternalNotes] = useState('');
+
+  // Sertifika & 3'lü YouTube Video State'leri
+  const [certificateNo, setCertificateNo] = useState('');
+  const [issuingBody, setIssuingBody] = useState('');
   const [videoUrl1, setVideoUrl1] = useState('');
   const [videoUrl2, setVideoUrl2] = useState('');
   const [videoUrl3, setVideoUrl3] = useState('');
 
-  // Sağ Panel Takip Alanı State'leri
-  const [controlDate, setControlDate] = useState('');
-  const [complianceScore, setComplianceScore] = useState('');
-  const [salaryMatch, setSalaryMatch] = useState(false);
-  const [accommodationMatch, setAccommodationMatch] = useState(false);
-  const [employerFeedback, setEmployerFeedback] = useState('');
-  const [workerFeedback, setWorkerFeedback] = useState('');
-  const [panovaNote, setPanovaNote] = useState('');
+  // Seyahat ve Uçuş Lojistik State'leri
+  const [travelStatus, setTravelStatus] = useState('planned');
+  const [flightDate, setFlightDate] = useState('');
+  const [flightNumber, setFlightNumber] = useState('');
+  const [departureCity, setDepartureCity] = useState('');
+  const [arrivalCity, setArrivalCity] = useState('');
+  const [pnrCode, setPnrCode] = useState('');
+  const [accommodationDetails, setAccommodationDetails] = useState('');
 
+  // Vazgeçme ve Süreç Kapatma State'leri
+  const [closureReason, setClosureReason] = useState('');
+  const [isClosed, setIsClosed] = useState(false);
+
+  // İş Teklifi State'leri
+  const [offerEmployer, setOfferEmployer] = useState('');
+  const [offerSalary, setOfferSalary] = useState('');
+  const [offerDate, setOfferDate] = useState('');
+  const [offerTerms, setOfferTerms] = useState('');
+
+  // Yeni Belge & Önizleme / Video Önizleme
+  const [newDocName, setNewDocName] = useState('');
+  const [hasTableDocs, setHasTableDocs] = useState<boolean | null>(null);
   useEffect(() => {
-    if (candidateId) {
-      setLoading(false);
-    }
+    supabase.from('candidate_documents').select('id', { count: 'exact', head: true }).eq('candidate_id', candidateId)
+      .then(({ count }) => setHasTableDocs((count ?? 0) > 0));
+  }, [candidateId]);
+  const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
+  const [previewVideo, setPreviewVideo] = useState<string | null>(null);
+
+  // Aday Bildirim Gönderme State'leri
+  const [notifTitle, setNotifTitle] = useState('');
+  const [notifMessage, setNotifMessage] = useState('');
+  const [notifSending, setNotifSending] = useState(false);
+
+  const t = translations[currentLang] || translations.en;
+  const isRtl = currentLang === 'ar';
+  
+  useEffect(() => {
+    fetchCandidateDetail();
   }, [candidateId]);
 
-  const handleSaveTracking = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('Başarıyla Kaydedildi');
+  useEffect(() => {
+    if (documents.length > 0) {
+      setDocuments(prevDocs => 
+        prevDocs.map((doc, idx) => {
+          if (idx === 0) return { ...doc, name: t.docPassportScan || doc.name };
+          if (idx === 1) return { ...doc, name: t.docProfessionalCert || doc.name };
+          if (idx === 2) return { ...doc, name: t.docCriminalRecord || doc.name };
+          if (idx === 3) return { ...doc, name: t.docHealthReport || doc.name };
+          return doc;
+        })
+      );
+    }
+  }, [currentLang]);
+
+  const fetchCandidateDetail = async () => {
+    setLoading(true);
+    try {
+      const data = await candidateService.getCandidateById(candidateId);
+      if (data) {
+        setCandidate(data);
+        setStatus(data.status || 'pending');
+        
+        setCandidatePhoto(data.photo_url || '');
+        setCandidatePhone(data.phone || '');
+        setCandidateEmail(data.email || '');
+        setInternalNotes(data.notes || '');
+        setCertificateNo(data.certificate_no || '');
+        setIssuingBody(data.issuing_body || '');
+        
+        // 3'lü Video Linklerini Yükle
+        setVideoUrl1(data.video_url_1 || data.video_url || '');
+        setVideoUrl2(data.video_url_2 || '');
+        setVideoUrl3(data.video_url_3 || '');
+
+        setTravelStatus(data.travel_status || 'planned');
+        setFlightDate(data.flight_date || '');
+        setFlightNumber(data.flight_number || '');
+        setDepartureCity(data.departure_city || '');
+        setArrivalCity(data.arrival_city || '');
+        setPnrCode(data.pnr_code || '');
+        setAccommodationDetails(data.accommodation_details || '');
+
+        try {
+          const parsedMeta = data.documents_json ? JSON.parse(data.documents_json) : {};
+          if (parsedMeta && parsedMeta.closure_meta) {
+            setIsClosed(parsedMeta.closure_meta.is_closed || false);
+            setClosureReason(parsedMeta.closure_meta.closure_reason || '');
+          }
+        } catch (e) {}
+
+        const defaultDocs: CandidateDocument[] = [
+          { id: '1', name: t.docPassportScan || 'Pasaport Taraması', status: data.passport_number ? 'approved' : 'pending' },
+          { id: '2', name: t.docProfessionalCert || 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
+          { id: '3', name: t.docCriminalRecord || 'Adli Sicil Kaydı (Sabıka Kaydı)', status: 'pending' },
+          { id: '4', name: t.docHealthReport || 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
+        ];
+        
+        try {
+          const parsed = data.documents_json ? JSON.parse(data.documents_json) : {};
+          const parsedDocs = Array.isArray(parsed) ? parsed : (parsed.docs || defaultDocs);
+          const normalizedDocs = parsedDocs.map((doc: CandidateDocument, idx: number) => {
+            if (idx === 0) return { ...doc, name: t.docPassportScan || doc.name };
+            if (idx === 1) return { ...doc, name: t.docProfessionalCert || doc.name };
+            if (idx === 2) return { ...doc, name: t.docCriminalRecord || doc.name };
+            if (idx === 3) return { ...doc, name: t.docHealthReport || doc.name };
+            return doc;
+          });
+          setDocuments(normalizedDocs);
+        } catch {
+          setDocuments(defaultDocs);
+        }
+      }
+    } catch (err: any) {
+      console.error('Aday detay yükleme hatası:', err.message);
+    }
+    setLoading(false);
   };
 
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setCandidatePhoto(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDocStatusChange = (docId: string, newStatus: CandidateDocument['status']) => {
+    setDocuments(documents.map(doc => doc.id === docId ? { ...doc, status: newStatus } : doc));
+  };
+
+  const handleFileUpload = (docId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const fileUrl = e.target?.result as string;
+      setDocuments(documents.map(doc => {
+        if (doc.id === docId) {
+          return {
+            ...doc,
+            file_url: fileUrl,
+            file_name: file.name,
+            status: 'uploaded',
+          };
+        }
+        return doc;
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAddDocument = () => {
+    if (!newDocName.trim()) return;
+    const newDoc: CandidateDocument = {
+      id: Date.now().toString(),
+      name: newDocName,
+      status: 'pending',
+    };
+    setDocuments([...documents, newDoc]);
+    setNewDocName('');
+  };
+
+  const handleDeleteDocument = (docId: string) => {
+    setDocuments(documents.filter(d => d.id !== docId));
+  };
+
+  const handleSaveDetail = async () => {
+    setSaving(true);
+
+    let existingMeta = {};
+    try {
+      const parsed = candidate?.documents_json ? JSON.parse(candidate.documents_json) : {};
+      if (!Array.isArray(parsed)) existingMeta = parsed;
+    } catch (e) {}
+
+    const payloadDocumentsJson = JSON.stringify({
+      docs: documents,
+      closure_meta: {
+        is_closed: isClosed,
+        closure_reason: closureReason
+      },
+      ...existingMeta
+    });
+
+    try {
+      await candidateService.updateCandidateDetail(candidateId, {
+        status: status,
+        photo_url: candidatePhoto,
+        phone: candidatePhone,
+        email: candidateEmail,
+        notes: internalNotes,
+        certificate_no: certificateNo,
+        issuing_body: issuingBody,
+        video_url: videoUrl1,
+        video_url_1: videoUrl1,
+        video_url_2: videoUrl2,
+        video_url_3: videoUrl3,
+        documents_json: payloadDocumentsJson,
+        travel_status: travelStatus,
+        flight_date: flightDate,
+        flight_number: flightNumber,
+        departure_city: departureCity,
+        arrival_city: arrivalCity,
+        pnr_code: pnrCode,
+        accommodation_details: accommodationDetails,
+      });
+
+      setSaving(false);
+      alert(t.savedSuccess || 'Başarıyla kaydedildi!');
+    } catch (error: any) {
+      setSaving(false);
+      alert('Hata: ' + error.message);
+    }
+  };
+
+  const handleSendJobOffer = async () => {
+    if (!offerEmployer || !offerSalary) {
+      alert(t.fillEmployerAndSalary || 'Lütfen firma adı ve maaş bilgilerini doldurun.');
+      return;
+    }
+
+    const { error } = await supabase.from('job_offers').insert([
+      {
+        candidate_id: candidateId,
+        employer_name: offerEmployer,
+        position_title: candidate.profession || 'General Position',
+        monthly_net_salary: Number(offerSalary),
+        start_date: offerDate,
+        terms_details: offerTerms,
+        status: 'pending',
+        is_demo: !!candidate?.is_demo
+      }
+    ]);
+
+    if (!error) {
+      alert(t.offerSentSuccess || 'Resmi iş teklifi başarıyla adaya iletildi!');
+      setOfferEmployer('');
+      setOfferSalary('');
+      setOfferDate('');
+      setOfferTerms('');
+    } else {
+      alert('Hata: ' + error.message);
+    }
+  };
+
+  const handleSendNotificationToCandidate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!notifTitle.trim() || !notifMessage.trim()) return;
+    setNotifSending(true);
+
+    try {
+      const { error: dbError } = await supabase.from('candidate_notifications').insert([
+        {
+          candidate_id: candidateId,
+          title: notifTitle,
+          message: notifMessage,
+          type: 'warning',
+          is_read: false
+        }
+      ]);
+
+      if (dbError) throw dbError;
+
+      if (candidate?.email) {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: candidate.email,
+            candidateName: candidate.full_name,
+            subject: notifTitle,
+            message: notifMessage,
+          }),
+        });
+      }
+
+      setNotifSending(false);
+      alert(t.notificationSentSuccess || 'Bildirim adaya başarıyla gönderildi!');
+      setNotifTitle('');
+      setNotifMessage('');
+    } catch (err: any) {
+      setNotifSending(false);
+      alert('Hata: ' + err.message);
+    }
+  };
+
+  if (loading) {
+    return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500 font-bold">Yükleniyor...</div>;
+  }
+
+  if (!candidate) {
+    return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-red-500 font-bold">Aday bulunamadı.</div>;
+  }
+
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Aday Detayı</h1>
-          <p className="text-xs text-slate-500">ID: {candidateId}</p>
-        </div>
-        <button
-          onClick={() => router.back()}
-          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer"
-        >
-          ← Geri Dön
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Sol ve Orta Sütun: Belgeler ve 3'lü YouTube Videoları */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
-            <h2 className="text-sm font-extrabold text-emerald-800 uppercase">
-              📹 Kurumsal YouTube Videoları
-            </h2>
-            
-            {/* 1. Video */}
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-600">1. Video: Genel Tanıtım</label>
-              <div className="flex gap-1.5">
-                <input
-                  type="url"
-                  value={videoUrl1}
-                  onChange={(e) => setVideoUrl1(e.target.value)}
-                  placeholder="https://youtube.com/..."
-                  className="w-full px-3 py-2 rounded-xl border bg-slate-50 font-medium text-slate-800 text-xs focus:bg-white transition"
-                />
-                {videoUrl1 && (
-                  <button
-                    type="button"
-                    onClick={() => setPreviewVideo(videoUrl1)}
-                    className="bg-emerald-100 text-[#2e7d32] px-3 py-2 rounded-xl font-bold text-[11px] hover:bg-emerald-200 transition shrink-0 cursor-pointer"
-                  >
-                    Önizle
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* 2. Video */}
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-600">2. Video: Mesleki Beceri</label>
-              <div className="flex gap-1.5">
-                <input
-                  type="url"
-                  value={videoUrl2}
-                  onChange={(e) => setVideoUrl2(e.target.value)}
-                  placeholder="https://youtube.com/..."
-                  className="w-full px-3 py-2 rounded-xl border bg-slate-50 font-medium text-slate-800 text-xs focus:bg-white transition"
-                />
-                {videoUrl2 && (
-                  <button
-                    type="button"
-                    onClick={() => setPreviewVideo(videoUrl2)}
-                    className="bg-emerald-100 text-[#2e7d32] px-3 py-2 rounded-xl font-bold text-[11px] hover:bg-emerald-200 transition shrink-0 cursor-pointer"
-                  >
-                    Önizle
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* 3. Video */}
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-600">3. Video: Saha Mülakatı</label>
-              <div className="flex gap-1.5">
-                <input
-                  type="url"
-                  value={videoUrl3}
-                  onChange={(e) => setVideoUrl3(e.target.value)}
-                  placeholder="https://youtube.com/..."
-                  className="w-full px-3 py-2 rounded-xl border bg-slate-50 font-medium text-slate-800 text-xs focus:bg-white transition"
-                />
-                {videoUrl3 && (
-                  <button
-                    type="button"
-                    onClick={() => setPreviewVideo(videoUrl3)}
-                    className="bg-emerald-100 text-[#2e7d32] px-3 py-2 rounded-xl font-bold text-[11px] hover:bg-emerald-200 transition shrink-0 cursor-pointer"
-                  >
-                    Önizle
-                  </button>
-                )}
+    <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
+        
+        {/* Üst Bar ve Aday Özet Kartı */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            <Link href="/portal" className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-700 font-bold text-xs w-fit">
+              ← {t.returnToPortal || 'Yönetim Paneline Dön'}
+            </Link>
+            <div className="flex items-center gap-3">
+              {candidatePhoto ? (
+                <img src={candidatePhoto} alt="Foto" className="w-12 h-12 rounded-full object-cover border-2 border-emerald-600 shadow shrink-0" />
+              ) : (
+                <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold shrink-0">
+                  {candidate.full_name?.charAt(0)}
+                </div>
+              )}
+              <div>
+                <h1 className="text-base sm:text-xl font-extrabold text-slate-900 truncate max-w-[200px] sm:max-w-none">{candidate.full_name}</h1>
+                <div className="flex items-center gap-2 text-[11px] text-slate-500">
+                  <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">PNV-CAND-{candidate.id.substring(0, 6)}</span>
+                  <span>📍 {candidate.country || 'N/A'}, {candidate.city || 'N/A'}</span>
+                  <span>💼 {candidate.profession || 'Genel'}</span>
+                </div>
               </div>
             </div>
           </div>
+
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
+
+            <button onClick={handleSaveDetail} disabled={saving} className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow flex items-center gap-2 cursor-pointer w-full sm:w-auto justify-center">
+              <Save className="w-4 h-4" /> {saving ? (t.saving || 'Kaydediliyor...') : (t.saveChanges || 'Değişiklikleri Kaydet')}
+            </button>
+          </div>
         </div>
 
-        {/* Sağ Sütun: Takip, Kontrol ve Not Paneli */}
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
-            <h2 className="text-sm font-extrabold text-slate-900 uppercase">
-              30-60-90 Gün Takip
-            </h2>
-
-            <form onSubmit={handleSaveTracking} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-600">Kontrol Tarihi</label>
-                <input
-                  type="date"
-                  value={controlDate}
-                  onChange={(e) => setControlDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border text-xs font-medium"
-                />
+        {/* Vazgeçme ve Süreç Kapanış Durumu Uyarısı */}
+        {isClosed && (
+          <div className="bg-red-50 border border-red-200 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm text-red-900">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
+              <div>
+                <strong>{t.dossierClosedNotice || 'Bu aday dosyası kapatılmıştır / süreçten çıkılmıştır.'}</strong> {t.reason || 'Sebep:'} {closureReason || 'Belirtilmemiş'}
               </div>
+            </div>
+            <button onClick={() => { setIsClosed(false); setClosureReason(''); }} className="bg-white px-3 py-1.5 rounded-lg border border-red-300 font-bold hover:bg-red-100 transition cursor-pointer">
+              {t.reopenProcess || 'Süreci Tekrar Aç'}
+            </button>
+          </div>
+        )}
 
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-600">Uyum Puanı (1-5)</label>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+          
+          {/* Sol Kolon */}
+          <div className="lg:col-span-8 space-y-4 sm:space-y-6">
+            
+            {/* Fotoğraf, GSM, E-Posta ve Şifre Yönetimi */}
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+                <User className="w-5 h-5 text-[#2e7d32]" /> {t.profileCredentialsManagement || 'Aday Fotoğraf, GSM, E-Posta ve Şifre Yönetimi'}
+              </h3>
+
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 p-4 bg-slate-50 rounded-2xl border">
+                <div className="relative shrink-0">
+                  {candidatePhoto ? (
+                    <img src={candidatePhoto} alt="Profil" className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border shadow" />
+                  ) : (
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-slate-200 rounded-2xl flex items-center justify-center text-slate-400 font-bold text-2xl">
+                      {candidate.full_name?.charAt(0)}
+                    </div>
+                  )}
+                  <label className="absolute -bottom-2 -right-2 bg-[#2e7d32] text-white p-2 rounded-xl cursor-pointer shadow hover:bg-[#1b5e20] transition" title="Fotoğraf Yükle">
+                    <Camera className="w-4 h-4" />
+                    <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                  </label>
+                </div>
+
+                <div className="flex-1 space-y-3 w-full text-xs">
+                  <div>
+                    <label className="font-bold text-slate-400 uppercase flex items-center gap-1 mb-1">
+                      <Phone className="w-3 h-3" /> {t.phoneNumberGsm || 'Telefon Numarası (GSM)'}
+                    </label>
+                    <input type="tel" value={candidatePhone} onChange={(e) => setCandidatePhone(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white font-bold text-slate-900 outline-none text-xs sm:text-sm" />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-400 uppercase flex items-center gap-1 mb-1">
+                      <Mail className="w-3 h-3" /> {t.emailAddress || 'E-Posta Adresi'}
+                    </label>
+                    <input type="email" value={candidateEmail} onChange={(e) => setCandidateEmail(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white font-bold text-slate-900 outline-none text-xs sm:text-sm" />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-400 uppercase flex items-center gap-1 mb-1">
+                      <KeyRound className="w-3 h-3" /> {t.portalPassword || 'Aday Portalı Şifresi'}
+                    </label>
+                    <p className="text-[11px] text-slate-500">Şifreler Supabase Auth ile yönetilir; aday kendi şifresini portaldan belirler/sıfırlar.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Seyahat ve Uçuş Lojistik Yönetimi */}
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 gap-2">
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <PlaneTakeoff className="w-5 h-5 text-sky-600" /> {t.travelFlightLogistics || 'Seyahat, Uçuş ve Konaklama Lojistiği'}
+                </h3>
                 <select
-                  value={complianceScore}
-                  onChange={(e) => setComplianceScore(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border text-xs font-medium bg-white"
+                  value={travelStatus}
+                  onChange={(e) => setTravelStatus(e.target.value)}
+                  className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase bg-sky-50 text-sky-800 border-sky-300 outline-none cursor-pointer w-fit"
                 >
-                  <option value="">Seçiniz...</option>
-                  <option value="1">1 - Çok Zayıf</option>
-                  <option value="2">2 - Zayıf</option>
-                  <option value="3">3 - Orta</option>
-                  <option value="4">4 - İyi</option>
-                  <option value="5">5 - Mükemmel</option>
+                  <option value="planned">✈️ {t.planned || 'Planlanıyor'}</option>
+                  <option value="ticketed">🎟️ {t.ticketed || 'Biletlendi'}</option>
+                  <option value="completed">✅ {t.completed || 'Seyahat Tamamlandı'}</option>
                 </select>
               </div>
 
-              <div className="space-y-2 pt-2">
-                <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={salaryMatch}
-                    onChange={(e) => setSalaryMatch(e.target.checked)}
-                    className="rounded text-emerald-600 focus:ring-emerald-500"
-                  />
-                  Maaş sözleşmeye uygun
-                </label>
-                <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={accommodationMatch}
-                    onChange={(e) => setAccommodationMatch(e.target.checked)}
-                    className="rounded text-emerald-600 focus:ring-emerald-500"
-                  />
-                  Konaklama uygun
-                </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-500 uppercase mb-1">{t.flightDateTime || 'Uçuş Tarihi & Saati'}</label>
+                  <input type="text" value={flightDate} onChange={(e) => setFlightDate(e.target.value)} placeholder="Örn: 15.10.2026 - 14:30" className="w-full px-3 py-2.5 rounded-xl border bg-white font-bold text-slate-800 outline-none" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-500 uppercase mb-1">{t.flightNumber || 'Uçuş Kodu / Sefer No'}</label>
+                  <input type="text" value={flightNumber} onChange={(e) => setFlightNumber(e.target.value)} placeholder="Örn: TK-1926" className="w-full px-3 py-2.5 rounded-xl border bg-white font-bold text-slate-800 outline-none" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-500 uppercase mb-1">{t.departureCityAirport || 'Kalkış Yeri / Havalimanı'}</label>
+                  <input type="text" value={departureCity} onChange={(e) => setDepartureCity(e.target.value)} placeholder="Örn: Skopje (SKP)" className="w-full px-3 py-2.5 rounded-xl border bg-white font-bold text-slate-800 outline-none" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-500 uppercase mb-1">{t.arrivalCityAirport || 'Varış Yeri / Havalimanı'}</label>
+                  <input type="text" value={arrivalCity} onChange={(e) => setArrivalCity(e.target.value)} placeholder="Örn: Istanbul (IST)" className="w-full px-3 py-2.5 rounded-xl border bg-white font-bold text-slate-800 outline-none" />
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-600">İşveren Geri Bildirimi</label>
-                <textarea
-                  value={employerFeedback}
-                  onChange={(e) => setEmployerFeedback(e.target.value)}
-                  placeholder="İşveren görüşü..."
-                  rows={2}
-                  className="w-full px-3 py-2 rounded-xl border text-xs font-medium"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-2">
+                <div>
+                  <label className="block font-bold text-slate-500 uppercase mb-1">{t.pnrBookingCode || 'PNR / Bilet Rezervasyon Kodu'}</label>
+                  <input type="text" value={pnrCode} onChange={(e) => setPnrCode(e.target.value)} placeholder="Örn: X79R2A" className="w-full px-3 py-2.5 rounded-xl border bg-white font-bold text-slate-800 outline-none uppercase" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-500 uppercase mb-1">{t.accommodationTransferDetails || 'Konaklama & Karşılama Detayları'}</label>
+                  <input type="text" value={accommodationDetails} onChange={(e) => setAccommodationDetails(e.target.value)} placeholder="Örn: Otel transferi ve lojman bilgisi..." className="w-full px-3 py-2.5 rounded-xl border bg-white font-bold text-slate-800 outline-none" />
+                </div>
               </div>
-
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-600">Çalışan Geri Bildirimi</label>
-                <textarea
-                  value={workerFeedback}
-                  onChange={(e) => setWorkerFeedback(e.target.value)}
-                  placeholder="Çalışan görüşü..."
-                  rows={2}
-                  className="w-full px-3 py-2 rounded-xl border text-xs font-medium"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-600">Not</label>
-                <textarea
-                  value={panovaNote}
-                  onChange={(e) => setPanovaNote(e.target.value)}
-                  placeholder="Panova notu..."
-                  rows={2}
-                  className="w-full px-3 py-2 rounded-xl border text-xs font-medium"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-2.5 bg-[#2e7d32] hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
-              >
-                Kaydet / Güncelle
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      {/* Video Önizleme Modalı */}
-      {previewVideo && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white p-4 rounded-3xl max-w-3xl w-full space-y-3 shadow-2xl">
-            <div className="flex justify-between items-center">
-              <h3 className="font-bold text-slate-800 text-sm">Aday Çalışma Videosu Önizlemesi</h3>
-              <button
-                onClick={() => setPreviewVideo(null)}
-                className="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-full text-xs font-bold transition cursor-pointer"
-              >
-                ✕ Kapat
-              </button>
             </div>
-            <div className="aspect-video bg-black rounded-2xl overflow-hidden flex items-center justify-center">
-              <iframe
-                src={previewVideo.replace('watch?v=', 'embed/')}
-                title="Video Önizleme"
-                className="w-full h-full"
-                allowFullScreen
+
+            {/* Evrak & Belge Takip Mekanizması */}
+            {hasTableDocs === false && (
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+              <p className="text-[11px] text-amber-700 bg-amber-50 rounded-lg px-2 py-1">Eski JSON belge kaydı (geçiş öncesi). Yeni belgeler aşağıdaki Belge Durumu panelinden yönetilir.</p>
+              <div className="flex items-center justify-between border-b pb-3">
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <FileCheck className="w-5 h-5 text-indigo-600" /> {t.documentTrackingMechanism || 'Evrak & Belge Takip Mekanizması'}
+                </h3>
+                <span className="text-xs bg-indigo-50 text-indigo-700 font-bold px-2.5 py-1 rounded-lg">
+                  {documents.filter(d => d.status === 'approved').length} / {documents.length} {t.approved || 'Onaylı'}
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {documents.map((doc) => (
+                  <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm">
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-5 h-5 text-indigo-600 shrink-0" />
+                        <div>
+                          <div className="font-extrabold text-slate-900">{doc.name}</div>
+                          {doc.file_name && <div className="text-[11px] text-slate-500 truncate max-w-[200px] sm:max-w-none">{t.file || 'Dosya'}: {doc.file_name}</div>}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={doc.status}
+                          onChange={(e) => handleDocStatusChange(doc.id, e.target.value as any)}
+                          className={`px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer outline-none ${
+                            doc.status === 'approved' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
+                            doc.status === 'rejected' ? 'bg-red-100 text-red-800 border-red-300' :
+                            doc.status === 're_requested' ? 'bg-purple-100 text-purple-800 border-purple-300' :
+                            'bg-amber-100 text-amber-800 border-amber-300'
+                          }`}
+                        >
+                          <option value="pending">🟡 {t.pending || 'Bekleniyor'}</option>
+                          <option value="uploaded">📤 {t.uploaded || 'Yüklendi'}</option>
+                          <option value="reviewing">🔵 {t.reviewing || 'İnceleniyor'}</option>
+                          <option value="approved">🟢 {t.approved || 'Onaylandı'}</option>
+                          <option value="rejected">🔴 {t.rejected || 'Reddedildi'}</option>
+                          <option value="re_requested">🔄 {t.reRequested || 'Yeniden istendi'}</option>
+                        </select>
+
+                        <button onClick={() => handleDeleteDocument(doc.id)} className="p-1.5 text-slate-400 hover:text-red-600 transition cursor-pointer">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                      {doc.file_url ? (
+                        <button type="button" onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url! })} className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition flex items-center gap-1 cursor-pointer w-fit">
+                          <Eye className="w-3.5 h-3.5" /> {t.preview || 'Önizle'}
+                        </button>
+                      ) : <span className="text-slate-400 italic">{t.noFileUploaded || 'Dosya yüklenmedi'}</span>}
+
+                      <label className="bg-white hover:bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition shadow-sm flex items-center gap-1 w-fit">
+                        <Upload className="w-3.5 h-3.5 text-indigo-600" /> {t.uploadFromComputer || 'Bilgisayardan Yükle'}
+                        <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleFileUpload(doc.id, e)} className="hidden" />
+                      </label>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-3 border-t flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  placeholder={t.newDocNamePlaceholder || 'Yeni Belge Adı'}
+                  value={newDocName}
+                  onChange={(e) => setNewDocName(e.target.value)}
+                  className="flex-1 px-3.5 py-2.5 text-xs rounded-xl border text-slate-900 bg-white outline-none"
+                />
+                <button onClick={handleAddDocument} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer">
+                  <Plus className="w-4 h-4" /> {t.add || 'Ekle'}
+                </button>
+              </div>
+            </div>
+            )}
+
+            {/* Sertifika, 3'lü YouTube Video ve Değerlendirme */}
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+                <Award className="w-5 h-5 text-amber-500" /> {t.professionalEvaluationCertificate || 'Mesleki Değerlendirme & Sertifika'}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="p-4 bg-slate-50 rounded-xl border space-y-2">
+                  <span className="font-bold text-slate-500 uppercase block">{t.certificateInfo || 'Sertifika Bilgileri'}</span>
+                  <input type="text" value={certificateNo} onChange={(e) => setCertificateNo(e.target.value)} placeholder={t.certificateNo || 'Sertifika No'} className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
+                  <input type="text" value={issuingBody} onChange={(e) => setIssuingBody(e.target.value)} placeholder={t.issuingBody || 'Veren Kurum'} className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
+                </div>
+
+                {/* Kurumsal YouTube 3'lü Video Alanı */}
+                <div className="p-4 bg-slate-50 rounded-xl border space-y-3">
+                  <span className="font-extrabold text-slate-900 uppercase block text-[11px] text-emerald-800">📹 Kurumsal YouTube Videoları </span>
+                  
+                  {/* 1. Video */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">1. Video: Genel Tanıtım</label>
+                    <div className="flex gap-1.5">
+                      <input type="url" value={videoUrl1} onChange={(e) => setVideoUrl1(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white font-medium text-slate-800 text-xs" />
+                      {videoUrl1 && (
+                        <button type="button" onClick={() => setPreviewVideo(videoUrl1)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] hover:bg-emerald-200 transition shrink-0 cursor-pointer">
+                          Önizle
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 2. Video */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">2. Video: Mesleki Beceri</label>
+                    <div className="flex gap-1.5">
+                      <input type="url" value={videoUrl2} onChange={(e) => setVideoUrl2(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white font-medium text-slate-800 text-xs" />
+                      {videoUrl2 && (
+                        <button type="button" onClick={() => setPreviewVideo(videoUrl2)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] hover:bg-emerald-200 transition shrink-0 cursor-pointer">
+                          Önizle
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 3. Video */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">3. Video: Saha Mülakatı</label>
+                    <div className="flex gap-1.5">
+                      <input type="url" value={videoUrl3} onChange={(e) => setVideoUrl3(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white font-medium text-slate-800 text-xs" />
+                      {videoUrl3 && (
+                        <button type="button" onClick={() => setPreviewVideo(videoUrl3)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] hover:bg-emerald-200 transition shrink-0 cursor-pointer">
+                          Önizle
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* İç Notlar */}
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" /> {t.internalNotesAdminOnly || 'İç Değerlendirme Notları (Sadece PANOVA)'}
+              </h3>
+              <textarea rows={3} value={internalNotes} onChange={(e) => setInternalNotes(e.target.value)} className="w-full p-4 rounded-xl border text-xs outline-none text-slate-900" />
+            </div>
+          </div>
+
+          {/* Sağ Kolon */}
+          <div className="lg:col-span-4 space-y-4 sm:space-y-6">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b pb-2">{t.candidateStatus || 'Aday Süreç Durumu'}</h3>
+              <select 
+                value={status} 
+                onChange={(e) => setStatus(e.target.value)} 
+                className="w-full p-3 rounded-xl border text-xs sm:text-sm font-extrabold bg-slate-900 text-white outline-none cursor-pointer shadow-sm"
+              >
+                <option value="pending" className="bg-white text-slate-900">🟡 {t.pending || 'Beklemede'}</option>
+                <option value="reviewing" className="bg-white text-slate-900">🔵 {t.reviewing || 'İncelemede'}</option>
+                <option value="visa_processing" className="bg-white text-slate-900">🟣 {t.visaProcessing || 'Vize Sürecinde'}</option>
+                <option value="approved" className="bg-white text-slate-900">🟢 {t.approved || 'Onaylandı'}</option>
+              </select>
+            </div>
+
+            <DocumentStatusPanel candidateId={candidateId} />
+            <div className="bg-white border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <p className="font-bold text-slate-900 text-sm">🤝 Görüşme & İş Teklifi</p>
+                <p className="text-xs text-slate-500">Görüşme planla, sonucu kaydet, adaya teklif gönder.</p>
+              </div>
+              <button onClick={() => setShowIO(true)} className="text-xs font-bold px-4 py-2 rounded-lg bg-amber-500 text-white cursor-pointer">Aç</button>
+            </div>
+            {showIO && candidate && <InterviewOfferPanel candidate={{ ...candidate, id: candidateId }} onClose={() => setShowIO(false)} />}
+            <PlacementPanel candidateId={candidateId} />
+
+            {/* Vazgeçme ve Süreçten Çıkış Paneli */}
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3 border-amber-200">
+              <h3 className="text-sm sm:text-base font-bold text-amber-900 border-b pb-2 flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-amber-600" /> {t.processClosureWithdrawal || 'Vazgeçme ve Süreçten Çıkış'}
+              </h3>
+              <p className="text-[11px] text-slate-500">{t.closureDesc || 'Aday iş teklifini reddederse veya süreç olumsuz sonuçlanırsa kaydı silmeden kapatabilirsiniz.'}</p>
+              <textarea 
+                rows={2} 
+                value={closureReason} 
+                onChange={(e) => setClosureReason(e.target.value)} 
+                placeholder={t.closureReasonPlaceholder || 'Kapanış / Vazgeçme sebebi...'} 
+                className="w-full p-3 rounded-xl border text-xs outline-none bg-slate-50 text-slate-900" 
               />
+              <button 
+                type="button" 
+                onClick={() => { setIsClosed(true); handleSaveDetail(); }}
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-xl font-bold text-xs transition cursor-pointer shadow-sm"
+              >
+                {t.closeArchiveProcess || 'Aday Sürecini Kapat / Arşivle'}
+              </button>
             </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
-export default function CandidateDetailPage() {
-  return (
-    <AuthGuard role="staff">
-      <CandidateDetailPageInner />
-    </AuthGuard>
-  );
-}
+            {/* Resmi İş Teklifi Gönderme Kartı */}
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
+                <FileSignature className="w-4 h-4 text-[#2e7d32]" /> {t.sendOfficialJobOffer || 'Resmi İş Teklifi Gönder'}
+              </h3>
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.employerCompanyName || 'İşveren / Firma Adı'}</label>
+                  <input 
+                    type="text" 
+                    value={offerEmployer} 
+                    onChange={(e) => setOfferEmployer(e.target.value)} 
+                    placeholder="Örn: Panova Tarim DOO" 
+                    className="w-full px-3 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.monthlyNetSalary || 'Aylık Net Ücret (€)'}</label>
+                    <input 
+                      type="number" 
+                      value={offerSalary} 
+                      onChange={(e) => setOfferSalary(e.target.value)} 
+                      placeholder="1200" 
+                      className="w-full px-3 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.startDate || 'İşe Başlama Tarihi'}</label>
+                    <input 
+                      type="text" 
+                      value={offerDate} 
+                      onChange={(e) => setOfferDate(e.target.value)} 
+                      placeholder="01.11.2026" 
+                      className="w-full px-3 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.termsConditions || 'Teklif / Sözleşme Şartları'}</label>
+                  <textarea 
+                    rows={2} 
+                    value={offerTerms} 
+                    onChange={(e) => setOfferTerms(e.target.value)} 
+                    placeholder="Konaklama ve yemek dahil..." 
+                    className="w-full px-3 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
+                  />
+                </div>
+                <button 
+                  type="button" 
+                  onClick={handleSendJobOffer}
+                  className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <Send className="w-3.5 h-3.5" /> {t.sendOfferToCandidate || 'Resmi Teklifi Adaya İlet'}
+                </button>
+              </div>
+            </div>
+
+            {/* Adaya Anlık Bildirim Gönderme Paneli */}
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
+                <Bell className="w-4 h-4 text-[#2e7d32]" /> {t.sendNotification || 'Adaya Bildirim Gönder'}
+              </h3>
+              <form onSubmit={handleSendNotificationToCandidate} className="space-y-3 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.notificationTitle || 'Bildirim Başlığı'}</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={notifTitle} 
+                    onChange={(e) => setNotifTitle(e.target.value)} 
+                    placeholder="Örn: Pasaport Belgesi Hk." 
+                    className="w-full px-3 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.messageBody || 'Mesaj İçeriği'}</label>
+                  <textarea 
+                    rows={3} 
+                    required 
+                    value={notifMessage} 
+                    onChange={(e) => setNotifMessage(e.target.value)} 
+                    placeholder="Adayın panelinde görünecek mesaj..." 
+                    className="w-full px-3.5 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white"
