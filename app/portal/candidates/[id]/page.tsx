@@ -81,6 +81,7 @@ function CandidateDetailPageInner() {
 
   const [newDocName, setNewDocName] = useState('');
   const [hasTableDocs, setHasTableDocs] = useState<boolean | null>(null);
+  
   useEffect(() => {
     supabase.from('candidate_documents').select('id', { count: 'exact', head: true }).eq('candidate_id', candidateId)
       .then(({ count }) => setHasTableDocs((count ?? 0) > 0));
@@ -328,11 +329,11 @@ function CandidateDetailPageInner() {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500 font-bold">Yükleniyor...</div>;
+    return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-700 font-bold">Yükleniyor...</div>;
   }
 
   if (!candidate) {
-    return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-red-500 font-bold">Aday bulunamadı.</div>;
+    return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-red-600 font-bold">Aday bulunamadı.</div>;
   }
 
   return (
@@ -340,23 +341,23 @@ function CandidateDetailPageInner() {
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         
         {/* Üst Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-            <Link href="/portal" className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-700 font-bold text-xs w-fit">
+            <Link href="/portal" className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-800 font-bold text-xs w-fit">
               ← {t.returnToPortal || 'Yönetim Paneline Dön'}
             </Link>
             <div className="flex items-center gap-3">
               {candidatePhoto ? (
                 <img src={candidatePhoto} alt="Foto" className="w-12 h-12 rounded-full object-cover border-2 border-emerald-600 shadow shrink-0" />
               ) : (
-                <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold shrink-0">
+                <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-slate-700 font-bold shrink-0">
                   {candidate.full_name?.charAt(0)}
                 </div>
               )}
               <div>
                 <h1 className="text-base sm:text-xl font-extrabold text-slate-900 truncate max-w-[200px] sm:max-w-none">{candidate.full_name}</h1>
-                <div className="flex items-center gap-2 text-[11px] text-slate-500">
-                  <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">PNV-CAND-{candidate.id.substring(0, 6)}</span>
+                <div className="flex items-center gap-2 text-[11px] text-slate-600 font-medium">
+                  <span className="font-mono bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded">PNV-CAND-{candidate.id.substring(0, 6)}</span>
                   <span>📍 {candidate.country || 'N/A'}, {candidate.city || 'N/A'}</span>
                   <span>💼 {candidate.profession || 'Genel'}</span>
                 </div>
@@ -379,10 +380,10 @@ function CandidateDetailPageInner() {
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
               <div>
-                <strong>{t.dossierClosedNotice || 'Bu aday dosyası kapatılmıştır.'}</strong> {t.reason || 'Sebep:'} {closureReason || 'Belirtilmemiş'}
+                <strong className="text-red-900">{t.dossierClosedNotice || 'Bu aday dosyası kapatılmıştır.'}</strong> {t.reason || 'Sebep:'} <span className="text-red-800 font-medium">{closureReason || 'Belirtilmemiş'}</span>
               </div>
             </div>
-            <button onClick={() => { setIsClosed(false); setClosureReason(''); }} className="bg-white px-3 py-1.5 rounded-lg border border-red-300 font-bold hover:bg-red-100 transition cursor-pointer">
+            <button onClick={() => { setIsClosed(false); setClosureReason(''); }} className="bg-white px-3 py-1.5 rounded-lg border border-red-300 font-bold text-red-700 hover:bg-red-100 transition cursor-pointer">
               {t.reopenProcess || 'Süreci Tekrar Aç'}
             </button>
           </div>
@@ -394,17 +395,17 @@ function CandidateDetailPageInner() {
           <div className="lg:col-span-8 space-y-4 sm:space-y-6">
             
             {/* Profil Yönetimi */}
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
                 <User className="w-5 h-5 text-[#2e7d32]" /> {t.profileCredentialsManagement || 'Aday Fotoğraf, GSM ve E-Posta Yönetimi'}
               </h3>
 
-              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 p-4 bg-slate-50 rounded-2xl border">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-200">
                 <div className="relative shrink-0">
                   {candidatePhoto ? (
                     <img src={candidatePhoto} alt="Profil" className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border shadow" />
                   ) : (
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-slate-200 rounded-2xl flex items-center justify-center text-slate-400 font-bold text-2xl">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-slate-200 rounded-2xl flex items-center justify-center text-slate-600 font-bold text-2xl">
                       {candidate.full_name?.charAt(0)}
                     </div>
                   )}
@@ -416,39 +417,39 @@ function CandidateDetailPageInner() {
 
                 <div className="flex-1 space-y-3 w-full text-xs">
                   <div>
-                    <label className="font-bold text-slate-400 uppercase flex items-center gap-1 mb-1">
-                      <Phone className="w-3 h-3" /> {t.phoneNumberGsm || 'Telefon Numarası (GSM)'}
+                    <label className="font-bold text-slate-700 uppercase flex items-center gap-1 mb-1">
+                      <Phone className="w-3 h-3 text-slate-500" /> {t.phoneNumberGsm || 'Telefon Numarası (GSM)'}
                     </label>
-                    <input type="tel" value={candidatePhone} onChange={(e) => setCandidatePhone(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white font-bold text-slate-900 outline-none text-xs sm:text-sm" />
+                    <input type="tel" value={candidatePhone} onChange={(e) => setCandidatePhone(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-900 outline-none text-xs sm:text-sm" />
                   </div>
 
                   <div>
-                    <label className="font-bold text-slate-400 uppercase flex items-center gap-1 mb-1">
-                      <Mail className="w-3 h-3" /> {t.emailAddress || 'E-Posta Adresi'}
+                    <label className="font-bold text-slate-700 uppercase flex items-center gap-1 mb-1">
+                      <Mail className="w-3 h-3 text-slate-500" /> {t.emailAddress || 'E-Posta Adresi'}
                     </label>
-                    <input type="email" value={candidateEmail} onChange={(e) => setCandidateEmail(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white font-bold text-slate-900 outline-none text-xs sm:text-sm" />
+                    <input type="email" value={candidateEmail} onChange={(e) => setCandidateEmail(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-900 outline-none text-xs sm:text-sm" />
                   </div>
 
                   <div>
-                    <label className="font-bold text-slate-400 uppercase flex items-center gap-1 mb-1">
-                      <KeyRound className="w-3 h-3" /> {t.portalPassword || 'Aday Portalı Şifresi'}
+                    <label className="font-bold text-slate-700 uppercase flex items-center gap-1 mb-1">
+                      <KeyRound className="w-3 h-3 text-slate-500" /> {t.portalPassword || 'Aday Portalı Şifresi'}
                     </label>
-                    <p className="text-[11px] text-slate-500">Şifreler Supabase Auth ile yönetilir.</p>
+                    <p className="text-[11px] text-slate-600 font-medium">Şifreler Supabase Auth ile yönetilir.</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Seyahat Lojistiği */}
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 gap-2">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 gap-2">
                 <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
                   <PlaneTakeoff className="w-5 h-5 text-sky-600" /> {t.travelFlightLogistics || 'Seyahat, Uçuş ve Konaklama Lojistiği'}
                 </h3>
                 <select
                   value={travelStatus}
                   onChange={(e) => setTravelStatus(e.target.value)}
-                  className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase bg-sky-50 text-sky-800 border-sky-300 outline-none cursor-pointer w-fit"
+                  className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase bg-sky-50 text-sky-900 border-sky-300 outline-none cursor-pointer w-fit"
                 >
                   <option value="planned">✈️ {t.planned || 'Planlanıyor'}</option>
                   <option value="ticketed">🎟️ {t.ticketed || 'Biletlendi'}</option>
@@ -458,39 +459,39 @@ function CandidateDetailPageInner() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-500 uppercase mb-1">{t.flightDateTime || 'Uçuş Tarihi & Saati'}</label>
-                  <input type="text" value={flightDate} onChange={(e) => setFlightDate(e.target.value)} placeholder="Örn: 15.10.2026 - 14:30" className="w-full px-3 py-2.5 rounded-xl border bg-white font-bold text-slate-800 outline-none" />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.flightDateTime || 'Uçuş Tarihi & Saati'}</label>
+                  <input type="text" value={flightDate} onChange={(e) => setFlightDate(e.target.value)} placeholder="Örn: 15.10.2026 - 14:30" className="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-900 outline-none" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-500 uppercase mb-1">{t.flightNumber || 'Uçuş Kodu / Sefer No'}</label>
-                  <input type="text" value={flightNumber} onChange={(e) => setFlightNumber(e.target.value)} placeholder="Örn: TK-1926" className="w-full px-3 py-2.5 rounded-xl border bg-white font-bold text-slate-800 outline-none" />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.flightNumber || 'Uçuş Kodu / Sefer No'}</label>
+                  <input type="text" value={flightNumber} onChange={(e) => setFlightNumber(e.target.value)} placeholder="Örn: TK-1926" className="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-900 outline-none" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-500 uppercase mb-1">{t.departureCityAirport || 'Kalkış Yeri / Havalimanı'}</label>
-                  <input type="text" value={departureCity} onChange={(e) => setDepartureCity(e.target.value)} placeholder="Örn: Skopje (SKP)" className="w-full px-3 py-2.5 rounded-xl border bg-white font-bold text-slate-800 outline-none" />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.departureCityAirport || 'Kalkış Yeri / Havalimanı'}</label>
+                  <input type="text" value={departureCity} onChange={(e) => setDepartureCity(e.target.value)} placeholder="Örn: Skopje (SKP)" className="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-900 outline-none" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-500 uppercase mb-1">{t.arrivalCityAirport || 'Varış Yeri / Havalimanı'}</label>
-                  <input type="text" value={arrivalCity} onChange={(e) => setArrivalCity(e.target.value)} placeholder="Örn: Istanbul (IST)" className="w-full px-3 py-2.5 rounded-xl border bg-white font-bold text-slate-800 outline-none" />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.arrivalCityAirport || 'Varış Yeri / Havalimanı'}</label>
+                  <input type="text" value={arrivalCity} onChange={(e) => setArrivalCity(e.target.value)} placeholder="Örn: Istanbul (IST)" className="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-900 outline-none" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-2">
                 <div>
-                  <label className="block font-bold text-slate-500 uppercase mb-1">{t.pnrBookingCode || 'PNR / Bilet Rezervasyon Kodu'}</label>
-                  <input type="text" value={pnrCode} onChange={(e) => setPnrCode(e.target.value)} placeholder="Örn: X79R2A" className="w-full px-3 py-2.5 rounded-xl border bg-white font-bold text-slate-800 outline-none uppercase" />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.pnrBookingCode || 'PNR / Bilet Rezervasyon Kodu'}</label>
+                  <input type="text" value={pnrCode} onChange={(e) => setPnrCode(e.target.value)} placeholder="Örn: X79R2A" className="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-900 outline-none uppercase" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-500 uppercase mb-1">{t.accommodationTransferDetails || 'Konaklama & Karşılama Detayları'}</label>
-                  <input type="text" value={accommodationDetails} onChange={(e) => setAccommodationDetails(e.target.value)} placeholder="Örn: Otel transferi..." className="w-full px-3 py-2.5 rounded-xl border bg-white font-bold text-slate-800 outline-none" />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.accommodationTransferDetails || 'Konaklama & Karşılama Detayları'}</label>
+                  <input type="text" value={accommodationDetails} onChange={(e) => setAccommodationDetails(e.target.value)} placeholder="Örn: Otel transferi..." className="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-900 outline-none" />
                 </div>
               </div>
             </div>
 
-            {/* Eski Belge Takip Mekanizması */}
+            {/* Belge Takip Mekanizması */}
             {hasTableDocs === false && (
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-              <div className="flex items-center justify-between border-b pb-3">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
                   <FileCheck className="w-5 h-5 text-indigo-600" /> {t.documentTrackingMechanism || 'Evrak & Belge Takip Mekanizması'}
                 </h3>
@@ -498,13 +499,13 @@ function CandidateDetailPageInner() {
 
               <div className="space-y-3">
                 {documents.map((doc) => (
-                  <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border space-y-3">
+                  <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm">
                       <div className="flex items-center gap-3">
                         <FileText className="w-5 h-5 text-indigo-600 shrink-0" />
                         <div>
                           <div className="font-extrabold text-slate-900">{doc.name}</div>
-                          {doc.file_name && <div className="text-[11px] text-slate-500 truncate max-w-[200px]">{t.file || 'Dosya'}: {doc.file_name}</div>}
+                          {doc.file_name && <div className="text-[11px] text-slate-600 font-medium truncate max-w-[200px]">{t.file || 'Dosya'}: {doc.file_name}</div>}
                         </div>
                       </div>
 
@@ -512,28 +513,28 @@ function CandidateDetailPageInner() {
                         <select
                           value={doc.status}
                           onChange={(e) => handleDocStatusChange(doc.id, e.target.value as any)}
-                          className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer outline-none bg-amber-100 text-amber-800 border-amber-300"
+                          className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer outline-none bg-amber-100 text-amber-900 border-amber-300"
                         >
-                          <option value="pending">🟡 Bekleniyor</option>
-                          <option value="uploaded">📤 Yüklendi</option>
-                          <option value="reviewing">🔵 İnceleniyor</option>
-                          <option value="approved">🟢 Onaylandı</option>
-                          <option value="rejected">🔴 Reddedildi</option>
+                          <option value="pending" className="bg-white text-slate-900">🟡 Bekleniyor</option>
+                          <option value="uploaded" className="bg-white text-slate-900">📤 Yüklendi</option>
+                          <option value="reviewing" className="bg-white text-slate-900">🔵 İnceleniyor</option>
+                          <option value="approved" className="bg-white text-slate-900">🟢 Onaylandı</option>
+                          <option value="rejected" className="bg-white text-slate-900">🔴 Reddedildi</option>
                         </select>
-                        <button onClick={() => handleDeleteDocument(doc.id)} className="p-1.5 text-slate-400 hover:text-red-600 cursor-pointer">
+                        <button onClick={() => handleDeleteDocument(doc.id)} className="p-1.5 text-slate-500 hover:text-red-600 cursor-pointer">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t flex items-center justify-between text-xs">
+                    <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs">
                       {doc.file_url ? (
-                        <button type="button" onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url! })} className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer">
+                        <button type="button" onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url! })} className="text-emerald-800 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer">
                           <Eye className="w-3.5 h-3.5" /> Önizle
                         </button>
-                      ) : <span className="text-slate-400 italic">Dosya yüklenmedi</span>}
+                      ) : <span className="text-slate-500 font-medium italic">Dosya yüklenmedi</span>}
 
-                      <label className="bg-white hover:bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg border font-bold cursor-pointer shadow-sm flex items-center gap-1">
+                      <label className="bg-white hover:bg-slate-100 text-slate-800 px-3 py-1.5 rounded-lg border border-slate-300 font-bold cursor-pointer shadow-sm flex items-center gap-1">
                         <Upload className="w-3.5 h-3.5 text-indigo-600" /> Bilgisayardan Yükle
                         <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleFileUpload(doc.id, e)} className="hidden" />
                       </label>
@@ -542,13 +543,13 @@ function CandidateDetailPageInner() {
                 ))}
               </div>
 
-              <div className="pt-3 border-t flex gap-2">
+              <div className="pt-3 border-t border-slate-100 flex gap-2">
                 <input
                   type="text"
                   placeholder="Yeni Belge Adı"
                   value={newDocName}
                   onChange={(e) => setNewDocName(e.target.value)}
-                  className="flex-1 px-3.5 py-2.5 text-xs rounded-xl border text-slate-900 bg-white outline-none"
+                  className="flex-1 px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 text-slate-900 bg-white outline-none font-medium"
                 />
                 <button onClick={handleAddDocument} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
                   <Plus className="w-4 h-4" /> Ekle
@@ -558,40 +559,40 @@ function CandidateDetailPageInner() {
             )}
 
             {/* Sertifika ve 3'lü Video Alanı */}
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
                 <Award className="w-5 h-5 text-amber-500" /> {t.professionalEvaluationCertificate || 'Mesleki Değerlendirme & Sertifika'}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="p-4 bg-slate-50 rounded-xl border space-y-2">
-                  <span className="font-bold text-slate-500 uppercase block">Sertifika Bilgileri</span>
-                  <input type="text" value={certificateNo} onChange={(e) => setCertificateNo(e.target.value)} placeholder="Sertifika No" className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
-                  <input type="text" value={issuingBody} onChange={(e) => setIssuingBody(e.target.value)} placeholder="Veren Kurum" className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <span className="font-bold text-slate-700 uppercase block">Sertifika Bilgileri</span>
+                  <input type="text" value={certificateNo} onChange={(e) => setCertificateNo(e.target.value)} placeholder="Sertifika No" className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-900 outline-none" />
+                  <input type="text" value={issuingBody} onChange={(e) => setIssuingBody(e.target.value)} placeholder="Veren Kurum" className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-900 outline-none" />
                 </div>
 
-                <div className="p-4 bg-slate-50 rounded-xl border space-y-3">
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
                   <span className="font-extrabold text-slate-900 uppercase block text-[11px] text-emerald-800">📹 Kurumsal YouTube Videoları</span>
                   
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-600">1. Video: Genel Tanıtım</label>
+                    <label className="text-[11px] font-bold text-slate-700">1. Video: Genel Tanıtım</label>
                     <div className="flex gap-1.5">
-                      <input type="url" value={videoUrl1} onChange={(e) => setVideoUrl1(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white text-xs" />
+                      <input type="url" value={videoUrl1} onChange={(e) => setVideoUrl1(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-medium text-slate-900 outline-none" />
                       {videoUrl1 && <button type="button" onClick={() => setPreviewVideo(videoUrl1)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] cursor-pointer">Önizle</button>}
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-600">2. Video: Mesleki Beceri</label>
+                    <label className="text-[11px] font-bold text-slate-700">2. Video: Mesleki Beceri</label>
                     <div className="flex gap-1.5">
-                      <input type="url" value={videoUrl2} onChange={(e) => setVideoUrl2(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white text-xs" />
+                      <input type="url" value={videoUrl2} onChange={(e) => setVideoUrl2(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-medium text-slate-900 outline-none" />
                       {videoUrl2 && <button type="button" onClick={() => setPreviewVideo(videoUrl2)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] cursor-pointer">Önizle</button>}
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-600">3. Video: Saha Mülakatı</label>
+                    <label className="text-[11px] font-bold text-slate-700">3. Video: Saha Mülakatı</label>
                     <div className="flex gap-1.5">
-                      <input type="url" value={videoUrl3} onChange={(e) => setVideoUrl3(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white text-xs" />
+                      <input type="url" value={videoUrl3} onChange={(e) => setVideoUrl3(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-medium text-slate-900 outline-none" />
                       {videoUrl3 && <button type="button" onClick={() => setPreviewVideo(videoUrl3)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] cursor-pointer">Önizle</button>}
                     </div>
                   </div>
@@ -600,22 +601,22 @@ function CandidateDetailPageInner() {
             </div>
 
             {/* İç Notlar */}
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-600" /> {t.internalNotesAdminOnly || 'İç Değerlendirme Notları'}
               </h3>
-              <textarea rows={3} value={internalNotes} onChange={(e) => setInternalNotes(e.target.value)} className="w-full p-4 rounded-xl border text-xs outline-none text-slate-900" />
+              <textarea rows={3} value={internalNotes} onChange={(e) => setInternalNotes(e.target.value)} className="w-full p-4 rounded-xl border border-slate-300 text-xs outline-none text-slate-900 font-medium" />
             </div>
           </div>
 
           {/* Sağ Kolon */}
           <div className="lg:col-span-4 space-y-4 sm:space-y-6">
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3">
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b pb-2">{t.candidateStatus || 'Aday Süreç Durumu'}</h3>
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b border-slate-100 pb-2">{t.candidateStatus || 'Aday Süreç Durumu'}</h3>
               <select 
                 value={status} 
                 onChange={(e) => setStatus(e.target.value)} 
-                className="w-full p-3 rounded-xl border text-xs sm:text-sm font-extrabold bg-slate-900 text-white outline-none cursor-pointer shadow-sm"
+                className="w-full p-3 rounded-xl border border-slate-300 text-xs sm:text-sm font-extrabold bg-slate-900 text-white outline-none cursor-pointer shadow-sm"
               >
                 <option value="pending" className="bg-white text-slate-900">🟡 Beklemede</option>
                 <option value="reviewing" className="bg-white text-slate-900">🔵 İncelemede</option>
@@ -625,19 +626,19 @@ function CandidateDetailPageInner() {
             </div>
 
             <DocumentStatusPanel candidateId={candidateId} />
-            <div className="bg-white border rounded-2xl p-4 flex items-center justify-between gap-3">
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm">
               <div>
                 <p className="font-bold text-slate-900 text-sm">🤝 Görüşme & İş Teklifi</p>
-                <p className="text-xs text-slate-500">Görüşme planla ve teklif gönder.</p>
+                <p className="text-xs text-slate-600 font-medium">Görüşme planla ve teklif gönder.</p>
               </div>
-              <button onClick={() => setShowIO(true)} className="text-xs font-bold px-4 py-2 rounded-lg bg-amber-500 text-white cursor-pointer">Aç</button>
+              <button onClick={() => setShowIO(true)} className="text-xs font-bold px-4 py-2 rounded-lg bg-amber-500 text-white cursor-pointer hover:bg-amber-600 transition shadow">Aç</button>
             </div>
             {showIO && candidate && <InterviewOfferPanel candidate={{ ...candidate, id: candidateId }} onClose={() => setShowIO(false)} />}
             <PlacementPanel candidateId={candidateId} />
 
             {/* Süreçten Çıkış Paneli */}
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3 border-amber-200">
-              <h3 className="text-sm sm:text-base font-bold text-amber-900 border-b pb-2 flex items-center gap-2">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-amber-200 shadow-sm space-y-3">
+              <h3 className="text-sm sm:text-base font-bold text-amber-900 border-b border-amber-100 pb-2 flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 text-amber-600" /> {t.processClosureWithdrawal || 'Vazgeçme ve Süreçten Çıkış'}
               </h3>
               <textarea 
@@ -645,62 +646,62 @@ function CandidateDetailPageInner() {
                 value={closureReason} 
                 onChange={(e) => setClosureReason(e.target.value)} 
                 placeholder="Kapanış sebebi..." 
-                className="w-full p-3 rounded-xl border text-xs outline-none bg-slate-50 text-slate-900" 
+                className="w-full p-3 rounded-xl border border-slate-300 text-xs outline-none bg-slate-50 text-slate-900 font-medium" 
               />
               <button 
                 type="button" 
                 onClick={() => { setIsClosed(true); handleSaveDetail(); }}
-                className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-xl font-bold text-xs transition cursor-pointer"
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-xl font-bold text-xs transition cursor-pointer shadow"
               >
                 Aday Sürecini Kapat / Arşivle
               </button>
             </div>
 
             {/* Resmi İş Teklifi */}
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2">
                 <FileSignature className="w-4 h-4 text-[#2e7d32]" /> Resmi İş Teklifi Gönder
               </h3>
               <div className="space-y-3 text-xs">
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">Firma Adı</label>
-                  <input type="text" value={offerEmployer} onChange={(e) => setOfferEmployer(e.target.value)} placeholder="Örn: Panova Tarim DOO" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
+                  <input type="text" value={offerEmployer} onChange={(e) => setOfferEmployer(e.target.value)} placeholder="Örn: Panova Tarim DOO" className="w-full px-3 py-2.5 rounded-xl border border-slate-300 outline-none bg-white font-medium text-slate-900" />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="block font-bold text-slate-700 uppercase mb-1">Aylık Net Ücret (€)</label>
-                    <input type="number" value={offerSalary} onChange={(e) => setOfferSalary(e.target.value)} placeholder="1200" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
+                    <input type="number" value={offerSalary} onChange={(e) => setOfferSalary(e.target.value)} placeholder="1200" className="w-full px-3 py-2.5 rounded-xl border border-slate-300 outline-none bg-white font-medium text-slate-900" />
                   </div>
                   <div>
                     <label className="block font-bold text-slate-700 uppercase mb-1">Başlama Tarihi</label>
-                    <input type="text" value={offerDate} onChange={(e) => setOfferDate(e.target.value)} placeholder="01.11.2026" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
+                    <input type="text" value={offerDate} onChange={(e) => setOfferDate(e.target.value)} placeholder="01.11.2026" className="w-full px-3 py-2.5 rounded-xl border border-slate-300 outline-none bg-white font-medium text-slate-900" />
                   </div>
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">Şartlar</label>
-                  <textarea rows={2} value={offerTerms} onChange={(e) => setOfferTerms(e.target.value)} placeholder="Konaklama dahil..." className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
+                  <textarea rows={2} value={offerTerms} onChange={(e) => setOfferTerms(e.target.value)} placeholder="Konaklama dahil..." className="w-full px-3 py-2.5 rounded-xl border border-slate-300 outline-none bg-white font-medium text-slate-900" />
                 </div>
-                <button type="button" onClick={handleSendJobOffer} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+                <button type="button" onClick={handleSendJobOffer} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow">
                   <Send className="w-3.5 h-3.5" /> Resmi Teklifi İlet
                 </button>
               </div>
             </div>
 
             {/* Bildirim Gönder */}
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2">
                 <Bell className="w-4 h-4 text-[#2e7d32]" /> Adaya Bildirim Gönder
               </h3>
               <form onSubmit={handleSendNotificationToCandidate} className="space-y-3 text-xs">
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">Başlık</label>
-                  <input type="text" required value={notifTitle} onChange={(e) => setNotifTitle(e.target.value)} placeholder="Örn: Pasaport Hk." className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
+                  <input type="text" required value={notifTitle} onChange={(e) => setNotifTitle(e.target.value)} placeholder="Örn: Pasaport Hk." className="w-full px-3 py-2.5 rounded-xl border border-slate-300 outline-none bg-white font-medium text-slate-900" />
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">Mesaj</label>
-                  <textarea rows={3} required value={notifMessage} onChange={(e) => setNotifMessage(e.target.value)} placeholder="Mesajınız..." className="w-full px-3.5 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
+                  <textarea rows={3} required value={notifMessage} onChange={(e) => setNotifMessage(e.target.value)} placeholder="Mesajınız..." className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 outline-none bg-white font-medium text-slate-900" />
                 </div>
-                <button type="submit" disabled={notifSending} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+                <button type="submit" disabled={notifSending} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow">
                   <Send className="w-3.5 h-3.5" /> {notifSending ? 'Gönderiliyor...' : 'Bildirimi Gönder'}
                 </button>
               </form>
@@ -715,7 +716,7 @@ function CandidateDetailPageInner() {
           <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
             <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
               <h3 className="font-bold text-sm">{previewDoc.name}</h3>
-              <button onClick={() => setPreviewDoc(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300 cursor-pointer"><X className="w-5 h-5" /></button>
+              <button onClick={() => setPreviewDoc(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300 cursor-pointer hover:bg-slate-700"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-4 flex-1 overflow-auto flex justify-center items-center bg-slate-100">
               <iframe src={previewDoc.url} className="w-full h-[70vh] rounded-xl border bg-white" title="Önizleme" />
@@ -730,7 +731,7 @@ function CandidateDetailPageInner() {
           <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
             <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
               <h3 className="font-bold text-sm">Çalışma Videosu Önizleme</h3>
-              <button onClick={() => setPreviewVideo(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300 cursor-pointer"><X className="w-5 h-5" /></button>
+              <button onClick={() => setPreviewVideo(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300 cursor-pointer hover:bg-slate-700"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-4 flex-1 overflow-auto flex justify-center items-center bg-slate-100">
               {previewVideo.includes('youtube.com') || previewVideo.includes('youtu.be') ? (
