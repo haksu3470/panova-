@@ -138,10 +138,11 @@ function CandidateDetailPageInner() {
         } catch (e) {}
 
         const defaultDocs: CandidateDocument[] = [
-          { id: '1', name: t.docPassportScan || (isMk ? 'Скенирање пасош' : 'Pasaport Taraması'), status: data.passport_number ? 'approved' : 'pending' },
-          { id: '2', name: t.docProfessionalCert || (isMk ? 'Професионален сертификат / Дозвола' : 'Mesleki Sertifika / İzin Belgesi'), status: 'pending' },
-          { id: '3', name: t.docCriminalRecord || (isMk ? 'Казнена евиденција' : 'Adli Sicil Kaydı (Sabıka Kaydı)'), status: 'pending' },
-          { id: '4', name: t.docHealthReport || (isMk ? 'Здравствен извештај / Рендген на бели дробови' : 'Sağlık Raporu / Akciğer Grafisi'), status: 'pending' },
+          { id: '1', name: t.docPassportScan || 'Pasaport Taraması', status: data.passport_number ? 'approved' : 'pending' },
+          { id: '2', name: t.docProfessionalCert || 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
+          { id: '3', name: t.docCriminalRecord || 'Adli Sicil Kaydı', status: 'pending' },
+          { id: '4', name: t.docHealthReport || 'Sağlık Raporu / Akciğer Grafisi', status: 'pending' },
+          { id: '5', name: t.docApostille || 'e-Apostil / Dışişleri Bakanlığı Tasdiki', status: 'pending' },
         ];
         
         try {

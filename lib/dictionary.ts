@@ -275,6 +275,7 @@ export interface Translation {
   docProfessionalCert?: string;
   docCriminalRecord?: string;
   docHealthReport?: string;
+  docApostille?: string;
   savedSuccess?: string;
   fillEmployerAndSalary?: string;
   offerSentSuccess?: string;
@@ -789,6 +790,7 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'Mesleki Sertifika',
     docCriminalRecord: 'Adli Sicil Kaydı',
     docHealthReport: 'Sağlık Raporu',
+    docApostille: 'e-Apostil / Dışişleri Bakanlığı Tasdiki',
     savedSuccess: 'Başarıyla Kaydedildi',
     fillEmployerAndSalary: 'Lütfen İşveren ve Maaş Bilgilerini Doldurun',
     offerSentSuccess: 'İş Teklifi Başarıyla Gönderildi',
@@ -1290,6 +1292,7 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'Professional Certificate',
     docCriminalRecord: 'Criminal Record',
     docHealthReport: 'Health Report',
+    docApostille: 'e-Apostille / Ministry of Foreign Affairs Attestation',
     savedSuccess: 'Successfully Saved',
     fillEmployerAndSalary: 'Please Fill Employer and Salary Details',
     offerSentSuccess: 'Job Offer Sent Successfully',
@@ -1791,6 +1794,7 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'Certifikata Profesionale',
     docCriminalRecord: 'Dëshmi Penaliteti',
     docHealthReport: 'Raporti Mjekësor',
+    docApostille: 'e-Apostil / Vërtetim i Ministrisë së Punëve të Jashtme',
     savedSuccess: 'U Ruajt me Sukses',
     fillEmployerAndSalary: 'Ju lutemi plotësoni detajet e punëdhënësit dhe pagës',
     offerSentSuccess: 'Oferta e punës u dërgua me sukses',
@@ -2347,6 +2351,7 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'الشهادة المهنية',
     docCriminalRecord: 'السجل الجنائي',
     docHealthReport: 'التقرير الطبي',
+    docApostille: 'التصديق الإلكتروني / تصديق وزارة الخارجية',
     savedSuccess: 'تم الحفظ بنجاح',
     fillEmployerAndSalary: 'يرجى ملء تفاصيل صاحب العمل والراتب',
     offerSentSuccess: 'تم إرسال عرض العمل بنجاح',
@@ -2796,6 +2801,7 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'Професионален сертификат',
     docCriminalRecord: 'Уверение за неосудуваност',
     docHealthReport: 'Здравствен извештај',
+    docApostille: 'е-Апостил / Министерство за надворешни работи',
     savedSuccess: 'Успешно зачувано',
     fillEmployerAndSalary: 'Пополнете ги податоците за работодавач и плата',
     offerSentSuccess: 'Понудата за работа е успешно испратена',
