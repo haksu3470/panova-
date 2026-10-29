@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { candidateService } from '@/lib/services/candidateService';
-import { ArrowLeft, User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, Video, Trash2, Upload, Eye, X, Plus, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert } from 'lucide-react';
+import { User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, Trash2, Upload, Eye, X, Plus, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
@@ -57,14 +57,12 @@ function CandidateDetailPageInner() {
   const [candidateEmail, setCandidateEmail] = useState('');
   const [internalNotes, setInternalNotes] = useState('');
 
-  // Sertifika & 3'lü YouTube Video State'leri
   const [certificateNo, setCertificateNo] = useState('');
   const [issuingBody, setIssuingBody] = useState('');
   const [videoUrl1, setVideoUrl1] = useState('');
   const [videoUrl2, setVideoUrl2] = useState('');
   const [videoUrl3, setVideoUrl3] = useState('');
 
-  // Seyahat ve Uçuş Lojistik State'leri
   const [travelStatus, setTravelStatus] = useState('planned');
   const [flightDate, setFlightDate] = useState('');
   const [flightNumber, setFlightNumber] = useState('');
@@ -73,27 +71,24 @@ function CandidateDetailPageInner() {
   const [pnrCode, setPnrCode] = useState('');
   const [accommodationDetails, setAccommodationDetails] = useState('');
 
-  // Vazgeçme ve Süreç Kapatma State'leri
   const [closureReason, setClosureReason] = useState('');
   const [isClosed, setIsClosed] = useState(false);
 
-  // İş Teklifi State'leri
   const [offerEmployer, setOfferEmployer] = useState('');
   const [offerSalary, setOfferSalary] = useState('');
   const [offerDate, setOfferDate] = useState('');
   const [offerTerms, setOfferTerms] = useState('');
 
-  // Yeni Belge & Önizleme / Video Önizleme
   const [newDocName, setNewDocName] = useState('');
   const [hasTableDocs, setHasTableDocs] = useState<boolean | null>(null);
   useEffect(() => {
     supabase.from('candidate_documents').select('id', { count: 'exact', head: true }).eq('candidate_id', candidateId)
       .then(({ count }) => setHasTableDocs((count ?? 0) > 0));
   }, [candidateId]);
+
   const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
 
-  // Aday Bildirim Gönderme State'leri
   const [notifTitle, setNotifTitle] = useState('');
   const [notifMessage, setNotifMessage] = useState('');
   const [notifSending, setNotifSending] = useState(false);
@@ -104,20 +99,6 @@ function CandidateDetailPageInner() {
   useEffect(() => {
     fetchCandidateDetail();
   }, [candidateId]);
-
-  useEffect(() => {
-    if (documents.length > 0) {
-      setDocuments(prevDocs => 
-        prevDocs.map((doc, idx) => {
-          if (idx === 0) return { ...doc, name: t.docPassportScan || doc.name };
-          if (idx === 1) return { ...doc, name: t.docProfessionalCert || doc.name };
-          if (idx === 2) return { ...doc, name: t.docCriminalRecord || doc.name };
-          if (idx === 3) return { ...doc, name: t.docHealthReport || doc.name };
-          return doc;
-        })
-      );
-    }
-  }, [currentLang]);
 
   const fetchCandidateDetail = async () => {
     setLoading(true);
@@ -134,7 +115,6 @@ function CandidateDetailPageInner() {
         setCertificateNo(data.certificate_no || '');
         setIssuingBody(data.issuing_body || '');
         
-        // 3'lü Video Linklerini Yükle
         setVideoUrl1(data.video_url_1 || data.video_url || '');
         setVideoUrl2(data.video_url_2 || '');
         setVideoUrl3(data.video_url_3 || '');
@@ -165,14 +145,7 @@ function CandidateDetailPageInner() {
         try {
           const parsed = data.documents_json ? JSON.parse(data.documents_json) : {};
           const parsedDocs = Array.isArray(parsed) ? parsed : (parsed.docs || defaultDocs);
-          const normalizedDocs = parsedDocs.map((doc: CandidateDocument, idx: number) => {
-            if (idx === 0) return { ...doc, name: t.docPassportScan || doc.name };
-            if (idx === 1) return { ...doc, name: t.docProfessionalCert || doc.name };
-            if (idx === 2) return { ...doc, name: t.docCriminalRecord || doc.name };
-            if (idx === 3) return { ...doc, name: t.docHealthReport || doc.name };
-            return doc;
-          });
-          setDocuments(normalizedDocs);
+          setDocuments(parsedDocs);
         } catch {
           setDocuments(defaultDocs);
         }
@@ -366,7 +339,7 @@ function CandidateDetailPageInner() {
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         
-        {/* Üst Bar ve Aday Özet Kartı */}
+        {/* Üst Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             <Link href="/portal" className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-700 font-bold text-xs w-fit">
@@ -400,13 +373,13 @@ function CandidateDetailPageInner() {
           </div>
         </div>
 
-        {/* Vazgeçme ve Süreç Kapanış Durumu Uyarısı */}
+        {/* Kapanış Uyarısı */}
         {isClosed && (
           <div className="bg-red-50 border border-red-200 p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm text-red-900">
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
               <div>
-                <strong>{t.dossierClosedNotice || 'Bu aday dosyası kapatılmıştır / süreçten çıkılmıştır.'}</strong> {t.reason || 'Sebep:'} {closureReason || 'Belirtilmemiş'}
+                <strong>{t.dossierClosedNotice || 'Bu aday dosyası kapatılmıştır.'}</strong> {t.reason || 'Sebep:'} {closureReason || 'Belirtilmemiş'}
               </div>
             </div>
             <button onClick={() => { setIsClosed(false); setClosureReason(''); }} className="bg-white px-3 py-1.5 rounded-lg border border-red-300 font-bold hover:bg-red-100 transition cursor-pointer">
@@ -420,10 +393,10 @@ function CandidateDetailPageInner() {
           {/* Sol Kolon */}
           <div className="lg:col-span-8 space-y-4 sm:space-y-6">
             
-            {/* Fotoğraf, GSM, E-Posta ve Şifre Yönetimi */}
+            {/* Profil Yönetimi */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
               <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-                <User className="w-5 h-5 text-[#2e7d32]" /> {t.profileCredentialsManagement || 'Aday Fotoğraf, GSM, E-Posta ve Şifre Yönetimi'}
+                <User className="w-5 h-5 text-[#2e7d32]" /> {t.profileCredentialsManagement || 'Aday Fotoğraf, GSM ve E-Posta Yönetimi'}
               </h3>
 
               <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 p-4 bg-slate-50 rounded-2xl border">
@@ -460,13 +433,13 @@ function CandidateDetailPageInner() {
                     <label className="font-bold text-slate-400 uppercase flex items-center gap-1 mb-1">
                       <KeyRound className="w-3 h-3" /> {t.portalPassword || 'Aday Portalı Şifresi'}
                     </label>
-                    <p className="text-[11px] text-slate-500">Şifreler Supabase Auth ile yönetilir; aday kendi şifresini portaldan belirler/sıfırlar.</p>
+                    <p className="text-[11px] text-slate-500">Şifreler Supabase Auth ile yönetilir.</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Seyahat ve Uçuş Lojistik Yönetimi */}
+            {/* Seyahat Lojistiği */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 gap-2">
                 <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -509,22 +482,18 @@ function CandidateDetailPageInner() {
                 </div>
                 <div>
                   <label className="block font-bold text-slate-500 uppercase mb-1">{t.accommodationTransferDetails || 'Konaklama & Karşılama Detayları'}</label>
-                  <input type="text" value={accommodationDetails} onChange={(e) => setAccommodationDetails(e.target.value)} placeholder="Örn: Otel transferi ve lojman bilgisi..." className="w-full px-3 py-2.5 rounded-xl border bg-white font-bold text-slate-800 outline-none" />
+                  <input type="text" value={accommodationDetails} onChange={(e) => setAccommodationDetails(e.target.value)} placeholder="Örn: Otel transferi..." className="w-full px-3 py-2.5 rounded-xl border bg-white font-bold text-slate-800 outline-none" />
                 </div>
               </div>
             </div>
 
-            {/* Evrak & Belge Takip Mekanizması */}
+            {/* Eski Belge Takip Mekanizması */}
             {hasTableDocs === false && (
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-              <p className="text-[11px] text-amber-700 bg-amber-50 rounded-lg px-2 py-1">Eski JSON belge kaydı (geçiş öncesi). Yeni belgeler aşağıdaki Belge Durumu panelinden yönetilir.</p>
               <div className="flex items-center justify-between border-b pb-3">
                 <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
                   <FileCheck className="w-5 h-5 text-indigo-600" /> {t.documentTrackingMechanism || 'Evrak & Belge Takip Mekanizması'}
                 </h3>
-                <span className="text-xs bg-indigo-50 text-indigo-700 font-bold px-2.5 py-1 rounded-lg">
-                  {documents.filter(d => d.status === 'approved').length} / {documents.length} {t.approved || 'Onaylı'}
-                </span>
               </div>
 
               <div className="space-y-3">
@@ -535,7 +504,7 @@ function CandidateDetailPageInner() {
                         <FileText className="w-5 h-5 text-indigo-600 shrink-0" />
                         <div>
                           <div className="font-extrabold text-slate-900">{doc.name}</div>
-                          {doc.file_name && <div className="text-[11px] text-slate-500 truncate max-w-[200px] sm:max-w-none">{t.file || 'Dosya'}: {doc.file_name}</div>}
+                          {doc.file_name && <div className="text-[11px] text-slate-500 truncate max-w-[200px]">{t.file || 'Dosya'}: {doc.file_name}</div>}
                         </div>
                       </div>
 
@@ -543,36 +512,29 @@ function CandidateDetailPageInner() {
                         <select
                           value={doc.status}
                           onChange={(e) => handleDocStatusChange(doc.id, e.target.value as any)}
-                          className={`px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer outline-none ${
-                            doc.status === 'approved' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
-                            doc.status === 'rejected' ? 'bg-red-100 text-red-800 border-red-300' :
-                            doc.status === 're_requested' ? 'bg-purple-100 text-purple-800 border-purple-300' :
-                            'bg-amber-100 text-amber-800 border-amber-300'
-                          }`}
+                          className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer outline-none bg-amber-100 text-amber-800 border-amber-300"
                         >
-                          <option value="pending">🟡 {t.pending || 'Bekleniyor'}</option>
-                          <option value="uploaded">📤 {t.uploaded || 'Yüklendi'}</option>
-                          <option value="reviewing">🔵 {t.reviewing || 'İnceleniyor'}</option>
-                          <option value="approved">🟢 {t.approved || 'Onaylandı'}</option>
-                          <option value="rejected">🔴 {t.rejected || 'Reddedildi'}</option>
-                          <option value="re_requested">🔄 {t.reRequested || 'Yeniden istendi'}</option>
+                          <option value="pending">🟡 Bekleniyor</option>
+                          <option value="uploaded">📤 Yüklendi</option>
+                          <option value="reviewing">🔵 İnceleniyor</option>
+                          <option value="approved">🟢 Onaylandı</option>
+                          <option value="rejected">🔴 Reddedildi</option>
                         </select>
-
-                        <button onClick={() => handleDeleteDocument(doc.id)} className="p-1.5 text-slate-400 hover:text-red-600 transition cursor-pointer">
+                        <button onClick={() => handleDeleteDocument(doc.id)} className="p-1.5 text-slate-400 hover:text-red-600 cursor-pointer">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                    <div className="pt-2 border-t flex items-center justify-between text-xs">
                       {doc.file_url ? (
-                        <button type="button" onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url! })} className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition flex items-center gap-1 cursor-pointer w-fit">
-                          <Eye className="w-3.5 h-3.5" /> {t.preview || 'Önizle'}
+                        <button type="button" onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url! })} className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer">
+                          <Eye className="w-3.5 h-3.5" /> Önizle
                         </button>
-                      ) : <span className="text-slate-400 italic">{t.noFileUploaded || 'Dosya yüklenmedi'}</span>}
+                      ) : <span className="text-slate-400 italic">Dosya yüklenmedi</span>}
 
-                      <label className="bg-white hover:bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition shadow-sm flex items-center gap-1 w-fit">
-                        <Upload className="w-3.5 h-3.5 text-indigo-600" /> {t.uploadFromComputer || 'Bilgisayardan Yükle'}
+                      <label className="bg-white hover:bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg border font-bold cursor-pointer shadow-sm flex items-center gap-1">
+                        <Upload className="w-3.5 h-3.5 text-indigo-600" /> Bilgisayardan Yükle
                         <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleFileUpload(doc.id, e)} className="hidden" />
                       </label>
                     </div>
@@ -580,73 +542,57 @@ function CandidateDetailPageInner() {
                 ))}
               </div>
 
-              <div className="pt-3 border-t flex flex-col sm:flex-row gap-2">
+              <div className="pt-3 border-t flex gap-2">
                 <input
                   type="text"
-                  placeholder={t.newDocNamePlaceholder || 'Yeni Belge Adı'}
+                  placeholder="Yeni Belge Adı"
                   value={newDocName}
                   onChange={(e) => setNewDocName(e.target.value)}
                   className="flex-1 px-3.5 py-2.5 text-xs rounded-xl border text-slate-900 bg-white outline-none"
                 />
-                <button onClick={handleAddDocument} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer">
-                  <Plus className="w-4 h-4" /> {t.add || 'Ekle'}
+                <button onClick={handleAddDocument} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+                  <Plus className="w-4 h-4" /> Ekle
                 </button>
               </div>
             </div>
             )}
 
-            {/* Sertifika, 3'lü YouTube Video ve Değerlendirme */}
+            {/* Sertifika ve 3'lü Video Alanı */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
               <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
                 <Award className="w-5 h-5 text-amber-500" /> {t.professionalEvaluationCertificate || 'Mesleki Değerlendirme & Sertifika'}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div className="p-4 bg-slate-50 rounded-xl border space-y-2">
-                  <span className="font-bold text-slate-500 uppercase block">{t.certificateInfo || 'Sertifika Bilgileri'}</span>
-                  <input type="text" value={certificateNo} onChange={(e) => setCertificateNo(e.target.value)} placeholder={t.certificateNo || 'Sertifika No'} className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
-                  <input type="text" value={issuingBody} onChange={(e) => setIssuingBody(e.target.value)} placeholder={t.issuingBody || 'Veren Kurum'} className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
+                  <span className="font-bold text-slate-500 uppercase block">Sertifika Bilgileri</span>
+                  <input type="text" value={certificateNo} onChange={(e) => setCertificateNo(e.target.value)} placeholder="Sertifika No" className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
+                  <input type="text" value={issuingBody} onChange={(e) => setIssuingBody(e.target.value)} placeholder="Veren Kurum" className="w-full px-3 py-2 rounded-lg border bg-white font-bold text-slate-800" />
                 </div>
 
-                {/* Kurumsal YouTube 3'lü Video Alanı */}
                 <div className="p-4 bg-slate-50 rounded-xl border space-y-3">
-                  <span className="font-extrabold text-slate-900 uppercase block text-[11px] text-emerald-800">📹 Kurumsal YouTube Videoları </span>
+                  <span className="font-extrabold text-slate-900 uppercase block text-[11px] text-emerald-800">📹 Kurumsal YouTube Videoları</span>
                   
-                  {/* 1. Video */}
                   <div className="space-y-1">
                     <label className="text-[11px] font-bold text-slate-600">1. Video: Genel Tanıtım</label>
                     <div className="flex gap-1.5">
-                      <input type="url" value={videoUrl1} onChange={(e) => setVideoUrl1(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white font-medium text-slate-800 text-xs" />
-                      {videoUrl1 && (
-                        <button type="button" onClick={() => setPreviewVideo(videoUrl1)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] hover:bg-emerald-200 transition shrink-0 cursor-pointer">
-                          Önizle
-                        </button>
-                      )}
+                      <input type="url" value={videoUrl1} onChange={(e) => setVideoUrl1(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white text-xs" />
+                      {videoUrl1 && <button type="button" onClick={() => setPreviewVideo(videoUrl1)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] cursor-pointer">Önizle</button>}
                     </div>
                   </div>
 
-                  {/* 2. Video */}
                   <div className="space-y-1">
                     <label className="text-[11px] font-bold text-slate-600">2. Video: Mesleki Beceri</label>
                     <div className="flex gap-1.5">
-                      <input type="url" value={videoUrl2} onChange={(e) => setVideoUrl2(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white font-medium text-slate-800 text-xs" />
-                      {videoUrl2 && (
-                        <button type="button" onClick={() => setPreviewVideo(videoUrl2)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] hover:bg-emerald-200 transition shrink-0 cursor-pointer">
-                          Önizle
-                        </button>
-                      )}
+                      <input type="url" value={videoUrl2} onChange={(e) => setVideoUrl2(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white text-xs" />
+                      {videoUrl2 && <button type="button" onClick={() => setPreviewVideo(videoUrl2)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] cursor-pointer">Önizle</button>}
                     </div>
                   </div>
 
-                  {/* 3. Video */}
                   <div className="space-y-1">
                     <label className="text-[11px] font-bold text-slate-600">3. Video: Saha Mülakatı</label>
                     <div className="flex gap-1.5">
-                      <input type="url" value={videoUrl3} onChange={(e) => setVideoUrl3(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white font-medium text-slate-800 text-xs" />
-                      {videoUrl3 && (
-                        <button type="button" onClick={() => setPreviewVideo(videoUrl3)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] hover:bg-emerald-200 transition shrink-0 cursor-pointer">
-                          Önizle
-                        </button>
-                      )}
+                      <input type="url" value={videoUrl3} onChange={(e) => setVideoUrl3(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border bg-white text-xs" />
+                      {videoUrl3 && <button type="button" onClick={() => setPreviewVideo(videoUrl3)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] cursor-pointer">Önizle</button>}
                     </div>
                   </div>
                 </div>
@@ -656,7 +602,7 @@ function CandidateDetailPageInner() {
             {/* İç Notlar */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3">
               <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-blue-600" /> {t.internalNotesAdminOnly || 'İç Değerlendirme Notları (Sadece PANOVA)'}
+                <FileText className="w-5 h-5 text-blue-600" /> {t.internalNotesAdminOnly || 'İç Değerlendirme Notları'}
               </h3>
               <textarea rows={3} value={internalNotes} onChange={(e) => setInternalNotes(e.target.value)} className="w-full p-4 rounded-xl border text-xs outline-none text-slate-900" />
             </div>
@@ -671,127 +617,139 @@ function CandidateDetailPageInner() {
                 onChange={(e) => setStatus(e.target.value)} 
                 className="w-full p-3 rounded-xl border text-xs sm:text-sm font-extrabold bg-slate-900 text-white outline-none cursor-pointer shadow-sm"
               >
-                <option value="pending" className="bg-white text-slate-900">🟡 {t.pending || 'Beklemede'}</option>
-                <option value="reviewing" className="bg-white text-slate-900">🔵 {t.reviewing || 'İncelemede'}</option>
-                <option value="visa_processing" className="bg-white text-slate-900">🟣 {t.visaProcessing || 'Vize Sürecinde'}</option>
-                <option value="approved" className="bg-white text-slate-900">🟢 {t.approved || 'Onaylandı'}</option>
+                <option value="pending" className="bg-white text-slate-900">🟡 Beklemede</option>
+                <option value="reviewing" className="bg-white text-slate-900">🔵 İncelemede</option>
+                <option value="visa_processing" className="bg-white text-slate-900">🟣 Vize Sürecinde</option>
+                <option value="approved" className="bg-white text-slate-900">🟢 Onaylandı</option>
               </select>
             </div>
 
             <DocumentStatusPanel candidateId={candidateId} />
-            <div className="bg-white border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="bg-white border rounded-2xl p-4 flex items-center justify-between gap-3">
               <div>
                 <p className="font-bold text-slate-900 text-sm">🤝 Görüşme & İş Teklifi</p>
-                <p className="text-xs text-slate-500">Görüşme planla, sonucu kaydet, adaya teklif gönder.</p>
+                <p className="text-xs text-slate-500">Görüşme planla ve teklif gönder.</p>
               </div>
               <button onClick={() => setShowIO(true)} className="text-xs font-bold px-4 py-2 rounded-lg bg-amber-500 text-white cursor-pointer">Aç</button>
             </div>
             {showIO && candidate && <InterviewOfferPanel candidate={{ ...candidate, id: candidateId }} onClose={() => setShowIO(false)} />}
             <PlacementPanel candidateId={candidateId} />
 
-            {/* Vazgeçme ve Süreçten Çıkış Paneli */}
+            {/* Süreçten Çıkış Paneli */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3 border-amber-200">
               <h3 className="text-sm sm:text-base font-bold text-amber-900 border-b pb-2 flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 text-amber-600" /> {t.processClosureWithdrawal || 'Vazgeçme ve Süreçten Çıkış'}
               </h3>
-              <p className="text-[11px] text-slate-500">{t.closureDesc || 'Aday iş teklifini reddederse veya süreç olumsuz sonuçlanırsa kaydı silmeden kapatabilirsiniz.'}</p>
               <textarea 
                 rows={2} 
                 value={closureReason} 
                 onChange={(e) => setClosureReason(e.target.value)} 
-                placeholder={t.closureReasonPlaceholder || 'Kapanış / Vazgeçme sebebi...'} 
+                placeholder="Kapanış sebebi..." 
                 className="w-full p-3 rounded-xl border text-xs outline-none bg-slate-50 text-slate-900" 
               />
               <button 
                 type="button" 
                 onClick={() => { setIsClosed(true); handleSaveDetail(); }}
-                className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-xl font-bold text-xs transition cursor-pointer shadow-sm"
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-xl font-bold text-xs transition cursor-pointer"
               >
-                {t.closeArchiveProcess || 'Aday Sürecini Kapat / Arşivle'}
+                Aday Sürecini Kapat / Arşivle
               </button>
             </div>
 
-            {/* Resmi İş Teklifi Gönderme Kartı */}
+            {/* Resmi İş Teklifi */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
               <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
-                <FileSignature className="w-4 h-4 text-[#2e7d32]" /> {t.sendOfficialJobOffer || 'Resmi İş Teklifi Gönder'}
+                <FileSignature className="w-4 h-4 text-[#2e7d32]" /> Resmi İş Teklifi Gönder
               </h3>
               <div className="space-y-3 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.employerCompanyName || 'İşveren / Firma Adı'}</label>
-                  <input 
-                    type="text" 
-                    value={offerEmployer} 
-                    onChange={(e) => setOfferEmployer(e.target.value)} 
-                    placeholder="Örn: Panova Tarim DOO" 
-                    className="w-full px-3 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
-                  />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Firma Adı</label>
+                  <input type="text" value={offerEmployer} onChange={(e) => setOfferEmployer(e.target.value)} placeholder="Örn: Panova Tarim DOO" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.monthlyNetSalary || 'Aylık Net Ücret (€)'}</label>
-                    <input 
-                      type="number" 
-                      value={offerSalary} 
-                      onChange={(e) => setOfferSalary(e.target.value)} 
-                      placeholder="1200" 
-                      className="w-full px-3 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
-                    />
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Aylık Net Ücret (€)</label>
+                    <input type="number" value={offerSalary} onChange={(e) => setOfferSalary(e.target.value)} placeholder="1200" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.startDate || 'İşe Başlama Tarihi'}</label>
-                    <input 
-                      type="text" 
-                      value={offerDate} 
-                      onChange={(e) => setOfferDate(e.target.value)} 
-                      placeholder="01.11.2026" 
-                      className="w-full px-3 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
-                    />
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Başlama Tarihi</label>
+                    <input type="text" value={offerDate} onChange={(e) => setOfferDate(e.target.value)} placeholder="01.11.2026" className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
                   </div>
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.termsConditions || 'Teklif / Sözleşme Şartları'}</label>
-                  <textarea 
-                    rows={2} 
-                    value={offerTerms} 
-                    onChange={(e) => setOfferTerms(e.target.value)} 
-                    placeholder="Konaklama ve yemek dahil..." 
-                    className="w-full px-3 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
-                  />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Şartlar</label>
+                  <textarea rows={2} value={offerTerms} onChange={(e) => setOfferTerms(e.target.value)} placeholder="Konaklama dahil..." className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
                 </div>
-                <button 
-                  type="button" 
-                  onClick={handleSendJobOffer}
-                  className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
-                >
-                  <Send className="w-3.5 h-3.5" /> {t.sendOfferToCandidate || 'Resmi Teklifi Adaya İlet'}
+                <button type="button" onClick={handleSendJobOffer} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+                  <Send className="w-3.5 h-3.5" /> Resmi Teklifi İlet
                 </button>
               </div>
             </div>
 
-            {/* Adaya Anlık Bildirim Gönderme Paneli */}
+            {/* Bildirim Gönder */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
               <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
-                <Bell className="w-4 h-4 text-[#2e7d32]" /> {t.sendNotification || 'Adaya Bildirim Gönder'}
+                <Bell className="w-4 h-4 text-[#2e7d32]" /> Adaya Bildirim Gönder
               </h3>
               <form onSubmit={handleSendNotificationToCandidate} className="space-y-3 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.notificationTitle || 'Bildirim Başlığı'}</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={notifTitle} 
-                    onChange={(e) => setNotifTitle(e.target.value)} 
-                    placeholder="Örn: Pasaport Belgesi Hk." 
-                    className="w-full px-3 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white" 
-                  />
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Başlık</label>
+                  <input type="text" required value={notifTitle} onChange={(e) => setNotifTitle(e.target.value)} placeholder="Örn: Pasaport Hk." className="w-full px-3 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.messageBody || 'Mesaj İçeriği'}</label>
-                  <textarea 
-                    rows={3} 
-                    required 
-                    value={notifMessage} 
-                    onChange={(e) => setNotifMessage(e.target.value)} 
-                    placeholder="Adayın panelinde görünecek mesaj..." 
-                    className="w-full px-3.5 py-2.5 rounded-xl border outline-none text-slate-900 font-medium bg-white"
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Mesaj</label>
+                  <textarea rows={3} required value={notifMessage} onChange={(e) => setNotifMessage(e.target.value)} placeholder="Mesajınız..." className="w-full px-3.5 py-2.5 rounded-xl border outline-none bg-white font-medium text-slate-900" />
+                </div>
+                <button type="submit" disabled={notifSending} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+                  <Send className="w-3.5 h-3.5" /> {notifSending ? 'Gönderiliyor...' : 'Bildirimi Gönder'}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Belge Önizleme Modal */}
+      {previewDoc && (
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
+              <h3 className="font-bold text-sm">{previewDoc.name}</h3>
+              <button onClick={() => setPreviewDoc(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300 cursor-pointer"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-4 flex-1 overflow-auto flex justify-center items-center bg-slate-100">
+              <iframe src={previewDoc.url} className="w-full h-[70vh] rounded-xl border bg-white" title="Önizleme" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Önizleme Modal */}
+      {previewVideo && (
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
+              <h3 className="font-bold text-sm">Çalışma Videosu Önizleme</h3>
+              <button onClick={() => setPreviewVideo(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300 cursor-pointer"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-4 flex-1 overflow-auto flex justify-center items-center bg-slate-100">
+              {previewVideo.includes('youtube.com') || previewVideo.includes('youtu.be') ? (
+                <iframe src={previewVideo.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')} className="w-full h-[70vh] rounded-xl border bg-black" title="Video" allowFullScreen />
+              ) : (
+                <video src={previewVideo} controls className="w-full h-[70vh] rounded-xl border bg-black" />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function CandidateDetailPage() {
+  return (
+    <AuthGuard role="staff">
+      <CandidateDetailPageInner />
+    </AuthGuard>
+  );
+}
