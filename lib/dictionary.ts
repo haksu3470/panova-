@@ -2547,7 +2547,7 @@ export const translations: Record<Language, Translation> = {
     approvedStatus: 'Одобрено',
     colPosSec: 'Позиција / сектор',
     colHeadcount: 'Број на лица',
-    newDemandBtn: 'Креирај ново барање',
+    newDemandBtn: 'Криј ново барање',
     modalDemandTitle: 'Детали за барањето',
     specifyCustomPos: 'Наведете посебна позиција',
     specialReqs: 'Посебни услови',
