@@ -167,12 +167,6 @@ export interface Translation {
   dateFormatPlaceholder: string;
   message: string;
 
-  corporateYouTubeVideos?: string;
-  video1GenIntro?: string;
-  video2Skill?: string;
-  video3Field?: string;
-  previewBtn?: string;
-
   signInMenu?: string;
   signUpMenu?: string;
   loginPortalTitle?: string;
@@ -275,7 +269,6 @@ export interface Translation {
   docProfessionalCert?: string;
   docCriminalRecord?: string;
   docHealthReport?: string;
-  docApostille?: string;
   savedSuccess?: string;
   fillEmployerAndSalary?: string;
   offerSentSuccess?: string;
@@ -481,6 +474,8 @@ export interface Translation {
   staffSignupFieldsRequired?: string;
 }
 
+// `name` is the one short code shown beside the flag. `flag` is only data:
+// do not render it. Windows draws those emoji as the same two letters as `name`.
 export const languages = [
   { code: 'tr' as Language, name: 'TR', label: 'Türkçe', flag: '🇹🇷' },
   { code: 'en' as Language, name: 'GB', label: 'English', flag: '🇬🇧' },
@@ -589,11 +584,6 @@ export const translations: Record<Language, Translation> = {
     successDesc: 'talebinizi aldı. En kısa sürede dönüş yapacağız.',
     formSubmitError: 'Mesajınız gönderilemedi. Lütfen tekrar deneyin veya bize e-posta ile ulaşın.',
     notesLabel: 'Not',
-    corporateYouTubeVideos: 'Kurumsal YouTube Videoları',
-    video1GenIntro: '1. Video: Genel Tanıtım',
-    video2Skill: '2. Video: Mesleki Beceri',
-    video3Field: '3. Video: Saha Mülakatı',
-    previewBtn: 'Önizle',
     companies: {
       hr: {
         name: 'Panova HR',
@@ -790,7 +780,6 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'Mesleki Sertifika',
     docCriminalRecord: 'Adli Sicil Kaydı',
     docHealthReport: 'Sağlık Raporu',
-    docApostille: 'e-Apostil / Dışişleri Bakanlığı Tasdiki',
     savedSuccess: 'Başarıyla Kaydedildi',
     fillEmployerAndSalary: 'Lütfen İşveren ve Maaş Bilgilerini Doldurun',
     offerSentSuccess: 'İş Teklifi Başarıyla Gönderildi',
@@ -1091,11 +1080,6 @@ export const translations: Record<Language, Translation> = {
     successDesc: 'has received your request. We will reply shortly.',
     formSubmitError: 'Your message could not be sent. Please try again or email us directly.',
     notesLabel: 'Note',
-    corporateYouTubeVideos: 'Corporate YouTube Videos',
-    video1GenIntro: '1. Video: General Intro',
-    video2Skill: '2. Video: Professional Skill',
-    video3Field: '3. Video: Field Interview',
-    previewBtn: 'Preview',
     companies: {
       hr: {
         name: 'Panova HR',
@@ -1292,7 +1276,6 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'Professional Certificate',
     docCriminalRecord: 'Criminal Record',
     docHealthReport: 'Health Report',
-    docApostille: 'e-Apostille / Ministry of Foreign Affairs Attestation',
     savedSuccess: 'Successfully Saved',
     fillEmployerAndSalary: 'Please Fill Employer and Salary Details',
     offerSentSuccess: 'Job Offer Sent Successfully',
@@ -1594,11 +1577,6 @@ export const translations: Record<Language, Translation> = {
     formSubmitError: 'Mesazhi nuk u dërgua. Ju lutemi provoni përsëri ose na shkruani me email.',
     notesLabel: 'Shënim',
     notesPlaceholder: 'P.sh. orari i punës, detajet e turnit...',
-    corporateYouTubeVideos: 'Videot e Korporatës YouTube',
-    video1GenIntro: '1. Video: Prezantimi i Përgjithshëm',
-    video2Skill: '2. Video: Aftësia Profesionale',
-    video3Field: '3. Video: Intervista në Terren',
-    previewBtn: 'Parapamje',
     companies: {
       hr: {
         name: 'Panova HR',
@@ -1794,7 +1772,6 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'Certifikata Profesionale',
     docCriminalRecord: 'Dëshmi Penaliteti',
     docHealthReport: 'Raporti Mjekësor',
-    docApostille: 'e-Apostil / Vërtetim i Ministrisë së Punëve të Jashtme',
     savedSuccess: 'U Ruajt me Sukses',
     fillEmployerAndSalary: 'Ju lutemi plotësoni detajet e punëdhënësit dhe pagës',
     offerSentSuccess: 'Oferta e punës u dërgua me sukses',
@@ -2095,11 +2072,6 @@ export const translations: Record<Language, Translation> = {
     successDesc: 'استلم طلبكم. سنرد في أقرب وقت.',
     formSubmitError: 'تعذر إرسال رسالتكم. يرجى المحاولة مرة أخرى أو مراسلتنا بالبريد.',
     notesLabel: 'ملاحظة',
-    corporateYouTubeVideos: 'فيديوهات يوتيوب المؤسسية',
-    video1GenIntro: '1. فيديو: التعريف العام',
-    video2Skill: '2. فيديو: المهارة المهنية',
-    video3Field: '3. فيديو: المقابلة الميدانية',
-    previewBtn: 'معاينة',
     companies: {
       hr: {
         name: 'Panova HR',
@@ -2311,7 +2283,7 @@ export const translations: Record<Language, Translation> = {
     updatingBtn: 'جاري التحديث...',
     saveChangesBtn: 'حفظ التغييرات',
     profileUpdatedSuccess: 'تم تحديث ملف الشركة بنجاح!',
-    profileSaveFailed: 'لم يتم حفظ ملف الشركة. لم تُحدَّث قاعدة البيانات.',
+    profileSaveFailed: 'لم يتم حفظ ملف الشركة. لم تُحدَّث قاعدة البيانات.',
     profileEmailTaken: 'هذا البريد مستخدم في سجل صاحب عمل آخر. لم يُكتب أي تغيير.',
     profileNotLinked: 'لا يوجد صاحب عمل مرتبط بهذا الحساب. لم يُحفظ الملف.',
     completed: 'مكتمل',
@@ -2351,7 +2323,6 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'الشهادة المهنية',
     docCriminalRecord: 'السجل الجنائي',
     docHealthReport: 'التقرير الطبي',
-    docApostille: 'التصديق الإلكتروني / تصديق وزارة الخارجية',
     savedSuccess: 'تم الحفظ بنجاح',
     fillEmployerAndSalary: 'يرجى ملء تفاصيل صاحب العمل والراتب',
     offerSentSuccess: 'تم إرسال عرض العمل بنجاح',
@@ -2552,7 +2523,7 @@ export const translations: Record<Language, Translation> = {
     approvedStatus: 'Одобрено',
     colPosSec: 'Позиција / сектор',
     colHeadcount: 'Број на лица',
-    newDemandBtn: 'Криј ново барање',
+    newDemandBtn: 'Креирај ново барање',
     modalDemandTitle: 'Детали за барањето',
     specifyCustomPos: 'Наведете посебна позиција',
     specialReqs: 'Посебни услови',
@@ -2587,11 +2558,6 @@ export const translations: Record<Language, Translation> = {
     successDesc: 'го прими вашето барање. Ќе одговориме наскоро.',
     formSubmitError: 'Пораката не можеше да се испрати. Обидете се повторно или пишете ни на е-пошта.',
     notesLabel: 'Белешка',
-    corporateYouTubeVideos: 'Корпоративни YouTube видеа',
-    video1GenIntro: '1. Видео: Општо претставување',
-    video2Skill: '2. Видео: Професионална вештина',
-    video3Field: '3. Видео: Теренско интервју',
-    previewBtn: 'Преглед',
     companies: {
       hr: {
         name: 'Panova HR',
@@ -2801,7 +2767,6 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'Професионален сертификат',
     docCriminalRecord: 'Уверение за неосудуваност',
     docHealthReport: 'Здравствен извештај',
-    docApostille: 'е-Апостил / Министерство за надворешни работи',
     savedSuccess: 'Успешно зачувано',
     fillEmployerAndSalary: 'Пополнете ги податоците за работодавач и плата',
     offerSentSuccess: 'Понудата за работа е успешно испратена',
