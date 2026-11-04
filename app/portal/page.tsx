@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
+import { portalUi } from '@/lib/portal-ui-copy';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
@@ -51,6 +52,7 @@ export default function PortalPage() {
   }, []);
 
   const t = translations[currentLang] || translations.en;
+  const ui = portalUi[currentLang];
   const isRtl = currentLang === 'ar';
 
   const changeLanguage = (lang: Language) => {
@@ -152,8 +154,8 @@ export default function PortalPage() {
       setTasks(taskData);
     } else {
       setTasks([
-        { id: '1', title: 'Pasaportu kontrol et', assignee: 'Hüseyin Aksu', backup_assignee: 'Aleksandar Petrov', due_date: '2026-10-01', status: 'pending' },
-        { id: '2', title: 'İşvereni ara', assignee: 'Mehmet Çitil', backup_assignee: 'Rabia Aksu', due_date: '2026-09-25', status: 'completed' }
+        { id: '1', title: 'taskPassportCheck', assignee: 'Hüseyin Aksu', backup_assignee: 'Aleksandar Petrov', due_date: '2026-10-01', status: 'pending' },
+        { id: '2', title: 'taskSaveDemand', assignee: 'Mehmet Citil', backup_assignee: 'Rabia Aksu', due_date: '2026-09-25', status: 'completed' }
       ]);
     }
 
@@ -191,7 +193,7 @@ export default function PortalPage() {
     const loggedUser = staffData || { name: fullName || email, email, role_level: 'upper_management' };
     setAuthenticated(true);
     setCurrentUser(loggedUser);
-    if (audit) logAudit('Sisteme Supabase Auth ile Giriş Yapıldı', loggedUser.name);
+    if (audit) logAudit(portalUi[langRef.current].signedIn, loggedUser.name);
     return true;
   };
 
@@ -311,7 +313,7 @@ export default function PortalPage() {
   const updateCandidateStatus = async (id: string, newStatus: string) => {
     await supabase.from('job_candidates').update({ status: newStatus }).eq('id', id);
     setCandidates(candidates.map(c => c.id === id ? { ...c, status: newStatus } : c));
-    logAudit(`Aday Durumu Değiştirildi -> ${newStatus}`, currentUser?.name);
+    logAudit(`${ui.candidateWord} → ${newStatus}`, currentUser?.name);
   };
 
   const updateRequestStatus = async (id: string, newStatus: string, cancellationReason: string = '') => {
@@ -322,7 +324,7 @@ export default function PortalPage() {
     }
     await supabase.from('job_requests').update(updatePayload).eq('id', id);
     setJobRequests(jobRequests.map(r => r.id === id ? { ...r, ...updatePayload } : r));
-    logAudit(`Talep Durumu Değiştirildi -> ${newStatus}`, currentUser?.name);
+    logAudit(`${ui.linkRequest} → ${newStatus}`, currentUser?.name);
     if (selectedDemandDetail && selectedDemandDetail.id === id) {
       setSelectedDemandDetail({ ...selectedDemandDetail, ...updatePayload });
     }
@@ -331,23 +333,23 @@ export default function PortalPage() {
   const updateCandidateAssignee = async (id: string, assignee: string) => {
     await supabase.from('job_candidates').update({ assigned_to: assignee }).eq('id', id);
     setCandidates(candidates.map(c => c.id === id ? { ...c, assigned_to: assignee } : c));
-    logAudit(`Aday Sorumlusu Atandı -> ${assignee}`, currentUser?.name);
+    logAudit(`${ui.candidateWord} → ${assignee}`, currentUser?.name);
   };
 
   const updateStaffRoleLevel = async (staffId: string, newLevel: string) => {
     if (!isUpperManagement) {
-      alert('Bu işlem için Üst Yönetim yetkisi gereklidir!');
+      alert(ui.upperManagementOnly);
       return;
     }
     await supabase.from('staff_members').update({ role_level: newLevel }).eq('id', staffId);
     setStaffMembers(staffMembers.map(s => s.id === staffId ? { ...s, role_level: newLevel } : s));
-    logAudit(`Personel Rol Seviyesi Güncellendi`, currentUser?.name);
+    logAudit(ui.staffUpdated, currentUser?.name);
   };
 
   const handleAddStaff = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isUpperManagement) {
-      alert('Bu işlem için Üst Yönetim yetkisi gereklidir!');
+      alert(ui.upperManagementOnly);
       return;
     }
     if (!newStaffName.trim() || !newStaffEmail.trim()) return;
@@ -358,9 +360,9 @@ export default function PortalPage() {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sess.session?.access_token || ''}` },
       body: JSON.stringify({ name: newStaffName, email: newStaffEmail.trim().toLowerCase(), role: newStaffRoleLevel }),
     });
-    const result = await res.json().catch(() => ({ error: 'Sunucu yanıtı okunamadı.' }));
+    const result = await res.json().catch(() => ({ error: ui.serverUnreadable }));
     if (!res.ok || result.error) {
-      alert('Hata: ' + (result.error || res.statusText));
+      alert(`${ui.errorPrefix} ${result.error || res.statusText}`);
       return;
     }
 
@@ -368,9 +370,7 @@ export default function PortalPage() {
     setNewStaffName('');
     setNewStaffEmail('');
     setNewStaffPassword('');
-    alert(result.emailSent
-      ? 'Davet e-postası gönderildi. Personel bu e-posta ile Google veya e-posta kaydıyla portala giriş yaptığında hesabı otomatik bağlanır.'
-      : result.warning);
+    alert(result.emailSent ? ui.inviteSent : result.warning);
     fetchAllData();
   };
 
@@ -392,24 +392,24 @@ export default function PortalPage() {
         }).eq('email', editingStaff.email);
       }
 
-      logAudit(`Personel Bilgileri Düzenlendi: ${editingStaff.name}`, currentUser?.name);
+      logAudit(`${ui.staffUpdated} ${editingStaff.name}`, currentUser?.name);
       setEditingStaff(null);
-      alert('Personel bilgileri başarıyla güncellendi!');
+      alert(ui.staffUpdated);
       fetchAllData();
     } catch (err: any) {
-      alert('Güncelleme hatası: ' + err.message);
+      alert(`${ui.updateFailed} ${err.message}`);
     }
   };
 
   const handleDeleteStaff = async (staffId: string) => {
     if (!isUpperManagement) {
-      alert('Bu işlem için Üst Yönetim yetkisi gereklidir!');
+      alert(ui.upperManagementOnly);
       return;
     }
-    if (confirm('Bu personel kaydını silmek istediğinizden emin misiniz?')) {
+    if (confirm(ui.confirmDeleteStaff)) {
       await supabase.from('staff_members').delete().eq('id', staffId);
       setStaffMembers(staffMembers.filter(s => s.id !== staffId));
-      logAudit('Personel Kaydı Silindi', currentUser?.name);
+      logAudit(ui.staffDeleted, currentUser?.name);
       fetchAllData();
     }
   };
@@ -434,16 +434,16 @@ export default function PortalPage() {
     const { error } = await supabase.from('tasks').insert([newTaskPayload]);
 
     if (error) {
-      alert('Görev kaydedilirken hata oluştu: ' + error.message);
+      alert(`${ui.taskSaveFailed} ${error.message}`);
       return;
     }
 
-    logAudit(`Yeni Görev Atandı: ${newTaskTitle} (${newTaskPayload.assignee})`, currentUser?.name);
+    logAudit(`${ui.taskSaved} ${newTaskTitle} (${newTaskPayload.assignee})`, currentUser?.name);
     setNewTaskTitle('');
     setNewTaskDueDate('');
     setNewTaskLinkType('');
     setNewTaskLinkId('');
-    alert('Görev kaydedildi ve sorumlu personele iletildi!');
+    alert(ui.taskSaved);
     fetchAllData();
   };
 
@@ -451,7 +451,7 @@ export default function PortalPage() {
     const nextStatus = currentStatus === 'pending' ? 'completed' : 'pending';
     await supabase.from('tasks').update({ status: nextStatus }).eq('id', taskId);
     setTasks(tasks.map(t => t.id === taskId ? { ...t, status: nextStatus } : t));
-    logAudit('Görev durumu güncellendi', currentUser?.name);
+    logAudit(ui.taskSaved, currentUser?.name);
   };
 
   if (!authenticated) {
@@ -606,33 +606,33 @@ export default function PortalPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
-          <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+        <div className="flex flex-wrap items-center gap-2 border-b pb-3 text-xs font-bold">
+          <button onClick={() => setActiveTab('overview')} className={`px-3 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
           </button>
-          <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             👥 {t.candidatesTab} ({candidates.length})
           </button>
-          <button onClick={() => setActiveTab('requests')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'requests' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('requests')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'requests' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📁 {t.requestsTab} ({jobRequests.length})
           </button>
           
           {isUpperManagement && (
-            <button onClick={() => setActiveTab('staff')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'staff' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            <button onClick={() => setActiveTab('staff')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'staff' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
               🛡️ {t.staffTab} ({staffMembers.length})
             </button>
           )}
 
-          <button onClick={() => setActiveTab('tasks')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'tasks' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('tasks')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'tasks' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             ✅ {t.tasksTab} ({tasks.filter(t => t.status === 'pending').length})
           </button>
-          <button onClick={() => setActiveTab('audit')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'audit' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('audit')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'audit' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📜 {t.auditTab} ({auditLogs.length})
           </button>
-          <button onClick={() => setActiveTab('employers')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'employers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('employers')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'employers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             🏢 {t.employersTab} ({employers.length})
           </button>
-          <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             💬 {t.supportTab} ({supportTickets.length})
           </button>
         </div>
@@ -779,7 +779,7 @@ export default function PortalPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {auditLogs.length === 0 && (<tr><td colSpan={3} className="p-4 text-center text-slate-400">Henüz kayıt yok.</td></tr>)}
+                  {auditLogs.length === 0 && (<tr><td colSpan={3} className="p-4 text-center text-slate-400">{ui.noAuditYet}</td></tr>)}
                   {auditLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50">
                       <td className="p-4 font-bold text-slate-900">
@@ -807,7 +807,7 @@ export default function PortalPage() {
                     <div className="flex items-center justify-between">
                       <h4 className="font-extrabold text-slate-900">{emp.company_name}<DemoBadge show={emp.is_demo} /></h4>
                       <div className="flex flex-wrap gap-1.5 justify-end">
-                      <Link href={`/portal/employers/${emp.id}`} className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm">📂 İşveren Dosyası</Link>
+                      <Link href={`/portal/employers/${emp.id}`} className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm">📂 {ui.employerFile}</Link>
                       <button
                         onClick={() => {
                           const employerSessionData = {
@@ -816,7 +816,7 @@ export default function PortalPage() {
                             email: emp.email || 'huseyinaksu@gmail.com',
                             contact_person: emp.contact_person,
                             country: emp.country,
-                            sector: emp.sector || 'Tarım / İnşaat',
+                            sector: emp.sector || ui.sectorFallback,
                             isAdminImpersonation: true
                           };
                           localStorage.setItem('panova_employer_auth', 'true');
@@ -825,7 +825,7 @@ export default function PortalPage() {
                         }}
                         className="px-3 py-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm"
                       >
-                        İşveren Portalını Gör
+                        {ui.viewEmployerPortal}
                       </button>
                       </div>
                     </div>

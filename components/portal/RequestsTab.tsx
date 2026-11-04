@@ -5,6 +5,8 @@ import { Building2, FileText, Link2 } from 'lucide-react';
 import Link from 'next/link';
 import MatchPanel from './MatchPanel';
 import DemoBadge from './DemoBadge';
+import { portalUi } from '@/lib/portal-ui-copy';
+import { useSiteLanguage } from '@/lib/site-language';
 
 interface RequestsTabProps {
   jobRequests: any[];
@@ -20,6 +22,8 @@ export default function RequestsTab({
   setSelectedDemandDetail
 }: RequestsTabProps) {
   const [matchReq, setMatchReq] = useState<any | null>(null);
+  const { currentLang } = useSiteLanguage('en');
+  const ui = portalUi[currentLang];
   return (
     <div className="space-y-6">
       {matchReq && <MatchPanel request={matchReq} onClose={() => setMatchReq(null)} />}
@@ -68,7 +72,7 @@ export default function RequestsTab({
                   onChange={(e) => {
                     const val = e.target.value;
                     if (val === 'cancelled') {
-                      const reason = prompt('Please enter cancellation reason:', 'Employer cancelled demand');
+                      const reason = prompt(ui.cancelPrompt, ui.cancelReasonLabel);
                       if (reason !== null) {
                         updateRequestStatus(req.id, val, reason);
                       }
@@ -94,7 +98,7 @@ export default function RequestsTab({
                   <option value="cancelled">🔴 {t.stageCancelled}</option>
                 </select>
                 {req.cancellation_reason && (
-                  <p className="text-[10px] text-red-600 font-medium">Cancellation Reason: {req.cancellation_reason}</p>
+                  <p className="text-[10px] text-red-600 font-medium">{ui.cancelReasonLabel} {req.cancellation_reason}</p>
                 )}
               </div>
             </div>
@@ -104,13 +108,13 @@ export default function RequestsTab({
                 onClick={() => setMatchReq(req)}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer flex items-center justify-center gap-1.5"
               >
-                <Link2 className="w-4 h-4" /> Aday Eşleştir
+                <Link2 className="w-4 h-4" /> {ui.matchCandidates}
               </button>
               <Link
                 href={`/portal/requests/${req.id}`}
                 className="w-full bg-white border hover:bg-slate-50 text-slate-800 py-2 rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-1.5"
               >
-                📂 Talep Dosyası
+                📂 {ui.requestInfo}
               </Link>
               <button
                 onClick={() => setSelectedDemandDetail(req)}
