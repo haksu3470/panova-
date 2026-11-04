@@ -1,8 +1,10 @@
 /**
  * Registration identity for the signed-in candidate.
  * Signup stores name, passport, phone, profession, and sector on the
- * job_candidates row. Profile save must update that same row. It must not
- * change the auth email (that flow re-verifies) or privileged columns.
+ * job_candidates row. Profile save must update that same row. Email is a
+ * separate write: a unique collision must not discard the other fields, and
+ * this path must not change the auth email (that flow re-verifies) or
+ * privileged columns.
  */
 
 export type CandidateProfileCode =
@@ -46,18 +48,49 @@ function required(value: string | null | undefined): string | null {
   return trimmed ? trimmed : null;
 }
 
-/** Columns a candidate may change. No id, auth link, status, or verification flags. */
-export function candidateIdentityPayload(input: CandidateIdentityInput): CandidateIdentity {
+export type CandidateRegistration = Omit<CandidateIdentity, 'email'>;
+
+/** Name, passport, phone, profession, and sector. Email is not in this write. */
+export function candidateRegistrationPayload(
+  input: Omit<CandidateIdentityInput, 'email'>,
+): CandidateRegistration {
   const full_name = required(input.fullName);
   const passport_number = required(input.passport)?.toUpperCase() ?? null;
   const phone = required(input.phone);
-  const email = required(input.email)?.toLowerCase() ?? null;
   const profession = required(input.profession);
   const sector = required(input.sector);
-  if (!full_name || !passport_number || !phone || !email || !email.includes('@') || !profession || !sector) {
+  if (!full_name || !passport_number || !phone || !profession || !sector) {
     throw new CandidateProfileError('invalid', 'Registration fields are required');
   }
-  return { full_name, passport_number, phone, email, profession, sector };
+  return { full_name, passport_number, phone, profession, sector };
+}
+
+/**
+ * Email change for the candidate row only.
+ * Null means the address is unchanged, so the save must not touch the column.
+ */
+export function changedCandidateEmail(current: string | null | undefined, next: string): string | null {
+  const email = required(next)?.toLowerCase() ?? null;
+  if (!email || !email.includes('@')) {
+    throw new CandidateProfileError('invalid', 'Registration fields are required');
+  }
+  const previous = required(current)?.toLowerCase() ?? '';
+  return email === previous ? null : email;
+}
+
+/** Null means the photo is unchanged and must not be sent again. */
+export function changedCandidatePhoto(current: string | null | undefined, next: string): string | null {
+  const photo = next ?? '';
+  if (photo === (current ?? '')) return null;
+  return photo;
+}
+
+/** Columns a candidate may change. No id, auth link, status, or verification flags. */
+export function candidateIdentityPayload(input: CandidateIdentityInput): CandidateIdentity {
+  const registration = candidateRegistrationPayload(input);
+  const email = changedCandidateEmail(null, input.email);
+  if (!email) throw new CandidateProfileError('invalid', 'Registration fields are required');
+  return { ...registration, email };
 }
 
 /**
