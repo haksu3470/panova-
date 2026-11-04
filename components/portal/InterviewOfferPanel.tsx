@@ -113,58 +113,66 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
     if (ok) setOf({ ...of, id: null, monthly_net_salary: '', start_date: '', terms_details: '', status: 'pending' });
   };
 
-  const inp = 'w-full border rounded-xl px-3 py-2 text-sm';
+  const inp = [
+    'w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 outline-none scheme-light',
+    'placeholder:text-slate-600',
+    '[&::-webkit-datetime-edit]:text-slate-900 [&::-webkit-datetime-edit-fields-wrapper]:text-slate-900',
+    '[&::-webkit-datetime-edit-text]:text-slate-900',
+    '[&::-webkit-datetime-edit-day-field]:text-slate-900 [&::-webkit-datetime-edit-month-field]:text-slate-900 [&::-webkit-datetime-edit-year-field]:text-slate-900',
+    '[&::-webkit-datetime-edit-hour-field]:text-slate-900 [&::-webkit-datetime-edit-minute-field]:text-slate-900 [&::-webkit-datetime-edit-ampm-field]:text-slate-900',
+    '[&::-webkit-calendar-picker-indicator]:opacity-80',
+  ].join(' ');
   const offerLocked = (o: any) => o.status === 'accepted' || o.status === 'rejected';
   const when = (iso?: string | null) => (iso ? new Date(iso).toLocaleString(dateLocale[currentLang], { dateStyle: 'medium', timeStyle: 'short' }) : '—');
 
   return (
     <div className="fixed inset-0 z-[60] bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
-      <div className="bg-white w-full sm:max-w-3xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 space-y-5" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white text-slate-900 scheme-light w-full sm:max-w-3xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 space-y-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="font-extrabold text-slate-900 text-lg">🤝 {ui.ioTitle}<DemoBadge show={isDemo} /></h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="font-extrabold text-slate-950 text-lg">🤝 {ui.ioTitle}<DemoBadge show={isDemo} /></h3>
+            <p className="text-xs font-medium text-slate-700">
               {candidate.full_name}
               {request ? ` · ${request.position_title} · ${request.employer_name}` : ` · ${ui.ioAllRequests}`}
             </p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-100" aria-label={ui.close}><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="p-2 rounded-lg text-slate-700 hover:bg-slate-100" aria-label={ui.close}><X className="w-5 h-5" /></button>
         </div>
 
         {error && <p className="text-xs text-red-600 bg-red-50 p-2 rounded-lg">{error}</p>}
 
         <section className="space-y-2">
-          <h4 className="text-xs font-bold uppercase text-slate-600">{ui.ioInterviews} ({interviews.length})</h4>
+          <h4 className="text-xs font-bold uppercase tracking-wide text-slate-800">{ui.ioInterviews} ({interviews.length})</h4>
           {interviews.map((i) => (
             <button key={i.id} onClick={() => setIv({ id: i.id, scheduled_at: toLocal(i.scheduled_at), status: i.status || 'scheduled', result: i.result || '', employer_notes: i.employer_notes || '', panova_notes: i.panova_notes || '' })}
-              className={`w-full text-start border rounded-xl p-3 hover:bg-slate-50 ${iv.id === i.id ? 'ring-2 ring-blue-500' : ''}`}>
-              <p className="text-sm font-bold text-slate-900">
+              className={`w-full text-start border border-slate-200 bg-white rounded-xl p-3 hover:bg-slate-50 ${iv.id === i.id ? 'ring-2 ring-blue-500' : ''}`}>
+              <p className="text-sm font-bold text-slate-950">
                 {when(i.scheduled_at)}
                 <DemoBadge show={i.is_demo} />
               </p>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] font-medium text-slate-700">
                 {ui.intStatus[i.status] || i.status}
                 {i.result ? ` · ${ui.intResult[i.result] || i.result}` : ''}
                 {i.panova_notes ? ` · ${i.panova_notes}` : ''}
               </p>
             </button>
           ))}
-          <div className="border rounded-xl p-3 bg-slate-50 space-y-2">
-            <p className="text-xs font-bold text-slate-700">{iv.id ? ui.ioEditInterview : ui.ioNewInterview}</p>
+          <div className="border border-slate-200 rounded-xl p-3 bg-slate-50 space-y-2">
+            <p className="text-xs font-bold text-slate-900">{iv.id ? ui.ioEditInterview : ui.ioNewInterview}</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <input type="datetime-local" value={iv.scheduled_at} onChange={(e) => setIv({ ...iv, scheduled_at: e.target.value })} className={inp} />
               <select value={iv.status} onChange={(e) => setIv({ ...iv, status: e.target.value })} className={inp}>
-                {Object.entries(ui.intStatus).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                {Object.entries(ui.intStatus).map(([value, label]) => <option key={value} className="bg-white text-slate-900" value={value}>{label}</option>)}
               </select>
               <select value={iv.result} onChange={(e) => setIv({ ...iv, result: e.target.value })} className={inp}>
-                <option value="">{ui.intNoResult}</option>
-                {Object.entries(ui.intResult).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                <option className="bg-white text-slate-900" value="">{ui.intNoResult}</option>
+                {Object.entries(ui.intResult).map(([value, label]) => <option key={value} className="bg-white text-slate-900" value={value}>{label}</option>)}
               </select>
             </div>
             <textarea rows={2} placeholder={ui.ioEmployerNote} value={iv.employer_notes} onChange={(e) => setIv({ ...iv, employer_notes: e.target.value })} className={inp} />
             <textarea rows={2} placeholder={ui.ioPanovaNote} value={iv.panova_notes} onChange={(e) => setIv({ ...iv, panova_notes: e.target.value })} className={inp} />
             <div className="flex gap-2 justify-end">
-              {iv.id && <button onClick={() => setIv({ id: null, scheduled_at: '', status: 'scheduled', result: '', employer_notes: '', panova_notes: '' })} className="text-xs px-3 py-2 rounded-lg border">{ui.ioNewInterview}</button>}
+              {iv.id && <button onClick={() => setIv({ id: null, scheduled_at: '', status: 'scheduled', result: '', employer_notes: '', panova_notes: '' })} className="text-xs font-bold px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800">{ui.ioNewInterview}</button>}
               <button disabled={busy} onClick={saveInterview} className="text-xs font-bold px-3 py-2 rounded-lg bg-blue-600 text-white flex items-center gap-1 disabled:opacity-50">
                 {iv.id ? <Save className="w-4 h-4" /> : <CalendarPlus className="w-4 h-4" />} {iv.id ? ui.save : ui.ioPlan}
               </button>
@@ -173,19 +181,19 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
         </section>
 
         <section className="space-y-2">
-          <h4 className="text-xs font-bold uppercase text-slate-600">{ui.ioJobOffers} ({offers.length})</h4>
+          <h4 className="text-xs font-bold uppercase tracking-wide text-slate-800">{ui.ioJobOffers} ({offers.length})</h4>
           {offers.map((o) => (
             <button key={o.id} disabled={offerLocked(o)} onClick={() => setOf({ id: o.id, employer_name: o.employer_name || '', position_title: o.position_title || '', monthly_net_salary: o.monthly_net_salary ?? '', start_date: o.start_date || '', terms_details: o.terms_details || '', status: o.status || 'pending' })}
-              className={`w-full text-start border rounded-xl p-3 hover:bg-slate-50 disabled:cursor-default ${of.id === o.id ? 'ring-2 ring-emerald-500' : ''}`}>
-              <p className="text-sm font-bold text-slate-900">{o.employer_name} · {o.position_title}<DemoBadge show={o.is_demo} /></p>
-              <p className="text-[11px] text-slate-500">
+              className={`w-full text-start border border-slate-200 bg-white rounded-xl p-3 hover:bg-slate-50 disabled:cursor-default ${of.id === o.id ? 'ring-2 ring-emerald-500' : ''}`}>
+              <p className="text-sm font-bold text-slate-950">{o.employer_name} · {o.position_title}<DemoBadge show={o.is_demo} /></p>
+              <p className="text-[11px] font-medium text-slate-700">
                 {fill(ui.ioNetLine, { amount: o.monthly_net_salary, date: o.start_date || '—' })} · {ui.offerStatus[o.status] || o.status}
                 {o.responded_at ? ` (${String(o.responded_at).substring(0, 10)})` : ''}
               </p>
             </button>
           ))}
-          <div className="border rounded-xl p-3 bg-slate-50 space-y-2">
-            <p className="text-xs font-bold text-slate-700">{of.id ? ui.ioEditOffer : ui.ioNewOffer}</p>
+          <div className="border border-slate-200 rounded-xl p-3 bg-slate-50 space-y-2">
+            <p className="text-xs font-bold text-slate-900">{of.id ? ui.ioEditOffer : ui.ioNewOffer}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <input placeholder={`${ui.ioCompany} *`} value={of.employer_name} onChange={(e) => setOf({ ...of, employer_name: e.target.value })} className={inp} />
               <input placeholder={ui.ioPosition} value={of.position_title} onChange={(e) => setOf({ ...of, position_title: e.target.value })} className={inp} />
@@ -195,12 +203,12 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
             <textarea rows={3} placeholder={ui.ioTerms} value={of.terms_details} onChange={(e) => setOf({ ...of, terms_details: e.target.value })} className={inp} />
             {of.id && (
               <select value={of.status} onChange={(e) => setOf({ ...of, status: e.target.value })} className={inp}>
-                <option value="pending">{ui.offerStatus.pending}</option>
-                <option value="withdrawn">{ui.offerStatus.withdrawn}</option>
+                <option className="bg-white text-slate-900" value="pending">{ui.offerStatus.pending}</option>
+                <option className="bg-white text-slate-900" value="withdrawn">{ui.offerStatus.withdrawn}</option>
               </select>
             )}
             <div className="flex gap-2 justify-end">
-              {of.id && <button onClick={() => setOf({ ...of, id: null, status: 'pending' })} className="text-xs px-3 py-2 rounded-lg border">{ui.ioNewOffer}</button>}
+              {of.id && <button onClick={() => setOf({ ...of, id: null, status: 'pending' })} className="text-xs font-bold px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800">{ui.ioNewOffer}</button>}
               <button disabled={busy} onClick={saveOffer} className="text-xs font-bold px-3 py-2 rounded-lg bg-emerald-600 text-white flex items-center gap-1 disabled:opacity-50">
                 <FileSignature className="w-4 h-4" /> {of.id ? ui.save : ui.ioSendOffer}
               </button>
