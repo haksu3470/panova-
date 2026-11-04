@@ -7,6 +7,15 @@ import DemoBadge from './DemoBadge';
 import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
 import { toLanguage } from '@/lib/europeanCountries';
 import { supabase } from '@/lib/supabase';
+import {
+  candidateFilterLabels,
+  candidatePassportLabel,
+  candidatePlaceLabel,
+  candidateProfessionLabel,
+  candidateSectorChoices,
+  candidateSectorLabel,
+  sameSector,
+} from '@/lib/candidateLabels';
 import { fill, portalUi } from '@/lib/portal-ui-copy';
 import {
   canManagerDeleteOpenCandidate,
@@ -52,7 +61,10 @@ export default function CandidatesTab({
   currentUser,
   isUpperManagement,
 }: CandidatesTabProps) {
-  const ui = portalUi[toLanguage(currentLang)];
+  const lang = toLanguage(currentLang);
+  const ui = portalUi[lang];
+  const filters = candidateFilterLabels(t);
+  const sectorChoices = candidateSectorChoices(ui, t);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSector, setSelectedSector] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -80,7 +92,7 @@ export default function CandidatesTab({
       (cand.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
       code.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesSector = selectedSector === 'all' || cand.sector === selectedSector;
+    const matchesSector = sameSector(cand.sector, selectedSector);
     const matchesStatus = selectedStatus === 'all' || cand.status === selectedStatus;
     const matchesCountry = selectedCountry === 'all' || (cand.country && cand.country.toLowerCase() === selectedCountry.toLowerCase());
     const matchesCode = !isUpperManagement || matchesReferralCodeFilter(cand.referral_code, codeFilter);
@@ -265,10 +277,10 @@ export default function CandidatesTab({
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5 rtl:left-auto rtl:right-3" />
           <input
             type="text"
-            placeholder={t.searchPlaceholder || 'Search...'}
+            placeholder={t.searchPlaceholder || ''}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            aria-label={t.searchPlaceholder || 'Search'}
+            aria-label={t.searchPlaceholder || ''}
             className="w-full pl-9 pr-4 rtl:pr-9 rtl:pl-4 py-2.5 rounded-xl border text-xs sm:text-sm outline-none text-slate-900 font-medium bg-white focus:ring-2 focus:ring-[#2e7d32]"
           />
         </div>
@@ -280,11 +292,10 @@ export default function CandidatesTab({
             aria-label={ui.sectorLabel}
             className="w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 bg-white cursor-pointer outline-none focus:ring-2 focus:ring-[#2e7d32]"
           >
-            <option value="all">📁 All Sectors</option>
-            <option value="construction">Construction</option>
-            <option value="agriculture">Agriculture</option>
-            <option value="hr">General HR</option>
-            <option value="trade">Foreign Trade</option>
+            <option value="all">{filters.allSectors}</option>
+            {sectorChoices.map((sector) => (
+              <option key={sector.value} value={sector.value}>{sector.label}</option>
+            ))}
           </select>
         </div>
 
@@ -310,8 +321,8 @@ export default function CandidatesTab({
             aria-label={t.nationalityCol}
             className="w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 bg-white cursor-pointer outline-none focus:ring-2 focus:ring-[#2e7d32]"
           >
-            <option value="all">🌍 All Countries</option>
-            <EuropeanCountryOptions lang={toLanguage(currentLang)} />
+            <option value="all">{filters.allCountries}</option>
+            <EuropeanCountryOptions lang={lang} />
           </select>
         </div>
 
@@ -341,7 +352,7 @@ export default function CandidatesTab({
             onClick={fetchAllData}
             className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 px-3 py-1.5 rounded-xl cursor-pointer transition"
           >
-            <RefreshCw className="w-3.5 h-3.5" /> Refresh
+            <RefreshCw className="w-3.5 h-3.5" /> {ui.refresh}
           </button>
         </div>
         <div className="overflow-x-auto">
@@ -404,12 +415,12 @@ export default function CandidatesTab({
                       )}
                     </td>
                     <td className="p-4">
-                      <div>{candidate.passport_number || candidate.passport_no || 'N/A'}</div>
-                      <div className="text-[11px] text-slate-400">{candidate.nationality || candidate.country}</div>
+                      <div>{candidatePassportLabel(candidate.passport_number || candidate.passport_no, ui.unspecified)}</div>
+                      <div className="text-[11px] text-slate-400">{candidatePlaceLabel(candidate.nationality, candidate.country, lang, ui.unspecified)}</div>
                     </td>
                     <td className="p-4">
-                      <span className="font-semibold text-slate-800">{candidate.profession}</span>
-                      <div className="text-[11px] text-slate-400 uppercase">{candidate.sector}</div>
+                      <span className="font-semibold text-slate-800">{candidateProfessionLabel(candidate.profession, ui.unspecified)}</span>
+                      <div className="text-[11px] text-slate-400">{candidateSectorLabel(candidate.sector, ui, t)}</div>
                     </td>
                     <td className="p-4">
                       <select

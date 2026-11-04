@@ -195,6 +195,7 @@ export type PortalUi = {
   registerCandidateFailed: string;
   unknownSupervisorCode: string;
   candidateListCount: string;
+  refresh: string;
   taskSaveFailed: string;
   taskSaved: string;
   noAuditYet: string;
@@ -405,6 +406,7 @@ const tr: PortalUi = {
   registerCandidateFailed: 'Aday kaydedilemedi:',
   unknownSupervisorCode: 'Bu yönlendirme kodu bir bölge sorumlusuna ait değil.',
   candidateListCount: 'Aday listesi ({shown} / {total})',
+  refresh: 'Yenile',
   taskSaveFailed: 'Görev kaydedilirken hata oluştu:', taskSaved: 'Görev kaydedildi ve sorumlu personele iletildi.',
   noAuditYet: 'Henüz kayıt yok.', employerFile: 'İşveren dosyası', viewEmployerPortal: 'İşveren portalını gör',
   linkedRecord: 'Bağlı kayıt (opsiyonel)', noneOption: 'Yok', selectOption: 'Seçin…',
@@ -613,6 +615,7 @@ const en: PortalUi = {
   registerCandidateFailed: 'Could not register the candidate:',
   unknownSupervisorCode: 'That referral code does not belong to a region supervisor.',
   candidateListCount: 'Candidate list ({shown} / {total})',
+  refresh: 'Refresh',
   taskSaveFailed: 'The task could not be saved:', taskSaved: 'Task saved and sent to the assignee.',
   noAuditYet: 'No records yet.', employerFile: 'Employer file', viewEmployerPortal: 'View employer portal',
   linkedRecord: 'Linked record (optional)', noneOption: 'None', selectOption: 'Select…',
@@ -821,6 +824,7 @@ const sq: PortalUi = {
   registerCandidateFailed: 'Kandidati nuk u regjistrua:',
   unknownSupervisorCode: 'Ky kod referimi nuk i përket një përgjegjësi rajoni.',
   candidateListCount: 'Lista e kandidatëve ({shown} / {total})',
+  refresh: 'Rifresko',
   taskSaveFailed: 'Detyra nuk u ruajt:', taskSaved: 'Detyra u ruajt dhe iu dërgua përgjegjësit.',
   noAuditYet: 'Ende nuk ka regjistrime.', employerFile: 'Dosja e punëdhënësit', viewEmployerPortal: 'Shiko portalin e punëdhënësit',
   linkedRecord: 'Regjistrim i lidhur (opsional)', noneOption: 'Asnjë', selectOption: 'Zgjidhni…',
@@ -1029,6 +1033,7 @@ const ar: PortalUi = {
   registerCandidateFailed: 'تعذر تسجيل المرشح:',
   unknownSupervisorCode: 'هذا الرمز لا يخص مشرف منطقة.',
   candidateListCount: 'قائمة المرشحين ({shown} / {total})',
+  refresh: 'تحديث',
   taskSaveFailed: 'تعذر حفظ المهمة:', taskSaved: 'حُفظت المهمة وأُرسلت إلى المسؤول.',
   noAuditYet: 'لا توجد سجلات بعد.', employerFile: 'ملف صاحب العمل', viewEmployerPortal: 'عرض بوابة صاحب العمل',
   linkedRecord: 'سجل مرتبط (اختياري)', noneOption: 'لا شيء', selectOption: 'اختيار…',
@@ -1237,6 +1242,7 @@ const mk: PortalUi = {
   registerCandidateFailed: 'Кандидатот не е регистриран:',
   unknownSupervisorCode: 'Овој код не припаѓа на регионален одговорен.',
   candidateListCount: 'Листа на кандидати ({shown} / {total})',
+  refresh: 'Освежи',
   taskSaveFailed: 'Задачата не е зачувана:', taskSaved: 'Задачата е зачувана и испратена до одговорниот.',
   noAuditYet: 'Сè уште нема записи.', employerFile: 'Досие на работодавач', viewEmployerPortal: 'Види портал на работодавач',
   linkedRecord: 'Поврзан запис (изборно)', noneOption: 'Нема', selectOption: 'Изберете…',

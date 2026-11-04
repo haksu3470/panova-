@@ -63,6 +63,9 @@ const SECTOR_LABEL_KEY: Record<string, keyof Translation> = {
   manufacturing: 'sectorManufacturing',
 };
 
+/** Stable sector codes used by candidate and employer filters. */
+export const SECTOR_FILTER_CODES = Object.keys(SECTOR_LABEL_KEY);
+
 export function normalizeFilterText(value: string | null | undefined): string {
   return (value ?? '').trim().toLocaleLowerCase('tr-TR');
 }
