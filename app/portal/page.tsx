@@ -6,6 +6,7 @@ import { AuthFooter } from '@/components/site/AuthFooter';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ensureStaff, signOut } from '@/lib/auth';
+import { consumeOAuthIntent, listenerMayRevokeSharedSession, PORTAL_OAUTH_PATH } from '@/lib/staffSession';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
 import ForgotPasswordPanel, { ForgotPasswordLink } from '@/components/auth/ForgotPasswordPanel';
 import {
@@ -189,11 +190,15 @@ export default function PortalPage() {
     fullName?: string,
     announce = false,
     audit = announce,
+    revokeOnFailure = false,
   ) => {
     const staffOk = await ensureStaff(fullName || email || undefined);
     if (!staffOk) {
+      // signOut is global for this browser. Only an explicit portal login,
+      // or OAuth that this tab started, may revoke. A candidate signed in
+      // on /candidate shares this session.
+      if (revokeOnFailure) await signOut();
       if (announce) {
-        await signOut();
         const copy = translations[langRef.current] || translations.en;
         alert(copy.staffNotInvited);
       }
@@ -219,6 +224,9 @@ export default function PortalPage() {
       if (event !== 'INITIAL_SESSION' && event !== 'SIGNED_IN') return;
       setTimeout(async () => {
         if (!alive || emailGateListenerPaused() || !session) return;
+        // A hidden portal tab hears every sign-in on this origin. Adopting it
+        // would run claim_first_staff and, previously, signOut the candidate.
+        if (document.visibilityState !== 'visible') return;
         const gate = await gateSession();
         if (!alive) return;
         if (gate.status === 'verify') {
@@ -230,17 +238,21 @@ export default function PortalPage() {
         if (gate.status !== 'ready') return;
         // Google dönüşü INITIAL_SESSION veya SIGNED_IN olabilir. Personel değilse
         // ikisinde de uyarı göster; sessiz dönüş giriş formunda kalmasın.
+        // Oturumu silmek yalnız bu sekmenin kendi Google dönüşünde olur.
         // Denetim kaydı yalnız yeni oturumda yazılır, sayfa yenilemesinde değil.
         if (handledUserId === session.user.id) return;
         handledUserId = session.user.id;
-        const opened = await enterStaff(
+        const revoke = listenerMayRevokeSharedSession(consumeOAuthIntent(PORTAL_OAUTH_PATH), true);
+        // handledUserId stays set so the paired INITIAL_SESSION / SIGNED_IN
+        // does not alert twice. The portal form still calls enterStaff itself.
+        await enterStaff(
           session.user.id,
           session.user.email || undefined,
           undefined,
           true,
           event === 'SIGNED_IN',
+          revoke,
         );
-        if (!opened) handledUserId = null;
       }, 0);
     });
     return () => {
@@ -277,7 +289,7 @@ export default function PortalPage() {
         setAuthMode('verify');
         return;
       }
-      await enterStaff(authData.user.id, authData.user.email || loginEmail, undefined, true);
+      await enterStaff(authData.user.id, authData.user.email || loginEmail, undefined, true, true, true);
     } catch (err: any) {
       alert((t.loginError || '{message}').replace('{message}', err.message));
     } finally {
@@ -526,7 +538,7 @@ export default function PortalPage() {
                     const { data } = await supabase.auth.getSession();
                     const user = data.session?.user;
                     if (!user) return;
-                    await enterStaff(user.id, user.email || verifyEmail, regName || undefined, true);
+                    await enterStaff(user.id, user.email || verifyEmail, regName || undefined, true, true, true);
                   }}
                 />
                 <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-slate-500 cursor-pointer">{t.verifyEmailBack}</button>

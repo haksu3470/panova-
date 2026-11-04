@@ -14,6 +14,7 @@ import {
   candidateRegistrationPayload,
   changedCandidateEmail,
   changedCandidatePhoto,
+  isPermissionDenied,
 } from '@/lib/candidateProfile';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
 import ForgotPasswordPanel, { ForgotPasswordLink } from '@/components/auth/ForgotPasswordPanel';
@@ -147,6 +148,7 @@ export default function CandidateDashboard() {
       profileNotSaved: 'Profil kaydedilemedi. Oturumunuzu kontrol edip tekrar deneyin.',
       profileEmailKept: 'Diğer bilgiler kaydedildi. Bu e-posta başka bir adayda kayıtlı olduğu için e-posta değişmedi.',
       profilePhotoNotSaved: 'Diğer bilgiler kaydedildi. Fotoğraf kaydedilemedi. Daha küçük bir görsel deneyin.',
+      sessionRequired: 'Oturumunuz kapandı. Kayıt bilgilerini ve belgeleri kaydetmek için tekrar giriş yapın.',
       emailLabel: 'E-Posta Adresi',
       phoneLabel: 'Telefon Numarası',
       emergencyHeader: 'Acil Durum İletişim Bilgileri (Emergency Contact)',
@@ -204,6 +206,7 @@ export default function CandidateDashboard() {
       profileNotSaved: 'Profile could not be saved. Check your session and try again.',
       profileEmailKept: 'The other details were saved. That email belongs to another candidate, so the email was not changed.',
       profilePhotoNotSaved: 'The other details were saved. The photo could not be saved. Try a smaller image.',
+      sessionRequired: 'Your session has ended. Sign in again to save your registration and documents.',
       emailLabel: 'Email Address',
       phoneLabel: 'Phone Number',
       emergencyHeader: 'Emergency Contact Information',
@@ -261,6 +264,7 @@ export default function CandidateDashboard() {
       profileNotSaved: 'Profili nuk u ruajt. Kontrolloni sesionin dhe provoni përsëri.',
       profileEmailKept: 'Të dhënat e tjera u ruajtën. Ky email i përket një kandidati tjetër, ndaj email-i nuk u ndryshua.',
       profilePhotoNotSaved: 'Të dhënat e tjera u ruajtën. Fotoja nuk u ruajt. Provoni një imazh më të vogël.',
+      sessionRequired: 'Sesioni juaj ka përfunduar. Identifikohuni përsëri për të ruajtur regjistrimin dhe dokumentet.',
       emailLabel: 'Adresa e Emailit',
       phoneLabel: 'Numri i Telefonit',
       emergencyHeader: 'Informacioni i Kontaktit të Urgjencës',
@@ -318,6 +322,7 @@ export default function CandidateDashboard() {
       profileNotSaved: 'تعذر حفظ الملف الشخصي. تحقق من الجلسة وحاول مرة أخرى.',
       profileEmailKept: 'تم حفظ البيانات الأخرى. هذا البريد مرتبط بمرشح آخر، لذلك لم يتغير البريد.',
       profilePhotoNotSaved: 'تم حفظ البيانات الأخرى. تعذر حفظ الصورة. جرب صورة أصغر.',
+      sessionRequired: 'انتهت جلستك. سجّل الدخول مرة أخرى لحفظ بيانات التسجيل والمستندات.',
       emailLabel: 'البريد الإلكتروني',
       phoneLabel: 'رقم الهاتف',
       emergencyHeader: 'معلومات الاتصال في حالات الطوارئ',
@@ -375,6 +380,7 @@ export default function CandidateDashboard() {
       profileNotSaved: 'Профилот не можеше да се зачува. Проверете ја сесијата и обидете се повторно.',
       profileEmailKept: 'Останатите податоци се зачувани. Оваа е-пошта е на друг кандидат, па е-поштата не е сменета.',
       profilePhotoNotSaved: 'Останатите податоци се зачувани. Фотографијата не е зачувана. Обидете се со помала слика.',
+      sessionRequired: 'Вашата сесија заврши. Најавете се повторно за да ги зачувате регистрацијата и документите.',
       emailLabel: 'Е-пошта',
       phoneLabel: 'Телефонски број',
       emergencyHeader: 'Контакт за итни случаи',
@@ -502,6 +508,12 @@ export default function CandidateDashboard() {
     }
     let alive = true;
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        profileDirty.current = false;
+        setAuthenticated(false);
+        setCandidate(null);
+        return;
+      }
       if (event !== 'INITIAL_SESSION' && event !== 'SIGNED_IN') return;
       setTimeout(async () => {
         if (!alive || emailGateListenerPaused() || !session) return;
@@ -717,6 +729,20 @@ export default function CandidateDashboard() {
     reader.readAsDataURL(file);
   };
 
+  const loseCandidateSession = () => {
+    profileDirty.current = false;
+    setAuthenticated(false);
+    setCandidate(null);
+    alert(ct.sessionRequired);
+  };
+
+  const requireCandidateSession = async () => {
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.user) return true;
+    loseCandidateSession();
+    return false;
+  };
+
   const handleDocUpload = async (docIndex: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !candidate) return;
@@ -724,6 +750,7 @@ export default function CandidateDashboard() {
 
     const reader = new FileReader();
     reader.onload = async (e) => {
+      if (!(await requireCandidateSession())) return;
       const fileUrl = e.target?.result as string;
       const payload = { file_url: fileUrl, status: 'uploaded', uploaded_at: new Date().toISOString(), notes: file.name };
       const existing = docRows.find((r) => r.doc_type === docType && ['pending', 'uploaded', 'rerequested', 'rejected'].includes(r.status));
@@ -734,8 +761,13 @@ export default function CandidateDashboard() {
       if (!error) {
         await fetchCandidateData(candidate.id);
         alert(ct.docUploaded);
+      } else if (isPermissionDenied(error)) {
+        loseCandidateSession();
       } else {
-        alert('Hata: ' + error.message);
+        const message = error && typeof error === 'object' && 'message' in error
+          ? String((error as { message?: string }).message || '')
+          : '';
+        alert(message || ct.profileNotSaved);
       }
     };
     reader.readAsDataURL(file);
@@ -755,6 +787,7 @@ export default function CandidateDashboard() {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!candidate?.id) return;
+    if (!(await requireCandidateSession())) return;
 
     let registration;
     let emailUpdate: string | null = null;
@@ -813,6 +846,10 @@ export default function CandidateDashboard() {
     } catch (writeError) {
       setUpdatingProfile(false);
       console.error("Panova HR Log - Veritabanı Kayıt Hatası:", writeError);
+      if (isPermissionDenied(writeError)) {
+        loseCandidateSession();
+        return;
+      }
       alert(explainProfileError(writeError));
       return;
     }
@@ -830,6 +867,11 @@ export default function CandidateDashboard() {
         persisted = { ...persisted, email: savedEmail.email };
       } catch (writeError) {
         console.error("Panova HR Log - E-posta güncellenemedi:", writeError);
+        if (isPermissionDenied(writeError)) {
+          setUpdatingProfile(false);
+          loseCandidateSession();
+          return;
+        }
         const detail = explainProfileError(writeError);
         emailNote = writeError instanceof CandidateProfileError && writeError.code === 'email'
           ? ct.profileEmailKept
@@ -850,6 +892,11 @@ export default function CandidateDashboard() {
         persisted = { ...persisted, photo_url: savedPhoto.photo_url };
       } catch (writeError) {
         console.error("Panova HR Log - Fotoğraf güncellenemedi:", writeError);
+        if (isPermissionDenied(writeError)) {
+          setUpdatingProfile(false);
+          loseCandidateSession();
+          return;
+        }
         photoNote = ct.profilePhotoNotSaved;
       }
     }
