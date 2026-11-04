@@ -203,6 +203,25 @@ export interface Translation {
   empNoRequests?: string;
   empCandidatesPoolTitle?: string;
   empNoCandidates?: string;
+  empCandSearch?: string;
+  empCandExperience?: string;
+  empCandAnyExperience?: string;
+  empCandProfession?: string;
+  empCandAnyProfession?: string;
+  empCandSector?: string;
+  empCandAnySector?: string;
+  empCandCountry?: string;
+  empCandAnyCountry?: string;
+  empCandLanguage?: string;
+  empCandAnyLanguage?: string;
+  empCandShift?: string;
+  empCandAnyShift?: string;
+  empCandShiftYes?: string;
+  empCandShiftNo?: string;
+  empCandClear?: string;
+  empCandShowing?: string;
+  empCandNoMatch?: string;
+  empCandYears?: string;
   empInterviewRequestBtn?: string;
   empShortlistBtn?: string;
   empInterviewsTitle?: string;
@@ -371,6 +390,9 @@ export interface Translation {
   sectorConstruction?: string;
   sectorTrade?: string;
   sectorHR?: string;
+  sectorHospitality?: string;
+  sectorLogistics?: string;
+  sectorManufacturing?: string;
 
   corporateDemandTitle?: string;
   corporateDemandDesc?: string;
@@ -755,6 +777,25 @@ export const translations: Record<Language, Translation> = {
     empNoRequests: 'Kayıtlı personel talebiniz bulunmuyor.',
     empCandidatesPoolTitle: 'Taleplerinize Sunulan Aday Havuzu',
     empNoCandidates: 'Henüz eşleşen aday bulunmuyor.',
+    empCandSearch: 'Ad veya meslek ara',
+    empCandExperience: 'Tecrübe',
+    empCandAnyExperience: 'Tüm tecrübe',
+    empCandProfession: 'Meslek',
+    empCandAnyProfession: 'Tüm meslekler',
+    empCandSector: 'Sektör',
+    empCandAnySector: 'Tüm sektörler',
+    empCandCountry: 'Uyruk / ülke',
+    empCandAnyCountry: 'Tüm ülkeler',
+    empCandLanguage: 'Dil',
+    empCandAnyLanguage: 'Tüm diller',
+    empCandShift: 'Vardiya',
+    empCandAnyShift: 'Fark etmez',
+    empCandShiftYes: 'Vardiyaya uygun',
+    empCandShiftNo: 'Vardiyaya uygun değil',
+    empCandClear: 'Filtreleri temizle',
+    empCandShowing: '{shown} / {total} aday',
+    empCandNoMatch: 'Bu filtrelere uyan aday yok. Filtreleri temizleyerek tüm listeye dönebilirsiniz.',
+    empCandYears: '{years} yıl',
     empInterviewRequestBtn: 'Görüşme İste',
     empShortlistBtn: 'Kısa Listeye Al',
     empInterviewsTitle: 'Planlanan ve Tamamlanan Görüşmeler',
@@ -923,6 +964,9 @@ export const translations: Record<Language, Translation> = {
     sectorConstruction: 'İnşaat ve Yapı',
     sectorTrade: 'Dış Ticaret ve Lojistik',
     sectorHR: 'İnsan Kaynakları',
+    sectorHospitality: 'Turizm ve Otelcilik',
+    sectorLogistics: 'Lojistik',
+    sectorManufacturing: 'Üretim ve Sanayi',
 
     corporateDemandTitle: 'Kurumsal İş Gücü Talep Formu',
     corporateDemandDesc: 'Sektör seçin, aradığınız pozisyonları, tecrübe, dil ve çalışma şartlarını belirleyin.',
@@ -1294,6 +1338,25 @@ export const translations: Record<Language, Translation> = {
     empNoRequests: 'No active workforce requests found.',
     empCandidatesPoolTitle: 'Candidate Pool Offered for Your Demands',
     empNoCandidates: 'No matching candidates found yet.',
+    empCandSearch: 'Search name or profession',
+    empCandExperience: 'Experience',
+    empCandAnyExperience: 'Any experience',
+    empCandProfession: 'Profession',
+    empCandAnyProfession: 'Any profession',
+    empCandSector: 'Sector',
+    empCandAnySector: 'All sectors',
+    empCandCountry: 'Nationality / country',
+    empCandAnyCountry: 'All countries',
+    empCandLanguage: 'Language',
+    empCandAnyLanguage: 'All languages',
+    empCandShift: 'Shift',
+    empCandAnyShift: 'Any',
+    empCandShiftYes: 'Suitable for shifts',
+    empCandShiftNo: 'Not suitable for shifts',
+    empCandClear: 'Clear filters',
+    empCandShowing: '{shown} / {total} candidates',
+    empCandNoMatch: 'No candidates match these filters. Clear the filters to see the full list.',
+    empCandYears: '{years} years',
     empInterviewRequestBtn: 'Request Interview',
     empShortlistBtn: 'Shortlist',
     empInterviewsTitle: 'Scheduled and Completed Interviews',
@@ -1462,6 +1525,9 @@ export const translations: Record<Language, Translation> = {
     sectorConstruction: 'Construction & Building',
     sectorTrade: 'Foreign Trade & Logistics',
     sectorHR: 'Human Resources',
+    sectorHospitality: 'Tourism & Hospitality',
+    sectorLogistics: 'Logistics',
+    sectorManufacturing: 'Manufacturing & Industry',
 
     corporateDemandTitle: 'Corporate Workforce Demand Form',
     corporateDemandDesc: 'Select sector, specify positions, experience, language and working conditions.',
@@ -1833,6 +1899,25 @@ export const translations: Record<Language, Translation> = {
     empNoRequests: 'Nuk u gjet asnjë kërkesë aktive për personel.',
     empCandidatesPoolTitle: 'Grupi i Kandidatëve për Kërkesat Tuaja',
     empNoCandidates: 'Ende nuk ka kandidatë përputhës.',
+    empCandSearch: 'Kërko emrin ose profesionin',
+    empCandExperience: 'Eksperienca',
+    empCandAnyExperience: 'Çdo eksperiencë',
+    empCandProfession: 'Profesioni',
+    empCandAnyProfession: 'Të gjitha profesionet',
+    empCandSector: 'Sektori',
+    empCandAnySector: 'Të gjithë sektorët',
+    empCandCountry: 'Kombësia / vendi',
+    empCandAnyCountry: 'Të gjitha vendet',
+    empCandLanguage: 'Gjuha',
+    empCandAnyLanguage: 'Të gjitha gjuhët',
+    empCandShift: 'Turni',
+    empCandAnyShift: 'Pa rëndësi',
+    empCandShiftYes: 'I përshtatshëm për turne',
+    empCandShiftNo: 'Jo i përshtatshëm për turne',
+    empCandClear: 'Pastro filtrat',
+    empCandShowing: '{shown} / {total} kandidatë',
+    empCandNoMatch: 'Asnjë kandidat nuk përputhet me këto filtra. Pastro filtrat për të parë listën e plotë.',
+    empCandYears: '{years} vite',
     empInterviewRequestBtn: 'Kërko Intervistë',
     empShortlistBtn: 'Shto në Listë të Shkurtër',
     empInterviewsTitle: 'Intervistat e Planifikuara dhe të Përfunduara',
@@ -2001,6 +2086,9 @@ export const translations: Record<Language, Translation> = {
     sectorConstruction: 'Ndërtim dhe Objekte',
     sectorTrade: 'Tregti e Jashtme dhe Logjistikë',
     sectorHR: 'Burimet Njerëzore',
+    sectorHospitality: 'Turizëm dhe Hoteleri',
+    sectorLogistics: 'Logjistikë',
+    sectorManufacturing: 'Prodhim dhe Industri',
 
     corporateDemandTitle: 'Formulari i Kërkesës për Fuqi Punëtore Korporative',
     corporateDemandDesc: 'Zgjidhni sektorin, pozicionet, eksperiencën, gjuhën dhe kushtet e punës.',
@@ -2441,6 +2529,25 @@ export const translations: Record<Language, Translation> = {
     empNoRequests: 'لا توجد طلبات قوى عاملة نشطة.',
     empCandidatesPoolTitle: 'قائمة المرشحين المقدمة لطلباتك',
     empNoCandidates: 'لا يوجد مرشحون مطابقون حتى الآن.',
+    empCandSearch: 'ابحث بالاسم أو المهنة',
+    empCandExperience: 'الخبرة',
+    empCandAnyExperience: 'أي خبرة',
+    empCandProfession: 'المهنة',
+    empCandAnyProfession: 'كل المهن',
+    empCandSector: 'القطاع',
+    empCandAnySector: 'كل القطاعات',
+    empCandCountry: 'الجنسية / الدولة',
+    empCandAnyCountry: 'كل الدول',
+    empCandLanguage: 'اللغة',
+    empCandAnyLanguage: 'كل اللغات',
+    empCandShift: 'نوبات العمل',
+    empCandAnyShift: 'الكل',
+    empCandShiftYes: 'مناسب للنوبات',
+    empCandShiftNo: 'غير مناسب للنوبات',
+    empCandClear: 'مسح عوامل التصفية',
+    empCandShowing: '{shown} / {total} مرشح',
+    empCandNoMatch: 'لا يوجد مرشحون يطابقون عوامل التصفية. امسحها لعرض القائمة كاملة.',
+    empCandYears: '{years} سنوات',
     empInterviewRequestBtn: 'طلب مقابلة',
     empShortlistBtn: 'إضافة للقائمة المختصرة',
     empInterviewsTitle: 'المقابلات المجدولة والمكتملة',
@@ -2600,6 +2707,9 @@ export const translations: Record<Language, Translation> = {
     sectorConstruction: 'البناء والتشييد',
     sectorTrade: 'التجارة الخارجية والخدمات اللوجستية',
     sectorHR: 'الموارد البشرية',
+    sectorHospitality: 'السياحة والضيافة',
+    sectorLogistics: 'الخدمات اللوجستية',
+    sectorManufacturing: 'التصنيع والصناعة',
     colPosSecTitle: 'المنصب / القطاع',
 
     verifyEmailTitle: 'تحقق من بريدك الوارد',
@@ -2919,6 +3029,25 @@ export const translations: Record<Language, Translation> = {
     empNoRequests: 'Нема активни барања за работна сила.',
     empCandidatesPoolTitle: 'База на кандидати понудена за вашите барања',
     empNoCandidates: 'Сè уште нема соодветни кандидати.',
+    empCandSearch: 'Пребарај име или професија',
+    empCandExperience: 'Искуство',
+    empCandAnyExperience: 'Секое искуство',
+    empCandProfession: 'Професија',
+    empCandAnyProfession: 'Сите професии',
+    empCandSector: 'Сектор',
+    empCandAnySector: 'Сите сектори',
+    empCandCountry: 'Државјанство / држава',
+    empCandAnyCountry: 'Сите држави',
+    empCandLanguage: 'Јазик',
+    empCandAnyLanguage: 'Сите јазици',
+    empCandShift: 'Смени',
+    empCandAnyShift: 'Сите',
+    empCandShiftYes: 'Погоден за смени',
+    empCandShiftNo: 'Не е погоден за смени',
+    empCandClear: 'Исчисти филтри',
+    empCandShowing: '{shown} / {total} кандидати',
+    empCandNoMatch: 'Ниту еден кандидат не одговара на овие филтри. Исчистете ги филтрите за целата листа.',
+    empCandYears: '{years} години',
     empInterviewRequestBtn: 'Побарај интервју',
     empShortlistBtn: 'На кратка листа',
     empInterviewsTitle: 'Закажани и завршени интервјуа',
@@ -3079,6 +3208,9 @@ export const translations: Record<Language, Translation> = {
     sectorConstruction: 'Градежништво',
     sectorTrade: 'Надворешна трговија и логистика',
     sectorHR: 'Човечки ресурси',
+    sectorHospitality: 'Туризам и хотелиерство',
+    sectorLogistics: 'Логистика',
+    sectorManufacturing: 'Производство и индустрија',
     corporateDemandTitle: 'Образец за корпоративно барање на работна сила',
     corporateDemandDesc: 'Изберете сектор и наведете позиции, искуство, јазик и услови за работа.',
     totalActiveFiles: 'Вкупно активни досиеја',
