@@ -18,6 +18,14 @@ import { benefitPhrase, buildEmployerDemandInsert, displayedRequestSalary, type 
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
+import EmployerCandidateBrowser from './components/EmployerCandidateBrowser';
+import {
+  EMPLOYER_CANDIDATE_BROWSE_COLUMNS,
+  isMissingBrowseRpc,
+  sectorFilterLabel,
+  toEmployerCandidate,
+  type EmployerCandidate,
+} from '@/lib/employerCandidateFilters';
 
 function EmployerPortalInner() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
@@ -154,11 +162,26 @@ function EmployerPortalInner() {
       ]);
     }
 
-    const { data: candData } = await supabase.from('job_candidates').select('*').order('created_at', { ascending: false });
-    if (candData) {
-      setCandidates(candData);
-      setSelectedCandidates(candData.filter((c: any) => c.status === 'approved' || c.status === 'selected' || c.is_selected));
+    const { data: pooled, error: poolError } = await supabase.rpc('employer_browse_candidates');
+    let candData: unknown[] | null = pooled;
+    if (poolError) {
+      if (isMissingBrowseRpc(poolError)) {
+        const { data } = await supabase
+          .from('job_candidates')
+          .select(EMPLOYER_CANDIDATE_BROWSE_COLUMNS)
+          .is('archived_at', null)
+          .order('created_at', { ascending: false });
+        candData = data;
+      } else {
+        console.error('employer candidate browse failed', poolError.code || poolError.message);
+        candData = [];
+      }
     }
+    const rows = (candData ?? [])
+      .map((row) => toEmployerCandidate((row ?? {}) as Record<string, unknown>))
+      .filter((row) => row.id);
+    setCandidates(rows);
+    setSelectedCandidates(rows.filter((c) => c.status === 'approved' || c.status === 'selected'));
 
     const { data: intData } = await supabase.from('interviews').select('*').order('created_at', { ascending: false });
     if (intData && intData.length > 0) {
@@ -750,38 +773,47 @@ function EmployerPortalInner() {
 
         {/* 3. ADAYLAR */}
         {activeTab === 'candidates' && (
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">{t.candidatesTitle}</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm text-slate-700">
-                <thead className="bg-slate-50 text-slate-900 font-bold border-b">
-                  <tr>
-                    <th className="p-4">{t.fullNameCol}</th>
-                    <th className="p-4">{t.professionCol}</th>
-                    <th className="p-4">{t.nationalityCol}</th>
-                    <th className="p-4">{t.actionCol}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {candidates.map((cand) => (
-                    <tr key={cand.id} className="hover:bg-slate-50/50">
-                      <td className="p-4 font-bold text-slate-950">{cand.full_name || cand.name}</td>
-                      <td className="p-4">{cand.profession || ui.specialist} ({cand.sector || ui.general})</td>
-                      <td className="p-4">{cand.nationality || cand.country}</td>
-                      <td className="p-4 flex items-center gap-2">
-                        <button onClick={() => handleRequestInterview(cand)} className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-100 cursor-pointer">
-                          {t.interviewReqBtn}
-                        </button>
-                        <button onClick={() => handleSelectCandidate(cand)} className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-100 cursor-pointer">
-                          {t.selectBtn}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <EmployerCandidateBrowser
+            candidates={candidates as EmployerCandidate[]}
+            labels={{
+              title: t.candidatesTitle || '',
+              search: t.empCandSearch || '',
+              experience: t.empCandExperience || '',
+              anyExperience: t.empCandAnyExperience || '',
+              experienceNone: t.expOpt1 || '',
+              experience1to3: t.expOpt2 || '',
+              experience3to5: t.expOpt3 || '',
+              experience5plus: t.expOpt4 || '',
+              profession: t.empCandProfession || '',
+              anyProfession: t.empCandAnyProfession || '',
+              sector: t.empCandSector || '',
+              anySector: t.empCandAnySector || '',
+              country: t.empCandCountry || '',
+              anyCountry: t.empCandAnyCountry || '',
+              language: t.empCandLanguage || '',
+              anyLanguage: t.empCandAnyLanguage || '',
+              shift: t.empCandShift || '',
+              anyShift: t.empCandAnyShift || '',
+              shiftYes: t.empCandShiftYes || '',
+              shiftNo: t.empCandShiftNo || '',
+              clear: t.empCandClear || '',
+              showing: t.empCandShowing || '{shown} / {total}',
+              empty: t.empNoCandidates || '',
+              noMatch: t.empCandNoMatch || '',
+              years: t.empCandYears || '{years}',
+              fullName: t.fullNameCol || '',
+              professionCol: t.professionCol || '',
+              nationality: t.nationalityCol || '',
+              action: t.actionCol || '',
+              interview: t.interviewReqBtn || '',
+              select: t.selectBtn || '',
+              specialist: ui.specialist,
+              general: ui.general,
+            }}
+            sectorLabel={(sector) => sectorFilterLabel(sector, t)}
+            onInterview={handleRequestInterview}
+            onSelect={handleSelectCandidate}
+          />
         )}
 
         {/* 4. GÖRÜŞMELER (DİNAMİK ÇEVİRİ DESTEKLİ) */}

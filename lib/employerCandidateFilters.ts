@@ -1,0 +1,161 @@
+import type { Translation } from './dictionary';
+
+/**
+ * Fields an employer may use to narrow the candidates already linked to their
+ * requests. Contact and identity columns stay off this shape on purpose.
+ */
+export type EmployerCandidate = {
+  id: string;
+  full_name: string | null;
+  profession: string | null;
+  sector: string | null;
+  nationality: string | null;
+  city: string | null;
+  experience_years: number | null;
+  language_skills: string | null;
+  shift_suitable: boolean | null;
+  status: string | null;
+  travel_status: string | null;
+  created_at: string | null;
+  active_request_id: string | null;
+};
+
+export const EMPLOYER_CANDIDATE_BROWSE_COLUMNS =
+  'id, full_name, profession, sector, nationality, city, experience_years, language_skills, shift_suitable, status, travel_status, created_at, active_request_id';
+
+export const EXPERIENCE_BANDS = ['any', '0', '1-3', '3-5', '5+'] as const;
+export type ExperienceBand = (typeof EXPERIENCE_BANDS)[number];
+
+export const SHIFT_FILTERS = ['any', 'yes', 'no'] as const;
+export type ShiftFilter = (typeof SHIFT_FILTERS)[number];
+
+export type EmployerCandidateFilters = {
+  query: string;
+  experience: ExperienceBand;
+  profession: string;
+  sector: string;
+  nationality: string;
+  language: string;
+  shift: ShiftFilter;
+};
+
+export const EMPTY_EMPLOYER_CANDIDATE_FILTERS: EmployerCandidateFilters = {
+  query: '',
+  experience: 'any',
+  profession: 'all',
+  sector: 'all',
+  nationality: 'all',
+  language: 'all',
+  shift: 'any',
+};
+
+const SECTOR_LABEL_KEY: Record<string, keyof Translation> = {
+  agriculture: 'sectorAgriculture',
+  construction: 'sectorConstruction',
+  trade: 'sectorTrade',
+  hr: 'sectorHR',
+  hospitality: 'sectorHospitality',
+  logistics: 'sectorLogistics',
+  manufacturing: 'sectorManufacturing',
+};
+
+export function normalizeFilterText(value: string | null | undefined): string {
+  return (value ?? '').trim().toLocaleLowerCase('tr-TR');
+}
+
+export function isMissingBrowseRpc(error: { code?: string; message?: string } | null | undefined): boolean {
+  if (!error) return false;
+  const message = `${error.code || ''} ${error.message || ''}`;
+  return error.code === 'PGRST202' || /employer_browse_candidates|schema cache|could not find the function/i.test(message);
+}
+
+function text(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+/** Copy only the browse columns. Extra identity fields on the source row are dropped. */
+export function toEmployerCandidate(row: Record<string, unknown>): EmployerCandidate {
+  const years = row.experience_years;
+  const parsedYears = years == null || years === '' ? null : Number(years);
+  return {
+    id: text(row.id) ?? '',
+    full_name: text(row.full_name) ?? text(row.name),
+    profession: text(row.profession),
+    sector: text(row.sector),
+    nationality: text(row.nationality) ?? text(row.country),
+    city: text(row.city),
+    experience_years: parsedYears == null || Number.isNaN(parsedYears) ? null : parsedYears,
+    language_skills: text(row.language_skills),
+    shift_suitable: typeof row.shift_suitable === 'boolean' ? row.shift_suitable : null,
+    status: text(row.status),
+    travel_status: text(row.travel_status),
+    created_at: text(row.created_at),
+    active_request_id: text(row.active_request_id),
+  };
+}
+
+export function sectorFilterLabel(sector: string, t: Pick<Translation, keyof Translation>): string {
+  const key = SECTOR_LABEL_KEY[normalizeFilterText(sector)];
+  const label = key ? t[key] : undefined;
+  return typeof label === 'string' && label.trim() ? label : sector;
+}
+
+export function isEmployerCandidateFilterActive(filters: EmployerCandidateFilters): boolean {
+  return normalizeFilterText(filters.query) !== ''
+    || filters.experience !== 'any'
+    || filters.profession !== 'all'
+    || filters.sector !== 'all'
+    || filters.nationality !== 'all'
+    || filters.language !== 'all'
+    || filters.shift !== 'any';
+}
+
+/** Years are inclusive on both ends of a band. Missing years count as none. */
+export function matchesExperience(years: number | null | undefined, band: ExperienceBand): boolean {
+  if (band === 'any') return true;
+  const n = years == null || Number.isNaN(Number(years)) ? 0 : Number(years);
+  if (band === '0') return n <= 0;
+  if (band === '1-3') return n >= 1 && n <= 3;
+  if (band === '3-5') return n >= 3 && n <= 5;
+  return n >= 5;
+}
+
+export function uniqueFilterOptions(values: Array<string | null | undefined>): { value: string; label: string }[] {
+  const seen = new Map<string, string>();
+  for (const value of values) {
+    const label = (value ?? '').trim();
+    if (!label) continue;
+    const key = normalizeFilterText(label);
+    if (!seen.has(key)) seen.set(key, label);
+  }
+  return [...seen.entries()]
+    .map(([value, label]) => ({ value, label }))
+    .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
+}
+
+function same(value: string | null | undefined, selected: string): boolean {
+  return selected === 'all' || normalizeFilterText(value) === selected;
+}
+
+export function filterEmployerCandidates<T extends EmployerCandidate>(
+  rows: readonly T[],
+  filters: EmployerCandidateFilters,
+): T[] {
+  const query = normalizeFilterText(filters.query);
+  return rows.filter((row) => {
+    if (query) {
+      const haystack = `${normalizeFilterText(row.full_name)} ${normalizeFilterText(row.profession)}`;
+      if (!haystack.includes(query)) return false;
+    }
+    if (!matchesExperience(row.experience_years, filters.experience)) return false;
+    if (!same(row.profession, filters.profession)) return false;
+    if (!same(row.sector, filters.sector)) return false;
+    if (!same(row.nationality, filters.nationality)) return false;
+    if (!same(row.language_skills, filters.language)) return false;
+    if (filters.shift === 'yes' && row.shift_suitable !== true) return false;
+    if (filters.shift === 'no' && row.shift_suitable !== false) return false;
+    return true;
+  });
+}
