@@ -27,13 +27,14 @@ import {
 import { 
   User, CheckCircle2, LogOut, Lock, Camera, 
   FileText, Eye, X, Briefcase, Calendar, 
-  Plane, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, ShieldAlert, ShieldCheck, AlertCircle
+  Plane, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, ShieldAlert, ShieldCheck, AlertCircle, BookOpen
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations, type Translation } from '@/lib/dictionary';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
+import { guideNavLabel } from '@/lib/guides-nav';
 
 
 // Aday belge slotları -> candidate_documents.doc_type
@@ -1167,6 +1168,9 @@ export default function CandidateDashboard() {
           <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             💬 {t.support} ({supportTickets.length})
           </button>
+          <Link href="/guides" className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition shrink-0 bg-white border text-slate-700 hover:bg-slate-50">
+            <BookOpen className="w-3.5 h-3.5" aria-hidden /> {guideNavLabel[currentLang]}
+          </Link>
         </div>
 
         {/* Profil Sekmesi */}

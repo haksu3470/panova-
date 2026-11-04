@@ -19,7 +19,7 @@ import {
 } from '@/lib/emailVerification';
 import { 
   Lock, ShieldCheck, ArrowLeft, Building2, Users, FileText, 
-  UserCheck, CheckSquare, History, ShieldAlert, Key, RefreshCw, Trash2 
+  UserCheck, CheckSquare, History, ShieldAlert, Key, RefreshCw, Trash2, BookOpen
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
@@ -28,6 +28,7 @@ import { benefitPhrase, displayedRequestSalary } from '@/lib/workforceRequest';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
+import { guideNavLabel } from '@/lib/guides-nav';
 
 // Modüler Bileşenlerimiz (Kök dizindeki components klasörüne göre göreceli yol)
 import CandidatesTab from '../../components/portal/CandidatesTab';
@@ -645,6 +646,9 @@ export default function PortalPage() {
           <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             💬 {t.supportTab} ({supportTickets.length})
           </button>
+          <Link href="/guides" className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition text-start leading-snug whitespace-normal bg-white border text-slate-700 hover:bg-slate-50">
+            <BookOpen className="w-3.5 h-3.5" aria-hidden /> {guideNavLabel[currentLang]}
+          </Link>
         </div>
 
         {activeTab === 'overview' && (
