@@ -2,6 +2,7 @@
 
 import AuthGuard from '@/components/auth/AuthGuard';
 import DocumentStatusPanel from '@/components/portal/DocumentStatusPanel';
+import CandidateYouTubeEditor from '@/components/portal/CandidateYouTubeEditor';
 import InterviewOfferPanel from '@/components/portal/InterviewOfferPanel';
 import PlacementPanel from '@/components/portal/PlacementPanel';
 
@@ -15,6 +16,13 @@ import { Language, translations } from '@/lib/dictionary';
 import { portalUi } from '@/lib/portal-ui-copy';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
+import {
+  YouTubeUrlError,
+  canManageCandidateVideo,
+  candidateVideoWrite,
+  isMissingVideoPermissionRpc,
+  youtubeSaveFailure,
+} from '@/lib/youtube';
 
 interface CandidateDocument {
   id: string;
@@ -89,7 +97,7 @@ function CandidateDetailPageInner() {
   }, [candidateId]);
 
   const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
-  const [previewVideo, setPreviewVideo] = useState<string | null>(null);
+  const [canEditVideo, setCanEditVideo] = useState(false);
 
   const [notifTitle, setNotifTitle] = useState('');
   const [notifMessage, setNotifMessage] = useState('');
@@ -102,6 +110,29 @@ function CandidateDetailPageInner() {
   useEffect(() => {
     fetchCandidateDetail();
   }, [candidateId]);
+
+  useEffect(() => {
+    let alive = true;
+    const loadPermission = async () => {
+      const { data, error } = await supabase.rpc('can_manage_candidate_video');
+      if (!alive) return;
+      if (!error) {
+        setCanEditVideo(data === true);
+        return;
+      }
+      if (!isMissingVideoPermissionRpc(error)) return;
+      const { data: session } = await supabase.auth.getSession();
+      const uid = session.session?.user.id;
+      if (!uid) return;
+      const { data: profile } = await supabase.from('profiles').select('staff_role').eq('id', uid).maybeSingle();
+      if (!alive) return;
+      setCanEditVideo(canManageCandidateVideo(profile?.staff_role));
+    };
+    loadPermission();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const fetchCandidateDetail = async () => {
     setLoading(true);
@@ -212,8 +243,6 @@ function CandidateDetailPageInner() {
   };
 
   const handleSaveDetail = async () => {
-    setSaving(true);
-
     let existingMeta = {};
     try {
       const parsed = candidate?.documents_json ? JSON.parse(candidate.documents_json) : {};
@@ -229,34 +258,55 @@ function CandidateDetailPageInner() {
       ...existingMeta
     });
 
+    const payload: Record<string, unknown> = {
+      status: status,
+      photo_url: candidatePhoto,
+      phone: candidatePhone,
+      email: candidateEmail,
+      notes: internalNotes,
+      certificate_no: certificateNo,
+      issuing_body: issuingBody,
+      documents_json: payloadDocumentsJson,
+      travel_status: travelStatus,
+      flight_date: flightDate,
+      flight_number: flightNumber,
+      departure_city: departureCity,
+      arrival_city: arrivalCity,
+      pnr_code: pnrCode,
+      accommodation_details: accommodationDetails,
+    };
+
+    if (canEditVideo) {
+      try {
+        const videos = candidateVideoWrite({ videoUrl1, videoUrl2, videoUrl3 });
+        Object.assign(payload, videos);
+        setVideoUrl1(videos.video_url_1 ?? '');
+        setVideoUrl2(videos.video_url_2 ?? '');
+        setVideoUrl3(videos.video_url_3 ?? '');
+      } catch (error) {
+        if (error instanceof YouTubeUrlError) {
+          alert(t.youtubeVideoInvalid);
+          return;
+        }
+        throw error;
+      }
+    }
+
+    setSaving(true);
     try {
-      await candidateService.updateCandidateDetail(candidateId, {
-        status: status,
-        photo_url: candidatePhoto,
-        phone: candidatePhone,
-        email: candidateEmail,
-        notes: internalNotes,
-        certificate_no: certificateNo,
-        issuing_body: issuingBody,
-        video_url: videoUrl1,
-        video_url_1: videoUrl1,
-        video_url_2: videoUrl2,
-        video_url_3: videoUrl3,
-        documents_json: payloadDocumentsJson,
-        travel_status: travelStatus,
-        flight_date: flightDate,
-        flight_number: flightNumber,
-        departure_city: departureCity,
-        arrival_city: arrivalCity,
-        pnr_code: pnrCode,
-        accommodation_details: accommodationDetails,
-      });
+      await candidateService.updateCandidateDetail(candidateId, payload);
 
       setSaving(false);
       alert(t.savedSuccess);
     } catch (error: any) {
       setSaving(false);
-      alert(`${ui.errorPrefix} ${error.message}`);
+      const failure = youtubeSaveFailure(error?.message);
+      const detail = failure === 'forbidden'
+        ? t.youtubeVideoReadOnly
+        : failure === 'invalid'
+          ? t.youtubeVideoInvalid
+          : error.message;
+      alert(`${ui.errorPrefix} ${detail}`);
     }
   };
 
@@ -566,41 +616,31 @@ function CandidateDetailPageInner() {
               <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
                 <Award className="w-5 h-5 text-amber-500" /> {t.professionalEvaluationCertificate}
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-                  <span className="font-bold text-slate-700 uppercase block">{t.certificateInfo}</span>
-                  <input type="text" value={certificateNo} onChange={(e) => setCertificateNo(e.target.value)} placeholder={ui.certNoPh} className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-900 outline-none" />
-                  <input type="text" value={issuingBody} onChange={(e) => setIssuingBody(e.target.value)} placeholder={ui.issuerPh} className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-slate-900 outline-none" />
-                </div>
-
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                  <span className="font-extrabold text-slate-900 uppercase block text-[11px] text-emerald-800">📹 {t.corporateYouTubeVideos}</span>
-                  
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-700">{t.video1GenIntro}</label>
-                    <div className="flex gap-1.5">
-                      <input type="url" value={videoUrl1} onChange={(e) => setVideoUrl1(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-medium text-slate-900 outline-none" />
-                      {videoUrl1 && <button type="button" onClick={() => setPreviewVideo(videoUrl1)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] cursor-pointer">{t.previewBtn}</button>}
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-700">{t.video2Skill}</label>
-                    <div className="flex gap-1.5">
-                      <input type="url" value={videoUrl2} onChange={(e) => setVideoUrl2(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-medium text-slate-900 outline-none" />
-                      {videoUrl2 && <button type="button" onClick={() => setPreviewVideo(videoUrl2)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] cursor-pointer">{t.previewBtn}</button>}
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-700">{t.video3Field}</label>
-                    <div className="flex gap-1.5">
-                      <input type="url" value={videoUrl3} onChange={(e) => setVideoUrl3(e.target.value)} placeholder="https://youtube.com/..." className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-medium text-slate-900 outline-none" />
-                      {videoUrl3 && <button type="button" onClick={() => setPreviewVideo(videoUrl3)} className="bg-emerald-100 text-[#2e7d32] px-2.5 py-1.5 rounded-lg font-bold text-[11px] cursor-pointer">{t.previewBtn}</button>}
-                    </div>
-                  </div>
-                </div>
+              <div className="max-w-xl space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs">
+                <span className="block font-bold uppercase text-slate-700">{t.certificateInfo}</span>
+                <input type="text" value={certificateNo} onChange={(e) => setCertificateNo(e.target.value)} placeholder={ui.certNoPh} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-bold text-slate-900 outline-none" />
+                <input type="text" value={issuingBody} onChange={(e) => setIssuingBody(e.target.value)} placeholder={ui.issuerPh} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-bold text-slate-900 outline-none" />
               </div>
+              <CandidateYouTubeEditor
+                canEdit={canEditVideo}
+                slots={[
+                  { id: 'candidate-video-1', label: t.video1GenIntro || '', value: videoUrl1, onChange: setVideoUrl1 },
+                  { id: 'candidate-video-2', label: t.video2Skill || '', value: videoUrl2, onChange: setVideoUrl2 },
+                  { id: 'candidate-video-3', label: t.video3Field || '', value: videoUrl3, onChange: setVideoUrl3 },
+                ]}
+                labels={{
+                  title: t.youtubeVideoTitle || t.corporateYouTubeVideos || '',
+                  empty: t.youtubeVideoEmpty || '',
+                  watch: t.youtubeVideoWatch || t.watchVideo,
+                  open: t.youtubeVideoOpen || '',
+                  field: t.youtubeVideoLabel || '',
+                  clear: t.youtubeVideoClear || '',
+                  invalid: t.youtubeVideoInvalid || '',
+                  supervisorNote: t.youtubeVideoSupervisorNote || '',
+                  readOnly: t.youtubeVideoReadOnly || '',
+                }}
+                preview={{ video_url_1: videoUrl1, video_url_2: videoUrl2, video_url_3: videoUrl3 }}
+              />
             </div>
 
             {/* İç Notlar */}
@@ -728,24 +768,6 @@ function CandidateDetailPageInner() {
         </div>
       )}
 
-      {/* Video Önizleme Modal */}
-      {previewVideo && (
-        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-            <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
-              <h3 className="font-bold text-sm">{t.workVideoPreview}</h3>
-              <button onClick={() => setPreviewVideo(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300 cursor-pointer hover:bg-slate-700"><X className="w-5 h-5" /></button>
-            </div>
-            <div className="p-4 flex-1 overflow-auto flex justify-center items-center bg-slate-100">
-              {previewVideo.includes('youtube.com') || previewVideo.includes('youtu.be') ? (
-                <iframe src={previewVideo.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')} className="w-full h-[70vh] rounded-xl border bg-black" title="Video" allowFullScreen />
-              ) : (
-                <video src={previewVideo} controls className="w-full h-[70vh] rounded-xl border bg-black" />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

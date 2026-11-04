@@ -18,10 +18,14 @@ export type EmployerCandidate = {
   travel_status: string | null;
   created_at: string | null;
   active_request_id: string | null;
+  video_url: string | null;
+  video_url_1: string | null;
+  video_url_2: string | null;
+  video_url_3: string | null;
 };
 
 export const EMPLOYER_CANDIDATE_BROWSE_COLUMNS =
-  'id, full_name, profession, sector, nationality, city, experience_years, language_skills, shift_suitable, status, travel_status, created_at, active_request_id';
+  'id, full_name, profession, sector, nationality, city, experience_years, language_skills, shift_suitable, status, travel_status, created_at, active_request_id, video_url, video_url_1, video_url_2, video_url_3';
 
 export const EXPERIENCE_BANDS = ['any', '0', '1-3', '3-5', '5+'] as const;
 export type ExperienceBand = (typeof EXPERIENCE_BANDS)[number];
@@ -93,6 +97,10 @@ export function toEmployerCandidate(row: Record<string, unknown>): EmployerCandi
     travel_status: text(row.travel_status),
     created_at: text(row.created_at),
     active_request_id: text(row.active_request_id),
+    video_url: text(row.video_url),
+    video_url_1: text(row.video_url_1),
+    video_url_2: text(row.video_url_2),
+    video_url_3: text(row.video_url_3),
   };
 }
 

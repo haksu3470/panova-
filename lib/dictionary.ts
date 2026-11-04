@@ -172,6 +172,15 @@ export interface Translation {
   video2Skill?: string;
   video3Field?: string;
   previewBtn?: string;
+  youtubeVideoTitle?: string;
+  youtubeVideoEmpty?: string;
+  youtubeVideoWatch?: string;
+  youtubeVideoOpen?: string;
+  youtubeVideoClear?: string;
+  youtubeVideoInvalid?: string;
+  youtubeVideoSupervisorNote?: string;
+  youtubeVideoReadOnly?: string;
+  youtubeVideoLabel?: string;
 
   signInMenu?: string;
   signUpMenu?: string;
@@ -653,6 +662,15 @@ export const translations: Record<Language, Translation> = {
     video2Skill: '2. Video: Mesleki Beceri',
     video3Field: '3. Video: Saha Mülakatı',
     previewBtn: 'Önizle',
+    youtubeVideoTitle: 'YouTube videosu',
+    youtubeVideoEmpty: 'Bu aday için henüz YouTube videosu eklenmedi.',
+    youtubeVideoWatch: 'YouTube’da izle',
+    youtubeVideoOpen: 'Video bağlantısını aç',
+    youtubeVideoClear: 'Temizle',
+    youtubeVideoInvalid: 'Geçerli bir YouTube bağlantısı girin: youtube.com/watch, youtu.be, shorts veya embed.',
+    youtubeVideoSupervisorNote: 'Yalnızca bölge ve ülke sorumluları bu videoyu değiştirebilir. Bağlantı Panova YouTube kanalından olmalıdır (panova@panovagroup.org).',
+    youtubeVideoReadOnly: 'Bu videoyu yalnızca bölge ve ülke sorumluları düzenleyebilir.',
+    youtubeVideoLabel: 'YouTube video bağlantısı',
     companies: {
       hr: {
         name: 'Panova HR',
@@ -1214,6 +1232,15 @@ export const translations: Record<Language, Translation> = {
     video2Skill: '2. Video: Professional Skill',
     video3Field: '3. Video: Field Interview',
     previewBtn: 'Preview',
+    youtubeVideoTitle: 'YouTube video',
+    youtubeVideoEmpty: 'No YouTube video has been added for this candidate yet.',
+    youtubeVideoWatch: 'Watch on YouTube',
+    youtubeVideoOpen: 'Open the video link',
+    youtubeVideoClear: 'Clear',
+    youtubeVideoInvalid: 'Enter a valid YouTube link: youtube.com/watch, youtu.be, shorts, or embed.',
+    youtubeVideoSupervisorNote: 'Only region and country supervisors can change this video. Use a link from the Panova YouTube channel (panova@panovagroup.org).',
+    youtubeVideoReadOnly: 'Only region and country supervisors can edit this video.',
+    youtubeVideoLabel: 'YouTube video link',
     companies: {
       hr: {
         name: 'Panova HR',
@@ -1776,6 +1803,15 @@ export const translations: Record<Language, Translation> = {
     video2Skill: '2. Video: Aftësia Profesionale',
     video3Field: '3. Video: Intervista në Terren',
     previewBtn: 'Parapamje',
+    youtubeVideoTitle: 'Video YouTube',
+    youtubeVideoEmpty: 'Për këtë kandidat ende nuk është shtuar një video YouTube.',
+    youtubeVideoWatch: 'Shiko në YouTube',
+    youtubeVideoOpen: 'Hap lidhjen e videos',
+    youtubeVideoClear: 'Pastro',
+    youtubeVideoInvalid: 'Vendosni një lidhje të vlefshme YouTube: youtube.com/watch, youtu.be, shorts ose embed.',
+    youtubeVideoSupervisorNote: 'Vetëm mbikëqyrësit e rajonit dhe të vendit mund ta ndryshojnë këtë video. Përdorni një lidhje nga kanali YouTube i Panova (panova@panovagroup.org).',
+    youtubeVideoReadOnly: 'Këtë video mund ta ndryshojnë vetëm mbikëqyrësit e rajonit dhe të vendit.',
+    youtubeVideoLabel: 'Lidhja e videos në YouTube',
     companies: {
       hr: {
         name: 'Panova HR',
@@ -2336,6 +2372,15 @@ export const translations: Record<Language, Translation> = {
     video2Skill: '2. فيديو: المهارة المهنية',
     video3Field: '3. فيديو: المقابلة الميدانية',
     previewBtn: 'معاينة',
+    youtubeVideoTitle: 'فيديو يوتيوب',
+    youtubeVideoEmpty: 'لم يُضف فيديو يوتيوب لهذا المرشح بعد.',
+    youtubeVideoWatch: 'المشاهدة على يوتيوب',
+    youtubeVideoOpen: 'افتح رابط الفيديو',
+    youtubeVideoClear: 'مسح',
+    youtubeVideoInvalid: 'أدخل رابط يوتيوب صالحاً: youtube.com/watch أو youtu.be أو shorts أو embed.',
+    youtubeVideoSupervisorNote: 'يمكن لمشرفي المنطقة والبلد فقط تغيير هذا الفيديو. استخدم رابطاً من قناة يوتيوب بانوفا (panova@panovagroup.org).',
+    youtubeVideoReadOnly: 'يمكن لمشرفي المنطقة والبلد فقط تعديل هذا الفيديو.',
+    youtubeVideoLabel: 'رابط فيديو يوتيوب',
     companies: {
       hr: {
         name: 'Panova HR',
@@ -2887,6 +2932,15 @@ export const translations: Record<Language, Translation> = {
     video2Skill: '2. Видео: Професионална вештина',
     video3Field: '3. Видео: Теренско интервју',
     previewBtn: 'Преглед',
+    youtubeVideoTitle: 'YouTube видео',
+    youtubeVideoEmpty: 'За овој кандидат сè уште нема додадено YouTube видео.',
+    youtubeVideoWatch: 'Гледај на YouTube',
+    youtubeVideoOpen: 'Отвори го линкот на видеото',
+    youtubeVideoClear: 'Избриши',
+    youtubeVideoInvalid: 'Внесете валиден YouTube линк: youtube.com/watch, youtu.be, shorts или embed.',
+    youtubeVideoSupervisorNote: 'Само регионалните и државните одговорни можат да го менуваат ова видео. Користете линк од YouTube каналот на Panova (panova@panovagroup.org).',
+    youtubeVideoReadOnly: 'Ова видео можат да го уредуваат само регионалните и државните одговорни.',
+    youtubeVideoLabel: 'Линк до YouTube видео',
     companies: {
       hr: {
         name: 'Panova HR',
