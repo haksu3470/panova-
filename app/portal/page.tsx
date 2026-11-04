@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ensureStaff, signOut } from '@/lib/auth';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
+import ForgotPasswordPanel, { ForgotPasswordLink } from '@/components/auth/ForgotPasswordPanel';
 import {
   beginPasswordSignup,
   emailGateListenerPaused,
@@ -61,7 +62,7 @@ export default function PortalPage() {
   };
 
   const [authenticated, setAuthenticated] = useState(false);
-  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify'>('signin');
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify' | 'forgot'>('signin');
   const [verifyEmail, setVerifyEmail] = useState('');
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
@@ -475,7 +476,7 @@ export default function PortalPage() {
             <div className="w-14 h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
               <Lock className="w-7 h-7" />
             </div>
-            {authMode !== 'verify' && <>
+            {(authMode === 'signin' || authMode === 'signup') && <>
             <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1">{authMode === 'signup' ? t.staffSignupTitle : t.portalTitle}</h1>
             <p className="text-slate-500 text-xs sm:text-sm mb-6">{authMode === 'signup' ? t.staffSignupSub : t.portalSub}</p>
             </>}
@@ -496,6 +497,13 @@ export default function PortalPage() {
                 <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-slate-500 cursor-pointer">{t.verifyEmailBack}</button>
                 <OAuthButtons redirectPath="/portal" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} />
               </div>
+            ) : authMode === 'forgot' ? (
+              <ForgotPasswordPanel
+                lang={currentLang}
+                initialEmail={username}
+                audience="portal"
+                onBack={() => setAuthMode('signin')}
+              />
             ) : authMode === 'signup' ? (
               <form onSubmit={handleStaffSignup} className="space-y-4 text-left rtl:text-right">
                 <div>
@@ -539,6 +547,7 @@ export default function PortalPage() {
                   placeholder="••••••••"
                 />
               </div>
+              <ForgotPasswordLink label={t.forgotPassword || ''} onClick={() => setAuthMode('forgot')} />
               <button
                 type="submit"
                 disabled={loading}
