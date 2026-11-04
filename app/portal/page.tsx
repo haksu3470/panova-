@@ -33,7 +33,7 @@ import { guideNavLabel } from '@/lib/guides-nav';
 // Modüler Bileşenlerimiz (Kök dizindeki components klasörüne göre göreceli yol)
 import CandidatesTab from '../../components/portal/CandidatesTab';
 import { ReferralCodeChip } from '../../components/portal/ReferralCodeChip';
-import { isRegionSupervisor, normalizeReferralCode } from '@/lib/referralCode';
+import { isSourceCountryOfficer, normalizeReferralCode } from '@/lib/referralCode';
 import RequestsTab from '../../components/portal/RequestsTab';
 import { writeAudit } from '@/lib/audit';
 import DemoBadge from '@/components/portal/DemoBadge';
@@ -351,8 +351,24 @@ export default function PortalPage() {
       alert(ui.upperManagementOnly);
       return;
     }
-    await supabase.from('staff_members').update({ role_level: newLevel }).eq('id', staffId);
-    setStaffMembers(staffMembers.map(s => s.id === staffId ? { ...s, role_level: newLevel } : s));
+    const { data, error } = await supabase
+      .from('staff_members')
+      .update({ role_level: newLevel })
+      .eq('id', staffId)
+      .select('id, role_level, referral_code')
+      .maybeSingle();
+    if (error) {
+      const detail = /source_officer|referral_code_role|referral_code_immutable/.test(error.message)
+        ? ui.sourceOfficerMissingCode
+        : error.message;
+      alert(`${ui.updateFailed} ${detail}`);
+      return;
+    }
+    if (newLevel === 'source_country' && !normalizeReferralCode(data?.referral_code)) {
+      alert(ui.sourceOfficerMissingCode);
+      return;
+    }
+    setStaffMembers(staffMembers.map(s => s.id === staffId ? { ...s, ...data, role_level: newLevel } : s));
     logAudit(ui.staffUpdated, currentUser?.name);
     fetchAllData();
   };
@@ -390,17 +406,26 @@ export default function PortalPage() {
     if (!isUpperManagement || !editingStaff) return;
 
     try {
-      const { error } = await supabase.from('staff_members').update({
+      let saved = await supabase.from('staff_members').update({
         name: editingStaff.name,
         email: editingStaff.email,
         role_level: editingStaff.role_level
-      }).eq('id', editingStaff.id);
+      }).eq('id', editingStaff.id).select('id, role_level, referral_code').maybeSingle();
 
-      if (error) {
-        await supabase.from('staff_members').update({
+      if (saved.error) {
+        saved = await supabase.from('staff_members').update({
           name: editingStaff.name,
           role_level: editingStaff.role_level
-        }).eq('email', editingStaff.email);
+        }).eq('email', editingStaff.email).select('id, role_level, referral_code').maybeSingle();
+      }
+
+      if (saved.error) {
+        alert(`${ui.updateFailed} ${saved.error.message}`);
+        return;
+      }
+      if (editingStaff.role_level === 'source_country' && !normalizeReferralCode(saved.data?.referral_code)) {
+        alert(ui.sourceOfficerMissingCode);
+        return;
       }
 
       logAudit(`${ui.staffUpdated} ${editingStaff.name}`, currentUser?.name);
@@ -604,13 +629,16 @@ export default function PortalPage() {
                 <span className="text-[10px] text-emerald-800 uppercase font-semibold">
                   {getRoleDisplayName(currentUser?.role_level)}
                 </span>
-                {isRegionSupervisor(currentUser?.role_level) && normalizeReferralCode(currentUser?.referral_code) ? (
-                  <ReferralCodeChip
-                    code={normalizeReferralCode(currentUser.referral_code) as string}
-                    label={ui.referralCodeYours}
-                    copyLabel={ui.referralCodeCopy}
-                    copiedLabel={ui.referralCodeCopied}
-                  />
+                {isSourceCountryOfficer(currentUser?.role_level) && normalizeReferralCode(currentUser?.referral_code) ? (
+                  <span className="mt-1 block normal-case">
+                    <ReferralCodeChip
+                      code={normalizeReferralCode(currentUser.referral_code) as string}
+                      label={ui.referralCodeYours}
+                      copyLabel={ui.referralCodeCopy}
+                      copiedLabel={ui.referralCodeCopied}
+                    />
+                    <span className="mt-0.5 block text-[10px] font-medium text-emerald-900">{ui.referralCodeImmutable}</span>
+                  </span>
                 ) : null}
               </div>
             </div>
@@ -1031,6 +1059,17 @@ export default function PortalPage() {
                   <option value="target_country" className="text-slate-900 bg-white">🏢 {t.roleTargetCountry}</option>
                   <option value="field_officer" className="text-slate-900 bg-white">✈️ {t.roleFieldOfficer}</option>
                 </select>
+                {editingStaff.role_level === 'source_country' ? (
+                  <div className="mt-2 space-y-1">
+                    <p className="font-bold text-slate-700 uppercase">{ui.referralCode}</p>
+                    {normalizeReferralCode(editingStaff.referral_code) ? (
+                      <p className="font-mono font-bold text-slate-900">{normalizeReferralCode(editingStaff.referral_code)}</p>
+                    ) : null}
+                    <p className="text-[11px] font-medium text-slate-500 leading-snug">
+                      {normalizeReferralCode(editingStaff.referral_code) ? ui.referralCodeImmutable : ui.referralCodeOnInvite}
+                    </p>
+                  </div>
+                ) : null}
               </div>
               <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs">
                 Save Changes and Password
