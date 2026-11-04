@@ -6,6 +6,12 @@ import { AuthFooter } from '@/components/site/AuthFooter';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { linkMyCandidate, signOut, type CandidateLinkResult } from '@/lib/auth';
+import {
+  CandidateProfileError,
+  assertCandidatePersisted,
+  candidateAuthMetadata,
+  candidateIdentityPayload,
+} from '@/lib/candidateProfile';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
 import {
   beginPasswordSignup,
@@ -70,6 +76,10 @@ export default function CandidateDashboard() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'documents' | 'jobs' | 'interviews' | 'offers' | 'process' | 'travel' | 'notifications' | 'support'>('overview');
   
+  const [newFullName, setNewFullName] = useState('');
+  const [newPassport, setNewPassport] = useState('');
+  const [newProfession, setNewProfession] = useState('');
+  const [newSector, setNewSector] = useState('construction');
   const [newPhone, setNewPhone] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -133,6 +143,8 @@ export default function CandidateDashboard() {
       video3Label: '3. Video: Saha Mülakatı / Ek Değerlendirme Videosu',
       videoPlaceholder: 'https://www.youtube.com/watch?v=...',
       previewBtn: 'Önizle',
+      registrationHeader: 'Kayıt Bilgileri',
+      profileNotSaved: 'Profil kaydedilemedi. Oturumunuzu kontrol edip tekrar deneyin.',
       emailLabel: 'E-Posta Adresi',
       phoneLabel: 'Telefon Numarası',
       emergencyHeader: 'Acil Durum İletişim Bilgileri (Emergency Contact)',
@@ -186,6 +198,8 @@ export default function CandidateDashboard() {
       video3Label: '3. Video: Field Interview / Extra Assessment Video',
       videoPlaceholder: 'https://www.youtube.com/watch?v=...',
       previewBtn: 'Preview',
+      registrationHeader: 'Registration Details',
+      profileNotSaved: 'Profile could not be saved. Check your session and try again.',
       emailLabel: 'Email Address',
       phoneLabel: 'Phone Number',
       emergencyHeader: 'Emergency Contact Information',
@@ -239,6 +253,8 @@ export default function CandidateDashboard() {
       video3Label: '3. Video: Intervista në Terren / Vlerësim Shtesë',
       videoPlaceholder: 'https://www.youtube.com/watch?v=...',
       previewBtn: 'Parapamje',
+      registrationHeader: 'Të dhënat e regjistrimit',
+      profileNotSaved: 'Profili nuk u ruajt. Kontrolloni sesionin dhe provoni përsëri.',
       emailLabel: 'Adresa e Emailit',
       phoneLabel: 'Numri i Telefonit',
       emergencyHeader: 'Informacioni i Kontaktit të Urgjencës',
@@ -292,6 +308,8 @@ export default function CandidateDashboard() {
       video3Label: '3. فيديو: المقابلة الميدانية / التقييم الإضافي',
       videoPlaceholder: 'https://www.youtube.com/watch?v=...',
       previewBtn: 'معاينة',
+      registrationHeader: 'بيانات التسجيل',
+      profileNotSaved: 'تعذر حفظ الملف الشخصي. تحقق من الجلسة وحاول مرة أخرى.',
       emailLabel: 'البريد الإلكتروني',
       phoneLabel: 'رقم الهاتف',
       emergencyHeader: 'معلومات الاتصال في حالات الطوارئ',
@@ -345,6 +363,8 @@ export default function CandidateDashboard() {
       video3Label: '3. Видео: Теренско интервју / дополнителна оценка',
       videoPlaceholder: 'https://www.youtube.com/watch?v=...',
       previewBtn: 'Преглед',
+      registrationHeader: 'Податоци од регистрацијата',
+      profileNotSaved: 'Профилот не можеше да се зачува. Проверете ја сесијата и обидете се повторно.',
       emailLabel: 'Е-пошта',
       phoneLabel: 'Телефонски број',
       emergencyHeader: 'Контакт за итни случаи',
@@ -380,6 +400,10 @@ export default function CandidateDashboard() {
   useEffect(() => {
     if (authenticated && candidate) {
       fetchCandidateData(candidate.id);
+      setNewFullName(candidate.full_name || '');
+      setNewPassport(candidate.passport_number || '');
+      setNewProfession(candidate.profession || '');
+      setNewSector(candidate.sector || 'construction');
       setNewPhone(candidate.phone || '');
       setNewEmail(candidate.email || '');
       setNewPassword('');
@@ -402,6 +426,10 @@ export default function CandidateDashboard() {
 
   const applyCandidate = (data: any) => {
     setCandidate(data);
+    setNewFullName(data.full_name || '');
+    setNewPassport(data.passport_number || '');
+    setNewProfession(data.profession || '');
+    setNewSector(data.sector || 'construction');
     setNewPhone(data.phone || '');
     setNewEmail(data.email || '');
     setNewPassword('');
@@ -707,13 +735,41 @@ export default function CandidateDashboard() {
     reader.readAsDataURL(file);
   };
 
+  const explainProfileError = (error: unknown) => {
+    if (error instanceof CandidateProfileError) {
+      if (error.code === 'phone') return t.candidatePhoneTaken || error.message;
+      if (error.code === 'passport') return t.candidatePassportTaken || error.message;
+      if (error.code === 'email') return t.candidateEmailTaken || error.message;
+      if (error.code === 'invalid') return t.fillRequiredFields || error.message;
+      if (error.code === 'not_persisted') return ct.profileNotSaved;
+    }
+    return error instanceof Error ? error.message : ct.profileNotSaved;
+  };
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!candidate?.id) return;
+
+    let identity;
+    try {
+      identity = candidateIdentityPayload({
+        fullName: newFullName,
+        passport: newPassport,
+        phone: newPhone,
+        email: newEmail,
+        profession: newProfession,
+        sector: newSector,
+      });
+    } catch (error) {
+      alert(explainProfileError(error));
+      return;
+    }
+
     setUpdatingProfile(true);
 
     // LOG TUTMA (Console Debug)
     console.log("Panova HR Log - Aday Profil Güncelleme Başlıyor:", {
-      candidate_id: candidate?.id,
+      candidate_id: candidate.id,
       video_1: newVideoUrl1,
       video_2: newVideoUrl2,
       video_3: newVideoUrl3
@@ -745,8 +801,7 @@ export default function CandidateDashboard() {
     };
 
     const updatePayload: any = {
-      phone: newPhone,
-      email: newEmail,
+      ...identity,
       photo_url: newPhoto,
       video_url: newVideoUrl1,
       video_url_1: newVideoUrl1,
@@ -755,10 +810,22 @@ export default function CandidateDashboard() {
       documents_json: JSON.stringify(currentData)
     };
 
-    const { error } = await supabase
+    const { data: savedRow, error } = await supabase
       .from('job_candidates')
       .update(updatePayload)
-      .eq('id', candidate.id);
+      .eq('id', candidate.id)
+      .select('*')
+      .maybeSingle();
+
+    let persisted: any = null;
+    try {
+      persisted = assertCandidatePersisted(savedRow, error);
+    } catch (writeError) {
+      setUpdatingProfile(false);
+      console.error("Panova HR Log - Veritabanı Kayıt Hatası:", writeError);
+      alert(explainProfileError(writeError));
+      return;
+    }
 
     let passError: any = null;
     if (newPassword && newPassword.length >= 8) {
@@ -767,6 +834,12 @@ export default function CandidateDashboard() {
       if (!passError) setNewPassword('');
     }
 
+    // Metadata is the copy link_my_candidate reads only when creating the row.
+    // Email is omitted so this does not start an address-change confirmation.
+    const meta = await supabase.auth.updateUser({ data: candidateAuthMetadata(identity) });
+    if (meta.error) console.error("Panova HR Log - Kimlik metadata güncellenemedi:", meta.error);
+    await linkMyCandidate();
+
     setUpdatingProfile(false);
 
     if (passError) {
@@ -774,21 +847,19 @@ export default function CandidateDashboard() {
       alert('Şifre güncellenemedi: ' + passError.message);
     }
 
-    if (!error) {
-      const updatedCandidate = {
-        ...candidate,
-        ...updatePayload
-      };
-      setCandidate(updatedCandidate);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('panova_current_candidate', JSON.stringify(updatedCandidate));
-      }
-      console.log("Panova HR Log - Profil ve 3'lü Videolar Başarıyla Kaydedildi!");
-      alert(ct.savedSuccess);
-    } else {
-      console.error("Panova HR Log - Veritabanı Kayıt Hatası:", error);
-      alert('Hata: ' + error.message);
+    const updatedCandidate = { ...candidate, ...persisted };
+    setCandidate(updatedCandidate);
+    setNewFullName(persisted.full_name || identity.full_name);
+    setNewPassport(persisted.passport_number || identity.passport_number);
+    setNewProfession(persisted.profession || identity.profession);
+    setNewSector(persisted.sector || identity.sector);
+    setNewPhone(persisted.phone || identity.phone);
+    setNewEmail(persisted.email || identity.email);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('panova_current_candidate', JSON.stringify(updatedCandidate));
     }
+    console.log("Panova HR Log - Profil ve 3'lü Videolar Başarıyla Kaydedildi!");
+    alert(ct.savedSuccess);
   };
 
   if (!authenticated || !candidate) {
@@ -1191,24 +1262,79 @@ export default function CandidateDashboard() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-slate-50 p-4 rounded-2xl border space-y-3">
+                <h4 className="font-extrabold text-slate-900 text-xs text-emerald-800 uppercase border-b pb-1">{ct.registrationHeader}</h4>
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{ct.emailLabel}</label>
-                  <input 
-                    type="email" 
-                    value={newEmail} 
-                    onChange={(e) => setNewEmail(e.target.value)} 
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.nameLabel} *</label>
+                  <input
+                    type="text"
+                    required
+                    value={newFullName}
+                    onChange={(e) => setNewFullName(e.target.value)}
+                    placeholder={t.examplePersonName}
                     className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
                   />
                 </div>
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{ct.phoneLabel}</label>
-                  <input 
-                    type="text" 
-                    value={newPhone} 
-                    onChange={(e) => setNewPhone(e.target.value)} 
-                    className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.passportLabel} *</label>
+                    <input
+                      type="text"
+                      required
+                      value={newPassport}
+                      onChange={(e) => setNewPassport(e.target.value)}
+                      placeholder="U1234567"
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium uppercase"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{ct.phoneLabel} *</label>
+                    <input
+                      type="tel"
+                      required
+                      value={newPhone}
+                      onChange={(e) => setNewPhone(e.target.value)}
+                      placeholder="+389..."
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.professionLabel} *</label>
+                    <input
+                      type="text"
+                      required
+                      value={newProfession}
+                      onChange={(e) => setNewProfession(e.target.value)}
+                      placeholder={t.exampleProfession}
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.sectorLabel} *</label>
+                    <select
+                      required
+                      value={newSector}
+                      onChange={(e) => setNewSector(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium outline-none cursor-pointer"
+                    >
+                      {homeCopy[currentLang].formSectors.some((sector) => sector.value === newSector) ? null : (
+                        <option value={newSector}>{newSector}</option>
+                      )}
+                      {homeCopy[currentLang].formSectors.map((sector) => (
+                        <option key={sector.value} value={sector.value}>{sector.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{ct.emailLabel} *</label>
+                    <input
+                      type="email"
+                      required
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
+                    />
+                  </div>
                 </div>
               </div>
 
