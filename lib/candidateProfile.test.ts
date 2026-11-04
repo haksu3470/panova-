@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import {
   CandidateProfileError,
   assertCandidatePersisted,
   candidateAuthMetadata,
   candidateIdentityPayload,
+  isPermissionDenied,
 } from './candidateProfile.ts';
 
 const ROW = '7c1a0b2e-4f55-4a1d-9c3e-2b6d8e0a11f4';
@@ -103,6 +105,26 @@ test('a write that matches no rows is not a success', () => {
     () => assertCandidatePersisted(null, null),
     (error: unknown) => error instanceof CandidateProfileError && error.code === 'not_persisted',
   );
+});
+
+test('a revoked session message exists in TR, EN, SQ, AR, and MK', () => {
+  const page = readFileSync(new URL('../app/candidate/page.tsx', import.meta.url), 'utf8');
+  for (const text of [
+    'Oturumunuz kapandı',
+    'Your session has ended',
+    'Sesioni juaj ka përfunduar',
+    'انتهت جلستك',
+    'Вашата сесија заврши',
+  ]) {
+    assert.match(page, new RegExp(text));
+  }
+});
+
+test('a revoked session surfaces as permission denied, not a saved row', () => {
+  assert.equal(isPermissionDenied({ code: '42501', message: 'permission denied for table job_candidates' }), true);
+  assert.equal(isPermissionDenied(new CandidateProfileError('write_failed', 'permission denied for table candidate_documents')), true);
+  assert.equal(isPermissionDenied(new CandidateProfileError('phone', 'Candidate phone already used')), false);
+  assert.equal(isPermissionDenied(null), false);
 });
 
 test('a returned row is the persisted candidate', () => {
