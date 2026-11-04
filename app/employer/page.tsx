@@ -9,7 +9,7 @@ import { EmployerWriteError, toEmployerProfileView, type EmployerRow } from '@/l
 import { employerService } from '@/lib/services/employerService';
 import { 
   Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, 
-  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, Plane, ShieldCheck, HeartHandshake, UploadCloud, Check, Video, Star, CheckCircle2
+  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, Plane, ShieldCheck, HeartHandshake, UploadCloud, Check, Video, Star, CheckCircle2, BookOpen
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
@@ -19,6 +19,7 @@ import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
 import EmployerCandidateBrowser from './components/EmployerCandidateBrowser';
+import { guideNavLabel } from '@/lib/guides-nav';
 import CandidateYouTube from '@/components/candidate/CandidateYouTube';
 import {
   EMPLOYER_CANDIDATE_BROWSE_COLUMNS,
@@ -495,6 +496,9 @@ function EmployerPortalInner() {
             <button onClick={() => setActiveTab('company')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'company' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               🏢 {t.empTabProfile}
             </button>
+            <Link href="/guides" className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl transition bg-slate-50 border text-slate-700 hover:bg-slate-100">
+              <BookOpen className="w-3.5 h-3.5" aria-hidden /> {guideNavLabel[currentLang]}
+            </Link>
           </div>
         </div>
 
