@@ -39,6 +39,7 @@ export async function POST(request: Request) {
       : /already active/.test(error.message) ? 'Bu e-posta zaten aktif bir personel hesabına bağlı.'
       : /Invalid email/.test(error.message) ? 'Geçersiz e-posta adresi.'
       : /Invalid staff_role/.test(error.message) ? 'Geçersiz rol.'
+      : /source_officer_code_missing|referral_code_role/.test(error.message) ? 'Kaynak ülke sorumlusu için yönlendirme kodu atanamadı. Daveti yeniden deneyin.'
       : 'Davet kaydedilemedi: ' + error.message;
     return NextResponse.json({ error: msg }, { status: 403 });
   }

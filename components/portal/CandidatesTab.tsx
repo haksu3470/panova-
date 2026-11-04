@@ -19,7 +19,7 @@ import {
 import { fill, portalUi } from '@/lib/portal-ui-copy';
 import {
   canManagerDeleteOpenCandidate,
-  isRegionSupervisor,
+  isSourceCountryOfficer,
   matchesReferralCodeFilter,
   normalizeReferralCode,
   referralFilterCodes,
@@ -76,9 +76,8 @@ export default function CandidatesTab({
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const ownCode = isRegionSupervisor(currentUser?.role_level)
-    ? normalizeReferralCode(currentUser?.referral_code)
-    : null;
+  const isSourceOfficer = isSourceCountryOfficer(currentUser?.role_level);
+  const ownCode = isSourceOfficer ? normalizeReferralCode(currentUser?.referral_code) : null;
   const assignableCodes = supervisorReferralCodes(staffMembers);
   const filterCodes = isUpperManagement ? referralFilterCodes(staffMembers, candidates) : [];
 
@@ -118,6 +117,9 @@ export default function CandidatesTab({
 
   const explainWriteError = (message: string) => {
     if (message.includes('unknown_supervisor_code')) return ui.unknownSupervisorCode;
+    if (message.includes('source_officer_missing_code') || message.includes('staff_members_referral_code_role')) {
+      return ui.sourceOfficerMissingCode;
+    }
     return message;
   };
 
@@ -134,7 +136,7 @@ export default function CandidatesTab({
       sector: draft.sector,
       status: 'pending',
     };
-    if (isUpperManagement && draft.referralCode) {
+    if (!isSourceOfficer && isUpperManagement && draft.referralCode) {
       payload.referral_code = draft.referralCode;
     }
 
@@ -172,8 +174,8 @@ export default function CandidatesTab({
         <div className="space-y-1">
           <h3 className="text-sm font-extrabold text-slate-900">{ui.registerCandidate}</h3>
           <p className="text-xs text-slate-500">
-            {ownCode
-              ? fill(ui.registerCandidateHint, { code: ownCode })
+            {isSourceOfficer
+              ? (ownCode ? fill(ui.registerCandidateHint, { code: ownCode }) : ui.referralCodeAutoAttach)
               : ui.registerCandidateOpenHint}
           </p>
         </div>
@@ -245,7 +247,19 @@ export default function CandidatesTab({
               ))}
             </select>
           </label>
-          {isUpperManagement && (
+          {isSourceOfficer && (
+            <label className="block text-xs font-bold text-slate-700 sm:col-span-2">
+              {ui.referralCode}
+              <input
+                readOnly
+                aria-readonly="true"
+                value={ownCode ?? ''}
+                className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm font-mono font-bold text-slate-900 bg-slate-100 outline-none"
+              />
+              <span className="mt-1 block text-[11px] font-medium text-slate-500">{ui.referralCodeImmutable}</span>
+            </label>
+          )}
+          {!isSourceOfficer && isUpperManagement && (
             <label className="block text-xs font-bold text-slate-700 sm:col-span-2">
               {ui.referralCode}
               <select

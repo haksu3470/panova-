@@ -1,7 +1,5 @@
-/** Region supervisors. Field officers, finance, and limited staff are not region agents. */
-export const REGION_SUPERVISOR_ROLES = ['source_country', 'target_country'] as const;
-
-export type RegionSupervisorRole = (typeof REGION_SUPERVISOR_ROLES)[number];
+/** Referral codes belong only to source-country officers. */
+export const SOURCE_COUNTRY_ROLE = 'source_country';
 
 export type ReferralCodeFilter = 'all' | 'none' | (string & {});
 
@@ -14,9 +12,8 @@ type CandidateCodeRow = {
   referral_code?: string | null;
 };
 
-export function isRegionSupervisor(role: string | null | undefined): boolean {
-  const value = role?.toLowerCase() ?? '';
-  return value === 'source_country' || value === 'target_country';
+export function isSourceCountryOfficer(role: string | null | undefined): boolean {
+  return (role?.toLowerCase() ?? '') === SOURCE_COUNTRY_ROLE;
 }
 
 /** Blank and whitespace-only codes are open registration. */
@@ -43,18 +40,18 @@ export function canManagerDeleteOpenCandidate(
   return isManager && normalizeReferralCode(code) === null;
 }
 
-/** Codes a manager may attach while registering. Current region supervisors only. */
+/** Codes a manager may attach while registering. Current source-country officers only. */
 export function supervisorReferralCodes(staff: StaffCodeRow[]): string[] {
   const codes = new Set<string>();
   for (const member of staff) {
-    if (!isRegionSupervisor(member.role_level)) continue;
+    if (!isSourceCountryOfficer(member.role_level)) continue;
     const code = normalizeReferralCode(member.referral_code);
     if (code) codes.add(code);
   }
   return [...codes].sort();
 }
 
-/** Filter options: live supervisor codes plus any code already stored on a candidate. */
+/** Filter options: live source-country codes plus any code already stored on a candidate. */
 export function referralFilterCodes(staff: StaffCodeRow[], candidates: CandidateCodeRow[]): string[] {
   const codes = new Set<string>(supervisorReferralCodes(staff));
   for (const candidate of candidates) {

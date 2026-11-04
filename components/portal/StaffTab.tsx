@@ -3,7 +3,7 @@
 import { UserPlus, Trash2, Key } from 'lucide-react';
 import DemoBadge from './DemoBadge';
 import { ReferralCodeChip } from './ReferralCodeChip';
-import { isRegionSupervisor, normalizeReferralCode } from '@/lib/referralCode';
+import { isSourceCountryOfficer, normalizeReferralCode } from '@/lib/referralCode';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 
@@ -82,6 +82,9 @@ export default function StaffTab({
               <option value="target_country" className="text-slate-900 bg-white">🏢 {t.roleTargetCountry}</option>
               <option value="field_officer" className="text-slate-900 bg-white">✈️ {t.roleFieldOfficer}</option>
             </select>
+            {newStaffRoleLevel === 'source_country' ? (
+              <p className="mt-2 text-[11px] font-medium text-slate-500 leading-snug">{ui.referralCodeOnInvite}</p>
+            ) : null}
           </div>
           <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-xs sm:text-sm">
             {ui.sendInvite}
@@ -106,13 +109,19 @@ export default function StaffTab({
                   </div>
                 </div>
                 <p className="text-xs text-slate-500">{staff.email}</p>
-                {isRegionSupervisor(staff.role_level) && normalizeReferralCode(staff.referral_code) ? (
-                  <ReferralCodeChip
-                    code={normalizeReferralCode(staff.referral_code) as string}
-                    label={ui.referralCode}
-                    copyLabel={ui.referralCodeCopy}
-                    copiedLabel={ui.referralCodeCopied}
-                  />
+                {isSourceCountryOfficer(staff.role_level) && normalizeReferralCode(staff.referral_code) ? (
+                  <div className="space-y-1">
+                    <ReferralCodeChip
+                      code={normalizeReferralCode(staff.referral_code) as string}
+                      label={ui.referralCode}
+                      copyLabel={ui.referralCodeCopy}
+                      copiedLabel={ui.referralCodeCopied}
+                    />
+                    <p className="text-[10px] font-medium text-slate-500 leading-snug">{ui.referralCodeImmutable}</p>
+                  </div>
+                ) : null}
+                {isSourceCountryOfficer(staff.role_level) && !normalizeReferralCode(staff.referral_code) ? (
+                  <p className="text-[11px] font-medium text-amber-700 leading-snug">{ui.sourceOfficerMissingCode}</p>
                 ) : null}
                 <p className="text-[11px] font-bold">{staff.auth_user_id
                   ? <span className="text-emerald-700">● {ui.activeAccount}</span>
