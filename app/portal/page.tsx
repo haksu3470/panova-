@@ -32,6 +32,8 @@ import { guideNavLabel } from '@/lib/guides-nav';
 
 // Modüler Bileşenlerimiz (Kök dizindeki components klasörüne göre göreceli yol)
 import CandidatesTab from '../../components/portal/CandidatesTab';
+import { ReferralCodeChip } from '../../components/portal/ReferralCodeChip';
+import { isRegionSupervisor, normalizeReferralCode } from '@/lib/referralCode';
 import RequestsTab from '../../components/portal/RequestsTab';
 import { writeAudit } from '@/lib/audit';
 import DemoBadge from '@/components/portal/DemoBadge';
@@ -139,6 +141,11 @@ export default function PortalPage() {
     const { data: staffData } = await supabase.from('staff_members').select('*').order('created_at', { ascending: false });
     if (staffData && staffData.length > 0) {
       setStaffMembers(staffData);
+      setCurrentUser((prev: any) => {
+        if (!prev) return prev;
+        const mine = staffData.find((member: any) => member.id === prev.id || (prev.auth_user_id && member.auth_user_id === prev.auth_user_id));
+        return mine ? { ...prev, ...mine } : prev;
+      });
       if (!newTaskAssignee && staffData[0]) {
         setNewTaskAssignee(staffData[0].name);
         setNewTaskBackup(staffData[1]?.name || staffData[0].name);
@@ -347,6 +354,7 @@ export default function PortalPage() {
     await supabase.from('staff_members').update({ role_level: newLevel }).eq('id', staffId);
     setStaffMembers(staffMembers.map(s => s.id === staffId ? { ...s, role_level: newLevel } : s));
     logAudit(ui.staffUpdated, currentUser?.name);
+    fetchAllData();
   };
 
   const handleAddStaff = async (e: React.FormEvent) => {
@@ -596,6 +604,14 @@ export default function PortalPage() {
                 <span className="text-[10px] text-emerald-800 uppercase font-semibold">
                   {getRoleDisplayName(currentUser?.role_level)}
                 </span>
+                {isRegionSupervisor(currentUser?.role_level) && normalizeReferralCode(currentUser?.referral_code) ? (
+                  <ReferralCodeChip
+                    code={normalizeReferralCode(currentUser.referral_code) as string}
+                    label={ui.referralCodeYours}
+                    copyLabel={ui.referralCodeCopy}
+                    copiedLabel={ui.referralCodeCopied}
+                  />
+                ) : null}
               </div>
             </div>
 
@@ -715,6 +731,7 @@ export default function PortalPage() {
             updateCandidateStatus={updateCandidateStatus}
             logAudit={logAudit}
             currentUser={currentUser}
+            isUpperManagement={isUpperManagement}
           />
         )}
 

@@ -14,6 +14,8 @@ import { User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, 
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
 import { portalUi } from '@/lib/portal-ui-copy';
+import { normalizeReferralCode } from '@/lib/referralCode';
+import { ReferralCodeChip } from '@/components/portal/ReferralCodeChip';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import {
@@ -409,8 +411,18 @@ function CandidateDetailPageInner() {
               )}
               <div>
                 <h1 className="text-base sm:text-xl font-extrabold text-slate-900 truncate max-w-[200px] sm:max-w-none">{candidate.full_name}</h1>
-                <div className="flex items-center gap-2 text-[11px] text-slate-600 font-medium">
+                <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-600 font-medium">
                   <span className="font-mono bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded">PNV-CAND-{candidate.id.substring(0, 6)}</span>
+                  {normalizeReferralCode(candidate.referral_code) ? (
+                    <ReferralCodeChip
+                      code={normalizeReferralCode(candidate.referral_code) as string}
+                      label={ui.referralCode}
+                      copyLabel={ui.referralCodeCopy}
+                      copiedLabel={ui.referralCodeCopied}
+                    />
+                  ) : (
+                    <span className="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">{ui.referralCodeNone}</span>
+                  )}
                   <span>📍 {candidate.country || 'N/A'}, {candidate.city || 'N/A'}</span>
                   <span>💼 {candidate.profession || ui.general}</span>
                 </div>

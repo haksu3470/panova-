@@ -6,7 +6,7 @@ import { ArrowLeft, CheckCircle2, UserPlus, Send, Building } from 'lucide-react'
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
-import { homeCopy } from '@/lib/home-copy';
+import { fill, homeCopy } from '@/lib/home-copy';
 import { isGmailAddress } from '@/lib/emailAddress';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 
@@ -30,6 +30,7 @@ export default function SupplierCandidateRegister() {
   };
 
   const [submitted, setSubmitted] = useState(false);
+  const [savedCode, setSavedCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [supplierName, setSupplierName] = useState('');
 
@@ -51,7 +52,7 @@ export default function SupplierCandidateRegister() {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.from('job_candidates').insert([
+    const { data, error } = await supabase.from('job_candidates').insert([
       {
         full_name: formData.fullName,
         passport_number: formData.passportNumber,
@@ -63,11 +64,13 @@ export default function SupplierCandidateRegister() {
         status: 'pending',
         notes: `Tedarikçi Partner Tarafından Kaydedildi: ${supplierName || 'Yetkili Tedarikçi'}`,
       },
-    ]);
+    ]).select('referral_code').single();
 
     setLoading(false);
-    if (!error) setSubmitted(true);
-    else alert('Hata: ' + error.message);
+    if (!error) {
+      setSavedCode(data?.referral_code?.trim() || null);
+      setSubmitted(true);
+    } else alert('Hata: ' + error.message);
   };
 
   return (
@@ -98,6 +101,7 @@ export default function SupplierCandidateRegister() {
             <div className="bg-emerald-950 p-6 sm:p-8 rounded-2xl text-center space-y-3">
               <CheckCircle2 className="w-14 h-14 sm:w-16 sm:h-16 text-emerald-400 mx-auto" />
               <h2 className="text-base sm:text-lg font-bold text-white">{s.success}</h2>
+              <p className="text-xs text-emerald-100 leading-relaxed">{savedCode ? fill(s.linkedCode, { code: savedCode }) : s.openRegistration}</p>
               {!isGmailAddress(formData.email) ? <p className="text-xs text-emerald-100 leading-relaxed">{t.supplierNonGmailHint}</p> : null}
               <button onClick={() => setSubmitted(false)} className="bg-[#2e7d32] text-white px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition hover:bg-[#1b5e20]">{s.another}</button>
             </div>
