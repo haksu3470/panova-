@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { linkMyEmployer, signOut } from '@/lib/auth';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
+import ForgotPasswordPanel, { ForgotPasswordLink } from '@/components/auth/ForgotPasswordPanel';
 import {
   beginPasswordSignup,
   emailGateListenerPaused,
@@ -48,7 +49,7 @@ export default function EmployerLoginPage() {
     writeStoredLanguage(lang);
   };
 
-  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify'>('signin');
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify' | 'forgot'>('signin');
   const [verifyEmail, setVerifyEmail] = useState('');
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -195,7 +196,7 @@ export default function EmployerLoginPage() {
 
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 border border-slate-200 w-full">
-          {authMode !== 'verify' && <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-8">
+          {(authMode === 'signin' || authMode === 'signup') && <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-8">
             <button
               type="button"
               onClick={() => setAuthMode('signin')}
@@ -216,7 +217,7 @@ export default function EmployerLoginPage() {
             </button>
           </div>}
 
-          {authMode !== 'verify' && <div className="text-center mb-6">
+          {(authMode === 'signin' || authMode === 'signup') && <div className="text-center mb-6">
             <div className="inline-block p-3 bg-blue-50 text-blue-700 rounded-2xl mb-2 text-xl font-bold shadow-sm">
               🏢
             </div>
@@ -241,6 +242,13 @@ export default function EmployerLoginPage() {
                 {t.verifyEmailBack}
               </button>
             </div>
+          ) : authMode === 'forgot' ? (
+            <ForgotPasswordPanel
+              lang={currentLang}
+              initialEmail={loginEmail}
+              audience="employer"
+              onBack={() => setAuthMode('signin')}
+            />
           ) : authMode === 'signin' ? (
             <><form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
               <div>
@@ -265,6 +273,8 @@ export default function EmployerLoginPage() {
                   className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
                 />
               </div>
+
+              <ForgotPasswordLink label={t.forgotPassword || ''} onClick={() => setAuthMode('forgot')} />
 
               <button
                 type="submit"

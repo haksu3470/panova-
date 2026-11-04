@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { linkMyCandidate, signOut, type CandidateLinkResult } from '@/lib/auth';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
+import ForgotPasswordPanel, { ForgotPasswordLink } from '@/components/auth/ForgotPasswordPanel';
 import {
   beginPasswordSignup,
   emailGateListenerPaused,
@@ -48,7 +49,7 @@ export default function CandidateDashboard() {
 
   const [authenticated, setAuthenticated] = useState(false);
 
-  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'verify'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'verify' | 'forgot'>('login');
   const [verifyEmail, setVerifyEmail] = useState('');
   const [linkIssue, setLinkIssue] = useState<'phone' | 'passport' | null>(null);
   const [fixValue, setFixValue] = useState('');
@@ -809,7 +810,7 @@ export default function CandidateDashboard() {
 
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 max-w-md w-full">
-            {authMode !== 'verify' && !linkIssue && <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border">
+            {(authMode === 'login' || authMode === 'signup') && !linkIssue && <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border">
               <button
                 type="button"
                 onClick={() => setAuthMode('login')}
@@ -830,7 +831,7 @@ export default function CandidateDashboard() {
               </button>
             </div>}
 
-            {authMode !== 'verify' && !linkIssue && <div className="text-center mb-6">
+            {(authMode === 'login' || authMode === 'signup') && !linkIssue && <div className="text-center mb-6">
               <div className="w-12 h-12 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-3">
                 {authMode === 'login' ? <Lock className="w-6 h-6" /> : <UserPlus className="w-6 h-6" />}
               </div>
@@ -885,6 +886,13 @@ export default function CandidateDashboard() {
                 </button>
                 <OAuthButtons redirectPath="/candidate" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} />
               </div>
+            ) : authMode === 'forgot' ? (
+              <ForgotPasswordPanel
+                lang={currentLang}
+                initialEmail={loginInput}
+                audience="candidate"
+                onBack={() => setAuthMode('login')}
+              />
             ) : authMode === 'login' ? (
               <><form onSubmit={handleCandidateLogin} className="space-y-4 text-left rtl:text-right">
                 <div>
@@ -911,6 +919,7 @@ export default function CandidateDashboard() {
                   />
                 </div>
 
+                <ForgotPasswordLink label={t.forgotPassword || ''} onClick={() => setAuthMode('forgot')} />
 
                 <button 
                   type="submit" 
