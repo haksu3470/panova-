@@ -4,14 +4,16 @@ import OAuthButtons from '@/components/auth/OAuthButtons';
 import { AuthFooter } from '@/components/site/AuthFooter';
 import CandidateYouTube from '@/components/candidate/CandidateYouTube';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { linkMyCandidate, signOut, type CandidateLinkResult } from '@/lib/auth';
 import {
   CandidateProfileError,
   assertCandidatePersisted,
   candidateAuthMetadata,
-  candidateIdentityPayload,
+  candidateRegistrationPayload,
+  changedCandidateEmail,
+  changedCandidatePhoto,
   isPermissionDenied,
 } from '@/lib/candidateProfile';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
@@ -94,6 +96,7 @@ export default function CandidateDashboard() {
   const [newEmergencyPhone, setNewEmergencyPhone] = useState('');
   
   const [updatingProfile, setUpdatingProfile] = useState(false);
+  const profileDirty = useRef(false);
 
   const [notifications, setNotifications] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
@@ -143,6 +146,8 @@ export default function CandidateDashboard() {
       previewBtn: 'Önizle',
       registrationHeader: 'Kayıt Bilgileri',
       profileNotSaved: 'Profil kaydedilemedi. Oturumunuzu kontrol edip tekrar deneyin.',
+      profileEmailKept: 'Diğer bilgiler kaydedildi. Bu e-posta başka bir adayda kayıtlı olduğu için e-posta değişmedi.',
+      profilePhotoNotSaved: 'Diğer bilgiler kaydedildi. Fotoğraf kaydedilemedi. Daha küçük bir görsel deneyin.',
       sessionRequired: 'Oturumunuz kapandı. Kayıt bilgilerini ve belgeleri kaydetmek için tekrar giriş yapın.',
       emailLabel: 'E-Posta Adresi',
       phoneLabel: 'Telefon Numarası',
@@ -199,6 +204,8 @@ export default function CandidateDashboard() {
       previewBtn: 'Preview',
       registrationHeader: 'Registration Details',
       profileNotSaved: 'Profile could not be saved. Check your session and try again.',
+      profileEmailKept: 'The other details were saved. That email belongs to another candidate, so the email was not changed.',
+      profilePhotoNotSaved: 'The other details were saved. The photo could not be saved. Try a smaller image.',
       sessionRequired: 'Your session has ended. Sign in again to save your registration and documents.',
       emailLabel: 'Email Address',
       phoneLabel: 'Phone Number',
@@ -255,6 +262,8 @@ export default function CandidateDashboard() {
       previewBtn: 'Parapamje',
       registrationHeader: 'Të dhënat e regjistrimit',
       profileNotSaved: 'Profili nuk u ruajt. Kontrolloni sesionin dhe provoni përsëri.',
+      profileEmailKept: 'Të dhënat e tjera u ruajtën. Ky email i përket një kandidati tjetër, ndaj email-i nuk u ndryshua.',
+      profilePhotoNotSaved: 'Të dhënat e tjera u ruajtën. Fotoja nuk u ruajt. Provoni një imazh më të vogël.',
       sessionRequired: 'Sesioni juaj ka përfunduar. Identifikohuni përsëri për të ruajtur regjistrimin dhe dokumentet.',
       emailLabel: 'Adresa e Emailit',
       phoneLabel: 'Numri i Telefonit',
@@ -311,6 +320,8 @@ export default function CandidateDashboard() {
       previewBtn: 'معاينة',
       registrationHeader: 'بيانات التسجيل',
       profileNotSaved: 'تعذر حفظ الملف الشخصي. تحقق من الجلسة وحاول مرة أخرى.',
+      profileEmailKept: 'تم حفظ البيانات الأخرى. هذا البريد مرتبط بمرشح آخر، لذلك لم يتغير البريد.',
+      profilePhotoNotSaved: 'تم حفظ البيانات الأخرى. تعذر حفظ الصورة. جرب صورة أصغر.',
       sessionRequired: 'انتهت جلستك. سجّل الدخول مرة أخرى لحفظ بيانات التسجيل والمستندات.',
       emailLabel: 'البريد الإلكتروني',
       phoneLabel: 'رقم الهاتف',
@@ -367,6 +378,8 @@ export default function CandidateDashboard() {
       previewBtn: 'Преглед',
       registrationHeader: 'Податоци од регистрацијата',
       profileNotSaved: 'Профилот не можеше да се зачува. Проверете ја сесијата и обидете се повторно.',
+      profileEmailKept: 'Останатите податоци се зачувани. Оваа е-пошта е на друг кандидат, па е-поштата не е сменета.',
+      profilePhotoNotSaved: 'Останатите податоци се зачувани. Фотографијата не е зачувана. Обидете се со помала слика.',
       sessionRequired: 'Вашата сесија заврши. Најавете се повторно за да ги зачувате регистрацијата и документите.',
       emailLabel: 'Е-пошта',
       phoneLabel: 'Телефонски број',
@@ -401,30 +414,33 @@ export default function CandidateDashboard() {
   const ct = candidateTexts[currentLang] || candidateTexts.tr;
 
   useEffect(() => {
-    if (authenticated && candidate) {
-      fetchCandidateData(candidate.id);
-      setNewFullName(candidate.full_name || '');
-      setNewPassport(candidate.passport_number || '');
-      setNewProfession(candidate.profession || '');
-      setNewSector(candidate.sector || 'construction');
-      setNewPhone(candidate.phone || '');
-      setNewEmail(candidate.email || '');
-      setNewPassword('');
-      setNewPhoto(candidate.photo_url || '');
+    if (!authenticated || !candidate || profileDirty.current) return;
+    setNewFullName(candidate.full_name || '');
+    setNewPassport(candidate.passport_number || '');
+    setNewProfession(candidate.profession || '');
+    setNewSector(candidate.sector || 'construction');
+    setNewPhone(candidate.phone || '');
+    setNewEmail(candidate.email || '');
+    setNewPassword('');
+    setNewPhoto(candidate.photo_url || '');
 
-      try {
-        const extra = candidate.documents_json ? JSON.parse(candidate.documents_json) : {};
-        if (extra && extra.profile_meta) {
-          setNewEmergencyName(extra.profile_meta.emergency_name || '');
-          setNewEmergencyRelation(extra.profile_meta.emergency_relation || '');
-          setNewEmergencyPhone(extra.profile_meta.emergency_phone || '');
-        }
-      } catch (e) {}
-    }
+    try {
+      const extra = candidate.documents_json ? JSON.parse(candidate.documents_json) : {};
+      if (extra && extra.profile_meta) {
+        setNewEmergencyName(extra.profile_meta.emergency_name || '');
+        setNewEmergencyRelation(extra.profile_meta.emergency_relation || '');
+        setNewEmergencyPhone(extra.profile_meta.emergency_phone || '');
+      }
+    } catch (e) {}
   }, [authenticated]);
 
   const applyCandidate = (data: any) => {
     setCandidate(data);
+    setAuthenticated(true);
+    if (profileDirty.current) {
+      fetchCandidateData(data.id);
+      return;
+    }
     setNewFullName(data.full_name || '');
     setNewPassport(data.passport_number || '');
     setNewProfession(data.profession || '');
@@ -433,7 +449,6 @@ export default function CandidateDashboard() {
     setNewEmail(data.email || '');
     setNewPassword('');
     setNewPhoto(data.photo_url || '');
-    setAuthenticated(true);
     try {
       const extra = data.documents_json ? JSON.parse(data.documents_json) : {};
       if (extra && extra.profile_meta) {
@@ -494,6 +509,7 @@ export default function CandidateDashboard() {
     let alive = true;
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
+        profileDirty.current = false;
         setAuthenticated(false);
         setCandidate(null);
         return;
@@ -508,7 +524,7 @@ export default function CandidateDashboard() {
           setLoading(false);
           return;
         }
-        if (gate.status === 'ready') await handleLinkResult(await loadLinkedCandidate(), false);
+        if (gate.status === 'ready' && !profileDirty.current) await handleLinkResult(await loadLinkedCandidate(), false);
         setLoading(false);
       }, 0);
     });
@@ -615,6 +631,7 @@ export default function CandidateDashboard() {
   };
 
   const handleLogout = async () => {
+    profileDirty.current = false;
     await signOut();
     setAuthenticated(false);
     setCandidate(null);
@@ -713,6 +730,7 @@ export default function CandidateDashboard() {
   };
 
   const loseCandidateSession = () => {
+    profileDirty.current = false;
     setAuthenticated(false);
     setCandidate(null);
     alert(ct.sessionRequired);
@@ -771,20 +789,22 @@ export default function CandidateDashboard() {
     if (!candidate?.id) return;
     if (!(await requireCandidateSession())) return;
 
-    let identity;
+    let registration;
+    let emailUpdate: string | null = null;
     try {
-      identity = candidateIdentityPayload({
+      registration = candidateRegistrationPayload({
         fullName: newFullName,
         passport: newPassport,
         phone: newPhone,
-        email: newEmail,
         profession: newProfession,
         sector: newSector,
       });
+      emailUpdate = changedCandidateEmail(candidate.email, newEmail);
     } catch (error) {
       alert(explainProfileError(error));
       return;
     }
+    const photoUpdate = changedCandidatePhoto(candidate.photo_url, newPhoto);
 
     setUpdatingProfile(true);
 
@@ -813,15 +833,9 @@ export default function CandidateDashboard() {
       emergency_phone: newEmergencyPhone
     };
 
-    const updatePayload: any = {
-      ...identity,
-      photo_url: newPhoto,
-      documents_json: JSON.stringify(currentData)
-    };
-
     const { data: savedRow, error } = await supabase
       .from('job_candidates')
-      .update(updatePayload)
+      .update({ ...registration, documents_json: JSON.stringify(currentData) })
       .eq('id', candidate.id)
       .select('*')
       .maybeSingle();
@@ -840,6 +854,53 @@ export default function CandidateDashboard() {
       return;
     }
 
+    let emailNote = '';
+    if (emailUpdate) {
+      const { data: emailRow, error: emailError } = await supabase
+        .from('job_candidates')
+        .update({ email: emailUpdate })
+        .eq('id', candidate.id)
+        .select('id, email')
+        .maybeSingle();
+      try {
+        const savedEmail = assertCandidatePersisted(emailRow, emailError);
+        persisted = { ...persisted, email: savedEmail.email };
+      } catch (writeError) {
+        console.error("Panova HR Log - E-posta güncellenemedi:", writeError);
+        if (isPermissionDenied(writeError)) {
+          setUpdatingProfile(false);
+          loseCandidateSession();
+          return;
+        }
+        const detail = explainProfileError(writeError);
+        emailNote = writeError instanceof CandidateProfileError && writeError.code === 'email'
+          ? ct.profileEmailKept
+          : `${ct.profileEmailKept}\n${detail}`;
+      }
+    }
+
+    let photoNote = '';
+    if (photoUpdate !== null) {
+      const { data: photoRow, error: photoError } = await supabase
+        .from('job_candidates')
+        .update({ photo_url: photoUpdate })
+        .eq('id', candidate.id)
+        .select('id, photo_url')
+        .maybeSingle();
+      try {
+        const savedPhoto = assertCandidatePersisted(photoRow, photoError);
+        persisted = { ...persisted, photo_url: savedPhoto.photo_url };
+      } catch (writeError) {
+        console.error("Panova HR Log - Fotoğraf güncellenemedi:", writeError);
+        if (isPermissionDenied(writeError)) {
+          setUpdatingProfile(false);
+          loseCandidateSession();
+          return;
+        }
+        photoNote = ct.profilePhotoNotSaved;
+      }
+    }
+
     let passError: any = null;
     if (newPassword && newPassword.length >= 8) {
       const res = await supabase.auth.updateUser({ password: newPassword });
@@ -847,9 +908,13 @@ export default function CandidateDashboard() {
       if (!passError) setNewPassword('');
     }
 
+    // A failed email edit must stay on screen. A session reload would put the old address back.
+    profileDirty.current = Boolean(emailNote);
     // Metadata is the copy link_my_candidate reads only when creating the row.
     // Email is omitted so this does not start an address-change confirmation.
-    const meta = await supabase.auth.updateUser({ data: candidateAuthMetadata(identity) });
+    const meta = await supabase.auth.updateUser({
+      data: candidateAuthMetadata({ ...registration, email: persisted.email || candidate.email || newEmail }),
+    });
     if (meta.error) console.error("Panova HR Log - Kimlik metadata güncellenemedi:", meta.error);
     await linkMyCandidate();
 
@@ -862,16 +927,17 @@ export default function CandidateDashboard() {
 
     const updatedCandidate = { ...candidate, ...persisted };
     setCandidate(updatedCandidate);
-    setNewFullName(persisted.full_name || identity.full_name);
-    setNewPassport(persisted.passport_number || identity.passport_number);
-    setNewProfession(persisted.profession || identity.profession);
-    setNewSector(persisted.sector || identity.sector);
-    setNewPhone(persisted.phone || identity.phone);
-    setNewEmail(persisted.email || identity.email);
+    setNewFullName(persisted.full_name || registration.full_name);
+    setNewPassport(persisted.passport_number || registration.passport_number);
+    setNewProfession(persisted.profession || registration.profession);
+    setNewSector(persisted.sector || registration.sector);
+    setNewPhone(persisted.phone || registration.phone);
+    setNewEmail(emailNote ? newEmail : (persisted.email || newEmail));
+    setNewPhoto(persisted.photo_url || '');
     if (typeof window !== 'undefined') {
       localStorage.setItem('panova_current_candidate', JSON.stringify(updatedCandidate));
     }
-    alert(ct.savedSuccess);
+    alert([emailNote, photoNote].filter(Boolean).join('\n') || ct.savedSuccess);
   };
 
   if (!authenticated || !candidate) {
@@ -1213,7 +1279,7 @@ export default function CandidateDashboard() {
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-6">
             <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">👤 {ct.profileHeader}</h3>
             
-            <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs">
+            <form onSubmit={handleUpdateProfile} onChange={() => { profileDirty.current = true; }} autoComplete="off" className="space-y-4 text-xs">
               <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border">
                 {newPhoto ? (
                   <img src={newPhoto} alt="Önizleme" className="w-20 h-20 rounded-2xl object-cover border shadow-sm" />
@@ -1301,6 +1367,7 @@ export default function CandidateDashboard() {
                     <input
                       type="email"
                       required
+                      autoComplete="off"
                       value={newEmail}
                       onChange={(e) => setNewEmail(e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"

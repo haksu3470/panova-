@@ -6,6 +6,9 @@ import {
   assertCandidatePersisted,
   candidateAuthMetadata,
   candidateIdentityPayload,
+  candidateRegistrationPayload,
+  changedCandidateEmail,
+  changedCandidatePhoto,
   isPermissionDenied,
 } from './candidateProfile.ts';
 
@@ -130,4 +133,41 @@ test('a revoked session surfaces as permission denied, not a saved row', () => {
 test('a returned row is the persisted candidate', () => {
   const row = { id: ROW, full_name: 'Ayse Yilmaz', passport_number: 'U1234567' };
   assert.equal(assertCandidatePersisted(row, null), row);
+});
+
+test('registration save does not include email, photo, or privileged columns', () => {
+  const payload = candidateRegistrationPayload({
+    fullName: '  Ayse Yilmaz ',
+    passport: ' u1234567 ',
+    phone: ' +38970111222 ',
+    profession: ' Elektrikçi ',
+    sector: ' construction ',
+  });
+  assert.deepEqual(payload, {
+    full_name: 'Ayse Yilmaz',
+    passport_number: 'U1234567',
+    phone: '+38970111222',
+    profession: 'Elektrikçi',
+    sector: 'construction',
+  });
+  assert.equal('email' in payload, false);
+  assert.equal('photo_url' in payload, false);
+  assert.equal('auth_user_id' in payload, false);
+  assert.equal('documents_json' in payload, false);
+});
+
+test('an unchanged email is not written again', () => {
+  assert.equal(changedCandidateEmail('Ayse@Example.com', ' ayse@example.com '), null);
+  assert.equal(changedCandidateEmail('ayse@example.com', 'new@example.com'), 'new@example.com');
+  assert.throws(
+    () => changedCandidateEmail('ayse@example.com', 'not-an-email'),
+    (error: unknown) => error instanceof CandidateProfileError && error.code === 'invalid',
+  );
+});
+
+test('an unchanged photo is not sent with the profile save', () => {
+  assert.equal(changedCandidatePhoto('data:image/png;base64,abc', 'data:image/png;base64,abc'), null);
+  assert.equal(changedCandidatePhoto('', ''), null);
+  assert.equal(changedCandidatePhoto('data:image/png;base64,abc', ''), '');
+  assert.equal(changedCandidatePhoto(null, 'data:image/png;base64,next'), 'data:image/png;base64,next');
 });
