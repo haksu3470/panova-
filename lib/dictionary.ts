@@ -444,6 +444,9 @@ export interface Translation {
   verifyEmailResent?: string;
   verifyEmailResendFail?: string;
   verifyEmailCodeLabel?: string;
+  verifyEmailCopy?: string;
+  verifyEmailCopied?: string;
+  verifyEmailCopyFail?: string;
   verifyEmailCodeBtn?: string;
   verifyEmailCodeFail?: string;
   verifyEmailProofFail?: string;
@@ -956,6 +959,9 @@ export const translations: Record<Language, Translation> = {
     verifyEmailResent: 'Doğrulama e-postası yeniden gönderildi.',
     verifyEmailResendFail: 'E-posta gönderilemedi. Biraz sonra tekrar deneyin.',
     verifyEmailCodeLabel: 'Sayısal kod',
+    verifyEmailCopy: 'Kopyala',
+    verifyEmailCopied: 'Kopyalandı',
+    verifyEmailCopyFail: 'Kopyalanamadı',
     verifyEmailCodeBtn: 'Kodu doğrula',
     verifyEmailCodeFail: 'Kod kabul edilmedi. Bağlantıyı açın veya yeni bir ileti isteyin.',
     verifyEmailProofFail: 'Doğrulama oturumu kaydedilemedi. Yeni bir e-posta isteyip tekrar deneyin.',
@@ -1458,6 +1464,9 @@ export const translations: Record<Language, Translation> = {
     verifyEmailResent: 'Verification email sent again.',
     verifyEmailResendFail: 'The email could not be sent. Try again shortly.',
     verifyEmailCodeLabel: 'Numeric code',
+    verifyEmailCopy: 'Copy',
+    verifyEmailCopied: 'Copied',
+    verifyEmailCopyFail: 'Could not copy',
     verifyEmailCodeBtn: 'Verify code',
     verifyEmailCodeFail: 'That code was not accepted. Open the link or request a new message.',
     verifyEmailProofFail: 'The verification session could not be saved. Request a new email and try again.',
@@ -1960,6 +1969,9 @@ export const translations: Record<Language, Translation> = {
     verifyEmailResent: 'E-maili i verifikimit u dërgua përsëri.',
     verifyEmailResendFail: 'E-maili nuk u dërgua. Provoni përsëri pas pak.',
     verifyEmailCodeLabel: 'Kodi numerik',
+    verifyEmailCopy: 'Kopjo',
+    verifyEmailCopied: 'U kopjua',
+    verifyEmailCopyFail: 'Nuk u kopjua',
     verifyEmailCodeBtn: 'Verifiko kodin',
     verifyEmailCodeFail: 'Kodi nuk u pranua. Hapni lidhjen ose kërkoni një letër të re.',
     verifyEmailProofFail: 'Sesioni i verifikimit nuk u ruajt. Kërkoni një email të ri dhe provoni përsëri.',
@@ -2452,6 +2464,9 @@ export const translations: Record<Language, Translation> = {
     verifyEmailResent: 'أُعيد إرسال رسالة التحقق.',
     verifyEmailResendFail: 'تعذر إرسال الرسالة. حاول مرة أخرى بعد قليل.',
     verifyEmailCodeLabel: 'الرمز الرقمي',
+    verifyEmailCopy: 'نسخ',
+    verifyEmailCopied: 'تم النسخ',
+    verifyEmailCopyFail: 'تعذر النسخ',
     verifyEmailCodeBtn: 'تأكيد الرمز',
     verifyEmailCodeFail: 'لم يُقبل الرمز. افتح الرابط أو اطلب رسالة جديدة.',
     verifyEmailProofFail: 'تعذر حفظ جلسة التحقق. اطلب رسالة جديدة وحاول مرة أخرى.',
@@ -2960,6 +2975,9 @@ export const translations: Record<Language, Translation> = {
     verifyEmailResent: 'Е-поштата за потврда е испратена повторно.',
     verifyEmailResendFail: 'Е-поштата не можеше да се испрати. Обидете се повторно наскоро.',
     verifyEmailCodeLabel: 'Бројчен код',
+    verifyEmailCopy: 'Копирај',
+    verifyEmailCopied: 'Копирано',
+    verifyEmailCopyFail: 'Не се копира',
     verifyEmailCodeBtn: 'Потврди го кодот',
     verifyEmailCodeFail: 'Кодот не е прифатен. Отворете ја врската или побарајте нова порака.',
     verifyEmailProofFail: 'Сесијата за потврда не можеше да се зачува. Побарајте нова е-пошта и обидете се повторно.',
