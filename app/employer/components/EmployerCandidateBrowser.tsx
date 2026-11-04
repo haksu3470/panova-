@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
+import CandidateYouTube from '@/components/candidate/CandidateYouTube';
 import { fill } from '@/lib/portal-ui-copy';
 import {
   EMPTY_EMPLOYER_CANDIDATE_FILTERS,
@@ -51,6 +52,10 @@ export type EmployerCandidateBrowserLabels = {
   select: string;
   specialist: string;
   general: string;
+  videoTitle: string;
+  videoEmpty: string;
+  videoWatch: string;
+  videoOpen: string;
 };
 
 type Props = {
@@ -102,6 +107,13 @@ export default function EmployerCandidateBrowser({
     if (candidate.shift_suitable === true) return labels.shiftYes;
     if (candidate.shift_suitable === false) return labels.shiftNo;
     return '—';
+  };
+
+  const videoLabels = {
+    title: labels.videoTitle,
+    empty: labels.videoEmpty,
+    watch: labels.videoWatch,
+    open: labels.videoOpen,
   };
 
   const professionLine = (candidate: EmployerCandidate) => {
@@ -278,6 +290,7 @@ export default function EmployerCandidateBrowser({
                     <dd className="font-semibold text-slate-800">{shiftLabel(candidate)}</dd>
                   </div>
                 </dl>
+                <CandidateYouTube videos={candidate} labels={videoLabels} compact />
                 <CandidateActions candidate={candidate} labels={labels} onInterview={onInterview} onSelect={onSelect} />
               </li>
             ))}
@@ -293,6 +306,7 @@ export default function EmployerCandidateBrowser({
                   <th className="p-4 font-bold">{labels.nationality}</th>
                   <th className="p-4 font-bold">{labels.language}</th>
                   <th className="p-4 font-bold">{labels.shift}</th>
+                  <th className="p-4 font-bold">{labels.videoTitle}</th>
                   <th className="p-4 font-bold">{labels.action}</th>
                 </tr>
               </thead>
@@ -305,6 +319,11 @@ export default function EmployerCandidateBrowser({
                     <td className="p-4">{countryLine(candidate)}</td>
                     <td className="p-4">{candidate.language_skills || '—'}</td>
                     <td className="p-4">{shiftLabel(candidate)}</td>
+                    <td className="p-4 align-top">
+                      <div className="w-64 max-w-full">
+                        <CandidateYouTube videos={candidate} labels={videoLabels} compact showTitle={false} />
+                      </div>
+                    </td>
                     <td className="p-4">
                       <CandidateActions candidate={candidate} labels={labels} onInterview={onInterview} onSelect={onSelect} />
                     </td>

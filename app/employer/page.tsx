@@ -19,6 +19,7 @@ import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
 import EmployerCandidateBrowser from './components/EmployerCandidateBrowser';
+import CandidateYouTube from '@/components/candidate/CandidateYouTube';
 import {
   EMPLOYER_CANDIDATE_BROWSE_COLUMNS,
   isMissingBrowseRpc,
@@ -809,6 +810,10 @@ function EmployerPortalInner() {
               select: t.selectBtn || '',
               specialist: ui.specialist,
               general: ui.general,
+              videoTitle: t.youtubeVideoTitle || '',
+              videoEmpty: t.youtubeVideoEmpty || '',
+              videoWatch: t.youtubeVideoWatch || t.watchVideo,
+              videoOpen: t.youtubeVideoOpen || '',
             }}
             sectorLabel={(sector) => sectorFilterLabel(sector, t)}
             onInterview={handleRequestInterview}
@@ -889,6 +894,16 @@ function EmployerPortalInner() {
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" /> {t.approvedAndProcessing}
                       </span>
                     </div>
+                    <CandidateYouTube
+                      videos={cand}
+                      labels={{
+                        title: t.youtubeVideoTitle || '',
+                        empty: t.youtubeVideoEmpty || '',
+                        watch: t.youtubeVideoWatch || t.watchVideo,
+                        open: t.youtubeVideoOpen || '',
+                      }}
+                      compact
+                    />
                   </div>
                 ))}
               </div>

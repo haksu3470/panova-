@@ -53,6 +53,10 @@ function row(partial: Partial<EmployerCandidate> & Pick<EmployerCandidate, 'id'>
     travel_status: null,
     created_at: null,
     active_request_id: null,
+    video_url: null,
+    video_url_1: null,
+    video_url_2: null,
+    video_url_3: null,
     ...partial,
   };
 }
@@ -185,6 +189,8 @@ test('browse mapping drops identity columns and keeps filter fields', () => {
     travel_status: 'planned',
     created_at: '2026-11-01',
     active_request_id: 'req-1',
+    video_url: ' https://youtu.be/E4qr4CiDFIw ',
+    video_url_1: 'https://www.youtube.com/watch?v=gKy4n9-gEA4',
     passport_number: 'U999',
     phone: '+38970000000',
     email: 'ali@example.com',
@@ -193,6 +199,9 @@ test('browse mapping drops identity columns and keeps filter fields', () => {
   assert.equal(mapped.experience_years, 6);
   assert.equal(mapped.language_skills, 'Temel İngilizce');
   assert.equal(mapped.full_name, 'Ali Demir');
+  assert.equal(mapped.video_url, 'https://youtu.be/E4qr4CiDFIw');
+  assert.equal(mapped.video_url_1, 'https://www.youtube.com/watch?v=gKy4n9-gEA4');
+  assert.equal(mapped.video_url_2, null);
   assert.equal('passport_number' in mapped, false);
   assert.equal('phone' in mapped, false);
   assert.equal('email' in mapped, false);

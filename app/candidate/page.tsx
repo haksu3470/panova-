@@ -2,6 +2,7 @@
 
 import OAuthButtons from '@/components/auth/OAuthButtons';
 import { AuthFooter } from '@/components/site/AuthFooter';
+import CandidateYouTube from '@/components/candidate/CandidateYouTube';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -26,7 +27,7 @@ import {
 import { 
   User, CheckCircle2, LogOut, Lock, Camera, 
   FileText, Eye, X, Briefcase, Calendar, 
-  Plane, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, Video, ShieldAlert, ShieldCheck, AlertCircle
+  Plane, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, ShieldAlert, ShieldCheck, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations, type Translation } from '@/lib/dictionary';
@@ -85,12 +86,7 @@ export default function CandidateDashboard() {
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newPhoto, setNewPhoto] = useState('');
-  
-  // 3 Ayrı YouTube Video Linki State'i
-  const [newVideoUrl1, setNewVideoUrl1] = useState('');
-  const [newVideoUrl2, setNewVideoUrl2] = useState('');
-  const [newVideoUrl3, setNewVideoUrl3] = useState('');
-  
+
   const [newEmergencyName, setNewEmergencyName] = useState('');
   const [newEmergencyRelation, setNewEmergencyRelation] = useState('');
   const [newEmergencyPhone, setNewEmergencyPhone] = useState('');
@@ -104,7 +100,6 @@ export default function CandidateDashboard() {
   const [supportMsg, setSupportMsg] = useState('');
   const [supportSending, setSupportSending] = useState(false);
 
-  const [previewVideo, setPreviewVideo] = useState<string | null>(null);
   const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
 
   const t = translations[currentLang] || translations.tr;
@@ -169,7 +164,7 @@ export default function CandidateDashboard() {
       closeModal: 'Kapat',
       videoPreviewTitle: 'Aday Video Önizlemesi',
       docPreviewTitle: 'Belge Önizlemesi',
-      savedSuccess: 'Tüm profil, acil durum ve YouTube video bilgileri veritabanına başarıyla kaydedildi!',
+      savedSuccess: 'Profil ve acil durum bilgileri veritabanına kaydedildi.',
       docUploaded: 'Belge yüklendi ve veritabanına kaydedildi!',
       offerUpdated: 'İş teklifi durumu güncellendi!',
       supportCreated: 'Destek talebiniz oluşturuldu!',
@@ -224,7 +219,7 @@ export default function CandidateDashboard() {
       closeModal: 'Close',
       videoPreviewTitle: 'Candidate Video Preview',
       docPreviewTitle: 'Document Preview',
-      savedSuccess: 'All profile, emergency and YouTube video data saved successfully!',
+      savedSuccess: 'Profile and emergency details were saved.',
       docUploaded: 'Document uploaded and saved to DB!',
       offerUpdated: 'Job offer status updated.',
       supportCreated: 'Support ticket created successfully!',
@@ -279,7 +274,7 @@ export default function CandidateDashboard() {
       closeModal: 'Mbyll',
       videoPreviewTitle: 'Parapamje e Videos së Kandidatit',
       docPreviewTitle: 'Parapamje e Dokumentit',
-      savedSuccess: 'Të dhënat e profilit dhe videot u ruajtën me sukses!',
+      savedSuccess: 'Të dhënat e profilit dhe të urgjencës u ruajtën.',
       docUploaded: 'Dokumenti u ngarkua dhe u ruajt!',
       offerUpdated: 'Statusi i ofertës së punës u përditësua!',
       supportCreated: 'Kërkesa për mbështetje u krijua me sukses!',
@@ -334,7 +329,7 @@ export default function CandidateDashboard() {
       closeModal: 'إغلاق',
       videoPreviewTitle: 'معاينة فيديو المرشح',
       docPreviewTitle: 'معاينة المستند',
-      savedSuccess: 'تم حفظ كافة بيانات الملف الشخصي وفيديوهات يوتيوب بنجاح!',
+      savedSuccess: 'تم حفظ بيانات الملف الشخصي والطوارئ.',
       docUploaded: 'تم تحميل المستند وحفظه في قاعدة البيانات!',
       offerUpdated: 'تم تحديث حالة عرض العمل!',
       supportCreated: 'تم إنشاء طلب الدعم بنجاح!',
@@ -389,7 +384,7 @@ export default function CandidateDashboard() {
       closeModal: 'Затвори',
       videoPreviewTitle: 'Преглед на видеото на кандидатот',
       docPreviewTitle: 'Преглед на документ',
-      savedSuccess: 'Профилот, податоците и YouTube видеата се успешно зачувани!',
+      savedSuccess: 'Профилот и податоците за итни случаи се зачувани.',
       docUploaded: 'Документот е прикачен и зачуван!',
       offerUpdated: 'Статусот на понудата за работа е ажуриран!',
       supportCreated: 'Барањето за поддршка е успешно создадено!',
@@ -409,10 +404,6 @@ export default function CandidateDashboard() {
       setNewEmail(candidate.email || '');
       setNewPassword('');
       setNewPhoto(candidate.photo_url || '');
-      
-      setNewVideoUrl1(candidate.video_url_1 || candidate.video_url || '');
-      setNewVideoUrl2(candidate.video_url_2 || '');
-      setNewVideoUrl3(candidate.video_url_3 || '');
 
       try {
         const extra = candidate.documents_json ? JSON.parse(candidate.documents_json) : {};
@@ -435,9 +426,6 @@ export default function CandidateDashboard() {
     setNewEmail(data.email || '');
     setNewPassword('');
     setNewPhoto(data.photo_url || '');
-    setNewVideoUrl1(data.video_url_1 || data.video_url || '');
-    setNewVideoUrl2(data.video_url_2 || '');
-    setNewVideoUrl3(data.video_url_3 || '');
     setAuthenticated(true);
     try {
       const extra = data.documents_json ? JSON.parse(data.documents_json) : {};
@@ -768,14 +756,6 @@ export default function CandidateDashboard() {
 
     setUpdatingProfile(true);
 
-    // LOG TUTMA (Console Debug)
-    console.log("Panova HR Log - Aday Profil Güncelleme Başlıyor:", {
-      candidate_id: candidate.id,
-      video_1: newVideoUrl1,
-      video_2: newVideoUrl2,
-      video_3: newVideoUrl3
-    });
-
     let currentData = { docs: [
       { id: '1', name: 'Pasaport Taraması', status: 'pending' },
       { id: '2', name: 'Mesleki Sertifika / İzin Belgesi', status: 'pending' },
@@ -804,10 +784,6 @@ export default function CandidateDashboard() {
     const updatePayload: any = {
       ...identity,
       photo_url: newPhoto,
-      video_url: newVideoUrl1,
-      video_url_1: newVideoUrl1,
-      video_url_2: newVideoUrl2,
-      video_url_3: newVideoUrl3,
       documents_json: JSON.stringify(currentData)
     };
 
@@ -859,7 +835,6 @@ export default function CandidateDashboard() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('panova_current_candidate', JSON.stringify(updatedCandidate));
     }
-    console.log("Panova HR Log - Profil ve 3'lü Videolar Başarıyla Kaydedildi!");
     alert(ct.savedSuccess);
   };
 
@@ -1131,8 +1106,14 @@ export default function CandidateDashboard() {
   const missingDocs = candidateDocs.filter((d: any) => !DONE_STATUSES.includes(d.status));
   const missingProfileFields = [];
   if (!newPhoto) missingProfileFields.push(ct.missingPhoto);
-  if (!newVideoUrl1 && !newVideoUrl2 && !newVideoUrl3) missingProfileFields.push(ct.missingVideo);
   if (!newEmergencyName || !newEmergencyPhone) missingProfileFields.push(ct.missingEmergency);
+
+  const youtubeLabels = {
+    title: t.youtubeVideoTitle || t.corporateYouTubeVideos || '',
+    empty: t.youtubeVideoEmpty || '',
+    watch: t.youtubeVideoWatch || t.watchVideo,
+    open: t.youtubeVideoOpen || '',
+  };
 
   return (
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -1209,66 +1190,8 @@ export default function CandidateDashboard() {
                 </div>
               </div>
 
-              {/* Kurumsal YouTube 3'lü Video Alanı (Tümü Önizleme Butonlu) */}
-              <div className="bg-slate-50 p-4 rounded-2xl border space-y-3">
-                <h4 className="font-extrabold text-slate-900 text-xs text-emerald-800 uppercase border-b pb-1">📹 {ct.videoHeader}</h4>
-                
-                {/* 1. Video */}
-                <div className="space-y-1">
-                  <label className="block font-bold text-slate-700">{ct.video1Label}</label>
-                  <div className="flex gap-2">
-                    <input 
-                      type="url" 
-                      value={newVideoUrl1} 
-                      onChange={(e) => setNewVideoUrl1(e.target.value)} 
-                      placeholder={ct.videoPlaceholder} 
-                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
-                    />
-                    {newVideoUrl1 && (
-                      <button type="button" onClick={() => setPreviewVideo(newVideoUrl1)} className="bg-emerald-100 text-[#2e7d32] px-4 py-2 rounded-xl font-bold hover:bg-emerald-200 transition cursor-pointer shrink-0">
-                        {ct.previewBtn}
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* 2. Video */}
-                <div className="space-y-1">
-                  <label className="block font-bold text-slate-700">{ct.video2Label}</label>
-                  <div className="flex gap-2">
-                    <input 
-                      type="url" 
-                      value={newVideoUrl2} 
-                      onChange={(e) => setNewVideoUrl2(e.target.value)} 
-                      placeholder={ct.videoPlaceholder} 
-                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
-                    />
-                    {newVideoUrl2 && (
-                      <button type="button" onClick={() => setPreviewVideo(newVideoUrl2)} className="bg-emerald-100 text-[#2e7d32] px-4 py-2 rounded-xl font-bold hover:bg-emerald-200 transition cursor-pointer shrink-0">
-                        {ct.previewBtn}
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* 3. Video */}
-                <div className="space-y-1">
-                  <label className="block font-bold text-slate-700">{ct.video3Label}</label>
-                  <div className="flex gap-2">
-                    <input 
-                      type="url" 
-                      value={newVideoUrl3} 
-                      onChange={(e) => setNewVideoUrl3(e.target.value)} 
-                      placeholder={ct.videoPlaceholder} 
-                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
-                    />
-                    {newVideoUrl3 && (
-                      <button type="button" onClick={() => setPreviewVideo(newVideoUrl3)} className="bg-emerald-100 text-[#2e7d32] px-4 py-2 rounded-xl font-bold hover:bg-emerald-200 transition cursor-pointer shrink-0">
-                        {ct.previewBtn}
-                      </button>
-                    )}
-                  </div>
-                </div>
+              <div className="rounded-2xl border bg-slate-50 p-4">
+                <CandidateYouTube videos={candidate} labels={youtubeLabels} />
               </div>
 
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-3">
@@ -1462,6 +1385,9 @@ export default function CandidateDashboard() {
                 </button>
               </div>
             </div>
+            <div className="rounded-2xl border bg-slate-50 p-4">
+              <CandidateYouTube videos={candidate} labels={youtubeLabels} />
+            </div>
           </div>
         )}
 
@@ -1544,21 +1470,6 @@ export default function CandidateDashboard() {
         )}
 
       </div>
-
-      {/* Video Önizleme Modalı */}
-      {previewVideo && (
-        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 z-50">
-          <div className="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl border space-y-4">
-            <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="font-bold text-slate-900 text-sm">📹 {ct.videoPreviewTitle}</h3>
-              <button onClick={() => setPreviewVideo(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
-            </div>
-            <div className="aspect-video bg-slate-900 rounded-2xl flex items-center justify-center overflow-hidden">
-              <iframe src={previewVideo.replace('watch?v=', 'embed/')} className="w-full h-full" allowFullScreen></iframe>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Belge Önizleme Modalı */}
       {previewDoc && (
