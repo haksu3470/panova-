@@ -12,6 +12,7 @@ import {
   assertCandidatePersisted,
   candidateAuthMetadata,
   candidateIdentityPayload,
+  isPermissionDenied,
 } from '@/lib/candidateProfile';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
 import ForgotPasswordPanel, { ForgotPasswordLink } from '@/components/auth/ForgotPasswordPanel';
@@ -142,6 +143,7 @@ export default function CandidateDashboard() {
       previewBtn: 'Önizle',
       registrationHeader: 'Kayıt Bilgileri',
       profileNotSaved: 'Profil kaydedilemedi. Oturumunuzu kontrol edip tekrar deneyin.',
+      sessionRequired: 'Oturumunuz kapandı. Kayıt bilgilerini ve belgeleri kaydetmek için tekrar giriş yapın.',
       emailLabel: 'E-Posta Adresi',
       phoneLabel: 'Telefon Numarası',
       emergencyHeader: 'Acil Durum İletişim Bilgileri (Emergency Contact)',
@@ -197,6 +199,7 @@ export default function CandidateDashboard() {
       previewBtn: 'Preview',
       registrationHeader: 'Registration Details',
       profileNotSaved: 'Profile could not be saved. Check your session and try again.',
+      sessionRequired: 'Your session has ended. Sign in again to save your registration and documents.',
       emailLabel: 'Email Address',
       phoneLabel: 'Phone Number',
       emergencyHeader: 'Emergency Contact Information',
@@ -252,6 +255,7 @@ export default function CandidateDashboard() {
       previewBtn: 'Parapamje',
       registrationHeader: 'Të dhënat e regjistrimit',
       profileNotSaved: 'Profili nuk u ruajt. Kontrolloni sesionin dhe provoni përsëri.',
+      sessionRequired: 'Sesioni juaj ka përfunduar. Identifikohuni përsëri për të ruajtur regjistrimin dhe dokumentet.',
       emailLabel: 'Adresa e Emailit',
       phoneLabel: 'Numri i Telefonit',
       emergencyHeader: 'Informacioni i Kontaktit të Urgjencës',
@@ -307,6 +311,7 @@ export default function CandidateDashboard() {
       previewBtn: 'معاينة',
       registrationHeader: 'بيانات التسجيل',
       profileNotSaved: 'تعذر حفظ الملف الشخصي. تحقق من الجلسة وحاول مرة أخرى.',
+      sessionRequired: 'انتهت جلستك. سجّل الدخول مرة أخرى لحفظ بيانات التسجيل والمستندات.',
       emailLabel: 'البريد الإلكتروني',
       phoneLabel: 'رقم الهاتف',
       emergencyHeader: 'معلومات الاتصال في حالات الطوارئ',
@@ -362,6 +367,7 @@ export default function CandidateDashboard() {
       previewBtn: 'Преглед',
       registrationHeader: 'Податоци од регистрацијата',
       profileNotSaved: 'Профилот не можеше да се зачува. Проверете ја сесијата и обидете се повторно.',
+      sessionRequired: 'Вашата сесија заврши. Најавете се повторно за да ги зачувате регистрацијата и документите.',
       emailLabel: 'Е-пошта',
       phoneLabel: 'Телефонски број',
       emergencyHeader: 'Контакт за итни случаи',
@@ -487,6 +493,11 @@ export default function CandidateDashboard() {
     }
     let alive = true;
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setAuthenticated(false);
+        setCandidate(null);
+        return;
+      }
       if (event !== 'INITIAL_SESSION' && event !== 'SIGNED_IN') return;
       setTimeout(async () => {
         if (!alive || emailGateListenerPaused() || !session) return;
@@ -701,6 +712,19 @@ export default function CandidateDashboard() {
     reader.readAsDataURL(file);
   };
 
+  const loseCandidateSession = () => {
+    setAuthenticated(false);
+    setCandidate(null);
+    alert(ct.sessionRequired);
+  };
+
+  const requireCandidateSession = async () => {
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.user) return true;
+    loseCandidateSession();
+    return false;
+  };
+
   const handleDocUpload = async (docIndex: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !candidate) return;
@@ -708,6 +732,7 @@ export default function CandidateDashboard() {
 
     const reader = new FileReader();
     reader.onload = async (e) => {
+      if (!(await requireCandidateSession())) return;
       const fileUrl = e.target?.result as string;
       const payload = { file_url: fileUrl, status: 'uploaded', uploaded_at: new Date().toISOString(), notes: file.name };
       const existing = docRows.find((r) => r.doc_type === docType && ['pending', 'uploaded', 'rerequested', 'rejected'].includes(r.status));
@@ -718,8 +743,13 @@ export default function CandidateDashboard() {
       if (!error) {
         await fetchCandidateData(candidate.id);
         alert(ct.docUploaded);
+      } else if (isPermissionDenied(error)) {
+        loseCandidateSession();
       } else {
-        alert('Hata: ' + error.message);
+        const message = error && typeof error === 'object' && 'message' in error
+          ? String((error as { message?: string }).message || '')
+          : '';
+        alert(message || ct.profileNotSaved);
       }
     };
     reader.readAsDataURL(file);
@@ -739,6 +769,7 @@ export default function CandidateDashboard() {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!candidate?.id) return;
+    if (!(await requireCandidateSession())) return;
 
     let identity;
     try {
@@ -801,6 +832,10 @@ export default function CandidateDashboard() {
     } catch (writeError) {
       setUpdatingProfile(false);
       console.error("Panova HR Log - Veritabanı Kayıt Hatası:", writeError);
+      if (isPermissionDenied(writeError)) {
+        loseCandidateSession();
+        return;
+      }
       alert(explainProfileError(writeError));
       return;
     }

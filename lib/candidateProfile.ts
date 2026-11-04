@@ -77,6 +77,13 @@ export function candidateAuthMetadata(identity: CandidateIdentity): Record<strin
 
 type WriteError = { code?: string; message?: string; details?: string | null } | null;
 
+/** PostgREST returns this when the browser session was revoked and the call ran as anon. */
+export function isPermissionDenied(error: unknown): boolean {
+  const record = typeof error === 'object' && error ? error as { code?: string; message?: string } : {};
+  const message = error instanceof Error ? error.message : (record.message || '');
+  return record.code === '42501' || /permission denied for table/i.test(message);
+}
+
 function writeText(error: WriteError): string {
   return `${error?.code || ''} ${error?.message || ''} ${error?.details || ''}`;
 }

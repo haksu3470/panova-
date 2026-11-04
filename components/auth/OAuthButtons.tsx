@@ -1,6 +1,7 @@
 'use client';
 
 import { supabase } from '@/lib/supabase';
+import { rememberOAuthIntent } from '@/lib/staffSession';
 
 /**
  * Google ile giriş (Supabase Auth OAuth).
@@ -16,6 +17,7 @@ export default function OAuthButtons({
   googleLabel?: string;
 }) {
   const signIn = async () => {
+    rememberOAuthIntent(redirectPath);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}${redirectPath}` },
