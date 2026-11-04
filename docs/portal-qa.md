@@ -10,7 +10,7 @@ Otomatik kontroller (kimlik bilgisi gerekmez) / Automated checks (no credentials
 npm test
 ```
 
-`npm test` runs `node --experimental-strip-types --test` on `lib/*.test.ts` and `lib/email/*.test.ts`. YouTube URL rules, guide role filtering, lodging/meals, employer filters, and the sign-in entry points below are covered there. Browser end-to-end tests are not in this repo.
+`npm test` runs `node --experimental-strip-types --test` on `lib/*.test.ts` and `lib/email/*.test.ts`. YouTube URL rules, guide role filtering, lodging/meals, employer filters, referral-code filtering, and the sign-in entry points below are covered there. Browser end-to-end tests are not in this repo.
 
 Diller / Languages: TR, EN, SQ, AR, MK. The switcher is on the public home page and on each portal. Arabic sets `dir="rtl"`.
 
@@ -260,6 +260,28 @@ Automated: `lib/guides.test.ts`.
 
 Automated: `lib/passwordReset.test.ts` and `lib/qa-entrypoints.test.ts`.
 
+## S13. Bölge sorumlusu yönlendirme kodu / Region supervisor referral code
+
+**Rol / Role:** `source_country` and `target_country` supervisors, then `upper_management`. Repeat once as `field_officer` and once as a self-registered candidate.
+
+**Önkoşul / Preconditions:** Migration `20261104193000_supervisor_referral_codes.sql` is applied. Each supervisor row has `staff_members.referral_code` (`PV` plus 6 letters). Field officers, finance, and limited staff do not. A candidate account is not a staff member.
+
+**Adımlar / Steps:**
+
+1. Sign in as a source-country or target-country supervisor at `/portal`. Read the code in the header badge and copy it.
+2. Open **Candidates**, register a candidate (name, nationality, phone, profession, sector). Leave email empty or use a new one.
+3. Sign in as upper management. On **Candidates**, set the code filter to that supervisor’s code, then to **No code / open registration**.
+4. As upper management, register one candidate with a supervisor code selected and one with the open-registration option.
+5. On a no-code row, use **Delete open registration**. Open a coded row and confirm that button is absent. Try the same delete as the supervisor.
+6. Register a candidate at `/candidate` (self-signup) and, as a field officer, from **Candidates** or `/supplier`.
+7. Open the candidate file `/portal/candidates/[id]` and switch the language (TR, GB, MK, AL, SA).
+
+**Beklenen / Expected:** The supervisor’s new candidate stores that supervisor’s code even if the request names a different code. Self-registration, field-officer registration, and `/supplier` used by anyone who is not a region supervisor stay null. Upper management can filter by a code and by no code. The list and the dossier show the code or an empty / open-registration label. Only upper management can delete a null-code candidate; coded rows and supervisor sessions cannot. Copy is available in TR, EN, SQ, AR, and MK. Arabic keeps `dir="rtl"`.
+
+**Bilinen engel / Known blocker:** The database is the control. The Candidates screen does not send a supervisor’s own code; the insert trigger writes it. `/supplier` is still not linked from the portal navigation. Deleting a no-code candidate is a hard delete (related rows cascade; the profile link is set null). There is no in-app guide article for this flow.
+
+Automated: `lib/referralCode.test.ts`.
+
 ---
 
 ## Boşluk analizi / Gap analysis
@@ -299,7 +321,7 @@ Logout (S11), forgot password (S12), and the OTP/paste field on `EmailVerifyNoti
 ### Screens that are not the portal map
 
 - `/admin` is behind `AuthGuard` role `staff`. The page title comes from `homeCopy.admin.title` (“Admin hub”). The employers, demands, candidates, and tasks on that page are `useState` samples. It does not read Supabase. No navigation link points at `/admin`.
-- `/supplier` is behind `StaffGate` and inserts a `job_candidates` row. No navigation link points at `/supplier`.
+- `/supplier` is behind `StaffGate` and inserts a `job_candidates` row. No navigation link points at `/supplier`. A region supervisor’s insert is stamped with their referral code; other staff leave the code null.
 - The public home page section `#nasil-calisir` is marketing copy, not the guides hub.
 
 ### What is already guarded
@@ -310,3 +332,4 @@ These are not gaps; they are here so a later pass does not re-file them:
 - YouTube preview uses the video id only. Supervisors in upper management, source country, and target country may write. The database trigger blocks everyone else.
 - `/guides` hides articles until the session is confirmed and linked, then filters cards and how-tos with `audienceAllows`.
 - Employer interview creation goes through `employer_request_interview`, which requires a match on that employer’s request.
+- Region supervisors (`source_country`, `target_country`) each have one `referral_code`. Their candidate inserts are stamped with it. Self-registration stays null. Only a portal manager can delete a candidate, and only when `referral_code` is null.

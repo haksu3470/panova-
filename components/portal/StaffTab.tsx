@@ -2,6 +2,8 @@
 
 import { UserPlus, Trash2, Key } from 'lucide-react';
 import DemoBadge from './DemoBadge';
+import { ReferralCodeChip } from './ReferralCodeChip';
+import { isRegionSupervisor, normalizeReferralCode } from '@/lib/referralCode';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 
@@ -104,6 +106,14 @@ export default function StaffTab({
                   </div>
                 </div>
                 <p className="text-xs text-slate-500">{staff.email}</p>
+                {isRegionSupervisor(staff.role_level) && normalizeReferralCode(staff.referral_code) ? (
+                  <ReferralCodeChip
+                    code={normalizeReferralCode(staff.referral_code) as string}
+                    label={ui.referralCode}
+                    copyLabel={ui.referralCodeCopy}
+                    copiedLabel={ui.referralCodeCopied}
+                  />
+                ) : null}
                 <p className="text-[11px] font-bold">{staff.auth_user_id
                   ? <span className="text-emerald-700">● {ui.activeAccount}</span>
                   : staff.invited_at

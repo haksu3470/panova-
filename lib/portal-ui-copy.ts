@@ -176,6 +176,25 @@ export type PortalUi = {
   staffUpdated: string;
   updateFailed: string;
   confirmDeleteStaff: string;
+  referralCode: string;
+  referralCodeAll: string;
+  referralCodeNone: string;
+  referralCodeEmpty: string;
+  referralCodeYours: string;
+  referralCodeCopy: string;
+  referralCodeCopied: string;
+  referralFilterLabel: string;
+  deleteOpenCandidate: string;
+  confirmDeleteOpenCandidate: string;
+  deleteOpenFailed: string;
+  deleteOpenDone: string;
+  registerCandidate: string;
+  registerCandidateHint: string;
+  registerCandidateOpenHint: string;
+  registerCandidateSaved: string;
+  registerCandidateFailed: string;
+  unknownSupervisorCode: string;
+  candidateListCount: string;
   taskSaveFailed: string;
   taskSaved: string;
   noAuditYet: string;
@@ -367,6 +386,25 @@ const tr: PortalUi = {
   inviteSent: 'Davet e-postası gönderildi. Personel bu e-posta ile Google veya e-posta kaydıyla portala giriş yaptığında hesabı otomatik bağlanır.',
   staffUpdated: 'Personel bilgileri güncellendi.', updateFailed: 'Güncelleme hatası:',
   confirmDeleteStaff: 'Bu personel kaydını silmek istediğinizden emin misiniz?',
+  referralCode: 'Yönlendirme kodu',
+  referralCodeAll: 'Tüm kodlar',
+  referralCodeNone: 'Kodsuz / açık kayıt',
+  referralCodeEmpty: '—',
+  referralCodeYours: 'Sizin kodunuz',
+  referralCodeCopy: 'Kopyala',
+  referralCodeCopied: 'Kopyalandı',
+  referralFilterLabel: 'Koda göre süz',
+  deleteOpenCandidate: 'Açık kaydı sil',
+  confirmDeleteOpenCandidate: 'Bu kodsuz açık kaydı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+  deleteOpenFailed: 'Aday silinemedi:',
+  deleteOpenDone: 'Açık kayıt silindi.',
+  registerCandidate: 'Aday kaydet',
+  registerCandidateHint: 'Bu aday sizin yönlendirme kodunuza bağlanır: {code}',
+  registerCandidateOpenHint: 'Kod seçilmezse aday açık kayıt olarak kalır. Üst yönetim mevcut bir sorumlu kodu da seçebilir.',
+  registerCandidateSaved: 'Aday kaydedildi.',
+  registerCandidateFailed: 'Aday kaydedilemedi:',
+  unknownSupervisorCode: 'Bu yönlendirme kodu bir bölge sorumlusuna ait değil.',
+  candidateListCount: 'Aday listesi ({shown} / {total})',
   taskSaveFailed: 'Görev kaydedilirken hata oluştu:', taskSaved: 'Görev kaydedildi ve sorumlu personele iletildi.',
   noAuditYet: 'Henüz kayıt yok.', employerFile: 'İşveren dosyası', viewEmployerPortal: 'İşveren portalını gör',
   linkedRecord: 'Bağlı kayıt (opsiyonel)', noneOption: 'Yok', selectOption: 'Seçin…',
@@ -556,6 +594,25 @@ const en: PortalUi = {
   inviteSent: 'Invite email sent. The account links automatically when they sign in with Google or email at that address.',
   staffUpdated: 'Staff details updated.', updateFailed: 'Update error:',
   confirmDeleteStaff: 'Delete this staff record?',
+  referralCode: 'Referral code',
+  referralCodeAll: 'All codes',
+  referralCodeNone: 'No code / open registration',
+  referralCodeEmpty: '—',
+  referralCodeYours: 'Your code',
+  referralCodeCopy: 'Copy',
+  referralCodeCopied: 'Copied',
+  referralFilterLabel: 'Filter by code',
+  deleteOpenCandidate: 'Delete open registration',
+  confirmDeleteOpenCandidate: 'Delete this open registration with no code? This cannot be undone.',
+  deleteOpenFailed: 'Could not delete the candidate:',
+  deleteOpenDone: 'Open registration deleted.',
+  registerCandidate: 'Register candidate',
+  registerCandidateHint: 'This candidate is linked to your referral code: {code}',
+  registerCandidateOpenHint: 'Leave the code empty to keep an open registration. Upper management can also choose an existing supervisor code.',
+  registerCandidateSaved: 'Candidate registered.',
+  registerCandidateFailed: 'Could not register the candidate:',
+  unknownSupervisorCode: 'That referral code does not belong to a region supervisor.',
+  candidateListCount: 'Candidate list ({shown} / {total})',
   taskSaveFailed: 'The task could not be saved:', taskSaved: 'Task saved and sent to the assignee.',
   noAuditYet: 'No records yet.', employerFile: 'Employer file', viewEmployerPortal: 'View employer portal',
   linkedRecord: 'Linked record (optional)', noneOption: 'None', selectOption: 'Select…',
@@ -745,6 +802,25 @@ const sq: PortalUi = {
   inviteSent: 'Emaili i ftesës u dërgua. Llogaria lidhet vetë kur hyjnë me Google ose email në atë adresë.',
   staffUpdated: 'Të dhënat e stafit u përditësuan.', updateFailed: 'Gabim përditësimi:',
   confirmDeleteStaff: 'Të fshihet ky regjistrim stafi?',
+  referralCode: 'Kodi i referimit',
+  referralCodeAll: 'Të gjitha kodet',
+  referralCodeNone: 'Pa kod / regjistrim i hapur',
+  referralCodeEmpty: '—',
+  referralCodeYours: 'Kodi juaj',
+  referralCodeCopy: 'Kopjo',
+  referralCodeCopied: 'U kopjua',
+  referralFilterLabel: 'Filtro sipas kodit',
+  deleteOpenCandidate: 'Fshi regjistrimin e hapur',
+  confirmDeleteOpenCandidate: 'Të fshihet ky regjistrim i hapur pa kod? Veprimi nuk kthehet.',
+  deleteOpenFailed: 'Kandidati nuk u fshi:',
+  deleteOpenDone: 'Regjistrimi i hapur u fshi.',
+  registerCandidate: 'Regjistro kandidatin',
+  registerCandidateHint: 'Ky kandidat lidhet me kodin tuaj të referimit: {code}',
+  registerCandidateOpenHint: 'Lëreni kodin bosh që të mbetet regjistrim i hapur. Menaxhimi i lartë mund të zgjedhë edhe një kod ekzistues të përgjegjësit.',
+  registerCandidateSaved: 'Kandidati u regjistrua.',
+  registerCandidateFailed: 'Kandidati nuk u regjistrua:',
+  unknownSupervisorCode: 'Ky kod referimi nuk i përket një përgjegjësi rajoni.',
+  candidateListCount: 'Lista e kandidatëve ({shown} / {total})',
   taskSaveFailed: 'Detyra nuk u ruajt:', taskSaved: 'Detyra u ruajt dhe iu dërgua përgjegjësit.',
   noAuditYet: 'Ende nuk ka regjistrime.', employerFile: 'Dosja e punëdhënësit', viewEmployerPortal: 'Shiko portalin e punëdhënësit',
   linkedRecord: 'Regjistrim i lidhur (opsional)', noneOption: 'Asnjë', selectOption: 'Zgjidhni…',
@@ -934,6 +1010,25 @@ const ar: PortalUi = {
   inviteSent: 'أُرسل بريد الدعوة. يُربط الحساب تلقائيًا عند الدخول عبر Google أو البريد على ذلك العنوان.',
   staffUpdated: 'تم تحديث بيانات الموظف.', updateFailed: 'خطأ في التحديث:',
   confirmDeleteStaff: 'حذف سجل الموظف هذا؟',
+  referralCode: 'رمز الإحالة',
+  referralCodeAll: 'كل الرموز',
+  referralCodeNone: 'بدون رمز / تسجيل مفتوح',
+  referralCodeEmpty: '—',
+  referralCodeYours: 'رمزك',
+  referralCodeCopy: 'نسخ',
+  referralCodeCopied: 'تم النسخ',
+  referralFilterLabel: 'تصفية حسب الرمز',
+  deleteOpenCandidate: 'حذف التسجيل المفتوح',
+  confirmDeleteOpenCandidate: 'حذف هذا التسجيل المفتوح بلا رمز؟ لا يمكن التراجع.',
+  deleteOpenFailed: 'تعذر حذف المرشح:',
+  deleteOpenDone: 'تم حذف التسجيل المفتوح.',
+  registerCandidate: 'تسجيل مرشح',
+  registerCandidateHint: 'يُربط هذا المرشح برمز الإحالة الخاص بك: {code}',
+  registerCandidateOpenHint: 'اترك الرمز فارغًا ليبقى التسجيل مفتوحًا. يمكن للإدارة العليا أيضًا اختيار رمز مشرف موجود.',
+  registerCandidateSaved: 'تم تسجيل المرشح.',
+  registerCandidateFailed: 'تعذر تسجيل المرشح:',
+  unknownSupervisorCode: 'هذا الرمز لا يخص مشرف منطقة.',
+  candidateListCount: 'قائمة المرشحين ({shown} / {total})',
   taskSaveFailed: 'تعذر حفظ المهمة:', taskSaved: 'حُفظت المهمة وأُرسلت إلى المسؤول.',
   noAuditYet: 'لا توجد سجلات بعد.', employerFile: 'ملف صاحب العمل', viewEmployerPortal: 'عرض بوابة صاحب العمل',
   linkedRecord: 'سجل مرتبط (اختياري)', noneOption: 'لا شيء', selectOption: 'اختيار…',
@@ -1123,6 +1218,25 @@ const mk: PortalUi = {
   inviteSent: 'Поканата е испратена. Сметката се поврзува автоматски кога ќе се најават со Google или е-пошта на таа адреса.',
   staffUpdated: 'Податоците за персоналот се ажурирани.', updateFailed: 'Грешка при ажурирање:',
   confirmDeleteStaff: 'Да се избрише овој запис за персонал?',
+  referralCode: 'Код за упатување',
+  referralCodeAll: 'Сите кодови',
+  referralCodeNone: 'Без код / отворена регистрација',
+  referralCodeEmpty: '—',
+  referralCodeYours: 'Вашиот код',
+  referralCodeCopy: 'Копирај',
+  referralCodeCopied: 'Копирано',
+  referralFilterLabel: 'Филтер по код',
+  deleteOpenCandidate: 'Избриши отворена регистрација',
+  confirmDeleteOpenCandidate: 'Да се избрише оваа отворена регистрација без код? Ова не може да се врати.',
+  deleteOpenFailed: 'Кандидатот не е избришан:',
+  deleteOpenDone: 'Отворената регистрација е избришана.',
+  registerCandidate: 'Регистрирај кандидат',
+  registerCandidateHint: 'Овој кандидат се врзува за вашиот код: {code}',
+  registerCandidateOpenHint: 'Оставете го кодот празен за отворена регистрација. Високиот менаџмент може да избере и постоечки код на одговорен.',
+  registerCandidateSaved: 'Кандидатот е регистриран.',
+  registerCandidateFailed: 'Кандидатот не е регистриран:',
+  unknownSupervisorCode: 'Овој код не припаѓа на регионален одговорен.',
+  candidateListCount: 'Листа на кандидати ({shown} / {total})',
   taskSaveFailed: 'Задачата не е зачувана:', taskSaved: 'Задачата е зачувана и испратена до одговорниот.',
   noAuditYet: 'Сè уште нема записи.', employerFile: 'Досие на работодавач', viewEmployerPortal: 'Види портал на работодавач',
   linkedRecord: 'Поврзан запис (изборно)', noneOption: 'Нема', selectOption: 'Изберете…',

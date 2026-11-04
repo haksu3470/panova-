@@ -71,6 +71,7 @@ export type HomeCopy = {
     title: string; subtitle: string; success: string; another: string;
     company: string; companyPh: string; name: string; passport: string;
     phone: string; email: string; save: string; saving: string;
+    linkedCode: string; openRegistration: string;
   };
   gate: {
     checking: string; loginRequired: string; noAccess: string; loginBody: string;
@@ -223,6 +224,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
       title: 'Yetkili Tedarikçi Aday Kayıt Paneli',
       subtitle: 'Partner ve tedarikçi firmalar üzerinden havuza aday ekleyin.',
       success: 'Aday başarıyla tedarikçi havuzuna eklendi.',
+      linkedCode: 'Aday bu yönlendirme koduna bağlandı: {code}',
+      openRegistration: 'Aday açık kayıt olarak kaldı. Yönlendirme kodu yok.',
       another: 'Yeni aday kaydet',
       company: 'Tedarikçi / partner firma adınız',
       companyPh: 'Örn: Balkan Global İK',
@@ -379,6 +382,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
       title: 'Authorised supplier candidate registration',
       subtitle: 'Add candidates to the pool on behalf of a partner or supplier company.',
       success: 'The candidate was added to the supplier pool.',
+      linkedCode: 'The candidate is linked to this referral code: {code}',
+      openRegistration: 'The candidate stayed an open registration. There is no referral code.',
       another: 'Register another candidate',
       company: 'Your supplier / partner company',
       companyPh: 'e.g. Balkan Global HR',
@@ -535,6 +540,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
       title: 'Paneli i regjistrimit të kandidatëve për furnitorë',
       subtitle: 'Shtoni kandidatë në grup përmes kompanive partnere dhe furnitore.',
       success: 'Kandidati u shtua në grupin e furnitorit.',
+      linkedCode: 'Kandidati u lidh me këtë kod referimi: {code}',
+      openRegistration: 'Kandidati mbeti regjistrim i hapur. Nuk ka kod referimi.',
       another: 'Regjistro një kandidat tjetër',
       company: 'Emri i kompanisë suaj furnitore / partnere',
       companyPh: 'P.sh. Balkan Global HR',
@@ -691,6 +698,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
       title: 'تسجيل مرشحي الموردين المعتمدين',
       subtitle: 'أضيفوا مرشحين إلى المجموعة عبر شركات الشركاء والموردين.',
       success: 'أُضيف المرشح إلى مجموعة الموردين.',
+      linkedCode: 'رُبط المرشح برمز الإحالة هذا: {code}',
+      openRegistration: 'بقي المرشح تسجيلاً مفتوحاً. لا يوجد رمز إحالة.',
       another: 'تسجيل مرشح آخر',
       company: 'اسم شركة المورد / الشريك',
       companyPh: 'مثال: Balkan Global HR',
@@ -967,6 +976,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
       title: 'Регистрација на кандидати од овластен добавувач',
       subtitle: 'Додајте кандидати во базата во име на партнерска или добавувачка компанија.',
       success: 'Кандидатот е додаден во базата на добавувачот.',
+      linkedCode: 'Кандидатот е врзан за овој код: {code}',
+      openRegistration: 'Кандидатот остана отворена регистрација. Нема код за упатување.',
       another: 'Регистрирај уште еден кандидат',
       company: 'Вашата добавувачка / партнерска компанија',
       companyPh: 'на пр. Balkan Global HR',
