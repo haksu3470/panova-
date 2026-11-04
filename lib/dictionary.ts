@@ -387,6 +387,15 @@ export interface Translation {
   facilityAccommodation?: string;
   facilityFood?: string;
   facilityTransport?: string;
+  benefitSelectPlaceholder?: string;
+  benefitProvided?: string;
+  benefitNotProvided?: string;
+  benefitUnanswered?: string;
+  lodgingRequired?: string;
+  mealsRequired?: string;
+  lodgingAndMealsRequired?: string;
+  salaryAmountRequired?: string;
+  demandSaveFailed?: string;
   submitDemandBtn?: string;
   activeDemandFilesTitle?: string;
   peopleUnit?: string;
@@ -930,6 +939,15 @@ export const translations: Record<Language, Translation> = {
     facilityAccommodation: 'Konaklama (Lojman / Daire)',
     facilityFood: 'Yemek (3 Öğün / Yemek Ücreti)',
     facilityTransport: 'Ulaşım (Servis / Yol Masrafı)',
+    benefitSelectPlaceholder: 'Seçin',
+    benefitProvided: 'Sağlanıyor',
+    benefitNotProvided: 'Sağlanmıyor',
+    benefitUnanswered: 'Belirtilmedi',
+    lodgingRequired: 'Konaklama seçimi zorunludur.',
+    mealsRequired: 'Yemek seçimi zorunludur.',
+    lodgingAndMealsRequired: 'Konaklama ve yemek seçimi zorunludur.',
+    salaryAmountRequired: 'Aylık net maaşı sayı olarak girin.',
+    demandSaveFailed: 'Talep kaydedilemedi. Lütfen tekrar deneyin.',
     submitDemandBtn: 'Kurumsal Personel Talebini PANOVA Operasyona Gönder',
     activeDemandFilesTitle: 'Aktif İş Gücü Talep Dosyalarınız',
     peopleUnit: 'Kişi',
@@ -1460,6 +1478,15 @@ export const translations: Record<Language, Translation> = {
     facilityAccommodation: 'Accommodation (Housing / Apartment)',
     facilityFood: 'Food (3 Meals / Food Allowance)',
     facilityTransport: 'Transport (Shuttle / Travel Expense)',
+    benefitSelectPlaceholder: 'Select',
+    benefitProvided: 'Provided',
+    benefitNotProvided: 'Not provided',
+    benefitUnanswered: 'Not specified',
+    lodgingRequired: 'Choose whether accommodation is provided.',
+    mealsRequired: 'Choose whether meals are provided.',
+    lodgingAndMealsRequired: 'Choose whether accommodation and meals are provided.',
+    salaryAmountRequired: 'Enter the monthly net salary as a number.',
+    demandSaveFailed: 'The request could not be saved. Please try again.',
     submitDemandBtn: 'Send Corporate Personnel Demand to PANOVA Operations',
     activeDemandFilesTitle: 'Your Active Workforce Demand Files',
     peopleUnit: 'Person(s)',
@@ -1986,10 +2013,19 @@ export const translations: Record<Language, Translation> = {
     languageReqLabel: 'Gjuha e Kërkuar',
     cityLocationLabel: 'Qyteti / Lokacioni',
     durationLabel: 'Koha e Punës',
-    providedFacilitiesLabel: 'Mjetet e Ofera',
-    facilityAccommodation: 'Akomodimi (Konak / Apartament)',
-    facilityFood: 'Ushqimi (3 Vaktet / Pagesë Ushqimi)',
-    facilityTransport: 'Transporti (Servis / Shpenzime Udhëtimi)',
+    providedFacilitiesLabel: 'Kushtet e ofruara',
+    facilityAccommodation: 'Akomodimi (strehim / apartament)',
+    facilityFood: 'Ushqimi (3 vakte / pagesë ushqimi)',
+    facilityTransport: 'Transporti (autobus / shpenzime udhëtimi)',
+    benefitSelectPlaceholder: 'Zgjidhni',
+    benefitProvided: 'Ofrohet',
+    benefitNotProvided: 'Nuk ofrohet',
+    benefitUnanswered: 'Nuk është caktuar',
+    lodgingRequired: 'Zgjidhni nëse ofrohet akomodimi.',
+    mealsRequired: 'Zgjidhni nëse ofrohet ushqimi.',
+    lodgingAndMealsRequired: 'Zgjidhni nëse ofrohen akomodimi dhe ushqimi.',
+    salaryAmountRequired: 'Shkruani pagën neto mujore si numër.',
+    demandSaveFailed: 'Kërkesa nuk u ruajt. Ju lutemi provoni përsëri.',
     submitDemandBtn: 'Dërgo Kërkesën e Personelit te Operacionet PANOVA',
     activeDemandFilesTitle: 'Skedarët tuaj aktivë të kërkesave për fuqi punëtore',
     peopleUnit: 'Persona',
@@ -2324,6 +2360,15 @@ export const translations: Record<Language, Translation> = {
     facilityAccommodation: 'الإقامة (سكن / شقة)',
     facilityFood: 'الطعام (3 وجبات / بدل طعام)',
     facilityTransport: 'المواصلات (حافلة / بدل نقل)',
+    benefitSelectPlaceholder: 'اختر',
+    benefitProvided: 'متوفر',
+    benefitNotProvided: 'غير متوفر',
+    benefitUnanswered: 'غير محدد',
+    lodgingRequired: 'حدد ما إذا كانت الإقامة متوفرة.',
+    mealsRequired: 'حدد ما إذا كانت الوجبات متوفرة.',
+    lodgingAndMealsRequired: 'حدد ما إذا كانت الإقامة والوجبات متوفرة.',
+    salaryAmountRequired: 'أدخل صافي الراتب الشهري كرقم.',
+    demandSaveFailed: 'تعذر حفظ الطلب. يرجى المحاولة مرة أخرى.',
     submitDemandBtn: 'إرسال طلب الموظفين المؤسسي إلى عمليات بانوفا',
     activeDemandFilesTitle: 'ملفات طلبات القوى العاملة النشطة',
     peopleUnit: 'أفراد',
@@ -3049,6 +3094,15 @@ export const translations: Record<Language, Translation> = {
     facilityAccommodation: 'Сместување (дом / стан)',
     facilityFood: 'Храна (3 оброка / додаток за храна)',
     facilityTransport: 'Превоз (превоз / патни трошоци)',
+    benefitSelectPlaceholder: 'Изберете',
+    benefitProvided: 'Се обезбедува',
+    benefitNotProvided: 'Не се обезбедува',
+    benefitUnanswered: 'Не е наведено',
+    lodgingRequired: 'Изберете дали се обезбедува сместување.',
+    mealsRequired: 'Изберете дали се обезбедува храна.',
+    lodgingAndMealsRequired: 'Изберете дали се обезбедуваат сместување и храна.',
+    salaryAmountRequired: 'Внесете ја месечната нето плата како број.',
+    demandSaveFailed: 'Барањето не е зачувано. Обидете се повторно.',
     submitDemandBtn: 'Испрати корпоративно барање за персонал до операциите на PANOVA',
     activeDemandFilesTitle: 'Вашите активни досиеја за работна сила',
     peopleUnit: 'лица',
