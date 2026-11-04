@@ -11,6 +11,7 @@ import { writeAudit } from '@/lib/audit';
 import { Card, Stat, Field, REQUEST_STATUS_KEYS, requestStatusLabel, resultLabel, fmtDate } from '@/components/portal/file/ui';
 import { translations } from '@/lib/dictionary';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
+import { benefitsAnswered } from '@/lib/workforceRequest';
 import { useSiteLanguage } from '@/lib/site-language';
 
 const TEXT_FIELDS: [string, string?][] = [
@@ -63,6 +64,10 @@ function RequestFileInner() {
 
   const save = async () => {
     if (!req) return;
+    const benefitGap = benefitsAnswered(form.accommodation_provided, form.food_provided);
+    if (benefitGap === 'both') { setMsg(t.lodgingAndMealsRequired || ''); return; }
+    if (benefitGap === 'lodging') { setMsg(t.lodgingRequired || ''); return; }
+    if (benefitGap === 'meals') { setMsg(t.mealsRequired || ''); return; }
     setSaving(true); setMsg('');
     const keys = [...TEXT_FIELDS.map((f) => f[0]), ...BOOL_FIELDS, 'status', 'special_requirements', 'closed_reason'];
     const changes: Record<string, any> = {};
@@ -137,8 +142,29 @@ function RequestFileInner() {
               <Field key={key} label={ui.requestFields[key] || key} type={type} value={form[key] == null ? '' : String(form[key]).substring(0, type === 'date' ? 10 : undefined)} onChange={(v) => setForm({ ...form, [key]: v })} />
             ))}
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {(['accommodation_provided', 'food_provided'] as const).map((key) => (
+              <label key={key} className="block text-xs font-bold text-slate-600 space-y-1">
+                <span>{key === 'accommodation_provided' ? t.facilityAccommodation : t.facilityFood} *</span>
+                <select
+                  required
+                  aria-required="true"
+                  value={form[key] === true ? 'yes' : form[key] === false ? 'no' : ''}
+                  onChange={(e) => setForm({
+                    ...form,
+                    [key]: e.target.value === 'yes' ? true : e.target.value === 'no' ? false : null,
+                  })}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-bold text-slate-900 bg-white"
+                >
+                  <option value="">{t.benefitSelectPlaceholder}</option>
+                  <option value="yes">{t.benefitProvided}</option>
+                  <option value="no">{t.benefitNotProvided}</option>
+                </select>
+              </label>
+            ))}
+          </div>
           <div className="flex flex-wrap gap-3 pt-1">
-            {BOOL_FIELDS.map((key) => (
+            {BOOL_FIELDS.filter((key) => key !== 'accommodation_provided' && key !== 'food_provided').map((key) => (
               <label key={key} className="flex items-center gap-2 text-sm font-bold text-slate-700 bg-slate-50 border rounded-xl px-3 py-2">
                 <input type="checkbox" className="w-4 h-4" checked={!!form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.checked })} /> {ui.requestBools[key]}
               </label>

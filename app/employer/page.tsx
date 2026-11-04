@@ -14,6 +14,7 @@ import {
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
 import { dateLocale, fill, optionLabel, portalUi, positionLabel } from '@/lib/portal-ui-copy';
+import { benefitPhrase, buildEmployerDemandInsert, displayedRequestSalary, type DemandBlock, type YesNo } from '@/lib/workforceRequest';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
@@ -124,10 +125,9 @@ function EmployerPortalInner() {
   const [demandExperience, setDemandExperience] = useState('1-3');
   const [demandLanguageReq, setDemandLanguageReq] = useState('none');
   const durationValue = demandDuration ?? ui.durationDefault;
-  const [demandAccommodation, setDemandAccommodation] = useState(true);
-  const [demandFood, setDemandFood] = useState(true);
-  const [demandTransport, setDemandTransport] = useState(true);
-  const [demandNotes, setDemandNotes] = useState('');
+  const [demandAccommodation, setDemandAccommodation] = useState<YesNo>('');
+  const [demandFood, setDemandFood] = useState<YesNo>('');
+  const [demandError, setDemandError] = useState<DemandBlock | 'save' | ''>('');
 
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMessage, setSupportMessage] = useState('');
@@ -260,35 +260,59 @@ function EmployerPortalInner() {
     }
   };
 
+  const demandErrorMessage = (code: DemandBlock | 'save') => {
+    if (code === 'position') return t.fillRequiredFields || '';
+    if (code === 'lodging') return t.lodgingRequired || '';
+    if (code === 'meals') return t.mealsRequired || '';
+    if (code === 'both') return t.lodgingAndMealsRequired || '';
+    if (code === 'salary') return t.salaryAmountRequired || '';
+    return t.demandSaveFailed || '';
+  };
+
+  const benefitText = (value: unknown) => benefitPhrase({
+    provided: t.benefitProvided || '',
+    notProvided: t.benefitNotProvided || '',
+    unanswered: t.benefitUnanswered || '',
+  }, value);
+
   const handleCreateCorporateDemand = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!employerProfile?.id) return;
-    if (selectedPositions.length === 0 && !customPosition.trim()) return;
 
-    const newDemandPayload = {
-      employer_id: employerProfile.id,
-      employer_name: employerProfile.companyName,
-      position_title: [...selectedPositions.map((id) => positionLabel(ui, id)), customPosition.trim()].filter(Boolean).join(', '),
+    const built = buildEmployerDemandInsert({
+      employerId: employerProfile?.id || '',
+      employerName: employerProfile?.companyName || '',
+      country: employerProfile?.country || '',
+      positionTitle: [...selectedPositions.map((id) => positionLabel(ui, id)), customPosition.trim()].filter(Boolean).join(', '),
       sector: selectedSector,
       headcount: Number(demandHeadcount),
       city: demandCity,
-      salary: demandSalary,
-      job_description: fill(ui.jobDesc, {
-        duration: durationValue,
-        experience: optionLabel(experienceOptions, demandExperience),
-        language: optionLabel(ui.languageOptions, demandLanguageReq),
-        stay: demandAccommodation ? ui.yes : ui.no,
-        food: demandFood ? ui.yes : ui.no,
-        transport: demandTransport ? ui.yes : ui.no,
-        notes: demandNotes,
-      }),
-      status: 'new_request'
-    };
+      salaryText: demandSalary,
+      duration: durationValue,
+      experience: demandExperience,
+      language: optionLabel(ui.languageOptions, demandLanguageReq),
+      lodging: demandAccommodation,
+      meals: demandFood,
+    });
+    if (!built.ok) {
+      setDemandError(built.error);
+      return;
+    }
+    if (!employerProfile?.id) {
+      setDemandError('save');
+      return;
+    }
 
-    await supabase.from('job_requests').insert([newDemandPayload]);
+    const { error } = await supabase.from('job_requests').insert([built.row]);
+    if (error) {
+      console.error('job request insert failed', error);
+      setDemandError('save');
+      return;
+    }
 
+    setDemandError('');
     setCustomPosition('');
-    setDemandNotes('');
+    setDemandAccommodation('');
+    setDemandFood('');
     fetchEmployerData();
     setActiveTab('demands');
   };
@@ -495,7 +519,7 @@ function EmployerPortalInner() {
                 </div>
               </div>
 
-              <form onSubmit={handleCreateCorporateDemand} className="space-y-6">
+              <form noValidate onSubmit={handleCreateCorporateDemand} className="space-y-6">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">1. {t.selectSectorLabel} *</label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -601,13 +625,57 @@ function EmployerPortalInner() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.salaryOfferLabel}</label>
-                    <input type="text" value={demandSalary} onChange={(e) => setDemandSalary(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
+                    <input type="text" value={demandSalary} onChange={(e) => { setDemandSalary(e.target.value); setDemandError(''); }} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.durationLabel}</label>
                     <input type="text" value={durationValue} onChange={(e) => setDemandDuration(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
                   </div>
                 </div>
+
+                <fieldset className="space-y-2">
+                  <legend className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">{t.providedFacilitiesLabel} *</legend>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="demand-lodging" className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.facilityAccommodation} *</label>
+                      <select
+                        id="demand-lodging"
+                        required
+                        aria-required="true"
+                        aria-invalid={demandError === 'lodging' || demandError === 'both'}
+                        value={demandAccommodation}
+                        onChange={(e) => { setDemandAccommodation(e.target.value as YesNo); setDemandError(''); }}
+                        className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950 cursor-pointer"
+                      >
+                        <option value="">{t.benefitSelectPlaceholder}</option>
+                        <option value="yes">{t.benefitProvided}</option>
+                        <option value="no">{t.benefitNotProvided}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="demand-meals" className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.facilityFood} *</label>
+                      <select
+                        id="demand-meals"
+                        required
+                        aria-required="true"
+                        aria-invalid={demandError === 'meals' || demandError === 'both'}
+                        value={demandFood}
+                        onChange={(e) => { setDemandFood(e.target.value as YesNo); setDemandError(''); }}
+                        className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950 cursor-pointer"
+                      >
+                        <option value="">{t.benefitSelectPlaceholder}</option>
+                        <option value="yes">{t.benefitProvided}</option>
+                        <option value="no">{t.benefitNotProvided}</option>
+                      </select>
+                    </div>
+                  </div>
+                </fieldset>
+
+                {demandError && (
+                  <p role="alert" className="text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                    {demandErrorMessage(demandError)}
+                  </p>
+                )}
 
                 <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-4 rounded-xl font-bold transition shadow-lg cursor-pointer text-sm">
                   {t.submitDemandBtn}
@@ -629,7 +697,8 @@ function EmployerPortalInner() {
                             <span className="text-xs font-extrabold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">{metrics.headcount} {t.peopleUnit}</span>
                           </div>
                           <h4 className="font-extrabold text-slate-950 text-base">{dem.position_title}</h4>
-                          <p className="text-xs text-slate-500">📍 {dem.city} | 💰 {dem.salary}</p>
+                          <p className="text-xs text-slate-500">📍 {dem.city} | 💰 {displayedRequestSalary(dem) || '—'}</p>
+                          <p className="text-xs text-slate-600">{t.facilityAccommodation}: {benefitText(dem.accommodation_provided)} · {t.facilityFood}: {benefitText(dem.food_provided)}</p>
                         </div>
                         <div className="text-right">
                           <span className="font-bold uppercase text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl text-xs">{t.statusLabel}: {dem.status}</span>

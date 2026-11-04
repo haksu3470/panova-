@@ -24,6 +24,7 @@ import {
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
 import { portalUi } from '@/lib/portal-ui-copy';
+import { benefitPhrase, displayedRequestSalary } from '@/lib/workforceRequest';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
@@ -900,14 +901,15 @@ export default function PortalPage() {
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
                 <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">💼 Working Conditions & Benefits</h4>
                 <div className="grid grid-cols-2 gap-2 text-slate-700">
-                  <div><strong>Salary:</strong> {selectedDemandDetail.salary || 'Negotiable'}</div>
+                  <div><strong>Salary:</strong> {displayedRequestSalary(selectedDemandDetail) || 'Negotiable'}</div>
                   <div><strong>Working Hours:</strong> {selectedDemandDetail.working_hours || '40-45 hrs/week'}</div>
                   <div><strong>Weekly Days:</strong> {selectedDemandDetail.weekly_days || '5-6 Days'}</div>
                   <div><strong>Overtime:</strong> {selectedDemandDetail.overtime_policy || 'Standard Legal'}</div>
-                  <div><strong>Accommodation:</strong> {selectedDemandDetail.accommodation ? '✅ Provided' : '❌ Not Provided'}</div>
-                  <div><strong>Food / Transport:</strong> {selectedDemandDetail.food_allowance ? '✅ Yes' : '❌ No'} / {selectedDemandDetail.transportation ? '✅ Yes' : '❌ No'}</div>
+                  <div><strong>{t.facilityAccommodation}:</strong> {benefitPhrase({ provided: t.benefitProvided || '', notProvided: t.benefitNotProvided || '', unanswered: t.benefitUnanswered || '' }, selectedDemandDetail.accommodation_provided ?? selectedDemandDetail.accommodation)}</div>
+                  <div><strong>{t.facilityFood}:</strong> {benefitPhrase({ provided: t.benefitProvided || '', notProvided: t.benefitNotProvided || '', unanswered: t.benefitUnanswered || '' }, selectedDemandDetail.food_provided ?? selectedDemandDetail.food_allowance)}</div>
+                  <div><strong>{t.facilityTransport}:</strong> {benefitPhrase({ provided: t.benefitProvided || '', notProvided: t.benefitNotProvided || '', unanswered: t.benefitUnanswered || '' }, selectedDemandDetail.transport_provided ?? selectedDemandDetail.transportation)}</div>
                   <div><strong>Flight Ticket:</strong> {selectedDemandDetail.flight_ticket ? '✅ Employer Covers' : 'Candidate'}</div>
-                  <div><strong>Contract Term:</strong> {selectedDemandDetail.contract_term || '1 Year'}</div>
+                  <div><strong>Contract Term:</strong> {selectedDemandDetail.contract_type || selectedDemandDetail.contract_term || '1 Year'}</div>
                 </div>
               </div>
 
@@ -916,7 +918,7 @@ export default function PortalPage() {
                 <div className="space-y-1 text-slate-700">
                   <div><strong>Experience:</strong> {selectedDemandDetail.experience_required || 'Min 2 years'}</div>
                   <div><strong>Certificate:</strong> {selectedDemandDetail.certificate_required || 'Professional Certificate Required'}</div>
-                  <div><strong>Language:</strong> {selectedDemandDetail.language_required || 'Basic English or Local Language'}</div>
+                  <div><strong>Language:</strong> {selectedDemandDetail.required_language || selectedDemandDetail.language_required || 'Basic English or Local Language'}</div>
                   <div><strong>Special Req:</strong> {selectedDemandDetail.special_requirements || selectedDemandDetail.special_reqs || 'Shift suitability.'}</div>
                 </div>
               </div>
