@@ -1,25 +1,39 @@
 import type { ReactNode } from 'react';
+import type { Translation } from '@/lib/dictionary';
+import type { PortalUi } from '@/lib/portal-ui-copy';
 
-export const REQUEST_STATUS: Record<string, string> = {
-  new_request: '🟡 Yeni talep',
-  reviewing: '🔵 İnceleniyor',
-  searching_candidates: '🌍 Aday aranıyor',
-  presenting_candidates: '📤 Aday sunuluyor',
-  interviews: '🤝 Görüşmeler',
-  selection_completed: '⭐ Seçim tamamlandı',
-  official_process: '📋 Resmî süreç',
-  travel_planning: '✈️ Seyahat planı',
-  completed: '🟢 Tamamlandı',
-  cancelled: '🔴 İptal',
-};
+export const REQUEST_STATUS_KEYS = [
+  'new_request',
+  'reviewing',
+  'searching_candidates',
+  'presenting_candidates',
+  'interviews',
+  'selection_completed',
+  'official_process',
+  'travel_planning',
+  'completed',
+  'cancelled',
+] as const;
 
-export const RESULT_LABEL: Record<string, string> = {
-  interview: '🤝 Görüşmeye çağrıldı',
-  selected: '⭐ Seçildi',
-  backup: '🔁 Yedek',
-  later: '⏳ Daha sonra',
-  not_suitable: '❌ Uygun değil',
-};
+export function requestStatusLabel(t: Translation, status?: string | null) {
+  const map: Record<string, string | undefined> = {
+    new_request: t.stageNewRequest,
+    reviewing: t.stageReviewing,
+    searching_candidates: t.stageSearchingCandidates,
+    presenting_candidates: t.stagePresentingCandidates,
+    interviews: t.stageInterviews,
+    selection_completed: t.stageSelectionCompleted,
+    official_process: t.stageOfficialProcess,
+    travel_planning: t.stageTravelPlanning,
+    completed: t.stageCompleted,
+    cancelled: t.stageCancelled,
+  };
+  return (status && map[status]) || status || '—';
+}
+
+export function resultLabel(ui: PortalUi, result?: string | null) {
+  return (result && ui.matchResults[result]) || '';
+}
 
 export function Card({ title, children, right }: { title: string; children: ReactNode; right?: ReactNode }) {
   return (

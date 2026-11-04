@@ -2,6 +2,8 @@
 
 import { UserPlus, Trash2, Key } from 'lucide-react';
 import DemoBadge from './DemoBadge';
+import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
+import { useSiteLanguage } from '@/lib/site-language';
 
 interface StaffTabProps {
   staffMembers: any[];
@@ -38,10 +40,12 @@ export default function StaffTab({
   setEditingStaff,
   handleDeleteStaff
 }: StaffTabProps) {
+  const { currentLang } = useSiteLanguage('en');
+  const ui = portalUi[currentLang];
   if (!isUpperManagement) {
     return (
       <div className="bg-white p-8 rounded-2xl border text-center text-slate-500 text-sm">
-        Bu alanı görüntülemek için Üst Yönetim (Upper Management) yetkisi gereklidir.
+        {ui.staffRestricted}
       </div>
     );
   }
@@ -62,7 +66,7 @@ export default function StaffTab({
             <input type="email" required value={newStaffEmail} onChange={(e) => setNewStaffEmail(e.target.value)} placeholder="ahmet@panova.com" className="w-full px-3.5 py-2.5 rounded-xl border outline-none font-medium text-slate-900 bg-white text-xs sm:text-sm" />
           </div>
           <div>
-            <p className="text-[11px] text-slate-500 leading-snug">Şifre belirlenmez. Kişiye davet e-postası gider; aynı e-posta ile Google veya e-posta kaydıyla portala girdiğinde hesabı otomatik bağlanır.</p>
+            <p className="text-[11px] text-slate-500 leading-snug">{ui.staffInviteHint}</p>
           </div>
           <div>
             <label className="block font-bold text-slate-700 uppercase mb-1">{t.staffPermLabel}</label>
@@ -78,7 +82,7 @@ export default function StaffTab({
             </select>
           </div>
           <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-xs sm:text-sm">
-            Davet Gönder
+            {ui.sendInvite}
           </button>
         </form>
       </div>
@@ -95,16 +99,16 @@ export default function StaffTab({
                 <div className="flex items-center justify-between">
                   <h4 className="font-extrabold text-slate-900 text-sm">{staff.name}<DemoBadge show={staff.is_demo} /></h4>
                   <div className="flex items-center gap-1">
-                    <button onClick={() => setEditingStaff(staff)} className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-[11px] font-bold transition cursor-pointer">Düzenle</button>
+                    <button onClick={() => setEditingStaff(staff)} className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-[11px] font-bold transition cursor-pointer">{ui.edit}</button>
                     <button onClick={() => handleDeleteStaff(staff.id)} className="p-1 text-slate-400 hover:text-red-600 transition cursor-pointer"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </div>
                 <p className="text-xs text-slate-500">{staff.email}</p>
                 <p className="text-[11px] font-bold">{staff.auth_user_id
-                  ? <span className="text-emerald-700">● Aktif hesap</span>
+                  ? <span className="text-emerald-700">● {ui.activeAccount}</span>
                   : staff.invited_at
-                    ? <span className="text-amber-600">● Davet bekliyor ({new Date(staff.invited_at).toLocaleDateString('tr-TR')})</span>
-                    : <span className="text-slate-400">● Hesap bağlı değil</span>}</p>
+                    ? <span className="text-amber-600">● {fill(ui.invitePending, { date: new Date(staff.invited_at).toLocaleDateString(dateLocale[currentLang]) })}</span>
+                    : <span className="text-slate-400">● {ui.accountUnlinked}</span>}</p>
               </div>
 
               <div className="pt-2 border-t space-y-1.5">

@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import type { Language } from '@/lib/dictionary';
+import { portalUi } from '@/lib/portal-ui-copy';
 
 interface DemandsTableProps {
   t: any;
@@ -8,7 +10,8 @@ interface DemandsTableProps {
   [key: string]: any;
 }
 
-export default function DemandsTable({ t, demands }: DemandsTableProps) {
+export default function DemandsTable({ t, demands, lang = 'en' }: DemandsTableProps) {
+  const ui = portalUi[(lang as Language)] ?? portalUi.en;
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredDemands = demands.filter(item => 
@@ -20,11 +23,11 @@ export default function DemandsTable({ t, demands }: DemandsTableProps) {
     <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl lg:col-span-2">
       <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
         <h2 className="text-sm font-black text-slate-900">
-          {t.empTabRequests || 'Personel Taleplerim'}
+          {t.empTabRequests}
         </h2>
         <input
           type="text"
-          placeholder={t.searchDemandPlaceholder || 'Talep ara...'}
+          placeholder={t.searchDemandPlaceholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="px-3 py-1.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 w-48"
@@ -35,10 +38,10 @@ export default function DemandsTable({ t, demands }: DemandsTableProps) {
         <table className="w-full text-left text-xs">
           <thead>
             <tr className="bg-slate-100 text-slate-600 uppercase font-bold">
-              <th className="p-3.5 rounded-l-xl">{t.colPosSectorTitle || 'POZİSYON / SEKTÖR'}</th>
-              <th className="p-3.5">{t.colCriteriaTitle || 'KRİTERLER'}</th>
-              <th className="p-3.5">{t.colHeadcountSalaryTitle || 'KİŞİ / MAAŞ'}</th>
-              <th className="p-3.5 rounded-r-xl">{t.colStatusTitle || 'DURUM'}</th>
+              <th className="p-3.5 rounded-s-xl">{t.colPosSectorTitle}</th>
+              <th className="p-3.5">{t.colCriteriaTitle}</th>
+              <th className="p-3.5">{t.colHeadcountSalaryTitle}</th>
+              <th className="p-3.5 rounded-e-xl">{t.colStatusTitle}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -47,7 +50,7 @@ export default function DemandsTable({ t, demands }: DemandsTableProps) {
                 <td className="p-3.5 font-medium text-slate-900">
                   <div className="font-bold">{item.position}</div>
                   <div className="text-[10px] text-slate-400">{item.sector}</div>
-                  <div className="text-[10px] text-slate-500 mt-1">Tarih: {item.date}</div>
+                  <div className="text-[10px] text-slate-500 mt-1">{ui.datePrefix} {item.date}</div>
                 </td>
                 <td className="p-3.5 text-slate-700">
                   <div className="flex flex-wrap gap-1 mb-1.5">
@@ -62,12 +65,12 @@ export default function DemandsTable({ t, demands }: DemandsTableProps) {
                   </div>
                 </td>
                 <td className="p-3.5">
-                  <div className="font-semibold text-slate-800">{item.headcount} Kişi</div>
+                  <div className="font-semibold text-slate-800">{item.headcount} {t.peopleUnit}</div>
                   <div className="text-slate-600 font-medium">{item.salary}</div>
                 </td>
                 <td className="p-3.5">
                   <span className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-bold text-[10px]">
-                    {item.status || 'Aktif'}
+                    {item.status || ui.activeStatus}
                   </span>
                 </td>
               </tr>
