@@ -660,7 +660,7 @@ function CandidateDetailPageInner() {
               <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-600" /> {t.internalNotesAdminOnly}
               </h3>
-              <textarea rows={3} value={internalNotes} onChange={(e) => setInternalNotes(e.target.value)} className="w-full p-4 rounded-xl border border-slate-300 text-xs outline-none text-slate-900 font-medium" />
+              <textarea rows={3} value={internalNotes} onChange={(e) => setInternalNotes(e.target.value)} className="w-full p-4 rounded-xl border border-slate-300 bg-white text-xs outline-none text-slate-900 font-medium scheme-light" />
             </div>
           </div>
 

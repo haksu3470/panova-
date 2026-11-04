@@ -113,7 +113,7 @@ export default function MatchPanel({ request, onClose }: Props) {
       />
     )}
     <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
-      <div className="bg-white w-full sm:max-w-3xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 space-y-5" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white text-slate-900 scheme-light w-full sm:max-w-3xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 space-y-5" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="font-extrabold text-slate-900 text-lg">🔗 {ui.matchTitle}</h3>
@@ -121,13 +121,13 @@ export default function MatchPanel({ request, onClose }: Props) {
               {request.position_title} · {request.employer_name} · {fill(ui.selectedOf, { selected: selectedCount, total: request.headcount })}
             </p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-100" aria-label={ui.close}><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="p-2 rounded-lg text-slate-700 hover:bg-slate-100" aria-label={ui.close}><X className="w-5 h-5" /></button>
         </div>
 
         {error && <p className="text-xs text-red-600 bg-red-50 p-2 rounded-lg">{error}</p>}
 
         <section className="space-y-2">
-          <h4 className="text-xs font-bold uppercase text-slate-600">{ui.linkedCandidates} ({matches.length})</h4>
+          <h4 className="text-xs font-bold uppercase tracking-wide text-slate-800">{ui.linkedCandidates} ({matches.length})</h4>
           {matches.length === 0 && <p className="text-xs text-slate-400">{ui.noneLinked}</p>}
           {matches.map((m) => {
             const c = byId[m.candidate_id];
@@ -143,9 +143,9 @@ export default function MatchPanel({ request, onClose }: Props) {
                   {!m.presented_at && (
                     <button disabled={busy} onClick={() => present(m)} className="text-xs font-bold px-3 py-2 rounded-lg bg-blue-600 text-white disabled:opacity-50">{ui.present}</button>
                   )}
-                  <select disabled={busy} value={m.employer_result || ''} onChange={(e) => setResult(m, e.target.value)} className="text-xs border rounded-lg px-2 py-2 bg-slate-50">
-                    <option value="">— {ui.intNoResult} —</option>
-                    {Object.entries(ui.matchResults).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  <select disabled={busy} value={m.employer_result || ''} onChange={(e) => setResult(m, e.target.value)} className="text-xs font-semibold border border-slate-300 rounded-lg px-2 py-2 bg-white text-slate-900 scheme-light">
+                    <option className="bg-white text-slate-900" value="">— {ui.intNoResult} —</option>
+                    {Object.entries(ui.matchResults).map(([value, label]) => <option key={value} className="bg-white text-slate-900" value={value}>{label}</option>)}
                   </select>
                   {(m.employer_result === 'interview' || m.employer_result === 'selected') && (
                     <button disabled={busy} onClick={() => setIoMatch(m)} className="text-xs font-bold px-3 py-2 rounded-lg bg-amber-500 text-white whitespace-nowrap">
@@ -160,8 +160,8 @@ export default function MatchPanel({ request, onClose }: Props) {
         </section>
 
         <section className="space-y-2">
-          <h4 className="text-xs font-bold uppercase text-slate-600">{ui.suggested}</h4>
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={ui.searchCandidates} className="w-full border rounded-xl px-3 py-2 text-sm" />
+          <h4 className="text-xs font-bold uppercase tracking-wide text-slate-800">{ui.suggested}</h4>
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={ui.searchCandidates} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 placeholder:text-slate-600 outline-none scheme-light" />
           {suggestions.map((c) => (
             <div key={c.id} className="border rounded-xl p-3 flex items-center gap-3">
               <div className="flex-1 min-w-0">
