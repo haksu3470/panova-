@@ -8,11 +8,13 @@ import DemoBadge from '@/components/portal/DemoBadge';
 import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
 import { Card, Stat, Field, requestStatusLabel, resultLabel, fmtDate } from '@/components/portal/file/ui';
+import DeleteRecordButton from '@/components/portal/DeleteRecordButton';
+import { useStaffRole } from '@/components/portal/useStaffRole';
 import { translations } from '@/lib/dictionary';
 import { fill, portalUi } from '@/lib/portal-ui-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 
-const EDITABLE = ['contact_person', 'contact_name', 'email', 'phone', 'country', 'city', 'website', 'address', 'tax_id', 'assigned_sector', 'compliance_status', 'suitability_status', 'notes'] as const;
+const EDITABLE = ['company_name', 'contact_person', 'contact_name', 'email', 'phone', 'country', 'city', 'website', 'address', 'tax_id', 'assigned_sector', 'compliance_status', 'suitability_status', 'notes'] as const;
 
 function EmployerFileInner() {
   const { id } = useParams() as { id: string };
@@ -30,6 +32,7 @@ function EmployerFileInner() {
   const { currentLang, isRtl } = useSiteLanguage('tr');
   const t = translations[currentLang] || translations.tr;
   const ui = portalUi[currentLang];
+  const { upper } = useStaffRole();
 
   const load = async () => {
     setLoading(true);
@@ -73,11 +76,14 @@ function EmployerFileInner() {
     const changes: Record<string, string | null> = {};
     for (const k of EDITABLE) if ((emp[k] ?? '') !== form[k]) changes[k] = form[k] || null;
     if (!Object.keys(changes).length) { setSaving(false); setMsg(ui.noChanges); return; }
-    const { error } = await supabase.from('employers').update(changes).eq('id', id);
-    if (error) setMsg(`${ui.errorPrefix} ${error.message}`);
+    const { data: saved, error } = await supabase.from('employers').update(changes).eq('id', id).select('id, company_name').maybeSingle();
+    if (error || !saved) setMsg(`${ui.errorPrefix} ${error?.message || ui.deleteFailed}`);
     else {
-      await writeAudit(`${ui.employerFile}: ${emp.company_name}`, 'employer', id, { fields: Object.keys(changes) });
-      setEmp({ ...emp, ...changes }); setMsg(t.savedSuccess || 'OK');
+      if (changes.company_name && changes.company_name !== emp.company_name) {
+        await supabase.from('job_requests').update({ employer_name: changes.company_name }).eq('employer_id', id);
+      }
+      await writeAudit(`${ui.employerFile}: ${saved.company_name || emp.company_name}`, 'employer', id, { fields: Object.keys(changes) });
+      setEmp({ ...emp, ...changes, company_name: saved.company_name }); setMsg(t.savedSuccess || 'OK');
     }
     setSaving(false);
   };
@@ -106,9 +112,19 @@ function EmployerFileInner() {
               <span>📅 {fill(ui.registeredOn, { date: fmtDate(emp.created_at) })}</span>
             </div>
           </div>
-          <button onClick={save} disabled={saving} className="w-full sm:w-auto bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">
-            {saving ? (t.saving || '...') : (t.saveChanges || t.saveBtn)}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <DeleteRecordButton
+              table="employers"
+              id={emp.id}
+              name={emp.company_name || emp.id}
+              isDemo={emp.is_demo}
+              allowed={upper}
+              onDeleted={() => { window.location.href = '/portal'; }}
+            />
+            <button onClick={save} disabled={saving} className="w-full sm:w-auto bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">
+              {saving ? (t.saving || '...') : (t.saveChanges || t.saveBtn)}
+            </button>
+          </div>
         </div>
         {msg && <div className="text-xs font-bold text-slate-700">{msg}</div>}
 

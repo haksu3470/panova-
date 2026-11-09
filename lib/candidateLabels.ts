@@ -1,5 +1,5 @@
 import { translations, type Language, type Translation } from './dictionary';
-import { EUROPEAN_COUNTRIES } from './europeanCountries';
+import { registrationCountries } from './registrationCountries';
 import { SECTOR_FILTER_CODES, normalizeFilterText, sectorFilterLabel } from './employerCandidateFilters';
 import { portalUi, type PortalUi } from './portal-ui-copy';
 
@@ -27,8 +27,8 @@ const UNSPECIFIED = new Set<string>(
   ].map(fold).filter(Boolean),
 );
 
-const COUNTRIES = new Map<string, (typeof EUROPEAN_COUNTRIES)[number]>();
-for (const country of EUROPEAN_COUNTRIES) {
+const COUNTRIES = new Map<string, ReturnType<typeof registrationCountries>[number]>();
+for (const country of registrationCountries()) {
   COUNTRIES.set(fold(country.value), country);
   COUNTRIES.set(fold(country.code), country);
   for (const name of Object.values(country.names)) COUNTRIES.set(fold(name), country);

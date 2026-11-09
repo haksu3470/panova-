@@ -35,7 +35,12 @@ import {
 import Link from 'next/link';
 import { Language, translations, type Translation } from '@/lib/dictionary';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
+import { RegistrationCountryOptions } from '@/components/site/RegistrationCountryOptions';
+import { candidatePlaceLabel } from '@/lib/candidateLabels';
 import { homeCopy } from '@/lib/home-copy';
+import { canonicalNationality } from '@/lib/registrationCountries';
+import { candidateOfferResponse, offerMoney, offerStatusLabel } from '@/lib/offers';
+import { portalUi } from '@/lib/portal-ui-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { guideNavLabel } from '@/lib/guides-nav';
 
@@ -75,6 +80,7 @@ export default function CandidateDashboard() {
   const [regEmail, setRegEmail] = useState('');
   const [regProfession, setRegProfession] = useState('');
   const [regSector, setRegSector] = useState('construction');
+  const [regNationality, setRegNationality] = useState('');
 
   const [candidate, setCandidate] = useState<any | null>(null);
   const [regPassword, setRegPassword] = useState('');
@@ -86,6 +92,7 @@ export default function CandidateDashboard() {
   const [newPassport, setNewPassport] = useState('');
   const [newProfession, setNewProfession] = useState('');
   const [newSector, setNewSector] = useState('construction');
+  const [newNationality, setNewNationality] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -419,6 +426,7 @@ export default function CandidateDashboard() {
     setNewPassport(candidate.passport_number || '');
     setNewProfession(candidate.profession || '');
     setNewSector(candidate.sector || 'construction');
+    setNewNationality(canonicalNationality(candidate.nationality) || '');
     setNewPhone(candidate.phone || '');
     setNewEmail(candidate.email || '');
     setNewPassword('');
@@ -445,6 +453,7 @@ export default function CandidateDashboard() {
     setNewPassport(data.passport_number || '');
     setNewProfession(data.profession || '');
     setNewSector(data.sector || 'construction');
+    setNewNationality(canonicalNationality(data.nationality) || '');
     setNewPhone(data.phone || '');
     setNewEmail(data.email || '');
     setNewPassword('');
@@ -564,7 +573,7 @@ export default function CandidateDashboard() {
 
   const handleCandidateSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!regFullName || !regPassport || !regEmail || !regPassword) {
+    if (!regFullName || !regPassport || !regEmail || !regPassword || !canonicalNationality(regNationality)) {
       alert(t.fillRequiredFields);
       return;
     }
@@ -588,7 +597,7 @@ export default function CandidateDashboard() {
           phone: regPhone,
           profession: regProfession,
           sector: regSector,
-          nationality: 'Belirtilmedi',
+          nationality: canonicalNationality(regNationality) || '',
         },
       });
       if (result.status === 'error') {
@@ -675,16 +684,19 @@ export default function CandidateDashboard() {
   };
 
   const handleUpdateOfferStatus = async (offerId: string, newStatus: 'accepted' | 'rejected') => {
-    const { error } = await supabase
+    const ui = portalUi[currentLang];
+    const { data, error } = await supabase
       .from('job_offers')
-      .update({ status: newStatus })
-      .eq('id', offerId);
+      .update(candidateOfferResponse(newStatus, new Date().toISOString()))
+      .eq('id', offerId)
+      .select('id, status, responded_at')
+      .maybeSingle();
 
-    if (!error) {
-      setJobOffers(jobOffers.map(o => o.id === offerId ? { ...o, status: newStatus } : o));
+    if (!error && data?.id) {
+      setJobOffers(jobOffers.map(o => o.id === offerId ? { ...o, status: data.status, responded_at: data.responded_at } : o));
       alert(ct.offerUpdated);
     } else {
-      alert('Hata: ' + error.message);
+      alert(error?.message ? `${ui.offerUpdateFailed} ${error.message}` : ui.offerUpdateFailed);
     }
   };
 
@@ -798,6 +810,7 @@ export default function CandidateDashboard() {
         phone: newPhone,
         profession: newProfession,
         sector: newSector,
+        nationality: newNationality,
       });
       emailUpdate = changedCandidateEmail(candidate.email, newEmail);
     } catch (error) {
@@ -931,6 +944,7 @@ export default function CandidateDashboard() {
     setNewPassport(persisted.passport_number || registration.passport_number);
     setNewProfession(persisted.profession || registration.profession);
     setNewSector(persisted.sector || registration.sector);
+    setNewNationality(canonicalNationality(persisted.nationality) || registration.nationality);
     setNewPhone(persisted.phone || registration.phone);
     setNewEmail(emailNote ? newEmail : (persisted.email || newEmail));
     setNewPhoto(persisted.photo_url || '');
@@ -1137,6 +1151,18 @@ export default function CandidateDashboard() {
                     className="w-full px-3.5 py-3 rounded-xl border text-slate-900 bg-white font-medium outline-none text-sm"
                   />
                 </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.nationalityCol} *</label>
+                  <select
+                    required
+                    value={regNationality}
+                    onChange={(e) => setRegNationality(e.target.value)}
+                    className="w-full px-3.5 py-3 rounded-xl border text-slate-900 bg-white font-medium outline-none cursor-pointer text-sm"
+                  >
+                    <option value="">{portalUi[currentLang].selectCountry}</option>
+                    <RegistrationCountryOptions lang={currentLang} currentValue={regNationality} />
+                  </select>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
                     <label className="block font-bold text-slate-700 uppercase mb-1">{t.professionLabel}</label>
@@ -1218,7 +1244,7 @@ export default function CandidateDashboard() {
   };
 
   return (
-    <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className={`min-h-screen bg-slate-50 text-slate-900 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm">
           <div className="flex items-center gap-3 sm:gap-4">
@@ -1235,6 +1261,7 @@ export default function CandidateDashboard() {
                 <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">PNV-CAND-{candidate.id.substring(0, 6)}</span>
                 <span>{t.passportLabel}: {candidate.passport_number || 'N/A'}</span>
                 <span>{t.professionLabel}: {candidate.profession}</span>
+                <span>{t.nationalityCol}: {candidatePlaceLabel(candidate.nationality, '', currentLang, portalUi[currentLang].unspecified)}</span>
               </div>
             </div>
           </div>
@@ -1360,6 +1387,18 @@ export default function CandidateDashboard() {
                       {homeCopy[currentLang].formSectors.map((sector) => (
                         <option key={sector.value} value={sector.value}>{sector.label}</option>
                       ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.nationalityCol} *</label>
+                    <select
+                      required
+                      value={newNationality}
+                      onChange={(e) => setNewNationality(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium outline-none cursor-pointer"
+                    >
+                      <option value="">{portalUi[currentLang].selectCountry}</option>
+                      <RegistrationCountryOptions lang={currentLang} currentValue={newNationality} />
                     </select>
                   </div>
                   <div className="sm:col-span-2">
@@ -1539,20 +1578,32 @@ export default function CandidateDashboard() {
             {jobOffers.length === 0 ? (
               <p className="text-xs text-slate-400">{ct.noOffers}</p>
             ) : (
-              jobOffers.map((offer) => (
-                <div key={offer.id} className="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center text-xs">
-                  <div>
-                    <strong>{offer.position_title}</strong> - {offer.employer_name} ({offer.country})
-                    <div className="text-[11px] text-slate-500 mt-0.5">Ücret: {offer.salary} | Durum: <strong>{offer.status}</strong></div>
+              jobOffers.map((offer) => {
+                const offerUi = portalUi[currentLang];
+                const money = offerMoney(offer);
+                const statusLabel = offerStatusLabel(offer.status, offerUi.offerStatus);
+                return (
+                <div key={offer.id} className="p-4 bg-white rounded-2xl border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-sm text-slate-900">
+                  <div className="space-y-1 min-w-0">
+                    <div className="font-extrabold text-slate-950">{offer.position_title || '—'} — {offer.employer_name || '—'}</div>
+                    <div className="text-xs font-semibold text-slate-800">
+                      {offerUi.offerSalary}: {money ? `${money} ${offerUi.offerNetPerMonth}` : offerUi.salaryNotSet}
+                      {offer.start_date ? ` · ${offerUi.offerStart}: ${String(offer.start_date).slice(0, 10)}` : ''}
+                    </div>
+                    {offer.terms_details ? (
+                      <div className="text-xs text-slate-700">{offerUi.offerTerms}: {offer.terms_details}</div>
+                    ) : null}
+                    <div className="text-xs font-bold text-slate-900">{offerUi.status}: <span className="inline-flex rounded-lg bg-slate-100 px-2 py-0.5">{statusLabel}</span></div>
                   </div>
                   {offer.status === 'pending' && (
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 shrink-0">
                       <button onClick={() => handleUpdateOfferStatus(offer.id, 'accepted')} className="px-3 py-1.5 bg-[#2e7d32] text-white rounded-xl font-bold cursor-pointer">{ct.acceptBtn}</button>
                       <button onClick={() => handleUpdateOfferStatus(offer.id, 'rejected')} className="px-3 py-1.5 bg-red-600 text-white rounded-xl font-bold cursor-pointer">{ct.rejectBtn}</button>
                     </div>
                   )}
                 </div>
-              ))
+                );
+              })
             )}
           </div>
         )}

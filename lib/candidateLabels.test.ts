@@ -80,7 +80,9 @@ test('unspecified sentinels localize and typed professions stay as entered', () 
   assert.equal(candidatePlaceLabel('Belirtilmedi', 'Turkey', 'mk', portalUi.mk.unspecified), 'Турција');
   assert.equal(candidatePlaceLabel('Türkiye', '', 'mk', portalUi.mk.unspecified), 'Турција');
   assert.equal(candidatePlaceLabel('North Macedonia', '', 'sq', portalUi.sq.unspecified), 'Maqedonia e Veriut');
-  assert.equal(candidatePlaceLabel('Özbekistan', '', 'en', portalUi.en.unspecified), 'Özbekistan');
+  assert.equal(candidatePlaceLabel('Özbekistan', '', 'en', portalUi.en.unspecified), 'Uzbekistan');
+  assert.equal(candidatePlaceLabel('Bangladesh', '', 'tr', portalUi.tr.unspecified), 'Bangladeş');
+  assert.equal(candidatePlaceLabel('Belirtilmedi', '', 'en', portalUi.en.unspecified), portalUi.en.unspecified);
   assert.equal(candidatePlaceLabel('', '', 'ar', portalUi.ar.unspecified), portalUi.ar.unspecified);
   assert.match(portalUi.mk.refresh, CYRILLIC);
   assert.match(portalUi.mk.unspecified, CYRILLIC);

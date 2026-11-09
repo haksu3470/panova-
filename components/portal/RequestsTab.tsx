@@ -5,7 +5,11 @@ import { Building2, FileText, Link2 } from 'lucide-react';
 import Link from 'next/link';
 import MatchPanel from './MatchPanel';
 import DemoBadge from './DemoBadge';
+import DeleteRecordButton from './DeleteRecordButton';
+import ListExportBar from './ListExportBar';
 import { portalUi } from '@/lib/portal-ui-copy';
+import { offerExportRows, requestExportRows, toCsv } from '@/lib/exportLists';
+import { supabase } from '@/lib/supabase';
 import { useSiteLanguage } from '@/lib/site-language';
 
 interface RequestsTabProps {
@@ -13,13 +17,17 @@ interface RequestsTabProps {
   t: any;
   updateRequestStatus: (id: string, status: string, reason?: string) => void;
   setSelectedDemandDetail: (detail: any) => void;
+  isUpperManagement?: boolean;
+  onChanged?: () => void;
 }
 
 export default function RequestsTab({
   jobRequests,
   t,
   updateRequestStatus,
-  setSelectedDemandDetail
+  setSelectedDemandDetail,
+  isUpperManagement = false,
+  onChanged,
 }: RequestsTabProps) {
   const [matchReq, setMatchReq] = useState<any | null>(null);
   const { currentLang } = useSiteLanguage('en');
@@ -32,8 +40,37 @@ export default function RequestsTab({
           <h3 className="text-base sm:text-lg font-extrabold text-slate-900">📁 {t.demandFilesTitle}</h3>
           <p className="text-xs text-slate-500 mt-0.5">{t.demandFilesSub}</p>
         </div>
-        <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
-          {t.openRequestsCard}: {jobRequests.length}
+        <div className="flex flex-col items-stretch sm:items-end gap-2">
+          <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
+            {t.openRequestsCard}: {jobRequests.length}
+          </div>
+          <ListExportBar
+            filename="labour-requests"
+            title={t.demandFilesTitle || 'Requests'}
+            rows={requestExportRows(jobRequests)}
+            labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty }}
+          />
+          <button
+            type="button"
+            onClick={async () => {
+              const { data } = await supabase.from('job_offers').select('id, candidate_id, employer_name, position_title, monthly_net_salary, offer_terms, status, start_date, terms_details, is_demo').order('created_at', { ascending: false });
+              const rows = offerExportRows(data || []);
+              if (!rows.length) {
+                window.alert(ui.exportEmpty);
+                return;
+              }
+              const file = new Blob([`\uFEFF${toCsv(rows)}`], { type: 'text/csv;charset=utf-8' });
+              const url = URL.createObjectURL(file);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = 'offers.csv';
+              link.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 cursor-pointer"
+          >
+            {ui.offersExport}
+          </button>
         </div>
       </div>
 
@@ -116,6 +153,14 @@ export default function RequestsTab({
               >
                 📂 {ui.requestInfo}
               </Link>
+              <DeleteRecordButton
+                table="job_requests"
+                id={req.id}
+                name={req.position_title || req.id}
+                isDemo={req.is_demo}
+                allowed={isUpperManagement}
+                onDeleted={onChanged}
+              />
               <button
                 onClick={() => setSelectedDemandDetail(req)}
                 className="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer flex items-center justify-center gap-1.5"

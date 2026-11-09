@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { register } from 'node:module';
 import test from 'node:test';
-import {
+
+await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.url);
+
+const {
   CandidateProfileError,
   assertCandidatePersisted,
   candidateAuthMetadata,
@@ -10,7 +14,7 @@ import {
   changedCandidateEmail,
   changedCandidatePhoto,
   isPermissionDenied,
-} from './candidateProfile.ts';
+} = await import('./candidateProfile.ts');
 
 const ROW = '7c1a0b2e-4f55-4a1d-9c3e-2b6d8e0a11f4';
 
@@ -22,6 +26,7 @@ test('profile save writes the registration fields onto the existing candidate', 
     email: ' Ayse@Example.com ',
     profession: ' Elektrikçi ',
     sector: ' construction ',
+    nationality: ' Türkiye ',
   });
   assert.deepEqual(payload, {
     full_name: 'Ayse Yilmaz',
@@ -30,6 +35,7 @@ test('profile save writes the registration fields onto the existing candidate', 
     email: 'ayse@example.com',
     profession: 'Elektrikçi',
     sector: 'construction',
+    nationality: 'Turkey',
   });
   assert.equal('id' in payload, false);
   assert.equal('auth_user_id' in payload, false);
@@ -47,6 +53,7 @@ test('blank registration fields are rejected before a write', () => {
       email: 'not-an-email',
       profession: '',
       sector: '',
+      nationality: '',
     }),
     (error: unknown) => error instanceof CandidateProfileError && error.code === 'invalid',
   );
@@ -60,6 +67,7 @@ test('auth metadata keeps identity in sync and does not change the login email',
     email: 'ayse@example.com',
     profession: 'Elektrikçi',
     sector: 'construction',
+    nationality: 'Turkey',
   });
   const metadata = candidateAuthMetadata(identity);
   assert.equal(metadata.full_name, 'Ayse Yilmaz');
@@ -67,6 +75,7 @@ test('auth metadata keeps identity in sync and does not change the login email',
   assert.equal(metadata.phone, '+38970111222');
   assert.equal(metadata.profession, 'Elektrikçi');
   assert.equal(metadata.sector, 'construction');
+  assert.equal(metadata.nationality, 'Turkey');
   assert.equal('email' in metadata, false);
   assert.equal('password' in metadata, false);
   assert.equal('role' in metadata, false);
@@ -142,6 +151,7 @@ test('registration save does not include email, photo, or privileged columns', (
     phone: ' +38970111222 ',
     profession: ' Elektrikçi ',
     sector: ' construction ',
+    nationality: 'Bangladesh',
   });
   assert.deepEqual(payload, {
     full_name: 'Ayse Yilmaz',
@@ -149,6 +159,7 @@ test('registration save does not include email, photo, or privileged columns', (
     phone: '+38970111222',
     profession: 'Elektrikçi',
     sector: 'construction',
+    nationality: 'Bangladesh',
   });
   assert.equal('email' in payload, false);
   assert.equal('photo_url' in payload, false);

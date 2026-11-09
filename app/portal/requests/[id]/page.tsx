@@ -13,6 +13,8 @@ import { translations } from '@/lib/dictionary';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { benefitsAnswered } from '@/lib/workforceRequest';
 import { useSiteLanguage } from '@/lib/site-language';
+import DeleteRecordButton from '@/components/portal/DeleteRecordButton';
+import { useStaffRole } from '@/components/portal/useStaffRole';
 
 const TEXT_FIELDS: [string, string?][] = [
   ['position_title'], ['sector'], ['headcount', 'number'],
@@ -39,6 +41,7 @@ function RequestFileInner() {
   const { currentLang, isRtl } = useSiteLanguage('tr');
   const t = translations[currentLang] || translations.tr;
   const ui = portalUi[currentLang];
+  const { upper } = useStaffRole();
 
   const load = async () => {
     const { data: r } = await supabase.from('job_requests').select('*').eq('id', id).maybeSingle();
@@ -114,6 +117,14 @@ function RequestFileInner() {
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <button onClick={() => setShowMatch(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">🔗 {ui.matchCandidates}</button>
+            <DeleteRecordButton
+              table="job_requests"
+              id={req.id}
+              name={req.position_title || req.id}
+              isDemo={req.is_demo}
+              allowed={upper}
+              onDeleted={() => { window.location.href = '/portal'; }}
+            />
             <button onClick={save} disabled={saving} className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">{saving ? (t.saving || '...') : t.saveBtn}</button>
           </div>
         </div>

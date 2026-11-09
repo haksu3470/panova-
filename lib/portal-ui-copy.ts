@@ -176,6 +176,30 @@ export type PortalUi = {
   staffUpdated: string;
   updateFailed: string;
   confirmDeleteStaff: string;
+  exportCsv: string;
+  exportExcel: string;
+  exportPrint: string;
+  exportEmpty: string;
+  offersExport: string;
+  deleteRecord: string;
+  deleteConfirmTitle: string;
+  deleteConfirmBody: string;
+  deleteDemoNote: string;
+  deleteCodedNote: string;
+  deleteFailed: string;
+  deleted: string;
+  empNoDemands: string;
+  offerSalary: string;
+  offerCurrency: string;
+  offerStart: string;
+  offerTerms: string;
+  offerNetPerMonth: string;
+  salaryNotSet: string;
+  offerUpdateFailed: string;
+  routeDenied: string;
+  backToPortal: string;
+  selectCountry: string;
+  cancelAction: string;
   referralCode: string;
   referralCodeAll: string;
   referralCodeNone: string;
@@ -371,7 +395,7 @@ const tr: PortalUi = {
   noInterviews: 'Görüşme yok.', interviewsTitle: 'Görüşmeler', createdOn: 'Oluşturma: {date}',
   employerWord: 'İşveren', candidateWord: 'Aday', positionWord: 'Pozisyon',
   employerFields: {
-    contact_person: 'Yetkili kişi', contact_name: 'İkinci irtibat', email: 'E-posta', phone: 'Telefon',
+    company_name: 'Şirket unvanı', contact_person: 'Yetkili kişi', contact_name: 'İkinci irtibat', email: 'E-posta', phone: 'Telefon',
     country: 'Ülke', city: 'Şehir', website: 'Web sitesi', address: 'Adres', tax_id: 'Vergi no',
     assigned_sector: 'Sektör', compliance_status: 'Uyum durumu', suitability_status: 'Uygunluk durumu', notes: 'İç notlar',
   },
@@ -391,6 +415,30 @@ const tr: PortalUi = {
   inviteSent: 'Davet e-postası gönderildi. Personel bu e-posta ile Google veya e-posta kaydıyla portala giriş yaptığında hesabı otomatik bağlanır.',
   staffUpdated: 'Personel bilgileri güncellendi.', updateFailed: 'Güncelleme hatası:',
   confirmDeleteStaff: 'Bu personel kaydını silmek istediğinizden emin misiniz?',
+  exportCsv: 'CSV indir',
+  exportExcel: 'Excel indir',
+  exportPrint: 'Yazdır / PDF',
+  exportEmpty: 'Dışa aktarılacak kayıt yok.',
+  offersExport: 'Teklifleri dışa aktar',
+  deleteRecord: 'Sil',
+  deleteConfirmTitle: 'Kayıt silinsin mi?',
+  deleteConfirmBody: '{name} kalıcı olarak silinir. Bu işlem geri alınamaz.',
+  deleteDemoNote: 'Bu bir demo kaydıdır.',
+  deleteCodedNote: 'Bu adayın yönlendirme kodu var: {code}.',
+  deleteFailed: 'Silinemedi. Yetkinizi kontrol edin.',
+  deleted: 'Kayıt silindi.',
+  empNoDemands: 'Henüz işgücü talebi yok. Yukarıdaki formdan ilk talebinizi oluşturun.',
+  offerSalary: 'Ücret',
+  offerCurrency: 'Para birimi',
+  offerStart: 'Başlangıç',
+  offerTerms: 'Şartlar',
+  offerNetPerMonth: 'net / ay',
+  salaryNotSet: 'Ücret girilmemiş',
+  offerUpdateFailed: 'Teklif güncellenemedi. Oturumunuzu kontrol edin.',
+  routeDenied: 'Bu sayfa sizin rolünüz için açık değil.',
+  backToPortal: 'Portala dön',
+  selectCountry: 'Ülke seçin',
+  cancelAction: 'Vazgeç',
   referralCode: 'Yönlendirme kodu',
   referralCodeAll: 'Tüm kodlar',
   referralCodeNone: 'Kodsuz / açık kayıt',
@@ -584,7 +632,7 @@ const en: PortalUi = {
   noInterviews: 'No interviews.', interviewsTitle: 'Interviews', createdOn: 'Created: {date}',
   employerWord: 'Employer', candidateWord: 'Candidate', positionWord: 'Position',
   employerFields: {
-    contact_person: 'Contact person', contact_name: 'Second contact', email: 'Email', phone: 'Phone',
+    company_name: 'Company name', contact_person: 'Contact person', contact_name: 'Second contact', email: 'Email', phone: 'Phone',
     country: 'Country', city: 'City', website: 'Website', address: 'Address', tax_id: 'Tax no.',
     assigned_sector: 'Sector', compliance_status: 'Compliance status', suitability_status: 'Suitability', notes: 'Internal notes',
   },
@@ -604,6 +652,30 @@ const en: PortalUi = {
   inviteSent: 'Invite email sent. The account links automatically when they sign in with Google or email at that address.',
   staffUpdated: 'Staff details updated.', updateFailed: 'Update error:',
   confirmDeleteStaff: 'Delete this staff record?',
+  exportCsv: 'Download CSV',
+  exportExcel: 'Download Excel',
+  exportPrint: 'Print / PDF',
+  exportEmpty: 'Nothing to export.',
+  offersExport: 'Export offers',
+  deleteRecord: 'Delete',
+  deleteConfirmTitle: 'Delete this record?',
+  deleteConfirmBody: '{name} is deleted permanently. This cannot be undone.',
+  deleteDemoNote: 'This is a demo record.',
+  deleteCodedNote: 'This candidate has a referral code: {code}.',
+  deleteFailed: 'Could not delete. Check your permission.',
+  deleted: 'Record deleted.',
+  empNoDemands: 'No labour requests yet. Create the first one with the form above.',
+  offerSalary: 'Salary',
+  offerCurrency: 'Currency',
+  offerStart: 'Start',
+  offerTerms: 'Terms',
+  offerNetPerMonth: 'net / month',
+  salaryNotSet: 'Salary not set',
+  offerUpdateFailed: 'The offer could not be updated. Check your session.',
+  routeDenied: 'This page is not open for your role.',
+  backToPortal: 'Back to the portal',
+  selectCountry: 'Select a country',
+  cancelAction: 'Cancel',
   referralCode: 'Referral code',
   referralCodeAll: 'All codes',
   referralCodeNone: 'No code / open registration',
@@ -797,7 +869,7 @@ const sq: PortalUi = {
   noInterviews: 'Nuk ka intervista.', interviewsTitle: 'Intervistat', createdOn: 'Krijuar: {date}',
   employerWord: 'Punëdhënësi', candidateWord: 'Kandidati', positionWord: 'Pozicioni',
   employerFields: {
-    contact_person: 'Personi i kontaktit', contact_name: 'Kontakti i dytë', email: 'Email', phone: 'Telefon',
+    company_name: 'Emri i kompanisë', contact_person: 'Personi i kontaktit', contact_name: 'Kontakti i dytë', email: 'Email', phone: 'Telefon',
     country: 'Shteti', city: 'Qyteti', website: 'Faqja e internetit', address: 'Adresa', tax_id: 'Nr. tatimor',
     assigned_sector: 'Sektori', compliance_status: 'Statusi i përputhjes', suitability_status: 'Përshtatshmëria', notes: 'Shënime të brendshme',
   },
@@ -817,6 +889,30 @@ const sq: PortalUi = {
   inviteSent: 'Emaili i ftesës u dërgua. Llogaria lidhet vetë kur hyjnë me Google ose email në atë adresë.',
   staffUpdated: 'Të dhënat e stafit u përditësuan.', updateFailed: 'Gabim përditësimi:',
   confirmDeleteStaff: 'Të fshihet ky regjistrim stafi?',
+  exportCsv: 'Shkarko CSV',
+  exportExcel: 'Shkarko Excel',
+  exportPrint: 'Printo / PDF',
+  exportEmpty: 'Nuk ka të dhëna për eksport.',
+  offersExport: 'Eksporto ofertat',
+  deleteRecord: 'Fshi',
+  deleteConfirmTitle: 'Të fshihet ky regjistrim?',
+  deleteConfirmBody: '{name} fshihet përgjithmonë. Ky veprim nuk kthehet.',
+  deleteDemoNote: 'Ky është një regjistrim demo.',
+  deleteCodedNote: 'Ky kandidat ka kod referimi: {code}.',
+  deleteFailed: 'Nuk u fshi. Kontrolloni lejen.',
+  deleted: 'Regjistrimi u fshi.',
+  empNoDemands: 'Ende nuk ka kërkesa për punë. Krijoni të parën me formularin më sipër.',
+  offerSalary: 'Paga',
+  offerCurrency: 'Monedha',
+  offerStart: 'Fillimi',
+  offerTerms: 'Kushtet',
+  offerNetPerMonth: 'neto / muaj',
+  salaryNotSet: 'Paga nuk është vendosur',
+  offerUpdateFailed: 'Oferta nuk u përditësua. Kontrolloni sesionin.',
+  routeDenied: 'Kjo faqe nuk është e hapur për rolin tuaj.',
+  backToPortal: 'Kthehu te portali',
+  selectCountry: 'Zgjidhni vendin',
+  cancelAction: 'Anulo',
   referralCode: 'Kodi i referimit',
   referralCodeAll: 'Të gjitha kodet',
   referralCodeNone: 'Pa kod / regjistrim i hapur',
@@ -1010,7 +1106,7 @@ const ar: PortalUi = {
   noInterviews: 'لا توجد مقابلات.', interviewsTitle: 'المقابلات', createdOn: 'تاريخ الإنشاء: {date}',
   employerWord: 'صاحب العمل', candidateWord: 'المرشح', positionWord: 'المنصب',
   employerFields: {
-    contact_person: 'شخص الاتصال', contact_name: 'جهة اتصال ثانية', email: 'البريد', phone: 'الهاتف',
+    company_name: 'اسم الشركة', contact_person: 'شخص الاتصال', contact_name: 'جهة اتصال ثانية', email: 'البريد', phone: 'الهاتف',
     country: 'الدولة', city: 'المدينة', website: 'الموقع', address: 'العنوان', tax_id: 'الرقم الضريبي',
     assigned_sector: 'القطاع', compliance_status: 'حالة الالتزام', suitability_status: 'الملاءمة', notes: 'ملاحظات داخلية',
   },
@@ -1030,6 +1126,30 @@ const ar: PortalUi = {
   inviteSent: 'أُرسل بريد الدعوة. يُربط الحساب تلقائيًا عند الدخول عبر Google أو البريد على ذلك العنوان.',
   staffUpdated: 'تم تحديث بيانات الموظف.', updateFailed: 'خطأ في التحديث:',
   confirmDeleteStaff: 'حذف سجل الموظف هذا؟',
+  exportCsv: 'تنزيل CSV',
+  exportExcel: 'تنزيل Excel',
+  exportPrint: 'طباعة / PDF',
+  exportEmpty: 'لا توجد سجلات للتصدير.',
+  offersExport: 'تصدير العروض',
+  deleteRecord: 'حذف',
+  deleteConfirmTitle: 'حذف هذا السجل؟',
+  deleteConfirmBody: 'يُحذف {name} نهائيًا. لا يمكن التراجع.',
+  deleteDemoNote: 'هذا سجل تجريبي.',
+  deleteCodedNote: 'لهذا المرشح رمز إحالة: {code}.',
+  deleteFailed: 'تعذر الحذف. تحقق من الصلاحية.',
+  deleted: 'تم حذف السجل.',
+  empNoDemands: 'لا توجد طلبات عمالة بعد. أنشئ أول طلب من النموذج أعلاه.',
+  offerSalary: 'الأجر',
+  offerCurrency: 'العملة',
+  offerStart: 'البداية',
+  offerTerms: 'الشروط',
+  offerNetPerMonth: 'صافي / شهر',
+  salaryNotSet: 'الأجر غير محدد',
+  offerUpdateFailed: 'تعذر تحديث العرض. تحقق من الجلسة.',
+  routeDenied: 'هذه الصفحة غير متاحة لدورك.',
+  backToPortal: 'العودة إلى البوابة',
+  selectCountry: 'اختر الدولة',
+  cancelAction: 'إلغاء',
   referralCode: 'رمز الإحالة',
   referralCodeAll: 'كل الرموز',
   referralCodeNone: 'بدون رمز / تسجيل مفتوح',
@@ -1223,7 +1343,7 @@ const mk: PortalUi = {
   noInterviews: 'Нема интервјуа.', interviewsTitle: 'Интервјуа', createdOn: 'Создадено: {date}',
   employerWord: 'Работодавач', candidateWord: 'Кандидат', positionWord: 'Позиција',
   employerFields: {
-    contact_person: 'Лице за контакт', contact_name: 'Втор контакт', email: 'Е-пошта', phone: 'Телефон',
+    company_name: 'Име на компанијата', contact_person: 'Лице за контакт', contact_name: 'Втор контакт', email: 'Е-пошта', phone: 'Телефон',
     country: 'Држава', city: 'Град', website: 'Веб-страница', address: 'Адреса', tax_id: 'Даночен број',
     assigned_sector: 'Сектор', compliance_status: 'Статус на усогласеност', suitability_status: 'Соодветност', notes: 'Внатрешни белешки',
   },
@@ -1243,6 +1363,30 @@ const mk: PortalUi = {
   inviteSent: 'Поканата е испратена. Сметката се поврзува автоматски кога ќе се најават со Google или е-пошта на таа адреса.',
   staffUpdated: 'Податоците за персоналот се ажурирани.', updateFailed: 'Грешка при ажурирање:',
   confirmDeleteStaff: 'Да се избрише овој запис за персонал?',
+  exportCsv: 'Преземи CSV',
+  exportExcel: 'Преземи Excel',
+  exportPrint: 'Печати / PDF',
+  exportEmpty: 'Нема записи за извоз.',
+  offersExport: 'Извези понуди',
+  deleteRecord: 'Избриши',
+  deleteConfirmTitle: 'Да се избрише овој запис?',
+  deleteConfirmBody: '{name} се брише трајно. Ова не може да се врати.',
+  deleteDemoNote: 'Ова е демо запис.',
+  deleteCodedNote: 'Овој кандидат има код за упатување: {code}.',
+  deleteFailed: 'Бришењето не успеа. Проверете ја дозволата.',
+  deleted: 'Записот е избришан.',
+  empNoDemands: 'Сè уште нема барања за работна сила. Создајте го првото со формуларот погоре.',
+  offerSalary: 'Плата',
+  offerCurrency: 'Валута',
+  offerStart: 'Почеток',
+  offerTerms: 'Услови',
+  offerNetPerMonth: 'нето / месец',
+  salaryNotSet: 'Платата не е внесена',
+  offerUpdateFailed: 'Понудата не се ажурира. Проверете ја сесијата.',
+  routeDenied: 'Оваа страница не е отворена за вашата улога.',
+  backToPortal: 'Назад до порталот',
+  selectCountry: 'Изберете држава',
+  cancelAction: 'Откажи',
   referralCode: 'Код за упатување',
   referralCodeAll: 'Сите кодови',
   referralCodeNone: 'Без код / отворена регистрација',

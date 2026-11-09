@@ -10,36 +10,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
 
-      - name: Run Supabase Backup Script
+      # SUPABASE_DB_URL is a repository secret: the Supabase Postgres URI
+      # (Project Settings → Database → Connection string → URI, direct, port 5432).
+      # The anon key is not a substitute. The 2026-11-09 failure was not a missing
+      # secret (the log masks SUPABASE_DB_URL). require("postgres") was not a function.
+      - name: Install backup client
+        working-directory: scripts/backup
+        run: npm install --omit=dev
+
+      - name: Run Supabase backup
+        working-directory: scripts/backup
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-        run: |
-          npm install postgres
-          node -e '
-            const postgres = require("postgres");
-            const fs = require("fs");
-            async function run() {
-              const sql = postgres(process.env.SUPABASE_DB_URL, { ssl: "require" });
-              const tables = ["job_candidates", "job_requests", "employers", "staff_members", "tasks", "candidate_support_tickets"];
-              let backup = {};
-              for (let t of tables) {
-                try {
-                  backup[t] = await sql`SELECT * FROM ${sql(t)}`;
-                } catch (err) {
-                  console.log("Tablo okunamadı:", t, err.message);
-                }
-              }
-              const filename = `panova_backup_${new Date().toISOString().slice(0,10)}.json`;
-              fs.writeFileSync(filename, JSON.stringify(backup, null, 2));
-              console.log("Yedek başarıyla alındı ve dosyaya yazıldı:", filename);
-              await sql.end();
-            }
-            run().catch(err => { console.error(err); process.exit(1); });
-          '
+        run: node --experimental-strip-types backup.mjs
+
+      - name: Upload backup artifact
+        if: success()
+        uses: actions/upload-artifact@v5
+        with:
+          name: panova-backup
+          path: scripts/backup/out/*.json
+          retention-days: 14

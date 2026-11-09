@@ -6,6 +6,8 @@ import { writeAudit } from '@/lib/audit';
 import DemoBadge from './DemoBadge';
 import { portalUi } from '@/lib/portal-ui-copy';
 import { useSiteLanguage } from '@/lib/site-language';
+import DeleteRecordButton from './DeleteRecordButton';
+import { useStaffRole } from './useStaffRole';
 
 const DOC_TYPE_KEYS = ['passport', 'cv', 'certificate', 'diploma', 'criminal_record', 'health_report', 'photo', 'contract', 'apostille', 'other'] as const;
 const STATUS_KEYS = ['pending', 'uploaded', 'reviewing', 'approved', 'rejected', 'rerequested', 'expiring', 'expired'] as const;
@@ -14,6 +16,7 @@ const STATUS_KEYS = ['pending', 'uploaded', 'reviewing', 'approved', 'rejected',
 export default function DocumentStatusPanel({ candidateId }: { candidateId: string }) {
   const { currentLang } = useSiteLanguage('en');
   const ui = portalUi[currentLang];
+  const { upper } = useStaffRole();
 
   const [docs, setDocs] = useState<any[]>([]);
   const [newType, setNewType] = useState('passport');
@@ -66,7 +69,10 @@ export default function DocumentStatusPanel({ candidateId }: { candidateId: stri
             <span className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
               {typeName(d.doc_type)} <DemoBadge show={d.is_demo} />
             </span>
-            {d.file_url && <a href={d.file_url} target="_blank" rel="noreferrer" className="text-xs font-bold text-blue-600 underline hover:text-blue-800">{ui.docOpen}</a>}
+            <span className="flex items-center gap-2">
+              {d.file_url && <a href={d.file_url} target="_blank" rel="noreferrer" className="text-xs font-bold text-blue-600 underline hover:text-blue-800">{ui.docOpen}</a>}
+              <DeleteRecordButton table="candidate_documents" id={d.id} name={typeName(d.doc_type)} isDemo={d.is_demo} allowed={upper} onDeleted={load} />
+            </span>
           </div>
 
           <select
