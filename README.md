@@ -39,9 +39,15 @@ The public site shows three company mailboxes (see `lib/company.ts`):
 
 Mail sent to those shared mailboxes is forwarded to the company owner by `POST /api/webhooks/resend`. Personal Resend Inboxes (`haksu@panovagroup.org`, `mcitil@panovagroup.org`) are not forwarded; they are read in the Resend Inbox UI. The route checks the Resend webhook signature, loads the message with the Receiving API, and sends one forward. Retries use the idempotency key `inbound-forward/<email_id>`.
 
-The homepage form (“Bize yazın”) posts to `POST /api/contact`. The route inserts `public.contact_submissions`, then sends one Turkish notification to `panova@panovagroup.org`. Reply-To is the visitor. The idempotency key is `contact-form/<submission id>`. If that send fails, the visitor still sees success and the error is logged. No new environment variables: the route uses `RESEND_API_KEY` and `RESEND_FROM`.
+The homepage form (“Bize yazın”) posts to `POST /api/contact`. The route inserts `public.contact_submissions`, then sends one notification to `panova@panovagroup.org` in the visitor’s site language (TR, EN, MK, SQ, or AR). Reply-To is the visitor. The idempotency key is `contact-form/<submission id>`. If that send fails, the visitor still sees success and the error is logged. No new environment variables: the route uses `RESEND_API_KEY` and `RESEND_FROM`.
 
-That notification is sent from the company domain, which the forwarder normally drops as `from-self`. A message with a UUID in `X-Panova-Contact-Form`, or whose subject starts with `Yeni iletişim formu:`, is still forwarded. The forward keeps the visitor as Reply-To so a reply from the owner’s mailbox goes to the person who filled in the form. The forwarded copy is prefixed with `[Panova]`, so it does not match that subject rule again.
+That notification is sent from the company domain, which the forwarder normally drops as `from-self`. A message with a UUID in `X-Panova-Contact-Form`, or whose subject starts with a localized contact prefix (`Yeni iletişim formu:`, `New contact form:`, and the SQ, AR, and MK equivalents), is still forwarded. The forward keeps the visitor as Reply-To so a reply from the owner’s mailbox goes to the person who filled in the form. The forwarded copy is prefixed with `[Panova]`, so it does not match that subject rule again.
+
+Staff invites, candidate notices, and task notices use the same card (`lib/email/layout.ts`). The From address is `RESEND_FROM` when that address is on `panovagroup.org`, otherwise `Panova <panova@panovagroup.org>`.
+
+## Auth emails and the 6-digit code
+
+Signup, magic-link, and password-reset mail is sent by Supabase Auth, not by the Resend routes. The repo copies are `supabase/templates/confirmation.html`, `magic_link.html`, and `recovery.html`. Hosted project `vptcihlhkzfmwxpaituf` does not read those files. Paste the subject and body from `supabase/templates/README.md`, and set the email OTP length to 6 on Authentication → Sign In / Providers → Email. The app accepts a 6-digit code and still accepts a 6–10 digit code so a message sent before that setting is saved can be verified.
 
 ### Environment variables
 

@@ -1,4 +1,9 @@
-import { INBOX_ADDRESS, escapeHtml, headerValue } from './forward-inbound';
+import { buildContactEmail, formatContactSubmittedAt } from './app-messages';
+import type { EmailLocale } from './email-copy';
+import { emailLocale } from './email-copy';
+import { INBOX_ADDRESS, headerValue } from './forward-inbound';
+
+export { formatContactSubmittedAt };
 
 export const CONTACT_NOTIFY_TO = INBOX_ADDRESS;
 
@@ -13,6 +18,7 @@ export type ContactFields = {
   email: string;
   phone: string;
   notes: string;
+  locale: EmailLocale;
 };
 
 export type ContactInsertRow = {
@@ -82,6 +88,7 @@ export function parseContactSubmission(body: unknown): { ok: true; value: Contac
       email,
       phone,
       notes,
+      locale: emailLocale(raw.locale),
     },
   };
 }
@@ -103,62 +110,13 @@ export function contactFormIdempotencyKey(id: string): string {
   return `contact-form/${id}`;
 }
 
-export function formatContactSubmittedAt(date: Date): string {
-  return new Intl.DateTimeFormat('tr-TR', {
-    dateStyle: 'long',
-    timeStyle: 'short',
-    timeZone: 'Europe/Istanbul',
-  }).format(date);
-}
-
 export function buildContactNotification(input: ContactFields & { id: string; submittedAt: string }): ContactNotification {
-  const notes = input.notes.trim() || '—';
-  const subject = headerValue(`Yeni iletişim formu: ${input.fullName} — ${input.companyName}`).slice(0, 180);
-  const text = [
-    'Panova web sitesinden yeni bir iletişim formu geldi.',
-    'Bu iletiye yanıt, formu dolduran kişiye gider.',
-    '',
-    `Ad soyad: ${input.fullName}`,
-    `E-posta: ${input.email}`,
-    `Telefon: ${input.phone}`,
-    `Firma: ${input.companyName}`,
-    `Firma kodu: ${input.companyKey}`,
-    `Gönderim: ${input.submittedAt}`,
-    `Kayıt no: ${input.id}`,
-    '',
-    'Not:',
-    notes,
-  ].join('\n');
-
-  const row = (label: string, value: string) =>
-    `<p style="margin:0 0 8px"><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</p>`;
-
-  const html = `<!DOCTYPE html>
-<html lang="tr" dir="ltr">
-<head><meta charset="utf-8"><title>${escapeHtml(subject)}</title></head>
-<body>
-  <div lang="tr" dir="ltr" style="font-family:Arial,sans-serif;color:#0f172a;font-size:15px;line-height:1.5;max-width:600px">
-    <h1 style="color:#1b5e20;font-size:20px;margin:0 0 12px">Yeni iletişim formu</h1>
-    <p style="margin:0 0 16px">Panova web sitesinden yeni bir iletişim formu geldi. Bu iletiye yanıt, formu dolduran kişiye gider.</p>
-    ${row('Ad soyad', input.fullName)}
-    <p style="margin:0 0 8px"><strong>E-posta:</strong> <a href="mailto:${escapeHtml(input.email)}" style="color:#1b5e20">${escapeHtml(input.email)}</a></p>
-    ${row('Telefon', input.phone)}
-    ${row('Firma', input.companyName)}
-    ${row('Firma kodu', input.companyKey)}
-    ${row('Gönderim', input.submittedAt)}
-    ${row('Kayıt no', input.id)}
-    <h2 style="font-size:16px;margin:16px 0 8px">Not</h2>
-    <p style="margin:0;white-space:pre-wrap">${escapeHtml(notes)}</p>
-    <p style="margin:24px 0 0;font-size:12px;color:#334155">Panova Group · <a href="https://panovagroup.org" style="color:#1b5e20">panovagroup.org</a></p>
-  </div>
-</body>
-</html>`;
-
+  const message = buildContactEmail(input);
   return {
     to: CONTACT_NOTIFY_TO,
-    subject,
-    text,
-    html,
+    subject: headerValue(message.subject).slice(0, 180),
+    text: message.text,
+    html: message.html,
     replyTo: input.email,
     headers: { 'X-Panova-Contact-Form': input.id },
   };
@@ -203,8 +161,8 @@ export async function acceptContactSubmission(
   if (!parsed.ok) return { ok: false, status: 400 };
 
   const id = (deps.createId ?? (() => crypto.randomUUID()))();
-  const submittedAt = formatContactSubmittedAt((deps.now ?? (() => new Date()))());
   const fields = parsed.value;
+  const submittedAt = formatContactSubmittedAt((deps.now ?? (() => new Date()))(), fields.locale);
   const inserted = await deps.insert({
     id,
     company_key: fields.companyKey,

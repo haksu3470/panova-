@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { classifyCandidateLinkError, parseVerificationInput } from './emailConfirmation.ts';
+import { EMAIL_OTP_LENGTH, classifyCandidateLinkError, parseVerificationInput } from './emailConfirmation.ts';
 
-test('a numeric code is the OTP the form submits to verifyOtp', () => {
+test('a 6-digit code is the OTP, and a code issued before the length change still parses', () => {
+  assert.equal(EMAIL_OTP_LENGTH, 6);
   assert.deepEqual(parseVerificationInput(' 123 456 '), { kind: 'otp', token: '123456' });
   assert.deepEqual(parseVerificationInput('1234-5678'), { kind: 'otp', token: '12345678' });
   assert.deepEqual(parseVerificationInput(''), { kind: 'empty' });
