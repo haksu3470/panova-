@@ -43,7 +43,7 @@ export default function StaffGate({ children }: { children: React.ReactNode }) {
         <div className="flex justify-center"><LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} /></div>
         <h1 className="text-lg font-bold text-slate-900">{state === 'verify' ? t.verifyEmailTitle : state === 'noauth' ? g.loginRequired : g.noAccess}</h1>
         <p className="text-xs text-slate-500">
-          {state === 'verify' ? t.verifyEmailBody : state === 'noauth' ? g.loginBody : g.noAccessBody}
+          {state === 'verify' ? t.verifyEmailLinkLead : state === 'noauth' ? g.loginBody : g.noAccessBody}
         </p>
         <Link href={state === 'verify' ? '/portal?verify=1' : '/portal'} className="inline-block bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-xl">{state === 'verify' ? t.verifyEmailBack : g.staffLogin}</Link>
       </div>

@@ -479,14 +479,10 @@ export interface Translation {
 
   verifyEmailTitle?: string;
   verifyEmailLinkLead?: string;
-  verifyEmailBody?: string;
   verifyEmailResend?: string;
   verifyEmailResent?: string;
   verifyEmailResendFail?: string;
   verifyEmailCodeLabel?: string;
-  verifyEmailPaste?: string;
-  verifyEmailPasted?: string;
-  verifyEmailPasteFail?: string;
   verifyEmailCodeBtn?: string;
   verifyEmailCodeFail?: string;
   verifyEmailProofFail?: string;
@@ -520,9 +516,6 @@ export interface Translation {
   resetPasswordProveLead?: string;
   resetPasswordChecking?: string;
   resetPasswordCode?: string;
-  resetPasswordPaste?: string;
-  resetPasswordPasted?: string;
-  resetPasswordPasteFail?: string;
   resetPasswordCodeBtn?: string;
   resetPasswordCodeFail?: string;
   resetPasswordNew?: string;
@@ -1061,15 +1054,11 @@ export const translations: Record<Language, Translation> = {
     approvedAndProcessing: 'Onaylandı & İşlemde',
 
     verifyEmailTitle: 'Gelen kutunuzu kontrol edin',
-    verifyEmailLinkLead: 'E-postadaki 6 haneli kodu yapıştırın veya bağlantıyı açın.',
-    verifyEmailBody: 'Kod bu ekrana yapıştırılır. Bağlantı bu cihazda kaydı tamamlar. Google ile girişte bu adım yoktur.',
+    verifyEmailLinkLead: 'E-postadaki bağlantıya tıklayın veya 6 haneli kodu buraya girin.',
     verifyEmailResend: 'Doğrulama e-postasını yeniden gönder',
     verifyEmailResent: 'Doğrulama e-postası yeniden gönderildi.',
     verifyEmailResendFail: 'E-posta gönderilemedi. Biraz sonra tekrar deneyin.',
     verifyEmailCodeLabel: '6 haneli kod',
-    verifyEmailPaste: 'Kodu yapıştır',
-    verifyEmailPasted: 'Kod yapıştırıldı',
-    verifyEmailPasteFail: 'Pano okunamadı. Alana tıklayıp yapıştırın.',
     verifyEmailCodeBtn: 'Kodu doğrula',
     verifyEmailCodeFail: 'Kod kabul edilmedi. Bağlantıyı açın veya yeni bir ileti isteyin.',
     verifyEmailProofFail: 'Doğrulama oturumu kaydedilemedi. Yeni bir e-posta isteyip tekrar deneyin.',
@@ -1100,12 +1089,9 @@ export const translations: Record<Language, Translation> = {
     forgotPasswordHaveCode: 'Kodum veya bağlantım var',
     resetPasswordTitle: 'Yeni şifre belirleyin',
     resetPasswordLead: 'E-postadaki bağlantı bu sayfayı açtıysa yeni şifrenizi yazın. Bağlantı başka bir cihazdaysa kodu aşağıya girin.',
-    resetPasswordProveLead: 'E-postadaki kodu veya bağlantıyı girin. Bağlantı bu sayfayı açtıysa yeni şifre alanları kendiliğinden gelir.',
+    resetPasswordProveLead: 'E-postadaki bağlantıya tıklayın veya 6 haneli kodu buraya girin. Bağlantı bu sayfayı açtıysa yeni şifre alanları kendiliğinden gelir.',
     resetPasswordChecking: 'Sıfırlama bağlantısı kontrol ediliyor.',
-    resetPasswordCode: 'E-postadaki kod veya bağlantı',
-    resetPasswordPaste: 'Kodu yapıştır',
-    resetPasswordPasted: 'Kod yapıştırıldı',
-    resetPasswordPasteFail: 'Pano okunamadı. Alana tıklayıp yapıştırın.',
+    resetPasswordCode: '6 haneli kod',
     resetPasswordCodeBtn: 'Kodu doğrula',
     resetPasswordCodeFail: 'Kod kabul edilmedi. Bağlantıyı açın veya yeni bir e-posta isteyin.',
     resetPasswordNew: 'Yeni şifre',
@@ -1634,15 +1620,11 @@ export const translations: Record<Language, Translation> = {
     approvedAndProcessing: 'Approved & In Process',
 
     verifyEmailTitle: 'Check your inbox',
-    verifyEmailLinkLead: 'Paste the 6-digit code from the email, or open the link.',
-    verifyEmailBody: 'Paste the code on this screen. The link finishes registration on this device. Google sign-in does not need this step.',
+    verifyEmailLinkLead: 'Click the link in the email, or enter the 6-digit code here.',
     verifyEmailResend: 'Resend verification email',
     verifyEmailResent: 'Verification email sent again.',
     verifyEmailResendFail: 'The email could not be sent. Try again shortly.',
     verifyEmailCodeLabel: '6-digit code',
-    verifyEmailPaste: 'Paste code',
-    verifyEmailPasted: 'Code pasted',
-    verifyEmailPasteFail: 'The clipboard could not be read. Click the field and paste.',
     verifyEmailCodeBtn: 'Verify code',
     verifyEmailCodeFail: 'That code was not accepted. Open the link or request a new message.',
     verifyEmailProofFail: 'The verification session could not be saved. Request a new email and try again.',
@@ -1673,12 +1655,9 @@ export const translations: Record<Language, Translation> = {
     forgotPasswordHaveCode: 'I have a code or link',
     resetPasswordTitle: 'Choose a new password',
     resetPasswordLead: 'If the email link opened this page, enter a new password. If the link is on another device, enter the code below.',
-    resetPasswordProveLead: 'Enter the code or link from the email. If the link opened this page, the new-password fields appear on their own.',
+    resetPasswordProveLead: 'Click the link in the email, or enter the 6-digit code here. If the link opened this page, the new-password fields appear on their own.',
     resetPasswordChecking: 'Checking the reset link.',
-    resetPasswordCode: 'Code or link from the email',
-    resetPasswordPaste: 'Paste code',
-    resetPasswordPasted: 'Code pasted',
-    resetPasswordPasteFail: 'The clipboard could not be read. Click the field and paste.',
+    resetPasswordCode: '6-digit code',
     resetPasswordCodeBtn: 'Verify code',
     resetPasswordCodeFail: 'That code was not accepted. Open the link or request a new email.',
     resetPasswordNew: 'New password',
@@ -2207,15 +2186,11 @@ export const translations: Record<Language, Translation> = {
     approvedAndProcessing: 'Miratuar & Në Proçes',
 
     verifyEmailTitle: 'Kontrolloni kutinë tuaj',
-    verifyEmailLinkLead: 'Ngjitni kodin 6-shifror nga e-maili, ose hapni lidhjen.',
-    verifyEmailBody: 'Kodi ngjitet në këtë ekran. Lidhja e përfundon regjistrimin në këtë pajisje. Hyrja me Google nuk e kërkon këtë hap.',
+    verifyEmailLinkLead: 'Klikoni lidhjen në e-mail, ose shkruani kodin 6-shifror këtu.',
     verifyEmailResend: 'Ridërgo e-mailin e verifikimit',
     verifyEmailResent: 'E-maili i verifikimit u dërgua përsëri.',
     verifyEmailResendFail: 'E-maili nuk u dërgua. Provoni përsëri pas pak.',
     verifyEmailCodeLabel: 'Kodi 6-shifror',
-    verifyEmailPaste: 'Ngjit kodin',
-    verifyEmailPasted: 'Kodi u ngjit',
-    verifyEmailPasteFail: 'Kujtesa nuk u lexua. Klikoni fushën dhe ngjiteni.',
     verifyEmailCodeBtn: 'Verifiko kodin',
     verifyEmailCodeFail: 'Kodi nuk u pranua. Hapni lidhjen ose kërkoni një letër të re.',
     verifyEmailProofFail: 'Sesioni i verifikimit nuk u ruajt. Kërkoni një email të ri dhe provoni përsëri.',
@@ -2246,12 +2221,9 @@ export const translations: Record<Language, Translation> = {
     forgotPasswordHaveCode: 'Kam një kod ose lidhje',
     resetPasswordTitle: 'Vendosni një fjalëkalim të ri',
     resetPasswordLead: 'Nëse lidhja e email-it e hapi këtë faqe, shkruani fjalëkalimin e ri. Nëse lidhja është në një pajisje tjetër, vendosni kodin më poshtë.',
-    resetPasswordProveLead: 'Vendosni kodin ose lidhjen nga email-i. Nëse lidhja e hapi këtë faqe, fushat e fjalëkalimit të ri shfaqen vetë.',
+    resetPasswordProveLead: 'Klikoni lidhjen në e-mail, ose shkruani kodin 6-shifror këtu. Nëse lidhja e hapi këtë faqe, fushat e fjalëkalimit të ri shfaqen vetë.',
     resetPasswordChecking: 'Po kontrollohet lidhja e rivendosjes.',
-    resetPasswordCode: 'Kodi ose lidhja nga email-i',
-    resetPasswordPaste: 'Ngjit kodin',
-    resetPasswordPasted: 'Kodi u ngjit',
-    resetPasswordPasteFail: 'Kujtesa nuk u lexua. Klikoni fushën dhe ngjiteni.',
+    resetPasswordCode: 'Kodi 6-shifror',
     resetPasswordCodeBtn: 'Verifiko kodin',
     resetPasswordCodeFail: 'Kodi nuk u pranua. Hapni lidhjen ose kërkoni një email të ri.',
     resetPasswordNew: 'Fjalëkalimi i ri',
@@ -2770,15 +2742,11 @@ export const translations: Record<Language, Translation> = {
     colPosSecTitle: 'المنصب / القطاع',
 
     verifyEmailTitle: 'تحقق من بريدك الوارد',
-    verifyEmailLinkLead: 'الصق الرمز المكوّن من 6 أرقام من البريد، أو افتح الرابط.',
-    verifyEmailBody: 'يُلصق الرمز في هذه الشاشة. الرابط يُكمل التسجيل على هذا الجهاز. تسجيل الدخول عبر Google لا يحتاج هذه الخطوة.',
+    verifyEmailLinkLead: 'انقر الرابط في البريد، أو أدخل الرمز المكوّن من 6 أرقام هنا.',
     verifyEmailResend: 'إعادة إرسال رسالة التحقق',
     verifyEmailResent: 'أُعيد إرسال رسالة التحقق.',
     verifyEmailResendFail: 'تعذر إرسال الرسالة. حاول مرة أخرى بعد قليل.',
     verifyEmailCodeLabel: 'رمز من 6 أرقام',
-    verifyEmailPaste: 'لصق الرمز',
-    verifyEmailPasted: 'تم لصق الرمز',
-    verifyEmailPasteFail: 'تعذر قراءة الحافظة. انقر الحقل والصق.',
     verifyEmailCodeBtn: 'تأكيد الرمز',
     verifyEmailCodeFail: 'لم يُقبل الرمز. افتح الرابط أو اطلب رسالة جديدة.',
     verifyEmailProofFail: 'تعذر حفظ جلسة التحقق. اطلب رسالة جديدة وحاول مرة أخرى.',
@@ -2809,12 +2777,9 @@ export const translations: Record<Language, Translation> = {
     forgotPasswordHaveCode: 'لدي رمز أو رابط',
     resetPasswordTitle: 'اختر كلمة مرور جديدة',
     resetPasswordLead: 'إذا فتح رابط البريد هذه الصفحة، اكتب كلمة المرور الجديدة. إذا كان الرابط على جهاز آخر، أدخل الرمز أدناه.',
-    resetPasswordProveLead: 'أدخل الرمز أو الرابط من البريد. إذا فتح الرابط هذه الصفحة، تظهر حقول كلمة المرور الجديدة تلقائيًا.',
+    resetPasswordProveLead: 'انقر الرابط في البريد، أو أدخل الرمز المكوّن من 6 أرقام هنا. إذا فتح الرابط هذه الصفحة، تظهر حقول كلمة المرور الجديدة تلقائيًا.',
     resetPasswordChecking: 'جارٍ التحقق من رابط إعادة التعيين.',
-    resetPasswordCode: 'الرمز أو الرابط من البريد',
-    resetPasswordPaste: 'لصق الرمز',
-    resetPasswordPasted: 'تم لصق الرمز',
-    resetPasswordPasteFail: 'تعذر قراءة الحافظة. انقر الحقل والصق.',
+    resetPasswordCode: 'رمز من 6 أرقام',
     resetPasswordCodeBtn: 'تأكيد الرمز',
     resetPasswordCodeFail: 'لم يُقبل الرمز. افتح الرابط أو اطلب رسالة جديدة.',
     resetPasswordNew: 'كلمة المرور الجديدة',
@@ -3349,15 +3314,11 @@ export const translations: Record<Language, Translation> = {
     totalSelected: 'Вкупно избрани',
     approvedAndProcessing: 'Одобрени и во постапка',
     verifyEmailTitle: 'Проверете ја е-поштата',
-    verifyEmailLinkLead: 'Залепете го 6-цифрениот код од е-поштата, или отворете ја врската.',
-    verifyEmailBody: 'Кодот се залепува на овој екран. Врската ја завршува регистрацијата на овој уред. Најавата со Google не бара дополнителен чекор.',
+    verifyEmailLinkLead: 'Кликнете на врската во е-поштата, или внесете го 6-цифрениот код тука.',
     verifyEmailResend: 'Испрати повторно е-пошта за потврда',
     verifyEmailResent: 'Е-поштата за потврда е испратена повторно.',
     verifyEmailResendFail: 'Е-поштата не можеше да се испрати. Обидете се повторно наскоро.',
     verifyEmailCodeLabel: '6-цифрен код',
-    verifyEmailPaste: 'Залепи го кодот',
-    verifyEmailPasted: 'Кодот е залепен',
-    verifyEmailPasteFail: 'Таблата не можеше да се прочита. Кликнете на полето и залепете.',
     verifyEmailCodeBtn: 'Потврди го кодот',
     verifyEmailCodeFail: 'Кодот не е прифатен. Отворете ја врската или побарајте нова порака.',
     verifyEmailProofFail: 'Сесијата за потврда не можеше да се зачува. Побарајте нова е-пошта и обидете се повторно.',
@@ -3387,12 +3348,9 @@ export const translations: Record<Language, Translation> = {
     forgotPasswordHaveCode: 'Имам код или врска',
     resetPasswordTitle: 'Поставете нова лозинка',
     resetPasswordLead: 'Ако врската од е-поштата ја отвори оваа страница, внесете нова лозинка. Ако врската е на друг уред, внесете го кодот подолу.',
-    resetPasswordProveLead: 'Внесете го кодот или врската од е-поштата. Ако врската ја отвори оваа страница, полињата за нова лозинка се појавуваат сами.',
+    resetPasswordProveLead: 'Кликнете на врската во е-поштата, или внесете го 6-цифрениот код тука. Ако врската ја отвори оваа страница, полињата за нова лозинка се појавуваат сами.',
     resetPasswordChecking: 'Се проверува врската за ресетирање.',
-    resetPasswordCode: 'Код или врска од е-поштата',
-    resetPasswordPaste: 'Залепи го кодот',
-    resetPasswordPasted: 'Кодот е залепен',
-    resetPasswordPasteFail: 'Таблата не можеше да се прочита. Кликнете на полето и залепете.',
+    resetPasswordCode: '6-цифрен код',
     resetPasswordCodeBtn: 'Потврди го кодот',
     resetPasswordCodeFail: 'Кодот не е прифатен. Отворете ја врската или побарајте нова е-пошта.',
     resetPasswordNew: 'Нова лозинка',

@@ -88,19 +88,16 @@ test('copyText returns false when the fallback throws', async () => {
   assert.equal(ok, false);
 });
 
-test('email code paste labels exist in TR, EN, SQ, AR, and MK', () => {
-  assert.equal(translations.tr.verifyEmailPaste, 'Kodu yapıştır');
-  assert.equal(translations.tr.verifyEmailPasted, 'Kod yapıştırıldı');
-  assert.equal(translations.en.verifyEmailPaste, 'Paste code');
-  assert.equal(translations.en.verifyEmailPasted, 'Code pasted');
-  assert.equal(translations.sq.verifyEmailPasted, 'Kodi u ngjit');
-  assert.equal(translations.ar.verifyEmailPasted, 'تم لصق الرمز');
-  assert.equal(translations.mk.verifyEmailPasted, 'Кодот е залепен');
+test('the verification helper is one sentence in TR, EN, SQ, AR, and MK', () => {
+  assert.equal(translations.tr.verifyEmailLinkLead, 'E-postadaki bağlantıya tıklayın veya 6 haneli kodu buraya girin.');
+  assert.equal(translations.en.verifyEmailLinkLead, 'Click the link in the email, or enter the 6-digit code here.');
+  assert.equal(translations.sq.verifyEmailLinkLead, 'Klikoni lidhjen në e-mail, ose shkruani kodin 6-shifror këtu.');
+  assert.equal(translations.ar.verifyEmailLinkLead, 'انقر الرابط في البريد، أو أدخل الرمز المكوّن من 6 أرقام هنا.');
+  assert.equal(translations.mk.verifyEmailLinkLead, 'Кликнете на врската во е-поштата, или внесете го 6-цифрениот код тука.');
   for (const lang of LOCALES) {
-    assert.ok(translations[lang].verifyEmailPaste);
-    assert.ok(translations[lang].verifyEmailPasted);
-    assert.ok(translations[lang].verifyEmailPasteFail);
-    assert.ok(translations[lang].resetPasswordPaste);
-    assert.ok(translations[lang].resetPasswordPasteFail);
+    assert.equal(translations[lang].verifyEmailCodeLabel?.includes('6'), true);
+    assert.equal('verifyEmailPaste' in translations[lang], false);
+    assert.equal('verifyEmailBody' in translations[lang], false);
+    assert.equal('resetPasswordPaste' in translations[lang], false);
   }
 });

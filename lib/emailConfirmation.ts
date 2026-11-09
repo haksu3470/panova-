@@ -34,6 +34,11 @@ function typeOrder(preferred: OtpType | null): OtpType[] {
  */
 export const EMAIL_OTP_LENGTH = 6;
 
+/** Digits only, capped at the email OTP length. Spaces and other characters are dropped. */
+export function otpDigits(raw: string): string {
+  return raw.replace(/\D/g, '').slice(0, EMAIL_OTP_LENGTH);
+}
+
 /**
  * The confirm-signup mail is a link (`/auth/v1/verify?token=…&type=signup`)
  * unless the Auth template also prints `{{ .Token }}`. Accept either shape.
