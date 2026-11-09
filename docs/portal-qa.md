@@ -84,7 +84,7 @@ In-app guide: `staff-login`.
 
 **Beklenen / Expected:** A confirmed session lands on the candidate dashboard (Overview, Profile, Documents, Offers, Support, Guides). Google sign-in uses the same address. An unconfirmed password account cannot open the dashboard.
 
-**Bilinen engel / Known blocker:** Signup metadata stores `nationality: 'Belirtilmedi'` regardless of the UI language (`app/candidate/page.tsx`). The code is `{{ .Token }}` in `supabase/templates/confirmation.html`. The hosted project does not read that file: paste it in the dashboard, and set Authentication → Sign In / Providers → Email → OTP length to 6. See `supabase/templates/README.md`.
+**Bilinen engel / Known blocker:** The code is `{{ .Token }}` in `supabase/templates/confirmation.html`. The hosted project does not read that file: paste it in the dashboard, and set Authentication → Sign In / Providers → Email → OTP length to 6. See `supabase/templates/README.md`. Sign-up now stores the selected nationality instead of `Belirtilmedi`.
 
 In-app guide: `candidate-register`.
 
@@ -143,7 +143,7 @@ In-app guide: `dossier-review`.
 
 **Beklenen / Expected:** `request_matches` gains the bind. Present sets `presented_at`. The interview and offer panels list the new rows. `employer_request_interview` inserts an interview only when the candidate is matched to that employer’s request; otherwise the UI reports that the person was not presented. The demand file counts matches, interviews, and offers.
 
-**Bilinen engel / Known blocker:** Employer “select” does not use this match result. See S08. The employer Interviews “join” control only raises an alert (`ui.joiningCall`); it does not open a meeting. This repo’s migrations do not define a `job_offers` policy for the candidate update, so accept/reject can fail with a database error until that policy exists in the hosted database. The candidate alert for that failure is the Turkish prefix `Hata:`.
+**Bilinen engel / Known blocker:** Employer “select” does not use this match result. See S08. The employer Interviews “join” control only raises an alert (`ui.joiningCall`); it does not open a meeting. Candidate accept/reject needs migration `20261109154616_phase2_offers_and_deletes.sql` on the hosted database. Until it is applied, the update matches no row and the candidate sees `offerUpdateFailed`.
 
 In-app guide: `matching-offers`.
 
@@ -162,7 +162,7 @@ In-app guide: `matching-offers`.
 
 **Beklenen / Expected:** The employer form does not insert until both answers and a positive salary are present (`buildEmployerDemandInsert`). Messages are `lodgingRequired`, `mealsRequired`, `lodgingAndMealsRequired`, or `salaryAmountRequired` in the active language. The stored columns are `accommodation_provided` and `food_provided` (booleans, not null). Staff see the same yes/no wording. The staff file also refuses a save that clears either answer.
 
-**Bilinen engel / Known blocker:** An employer with zero rows does not see an empty state. `fetchEmployerData` substitutes two sample demands (construction in Skopje, agriculture in Struga) that are not database rows. After a real insert, those samples disappear. `app/employer/components/DemandForm.tsx` is not mounted. Its “video interview required” checkbox is not on the live form and is not written by `buildEmployerDemandInsert`.
+**Bilinen engel / Known blocker:** `app/employer/components/DemandForm.tsx` is not mounted. Its “video interview required” checkbox is not on the live form and is not written by `buildEmployerDemandInsert`. An employer with zero requests now sees `empNoDemands` instead of sample rows.
 
 In-app guide: `employer-request`.
 
@@ -291,8 +291,8 @@ Only items checked in this repository. Hosted database policies that were never 
 
 ### Empty states that show sample rows
 
-- Employer with no `job_requests` sees two hard-coded demands in `app/employer/page.tsx` (`demoConstruction`, `demoAgriculture`). They are not `is_demo` rows and they are not in the database.
-- Employer with no `interviews` sees two hard-coded appointments in the same function, so the empty copy `empNoInterviews` does not appear.
+- An employer with no `job_requests` sees `empNoDemands`. Sample construction and agriculture rows are no longer substituted.
+- An employer with no `interviews` sees `empNoInterviews`. Sample appointments are no longer substituted.
 - Staff with no `tasks` rows sees two local tasks assigned to named people (`app/portal/page.tsx`). The titles are dictionary keys (`taskPassportCheck`, `taskSaveDemand`) and do translate, but the rows are not stored.
 - The candidate browser, YouTube block, document-status panel, and guides gate do have real empty copy.
 
@@ -313,7 +313,7 @@ Guide copy, portal dictionary, and the labor-request errors exist in TR, EN, SQ,
 - Staff invite JSON errors in `app/api/staff-invite/route.ts` (the invite email itself follows the sender's locale).
 - The audit text `Personel Davet Edildi:`.
 - Candidate support and emergency placeholders, the five default document names written into `documents_json`, and alerts prefixed with `Hata:`.
-- Candidate signup metadata `nationality: 'Belirtilmedi'`.
+- Candidate signup nationality is the selected country (English value), not `Belirtilmedi`. The confirm-signup template still has to be pasted into the hosted dashboard (`supabase/templates/README.md`).
 
 ### Product UI with no guide article
 
@@ -333,4 +333,63 @@ These are not gaps; they are here so a later pass does not re-file them:
 - YouTube preview uses the video id only. Supervisors in upper management, source country, and target country may write. The database trigger blocks everyone else.
 - `/guides` hides articles until the session is confirmed and linked, then filters cards and how-tos with `audienceAllows`.
 - Employer interview creation goes through `employer_request_interview`, which requires a match on that employer’s request.
-- Source-country officers each have one system-assigned `referral_code`, created when the role is saved. Their candidate inserts are stamped with it and the code cannot be changed afterwards. Target-country staff and field officers do not have a code. Self-registration stays null. Only a portal manager can delete a candidate, and only when `referral_code` is null.
+- Source-country officers each have one system-assigned `referral_code`, created when the role is saved. Their candidate inserts are stamped with it and the code cannot be changed afterwards. Target-country staff and field officers do not have a code. Self-registration stays null. Upper management can delete a candidate, including one that has a referral code, after the confirm dialog. Officers cannot.
+
+## S14. Cross-portal control / Çapraz portal kontrolü
+
+Walk every signed-in portal once. For each row: do the action, then check the expected result in the language you have selected (TR, EN, SQ, AR, MK). Arabic keeps `dir="rtl"`. Do not run `supabase/scripts/delete_demo_records.sql` on production until the preview counts are reviewed; that script ends in `ROLLBACK`.
+
+### Candidate (`/candidate`)
+
+| Control | Expected |
+| --- | --- |
+| Sign-in / sign-up toggle | The matching form opens. Sign-up does not create a row until the mailbox is confirmed. |
+| Nationality on sign-up | Required. Options are the European list plus Bangladesh and Uzbekistan, labeled in the active language. The stored value is the English country name, not `Belirtilmedi`. |
+| Password, Google, forgot password | A password shorter than 8 characters is refused. Google uses the same address. Forgot password opens the reset screen. |
+| Verify screen | A code or a pasted confirm URL confirms the mailbox. Leave that screen to the email-verification work. |
+| Overview, Profile, Documents, Offers, Support, Guides | Only these tabs. Guides opens `/guides` for a candidate. |
+| Profile save | Name, passport, phone, profession, sector, and nationality are required. An empty nationality is refused. A valid save reloads with the same values. An email or photo failure does not discard the other fields. |
+| Header | Shows the localized nationality next to the profession. |
+| Document upload | The file lands on `candidate_documents` for that slot and the status leaves pending. |
+| Offers card | The title is dark on white. Salary shows `monthly_net_salary` plus currency when `offer_terms.currency` is set, then the translated “net / month” label. An empty salary shows the translated “salary not set” line. Status uses `offerStatus`, not the raw key `pending`. |
+| Accept / Reject | Only while status is `pending`. The update returns a row. `job_offers.status` becomes `accepted` or `rejected` and `responded_at` is set. The same status is visible on the staff request file and, after the migration below, on the employer Interviews tab. A candidate cannot change the salary. |
+| Support form | A ticket is stored and listed. |
+| Log out | Returns to the candidate sign-in screen. |
+
+### Employer (`/employer-login`, then `/employer`)
+
+| Control | Expected |
+| --- | --- |
+| Register | Company name, contact, email, phone, and country are stored on the linked `employers` row. |
+| First visit, Requests | No sample labour request. The empty line is `empNoDemands`. |
+| Demand form | Sector, position, headcount, city, salary, lodging, and meals follow S07. A successful insert is the only row in the list. |
+| Interviews with no rows | `empNoInterviews`. Offers for this employer are listed on the same tab with a translated status after the offer-select policy is applied. |
+| Candidates, Selected, Support | Filters and the interview request behave as in S08. Support creates a ticket. |
+| Company profile, company name | The field is editable. Save writes `employers.company_name` and copies the new name onto that employer’s `job_requests.employer_name`. The header shows the saved name after reload. |
+| Language, home, log out | Labels follow the selected language. Home goes to `/`. Log out goes to `/employer-login`. |
+
+### Staff (`/portal`)
+
+Sign in once as each role. Tabs come from `tabsForStaffRole`.
+
+| Role | Tabs | Files |
+| --- | --- | --- |
+| upper_management | Overview, Candidates, Requests, Staff, Tasks, Audit, Employers, Support | Candidate, request, and employer files |
+| source_country | Candidates, Requests, Tasks | Candidate and request files. The employer file shows `routeDenied`. |
+| target_country | Candidates, Requests, Tasks, Employers | All three files |
+| field_officer | Overview, Candidates, Tasks, Support | Candidate file only. Request and employer files show `routeDenied`. |
+| finance / limited | Overview, Tasks | No files |
+
+| Control | Expected |
+| --- | --- |
+| Employers list | The company name and the file button open `/portal/employers/{that row's id}`. The heading is that company. |
+| View employer portal | Opens `/employer?as={that id}` and loads that employer. Saving the company name updates that row. |
+| Employer file, company name | `company_name` is on the form. Save persists it and updates linked request names. |
+| Export on Candidates, Requests, Employers | CSV, Excel, and Print/PDF use the rows on screen. Offers export on Requests downloads `job_offers` the session can read. A hidden tab has no export button. |
+| Delete (upper management only) | Candidates, employers, requests, and documents show Delete. The dialog names the record, notes a demo record when `is_demo` is true, and does nothing until confirm. Officers do not see Delete. Do not confirm a delete on live data during this pass. |
+| Candidate file | The header shows the localized nationality. |
+| Offer panel currency | A new offer stores `offer_terms.currency`. The candidate card shows that code. |
+| Staff invite, tasks, audit, support | Invite stays upper management only. Tasks still filter by role. Audit and support list their rows. |
+
+Apply after review, not before: `supabase/migrations/20261109154616_phase2_offers_and_deletes.sql`. It lets a candidate update only a pending offer’s status, lets the employer read their offers, and limits delete to upper management. Demo cleanup SQL, also not applied: `supabase/scripts/delete_demo_records.sql`.
+

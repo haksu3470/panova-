@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
 import DemoBadge from './DemoBadge';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
+import { OFFER_CURRENCIES, offerCurrency, offerTermsPayload } from '@/lib/offers';
 import { useSiteLanguage } from '@/lib/site-language';
 
 const toLocal = (iso?: string | null) => (iso ? new Date(iso).toISOString().slice(0, 16) : '');
@@ -33,6 +34,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
     employer_name: request?.employer_name || '',
     position_title: request?.position_title || candidate.profession || '',
     monthly_net_salary: '',
+    currency: 'EUR',
     start_date: '',
     terms_details: '',
     status: 'pending',
@@ -97,6 +99,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
       employer_name: of.employer_name,
       position_title: of.position_title || null,
       monthly_net_salary: Number(of.monthly_net_salary),
+      offer_terms: offerTermsPayload(of.currency, of.offer_terms),
       start_date: of.start_date || null,
       terms_details: of.terms_details || null,
       status: of.status,
@@ -183,7 +186,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
         <section className="space-y-2">
           <h4 className="text-xs font-bold uppercase tracking-wide text-slate-800">{ui.ioJobOffers} ({offers.length})</h4>
           {offers.map((o) => (
-            <button key={o.id} disabled={offerLocked(o)} onClick={() => setOf({ id: o.id, employer_name: o.employer_name || '', position_title: o.position_title || '', monthly_net_salary: o.monthly_net_salary ?? '', start_date: o.start_date || '', terms_details: o.terms_details || '', status: o.status || 'pending' })}
+            <button key={o.id} disabled={offerLocked(o)} onClick={() => setOf({ id: o.id, employer_name: o.employer_name || '', position_title: o.position_title || '', monthly_net_salary: o.monthly_net_salary ?? '', currency: offerCurrency(o) || 'EUR', offer_terms: o.offer_terms, start_date: o.start_date || '', terms_details: o.terms_details || '', status: o.status || 'pending' })}
               className={`w-full text-start border border-slate-200 bg-white rounded-xl p-3 hover:bg-slate-50 disabled:cursor-default ${of.id === o.id ? 'ring-2 ring-emerald-500' : ''}`}>
               <p className="text-sm font-bold text-slate-950">{o.employer_name} · {o.position_title}<DemoBadge show={o.is_demo} /></p>
               <p className="text-[11px] font-medium text-slate-700">
@@ -198,6 +201,9 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
               <input placeholder={`${ui.ioCompany} *`} value={of.employer_name} onChange={(e) => setOf({ ...of, employer_name: e.target.value })} className={inp} />
               <input placeholder={ui.ioPosition} value={of.position_title} onChange={(e) => setOf({ ...of, position_title: e.target.value })} className={inp} />
               <input type="number" inputMode="decimal" placeholder={`${ui.ioNetSalary} *`} value={of.monthly_net_salary} onChange={(e) => setOf({ ...of, monthly_net_salary: e.target.value })} className={inp} />
+              <select value={of.currency || 'EUR'} onChange={(e) => setOf({ ...of, currency: e.target.value })} className={inp} aria-label={ui.offerCurrency}>
+                {OFFER_CURRENCIES.map((code) => <option key={code} value={code} className="bg-white text-slate-900">{code}</option>)}
+              </select>
               <input type="date" value={of.start_date} onChange={(e) => setOf({ ...of, start_date: e.target.value })} className={inp} />
             </div>
             <textarea rows={3} placeholder={ui.ioTerms} value={of.terms_details} onChange={(e) => setOf({ ...of, terms_details: e.target.value })} className={inp} />

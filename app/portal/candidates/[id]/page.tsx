@@ -18,6 +18,7 @@ import { normalizeReferralCode } from '@/lib/referralCode';
 import { ReferralCodeChip } from '@/components/portal/ReferralCodeChip';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
+import { candidatePlaceLabel } from '@/lib/candidateLabels';
 import {
   YouTubeUrlError,
   canManageCandidateVideo,
@@ -426,6 +427,7 @@ function CandidateDetailPageInner() {
                   )}
                   <span>📍 {candidate.country || 'N/A'}, {candidate.city || 'N/A'}</span>
                   <span>💼 {candidate.profession || ui.general}</span>
+                  <span>🌍 {candidatePlaceLabel(candidate.nationality, candidate.country, currentLang, ui.unspecified)}</span>
                 </div>
               </div>
             </div>

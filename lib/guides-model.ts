@@ -75,7 +75,8 @@ export type GuidesCopy = {
 
 /**
  * Role cards follow the live portals.
- * Staff share /portal. The Staff tab is the only one limited to upper management.
+ * Staff tabs and file routes follow this catalog (see lib/staffAccess.ts).
+ * A dossier, request, or employer screen also shows the list that opens it.
  * Employer and candidate cards match the tabs those accounts actually render.
  */
 export const ROLE_CATALOG: RoleDef[] = [

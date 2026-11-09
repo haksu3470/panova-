@@ -1,7 +1,9 @@
+import { canonicalNationality } from './registrationCountries';
+
 /**
  * Registration identity for the signed-in candidate.
- * Signup stores name, passport, phone, profession, and sector on the
- * job_candidates row. Profile save must update that same row. Email is a
+ * Signup stores name, passport, phone, profession, sector, and nationality
+ * on the job_candidates row. Profile save must update that same row. Email is a
  * separate write: a unique collision must not discard the other fields, and
  * this path must not change the auth email (that flow re-verifies) or
  * privileged columns.
@@ -32,6 +34,7 @@ export type CandidateIdentityInput = {
   email: string;
   profession: string;
   sector: string;
+  nationality: string;
 };
 
 export type CandidateIdentity = {
@@ -41,6 +44,7 @@ export type CandidateIdentity = {
   email: string;
   profession: string;
   sector: string;
+  nationality: string;
 };
 
 function required(value: string | null | undefined): string | null {
@@ -50,7 +54,7 @@ function required(value: string | null | undefined): string | null {
 
 export type CandidateRegistration = Omit<CandidateIdentity, 'email'>;
 
-/** Name, passport, phone, profession, and sector. Email is not in this write. */
+/** Name, passport, phone, profession, sector, and nationality. Email is not in this write. */
 export function candidateRegistrationPayload(
   input: Omit<CandidateIdentityInput, 'email'>,
 ): CandidateRegistration {
@@ -59,10 +63,11 @@ export function candidateRegistrationPayload(
   const phone = required(input.phone);
   const profession = required(input.profession);
   const sector = required(input.sector);
-  if (!full_name || !passport_number || !phone || !profession || !sector) {
+  const nationality = canonicalNationality(input.nationality);
+  if (!full_name || !passport_number || !phone || !profession || !sector || !nationality) {
     throw new CandidateProfileError('invalid', 'Registration fields are required');
   }
-  return { full_name, passport_number, phone, profession, sector };
+  return { full_name, passport_number, phone, profession, sector, nationality };
 }
 
 /**
@@ -105,6 +110,7 @@ export function candidateAuthMetadata(identity: CandidateIdentity): Record<strin
     phone: identity.phone,
     profession: identity.profession,
     sector: identity.sector,
+    nationality: identity.nationality,
   };
 }
 

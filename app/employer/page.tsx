@@ -4,8 +4,9 @@ import AuthGuard from '@/components/auth/AuthGuard';
 
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { signOut } from '@/lib/auth';
-import { EmployerWriteError, toEmployerProfileView, type EmployerRow } from '@/lib/employerProfile';
+import { isStaff, signOut } from '@/lib/auth';
+import { EmployerWriteError, staffViewEmployerId, toEmployerProfileView, type EmployerRow } from '@/lib/employerProfile';
+import { offerMoney, offerStatusLabel } from '@/lib/offers';
 import { employerService } from '@/lib/services/employerService';
 import { 
   Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, 
@@ -63,6 +64,8 @@ function EmployerPortalInner() {
   const [profileErrorCode, setProfileErrorCode] = useState('');
   const [profileErrorDetail, setProfileErrorDetail] = useState('');
   const [profileSaving, setProfileSaving] = useState(false);
+  const [staffView, setStaffView] = useState(false);
+  const [employerOffers, setEmployerOffers] = useState<any[]>([]);
 
   const [editCompanyName, setEditCompanyName] = useState('');
   const [editContactPerson, setEditContactPerson] = useState('');
@@ -97,8 +100,16 @@ function EmployerPortalInner() {
     let cancelled = false;
     (async () => {
       try {
-        const row = await employerService.getMyEmployer();
+        let stored: unknown = null;
+        try {
+          stored = JSON.parse(localStorage.getItem('panova_employer_user') || 'null');
+        } catch {
+          stored = null;
+        }
+        const viewId = staffViewEmployerId(window.location.search, stored);
+        const row = await employerService.loadEmployerForPortal(viewId);
         if (cancelled) return;
+        setStaffView(Boolean(viewId) && row.id === viewId && await isStaff());
         rememberEmployer(row);
       } catch (err) {
         console.error('Veri çekme hatası:', err);
@@ -155,14 +166,7 @@ function EmployerPortalInner() {
       .or(filter)
       .order('created_at', { ascending: false });
 
-    if (demData && demData.length > 0) {
-      setJobDemands(demData);
-    } else {
-      setJobDemands([
-        { id: '1', position_title: ui.demoConstruction, sector: 'construction', headcount: 8, city: 'Skopje', salary: '1300 EUR', status: 'searching_candidates', created_at: '2026-09-20' },
-        { id: '2', position_title: ui.demoAgriculture, sector: 'agriculture', headcount: 15, city: 'Struga', salary: '950 EUR', status: 'new_request', created_at: '2026-09-22' }
-      ]);
-    }
+    setJobDemands(demData || []);
 
     const { data: pooled, error: poolError } = await supabase.rpc('employer_browse_candidates');
     let candData: unknown[] | null = pooled;
@@ -185,19 +189,19 @@ function EmployerPortalInner() {
     setCandidates(rows);
     setSelectedCandidates(rows.filter((c) => c.status === 'approved' || c.status === 'selected'));
 
-    const { data: intData } = await supabase.from('interviews').select('*').order('created_at', { ascending: false });
-    if (intData && intData.length > 0) {
-      setInterviews(intData);
-    } else {
-      setInterviews([
-        { id: '1', candidate_name: 'Ahmet Yilmaz', position: ui.demoFormwork, scheduled_at: '2026-11-10T11:00:00Z', status: 'scheduled' },
-        { id: '2', candidate_name: 'Mehmet Demir', position: ui.demoHarvestLead, scheduled_at: '2026-11-12T07:30:00Z', status: 'scheduled' }
-      ]);
-    }
+    const { data: intData } = await supabase.from('interviews').select('*').eq('employer_id', employerProfile.id).order('created_at', { ascending: false });
+    setInterviews(intData || []);
+
+    const { data: offerRows } = await supabase
+      .from('job_offers')
+      .select('id, candidate_id, position_title, employer_name, monthly_net_salary, status, terms_details, start_date, offer_terms, is_demo')
+      .eq('employer_id', employerProfile.id)
+      .order('created_at', { ascending: false });
+    setEmployerOffers(offerRows || []);
 
     const { data: ticketData } = await supabase.from('candidate_support_tickets').select('*').order('created_at', { ascending: false });
     if (ticketData) setSupportTickets(ticketData);
-  }, [employerProfile, ui]);
+  }, [employerProfile]);
 
   useEffect(() => {
     if (employerProfile) {
@@ -257,7 +261,7 @@ function EmployerPortalInner() {
         phone: editPhone,
         country: editCountry,
         logo: editCompanyLogo,
-      }, employerProfile.id);
+      }, employerProfile.id, { staffView });
       rememberEmployer(saved);
       alert(t.profileUpdatedSuccess || '');
     } catch (err) {
@@ -399,7 +403,7 @@ function EmployerPortalInner() {
   };
 
   return (
-    <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className={`min-h-screen bg-slate-50 text-slate-900 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         
         {/* ÜST HEADER */}
@@ -714,6 +718,9 @@ function EmployerPortalInner() {
             <div className="space-y-4">
               <h4 className="font-extrabold text-slate-950 text-base">{t.activeDemandFilesTitle} ({jobDemands.length})</h4>
               <div className="space-y-4">
+                {jobDemands.length === 0 ? (
+                  <div className="p-8 text-center text-sm font-semibold text-slate-600 bg-white rounded-2xl border">{ui.empNoDemands}</div>
+                ) : null}
                 {jobDemands.map((dem) => {
                   const metrics = getDemandMetrics(dem);
                   return (
@@ -864,6 +871,17 @@ function EmployerPortalInner() {
                 ))
               )}
             </div>
+            <div className="border-t pt-4 space-y-2">
+              <h4 className="text-sm font-extrabold text-slate-950">{ui.ioJobOffers} ({employerOffers.length})</h4>
+              {employerOffers.map((offer) => (
+                <div key={offer.id} className="p-3 bg-slate-50 rounded-xl border text-sm text-slate-900">
+                  <div className="font-extrabold">{offer.position_title || '—'} — {offer.employer_name || ''}</div>
+                  <div className="text-xs font-semibold text-slate-800">
+                    {ui.offerSalary}: {offerMoney(offer) || ui.salaryNotSet} · {ui.status}: {offerStatusLabel(offer.status, ui.offerStatus)}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -1006,7 +1024,7 @@ function EmployerPortalInner() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.companyNameLabel}</label>
-                  <input type="text" value={editCompanyName} onChange={(e) => setEditCompanyName(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-950 font-semibold" />
+                  <input type="text" required value={editCompanyName} onChange={(e) => setEditCompanyName(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-950 font-semibold" />
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.contactPersonLabel}</label>

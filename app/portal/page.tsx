@@ -38,8 +38,12 @@ import { isSourceCountryOfficer, normalizeReferralCode } from '@/lib/referralCod
 import RequestsTab from '../../components/portal/RequestsTab';
 import { writeAudit } from '@/lib/audit';
 import DemoBadge from '@/components/portal/DemoBadge';
+import DeleteRecordButton from '@/components/portal/DeleteRecordButton';
+import ListExportBar from '@/components/portal/ListExportBar';
 import StaffTab from '../../components/portal/StaffTab';
 import TasksTab from '../../components/portal/TasksTab';
+import { employerExportRows, offerExportRows, requestExportRows } from '@/lib/exportLists';
+import { isUpperManagementRole, tabsForStaffRole, type StaffTab as StaffTabId } from '@/lib/staffAccess';
 
 export default function PortalPage() {
   const [currentLang, setCurrentLang] = useState<Language>('en');
@@ -108,7 +112,15 @@ export default function PortalPage() {
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
   
   const userRole = currentUser?.role_level?.toLowerCase() || '';
-  const isUpperManagement = userRole === 'upper_management' || currentUser?.isAdmin || currentUser?.email === 'admin';
+  const isUpperManagement = isUpperManagementRole(userRole);
+  const allowedTabs = tabsForStaffRole(userRole);
+  const showTab = (tab: StaffTabId) => !currentUser || allowedTabs.includes(tab);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const tabs = tabsForStaffRole(userRole);
+    if (!tabs.includes(activeTab)) setActiveTab(tabs[0]);
+  }, [currentUser, userRole, activeTab]);
 
   const getRoleDisplayName = (role: string) => {
     const r = role?.toLowerCase() || '';
@@ -205,7 +217,12 @@ export default function PortalPage() {
       return false;
     }
     const { data: staffData } = await supabase.from('staff_members').select('*').eq('auth_user_id', userId).maybeSingle();
-    const loggedUser = staffData || { name: fullName || email, email, role_level: 'upper_management' };
+    let roleLevel = staffData?.role_level as string | undefined;
+    if (!roleLevel) {
+      const { data: profile } = await supabase.from('profiles').select('staff_role').eq('id', userId).maybeSingle();
+      roleLevel = profile?.staff_role || undefined;
+    }
+    const loggedUser = { ...(staffData || { name: fullName || email, email }), role_level: roleLevel || 'limited' };
     setAuthenticated(true);
     setCurrentUser(loggedUser);
     if (audit) logAudit(portalUi[langRef.current].signedIn, loggedUser.name);
@@ -675,40 +692,54 @@ export default function PortalPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 border-b pb-3 text-xs font-bold">
+          {showTab('overview') && (
           <button onClick={() => setActiveTab('overview')} className={`px-3 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
           </button>
+          )}
+          {showTab('candidates') && (
           <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             👥 {t.candidatesTab} ({candidates.length})
           </button>
+          )}
+          {showTab('requests') && (
           <button onClick={() => setActiveTab('requests')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'requests' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📁 {t.requestsTab} ({jobRequests.length})
           </button>
+          )}
           
-          {isUpperManagement && (
+          {showTab('staff') && isUpperManagement && (
             <button onClick={() => setActiveTab('staff')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'staff' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
               🛡️ {t.staffTab} ({staffMembers.length})
             </button>
           )}
 
+          {showTab('tasks') && (
           <button onClick={() => setActiveTab('tasks')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'tasks' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             ✅ {t.tasksTab} ({tasks.filter(t => t.status === 'pending').length})
           </button>
+          )}
+          {showTab('audit') && (
           <button onClick={() => setActiveTab('audit')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'audit' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📜 {t.auditTab} ({auditLogs.length})
           </button>
+          )}
+          {showTab('employers') && (
           <button onClick={() => setActiveTab('employers')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'employers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             🏢 {t.employersTab} ({employers.length})
           </button>
+          )}
+          {showTab('support') && (
           <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             💬 {t.supportTab} ({supportTickets.length})
           </button>
+          )}
           <Link href="/guides" className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition text-start leading-snug whitespace-normal bg-white border text-slate-700 hover:bg-slate-50">
             <BookOpen className="w-3.5 h-3.5" aria-hidden /> {guideNavLabel[currentLang]}
           </Link>
         </div>
 
-        {activeTab === 'overview' && (
+        {activeTab === 'overview' && showTab('overview') && (
           <div className="space-y-6">
             <div className={`grid grid-cols-1 sm:grid-cols-2 ${isUpperManagement ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
               <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
@@ -761,7 +792,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {activeTab === 'candidates' && (
+        {activeTab === 'candidates' && showTab('candidates') && (
           <CandidatesTab 
             candidates={candidates}
             staffMembers={staffMembers}
@@ -776,16 +807,18 @@ export default function PortalPage() {
           />
         )}
 
-        {activeTab === 'requests' && (
+        {activeTab === 'requests' && showTab('requests') && (
           <RequestsTab 
             jobRequests={jobRequests}
             t={t}
             updateRequestStatus={updateRequestStatus}
             setSelectedDemandDetail={setSelectedDemandDetail}
+            isUpperManagement={isUpperManagement}
+            onChanged={fetchAllData}
           />
         )}
 
-        {activeTab === 'staff' && isUpperManagement && (
+        {activeTab === 'staff' && showTab('staff') && isUpperManagement && (
           <StaffTab 
             staffMembers={staffMembers}
             isUpperManagement={isUpperManagement}
@@ -805,7 +838,7 @@ export default function PortalPage() {
           />
         )}
 
-        {activeTab === 'tasks' && (
+        {activeTab === 'tasks' && showTab('tasks') && (
           <TasksTab 
             tasks={tasks}
             staffMembers={staffMembers}
@@ -834,7 +867,7 @@ export default function PortalPage() {
           />
         )}
 
-        {activeTab === 'audit' && (
+        {activeTab === 'audit' && showTab('audit') && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
               <History className="w-5 h-5 text-emerald-700" /> {t.auditLogTitle}
@@ -867,38 +900,50 @@ export default function PortalPage() {
           </div>
         )}
 
-        {activeTab === 'employers' && (
+        {activeTab === 'employers' && showTab('employers') && (
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden p-4 sm:p-6 space-y-4">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.employersTab}</h3>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">{t.employersTab}</h3>
+              <ListExportBar
+                filename="employers"
+                title={t.employersTab || 'Employers'}
+                rows={employerExportRows(employers)}
+                labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty }}
+              />
+            </div>
             {employers.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-xs">{t.noEmployers}</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {employers.map((emp) => (
                   <div key={emp.id} className="p-4 bg-slate-50 rounded-2xl border space-y-2 text-xs sm:text-sm">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-extrabold text-slate-900">{emp.company_name}<DemoBadge show={emp.is_demo} /></h4>
+                    <div className="flex items-start justify-between gap-2">
+                      <Link href={`/portal/employers/${emp.id}`} className="font-extrabold text-slate-900 hover:underline">
+                        {emp.company_name}<DemoBadge show={emp.is_demo} />
+                      </Link>
                       <div className="flex flex-wrap gap-1.5 justify-end">
                       <Link href={`/portal/employers/${emp.id}`} className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm">📂 {ui.employerFile}</Link>
                       <button
                         onClick={() => {
-                          const employerSessionData = {
+                          localStorage.setItem('panova_employer_user', JSON.stringify({
                             id: emp.id,
                             company_name: emp.company_name,
-                            email: emp.email || 'huseyinaksu@gmail.com',
-                            contact_person: emp.contact_person,
-                            country: emp.country,
-                            sector: emp.sector || ui.sectorFallback,
-                            isAdminImpersonation: true
-                          };
-                          localStorage.setItem('panova_employer_auth', 'true');
-                          localStorage.setItem('panova_employer_user', JSON.stringify(employerSessionData));
-                          window.location.href = '/employer';
+                            isAdminImpersonation: true,
+                          }));
+                          window.location.href = `/employer?as=${emp.id}`;
                         }}
                         className="px-3 py-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm"
                       >
                         {ui.viewEmployerPortal}
                       </button>
+                      <DeleteRecordButton
+                        table="employers"
+                        id={emp.id}
+                        name={emp.company_name || emp.id}
+                        isDemo={emp.is_demo}
+                        allowed={isUpperManagement}
+                        onDeleted={fetchAllData}
+                      />
                       </div>
                     </div>
                     <p className="text-slate-500">Contact: <strong>{emp.contact_person}</strong> | Country: {emp.country}</p>
@@ -909,7 +954,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {activeTab === 'support' && (
+        {activeTab === 'support' && showTab('support') && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.supportTab}</h3>
             {supportTickets.length === 0 ? (

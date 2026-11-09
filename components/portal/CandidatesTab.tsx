@@ -1,10 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, RefreshCw, Trash2, UserPlus } from 'lucide-react';
+import { Search, RefreshCw, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import DemoBadge from './DemoBadge';
-import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
+import { RegistrationCountryOptions } from '@/components/site/RegistrationCountryOptions';
+import { canonicalNationality, sameNationality } from '@/lib/registrationCountries';
+import { candidateExportRows } from '@/lib/exportLists';
+import ListExportBar from './ListExportBar';
+import DeleteRecordButton from './DeleteRecordButton';
 import { toLanguage } from '@/lib/europeanCountries';
 import { supabase } from '@/lib/supabase';
 import {
@@ -18,7 +22,6 @@ import {
 } from '@/lib/candidateLabels';
 import { fill, portalUi } from '@/lib/portal-ui-copy';
 import {
-  canManagerDeleteOpenCandidate,
   isSourceCountryOfficer,
   matchesReferralCodeFilter,
   normalizeReferralCode,
@@ -74,7 +77,6 @@ export default function CandidatesTab({
   const [showRegister, setShowRegister] = useState(false);
   const [draft, setDraft] = useState(emptyDraft);
   const [saving, setSaving] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const isSourceOfficer = isSourceCountryOfficer(currentUser?.role_level);
   const ownCode = isSourceOfficer ? normalizeReferralCode(currentUser?.referral_code) : null;
@@ -93,7 +95,7 @@ export default function CandidatesTab({
 
     const matchesSector = sameSector(cand.sector, selectedSector);
     const matchesStatus = selectedStatus === 'all' || cand.status === selectedStatus;
-    const matchesCountry = selectedCountry === 'all' || (cand.country && cand.country.toLowerCase() === selectedCountry.toLowerCase());
+    const matchesCountry = sameNationality(cand.nationality || cand.country, selectedCountry);
     const matchesCode = !isUpperManagement || matchesReferralCodeFilter(cand.referral_code, codeFilter);
 
     return matchesSearch && matchesSector && matchesStatus && matchesCountry && matchesCode;
@@ -129,7 +131,7 @@ export default function CandidatesTab({
     setSaving(true);
     const payload: Record<string, string | null> = {
       full_name: draft.fullName.trim(),
-      nationality: draft.nationality.trim(),
+      nationality: canonicalNationality(draft.nationality) || draft.nationality.trim(),
       phone: draft.phone.trim(),
       email: draft.email.trim() ? draft.email.trim().toLowerCase() : null,
       profession: draft.profession.trim(),
@@ -153,21 +155,6 @@ export default function CandidatesTab({
     fetchAllData();
   };
 
-  const handleDeleteOpen = async (candidate: { id: string; full_name?: string; referral_code?: string | null }) => {
-    if (!canManagerDeleteOpenCandidate(isUpperManagement, candidate.referral_code) || deletingId) return;
-    if (!confirm(ui.confirmDeleteOpenCandidate)) return;
-    setDeletingId(candidate.id);
-    const { data, error } = await supabase.from('job_candidates').delete().eq('id', candidate.id).select('id');
-    setDeletingId(null);
-    if (error || !data?.length) {
-      alert(`${ui.deleteOpenFailed} ${error ? explainWriteError(error.message) : ''}`.trim());
-      return;
-    }
-    logAudit(`${ui.deleteOpenDone} ${candidate.full_name || ''}`.trim(), currentUser?.name);
-    setSelectedIds((ids) => ids.filter((id) => id !== candidate.id));
-    fetchAllData();
-  };
-
   return (
     <div className="space-y-4">
       <div className="bg-white p-4 rounded-2xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -179,13 +166,21 @@ export default function CandidatesTab({
               : ui.registerCandidateOpenHint}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowRegister((open) => !open)}
-          className="inline-flex items-center justify-center gap-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer"
-        >
-          <UserPlus className="w-3.5 h-3.5" /> {ui.registerCandidate}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <ListExportBar
+            filename="candidates"
+            title={t.candidatesTab || 'Candidates'}
+            rows={candidateExportRows(filteredCandidates)}
+            labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty }}
+          />
+          <button
+            type="button"
+            onClick={() => setShowRegister((open) => !open)}
+            className="inline-flex items-center justify-center gap-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer"
+          >
+            <UserPlus className="w-3.5 h-3.5" /> {ui.registerCandidate}
+          </button>
+        </div>
       </div>
 
       {showRegister && (
@@ -201,12 +196,15 @@ export default function CandidatesTab({
           </label>
           <label className="block text-xs font-bold text-slate-700">
             {t.nationalityCol}
-            <input
+            <select
               required
               value={draft.nationality}
               onChange={(e) => setDraft({ ...draft, nationality: e.target.value })}
               className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm font-medium text-slate-900 bg-white outline-none focus:ring-2 focus:ring-[#2e7d32]"
-            />
+            >
+              <option value="">{ui.selectCountry}</option>
+              <RegistrationCountryOptions lang={lang} currentValue={draft.nationality} />
+            </select>
           </label>
           <label className="block text-xs font-bold text-slate-700">
             {t.phoneLabel}
@@ -336,7 +334,7 @@ export default function CandidatesTab({
             className="w-full px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-slate-900 bg-white cursor-pointer outline-none focus:ring-2 focus:ring-[#2e7d32]"
           >
             <option value="all">{filters.allCountries}</option>
-            <EuropeanCountryOptions lang={lang} />
+            <RegistrationCountryOptions lang={lang} />
           </select>
         </div>
 
@@ -394,7 +392,7 @@ export default function CandidatesTab({
               {filteredCandidates.map((candidate) => {
                 const isSelected = selectedIds.includes(candidate.id);
                 const code = normalizeReferralCode(candidate.referral_code);
-                const canDelete = canManagerDeleteOpenCandidate(isUpperManagement, candidate.referral_code);
+                const canDelete = isUpperManagement;
                 return (
                   <tr key={candidate.id} className={`hover:bg-slate-50 ${isSelected ? 'bg-emerald-50' : ''}`}>
                     <td className="p-4 text-center">
@@ -417,16 +415,17 @@ export default function CandidatesTab({
                       ) : (
                         <span className="text-slate-400">{ui.referralCodeEmpty}</span>
                       )}
-                      {canDelete && (
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteOpen(candidate)}
-                          disabled={deletingId === candidate.id}
-                          className="mt-1 flex items-center gap-1 text-[11px] font-bold text-red-700 hover:text-red-900 cursor-pointer disabled:opacity-60"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" /> {ui.deleteOpenCandidate}
-                        </button>
-                      )}
+                      <DeleteRecordButton
+                        table="job_candidates"
+                        id={candidate.id}
+                        name={code ? `${candidate.full_name || candidate.id} (${code})` : (candidate.full_name || candidate.id)}
+                        isDemo={candidate.is_demo}
+                        allowed={canDelete}
+                        onDeleted={() => {
+                          setSelectedIds((ids) => ids.filter((id) => id !== candidate.id));
+                          fetchAllData();
+                        }}
+                      />
                     </td>
                     <td className="p-4">
                       <div>{candidatePassportLabel(candidate.passport_number || candidate.passport_no, ui.unspecified)}</div>
