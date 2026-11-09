@@ -13,6 +13,7 @@ import {
   prefixedSubject,
   skipReason,
 } from '@/lib/email/forward-inbound';
+import { forwardMailCopy } from '@/lib/email/email-copy';
 
 export const runtime = 'nodejs';
 
@@ -169,7 +170,7 @@ export async function POST(request: Request) {
     text: email.text,
     html: email.html,
     attachmentNote,
-    ...(contactNotice ? { intro: 'Panova iletişim formu. Yanıt, formu dolduran kişiye gider.' } : {}),
+    ...(contactNotice ? { intro: forwardMailCopy.tr.contactIntro } : {}),
   });
 
   const { error: sendError } = await resend.emails.send(

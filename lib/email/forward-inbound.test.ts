@@ -132,6 +132,14 @@ test('a homepage contact notification from the company domain is forwarded', () 
     skipReason({
       from: company.email,
       to: company.email,
+      subject: 'New contact form: Ada — Panova HR',
+    }),
+    null,
+  );
+  assert.equal(
+    skipReason({
+      from: company.email,
+      to: company.email,
       subject: '[Panova] Yeni iletişim formu: Ada',
     }),
     'from-self',

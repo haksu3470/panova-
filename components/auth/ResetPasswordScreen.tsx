@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import type { User } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { ArrowLeft, Lock } from 'lucide-react';
+import { VerificationCodeField } from '@/components/auth/VerificationCodeField';
 import { AuthFooter } from '@/components/site/AuthFooter';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { translations } from '@/lib/dictionary';
@@ -167,17 +168,15 @@ export default function ResetPasswordScreen({ audience }: { audience: ResetAudie
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium outline-none text-sm"
                 />
               </div>
-              <div>
-                <label htmlFor="reset-code" className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.resetPasswordCode}</label>
-                <input
-                  id="reset-code"
-                  required
-                  autoComplete="one-time-code"
-                  value={code}
-                  onChange={(event) => setCode(event.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium outline-none text-sm"
-                />
-              </div>
+              <VerificationCodeField
+                id="reset-code"
+                label={t.resetPasswordCode || ''}
+                value={code}
+                onChange={setCode}
+                pasteLabel={t.resetPasswordPaste || ''}
+                pastedLabel={t.resetPasswordPasted || ''}
+                pasteFail={t.resetPasswordPasteFail || ''}
+              />
               <button type="submit" disabled={busy} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] disabled:opacity-60 text-white font-bold py-3.5 rounded-xl text-sm cursor-pointer">
                 {t.resetPasswordCodeBtn}
               </button>

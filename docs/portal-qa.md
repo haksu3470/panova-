@@ -84,7 +84,7 @@ In-app guide: `staff-login`.
 
 **Beklenen / Expected:** A confirmed session lands on the candidate dashboard (Overview, Profile, Documents, Offers, Support, Guides). Google sign-in uses the same address. An unconfirmed password account cannot open the dashboard.
 
-**Bilinen engel / Known blocker:** Signup metadata stores `nationality: 'Belirtilmedi'` regardless of the UI language (`app/candidate/page.tsx`). Delivery of the code depends on the Supabase confirm-signup template (`supabase/templates/confirmation.html`); the numeric field needs `{{ .Token }}`.
+**Bilinen engel / Known blocker:** Signup metadata stores `nationality: 'Belirtilmedi'` regardless of the UI language (`app/candidate/page.tsx`). The code is `{{ .Token }}` in `supabase/templates/confirmation.html`. The hosted project does not read that file: paste it in the dashboard, and set Authentication → Sign In / Providers → Email → OTP length to 6. See `supabase/templates/README.md`.
 
 In-app guide: `candidate-register`.
 
@@ -310,7 +310,7 @@ Only items checked in this repository. Hosted database policies that were never 
 
 Guide copy, portal dictionary, and the labor-request errors exist in TR, EN, SQ, AR, and MK. These strings do not:
 
-- Staff invite email HTML and the JSON errors in `app/api/staff-invite/route.ts`.
+- Staff invite JSON errors in `app/api/staff-invite/route.ts` (the invite email itself follows the sender's locale).
 - The audit text `Personel Davet Edildi:`.
 - Candidate support and emergency placeholders, the five default document names written into `documents_json`, and alerts prefixed with `Hata:`.
 - Candidate signup metadata `nationality: 'Belirtilmedi'`.

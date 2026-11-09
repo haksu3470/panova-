@@ -313,6 +313,7 @@ export default function PortalPage() {
         password: regPassword,
         redirectPath: '/portal',
         metadata: { role: 'staff', full_name: regName.trim() },
+        locale: currentLang,
       });
       if (result.status === 'error') {
         alert((t.signupError || '{message}').replace('{message}', result.message));
@@ -397,7 +398,7 @@ export default function PortalPage() {
     const res = await fetch('/api/staff-invite', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sess.session?.access_token || ''}` },
-      body: JSON.stringify({ name: newStaffName, email: newStaffEmail.trim().toLowerCase(), role: newStaffRoleLevel }),
+      body: JSON.stringify({ name: newStaffName, email: newStaffEmail.trim().toLowerCase(), role: newStaffRoleLevel, locale: currentLang }),
     });
     const result = await res.json().catch(() => ({ error: ui.serverUnreadable }));
     if (!res.ok || result.error) {

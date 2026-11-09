@@ -165,6 +165,7 @@ export default function EmployerLoginPage() {
           phone: phoneForStorage(regPhone, regCountry),
           country: regCountry,
         },
+        locale: currentLang,
       });
       if (result.status === 'error') {
         alert((t.signupError || '{message}').replace('{message}', result.message));

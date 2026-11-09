@@ -44,6 +44,7 @@ export default function HomePage() {
           email: formData.email,
           phone: formData.phone,
           notes: formData.notes,
+          locale: currentLang,
         }),
       });
       ok = response.ok;

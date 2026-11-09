@@ -1,20 +1,55 @@
 <!--
-  Supabase Auth → Emails → Templates → Magic Link
-  Subject: {{ .Token }} · Panova
-  Same code and link as Confirm signup. verifyOtp tries email, magiclink, and signup.
+  Supabase Dashboard → Authentication → Emails → Templates → Magic Link
+  Subject: supabase/templates/README.md (Magic Link). Same subject and body as Confirm signup.
+  Resend uses this template when the signup message cannot be sent again.
 -->
-<div style="font-family:Arial,sans-serif;color:#0f172a;max-width:560px;margin:0 auto;padding:24px">
-  <h1 style="color:#1b5e20;font-size:22px;margin:0 0 12px">Panova</h1>
-  <p style="font-size:15px;line-height:1.5;margin:0 0 16px">
-    TR: Kayıt ekranına bu kodu yazın veya bağlantıyı açın.<br>
-    EN: Enter this code on the registration screen, or open the link.<br>
-    SQ: Shkruani këtë kod në regjistrim, ose hapni lidhjen.<br>
-    AR: أدخل هذا الرمز في شاشة التسجيل، أو افتح الرابط.<br>
-    MK: Внесете го овој код на екранот за регистрација, или отворете ја врската.
-  </p>
-  <p style="font-size:36px;letter-spacing:8px;font-weight:800;margin:8px 0 20px">{{ .Token }}</p>
-  <p style="margin:0 0 8px">
-    <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#2e7d32;color:#ffffff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:10px">Panova</a>
-  </p>
-  <p style="font-size:12px;color:#64748b;word-break:break-all">{{ .ConfirmationURL }}</p>
+{{ $locale := "" }}{{ with .Data }}{{ with index . "locale" }}{{ $locale = . }}{{ end }}{{ end }}
+<!DOCTYPE html>
+<html lang="{{ if eq $locale `tr` }}tr{{ else if eq $locale `en` }}en{{ else if eq $locale `sq` }}sq{{ else if eq $locale `ar` }}ar{{ else if eq $locale `mk` }}mk{{ else }}und{{ end }}" dir="{{ if eq $locale `ar` }}rtl{{ else if or (eq $locale `tr`) (eq $locale `en`) (eq $locale `sq`) (eq $locale `mk`) }}ltr{{ else }}auto{{ end }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="x-apple-disable-message-reformatting">
+<title>{{ if eq $locale `tr` }}Güvenlik kodunuz{{ else if eq $locale `en` }}Your security code{{ else if eq $locale `sq` }}Kodi juaj i sigurisë{{ else if eq $locale `ar` }}رمز الأمان{{ else if eq $locale `mk` }}Вашиот безбедносен код{{ else }}Panova{{ end }}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0f172a;">
+<div lang="{{ if eq $locale `tr` }}tr{{ else if eq $locale `en` }}en{{ else if eq $locale `sq` }}sq{{ else if eq $locale `ar` }}ar{{ else if eq $locale `mk` }}mk{{ else }}und{{ end }}" dir="{{ if eq $locale `ar` }}rtl{{ else if or (eq $locale `tr`) (eq $locale `en`) (eq $locale `sq`) (eq $locale `mk`) }}ltr{{ else }}auto{{ end }}" style="background-color:#0f172a;margin:0;padding:0;">
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#0f172a;opacity:0;">{{ if eq $locale `tr` }}Kayıt ekranına bu 6 haneli kodu yapıştırın.{{ else if eq $locale `en` }}Paste this 6-digit code on the registration screen.{{ else if eq $locale `sq` }}Ngjiteni këtë kod 6-shifror në ekranin e regjistrimit.{{ else if eq $locale `ar` }}الصق هذا الرمز المكوّن من 6 أرقام في شاشة التسجيل.{{ else if eq $locale `mk` }}Залепете го овој 6-цифрен код на екранот за регистрација.{{ else }}Panova{{ end }}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0f172a" style="background-color:#0f172a;margin:0;padding:0;">
+<tr>
+<td align="center" style="padding:24px 12px;">
+<!--[if mso]><table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="max-width:560px;width:100%;background-color:#ffffff;border-radius:20px;overflow:hidden;">
+<tr>
+<td align="center" style="padding:28px 28px 8px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
+<a href="https://panovagroup.org" style="text-decoration:none;">
+<img src="https://panovagroup.org/logo.png" alt="Panova Group" width="120" style="display:block;margin:0 auto 12px;border:0;outline:none;text-decoration:none;max-width:120px;height:auto;">
+</a>
+<p style="margin:0;font-size:13px;line-height:1.4;color:#64748b;font-family:Arial,Helvetica,sans-serif;">Panova Group HR</p>
+</td>
+</tr>
+<tr>
+<td style="padding:8px 28px 28px;font-family:Arial,Helvetica,sans-serif;text-align:center;">
+<h1 style="margin:16px 0 10px;font-size:24px;line-height:1.3;color:#0f172a;font-weight:800;font-family:Arial,Helvetica,sans-serif;text-align:center;">{{ if eq $locale `tr` }}Güvenlik kodunuz{{ else if eq $locale `en` }}Your security code{{ else if eq $locale `sq` }}Kodi juaj i sigurisë{{ else if eq $locale `ar` }}رمز الأمان{{ else if eq $locale `mk` }}Вашиот безбедносен код{{ else }}Panova{{ end }}</h1>
+{{ if eq $locale `tr` }}<p style="margin:0 0 16px;font-size:15px;line-height:1.5;color:#475569;text-align:center;font-family:Arial,Helvetica,sans-serif;">Bu kodu kimseyle paylaşmayın. Kayıt ekranına yapıştırın.</p>{{ else if eq $locale `en` }}<p style="margin:0 0 16px;font-size:15px;line-height:1.5;color:#475569;text-align:center;font-family:Arial,Helvetica,sans-serif;">Do not share this code with anyone. Paste it on the registration screen.</p>{{ else if eq $locale `sq` }}<p style="margin:0 0 16px;font-size:15px;line-height:1.5;color:#475569;text-align:center;font-family:Arial,Helvetica,sans-serif;">Mos e ndani këtë kod me askënd. Ngjiteni në ekranin e regjistrimit.</p>{{ else if eq $locale `ar` }}<p style="margin:0 0 16px;font-size:15px;line-height:1.5;color:#475569;text-align:center;font-family:Arial,Helvetica,sans-serif;">لا تشارك هذا الرمز مع أي شخص. الصقه في شاشة التسجيل.</p>{{ else if eq $locale `mk` }}<p style="margin:0 0 16px;font-size:15px;line-height:1.5;color:#475569;text-align:center;font-family:Arial,Helvetica,sans-serif;">Не го споделувајте овој код со никого. Залепете го на екранот за регистрација.</p>{{ else }}<p style="margin:0 0 16px;font-size:15px;line-height:1.5;color:#475569;text-align:center;font-family:Arial,Helvetica,sans-serif;">TR: Kodu yazın veya bağlantıyı açın.<br>EN: Enter the code or open the link.<br>SQ: Shkruani kodin ose hapni lidhjen.<br>AR: أدخل الرمز أو افتح الرابط.<br>MK: Внесете го кодот или отворете ја врската.</p>{{ end }}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ecfdf5" style="margin:0;background-color:#ecfdf5;border:2px dashed #2e7d32;border-radius:14px;"><tr><td align="center" style="padding:22px 12px;text-align:center;"><span style="font-size:40px;line-height:1.2;letter-spacing:8px;font-weight:800;color:#14532d;font-family:Consolas,'Courier New',Courier,monospace;-webkit-user-select:text;user-select:text;">{{ .Token }}</span></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:20px auto 0;"><tr><td align="center" bgcolor="#1b5e20" style="border-radius:999px;background-color:#1b5e20;"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background-color:#1b5e20;color:#ffffff;text-decoration:none;font-weight:700;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.2;padding:14px 26px;border-radius:999px;mso-padding-alt:0;">{{ if eq $locale `tr` }}Bağlantı ile onayla{{ else if eq $locale `en` }}Confirm with the link{{ else if eq $locale `sq` }}Konfirmo me lidhjen{{ else if eq $locale `ar` }}التأكيد عبر الرابط{{ else if eq $locale `mk` }}Потврди со врската{{ else }}Panova{{ end }}</a></td></tr></table>
+</td>
+</tr>
+<tr>
+<td bgcolor="#f1f5f9" style="padding:18px 28px;background-color:#f1f5f9;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:#334155;text-align:{{ if eq $locale `ar` }}right{{ else }}left{{ end }};">
+© Panova Group · {{ if eq $locale `tr` }}Bangladeş · Türkiye · Kuzey Makedonya{{ else if eq $locale `en` }}Bangladesh · Türkiye · North Macedonia{{ else if eq $locale `sq` }}Bangladeshi · Turqia · Maqedonia e Veriut{{ else if eq $locale `ar` }}بنغلاديش · تركيا · مقدونيا الشمالية{{ else if eq $locale `mk` }}Бангладеш · Турција · Северна Македонија{{ else }}Bangladesh · Türkiye · North Macedonia{{ end }}<br>
+<a href="mailto:panova@panovagroup.org" style="color:#1b5e20;text-decoration:underline;">panova@panovagroup.org</a>
+ · <a href="https://panovagroup.org" style="color:#1b5e20;text-decoration:underline;">panovagroup.org</a><br>
+{{ if eq $locale `tr` }}Bu ileti otomatik gönderilmiştir.{{ else if eq $locale `en` }}This message was sent automatically.{{ else if eq $locale `sq` }}Ky mesazh është dërguar automatikisht.{{ else if eq $locale `ar` }}أُرسلت هذه الرسالة تلقائيًا.{{ else if eq $locale `mk` }}Оваа порака е испратена автоматски.{{ else }}This message was sent automatically.{{ end }}
+</td>
+</tr>
+</table>
+<!--[if mso]></td></tr></table><![endif]-->
+</td>
+</tr>
+</table>
 </div>
+</body>
+</html>

@@ -52,7 +52,7 @@ test('parse keeps a homepage submission and rejects junk', () => {
   assert.equal(hostile.value.fullName.includes('Bcc:'), true);
 });
 
-test('the notification is a Turkish message to the company inbox', () => {
+test('the notification uses the corporate card in the visitor locale', () => {
   const parsed = parseContactSubmission({
     ...validBody,
     fullName: 'Ada <b> & "x"',
@@ -76,6 +76,10 @@ test('the notification is a Turkish message to the company inbox', () => {
   assert.match(message.text, /Firma kodu: hr/);
   assert.match(message.text, /Telefon: \+90 555 000 00 00/);
   assert.match(message.html, /lang="tr"/);
+  assert.match(message.html, /https:\/\/panovagroup\.org\/logo\.png/);
+  assert.match(message.html, /panova@panovagroup\.org/);
+  assert.match(message.html, /Bu ileti otomatik gönderilmiştir/);
+  assert.equal(message.html.includes('New contact form'), false);
   assert.match(message.html, /Ada &lt;b&gt; &amp; &quot;x&quot;/);
   assert.match(message.html, /&lt;script&gt;/);
   assert.equal(message.html.includes('<script>'), false);

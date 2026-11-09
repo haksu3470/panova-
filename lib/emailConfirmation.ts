@@ -27,6 +27,14 @@ function typeOrder(preferred: OtpType | null): OtpType[] {
 }
 
 /**
+ * Email OTP length the product sends. Hosted Supabase does not read this file:
+ * set Authentication → Sign In / Providers → Email → OTP length to 6
+ * (`mailer_otp_length` on the Management API). The field still accepts 6–10 digits
+ * so a code issued before that setting is saved can be verified.
+ */
+export const EMAIL_OTP_LENGTH = 6;
+
+/**
  * The confirm-signup mail is a link (`/auth/v1/verify?token=…&type=signup`)
  * unless the Auth template also prints `{{ .Token }}`. Accept either shape.
  */

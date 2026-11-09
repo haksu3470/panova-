@@ -369,6 +369,7 @@ function CandidateDetailPageInner() {
             candidateName: candidate.full_name,
             subject: notifTitle,
             message: notifMessage,
+            locale: currentLang,
           }),
         });
       }

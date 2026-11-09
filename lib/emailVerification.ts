@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 import { signOut } from '@/lib/auth';
 import { isGoogleProvedUser } from '@/lib/emailAddress';
 import { parseVerificationInput, type OtpType } from '@/lib/emailConfirmation';
+import type { EmailLocale } from '@/lib/email/email-copy';
+import { emailLocale } from '@/lib/email/email-copy';
 
 export type VerifyChannel = 'signup' | 'otp';
 
@@ -79,10 +81,11 @@ function redirectUrl(redirectPath: string): string {
 async function sendMailboxProof(
   email: string,
   emailRedirectTo: string,
+  locale: EmailLocale,
 ): Promise<{ status: 'verify'; email: string } | { status: 'error'; message: string }> {
   const otp = await supabase.auth.signInWithOtp({
     email,
-    options: { shouldCreateUser: false, emailRedirectTo },
+    options: { shouldCreateUser: false, emailRedirectTo, data: { locale } },
   });
   if (otp.error) return { status: 'error', message: otp.error.message };
   rememberVerifyEmail(email, 'otp');
@@ -98,20 +101,23 @@ export async function beginPasswordSignup(args: {
   password: string;
   redirectPath: string;
   metadata: Record<string, string>;
+  /** Saved on the account so Auth templates can read {{ .Data.locale }}. */
+  locale: string;
 }): Promise<{ status: 'verify'; email: string } | { status: 'error'; message: string }> {
   const email = args.email.trim().toLowerCase();
+  const locale = emailLocale(args.locale);
   const emailRedirectTo = redirectUrl(args.redirectPath);
   suppressCount += 1;
   try {
     const { data, error } = await supabase.auth.signUp({
       email,
       password: args.password,
-      options: { emailRedirectTo, data: args.metadata },
+      options: { emailRedirectTo, data: { ...args.metadata, locale } },
     });
     if (error) {
       const already = /already registered|already exists|user already/i.test(error.message);
       if (!already) return { status: 'error', message: error.message };
-      return sendMailboxProof(email, emailRedirectTo);
+      return sendMailboxProof(email, emailRedirectTo, locale);
     }
 
     const confirmed = Boolean(data.user?.email_confirmed_at || data.user?.confirmed_at);
@@ -122,15 +128,16 @@ export async function beginPasswordSignup(args: {
 
     // Autoconfirm issued a session without a mailbox proof. Drop it and send a real link.
     await supabase.auth.signOut();
-    return sendMailboxProof(email, emailRedirectTo);
+    return sendMailboxProof(email, emailRedirectTo, locale);
   } finally {
     suppressCount = Math.max(0, suppressCount - 1);
   }
 }
 
-export async function resendVerification(email: string, redirectPath: string): Promise<{ ok: boolean; message?: string }> {
+export async function resendVerification(email: string, redirectPath: string, locale: string): Promise<{ ok: boolean; message?: string }> {
   const emailRedirectTo = redirectUrl(redirectPath);
   const target = email.trim().toLowerCase();
+  const lang = emailLocale(locale);
   const signup = await supabase.auth.resend({
     type: 'signup',
     email: target,
@@ -142,7 +149,7 @@ export async function resendVerification(email: string, redirectPath: string): P
   }
   const otp = await supabase.auth.signInWithOtp({
     email: target,
-    options: { shouldCreateUser: false, emailRedirectTo },
+    options: { shouldCreateUser: false, emailRedirectTo, data: { locale: lang } },
   });
   if (otp.error) return { ok: false, message: otp.error.message };
   rememberVerifyEmail(target, 'otp');
@@ -151,10 +158,11 @@ export async function resendVerification(email: string, redirectPath: string): P
 
 /**
  * Signup mail is Supabase's Confirm signup template (and Magic Link on resend).
- * The numeric field needs `{{ .Token }}` in that template. The HTML to paste is
- * `supabase/templates/confirmation.html` and `supabase/templates/magic_link.html`,
- * with subject `{{ .Token }} · Panova`. The link in the same message still
+ * The code is `{{ .Token }}` (6 digits after Authentication → Email → OTP length is set to 6).
+ * Paste `supabase/templates/confirmation.html` and `supabase/templates/magic_link.html`.
+ * Subjects are in `supabase/templates/README.md`. The link in the same message still
  * confirms the address; a pasted verify URL is accepted as a token hash.
+ * The template language follows `user_metadata.locale`.
  */
 export type ConfirmEmailResult =
   | { ok: true }
