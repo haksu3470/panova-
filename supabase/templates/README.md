@@ -32,7 +32,7 @@ Send a new signup email after saving. An older 8-digit code still verifies in th
 
 Dashboard: **Authentication → Emails → Templates** ([direct link](https://supabase.com/dashboard/project/vptcihlhkzfmwxpaituf/auth/templates)).
 
-For each row, replace the **subject** with the one line below and the **body** with the whole HTML file, including the comment and the `{{ $locale }}` line. Do not enable a copy button in the email. Email clients do not run JavaScript; the code is selectable text, and the site has the Paste code button.
+For each row, replace the **subject** with the one line below and the **body** with the whole HTML file, including the comment and the `{{ $locale }}` line. Do not enable a copy button in the email. Email clients do not run JavaScript. The code is selectable text; the verify screen submits when six digits are entered.
 
 ### Confirm signup
 

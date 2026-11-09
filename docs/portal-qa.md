@@ -317,7 +317,7 @@ Guide copy, portal dictionary, and the labor-request errors exist in TR, EN, SQ,
 
 ### Product UI with no guide article
 
-Logout (S11), forgot password (S12), and the OTP/paste field on `EmailVerifyNotice` are implemented. `GUIDE_CATALOG` has no id for them.
+Logout (S11), forgot password (S12), and the 6-digit code field on `EmailVerifyNotice` are implemented. `GUIDE_CATALOG` has no id for them.
 
 ### Screens that are not the portal map
 

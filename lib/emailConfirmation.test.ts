@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { EMAIL_OTP_LENGTH, classifyCandidateLinkError, parseVerificationInput } from './emailConfirmation.ts';
+import { EMAIL_OTP_LENGTH, classifyCandidateLinkError, otpDigits, parseVerificationInput } from './emailConfirmation.ts';
+
+test('the code field keeps six digits and drops spaces and other characters', () => {
+  assert.equal(otpDigits(' 917 346 '), '917346');
+  assert.equal(otpDigits('91-73-46'), '917346');
+  assert.equal(otpDigits('Kod: 917346'), '917346');
+  assert.equal(otpDigits('91734678'), '917346');
+  assert.equal(otpDigits('12a3'), '123');
+  assert.equal(otpDigits(''), '');
+});
 
 test('a 6-digit code is the OTP, and a code issued before the length change still parses', () => {
   assert.equal(EMAIL_OTP_LENGTH, 6);

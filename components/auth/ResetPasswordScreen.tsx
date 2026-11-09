@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { User } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { ArrowLeft, Lock } from 'lucide-react';
@@ -8,6 +8,7 @@ import { VerificationCodeField } from '@/components/auth/VerificationCodeField';
 import { AuthFooter } from '@/components/site/AuthFooter';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { translations } from '@/lib/dictionary';
+import { EMAIL_OTP_LENGTH } from '@/lib/emailConfirmation';
 import { completePasswordReset, verifyRecoveryProof } from '@/lib/passwordResetActions';
 import {
   clearRecoveryPending,
@@ -36,6 +37,8 @@ export default function ResetPasswordScreen({ audience }: { audience: ResetAudie
   const [confirm, setConfirm] = useState('');
   const [info, setInfo] = useState('');
   const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
+  const autoTried = useRef('');
 
   const returnPath = resetReturnPath(audience);
 
@@ -74,22 +77,37 @@ export default function ResetPasswordScreen({ audience }: { audience: ResetAudie
     };
   }, [audience]);
 
-  const submitCode = async (event: FormEvent) => {
-    event.preventDefault();
+  const submitCode = async (token: string, manual: boolean) => {
+    const digits = token.replace(/\D/g, '');
+    if (digits.length !== EMAIL_OTP_LENGTH) return;
+    if (!manual && !email.includes('@')) return;
+    if (busyRef.current) return;
+    if (!manual && autoTried.current === digits) return;
+    busyRef.current = true;
+    autoTried.current = digits;
     setBusy(true);
     setInfo('');
-    const result = await verifyRecoveryProof(email, code);
-    setBusy(false);
-    if (result !== 'ok') {
-      setInfo(t.resetPasswordCodeFail || '');
-      return;
+    try {
+      const result = await verifyRecoveryProof(email, digits);
+      if (result !== 'ok') {
+        setInfo(t.resetPasswordCodeFail || '');
+        return;
+      }
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        setInfo(t.resetPasswordCodeFail || '');
+        return;
+      }
+      showSession(sessionData.session.user);
+    } finally {
+      busyRef.current = false;
+      setBusy(false);
     }
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
-      setInfo(t.resetPasswordCodeFail || '');
-      return;
-    }
-    showSession(sessionData.session.user);
+  };
+
+  const onSubmitCode = (event: FormEvent) => {
+    event.preventDefault();
+    void submitCode(code, true);
   };
 
   const submitPassword = async (event: FormEvent) => {
@@ -155,7 +173,7 @@ export default function ResetPasswordScreen({ audience }: { audience: ResetAudie
           </p>
 
           {phase === 'prove' ? (
-            <form onSubmit={submitCode} className="space-y-4 text-left rtl:text-right">
+            <form onSubmit={onSubmitCode} className="space-y-4 text-left rtl:text-right" aria-busy={busy}>
               <div>
                 <label htmlFor="reset-email" className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.emailLabel}</label>
                 <input
@@ -173,12 +191,11 @@ export default function ResetPasswordScreen({ audience }: { audience: ResetAudie
                 label={t.resetPasswordCode || ''}
                 value={code}
                 onChange={setCode}
-                pasteLabel={t.resetPasswordPaste || ''}
-                pastedLabel={t.resetPasswordPasted || ''}
-                pasteFail={t.resetPasswordPasteFail || ''}
+                onComplete={(digits) => { void submitCode(digits, false); }}
+                disabled={busy}
               />
-              <button type="submit" disabled={busy} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] disabled:opacity-60 text-white font-bold py-3.5 rounded-xl text-sm cursor-pointer">
-                {t.resetPasswordCodeBtn}
+              <button type="submit" disabled={busy || code.length !== EMAIL_OTP_LENGTH} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] disabled:opacity-60 text-white font-bold py-3.5 rounded-xl text-sm cursor-pointer">
+                {busy ? (t.submitting || t.resetPasswordCodeBtn) : t.resetPasswordCodeBtn}
               </button>
             </form>
           ) : null}
