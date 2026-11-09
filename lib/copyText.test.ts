@@ -88,17 +88,19 @@ test('copyText returns false when the fallback throws', async () => {
   assert.equal(ok, false);
 });
 
-test('email code copy labels exist in TR, EN, SQ, AR, and MK', () => {
-  assert.equal(translations.tr.verifyEmailCopy, 'Kopyala');
-  assert.equal(translations.tr.verifyEmailCopied, 'Kopyalandı');
-  assert.equal(translations.en.verifyEmailCopy, 'Copy');
-  assert.equal(translations.en.verifyEmailCopied, 'Copied');
-  assert.equal(translations.sq.verifyEmailCopied, 'U kopjua');
-  assert.equal(translations.ar.verifyEmailCopied, 'تم النسخ');
-  assert.equal(translations.mk.verifyEmailCopied, 'Копирано');
+test('email code paste labels exist in TR, EN, SQ, AR, and MK', () => {
+  assert.equal(translations.tr.verifyEmailPaste, 'Kodu yapıştır');
+  assert.equal(translations.tr.verifyEmailPasted, 'Kod yapıştırıldı');
+  assert.equal(translations.en.verifyEmailPaste, 'Paste code');
+  assert.equal(translations.en.verifyEmailPasted, 'Code pasted');
+  assert.equal(translations.sq.verifyEmailPasted, 'Kodi u ngjit');
+  assert.equal(translations.ar.verifyEmailPasted, 'تم لصق الرمز');
+  assert.equal(translations.mk.verifyEmailPasted, 'Кодот е залепен');
   for (const lang of LOCALES) {
-    assert.ok(translations[lang].verifyEmailCopy);
-    assert.ok(translations[lang].verifyEmailCopied);
-    assert.ok(translations[lang].verifyEmailCopyFail);
+    assert.ok(translations[lang].verifyEmailPaste);
+    assert.ok(translations[lang].verifyEmailPasted);
+    assert.ok(translations[lang].verifyEmailPasteFail);
+    assert.ok(translations[lang].resetPasswordPaste);
+    assert.ok(translations[lang].resetPasswordPasteFail);
   }
 });

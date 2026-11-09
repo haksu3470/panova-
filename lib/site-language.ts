@@ -33,6 +33,9 @@ export function writeStoredLanguage(lang: Language) {
   syncDocumentLanguage(lang);
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent<Language>(LANGUAGE_EVENT, { detail: lang }));
+    void import('./authLocale')
+      .then((mod) => mod.rememberAuthLocale(lang))
+      .catch(() => undefined);
   }
 }
 

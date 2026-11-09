@@ -590,6 +590,7 @@ export default function CandidateDashboard() {
           sector: regSector,
           nationality: 'Belirtilmedi',
         },
+        locale: currentLang,
       });
       if (result.status === 'error') {
         alert((t.signupError || '{message}').replace('{message}', result.message));
