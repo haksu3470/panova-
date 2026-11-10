@@ -9,6 +9,9 @@ import DeleteRecordButton from './DeleteRecordButton';
 import ListExportBar from './ListExportBar';
 import { portalUi } from '@/lib/portal-ui-copy';
 import { offerExportRows, requestExportRows, toCsv } from '@/lib/exportLists';
+import { displayedRequestSalary } from '@/lib/workforceRequest';
+import { releaseCopy } from '@/lib/release-copy';
+import { targetStartIsPast } from '@/lib/demandStatus';
 import { supabase } from '@/lib/supabase';
 import { useSiteLanguage } from '@/lib/site-language';
 
@@ -42,7 +45,7 @@ export default function RequestsTab({
         </div>
         <div className="flex flex-col items-stretch sm:items-end gap-2">
           <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
-            {t.openRequestsCard}: {jobRequests.length}
+            {t.openRequestsCard}: {jobRequests.filter((row) => !['completed', 'cancelled'].includes(String(row.status || ''))).length}
           </div>
           <ListExportBar
             filename="labour-requests"
@@ -99,7 +102,10 @@ export default function RequestsTab({
                 <div>📍 {req.city || 'N/A'}, {req.country || 'International'}</div>
                 <div>📅 {t.createdDate}: {req.created_at ? req.created_at.substring(0, 10) : '2026-09'}</div>
                 <div>🎯 {t.colTargetStart}: {req.target_start_date || '2026-10-15'}</div>
-                <div>💰 {t.colSalary}: {req.salary || 'Negotiable'}</div>
+                <div>💰 {t.colSalary}: {displayedRequestSalary(req) || '—'}</div>
+                {targetStartIsPast(req.target_start_date) && !['completed', 'cancelled'].includes(String(req.status || '')) ? (
+                  <div className="col-span-2 text-amber-800 font-bold">{releaseCopy[currentLang].pastTarget}</div>
+                ) : null}
               </div>
 
               <div className="pt-2 border-t space-y-1.5">
@@ -134,8 +140,8 @@ export default function RequestsTab({
                   <option value="completed">🟢 {t.stageCompleted}</option>
                   <option value="cancelled">🔴 {t.stageCancelled}</option>
                 </select>
-                {req.cancellation_reason && (
-                  <p className="text-[10px] text-red-600 font-medium">{ui.cancelReasonLabel} {req.cancellation_reason}</p>
+                {(req.closed_reason || req.cancellation_reason) && (
+                  <p className="text-[10px] text-red-600 font-medium">{ui.cancelReasonLabel} {req.closed_reason || req.cancellation_reason}</p>
                 )}
               </div>
             </div>

@@ -7,6 +7,7 @@ import { writeAudit } from '@/lib/audit';
 import DemoBadge from './DemoBadge';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { OFFER_CURRENCIES, offerCurrency, offerTermsPayload } from '@/lib/offers';
+import { releaseCopy } from '@/lib/release-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 
 const toLocal = (iso?: string | null) => (iso ? new Date(iso).toISOString().slice(0, 16) : '');
@@ -70,6 +71,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
   };
 
   const saveInterview = async () => {
+    if (request?.id && match && !match.presented_at) return setError(releaseCopy[currentLang].mustPresent);
     if (!iv.scheduled_at) return setError(ui.ioScheduleRequired);
     const row = {
       scheduled_at: new Date(iv.scheduled_at).toISOString(),
@@ -94,6 +96,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
   };
 
   const saveOffer = async () => {
+    if (request?.id && match && !match.presented_at) return setError(releaseCopy[currentLang].mustPresent);
     if (!of.employer_name || !of.monthly_net_salary) return setError(ui.ioOfferRequired);
     const row = {
       employer_name: of.employer_name,

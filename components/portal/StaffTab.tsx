@@ -6,6 +6,8 @@ import { ReferralCodeChip } from './ReferralCodeChip';
 import { isSourceCountryOfficer, normalizeReferralCode } from '@/lib/referralCode';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { useSiteLanguage } from '@/lib/site-language';
+import { releaseCopy } from '@/lib/release-copy';
+import { supabase } from '@/lib/supabase';
 
 interface StaffTabProps {
   staffMembers: any[];
@@ -23,6 +25,7 @@ interface StaffTabProps {
   updateStaffRoleLevel: (staffId: string, newLevel: string) => void;
   setEditingStaff: (staff: any) => void;
   handleDeleteStaff: (staffId: string) => void;
+  onChanged?: () => void;
 }
 
 export default function StaffTab({
@@ -40,7 +43,8 @@ export default function StaffTab({
   handleAddStaff,
   updateStaffRoleLevel,
   setEditingStaff,
-  handleDeleteStaff
+  handleDeleteStaff,
+  onChanged,
 }: StaffTabProps) {
   const { currentLang } = useSiteLanguage('en');
   const ui = portalUi[currentLang];
@@ -122,6 +126,21 @@ export default function StaffTab({
                 ) : null}
                 {isSourceCountryOfficer(staff.role_level) && !normalizeReferralCode(staff.referral_code) ? (
                   <p className="text-[11px] font-medium text-amber-700 leading-snug">{ui.sourceOfficerMissingCode}</p>
+                ) : null}
+                {!staff.auth_user_id && staff.invited_at ? (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <button type="button" onClick={async () => {
+                      const { data } = await supabase.auth.getSession();
+                      await fetch('/api/staff-invite', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session?.access_token || ''}` },
+                        body: JSON.stringify({ name: staff.name, email: staff.email, role: staff.role_level, locale: currentLang }),
+                      });
+                      onChanged?.();
+                    }} className="px-2 py-1 rounded-lg bg-emerald-700 text-white text-[11px] font-bold">{releaseCopy[currentLang].inviteResend}</button>
+                    <button type="button" onClick={async () => { await supabase.rpc('cancel_staff_invite', { p_staff_id: staff.id }); onChanged?.(); }} className="px-2 py-1 rounded-lg border text-[11px] font-bold">{releaseCopy[currentLang].inviteCancel}</button>
+                    <span className="text-[11px] text-slate-500">{staff.invite_cancelled_at ? releaseCopy[currentLang].inviteCancelled : staff.invite_expires_at && new Date(staff.invite_expires_at) < new Date() ? releaseCopy[currentLang].inviteExpired : `${releaseCopy[currentLang].inviteExpires}: ${staff.invite_expires_at ? new Date(staff.invite_expires_at).toLocaleDateString(dateLocale[currentLang]) : '—'}`}</span>
+                  </div>
                 ) : null}
                 <p className="text-[11px] font-bold">{staff.auth_user_id
                   ? <span className="text-emerald-700">● {ui.activeAccount}</span>

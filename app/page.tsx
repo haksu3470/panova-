@@ -9,6 +9,8 @@ import { translations } from '@/lib/dictionary';
 import { fill, homeCopy } from '@/lib/home-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 import { company as registry } from '@/lib/company';
+import KvkkConsent from '@/components/site/KvkkConsent';
+import { releaseCopy } from '@/lib/release-copy';
 
 export default function HomePage() {
   const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
@@ -16,6 +18,7 @@ export default function HomePage() {
   const [selectedCompanyKey, setSelectedCompanyKey] = useState<'hr' | 'trade' | 'agriculture' | 'construction'>('hr');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [kvkkAccepted, setKvkkAccepted] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -30,6 +33,10 @@ export default function HomePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!kvkkAccepted) {
+      alert(releaseCopy[currentLang].kvkkRequired);
+      return;
+    }
     setLoading(true);
 
     let ok = false;
@@ -45,6 +52,7 @@ export default function HomePage() {
           phone: formData.phone,
           notes: formData.notes,
           locale: currentLang,
+          kvkkAccepted: true,
         }),
       });
       ok = response.ok;
@@ -318,6 +326,8 @@ export default function HomePage() {
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium focus:ring-2 focus:ring-[#2e7d32] outline-none text-sm"
                     />
                   </div>
+
+                  <KvkkConsent id="contact-kvkk" checked={kvkkAccepted} onChange={setKvkkAccepted} copy={releaseCopy[currentLang]} />
 
                   <button
                     type="submit"

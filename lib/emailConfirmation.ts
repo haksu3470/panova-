@@ -75,12 +75,13 @@ function linkParts(text: string): VerificationInput | null {
   return { kind: 'hash', tokenHash: token, types: typeOrder(preferred) };
 }
 
-export type CandidateLinkFailure = 'phone' | 'passport' | 'email' | 'missing' | 'unconfirmed' | 'other';
+export type CandidateLinkFailure = 'phone' | 'passport' | 'email' | 'missing' | 'unconfirmed' | 'kvkk' | 'other';
 
 export function classifyCandidateLinkError(message: string | undefined): CandidateLinkFailure {
   const text = message || '';
   if (/phone already used/i.test(text)) return 'phone';
   if (/passport already used/i.test(text)) return 'passport';
+  if (/kvkk_required/i.test(text)) return 'kvkk';
   if (/already registered/i.test(text)) return 'email';
   if (/not confirmed/i.test(text)) return 'unconfirmed';
   if (/no unmatched candidate/i.test(text)) return 'missing';

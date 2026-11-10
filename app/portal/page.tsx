@@ -30,6 +30,9 @@ import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { guideNavLabel } from '@/lib/guides-nav';
+import { releaseCopy } from '@/lib/release-copy';
+import StaffMfaPanel from '@/components/portal/StaffMfaPanel';
+import { taskIsOverdue } from '@/lib/demandStatus';
 
 // Modüler Bileşenlerimiz (Kök dizindeki components klasörüne göre göreceli yol)
 import CandidatesTab from '../../components/portal/CandidatesTab';
@@ -98,6 +101,27 @@ export default function PortalPage() {
   const [newTaskLinkId, setNewTaskLinkId] = useState('');
 
   const [loading, setLoading] = useState(false);
+  const [mfaMode, setMfaMode] = useState<'off' | 'challenge' | 'optional'>('off');
+
+  useEffect(() => {
+    if (!authenticated) return;
+    let alive = true;
+    (async () => {
+      const [level, factors, required] = await Promise.all([
+        supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+        supabase.auth.mfa.listFactors(),
+        supabase.rpc('staff_mfa_required'),
+      ]);
+      if (!alive) return;
+      const verified = (factors.data?.totp ?? []).some((factor) => factor.status === 'verified');
+      if (verified && level.data?.currentLevel !== 'aal2') setMfaMode('challenge');
+      else if (required.data === true && !verified) setMfaMode('challenge');
+      else setMfaMode('optional');
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [authenticated]);
 
   const [newStaffName, setNewStaffName] = useState('');
   const [newStaffEmail, setNewStaffEmail] = useState('');
@@ -351,7 +375,11 @@ export default function PortalPage() {
   };
 
   const updateCandidateStatus = async (id: string, newStatus: string) => {
-    await supabase.from('job_candidates').update({ status: newStatus }).eq('id', id);
+    const { error } = await supabase.from('job_candidates').update({ status: newStatus }).eq('id', id);
+    if (error) {
+      alert(error.message.includes('visa_requires_accepted_offer') ? releaseCopy[currentLang].visaNeedsOffer : error.message);
+      return;
+    }
     setCandidates(candidates.map(c => c.id === id ? { ...c, status: newStatus } : c));
     logAudit(`${ui.candidateWord} → ${newStatus}`, currentUser?.name);
   };
@@ -359,10 +387,14 @@ export default function PortalPage() {
   const updateRequestStatus = async (id: string, newStatus: string, cancellationReason: string = '') => {
     const updatePayload: any = { status: newStatus };
     if (newStatus === 'cancelled' && cancellationReason) {
-      updatePayload.cancellation_reason = cancellationReason;
+      updatePayload.closed_reason = cancellationReason;
       updatePayload.closed_at = new Date().toISOString();
     }
-    await supabase.from('job_requests').update(updatePayload).eq('id', id);
+    const { error } = await supabase.from('job_requests').update(updatePayload).eq('id', id);
+    if (error) {
+      alert(error.message.includes('demand_status_transition') ? releaseCopy[currentLang].demandBlocked : error.message);
+      return;
+    }
     setJobRequests(jobRequests.map(r => r.id === id ? { ...r, ...updatePayload } : r));
     logAudit(`${ui.linkRequest} → ${newStatus}`, currentUser?.name);
     if (selectedDemandDetail && selectedDemandDetail.id === id) {
@@ -371,7 +403,11 @@ export default function PortalPage() {
   };
 
   const updateCandidateAssignee = async (id: string, assignee: string) => {
-    await supabase.from('job_candidates').update({ assigned_to: assignee }).eq('id', id);
+    const { error } = await supabase.from('job_candidates').update({ assigned_to: assignee || null }).eq('id', id);
+    if (error) {
+      alert(error.message);
+      return;
+    }
     setCandidates(candidates.map(c => c.id === id ? { ...c, assigned_to: assignee } : c));
     logAudit(`${ui.candidateWord} → ${assignee}`, currentUser?.name);
   };
@@ -439,8 +475,9 @@ export default function PortalPage() {
       let saved = await supabase.from('staff_members').update({
         name: editingStaff.name,
         email: editingStaff.email,
-        role_level: editingStaff.role_level
-      }).eq('id', editingStaff.id).select('id, role_level, referral_code').maybeSingle();
+        role_level: editingStaff.role_level,
+        scope_country: editingStaff.scope_country || null,
+      }).eq('id', editingStaff.id).select('id, role_level, referral_code, scope_country').maybeSingle();
 
       if (saved.error) {
         saved = await supabase.from('staff_members').update({
@@ -691,7 +728,10 @@ export default function PortalPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 border-b pb-3 text-xs font-bold">
+        {mfaMode === 'challenge' ? (
+          <StaffMfaPanel copy={releaseCopy[currentLang]} blocking onVerified={() => setMfaMode('optional')} />
+        ) : null}
+        <div className={`flex flex-wrap items-center gap-2 border-b pb-3 text-xs font-bold ${mfaMode === 'challenge' ? 'hidden' : ''}`}>
           {showTab('overview') && (
           <button onClick={() => setActiveTab('overview')} className={`px-3 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
@@ -739,7 +779,7 @@ export default function PortalPage() {
           </Link>
         </div>
 
-        {activeTab === 'overview' && showTab('overview') && (
+        {mfaMode !== 'challenge' && activeTab === 'overview' && showTab('overview') && (
           <div className="space-y-6">
             <div className={`grid grid-cols-1 sm:grid-cols-2 ${isUpperManagement ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
               <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
@@ -777,12 +817,42 @@ export default function PortalPage() {
               </div>
             </div>
 
-            <div className="bg-amber-50 border border-amber-200 p-4 sm:p-6 rounded-2xl shadow-sm flex items-start gap-4">
-              <ShieldAlert className="w-6 h-6 sm:w-7 sm:h-7 text-amber-600 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <h4 className="font-extrabold text-amber-900 text-xs sm:text-sm">{t.delayAlertsTitle}</h4>
-                <p className="text-xs text-amber-800">{t.delayAlertsDesc}</p>
+            {mfaMode === 'optional' ? (
+              <StaffMfaPanel
+                copy={releaseCopy[currentLang]}
+                blocking={false}
+                onVerified={() => setMfaMode('optional')}
+              />
+            ) : null}
+            <div className="bg-amber-50 border border-amber-200 p-4 sm:p-6 rounded-2xl shadow-sm space-y-3">
+              <div className="flex items-start gap-4">
+                <ShieldAlert className="w-6 h-6 sm:w-7 sm:h-7 text-amber-600 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="font-extrabold text-amber-900 text-xs sm:text-sm">{t.delayAlertsTitle}</h4>
+                  <p className="text-xs text-amber-800">{t.delayAlertsDesc}</p>
+                </div>
               </div>
+              {(() => {
+                const copy = releaseCopy[currentLang];
+                const now = Date.now();
+                const visaLate = candidates.filter((cand) => cand.status === 'visa_processing' && cand.updated_at && now - new Date(cand.updated_at).getTime() > 15 * 86400000);
+                const missingDocs = candidates.filter((cand) => !cand.passport_number);
+                const lateTasks = tasks.filter((task) => taskIsOverdue(task.due_date, task.status));
+                const lateDemands = jobRequests.filter((req) => taskIsOverdue(req.target_start_date, req.status === 'completed' ? 'completed' : 'pending'));
+                const blocks = [
+                  [copy.delayVisa, visaLate.map((cand) => cand.full_name)],
+                  [copy.delayDocs, missingDocs.map((cand) => cand.full_name)],
+                  [copy.delayTasks, lateTasks.map((task) => task.title)],
+                  [copy.delayDemands, lateDemands.map((req) => req.position_title)],
+                ].filter(([, names]) => (names as string[]).length);
+                if (!blocks.length) return <p className="text-xs text-amber-900">{copy.delayNone}</p>;
+                return blocks.map(([title, names]) => (
+                  <div key={String(title)} className="text-xs text-amber-950">
+                    <p className="font-bold">{title}</p>
+                    <p>{(names as string[]).filter(Boolean).join(', ')}</p>
+                  </div>
+                ));
+              })()}
             </div>
 
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
@@ -792,7 +862,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {activeTab === 'candidates' && showTab('candidates') && (
+        {mfaMode !== 'challenge' && activeTab === 'candidates' && showTab('candidates') && (
           <CandidatesTab 
             candidates={candidates}
             staffMembers={staffMembers}
@@ -807,7 +877,7 @@ export default function PortalPage() {
           />
         )}
 
-        {activeTab === 'requests' && showTab('requests') && (
+        {mfaMode !== 'challenge' && activeTab === 'requests' && showTab('requests') && (
           <RequestsTab 
             jobRequests={jobRequests}
             t={t}
@@ -818,7 +888,7 @@ export default function PortalPage() {
           />
         )}
 
-        {activeTab === 'staff' && showTab('staff') && isUpperManagement && (
+        {mfaMode !== 'challenge' && activeTab === 'staff' && showTab('staff') && isUpperManagement && (
           <StaffTab 
             staffMembers={staffMembers}
             isUpperManagement={isUpperManagement}
@@ -835,10 +905,11 @@ export default function PortalPage() {
             updateStaffRoleLevel={updateStaffRoleLevel}
             setEditingStaff={setEditingStaff}
             handleDeleteStaff={handleDeleteStaff}
+            onChanged={fetchAllData}
           />
         )}
 
-        {activeTab === 'tasks' && showTab('tasks') && (
+        {mfaMode !== 'challenge' && activeTab === 'tasks' && showTab('tasks') && (
           <TasksTab 
             tasks={tasks}
             staffMembers={staffMembers}
@@ -867,7 +938,7 @@ export default function PortalPage() {
           />
         )}
 
-        {activeTab === 'audit' && showTab('audit') && (
+        {mfaMode !== 'challenge' && activeTab === 'audit' && showTab('audit') && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
               <History className="w-5 h-5 text-emerald-700" /> {t.auditLogTitle}
@@ -900,7 +971,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {activeTab === 'employers' && showTab('employers') && (
+        {mfaMode !== 'challenge' && activeTab === 'employers' && showTab('employers') && (
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden p-4 sm:p-6 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
               <h3 className="text-base sm:text-lg font-bold text-slate-900">{t.employersTab}</h3>
@@ -944,6 +1015,13 @@ export default function PortalPage() {
                         allowed={isUpperManagement}
                         onDeleted={fetchAllData}
                       />
+                      {isUpperManagement && emp.compliance_status === 'pending' ? (
+                        <button type="button" className="px-3 py-1.5 bg-amber-600 text-white rounded-xl text-xs font-bold" onClick={async () => {
+                          const { error } = await supabase.from('employers').update({ compliance_status: 'approved' }).eq('id', emp.id);
+                          if (error) alert(error.message);
+                          else fetchAllData();
+                        }}>{releaseCopy[currentLang].employerApprove}</button>
+                      ) : null}
                       </div>
                     </div>
                     <p className="text-slate-500">Contact: <strong>{emp.contact_person}</strong> | Country: {emp.country}</p>
@@ -954,7 +1032,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {activeTab === 'support' && showTab('support') && (
+        {mfaMode !== 'challenge' && activeTab === 'support' && showTab('support') && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.supportTab}</h3>
             {supportTickets.length === 0 ? (
@@ -962,12 +1040,40 @@ export default function PortalPage() {
             ) : (
               <div className="space-y-3">
                 {supportTickets.map((tkt) => (
-                  <div key={tkt.id} className="p-4 bg-slate-50 rounded-2xl border space-y-1 text-xs">
-                    <div className="flex justify-between font-bold text-slate-900">
+                  <div key={tkt.id} className="p-4 bg-slate-50 rounded-2xl border space-y-2 text-xs">
+                    <div className="flex justify-between font-bold text-slate-900 gap-2">
                       <span>{tkt.subject} ({tkt.candidate_name})</span>
-                      <span className="text-red-600 uppercase text-[10px]">{tkt.status}</span>
+                      <span className={`uppercase text-[10px] ${String(tkt.status).toLowerCase() === 'answered' ? 'text-emerald-700' : 'text-red-600'}`}>{tkt.status}</span>
                     </div>
+                    <p className="text-slate-500">{tkt.created_at ? String(tkt.created_at).slice(0, 16).replace('T', ' ') : ''}</p>
                     <p className="text-slate-600">{t.message}: {tkt.message}</p>
+                    <p className="text-slate-800">{releaseCopy[currentLang].supportReply}: {tkt.admin_reply || releaseCopy[currentLang].supportNoReply}</p>
+                    {String(tkt.status).toLowerCase() !== 'closed' ? (
+                      <form className="flex flex-col sm:flex-row gap-2" onSubmit={async (event) => {
+                        event.preventDefault();
+                        const reply = String(new FormData(event.currentTarget).get('reply') || '').trim();
+                        if (!reply) return;
+                        const { error } = await supabase.from('candidate_support_tickets').update({
+                          admin_reply: reply,
+                          status: 'answered',
+                          replied_at: new Date().toISOString(),
+                          replied_by: (await supabase.auth.getUser()).data.user?.id ?? null,
+                          replied_by_name: currentUser?.name || null,
+                        }).eq('id', tkt.id);
+                        if (error) {
+                          alert(error.message);
+                          return;
+                        }
+                        fetchAllData();
+                      }}>
+                        <input name="reply" required placeholder={releaseCopy[currentLang].supportReplyPh} className="flex-1 px-3 py-2 rounded-xl border bg-white text-slate-900" />
+                        <button type="submit" className="px-3 py-2 rounded-xl bg-[#2e7d32] text-white font-bold">{releaseCopy[currentLang].supportSendReply}</button>
+                        <button type="button" className="px-3 py-2 rounded-xl border font-bold" onClick={async () => {
+                          await supabase.from('candidate_support_tickets').update({ status: 'closed' }).eq('id', tkt.id);
+                          fetchAllData();
+                        }}>{releaseCopy[currentLang].supportClose}</button>
+                      </form>
+                    ) : null}
                   </div>
                 ))}
               </div>
@@ -1117,6 +1223,13 @@ export default function PortalPage() {
                   <option value="target_country" className="text-slate-900 bg-white">🏢 {t.roleTargetCountry}</option>
                   <option value="field_officer" className="text-slate-900 bg-white">✈️ {t.roleFieldOfficer}</option>
                 </select>
+                {(editingStaff.role_level === 'source_country' || editingStaff.role_level === 'target_country') ? (
+                  <div className="mt-2 space-y-1">
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{releaseCopy[currentLang].scopeCountry}</label>
+                    <input value={editingStaff.scope_country || ''} onChange={(e) => setEditingStaff({ ...editingStaff, scope_country: e.target.value })} placeholder="Turkey" className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white" />
+                    <p className="text-[11px] text-slate-500">{releaseCopy[currentLang].scopeHint}</p>
+                  </div>
+                ) : null}
                 {editingStaff.role_level === 'source_country' ? (
                   <div className="mt-2 space-y-1">
                     <p className="font-bold text-slate-700 uppercase">{ui.referralCode}</p>

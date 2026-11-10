@@ -22,6 +22,7 @@ import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions
 import EmployerCandidateBrowser from './components/EmployerCandidateBrowser';
 import { guideNavLabel } from '@/lib/guides-nav';
 import CandidateYouTube from '@/components/candidate/CandidateYouTube';
+import { releaseCopy, supportStatusLabel } from '@/lib/release-copy';
 import {
   EMPLOYER_CANDIDATE_BROWSE_COLUMNS,
   isMissingBrowseRpc,
@@ -194,12 +195,16 @@ function EmployerPortalInner() {
 
     const { data: offerRows } = await supabase
       .from('job_offers')
-      .select('id, candidate_id, position_title, employer_name, monthly_net_salary, status, terms_details, start_date, offer_terms, is_demo')
+      .select('id, candidate_id, candidate_name, position_title, employer_name, monthly_net_salary, status, terms_details, start_date, offer_terms, is_demo')
       .eq('employer_id', employerProfile.id)
       .order('created_at', { ascending: false });
     setEmployerOffers(offerRows || []);
 
-    const { data: ticketData } = await supabase.from('candidate_support_tickets').select('*').order('created_at', { ascending: false });
+    const { data: ticketData } = await supabase
+      .from('candidate_support_tickets')
+      .select('id, subject, message, status, created_at, admin_reply, replied_at, replied_by_name, employer_id, candidate_name')
+      .eq('employer_id', employerProfile.id)
+      .order('created_at', { ascending: false });
     if (ticketData) setSupportTickets(ticketData);
   }, [employerProfile]);
 
@@ -330,6 +335,11 @@ function EmployerPortalInner() {
       setDemandError('save');
       return;
     }
+    if (employerProfile.complianceStatus === 'pending') {
+      setDemandError('save');
+      alert(releaseCopy[currentLang].employerPending);
+      return;
+    }
 
     const { error } = await supabase.from('job_requests').insert([built.row]);
     if (error) {
@@ -351,7 +361,8 @@ function EmployerPortalInner() {
     if (!employerProfile?.id || !supportSubject.trim() || !supportMessage.trim()) return;
 
     const ticketPayload = {
-      candidate_id: employerProfile.id,
+      employer_id: employerProfile.id,
+      candidate_id: null,
       candidate_name: employerProfile.companyName,
       subject: supportSubject,
       message: supportMessage,
@@ -460,6 +471,10 @@ function EmployerPortalInner() {
             </button>
           </div>
         </div>
+
+        {employerProfile?.complianceStatus === 'pending' ? (
+          <p className="text-sm font-bold text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">{releaseCopy[currentLang].employerPending}</p>
+        ) : null}
 
         {profileErrorCode && !employerProfile?.id && (
           <p className="text-sm font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
@@ -875,7 +890,7 @@ function EmployerPortalInner() {
               <h4 className="text-sm font-extrabold text-slate-950">{ui.ioJobOffers} ({employerOffers.length})</h4>
               {employerOffers.map((offer) => (
                 <div key={offer.id} className="p-3 bg-slate-50 rounded-xl border text-sm text-slate-900">
-                  <div className="font-extrabold">{offer.position_title || '—'} — {offer.employer_name || ''}</div>
+                  <div className="font-extrabold">{releaseCopy[currentLang].offerCandidate}: {offer.candidate_name || '—'} — {offer.position_title || '—'}</div>
                   <div className="text-xs font-semibold text-slate-800">
                     {ui.offerSalary}: {offerMoney(offer) || ui.salaryNotSet} · {ui.status}: {offerStatusLabel(offer.status, ui.offerStatus)}
                   </div>
@@ -1004,9 +1019,12 @@ function EmployerPortalInner() {
                     <div key={tkt.id} className="p-4 bg-slate-50 rounded-2xl border space-y-1 text-xs">
                       <div className="flex justify-between font-bold text-slate-950">
                         <span>{tkt.subject}</span>
-                        <span className="text-emerald-700 uppercase text-[10px]">{tkt.status}</span>
+                        <span className="text-emerald-700 uppercase text-[10px]">{supportStatusLabel(tkt.status, releaseCopy[currentLang])}</span>
                       </div>
+                      <p className="text-slate-500">{tkt.created_at ? new Date(tkt.created_at).toLocaleString(dateLocale[currentLang]) : ''}</p>
                       <p className="text-slate-700">{tkt.message}</p>
+                      <p className="text-slate-800 font-semibold">{releaseCopy[currentLang].supportReply}: {tkt.admin_reply || releaseCopy[currentLang].supportNoReply}</p>
+                      {tkt.replied_by_name ? <p className="text-slate-500">{releaseCopy[currentLang].supportReplied}: {tkt.replied_by_name}{tkt.replied_at ? ` · ${new Date(tkt.replied_at).toLocaleString(dateLocale[currentLang])}` : ''}</p> : null}
                     </div>
                   ))}
                 </div>
