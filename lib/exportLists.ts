@@ -6,8 +6,15 @@ function cell(value: unknown): string {
   return String(value);
 }
 
-function escapeCsv(value: unknown): string {
+/** Spreadsheet apps treat a leading = + - @ as a formula. A leading quote keeps it text. */
+export function neutralizeSpreadsheetFormula(value: unknown): string {
   const text = cell(value);
+  if (/^[=+\-@]/.test(text)) return `'${text}`;
+  return text;
+}
+
+function escapeCsv(value: unknown): string {
+  const text = neutralizeSpreadsheetFormula(value);
   if (/[",\n\r]/.test(text)) return `"${text.replaceAll('"', '""')}"`;
   return text;
 }
@@ -34,7 +41,7 @@ export function toExcelHtml(title: string, rows: readonly Record<string, unknown
   const headers = rows[0] ? Object.keys(rows[0]) : [];
   const head = headers.map((key) => `<th>${escapeHtml(key)}</th>`).join('');
   const body = rows.map((row) => (
-    `<tr>${headers.map((key) => `<td>${escapeHtml(row[key])}</td>`).join('')}</tr>`
+    `<tr>${headers.map((key) => `<td>${escapeHtml(neutralizeSpreadsheetFormula(row[key]))}</td>`).join('')}</tr>`
   )).join('');
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(title)}</title></head><body><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></body></html>`;
 }
@@ -60,7 +67,6 @@ export function candidateExportRows(rows: readonly Record<string, unknown>[]): R
     status: row.status ?? '',
     email: row.email ?? '',
     phone: row.phone ?? '',
-    passport_number: row.passport_number ?? '',
     is_demo: row.is_demo === true,
   }));
 }
