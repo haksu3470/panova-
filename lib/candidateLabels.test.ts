@@ -57,6 +57,9 @@ test('candidate sector labels match the register form, including uppercase codes
     assert.ok(choices.some((item) => item.value === 'trade'));
   }
   assert.equal(candidateSectorLabel('CONSTRUCTION', portalUi.mk, translations.mk), 'Градежништво');
+  assert.equal(candidateSectorLabel('HOSPITALITY', portalUi.tr, translations.tr), 'Turizm ve otelcilik');
+  assert.equal(candidateSectorLabel('HOSPITALITY', portalUi.ar, translations.ar), 'السياحة والفنادق');
+  assert.equal(candidateSectorLabel('CONSTRUCTION', portalUi.sq, translations.sq), 'Ndërtim');
   assert.equal(candidateSectorLabel('construction', portalUi.en, translations.en), 'Construction');
   assert.equal(candidateSectorLabel('hr', portalUi.mk, translations.mk), 'Човечки ресурси');
   assert.equal(candidateSectorLabel('trade', portalUi.en, translations.en), 'Foreign Trade & Logistics');

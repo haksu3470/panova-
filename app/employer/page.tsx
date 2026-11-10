@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
+import { demandStatusLabel } from '@/lib/demandStatus';
+import { localizeCatalogTitle } from '@/lib/professions';
 import { dateLocale, fill, optionLabel, portalUi, positionLabel } from '@/lib/portal-ui-copy';
 import { benefitPhrase, buildEmployerDemandInsert, displayedRequestSalary, type DemandBlock, type YesNo } from '@/lib/workforceRequest';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
@@ -25,7 +27,7 @@ import CandidateYouTube from '@/components/candidate/CandidateYouTube';
 import { releaseCopy, supportStatusLabel } from '@/lib/release-copy';
 import EmployerConsentCard from '@/components/auth/EmployerConsentCard';
 import { needsEmployerConsent } from '@/lib/employerInvite';
-import { candidateProfessionLabel } from '@/lib/candidateLabels';
+import { candidateProfessionLabel, candidateSectorLabel } from '@/lib/candidateLabels';
 import {
   EMPLOYER_CANDIDATE_BROWSE_COLUMNS,
   isMissingBrowseRpc,
@@ -137,7 +139,7 @@ function EmployerPortalInner() {
   }, [rememberEmployer]);
 
   const [activeTab, setActiveTab] = useState<
-    'home' | 'demands' | 'candidates' | 'interviews' | 'selected' | 'status' | 'travel' | 'employees' | 'support' | 'company'
+    'home' | 'newRequest' | 'candidates' | 'interviews' | 'selected' | 'status' | 'travel' | 'employees' | 'support' | 'company'
   >('home');
 
   const [jobDemands, setJobDemands] = useState<any[]>([]);
@@ -146,16 +148,16 @@ function EmployerPortalInner() {
   const [selectedCandidates, setSelectedCandidates] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
 
-  const [selectedSector, setSelectedSector] = useState<'agriculture' | 'construction' | 'trade'>('construction');
-  const [selectedPositions, setSelectedPositions] = useState<string[]>(['formwork']);
+  const [selectedSector, setSelectedSector] = useState<'' | 'agriculture' | 'construction' | 'trade'>('');
+  const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
   const [customPosition, setCustomPosition] = useState('');
-  const [demandHeadcount, setDemandHeadcount] = useState(5);
-  const [demandCity, setDemandCity] = useState('Struga');
-  const [demandSalary, setDemandSalary] = useState('1200 EUR');
-  const [demandDuration, setDemandDuration] = useState<string | null>(null);
-  const [demandExperience, setDemandExperience] = useState('1-3');
-  const [demandLanguageReq, setDemandLanguageReq] = useState('none');
-  const durationValue = demandDuration ?? ui.durationDefault;
+  const [catalogPick, setCatalogPick] = useState('');
+  const [demandHeadcount, setDemandHeadcount] = useState('');
+  const [demandCity, setDemandCity] = useState('');
+  const [demandSalary, setDemandSalary] = useState('');
+  const [demandDuration, setDemandDuration] = useState('');
+  const [demandExperience, setDemandExperience] = useState('');
+  const [demandLanguageReq, setDemandLanguageReq] = useState('');
   const [demandAccommodation, setDemandAccommodation] = useState<YesNo>('');
   const [demandFood, setDemandFood] = useState<YesNo>('');
   const [demandError, setDemandError] = useState<DemandBlock | 'save' | ''>('');
@@ -318,19 +320,51 @@ function EmployerPortalInner() {
     unanswered: t.benefitUnanswered || '',
   }, value);
 
+  const resetDemandForm = () => {
+    setSelectedSector('');
+    setSelectedPositions([]);
+    setCustomPosition('');
+    setCatalogPick('');
+    setDemandHeadcount('');
+    setDemandCity('');
+    setDemandSalary('');
+    setDemandDuration('');
+    setDemandExperience('');
+    setDemandLanguageReq('');
+    setDemandAccommodation('');
+    setDemandFood('');
+    setDemandError('');
+  };
+
   const handleCreateCorporateDemand = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const headcount = Number(demandHeadcount);
+    const positionTitle = [...selectedPositions.map((id) => positionLabel(ui, id)), customPosition.trim()].filter(Boolean).join(', ');
+    if (
+      !selectedSector
+      || !positionTitle
+      || !demandExperience
+      || !demandLanguageReq
+      || !demandCity.trim()
+      || !demandDuration.trim()
+      || !Number.isFinite(headcount)
+      || headcount < 1
+    ) {
+      setDemandError('position');
+      return;
+    }
 
     const built = buildEmployerDemandInsert({
       employerId: employerProfile?.id || '',
       employerName: employerProfile?.companyName || '',
       country: employerProfile?.country || '',
-      positionTitle: [...selectedPositions.map((id) => positionLabel(ui, id)), customPosition.trim()].filter(Boolean).join(', '),
+      positionTitle,
       sector: selectedSector,
-      headcount: Number(demandHeadcount),
+      headcount,
       city: demandCity,
       salaryText: demandSalary,
-      duration: durationValue,
+      duration: demandDuration,
       experience: demandExperience,
       language: optionLabel(ui.languageOptions, demandLanguageReq),
       lodging: demandAccommodation,
@@ -357,12 +391,9 @@ function EmployerPortalInner() {
       return;
     }
 
-    setDemandError('');
-    setCustomPosition('');
-    setDemandAccommodation('');
-    setDemandFood('');
+    resetDemandForm();
     fetchEmployerData();
-    setActiveTab('demands');
+    setActiveTab('home');
   };
 
   const handleSendSupport = async (e: React.FormEvent) => {
@@ -410,7 +441,8 @@ function EmployerPortalInner() {
   };
 
   const getDemandMetrics = (demand: any) => {
-    const headcount = demand.headcount || 5;
+    const parsedHeadcount = Number(demand.headcount);
+    const headcount = Number.isFinite(parsedHeadcount) && parsedHeadcount > 0 ? parsedHeadcount : 0;
     const bound = candidates.length;
     const offered = candidates.filter(c => c.status === 'reviewing' || c.status === 'approved').length;
     const interviewing = interviews.length;
@@ -420,6 +452,89 @@ function EmployerPortalInner() {
     const started = 0;
 
     return { headcount, bound, offered: Math.min(offered, headcount), interviewing, selected, inProcess, travelReady, started };
+  };
+
+  const requestStatusText = (status?: string | null) => demandStatusLabel(status, {
+    new_request: t.stageNewRequest,
+    reviewing: t.stageReviewing,
+    searching_candidates: t.stageSearchingCandidates,
+    presenting_candidates: t.stagePresentingCandidates,
+    interviews: t.stageInterviews,
+    selection_completed: t.stageSelectionCompleted,
+    official_process: t.stageOfficialProcess,
+    travel_planning: t.stageTravelPlanning,
+    completed: t.stageCompleted,
+    cancelled: t.stageCancelled,
+  });
+
+  const renderDemandCard = (dem: {
+    id?: string;
+    sector?: string;
+    position_title?: string;
+    city?: string;
+    status?: string;
+    created_at?: string;
+    accommodation_provided?: unknown;
+    food_provided?: unknown;
+    headcount?: number;
+    salary?: string | null;
+    monthly_net_salary?: number | string | null;
+  }) => {
+    const metrics = getDemandMetrics(dem);
+    const title = localizeCatalogTitle(dem.position_title, currentLang) || '—';
+    return (
+      <article key={dem.id} className="bg-card rounded-2xl border border-line p-5 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+          <div>
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <span className="text-[10px] font-bold bg-status-info-bg text-status-info px-2.5 py-1 rounded-md">{candidateSectorLabel(dem.sector, ui, t)}</span>
+              <span className="text-xs font-extrabold bg-status-ok-bg text-status-ok px-2.5 py-1 rounded-lg">{metrics.headcount} {t.peopleUnit}</span>
+            </div>
+            <h3 className="font-extrabold text-foreground text-base">{title}</h3>
+            <p className="text-xs text-muted-foreground">📍 {dem.city || '—'} | 💰 {displayedRequestSalary(dem) || '—'}</p>
+            <p className="text-xs text-muted-foreground">{t.facilityAccommodation}: {benefitText(dem.accommodation_provided)} · {t.facilityFood}: {benefitText(dem.food_provided)}</p>
+          </div>
+          <div className="text-end">
+            <span className="font-bold text-status-ok bg-status-ok-bg px-3 py-1.5 rounded-xl text-xs">{t.statusLabel}: {requestStatusText(dem.status)}</span>
+            <div className="text-[11px] text-muted-foreground mt-1">📅 {dem.created_at ? String(dem.created_at).substring(0, 10) : '—'}</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 bg-slate-50 p-3 rounded-xl border border-line text-center text-xs">
+          <div className="bg-card p-2 rounded-lg border border-line">
+            <div className="text-[9px] font-bold text-muted-foreground uppercase">{t.demandRequested}</div>
+            <div className="text-sm font-black text-foreground">{metrics.headcount}</div>
+          </div>
+          <div className="bg-card p-2 rounded-lg border border-line">
+            <div className="text-[9px] font-bold text-indigo-800 uppercase">{t.demandBound}</div>
+            <div className="text-sm font-black text-indigo-700">{metrics.bound}</div>
+          </div>
+          <div className="bg-card p-2 rounded-lg border border-line">
+            <div className="text-[9px] font-bold text-blue-800 uppercase">{t.demandOffered}</div>
+            <div className="text-sm font-black text-blue-700">{metrics.offered}</div>
+          </div>
+          <div className="bg-card p-2 rounded-lg border border-line">
+            <div className="text-[9px] font-bold text-amber-800 uppercase">{t.demandInterviewing}</div>
+            <div className="text-sm font-black text-amber-800">{metrics.interviewing}</div>
+          </div>
+          <div className="bg-card p-2 rounded-lg border border-line">
+            <div className="text-[9px] font-bold text-emerald-800 uppercase">{t.demandSelected}</div>
+            <div className="text-sm font-black text-emerald-700">{metrics.selected}</div>
+          </div>
+          <div className="bg-card p-2 rounded-lg border border-line">
+            <div className="text-[9px] font-bold text-purple-800 uppercase">{t.demandInProcess}</div>
+            <div className="text-sm font-black text-purple-700">{metrics.inProcess}</div>
+          </div>
+          <div className="bg-card p-2 rounded-lg border border-line">
+            <div className="text-[9px] font-bold text-sky-800 uppercase">{t.demandTravelReady}</div>
+            <div className="text-sm font-black text-sky-700">{metrics.travelReady}</div>
+          </div>
+          <div className="bg-card p-2 rounded-lg border border-line">
+            <div className="text-[9px] font-bold text-teal-800 uppercase">{t.demandStarted}</div>
+            <div className="text-sm font-black text-teal-700">{metrics.started}</div>
+          </div>
+        </div>
+      </article>
+    );
   };
 
   if (!profileLoading && needsConsent && employerProfile?.id) {
@@ -505,8 +620,8 @@ function EmployerPortalInner() {
             <button onClick={() => setActiveTab('home')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'home' ? 'bg-brand-solid text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               🏠 {t.overview}
             </button>
-            <button onClick={() => setActiveTab('demands')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'demands' ? 'bg-brand-solid text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
-              📁 {t.empTabRequests} ({jobDemands.length})
+            <button onClick={() => setActiveTab('newRequest')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'newRequest' ? 'bg-brand-solid text-on-dark shadow' : 'bg-slate-50 border text-foreground hover:bg-slate-100'}`}>
+              ➕ {t.empTabNewRequest}
             </button>
             <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'candidates' ? 'bg-brand-solid text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               👥 {t.candidatesTab} ({candidates.length})
@@ -541,6 +656,37 @@ function EmployerPortalInner() {
         {/* 1. ANA SAYFA */}
         {activeTab === 'home' && (
           <div className="space-y-6">
+            <section className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h2 className="font-extrabold text-foreground text-base">{t.activeDemandFilesTitle} ({jobDemands.length})</h2>
+                {jobDemands.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('newRequest')}
+                    className="inline-flex items-center justify-center gap-2 bg-brand-solid hover:bg-brand text-on-dark px-4 py-2.5 rounded-xl text-sm font-bold shadow cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" aria-hidden /> {t.newDemandBtn}
+                  </button>
+                ) : null}
+              </div>
+              {jobDemands.length === 0 ? (
+                <div className="bg-card rounded-2xl border border-line p-8 text-center space-y-4">
+                  <p className="text-sm font-semibold text-foreground">{t.empNoRequests}</p>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('newRequest')}
+                    className="inline-flex items-center justify-center gap-2 bg-brand-solid hover:bg-brand text-on-dark px-4 py-2.5 rounded-xl text-sm font-bold shadow cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" aria-hidden /> {t.newDemandBtn}
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {jobDemands.map((dem) => renderDemandCard(dem))}
+                </div>
+              )}
+            </section>
+
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
                 <span className="text-xs font-bold text-muted-foreground uppercase">{t.openRequestsCard}</span>
@@ -561,8 +707,8 @@ function EmployerPortalInner() {
             </div>
 
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-              <h3 className="font-extrabold text-slate-900 text-base border-b pb-3">{t.portalSummaryTitle}</h3>
-              <p className="text-xs text-slate-600">
+              <h3 className="font-extrabold text-foreground text-base border-b border-line pb-3">{t.portalSummaryTitle}</h3>
+              <p className="text-xs text-muted-foreground">
                 {t.portalSummaryDesc}
               </p>
             </div>
@@ -570,84 +716,88 @@ function EmployerPortalInner() {
         )}
 
         {/* 2. PERSONEL TALEPLERİM */}
-        {activeTab === 'demands' && (
+        {activeTab === 'newRequest' && (
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6">
               <div className="flex justify-between items-center border-b pb-4">
                 <div>
-                  <h3 className="text-lg font-extrabold text-slate-950">{t.corporateDemandTitle}</h3>
+                  <h2 className="text-lg font-extrabold text-foreground">{t.corporateDemandTitle}</h2>
                   <p className="text-xs text-muted-foreground mt-0.5">{t.corporateDemandDesc}</p>
-                </div>
-                <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
-                  {t.totalActiveFiles}: {jobDemands.length}
                 </div>
               </div>
 
               <form noValidate onSubmit={handleCreateCorporateDemand} className="space-y-6">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">1. {t.selectSectorLabel} *</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-2">1. {t.selectSectorLabel} *</label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <button
                       type="button"
                       onClick={() => { setSelectedSector('agriculture'); setSelectedPositions([]); }}
-                      className={`p-4 rounded-xl border text-left transition cursor-pointer flex items-center justify-between ${
-                        selectedSector === 'agriculture' ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500 text-emerald-950 font-extrabold' : 'bg-slate-50 border-slate-200 text-slate-700 font-semibold'
+                      className={`p-4 rounded-xl border text-start transition cursor-pointer flex items-center justify-between ${
+                        selectedSector === 'agriculture' ? 'bg-status-ok-bg border-brand ring-2 ring-brand text-status-ok font-extrabold' : 'bg-slate-50 border-line text-foreground font-semibold'
                       }`}
                     >
                       <span>🌱 {t.sectorAgriculture}</span>
-                      {selectedSector === 'agriculture' && <Check className="w-4 h-4 text-emerald-700" />}
+                      {selectedSector === 'agriculture' && <Check className="w-4 h-4 text-status-ok" aria-hidden />}
                     </button>
                     <button
                       type="button"
                       onClick={() => { setSelectedSector('construction'); setSelectedPositions([]); }}
-                      className={`p-4 rounded-xl border text-left transition cursor-pointer flex items-center justify-between ${
-                        selectedSector === 'construction' ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500 text-emerald-950 font-extrabold' : 'bg-slate-50 border-slate-200 text-slate-700 font-semibold'
+                      className={`p-4 rounded-xl border text-start transition cursor-pointer flex items-center justify-between ${
+                        selectedSector === 'construction' ? 'bg-status-ok-bg border-brand ring-2 ring-brand text-status-ok font-extrabold' : 'bg-slate-50 border-line text-foreground font-semibold'
                       }`}
                     >
                       <span>🏗️ {t.sectorConstruction}</span>
-                      {selectedSector === 'construction' && <Check className="w-4 h-4 text-emerald-700" />}
+                      {selectedSector === 'construction' && <Check className="w-4 h-4 text-status-ok" aria-hidden />}
                     </button>
                     <button
                       type="button"
                       onClick={() => { setSelectedSector('trade'); setSelectedPositions([]); }}
-                      className={`p-4 rounded-xl border text-left transition cursor-pointer flex items-center justify-between ${
-                        selectedSector === 'trade' ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500 text-emerald-950 font-extrabold' : 'bg-slate-50 border-slate-200 text-slate-700 font-semibold'
+                      className={`p-4 rounded-xl border text-start transition cursor-pointer flex items-center justify-between ${
+                        selectedSector === 'trade' ? 'bg-status-ok-bg border-brand ring-2 ring-brand text-status-ok font-extrabold' : 'bg-slate-50 border-line text-foreground font-semibold'
                       }`}
                     >
                       <span>📦 {t.sectorTrade}</span>
-                      {selectedSector === 'trade' && <Check className="w-4 h-4 text-emerald-700" />}
+                      {selectedSector === 'trade' && <Check className="w-4 h-4 text-status-ok" aria-hidden />}
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">2. {t.selectPositionsLabel} *</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 mb-3">
-                    {ui.positions[selectedSector].map((pos) => {
-                      const isSelected = selectedPositions.includes(pos.id);
-                      return (
-                        <button
-                          type="button"
-                          key={pos.id}
-                          onClick={() => togglePositionSelection(pos.id)}
-                          className={`p-3 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
-                            isSelected ? 'bg-emerald-700 text-white shadow-md border-emerald-700' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                          }`}
-                        >
-                          <span>{pos.label}</span>
-                          {isSelected && <Check className="w-3.5 h-3.5" />}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-2">2. {t.selectPositionsLabel} *</label>
+                  {selectedSector ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 mb-3">
+                      {ui.positions[selectedSector].map((pos) => {
+                        const isSelected = selectedPositions.includes(pos.id);
+                        return (
+                          <button
+                            type="button"
+                            key={pos.id}
+                            onClick={() => togglePositionSelection(pos.id)}
+                            className={`p-3 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
+                              isSelected ? 'bg-brand-solid text-on-dark shadow-md border-brand-solid' : 'bg-slate-50 border-line text-foreground hover:bg-slate-100'
+                            }`}
+                          >
+                            <span>{pos.label}</span>
+                            {isSelected && <Check className="w-3.5 h-3.5" aria-hidden />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-xs font-semibold text-muted-foreground mb-3">{t.selectSectorFirst}</p>
+                  )}
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <select
-                      onChange={(e) => { if (e.target.value) togglePositionSelection(e.target.value); }}
-                      className="w-full px-3.5 py-2.5 rounded-xl border text-xs bg-white text-slate-950 font-semibold cursor-pointer"
-                      defaultValue=""
+                      value={catalogPick}
+                      onChange={(e) => {
+                        if (e.target.value) togglePositionSelection(e.target.value);
+                        setCatalogPick('');
+                      }}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-line text-xs bg-card text-foreground font-semibold cursor-pointer"
                     >
-                      <option value="" disabled>📋 {t.universalPositionSelect}</option>
+                      <option value="">{t.benefitSelectPlaceholder}</option>
                       {(['agriculture', 'construction', 'trade'] as const).flatMap((key) => ui.positions[key]).map((item) => (
                         <option key={item.id} value={item.id}>{item.label}</option>
                       ))}
@@ -658,21 +808,23 @@ function EmployerPortalInner() {
                       placeholder={t.otherPositionPlaceholder}
                       value={customPosition}
                       onChange={(e) => setCustomPosition(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border text-xs bg-white text-slate-950 font-medium"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-line text-xs bg-card text-foreground font-medium"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">⏱️ {t.experienceLabel}</label>
-                    <select value={demandExperience} onChange={(e) => setDemandExperience(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950 cursor-pointer">
+                    <label className="block text-xs font-bold uppercase text-foreground mb-1">⏱️ {t.experienceLabel} *</label>
+                    <select required value={demandExperience} onChange={(e) => setDemandExperience(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground cursor-pointer">
+                      <option value="">{t.benefitSelectPlaceholder}</option>
                       {experienceOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">🗣️ {t.languageReqLabel}</label>
-                    <select value={demandLanguageReq} onChange={(e) => setDemandLanguageReq(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950 cursor-pointer">
+                    <label className="block text-xs font-bold uppercase text-foreground mb-1">🗣️ {t.languageReqLabel} *</label>
+                    <select required value={demandLanguageReq} onChange={(e) => setDemandLanguageReq(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground cursor-pointer">
+                      <option value="">{t.benefitSelectPlaceholder}</option>
                       {ui.languageOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
                     </select>
                   </div>
@@ -680,28 +832,28 @@ function EmployerPortalInner() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.headcountLabel}</label>
-                    <input type="number" min="1" value={demandHeadcount} onChange={(e) => setDemandHeadcount(Number(e.target.value))} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
+                    <label className="block text-xs font-bold uppercase text-foreground mb-1">{t.headcountLabel} *</label>
+                    <input type="number" min="1" required placeholder={t.headcountPlaceholder} value={demandHeadcount} onChange={(e) => setDemandHeadcount(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.cityLocationLabel}</label>
-                    <input type="text" value={demandCity} onChange={(e) => setDemandCity(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
+                    <label className="block text-xs font-bold uppercase text-foreground mb-1">{t.cityLocationLabel} *</label>
+                    <input type="text" required placeholder={t.cityPlaceholder} value={demandCity} onChange={(e) => setDemandCity(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.salaryOfferLabel}</label>
-                    <input type="text" value={demandSalary} onChange={(e) => { setDemandSalary(e.target.value); setDemandError(''); }} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
+                    <label className="block text-xs font-bold uppercase text-foreground mb-1">{t.salaryOfferLabel} *</label>
+                    <input type="text" required placeholder={t.salaryPlaceholder} value={demandSalary} onChange={(e) => { setDemandSalary(e.target.value); setDemandError(''); }} className="w-full px-3 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.durationLabel}</label>
-                    <input type="text" value={durationValue} onChange={(e) => setDemandDuration(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950" />
+                    <label className="block text-xs font-bold uppercase text-foreground mb-1">{t.durationLabel} *</label>
+                    <input type="text" required placeholder={t.durationPlaceholder} value={demandDuration} onChange={(e) => setDemandDuration(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground" />
                   </div>
                 </div>
 
                 <fieldset className="space-y-2">
-                  <legend className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">{t.providedFacilitiesLabel} *</legend>
+                  <legend className="block text-xs font-bold uppercase tracking-wider text-foreground mb-2">{t.providedFacilitiesLabel} *</legend>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="demand-lodging" className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.facilityAccommodation} *</label>
+                      <label htmlFor="demand-lodging" className="block text-xs font-bold uppercase text-foreground mb-1">{t.facilityAccommodation} *</label>
                       <select
                         id="demand-lodging"
                         required
@@ -709,7 +861,7 @@ function EmployerPortalInner() {
                         aria-invalid={demandError === 'lodging' || demandError === 'both'}
                         value={demandAccommodation}
                         onChange={(e) => { setDemandAccommodation(e.target.value as YesNo); setDemandError(''); }}
-                        className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950 cursor-pointer"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground cursor-pointer"
                       >
                         <option value="">{t.benefitSelectPlaceholder}</option>
                         <option value="yes">{t.benefitProvided}</option>
@@ -717,7 +869,7 @@ function EmployerPortalInner() {
                       </select>
                     </div>
                     <div>
-                      <label htmlFor="demand-meals" className="block text-xs font-bold uppercase text-slate-700 mb-1">{t.facilityFood} *</label>
+                      <label htmlFor="demand-meals" className="block text-xs font-bold uppercase text-foreground mb-1">{t.facilityFood} *</label>
                       <select
                         id="demand-meals"
                         required
@@ -725,7 +877,7 @@ function EmployerPortalInner() {
                         aria-invalid={demandError === 'meals' || demandError === 'both'}
                         value={demandFood}
                         onChange={(e) => { setDemandFood(e.target.value as YesNo); setDemandError(''); }}
-                        className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold bg-white text-slate-950 cursor-pointer"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground cursor-pointer"
                       >
                         <option value="">{t.benefitSelectPlaceholder}</option>
                         <option value="yes">{t.benefitProvided}</option>
@@ -736,81 +888,15 @@ function EmployerPortalInner() {
                 </fieldset>
 
                 {demandError && (
-                  <p role="alert" className="text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                  <p role="alert" className="text-xs font-bold text-status-bad bg-status-bad-bg border border-status-bad rounded-xl px-3 py-2">
                     {demandErrorMessage(demandError)}
                   </p>
                 )}
 
-                <button type="submit" className="w-full bg-brand-solid hover:bg-brand text-white py-4 rounded-xl font-bold transition shadow-lg cursor-pointer text-sm">
+                <button type="submit" className="w-full bg-brand-solid hover:bg-brand text-on-dark py-4 rounded-xl font-bold transition shadow-lg cursor-pointer text-sm">
                   {t.submitDemandBtn}
                 </button>
               </form>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-extrabold text-slate-950 text-base">{t.activeDemandFilesTitle} ({jobDemands.length})</h4>
-              <div className="space-y-4">
-                {jobDemands.length === 0 ? (
-                  <div className="p-8 text-center text-sm font-semibold text-slate-600 bg-white rounded-2xl border">{ui.empNoDemands}</div>
-                ) : null}
-                {jobDemands.map((dem) => {
-                  const metrics = getDemandMetrics(dem);
-                  return (
-                    <div key={dem.id} className="bg-white rounded-2xl border p-5 shadow-sm space-y-4">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-bold uppercase bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-md">{dem.sector}</span>
-                            <span className="text-xs font-extrabold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">{metrics.headcount} {t.peopleUnit}</span>
-                          </div>
-                          <h4 className="font-extrabold text-slate-950 text-base">{dem.position_title}</h4>
-                          <p className="text-xs text-muted-foreground">📍 {dem.city} | 💰 {displayedRequestSalary(dem) || '—'}</p>
-                          <p className="text-xs text-slate-600">{t.facilityAccommodation}: {benefitText(dem.accommodation_provided)} · {t.facilityFood}: {benefitText(dem.food_provided)}</p>
-                        </div>
-                        <div className="text-right">
-                          <span className="font-bold uppercase text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl text-xs">{t.statusLabel}: {dem.status}</span>
-                          <div className="text-[11px] text-muted-foreground mt-1">📅 {dem.created_at ? dem.created_at.substring(0, 10) : '2026-09'}</div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 bg-slate-50/80 p-3 rounded-xl border text-center text-xs">
-                        <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-muted-foreground uppercase">{t.demandRequested}</div>
-                          <div className="text-sm font-black text-slate-900">{metrics.headcount}</div>
-                        </div>
-                        <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-indigo-800 uppercase">{t.demandBound}</div>
-                          <div className="text-sm font-black text-indigo-700">{metrics.bound}</div>
-                        </div>
-                        <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-blue-800 uppercase">{t.demandOffered}</div>
-                          <div className="text-sm font-black text-blue-700">{metrics.offered}</div>
-                        </div>
-                        <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-amber-800 uppercase">{t.demandInterviewing}</div>
-                          <div className="text-sm font-black text-amber-800">{metrics.interviewing}</div>
-                        </div>
-                        <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-emerald-800 uppercase">{t.demandSelected}</div>
-                          <div className="text-sm font-black text-emerald-700">{metrics.selected}</div>
-                        </div>
-                        <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-purple-800 uppercase">{t.demandInProcess}</div>
-                          <div className="text-sm font-black text-purple-700">{metrics.inProcess}</div>
-                        </div>
-                        <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-sky-800 uppercase">{t.demandTravelReady}</div>
-                          <div className="text-sm font-black text-sky-700">{metrics.travelReady}</div>
-                        </div>
-                        <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-teal-800 uppercase">{t.demandStarted}</div>
-                          <div className="text-sm font-black text-teal-700">{metrics.started}</div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           </div>
         )}
