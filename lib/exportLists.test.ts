@@ -6,6 +6,11 @@ await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.
 
 const { offerExportRows, toCsv } = await import('./exportLists.ts');
 
+test('csv keeps formula text from executing and escapes quotes', () => {
+  const csv = toCsv([{ name: '=HYPERLINK("https://evil")', note: '@SUM(A1)' }]);
+  assert.equal(csv, 'name,note\r\n"\'=HYPERLINK(""https://evil"")",\'@SUM(A1)');
+});
+
 test('csv escapes quotes and keeps the salary column', () => {
   const csv = toCsv([
     { name: 'A, "B"', salary: 1000 },
