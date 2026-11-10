@@ -376,7 +376,7 @@ export default function EmployerLoginPage() {
               <div>
                 <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.passwordLabel} *</label>
                 <input type="password" required minLength={8} placeholder="••••••••" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
-                <p className="text-[11px] text-slate-500 mt-1">{releaseCopy[currentLang].passwordMin}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{releaseCopy[currentLang].passwordMin}</p>
               </div>
 
               <KvkkConsent id="employer-kvkk" checked={kvkkAccepted} onChange={(checked) => {

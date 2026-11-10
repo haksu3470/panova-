@@ -139,7 +139,7 @@ export default function StaffTab({
                       onChanged?.();
                     }} className="px-2 py-1 rounded-lg bg-emerald-700 text-white text-[11px] font-bold">{releaseCopy[currentLang].inviteResend}</button>
                     <button type="button" onClick={async () => { await supabase.rpc('cancel_staff_invite', { p_staff_id: staff.id }); onChanged?.(); }} className="px-2 py-1 rounded-lg border text-[11px] font-bold">{releaseCopy[currentLang].inviteCancel}</button>
-                    <span className="text-[11px] text-slate-500">{staff.invite_cancelled_at ? releaseCopy[currentLang].inviteCancelled : staff.invite_expires_at && new Date(staff.invite_expires_at) < new Date() ? releaseCopy[currentLang].inviteExpired : `${releaseCopy[currentLang].inviteExpires}: ${staff.invite_expires_at ? new Date(staff.invite_expires_at).toLocaleDateString(dateLocale[currentLang]) : '—'}`}</span>
+                    <span className="text-[11px] text-muted-foreground">{staff.invite_cancelled_at ? releaseCopy[currentLang].inviteCancelled : staff.invite_expires_at && new Date(staff.invite_expires_at) < new Date() ? releaseCopy[currentLang].inviteExpired : `${releaseCopy[currentLang].inviteExpires}: ${staff.invite_expires_at ? new Date(staff.invite_expires_at).toLocaleDateString(dateLocale[currentLang]) : '—'}`}</span>
                   </div>
                 ) : null}
                 <p className="text-[11px] font-bold">{staff.auth_user_id

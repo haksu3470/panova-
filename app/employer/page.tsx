@@ -1037,10 +1037,10 @@ function EmployerPortalInner() {
                         <span>{tkt.subject}</span>
                         <span className="text-emerald-700 uppercase text-[10px]">{supportStatusLabel(tkt.status, releaseCopy[currentLang])}</span>
                       </div>
-                      <p className="text-slate-500">{tkt.created_at ? new Date(tkt.created_at).toLocaleString(dateLocale[currentLang]) : ''}</p>
+                      <p className="text-muted-foreground">{tkt.created_at ? new Date(tkt.created_at).toLocaleString(dateLocale[currentLang]) : ''}</p>
                       <p className="text-slate-700">{tkt.message}</p>
                       <p className="text-slate-800 font-semibold">{releaseCopy[currentLang].supportReply}: {tkt.admin_reply || releaseCopy[currentLang].supportNoReply}</p>
-                      {tkt.replied_by_name ? <p className="text-slate-500">{releaseCopy[currentLang].supportReplied}: {tkt.replied_by_name}{tkt.replied_at ? ` · ${new Date(tkt.replied_at).toLocaleString(dateLocale[currentLang])}` : ''}</p> : null}
+                      {tkt.replied_by_name ? <p className="text-muted-foreground">{releaseCopy[currentLang].supportReplied}: {tkt.replied_by_name}{tkt.replied_at ? ` · ${new Date(tkt.replied_at).toLocaleString(dateLocale[currentLang])}` : ''}</p> : null}
                     </div>
                   ))}
                 </div>

@@ -1172,7 +1172,7 @@ export default function CandidateDashboard() {
                 >
                   {loading ? '...' : t.loginBtn}
                 </button>
-                <p className="text-[11px] text-slate-500 leading-snug">{t.loginDesc}</p>
+                <p className="text-[11px] text-muted-foreground leading-snug">{t.loginDesc}</p>
               </form>
               <div className="mt-4"><OAuthButtons redirectPath="/candidate" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} /></div></>
             ) : (

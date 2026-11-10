@@ -1017,7 +1017,7 @@ export default function PortalPage() {
                         onDeleted={fetchAllData}
                       />
                       {isUpperManagement && emp.compliance_status === 'pending' ? (
-                        <button type="button" className="px-3 py-1.5 bg-amber-600 text-white rounded-xl text-xs font-bold" onClick={async () => {
+                        <button type="button" className="px-3 py-1.5 bg-amber-800 text-on-dark rounded-xl text-xs font-bold" onClick={async () => {
                           const { error } = await supabase.from('employers').update({ compliance_status: 'approved' }).eq('id', emp.id);
                           if (error) alert(error.message);
                           else fetchAllData();
@@ -1061,7 +1061,7 @@ export default function PortalPage() {
                       <span>{tkt.subject} ({tkt.candidate_name})</span>
                       <span className={`uppercase text-[10px] ${String(tkt.status).toLowerCase() === 'answered' ? 'text-emerald-700' : 'text-red-600'}`}>{tkt.status}</span>
                     </div>
-                    <p className="text-slate-500">{tkt.created_at ? String(tkt.created_at).slice(0, 16).replace('T', ' ') : ''}</p>
+                    <p className="text-muted-foreground">{tkt.created_at ? String(tkt.created_at).slice(0, 16).replace('T', ' ') : ''}</p>
                     <p className="text-slate-600">{t.message}: {tkt.message}</p>
                     <p className="text-slate-800">{releaseCopy[currentLang].supportReply}: {tkt.admin_reply || releaseCopy[currentLang].supportNoReply}</p>
                     {String(tkt.status).toLowerCase() !== 'closed' ? (
@@ -1243,7 +1243,7 @@ export default function PortalPage() {
                   <div className="mt-2 space-y-1">
                     <label className="block font-bold text-slate-700 uppercase mb-1">{releaseCopy[currentLang].scopeCountry}</label>
                     <input value={editingStaff.scope_country || ''} onChange={(e) => setEditingStaff({ ...editingStaff, scope_country: e.target.value })} placeholder="Turkey" className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white" />
-                    <p className="text-[11px] text-slate-500">{releaseCopy[currentLang].scopeHint}</p>
+                    <p className="text-[11px] text-muted-foreground">{releaseCopy[currentLang].scopeHint}</p>
                   </div>
                 ) : null}
                 {editingStaff.role_level === 'source_country' ? (
