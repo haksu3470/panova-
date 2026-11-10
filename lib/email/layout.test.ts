@@ -6,7 +6,7 @@ import test from 'node:test';
 register(new URL('./resolve-at.mjs', import.meta.url).href, import.meta.url);
 
 const { authSubject, authTemplateSources, renderAuthPreview } = await import('./auth-templates.ts');
-const { buildCandidateNoticeEmail, buildStaffInviteEmail, buildTaskNoticeEmail } = await import('./app-messages.ts');
+const { buildCandidateNoticeEmail, buildEmployerInviteEmail, buildStaffInviteEmail, buildTaskNoticeEmail } = await import('./app-messages.ts');
 const { EMAIL_LOCALES, contactSubjectPrefixes, emailShellCopy } = await import('./email-copy.ts');
 const { EMAIL_LOGO_URL } = await import('./layout.ts');
 
@@ -102,4 +102,23 @@ test('app emails share the card and follow the requested locale', () => {
   assert.match(task.html, /Detyrë e re|U caktua një detyrë e re/);
   assert.match(task.html, /12 maj/);
   assert.match(task.html, /https:\/\/panovagroup\.org\/portal/);
+
+  const employerInvite = buildEmployerInviteEmail({
+    locale: 'ar',
+    kind: 'invite',
+    companyName: 'TEST <İşveren>',
+    contactName: 'Aylin',
+    email: 'owner@example.com',
+    actionUrl: 'https://vptcihlhkzfmwxpaituf.supabase.co/auth/v1/verify?token=abc&type=invite',
+    loginUrl: 'https://panovagroup.org/employer-login',
+  });
+  assert.match(employerInvite.subject, /بوابة صاحب العمل/);
+  assert.match(employerInvite.html, /lang="ar"/);
+  assert.match(employerInvite.html, /dir="rtl"/);
+  assert.match(employerInvite.html, /TEST &lt;İşveren&gt;/);
+  assert.match(employerInvite.html, /https:\/\/panovagroup\.org\/logo\.png/);
+  assert.match(employerInvite.html, /type=invite/);
+  assert.match(employerInvite.html, /employer-login/);
+  assert.equal(employerInvite.html.includes('<script'), false);
+  assert.equal(employerInvite.html.includes('Set your password'), false);
 });

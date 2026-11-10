@@ -32,6 +32,7 @@ import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@
 import { guideNavLabel } from '@/lib/guides-nav';
 import { releaseCopy } from '@/lib/release-copy';
 import StaffMfaPanel from '@/components/portal/StaffMfaPanel';
+import EmployerLoginInvite from '@/components/portal/EmployerLoginInvite';
 import { taskIsOverdue } from '@/lib/demandStatus';
 
 // Modüler Bileşenlerimiz (Kök dizindeki components klasörüne göre göreceli yol)
@@ -1024,7 +1025,22 @@ export default function PortalPage() {
                       ) : null}
                       </div>
                     </div>
-                    <p className="text-slate-500">Contact: <strong>{emp.contact_person}</strong> | Country: {emp.country}</p>
+                    <p className="text-sm text-slate-800">Contact: <strong>{emp.contact_person}</strong> | Country: {emp.country}</p>
+                    <EmployerLoginInvite
+                      compact
+                      staff={{ role: userRole, scopeCountry: currentUser?.scope_country }}
+                      employerId={emp.id}
+                      email={emp.email}
+                      country={emp.country}
+                      locale={emp.locale}
+                      authUserId={emp.auth_user_id}
+                      invitedAt={emp.invited_at}
+                      onSent={(result) => setEmployers((rows) => rows.map((row) => row.id === emp.id ? {
+                        ...row,
+                        invited_at: result.invitedAt || row.invited_at,
+                        auth_user_id: result.linked ? (result.authUserId || row.auth_user_id) : row.auth_user_id,
+                      } : row))}
+                    />
                   </div>
                 ))}
               </div>

@@ -1,6 +1,7 @@
 import {
   contactMailCopy,
   emailLocale,
+  employerInviteMailCopy,
   fillEmail,
   forwardMailCopy,
   inviteMailCopy,
@@ -105,6 +106,41 @@ export function buildStaffInviteEmail(input: {
     button: { href, label: copy.button },
   });
   return { subject: copy.subject, html: rendered.html, text: rendered.text };
+}
+
+export function buildEmployerInviteEmail(input: {
+  locale?: unknown;
+  kind: 'invite' | 'reset';
+  companyName: string;
+  contactName?: string;
+  email: string;
+  actionUrl: string;
+  loginUrl: string;
+}): { subject: string; html: string; text: string } {
+  const locale = emailLocale(input.locale);
+  const copy = employerInviteMailCopy[locale];
+  const name = input.contactName?.trim() || input.companyName.trim() || input.email;
+  const company = input.companyName.trim() || input.email;
+  const hello = fillEmail(copy.hello, { name });
+  const body = fillEmail(input.kind === 'reset' ? copy.resetBody : copy.inviteBody, {
+    company,
+    email: input.email,
+  });
+  const google = fillEmail(copy.google, { login: input.loginUrl });
+  const text = [hello, body, google, copy.ignore, `${copy.button}: ${input.actionUrl}`].join('\n\n');
+  const rendered = renderLocaleEmail({
+    locale,
+    preheader: copy.preheader,
+    title: input.kind === 'reset' ? copy.resetTitle : copy.inviteTitle,
+    paragraphs: [hello, body, google, copy.ignore],
+    text,
+    button: { href: input.actionUrl, label: copy.button },
+  });
+  return {
+    subject: input.kind === 'reset' ? copy.resetSubject : copy.inviteSubject,
+    html: rendered.html,
+    text: rendered.text,
+  };
 }
 
 export function buildCandidateNoticeEmail(input: {

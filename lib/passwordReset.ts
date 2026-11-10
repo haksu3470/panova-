@@ -74,25 +74,26 @@ export function readRecoveryLocation(href: string): RecoveryLocation {
   }
   const hash = new URLSearchParams(url.hash.replace(/^#/, ''));
   const type = (hash.get('type') || url.searchParams.get('type') || '').toLowerCase();
+  const setup = type === 'recovery' || type === 'invite';
   const error = hash.get('error_description') || url.searchParams.get('error_description') || hash.get('error') || url.searchParams.get('error') || '';
-  if (type === 'recovery' && error) return { kind: 'error', message: error };
+  if (setup && error) return { kind: 'error', message: error };
 
   const accessToken = hash.get('access_token') || '';
   const refreshToken = hash.get('refresh_token') || '';
-  if (type === 'recovery' && accessToken && refreshToken) return { kind: 'implicit' };
+  if (setup && accessToken && refreshToken) return { kind: 'implicit' };
 
   const tokenHash = url.searchParams.get('token_hash') || hash.get('token_hash') || '';
-  if (type === 'recovery' && tokenHash) return { kind: 'hash', tokenHash };
+  if (setup && tokenHash) return { kind: 'hash', tokenHash };
 
   const code = url.searchParams.get('code') || '';
   if (code && url.pathname.startsWith('/auth/reset-password')) return { kind: 'code', code };
 
-  if (type === 'recovery') return { kind: 'error', message: error || 'recovery' };
+  if (setup) return { kind: 'error', message: error || type };
   return { kind: 'none' };
 }
 
 export type RecoveryProof =
-  | { kind: 'hash'; tokenHash: string }
+  | { kind: 'hash'; tokenHash: string; otpType: 'recovery' | 'invite' }
   | { kind: 'otp'; email: string; token: string }
   | { kind: 'rejected' };
 
@@ -102,8 +103,9 @@ export function recoveryProofFromInput(raw: string, email: string): RecoveryProo
   if (parsed.kind === 'empty') return { kind: 'rejected' };
   if (parsed.kind === 'hash') {
     const typed = /[?&#]type=/i.test(raw);
-    if (typed && parsed.types[0] !== 'recovery') return { kind: 'rejected' };
-    return { kind: 'hash', tokenHash: parsed.tokenHash };
+    const otpType = parsed.types[0] === 'invite' ? 'invite' : 'recovery';
+    if (typed && otpType === 'recovery' && parsed.types[0] !== 'recovery') return { kind: 'rejected' };
+    return { kind: 'hash', tokenHash: parsed.tokenHash, otpType };
   }
   const target = normalizeEmail(email);
   if (!target.includes('@') || target.startsWith('@')) return { kind: 'rejected' };

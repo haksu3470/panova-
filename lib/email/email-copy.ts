@@ -574,3 +574,85 @@ export const forwardMailCopy: Record<EmailLocale, ForwardMailCopy> = {
     noSubject: '(нема наслов)',
   },
 };
+
+export type EmployerInviteMailCopy = {
+  inviteSubject: string;
+  resetSubject: string;
+  preheader: string;
+  inviteTitle: string;
+  resetTitle: string;
+  hello: string;
+  inviteBody: string;
+  resetBody: string;
+  google: string;
+  button: string;
+  ignore: string;
+};
+
+export const employerInviteMailCopy: Record<EmailLocale, EmployerInviteMailCopy> = {
+  tr: {
+    inviteSubject: 'Panova işveren portalı davetiniz',
+    resetSubject: 'Panova işveren portalı şifre bağlantısı',
+    preheader: 'Şifrenizi belirleyin veya aynı adresle Google ile giriş yapın.',
+    inviteTitle: 'İşveren portalına davet',
+    resetTitle: 'İşveren portalı şifresi',
+    hello: 'Merhaba {name},',
+    inviteBody: '{company} için Panova işveren portalı hazır. Bu adres ({email}) ile şifrenizi belirleyin. Bağlantı sizi şifre ekranına götürür.',
+    resetBody: '{company} işveren portalı hesabınız bağlı. Şifrenizi belirlemek veya yenilemek için bağlantıyı kullanın. Adres: {email}.',
+    google: 'Aynı adresle Google üzerinden de giriş yapabilirsiniz: {login}',
+    button: 'Şifrenizi belirleyin',
+    ignore: 'Bu daveti beklemiyorsanız e-postayı yok sayabilirsiniz.',
+  },
+  en: {
+    inviteSubject: 'Your invitation to the Panova employer portal',
+    resetSubject: 'Panova employer portal password link',
+    preheader: 'Set your password, or sign in with Google using this address.',
+    inviteTitle: 'Invitation to the employer portal',
+    resetTitle: 'Employer portal password',
+    hello: 'Hello {name},',
+    inviteBody: 'The Panova employer portal is ready for {company}. Set your password for this address ({email}). The link opens the password screen.',
+    resetBody: 'Your employer portal account for {company} is linked. Use the link to set or reset your password. Address: {email}.',
+    google: 'You can also sign in with Google using the same address: {login}',
+    button: 'Set your password',
+    ignore: 'If you were not expecting this message, you can ignore it.',
+  },
+  sq: {
+    inviteSubject: 'Ftesa juaj për portalin e punëdhënësit Panova',
+    resetSubject: 'Lidhja e fjalëkalimit për portalin e punëdhënësit Panova',
+    preheader: 'Vendosni fjalëkalimin ose hyni me Google në këtë adresë.',
+    inviteTitle: 'Ftesë për portalin e punëdhënësit',
+    resetTitle: 'Fjalëkalimi i portalit të punëdhënësit',
+    hello: 'Përshëndetje {name},',
+    inviteBody: 'Portali i punëdhënësit Panova është gati për {company}. Vendosni fjalëkalimin për këtë adresë ({email}). Lidhja hap ekranin e fjalëkalimit.',
+    resetBody: 'Llogaria juaj për {company} është lidhur. Përdorni lidhjen për të vendosur ose rivendosur fjalëkalimin. Adresa: {email}.',
+    google: 'Mund të hyni edhe me Google në të njëjtën adresë: {login}',
+    button: 'Vendosni fjalëkalimin',
+    ignore: 'Nëse nuk e prisnit këtë mesazh, mund ta shpërfillni.',
+  },
+  ar: {
+    inviteSubject: 'دعوتك إلى بوابة صاحب العمل في Panova',
+    resetSubject: 'رابط كلمة مرور بوابة صاحب العمل في Panova',
+    preheader: 'حدد كلمة المرور أو ادخل عبر Google بهذا العنوان.',
+    inviteTitle: 'دعوة إلى بوابة صاحب العمل',
+    resetTitle: 'كلمة مرور بوابة صاحب العمل',
+    hello: 'مرحبًا {name}،',
+    inviteBody: 'بوابة صاحب العمل في Panova جاهزة لـ {company}. حدد كلمة المرور لهذا العنوان ({email}). يفتح الرابط شاشة كلمة المرور.',
+    resetBody: 'حساب بوابة صاحب العمل لـ {company} مربوط. استخدم الرابط لتحديد كلمة المرور أو إعادة تعيينها. العنوان: {email}.',
+    google: 'يمكنك أيضًا الدخول عبر Google بنفس العنوان: {login}',
+    button: 'تحديد كلمة المرور',
+    ignore: 'إذا لم تكن تتوقع هذه الرسالة، يمكنك تجاهلها.',
+  },
+  mk: {
+    inviteSubject: 'Покана за порталот за работодавачи на Panova',
+    resetSubject: 'Врска за лозинка на порталот за работодавачи на Panova',
+    preheader: 'Поставете лозинка или најавете се со Google на оваа адреса.',
+    inviteTitle: 'Покана за порталот за работодавачи',
+    resetTitle: 'Лозинка за порталот за работодавачи',
+    hello: 'Здраво {name},',
+    inviteBody: 'Порталот за работодавачи на Panova е подготвен за {company}. Поставете лозинка за оваа адреса ({email}). Врската ја отвора страницата за лозинка.',
+    resetBody: 'Сметката за {company} е поврзана. Користете ја врската за да поставите или ресетирате лозинка. Адреса: {email}.',
+    google: 'Можете да се најавите и со Google на истата адреса: {login}',
+    button: 'Поставете лозинка',
+    ignore: 'Ако не ја очекувавте оваа порака, можете да ја игнорирате.',
+  },
+};
