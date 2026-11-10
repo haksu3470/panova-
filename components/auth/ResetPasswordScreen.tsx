@@ -158,11 +158,11 @@ export default function ResetPasswordScreen({ audience }: { audience: ResetAudie
 
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 max-w-md w-full">
-          <div className="w-14 h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 bg-emerald-100 text-brand rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Lock className="w-7 h-7" />
           </div>
           <h1 className="text-xl font-extrabold text-slate-900 text-center mb-1">{t.resetPasswordTitle}</h1>
-          <p className="text-slate-500 text-xs sm:text-sm text-center mb-6 leading-relaxed">
+          <p className="text-muted-foreground text-xs sm:text-sm text-center mb-6 leading-relaxed">
             {phase === 'checking'
               ? t.resetPasswordChecking
               : phase === 'link-error'
@@ -194,7 +194,7 @@ export default function ResetPasswordScreen({ audience }: { audience: ResetAudie
                 onComplete={(digits) => { void submitCode(digits, false); }}
                 disabled={busy}
               />
-              <button type="submit" disabled={busy || code.length !== EMAIL_OTP_LENGTH} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] disabled:opacity-60 text-white font-bold py-3.5 rounded-xl text-sm cursor-pointer">
+              <button type="submit" disabled={busy || code.length !== EMAIL_OTP_LENGTH} className="w-full bg-brand-solid hover:bg-brand disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 text-white font-bold py-3.5 rounded-xl text-sm cursor-pointer">
                 {busy ? (t.submitting || t.resetPasswordCodeBtn) : t.resetPasswordCodeBtn}
               </button>
             </form>
@@ -228,7 +228,7 @@ export default function ResetPasswordScreen({ audience }: { audience: ResetAudie
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium outline-none text-sm"
                 />
               </div>
-              <button type="submit" disabled={busy} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] disabled:opacity-60 text-white font-bold py-3.5 rounded-xl text-sm cursor-pointer">
+              <button type="submit" disabled={busy} className="w-full bg-brand-solid hover:bg-brand disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 text-white font-bold py-3.5 rounded-xl text-sm cursor-pointer">
                 {t.resetPasswordSave}
               </button>
             </form>
@@ -237,7 +237,7 @@ export default function ResetPasswordScreen({ audience }: { audience: ResetAudie
           {phase === 'google' ? (
             <div className="space-y-4 text-left rtl:text-right">
               <p className="text-sm text-slate-700 leading-relaxed">{t.resetPasswordGoogle}</p>
-              <button type="button" onClick={continueWithGoogle} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white font-bold py-3.5 rounded-xl text-sm cursor-pointer">
+              <button type="button" onClick={continueWithGoogle} className="w-full bg-brand-solid hover:bg-brand text-white font-bold py-3.5 rounded-xl text-sm cursor-pointer">
                 {t.resetPasswordContinue}
               </button>
             </div>
@@ -250,7 +250,7 @@ export default function ResetPasswordScreen({ audience }: { audience: ResetAudie
           {info ? <p className="text-xs text-slate-600 mt-3" role="status">{info}</p> : null}
 
           {phase !== 'saved' ? (
-            <Link href={returnPath} onClick={() => clearRecoveryPending()} className="block w-full text-center text-xs font-bold text-slate-500 mt-4">
+            <Link href={returnPath} onClick={() => clearRecoveryPending()} className="block w-full text-center text-xs font-bold text-muted-foreground mt-4">
               {t.verifyEmailBack}
             </Link>
           ) : null}

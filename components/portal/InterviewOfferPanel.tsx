@@ -145,7 +145,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
           <button onClick={onClose} className="p-2 rounded-lg text-slate-700 hover:bg-slate-100" aria-label={ui.close}><X className="w-5 h-5" /></button>
         </div>
 
-        {error && <p className="text-xs text-red-600 bg-red-50 p-2 rounded-lg">{error}</p>}
+        {error && <p className="text-xs text-red-800 bg-red-50 p-2 rounded-lg">{error}</p>}
 
         <section className="space-y-2">
           <h4 className="text-xs font-bold uppercase tracking-wide text-slate-800">{ui.ioInterviews} ({interviews.length})</h4>
@@ -179,7 +179,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
             <textarea rows={2} placeholder={ui.ioPanovaNote} value={iv.panova_notes} onChange={(e) => setIv({ ...iv, panova_notes: e.target.value })} className={inp} />
             <div className="flex gap-2 justify-end">
               {iv.id && <button onClick={() => setIv({ id: null, scheduled_at: '', status: 'scheduled', result: '', employer_notes: '', panova_notes: '' })} className="text-xs font-bold px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800">{ui.ioNewInterview}</button>}
-              <button disabled={busy} onClick={saveInterview} className="text-xs font-bold px-3 py-2 rounded-lg bg-blue-600 text-white flex items-center gap-1 disabled:opacity-50">
+              <button disabled={busy} onClick={saveInterview} className="text-xs font-bold px-3 py-2 rounded-lg bg-blue-600 text-white flex items-center gap-1 disabled:bg-disabled disabled:text-on-dark disabled:opacity-100">
                 {iv.id ? <Save className="w-4 h-4" /> : <CalendarPlus className="w-4 h-4" />} {iv.id ? ui.save : ui.ioPlan}
               </button>
             </div>
@@ -218,7 +218,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
             )}
             <div className="flex gap-2 justify-end">
               {of.id && <button onClick={() => setOf({ ...of, id: null, status: 'pending' })} className="text-xs font-bold px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800">{ui.ioNewOffer}</button>}
-              <button disabled={busy} onClick={saveOffer} className="text-xs font-bold px-3 py-2 rounded-lg bg-emerald-600 text-white flex items-center gap-1 disabled:opacity-50">
+              <button disabled={busy} onClick={saveOffer} className="text-xs font-bold px-3 py-2 rounded-lg bg-emerald-700 text-white flex items-center gap-1 disabled:bg-disabled disabled:text-on-dark disabled:opacity-100">
                 <FileSignature className="w-4 h-4" /> {of.id ? ui.save : ui.ioSendOffer}
               </button>
             </div>

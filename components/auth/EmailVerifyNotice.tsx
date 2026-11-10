@@ -69,7 +69,7 @@ export default function EmailVerifyNotice({
   return (
     <div className="space-y-4 text-left rtl:text-right">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#1b5e20] flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-emerald-50 text-brand flex items-center justify-center shrink-0">
           <Mail className="w-5 h-5" aria-hidden="true" />
         </div>
         <div>
@@ -90,7 +90,7 @@ export default function EmailVerifyNotice({
         <button
           type="submit"
           disabled={busy || code.length !== EMAIL_OTP_LENGTH}
-          className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] disabled:opacity-60 text-white font-bold py-3 rounded-xl text-sm cursor-pointer"
+          className="w-full bg-brand-solid hover:bg-brand disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 text-white font-bold py-3 rounded-xl text-sm cursor-pointer"
         >
           {busy ? (t.submitting || t.verifyEmailCodeBtn) : t.verifyEmailCodeBtn}
         </button>
@@ -99,7 +99,7 @@ export default function EmailVerifyNotice({
         type="button"
         onClick={resend}
         disabled={busy || cooldown || !email}
-        className="w-full border border-slate-300 text-slate-800 font-bold py-3 rounded-xl text-sm cursor-pointer disabled:opacity-60"
+        className="w-full border border-slate-300 text-slate-800 font-bold py-3 rounded-xl text-sm cursor-pointer disabled:bg-disabled disabled:text-on-dark disabled:opacity-100"
       >
         {t.verifyEmailResend}
       </button>

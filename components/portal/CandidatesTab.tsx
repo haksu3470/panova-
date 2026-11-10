@@ -160,7 +160,7 @@ export default function CandidatesTab({
       <div className="bg-white p-4 rounded-2xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1">
           <h3 className="text-sm font-extrabold text-slate-900">{ui.registerCandidate}</h3>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             {isSourceOfficer
               ? (ownCode ? fill(ui.registerCandidateHint, { code: ownCode }) : ui.referralCodeAutoAttach)
               : ui.registerCandidateOpenHint}
@@ -176,7 +176,7 @@ export default function CandidatesTab({
           <button
             type="button"
             onClick={() => setShowRegister((open) => !open)}
-            className="inline-flex items-center justify-center gap-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 bg-brand-solid hover:bg-brand text-white px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer"
           >
             <UserPlus className="w-3.5 h-3.5" /> {ui.registerCandidate}
           </button>
@@ -254,7 +254,7 @@ export default function CandidatesTab({
                 value={ownCode ?? ''}
                 className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm font-mono font-bold text-slate-900 bg-slate-100 outline-none"
               />
-              <span className="mt-1 block text-[11px] font-medium text-slate-500">{ui.referralCodeImmutable}</span>
+              <span className="mt-1 block text-[11px] font-medium text-muted-foreground">{ui.referralCodeImmutable}</span>
             </label>
           )}
           {!isSourceOfficer && isUpperManagement && (
@@ -276,7 +276,7 @@ export default function CandidatesTab({
             <button
               type="submit"
               disabled={saving}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white px-3 py-2.5 rounded-xl text-xs font-bold cursor-pointer disabled:opacity-60"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white px-3 py-2.5 rounded-xl text-xs font-bold cursor-pointer disabled:bg-disabled disabled:text-on-dark disabled:opacity-100"
             >
               {saving ? t.submitting : ui.registerCandidate}
             </button>
@@ -286,7 +286,7 @@ export default function CandidatesTab({
 
       <div className={`bg-white p-4 rounded-2xl border shadow-sm grid grid-cols-1 sm:grid-cols-2 ${isUpperManagement ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-3`}>
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5 rtl:left-auto rtl:right-3" />
+          <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-3.5 rtl:left-auto rtl:right-3" />
           <input
             type="text"
             placeholder={t.searchPlaceholder || ''}
@@ -405,7 +405,7 @@ export default function CandidatesTab({
                       />
                     </td>
                     <td className="p-4 font-bold text-slate-900">
-                      <Link href={`/portal/candidates/${candidate.id}`} className="hover:text-[#2e7d32] hover:underline">
+                      <Link href={`/portal/candidates/${candidate.id}`} className="hover:text-brand hover:underline">
                         {candidate.full_name}<DemoBadge show={candidate.is_demo} />
                       </Link>
                     </td>
@@ -413,7 +413,7 @@ export default function CandidatesTab({
                       {code ? (
                         <span className="font-mono text-xs font-bold text-slate-800">{code}</span>
                       ) : (
-                        <span className="text-slate-400">{ui.referralCodeEmpty}</span>
+                        <span className="text-muted-foreground">{ui.referralCodeEmpty}</span>
                       )}
                       <DeleteRecordButton
                         table="job_candidates"
@@ -429,11 +429,11 @@ export default function CandidatesTab({
                     </td>
                     <td className="p-4">
                       <div>{candidatePassportLabel(candidate.passport_number || candidate.passport_no, ui.unspecified)}</div>
-                      <div className="text-[11px] text-slate-400">{candidatePlaceLabel(candidate.nationality, candidate.country, lang, ui.unspecified)}</div>
+                      <div className="text-[11px] text-muted-foreground">{candidatePlaceLabel(candidate.nationality, candidate.country, lang, ui.unspecified)}</div>
                     </td>
                     <td className="p-4">
                       <span className="font-semibold text-slate-800">{candidateProfessionLabel(candidate.profession, ui.unspecified)}</span>
-                      <div className="text-[11px] text-slate-400">{candidateSectorLabel(candidate.sector, ui, t)}</div>
+                      <div className="text-[11px] text-muted-foreground">{candidateSectorLabel(candidate.sector, ui, t)}</div>
                     </td>
                     <td className="p-4">
                       <select

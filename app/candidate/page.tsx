@@ -40,6 +40,7 @@ import { candidatePlaceLabel } from '@/lib/candidateLabels';
 import { homeCopy } from '@/lib/home-copy';
 import { canonicalNationality } from '@/lib/registrationCountries';
 import { candidateOfferResponse, offerMoney, offerStatusLabel } from '@/lib/offers';
+import { offerStatusTone } from '@/lib/status-tone';
 import { portalUi } from '@/lib/portal-ui-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { guideNavLabel } from '@/lib/guides-nav';
@@ -1057,7 +1058,7 @@ export default function CandidateDashboard() {
                 type="button"
                 onClick={() => setAuthMode('login')}
                 className={`flex-1 py-3 text-xs font-extrabold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                  authMode === 'login' ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'
+                  authMode === 'login' ? 'bg-brand-solid text-white shadow' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <LogIn className="w-4 h-4" /> {t.signInMenu}
@@ -1066,7 +1067,7 @@ export default function CandidateDashboard() {
                 type="button"
                 onClick={() => setAuthMode('signup')}
                 className={`flex-1 py-3 text-xs font-extrabold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                  authMode === 'signup' ? 'bg-[#2e7d32] text-white shadow' : 'text-slate-600 hover:text-slate-900'
+                  authMode === 'signup' ? 'bg-brand-solid text-white shadow' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <UserPlus className="w-4 h-4" /> {t.signUpMenu}
@@ -1074,13 +1075,13 @@ export default function CandidateDashboard() {
             </div>}
 
             {(authMode === 'login' || authMode === 'signup') && !linkIssue && <div className="text-center mb-6">
-              <div className="w-12 h-12 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-3">
+              <div className="w-12 h-12 bg-emerald-100 text-brand rounded-2xl flex items-center justify-center mx-auto mb-3">
                 {authMode === 'login' ? <Lock className="w-6 h-6" /> : <UserPlus className="w-6 h-6" />}
               </div>
               <h1 className="text-xl font-extrabold text-slate-900">
                 {authMode === 'login' ? t.candidatePortal : t.candidateRegister}
               </h1>
-              <p className="text-slate-500 text-xs mt-1">
+              <p className="text-muted-foreground text-xs mt-1">
                 {authMode === 'login' ? t.loginDesc : t.regFormSub}
               </p>
             </div>}
@@ -1105,11 +1106,11 @@ export default function CandidateDashboard() {
                 <button
                   type="submit"
                   disabled={loading || !fixValue.trim()}
-                  className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] disabled:opacity-60 text-white font-bold py-3.5 rounded-xl text-sm cursor-pointer"
+                  className="w-full bg-brand-solid hover:bg-brand disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 text-white font-bold py-3.5 rounded-xl text-sm cursor-pointer"
                 >
                   {linkIssue === 'phone' ? t.candidateFixPhoneBtn : t.candidateFixPassportBtn}
                 </button>
-                <button type="button" onClick={cancelCandidateFix} className="w-full text-xs font-bold text-slate-500 cursor-pointer">
+                <button type="button" onClick={cancelCandidateFix} className="w-full text-xs font-bold text-muted-foreground cursor-pointer">
                   {t.verifyEmailBack}
                 </button>
               </form>
@@ -1123,7 +1124,7 @@ export default function CandidateDashboard() {
                     await handleLinkResult(await loadLinkedCandidate(), true);
                   }}
                 />
-                <button type="button" onClick={() => setAuthMode('login')} className="w-full text-xs font-bold text-slate-500 cursor-pointer">
+                <button type="button" onClick={() => setAuthMode('login')} className="w-full text-xs font-bold text-muted-foreground cursor-pointer">
                   {t.verifyEmailBack}
                 </button>
                 <OAuthButtons redirectPath="/candidate" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} />
@@ -1167,7 +1168,7 @@ export default function CandidateDashboard() {
                 <button 
                   type="submit" 
                   disabled={loading}
-                  className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white font-bold py-3.5 rounded-xl transition shadow-lg cursor-pointer text-sm"
+                  className="w-full bg-brand-solid hover:bg-brand text-white font-bold py-3.5 rounded-xl transition shadow-lg cursor-pointer text-sm"
                 >
                   {loading ? '...' : t.loginBtn}
                 </button>
@@ -1279,7 +1280,7 @@ export default function CandidateDashboard() {
                 <button 
                   type="submit" 
                   disabled={loading}
-                  className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white font-bold py-3.5 rounded-xl transition shadow-lg cursor-pointer text-sm mt-3"
+                  className="w-full bg-brand-solid hover:bg-brand text-white font-bold py-3.5 rounded-xl transition shadow-lg cursor-pointer text-sm mt-3"
                 >
                   {loading ? '...' : t.completeReg}
                 </button>
@@ -1339,13 +1340,13 @@ export default function CandidateDashboard() {
             {photoPreview || (newPhoto.startsWith('data:') ? newPhoto : '') ? (
               <img src={photoPreview || newPhoto} alt="Profil" className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border shadow" />
             ) : (
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center font-bold text-lg sm:text-xl">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-100 text-brand rounded-2xl flex items-center justify-center font-bold text-lg sm:text-xl">
                 {candidate.full_name?.charAt(0)}
               </div>
             )}
             <div>
               <h1 className="text-base sm:text-xl font-extrabold text-slate-900 truncate max-w-[200px] sm:max-w-none">{candidate.full_name}</h1>
-              <div className="flex items-center gap-2 text-[11px] sm:text-xs text-slate-500">
+              <div className="flex items-center gap-2 text-[11px] sm:text-xs text-muted-foreground">
                 <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">PNV-CAND-{candidate.id.substring(0, 6)}</span>
                 <span>{t.passportLabel}: {candidate.passport_number || 'N/A'}</span>
                 <span>{t.professionLabel}: {candidate.profession}</span>
@@ -1369,19 +1370,19 @@ export default function CandidateDashboard() {
 
         {/* Navigasyon Sekmeleri */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
-          <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overview}
           </button>
-          <button onClick={() => setActiveTab('profile')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'profile' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('profile')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'profile' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             👤 {t.profile}
           </button>
-          <button onClick={() => setActiveTab('documents')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'documents' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('documents')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'documents' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📁 {t.documents}
           </button>
-          <button onClick={() => setActiveTab('offers')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'offers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('offers')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'offers' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             💼 {t.offers} ({jobOffers.length})
           </button>
-          <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             💬 {t.support} ({supportTickets.length})
           </button>
           <Link href="/guides" className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition shrink-0 bg-white border text-slate-700 hover:bg-slate-50">
@@ -1399,14 +1400,14 @@ export default function CandidateDashboard() {
                 {newPhoto ? (
                   <img src={photoPreview || newPhoto} alt="Önizleme" className="w-20 h-20 rounded-2xl object-cover border shadow-sm" />
                 ) : (
-                  <div className="w-20 h-20 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center font-bold text-2xl">
+                  <div className="w-20 h-20 bg-emerald-100 text-brand rounded-2xl flex items-center justify-center font-bold text-2xl">
                     {candidate.full_name?.charAt(0)}
                   </div>
                 )}
                 <div className="space-y-1 text-center sm:text-left">
                   <label className="block font-extrabold text-slate-900 uppercase">{ct.photoLabel}</label>
-                  <p className="text-slate-500 text-[11px]">{ct.photoDesc}</p>
-                  <input type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" onChange={handlePhotoUpload} className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#2e7d32] hover:file:bg-emerald-100 cursor-pointer mt-1" />
+                  <p className="text-muted-foreground text-[11px]">{ct.photoDesc}</p>
+                  <input type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" onChange={handlePhotoUpload} className="block w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-brand hover:file:bg-emerald-100 cursor-pointer mt-1" />
                 </div>
               </div>
 
@@ -1552,7 +1553,7 @@ export default function CandidateDashboard() {
               <button 
                 type="submit" 
                 disabled={updatingProfile}
-                className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-6 py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs"
+                className="bg-brand-solid hover:bg-brand text-white px-6 py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs"
               >
                 {updatingProfile ? '...' : ct.saveProfileBtn}
               </button>
@@ -1566,7 +1567,7 @@ export default function CandidateDashboard() {
             <div className="border-b pb-4 flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-extrabold text-slate-900">📊 {ct.overviewTitle}</h3>
-                <p className="text-xs text-slate-500 mt-0.5">{ct.overviewDesc}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{ct.overviewDesc}</p>
               </div>
               <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase ${missingDocs.length === 0 && missingProfileFields.length === 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
                 {missingDocs.length === 0 && missingProfileFields.length === 0 ? `✓ ${ct.allComplete}` : `⚠️ ${ct.hasMissing}`}
@@ -1645,7 +1646,7 @@ export default function CandidateDashboard() {
                       type="file"
                       accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png"
                       onChange={(e) => handleDocUpload(idx, e)}
-                      className="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#2e7d32] hover:file:bg-emerald-100 cursor-pointer"
+                      className="block w-full text-xs text-muted-foreground file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-brand hover:file:bg-emerald-100 cursor-pointer"
                     />
                     {doc.file_url && (
                       <button 
@@ -1653,7 +1654,7 @@ export default function CandidateDashboard() {
                           const url = doc.id ? await openCandidateDocument(doc.id, doc.file_url) : await signedCandidateFileUrl(doc.file_url);
                           if (url) setPreviewDoc({ name: currentLangTitles[idx] || doc.name, url });
                         }}
-                        className="px-3 py-1.5 bg-emerald-100 text-[#2e7d32] font-bold rounded-xl text-xs hover:bg-emerald-200 transition shrink-0 cursor-pointer"
+                        className="px-3 py-1.5 bg-emerald-100 text-brand font-bold rounded-xl text-xs hover:bg-emerald-200 transition shrink-0 cursor-pointer"
                       >
                         {ct.previewDocBtn}
                       </button>
@@ -1670,7 +1671,7 @@ export default function CandidateDashboard() {
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
             <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">💼 {ct.offersHeader}</h3>
             {jobOffers.length === 0 ? (
-              <p className="text-xs text-slate-400">{ct.noOffers}</p>
+              <p className="text-xs text-muted-foreground">{ct.noOffers}</p>
             ) : (
               jobOffers.map((offer) => {
                 const offerUi = portalUi[currentLang];
@@ -1687,11 +1688,11 @@ export default function CandidateDashboard() {
                     {offer.terms_details ? (
                       <div className="text-xs text-slate-700">{offerUi.offerTerms}: {offer.terms_details}</div>
                     ) : null}
-                    <div className="text-xs font-bold text-slate-900">{offerUi.status}: <span className="inline-flex rounded-lg bg-slate-100 px-2 py-0.5">{statusLabel}</span></div>
+                    <div className="text-xs font-bold text-foreground">{offerUi.status}: <span className={`inline-flex rounded-lg px-2 py-0.5 ${offerStatusTone(offer.status)}`}>{statusLabel}</span></div>
                   </div>
                   {offer.status === 'pending' && (
                     <div className="flex gap-2 shrink-0">
-                      <button onClick={() => handleUpdateOfferStatus(offer.id, 'accepted')} className="px-3 py-1.5 bg-[#2e7d32] text-white rounded-xl font-bold cursor-pointer">{ct.acceptBtn}</button>
+                      <button onClick={() => handleUpdateOfferStatus(offer.id, 'accepted')} className="px-3 py-1.5 bg-brand-solid text-white rounded-xl font-bold cursor-pointer">{ct.acceptBtn}</button>
                       <button onClick={() => handleUpdateOfferStatus(offer.id, 'rejected')} className="px-3 py-1.5 bg-red-600 text-white rounded-xl font-bold cursor-pointer">{ct.rejectBtn}</button>
                     </div>
                   )}
@@ -1715,7 +1716,7 @@ export default function CandidateDashboard() {
                 <label className="block font-bold text-slate-700 uppercase mb-1">{ct.supportMsg}</label>
                 <textarea value={supportMsg} onChange={(e) => setSupportMsg(e.target.value)} required rows={3} placeholder="Sorununuzu detaylı yazın..." className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white" />
               </div>
-              <button type="submit" className="bg-[#2e7d32] text-white px-6 py-2.5 rounded-xl font-bold cursor-pointer">{ct.sendSupportBtn}</button>
+              <button type="submit" className="bg-brand-solid text-white px-6 py-2.5 rounded-xl font-bold cursor-pointer">{ct.sendSupportBtn}</button>
             </form>
           </div>
         )}
@@ -1728,7 +1729,7 @@ export default function CandidateDashboard() {
           <div className="bg-white rounded-3xl p-6 max-w-3xl w-full shadow-2xl border space-y-4 max-h-[90vh] flex flex-col">
             <div className="flex justify-between items-center border-b pb-3">
               <h3 className="font-bold text-slate-900 text-sm">📁 {ct.docPreviewTitle}: {previewDoc.name}</h3>
-              <button onClick={() => setPreviewDoc(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
+              <button onClick={() => setPreviewDoc(null)} className="text-muted-foreground hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
             </div>
             <div className="flex-1 bg-slate-100 rounded-2xl p-4 flex items-center justify-center overflow-auto">
               {previewDoc.url.startsWith('data:image') || /\.(jpe?g|png)(\?|$)/i.test(previewDoc.url) ? (

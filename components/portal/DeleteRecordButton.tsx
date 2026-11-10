@@ -64,7 +64,7 @@ export default function DeleteRecordButton({
             {error ? <p className="text-xs font-bold text-red-700">{error}</p> : null}
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setOpen(false)} disabled={busy} className="px-3 py-2 rounded-xl border text-xs font-bold text-slate-800 bg-white">{ui.cancelAction}</button>
-              <button type="button" onClick={remove} disabled={busy} className="px-3 py-2 rounded-xl bg-red-600 text-white text-xs font-bold disabled:opacity-50">{ui.deleteRecord}</button>
+              <button type="button" onClick={remove} disabled={busy} className="px-3 py-2 rounded-xl bg-red-600 text-white text-xs font-bold disabled:bg-disabled disabled:text-on-dark disabled:opacity-100">{ui.deleteRecord}</button>
             </div>
           </div>
         </div>

@@ -233,7 +233,7 @@ export default function EmployerLoginPage() {
               type="button"
               onClick={() => setAuthMode('signin')}
               className={`flex-1 py-3 rounded-xl text-xs font-bold transition cursor-pointer ${
-                authMode === 'signin' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-800'
+                authMode === 'signin' ? 'bg-white text-slate-900 shadow-md' : 'text-muted-foreground hover:text-slate-800'
               }`}
             >
               {t.signInMenu || t.signInBtn}
@@ -242,7 +242,7 @@ export default function EmployerLoginPage() {
               type="button"
               onClick={() => setAuthMode('signup')}
               className={`flex-1 py-3 rounded-xl text-xs font-bold transition cursor-pointer ${
-                authMode === 'signup' ? 'bg-emerald-700 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
+                authMode === 'signup' ? 'bg-emerald-700 text-white shadow-md' : 'text-muted-foreground hover:text-slate-800'
               }`}
             >
               {t.signUpMenu || t.signUpBtn}
@@ -256,7 +256,7 @@ export default function EmployerLoginPage() {
             <h1 className="text-xl font-black text-slate-900">
               {authMode === 'signup' ? (t.employerRegTitle || t.signUpPortalTitle) : (t.loginPortalTitle || t.empPortalTitle)}
             </h1>
-            <p className="text-slate-500 text-xs mt-1">{authMode === 'signup' ? (t.employerRegSub || t.signUpPortalSub) : (t.loginPortalSub || t.empPortalSub)}</p>
+            <p className="text-muted-foreground text-xs mt-1">{authMode === 'signup' ? (t.employerRegSub || t.signUpPortalSub) : (t.loginPortalSub || t.empPortalSub)}</p>
           </div>}
 
           {authMode === 'consent' ? (
@@ -279,7 +279,7 @@ export default function EmployerLoginPage() {
                   if (!opened) alert(t.employerVerifiedUnlinked);
                 }}
               />
-              <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-slate-500 cursor-pointer">
+              <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-muted-foreground cursor-pointer">
                 {t.verifyEmailBack}
               </button>
             </div>

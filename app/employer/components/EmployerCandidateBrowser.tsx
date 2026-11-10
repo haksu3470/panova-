@@ -134,7 +134,7 @@ export default function EmployerCandidateBrowser({
       <div role="search" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <Field id="emp-cand-search" label={labels.search}>
           <div className="relative">
-            <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+            <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <input
               id="emp-cand-search"
               type="search"
@@ -236,7 +236,7 @@ export default function EmployerCandidateBrowser({
             type="button"
             onClick={() => setFilters(EMPTY_EMPLOYER_CANDIDATE_FILTERS)}
             disabled={!active}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 sm:text-sm"
           >
             {labels.clear}
           </button>
@@ -250,7 +250,7 @@ export default function EmployerCandidateBrowser({
       )}
 
       {filtered.length === 0 ? (
-        <div className="space-y-3 p-8 text-center text-xs text-slate-400">
+        <div className="space-y-3 p-8 text-center text-xs text-muted-foreground">
           <p>{candidates.length === 0 ? labels.empty : labels.noMatch}</p>
           {candidates.length > 0 && (
             <button
@@ -278,15 +278,15 @@ export default function EmployerCandidateBrowser({
                 </div>
                 <dl className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
                   <div>
-                    <dt className="font-bold uppercase text-slate-400">{labels.country}</dt>
+                    <dt className="font-bold uppercase text-muted-foreground">{labels.country}</dt>
                     <dd className="font-semibold text-slate-800">{countryLine(candidate)}</dd>
                   </div>
                   <div>
-                    <dt className="font-bold uppercase text-slate-400">{labels.language}</dt>
+                    <dt className="font-bold uppercase text-muted-foreground">{labels.language}</dt>
                     <dd className="font-semibold text-slate-800">{candidate.language_skills || '—'}</dd>
                   </div>
                   <div>
-                    <dt className="font-bold uppercase text-slate-400">{labels.shift}</dt>
+                    <dt className="font-bold uppercase text-muted-foreground">{labels.shift}</dt>
                     <dd className="font-semibold text-slate-800">{shiftLabel(candidate)}</dd>
                   </div>
                 </dl>

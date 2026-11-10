@@ -9,6 +9,7 @@ import MatchPanel from '@/components/portal/MatchPanel';
 import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
 import { Card, Stat, Field, REQUEST_STATUS_KEYS, requestStatusLabel, resultLabel, fmtDate } from '@/components/portal/file/ui';
+import { matchResultTone } from '@/lib/status-tone';
 import { translations } from '@/lib/dictionary';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { benefitsAnswered } from '@/lib/workforceRequest';
@@ -91,8 +92,8 @@ function RequestFileInner() {
     setSaving(false);
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-slate-500 font-bold">{ui.loading}</div>;
-  if (!req) return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">{ui.requestNotFound}</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground font-bold">{ui.loading}</div>;
+  if (!req) return <div className="min-h-screen flex items-center justify-center text-red-700 font-bold">{ui.requestNotFound}</div>;
 
   const presented = matches.filter((m) => m.presented_at).length;
   const selected = matches.filter((m) => m.employer_result === 'selected').length;
@@ -104,9 +105,9 @@ function RequestFileInner() {
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
-            <Link href="/portal" className="text-xs font-bold text-slate-500 hover:text-slate-800">← {t.returnToPortal || t.returnHome}</Link>
+            <Link href="/portal" className="text-xs font-bold text-muted-foreground hover:text-slate-800">← {t.returnToPortal || t.returnHome}</Link>
             <h1 className="text-lg sm:text-2xl font-extrabold text-slate-900">📋 {req.position_title}<DemoBadge show={req.is_demo} /></h1>
-            <div className="text-[11px] text-slate-500 flex flex-wrap gap-2">
+            <div className="text-[11px] text-muted-foreground flex flex-wrap gap-2">
               <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">PNV-REQ-{req.id.substring(0, 6)}</span>
               {req.employer_id ? (
                 <Link href={`/portal/employers/${req.employer_id}`} className="font-bold text-emerald-700 hover:underline">🏢 {req.employer_name || ui.employerWord}</Link>
@@ -116,7 +117,7 @@ function RequestFileInner() {
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <button onClick={() => setShowMatch(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">🔗 {ui.matchCandidates}</button>
+            <button onClick={() => setShowMatch(true)} className="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">🔗 {ui.matchCandidates}</button>
             <DeleteRecordButton
               table="job_requests"
               id={req.id}
@@ -125,7 +126,7 @@ function RequestFileInner() {
               allowed={upper}
               onDeleted={() => { window.location.href = '/portal'; }}
             />
-            <button onClick={save} disabled={saving} className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">{saving ? (t.saving || '...') : t.saveBtn}</button>
+            <button onClick={save} disabled={saving} className="bg-brand-solid hover:bg-brand text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">{saving ? (t.saving || '...') : t.saveBtn}</button>
           </div>
         </div>
         {msg && <div className="text-xs font-bold text-slate-700">{msg}</div>}
@@ -185,7 +186,7 @@ function RequestFileInner() {
         </Card>
 
         <Card title={`${ui.matchedCandidates} (${matches.length})`} right={<button onClick={() => setShowMatch(true)} className="text-xs font-bold text-emerald-700">{ui.manage} →</button>}>
-          {matches.length === 0 ? <p className="text-xs text-slate-400">{ui.noneBound}</p> : (
+          {matches.length === 0 ? <p className="text-xs text-muted-foreground">{ui.noneBound}</p> : (
             <ul className="divide-y">
               {matches.map((m) => {
                 const c = cands[m.candidate_id];
@@ -196,9 +197,9 @@ function RequestFileInner() {
                     <div>
                       <Link href={`/portal/candidates/${m.candidate_id}`} className="font-bold text-slate-900 hover:underline">{c?.full_name || ui.candidateWord}</Link>
                       <DemoBadge show={m.is_demo} />
-                      <div className="text-[11px] text-slate-500">{c?.profession || '—'} · {c?.nationality || '—'} · {m.presented_at ? fill(ui.presentedOn, { date: fmtDate(m.presented_at) }) : ui.notPresented} · {ui.interview} {ivs.length}{of ? ` · ${ui.offer}: ${ui.offerStatus[of.status] || of.status}` : ''}</div>
+                      <div className="text-[11px] text-muted-foreground">{c?.profession || '—'} · {c?.nationality || '—'} · {m.presented_at ? fill(ui.presentedOn, { date: fmtDate(m.presented_at) }) : ui.notPresented} · {ui.interview} {ivs.length}{of ? ` · ${ui.offer}: ${ui.offerStatus[of.status] || of.status}` : ''}</div>
                     </div>
-                    <span className="text-xs font-bold">{resultLabel(ui, m.employer_result) || '—'}</span>
+                    <span className={`inline-flex w-fit shrink-0 rounded-lg px-2 py-0.5 text-xs font-bold ${matchResultTone(m.employer_result)}`}>{resultLabel(ui, m.employer_result) || '—'}</span>
                   </li>
                 );
               })}
@@ -207,10 +208,10 @@ function RequestFileInner() {
         </Card>
 
         <Card title={`${ui.interviewsTitle} (${interviews.length})`}>
-          {interviews.length === 0 ? <p className="text-xs text-slate-400">{ui.noInterviews}</p> : (
+          {interviews.length === 0 ? <p className="text-xs text-muted-foreground">{ui.noInterviews}</p> : (
             <ul className="divide-y text-sm">
               {interviews.map((i) => (
-                <li key={i.id} className="py-2">🤝 <strong>{cands[i.candidate_id]?.full_name || ui.candidateWord}</strong><DemoBadge show={i.is_demo} /> <span className="text-[11px] text-slate-500">· {i.scheduled_at ? new Date(i.scheduled_at).toLocaleString(dateLocale[currentLang]) : '—'} · {ui.intStatus[i.status] || i.status || '—'}{i.result ? ` · ${resultLabel(ui, i.result) || i.result}` : ''}</span></li>
+                <li key={i.id} className="py-2">🤝 <strong>{cands[i.candidate_id]?.full_name || ui.candidateWord}</strong><DemoBadge show={i.is_demo} /> <span className="text-[11px] text-muted-foreground">· {i.scheduled_at ? new Date(i.scheduled_at).toLocaleString(dateLocale[currentLang]) : '—'} · {ui.intStatus[i.status] || i.status || '—'}{i.result ? ` · ${resultLabel(ui, i.result) || i.result}` : ''}</span></li>
               ))}
             </ul>
           )}

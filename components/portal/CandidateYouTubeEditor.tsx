@@ -33,7 +33,7 @@ export default function CandidateYouTubeEditor({ slots, canEdit, labels, preview
     return (
       <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
         <CandidateYouTube videos={preview} labels={labels} />
-        <p className="text-[11px] font-medium text-slate-500">{labels.readOnly}</p>
+        <p className="text-[11px] font-medium text-muted-foreground">{labels.readOnly}</p>
       </div>
     );
   }
@@ -42,7 +42,7 @@ export default function CandidateYouTubeEditor({ slots, canEdit, labels, preview
     <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
       <div className="space-y-1">
         <h4 className="text-[11px] font-extrabold uppercase text-emerald-800">📹 {labels.title}</h4>
-        <p className="text-[11px] font-medium text-slate-500">{labels.supervisorNote}</p>
+        <p className="text-[11px] font-medium text-muted-foreground">{labels.supervisorNote}</p>
         <p className="text-[11px] font-bold text-slate-700">{labels.field}</p>
       </div>
       {slots.map((slot) => {
@@ -71,7 +71,7 @@ export default function CandidateYouTubeEditor({ slots, canEdit, labels, preview
                 onClick={() => slot.onChange('')}
                 disabled={!slot.value}
                 aria-label={`${labels.clear}: ${slot.label}`}
-                className="shrink-0 cursor-pointer rounded-lg bg-slate-200 px-2.5 py-1.5 text-[11px] font-bold text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className="shrink-0 cursor-pointer rounded-lg bg-slate-200 px-2.5 py-1.5 text-[11px] font-bold text-slate-800 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-on-dark disabled:opacity-100"
               >
                 {labels.clear}
               </button>

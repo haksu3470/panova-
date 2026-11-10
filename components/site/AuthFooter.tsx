@@ -17,10 +17,10 @@ export function AuthFooter({
   const a = homeCopy[currentLang].about;
   const cls =
     tone === 'dark'
-      ? 'bg-slate-800 text-slate-400 py-6 text-center text-xs border-t border-slate-700'
+      ? 'bg-slate-800 text-on-dark-muted py-6 text-center text-xs border-t border-slate-700'
       : tone === 'slate'
-        ? 'bg-slate-50 text-slate-500 py-6 text-center text-xs border-t border-slate-200'
-        : 'w-full py-4 text-center text-xs text-slate-500 border-t border-slate-200 bg-white';
+        ? 'bg-slate-50 text-muted-foreground py-6 text-center text-xs border-t border-slate-200'
+        : 'w-full py-4 text-center text-xs text-muted-foreground border-t border-slate-200 bg-white';
 
   const presence = company.presence
     .map((place, i) => `${a.countries[i]} (${place.city})`)

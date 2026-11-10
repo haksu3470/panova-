@@ -64,7 +64,7 @@ function AdminDashboardPageInner() {
           <div>
             <p className="text-sm font-black tracking-tight text-white leading-none">PANOVA</p>
             <h1 className="text-lg font-black tracking-tight text-white mt-1">{a.title}</h1>
-            <p className="text-[11px] text-slate-400">{company.brandName} &bull; {a.sub}</p>
+            <p className="text-[11px] text-on-dark-muted">{company.brandName} &bull; {a.sub}</p>
           </div>
         </div>
 
@@ -72,7 +72,7 @@ function AdminDashboardPageInner() {
           <LanguageSwitcher currentLang={lang} onChange={changeLanguage} tone="dark" />
           <button
             onClick={() => window.location.href = '/'}
-            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold rounded-xl text-xs transition cursor-pointer"
+            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-on-dark font-bold rounded-xl text-xs transition cursor-pointer"
           >
             {t.returnHome || a.home}
           </button>
@@ -88,7 +88,7 @@ function AdminDashboardPageInner() {
             ['employees', '👷'], ['followup', '📈'], ['support', '🛠️'], ['reports', '📈'],
             ['team', '👥'], ['settings', '⚙️'],
           ] as const).map(([id, icon]) => (
-            <button key={id} onClick={() => setActiveTab(id)} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === id ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>{icon} {a.tabs[id]}</button>
+            <button key={id} onClick={() => setActiveTab(id)} className={`px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${activeTab === id ? 'bg-emerald-700 text-white shadow-lg' : 'bg-slate-800 text-on-dark-muted hover:bg-slate-700'}`}>{icon} {a.tabs[id]}</button>
           ))}
         </div>
       </nav>
@@ -100,19 +100,19 @@ function AdminDashboardPageInner() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-slate-800 border border-slate-700 rounded-3xl p-5 shadow-md">
-                <div className="text-xs uppercase font-bold text-slate-400">{a.totalCandidates}</div>
+                <div className="text-xs uppercase font-bold text-on-dark-muted">{a.totalCandidates}</div>
                 <div className="text-3xl font-black text-white mt-1">248</div>
               </div>
               <div className="bg-slate-800 border border-slate-700 rounded-3xl p-5 shadow-md">
-                <div className="text-xs uppercase font-bold text-slate-400">{a.activeEmployers}</div>
+                <div className="text-xs uppercase font-bold text-on-dark-muted">{a.activeEmployers}</div>
                 <div className="text-3xl font-black text-white mt-1">{employers.length}</div>
               </div>
               <div className="bg-slate-800 border border-slate-700 rounded-3xl p-5 shadow-md">
-                <div className="text-xs uppercase font-bold text-slate-400">{a.openRequests}</div>
+                <div className="text-xs uppercase font-bold text-on-dark-muted">{a.openRequests}</div>
                 <div className="text-3xl font-black text-emerald-400 mt-1">{demandsList.length}</div>
               </div>
               <div className="bg-slate-800 border border-slate-700 rounded-3xl p-5 shadow-md">
-                <div className="text-xs uppercase font-bold text-slate-400">{a.travelReady}</div>
+                <div className="text-xs uppercase font-bold text-on-dark-muted">{a.travelReady}</div>
                 <div className="text-3xl font-black text-emerald-400 mt-1">12</div>
               </div>
             </div>
@@ -125,7 +125,7 @@ function AdminDashboardPageInner() {
             <h2 className="text-sm font-black text-white">{a.employersTitle}</h2>
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-slate-900 text-slate-400 font-bold">
+                <tr className="bg-slate-900 text-on-dark-muted font-bold">
                   <th className="p-3 rounded-l-xl">{a.colCompany}</th>
                   <th className="p-3">{a.colContact}</th>
                   <th className="p-3">{a.colCountry}</th>
@@ -137,8 +137,8 @@ function AdminDashboardPageInner() {
                 {employers.map((emp) => (
                   <tr key={emp.id}>
                     <td className="p-3 font-bold text-white">{emp.name}</td>
-                    <td className="p-3 text-slate-300">{emp.contact}</td>
-                    <td className="p-3 text-slate-300">{emp.country}</td>
+                    <td className="p-3 text-on-dark-muted">{emp.contact}</td>
+                    <td className="p-3 text-on-dark-muted">{emp.country}</td>
                     <td className="p-3 text-emerald-400 font-bold">{emp.activeDemands}</td>
                     <td className="p-3 font-semibold bg-slate-900/40 rounded-r-xl">{emp.responsible}</td>
                   </tr>
@@ -158,7 +158,7 @@ function AdminDashboardPageInner() {
 
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-slate-900 text-slate-400 font-bold">
+                <tr className="bg-slate-900 text-on-dark-muted font-bold">
                   <th className="p-3 rounded-l-xl">{a.colTask}</th>
                   <th className="p-3">{a.colAssignee}</th>
                   <th className="p-3">{a.colDue}</th>
@@ -169,8 +169,8 @@ function AdminDashboardPageInner() {
                 {tasks.map((task) => (
                   <tr key={task.id}>
                     <td className="p-3 font-bold text-white">{task.title}</td>
-                    <td className="p-3 text-slate-300">{task.assignee}</td>
-                    <td className="p-3 text-slate-300">{task.dueDate}</td>
+                    <td className="p-3 text-on-dark-muted">{task.assignee}</td>
+                    <td className="p-3 text-on-dark-muted">{task.dueDate}</td>
                     <td className="p-3 font-bold text-emerald-400">{task.status}</td>
                   </tr>
                 ))}
@@ -181,7 +181,7 @@ function AdminDashboardPageInner() {
 
         {/* Diğer sekmeler için placeholder */}
         {['demands', 'candidates', 'matching', 'documents', 'official', 'travel', 'employees', 'followup', 'reports', 'team', 'settings'].includes(activeTab) && activeTab !== 'overview' && activeTab !== 'employers' && activeTab !== 'support' && (
-          <div className="bg-slate-800 border border-slate-700 rounded-3xl p-12 text-center text-slate-400 shadow-xl">
+          <div className="bg-slate-800 border border-slate-700 rounded-3xl p-12 text-center text-on-dark-muted shadow-xl">
             <h2 className="text-base font-black text-white mb-2 uppercase tracking-wide">{a.tabs[activeTab]} — {a.moduleOn}</h2>
             <p className="text-xs">{a.moduleDesc}</p>
           </div>

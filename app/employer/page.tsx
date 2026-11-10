@@ -460,7 +460,7 @@ function EmployerPortalInner() {
                   localStorage.removeItem('panova_employer_user');
                   window.location.href = '/portal';
                 }}
-                className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer"
+                className="inline-flex items-center gap-1.5 bg-amber-800 hover:bg-amber-900 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer"
               >
                 ← {ui.returnToAdmin}
               </button>
@@ -501,34 +501,34 @@ function EmployerPortalInner() {
         {/* 10 SEKME */}
         <div className="bg-white p-3 rounded-2xl border shadow-sm">
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-            <button onClick={() => setActiveTab('home')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'home' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+            <button onClick={() => setActiveTab('home')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'home' ? 'bg-brand-solid text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               🏠 {t.overview}
             </button>
-            <button onClick={() => setActiveTab('demands')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'demands' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+            <button onClick={() => setActiveTab('demands')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'demands' ? 'bg-brand-solid text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               📁 {t.empTabRequests} ({jobDemands.length})
             </button>
-            <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+            <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'candidates' ? 'bg-brand-solid text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               👥 {t.candidatesTab} ({candidates.length})
             </button>
-            <button onClick={() => setActiveTab('interviews')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'interviews' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+            <button onClick={() => setActiveTab('interviews')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'interviews' ? 'bg-brand-solid text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               📅 {t.empTabInterviews || t.interviews} ({interviews.length})
             </button>
-            <button onClick={() => setActiveTab('selected')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'selected' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+            <button onClick={() => setActiveTab('selected')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'selected' ? 'bg-brand-solid text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               ⭐ {t.empTabSelected || t.selectedCandidatesTitle} ({selectedCandidates.length})
             </button>
-            <button onClick={() => setActiveTab('status')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'status' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+            <button onClick={() => setActiveTab('status')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'status' ? 'bg-brand-solid text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               📄 {t.process}
             </button>
-            <button onClick={() => setActiveTab('travel')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'travel' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+            <button onClick={() => setActiveTab('travel')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'travel' ? 'bg-brand-solid text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               ✈️ {t.travel}
             </button>
-            <button onClick={() => setActiveTab('employees')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'employees' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+            <button onClick={() => setActiveTab('employees')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'employees' ? 'bg-brand-solid text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               👷 {t.employeesTab}
             </button>
-            <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+            <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'support' ? 'bg-brand-solid text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               💬 {t.support} ({supportTickets.length})
             </button>
-            <button onClick={() => setActiveTab('company')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'company' ? 'bg-[#2e7d32] text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
+            <button onClick={() => setActiveTab('company')} className={`px-3.5 py-2.5 rounded-xl cursor-pointer transition ${activeTab === 'company' ? 'bg-brand-solid text-white shadow' : 'bg-slate-50 border text-slate-700 hover:bg-slate-100'}`}>
               🏢 {t.empTabProfile}
             </button>
             <Link href="/guides" className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl transition bg-slate-50 border text-slate-700 hover:bg-slate-100">
@@ -542,19 +542,19 @@ function EmployerPortalInner() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-slate-500 uppercase">{t.openRequestsCard}</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase">{t.openRequestsCard}</span>
                 <div className="text-2xl font-black text-emerald-700">{jobDemands.length}</div>
               </div>
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-slate-500 uppercase">{t.totalCandidatesCard}</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase">{t.totalCandidatesCard}</span>
                 <div className="text-2xl font-black text-blue-700">{candidates.length}</div>
               </div>
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-slate-500 uppercase">{t.empTabInterviews}</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase">{t.empTabInterviews}</span>
                 <div className="text-2xl font-black text-amber-600">{interviews.length}</div>
               </div>
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-slate-500 uppercase">{t.empTabSelected}</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase">{t.empTabSelected}</span>
                 <div className="text-2xl font-black text-purple-700">{selectedCandidates.length}</div>
               </div>
             </div>
@@ -575,7 +575,7 @@ function EmployerPortalInner() {
               <div className="flex justify-between items-center border-b pb-4">
                 <div>
                   <h3 className="text-lg font-extrabold text-slate-950">{t.corporateDemandTitle}</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">{t.corporateDemandDesc}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t.corporateDemandDesc}</p>
                 </div>
                 <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
                   {t.totalActiveFiles}: {jobDemands.length}
@@ -634,7 +634,7 @@ function EmployerPortalInner() {
                           }`}
                         >
                           <span>{pos.label}</span>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+                          {isSelected && <Check className="w-3.5 h-3.5" />}
                         </button>
                       );
                     })}
@@ -740,7 +740,7 @@ function EmployerPortalInner() {
                   </p>
                 )}
 
-                <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-4 rounded-xl font-bold transition shadow-lg cursor-pointer text-sm">
+                <button type="submit" className="w-full bg-brand-solid hover:bg-brand text-white py-4 rounded-xl font-bold transition shadow-lg cursor-pointer text-sm">
                   {t.submitDemandBtn}
                 </button>
               </form>
@@ -763,46 +763,46 @@ function EmployerPortalInner() {
                             <span className="text-xs font-extrabold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">{metrics.headcount} {t.peopleUnit}</span>
                           </div>
                           <h4 className="font-extrabold text-slate-950 text-base">{dem.position_title}</h4>
-                          <p className="text-xs text-slate-500">📍 {dem.city} | 💰 {displayedRequestSalary(dem) || '—'}</p>
+                          <p className="text-xs text-muted-foreground">📍 {dem.city} | 💰 {displayedRequestSalary(dem) || '—'}</p>
                           <p className="text-xs text-slate-600">{t.facilityAccommodation}: {benefitText(dem.accommodation_provided)} · {t.facilityFood}: {benefitText(dem.food_provided)}</p>
                         </div>
                         <div className="text-right">
                           <span className="font-bold uppercase text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl text-xs">{t.statusLabel}: {dem.status}</span>
-                          <div className="text-[11px] text-slate-400 mt-1">📅 {dem.created_at ? dem.created_at.substring(0, 10) : '2026-09'}</div>
+                          <div className="text-[11px] text-muted-foreground mt-1">📅 {dem.created_at ? dem.created_at.substring(0, 10) : '2026-09'}</div>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 bg-slate-50/80 p-3 rounded-xl border text-center text-xs">
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-slate-400 uppercase">{t.demandRequested}</div>
+                          <div className="text-[9px] font-bold text-muted-foreground uppercase">{t.demandRequested}</div>
                           <div className="text-sm font-black text-slate-900">{metrics.headcount}</div>
                         </div>
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-indigo-500 uppercase">{t.demandBound}</div>
+                          <div className="text-[9px] font-bold text-indigo-800 uppercase">{t.demandBound}</div>
                           <div className="text-sm font-black text-indigo-700">{metrics.bound}</div>
                         </div>
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-blue-500 uppercase">{t.demandOffered}</div>
+                          <div className="text-[9px] font-bold text-blue-800 uppercase">{t.demandOffered}</div>
                           <div className="text-sm font-black text-blue-700">{metrics.offered}</div>
                         </div>
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-amber-500 uppercase">{t.demandInterviewing}</div>
-                          <div className="text-sm font-black text-amber-600">{metrics.interviewing}</div>
+                          <div className="text-[9px] font-bold text-amber-800 uppercase">{t.demandInterviewing}</div>
+                          <div className="text-sm font-black text-amber-800">{metrics.interviewing}</div>
                         </div>
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-emerald-500 uppercase">{t.demandSelected}</div>
+                          <div className="text-[9px] font-bold text-emerald-800 uppercase">{t.demandSelected}</div>
                           <div className="text-sm font-black text-emerald-700">{metrics.selected}</div>
                         </div>
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-purple-500 uppercase">{t.demandInProcess}</div>
+                          <div className="text-[9px] font-bold text-purple-800 uppercase">{t.demandInProcess}</div>
                           <div className="text-sm font-black text-purple-700">{metrics.inProcess}</div>
                         </div>
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-sky-500 uppercase">{t.demandTravelReady}</div>
+                          <div className="text-[9px] font-bold text-sky-800 uppercase">{t.demandTravelReady}</div>
                           <div className="text-sm font-black text-sky-700">{metrics.travelReady}</div>
                         </div>
                         <div className="bg-white p-2 rounded-lg border shadow-xs">
-                          <div className="text-[9px] font-bold text-teal-500 uppercase">{t.demandStarted}</div>
+                          <div className="text-[9px] font-bold text-teal-800 uppercase">{t.demandStarted}</div>
                           <div className="text-sm font-black text-teal-700">{metrics.started}</div>
                         </div>
                       </div>
@@ -877,7 +877,7 @@ function EmployerPortalInner() {
 
             <div className="space-y-3">
               {interviews.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 text-xs">{t.empNoInterviews}</div>
+                <div className="p-8 text-center text-muted-foreground text-xs">{t.empNoInterviews}</div>
               ) : (
                 interviews.map((item, idx) => (
                   <div key={item.id || idx} className="p-4 bg-slate-50 rounded-2xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -886,8 +886,8 @@ function EmployerPortalInner() {
                         <span className="font-extrabold text-slate-950 text-sm">{item.candidate_name || candidates.find((x: any) => x.id === item.candidate_id)?.full_name || ui.candidateWord}</span>
                         <span className="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded">{item.position || candidates.find((x: any) => x.id === item.candidate_id)?.profession || ui.positionWord}</span>
                       </div>
-                      <p className="text-xs text-slate-500 flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" /> {item.scheduled_at ? new Date(item.scheduled_at).toLocaleString(dateLocale[currentLang]) : '—'} | 💻 {item.platform || ui.onlineMeeting}
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-muted-foreground" /> {item.scheduled_at ? new Date(item.scheduled_at).toLocaleString(dateLocale[currentLang]) : '—'} | 💻 {item.platform || ui.onlineMeeting}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -933,7 +933,7 @@ function EmployerPortalInner() {
             </p>
 
             {selectedCandidates.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs">{t.empNoSelected}</div>
+              <div className="p-8 text-center text-muted-foreground text-xs">{t.empNoSelected}</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {selectedCandidates.map((cand, idx) => (
@@ -941,7 +941,7 @@ function EmployerPortalInner() {
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="font-extrabold text-slate-950 text-sm">{cand.full_name || cand.name}</h4>
-                        <p className="text-xs text-slate-500">{cand.profession || ui.specialist} • {cand.nationality || '—'}</p>
+                        <p className="text-xs text-muted-foreground">{cand.profession || ui.specialist} • {cand.nationality || '—'}</p>
                       </div>
                       <span className="bg-emerald-50 text-emerald-800 text-[10px] font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" /> {t.approvedAndProcessing}
@@ -999,7 +999,7 @@ function EmployerPortalInner() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div className="p-4 bg-slate-50 rounded-2xl border space-y-1">
                 <div className="font-extrabold text-slate-950">{ui.employeeName}</div>
-                <div className="text-slate-500">{ui.employeeLine}</div>
+                <div className="text-muted-foreground">{ui.employeeLine}</div>
               </div>
             </div>
           </div>
@@ -1019,7 +1019,7 @@ function EmployerPortalInner() {
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.supportMessageLabel} *</label>
                   <textarea rows={4} required value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)} placeholder={ui.supportMessagePh} className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-slate-950 resize-none" />
                 </div>
-                <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold cursor-pointer text-xs sm:text-sm">
+                <button type="submit" className="w-full bg-brand-solid hover:bg-brand text-white py-3.5 rounded-xl font-bold cursor-pointer text-xs sm:text-sm">
                   {t.sendBtn}
                 </button>
               </form>
@@ -1028,7 +1028,7 @@ function EmployerPortalInner() {
             <div className="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
               <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">{t.supportHistoryTitle}</h3>
               {supportTickets.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 text-xs">{t.noSupportYet}</div>
+                <div className="p-8 text-center text-muted-foreground text-xs">{t.noSupportYet}</div>
               ) : (
                 <div className="space-y-3">
                   {supportTickets.map((tkt) => (
@@ -1108,7 +1108,7 @@ function EmployerPortalInner() {
               <button
                 type="submit"
                 disabled={!employerProfile?.id || profileSaving || profileLoading}
-                className="bg-[#2e7d32] hover:bg-[#1b5e20] disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-bold transition shadow cursor-pointer"
+                className="bg-brand-solid hover:bg-brand disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-bold transition shadow cursor-pointer"
               >
                 {profileSaving ? (t.updatingBtn) : (t.saveCompanyBtn)}
               </button>

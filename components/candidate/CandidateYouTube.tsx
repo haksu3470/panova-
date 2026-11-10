@@ -21,7 +21,7 @@ export default function CandidateYouTube({ videos, labels, compact = false, show
     <section className="space-y-3" aria-label={labels.title}>
       {showTitle && <h4 className="text-xs font-extrabold uppercase text-emerald-800">📹 {labels.title}</h4>}
       {entries.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-300 bg-white px-3 py-4 text-xs font-medium text-slate-500" role="status">
+        <p className="rounded-xl border border-dashed border-slate-300 bg-white px-3 py-4 text-xs font-medium text-muted-foreground" role="status">
           {labels.empty}
         </p>
       ) : (
@@ -45,7 +45,7 @@ export default function CandidateYouTube({ videos, labels, compact = false, show
                     href={entry.watchUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex text-xs font-bold text-[#2e7d32] underline"
+                    className="inline-flex text-xs font-bold text-brand underline"
                   >
                     {labels.watch}
                   </a>
@@ -59,7 +59,7 @@ export default function CandidateYouTube({ videos, labels, compact = false, show
                   href={entry.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex break-all text-xs font-bold text-[#2e7d32] underline"
+                  className="inline-flex break-all text-xs font-bold text-brand underline"
                 >
                   {labels.open}
                 </a>

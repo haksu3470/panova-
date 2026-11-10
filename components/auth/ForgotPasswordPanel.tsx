@@ -14,7 +14,7 @@ export function ForgotPasswordLink({ label, onClick }: { label: string; onClick:
       <button
         type="button"
         onClick={onClick}
-        className="text-xs font-bold text-[#1b5e20] underline underline-offset-2 cursor-pointer"
+        className="text-xs font-bold text-brand underline underline-offset-2 cursor-pointer"
       >
         {label}
       </button>
@@ -64,7 +64,7 @@ export default function ForgotPasswordPanel({
       {sent ? (
         <Link
           href={`/auth/reset-password/${audience}`}
-          className="inline-block text-xs font-bold text-[#1b5e20] underline underline-offset-2"
+          className="inline-block text-xs font-bold text-brand underline underline-offset-2"
         >
           {t.forgotPasswordHaveCode}
         </Link>
@@ -87,7 +87,7 @@ export default function ForgotPasswordPanel({
           <button
             type="submit"
             disabled={busy}
-            className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] disabled:opacity-60 text-white font-bold py-3.5 rounded-xl text-sm cursor-pointer"
+            className="w-full bg-brand-solid hover:bg-brand disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 text-white font-bold py-3.5 rounded-xl text-sm cursor-pointer"
           >
             {t.forgotPasswordSend}
           </button>
@@ -96,7 +96,7 @@ export default function ForgotPasswordPanel({
       {info ? <p className="text-xs text-slate-600" role="status">{info}</p> : null}
       <p className="text-xs text-slate-600 leading-relaxed">{t.forgotPasswordGoogle}</p>
       <OAuthButtons redirectPath={resetReturnPath(audience)} orLabel={ui.oauthOr} googleLabel={ui.oauthGoogle} />
-      <button type="button" onClick={onBack} className="w-full text-xs font-bold text-slate-500 cursor-pointer">
+      <button type="button" onClick={onBack} className="w-full text-xs font-bold text-muted-foreground cursor-pointer">
         {t.verifyEmailBack}
       </button>
     </div>

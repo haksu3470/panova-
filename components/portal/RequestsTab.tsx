@@ -41,7 +41,7 @@ export default function RequestsTab({
       <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-base sm:text-lg font-extrabold text-slate-900">📁 {t.demandFilesTitle}</h3>
-          <p className="text-xs text-slate-500 mt-0.5">{t.demandFilesSub}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{t.demandFilesSub}</p>
         </div>
         <div className="flex flex-col items-stretch sm:items-end gap-2">
           <div className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl font-bold text-xs border border-emerald-200">
@@ -88,7 +88,7 @@ export default function RequestsTab({
                   </span>
                   <h4 className="font-extrabold text-slate-900 text-base mt-1.5">{req.position_title}<DemoBadge show={req.is_demo} /></h4>
                   <p className="text-xs font-bold text-slate-600 flex items-center gap-1 mt-0.5">
-                    <Building2 className="w-3.5 h-3.5 text-slate-400" /> {req.employer_name}
+                    <Building2 className="w-3.5 h-3.5 text-muted-foreground" /> {req.employer_name}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
@@ -98,7 +98,7 @@ export default function RequestsTab({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t text-[11px] text-slate-500">
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t text-[11px] text-muted-foreground">
                 <div>📍 {req.city || 'N/A'}, {req.country || 'International'}</div>
                 <div>📅 {t.createdDate}: {req.created_at ? req.created_at.substring(0, 10) : '2026-09'}</div>
                 <div>🎯 {t.colTargetStart}: {req.target_start_date || '2026-10-15'}</div>
@@ -149,7 +149,7 @@ export default function RequestsTab({
             <div className="pt-3 border-t flex flex-col sm:flex-row gap-2">
               <button
                 onClick={() => setMatchReq(req)}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <Link2 className="w-4 h-4" /> {ui.matchCandidates}
               </button>

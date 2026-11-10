@@ -13,7 +13,7 @@ export default function StaffRoleGate({ route, children }: { route: StaffFileRou
   const ui = portalUi[currentLang];
 
   if (!ready) {
-    return <div className="min-h-screen flex items-center justify-center text-sm text-slate-500">{ui.loading}</div>;
+    return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">{ui.loading}</div>;
   }
   if (!canOpenStaffFile(role, route)) {
     return (

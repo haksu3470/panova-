@@ -160,7 +160,7 @@ export default function PlacementPanel({ candidateId }: Props) {
         {startedWork ? (
           <p className="text-sm font-bold text-emerald-700">✅ {ui.startedBanner}</p>
         ) : (
-          <button disabled={busy} onClick={() => setOfficial('started_work')} className="w-full sm:w-auto text-xs font-bold px-4 py-2.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition shadow">
+          <button disabled={busy} onClick={() => setOfficial('started_work')} className="w-full sm:w-auto text-xs font-bold px-4 py-2.5 rounded-lg bg-emerald-700 text-white hover:bg-emerald-800 transition shadow">
             {ui.markStarted}
           </button>
         )}
@@ -216,7 +216,7 @@ export default function PlacementPanel({ candidateId }: Props) {
 function Info({ k, v }: { k: string; v: string }) {
   return (
     <div className="p-2 rounded-lg bg-slate-50 border border-slate-200">
-      <div className="text-[10px] font-bold uppercase text-slate-500">{k}</div>
+      <div className="text-[10px] font-bold uppercase text-muted-foreground">{k}</div>
       <div className="font-semibold text-slate-900 break-words">{v}</div>
     </div>
   );

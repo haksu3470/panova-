@@ -171,7 +171,7 @@ export default function TasksTab({
               </div>
             </div>
           )}
-          <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-xs sm:text-sm">
+          <button type="submit" className="w-full bg-brand-solid hover:bg-brand text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-xs sm:text-sm">
             {t.saveTaskBtn}
           </button>
         </form>
@@ -181,12 +181,12 @@ export default function TasksTab({
         <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.taskListHeader}</h3>
         <div className="space-y-3">
           {tasks.map((task) => (
-            <div key={task.id} className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${task.status === 'completed' ? 'bg-slate-50 opacity-60' : taskIsOverdue(task.due_date, task.status) ? 'bg-amber-50 border-amber-300 shadow-sm' : 'bg-white shadow-sm'}`}>
+            <div key={task.id} className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${task.status === 'completed' ? 'bg-slate-100' : taskIsOverdue(task.due_date, task.status) ? 'bg-amber-50 border-amber-300 shadow-sm' : 'bg-white shadow-sm'}`}>
               <div className="flex items-start sm:items-center gap-3">
                 <input type="checkbox" checked={task.status === 'completed'} onChange={() => toggleTaskStatus(task.id, task.status)} className="w-5 h-5 accent-[#2e7d32] cursor-pointer mt-0.5 sm:mt-0 shrink-0" />
                 <div>
-                  <h4 className={`font-bold text-xs sm:text-sm ${task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-900'}`}>{taskLabel(t, task.title)}<DemoBadge show={task.is_demo} /></h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5">{t.assigneeText}: <strong>{task.assignee}</strong> | {t.backupText}: <strong>{task.backup_assignee}</strong> | {t.dueDateText}: {task.due_date}</p>
+                  <h4 className={`font-bold text-xs sm:text-sm ${task.status === 'completed' ? 'line-through text-muted-foreground' : 'text-slate-900'}`}>{taskLabel(t, task.title)}<DemoBadge show={task.is_demo} /></h4>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{t.assigneeText}: <strong>{task.assignee}</strong> | {t.backupText}: <strong>{task.backup_assignee}</strong> | {t.dueDateText}: {task.due_date}</p>
                   {task.related_entity_type && (
                     <p className="text-[11px] text-emerald-700 mt-0.5">🔗 {linkLabels[task.related_entity_type] || task.related_entity_type}: {findLabel(task.related_entity_type, task.related_entity_id) || String(task.related_entity_id || '').slice(0, 8)}</p>
                   )}
