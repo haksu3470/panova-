@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ensureStaff, signOut } from '@/lib/auth';
 import { consumeOAuthIntent, listenerMayRevokeSharedSession, PORTAL_OAUTH_PATH } from '@/lib/staffSession';
+import { AccountExistsNotice } from '@/components/auth/AccountExistsNotice';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
 import ForgotPasswordPanel, { ForgotPasswordLink } from '@/components/auth/ForgotPasswordPanel';
 import {
@@ -76,7 +77,7 @@ export default function PortalPage() {
   };
 
   const [authenticated, setAuthenticated] = useState(false);
-  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify' | 'forgot'>('signin');
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify' | 'forgot' | 'exists'>('signin');
   const [verifyEmail, setVerifyEmail] = useState('');
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
@@ -358,6 +359,11 @@ export default function PortalPage() {
         metadata: { role: 'staff', full_name: regName.trim() },
         locale: currentLang,
       });
+      if (result.status === 'exists') {
+        setUsername(email);
+        setAuthMode('exists');
+        return;
+      }
       if (result.status === 'error') {
         alert((t.signupError || '{message}').replace('{message}', result.message));
         return;
@@ -597,10 +603,20 @@ export default function PortalPage() {
                     if (!user) return;
                     await enterStaff(user.id, user.email || verifyEmail, regName || undefined, true, true, true);
                   }}
+                  onSignIn={() => { setUsername(verifyEmail); setAuthMode('signin'); }}
+                  onResetPassword={() => { setUsername(verifyEmail); setAuthMode('forgot'); }}
                 />
                 <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-muted-foreground cursor-pointer">{t.verifyEmailBack}</button>
                 <OAuthButtons redirectPath="/portal" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} />
               </div>
+            ) : authMode === 'exists' ? (
+              <AccountExistsNotice
+                message={t.accountExists || ''}
+                signInLabel={t.signInMenu || ''}
+                resetLabel={t.forgotPassword || ''}
+                onSignIn={() => setAuthMode('signin')}
+                onReset={() => setAuthMode('forgot')}
+              />
             ) : authMode === 'forgot' ? (
               <ForgotPasswordPanel
                 lang={currentLang}

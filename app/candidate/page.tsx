@@ -16,6 +16,7 @@ import {
   changedCandidatePhoto,
   isPermissionDenied,
 } from '@/lib/candidateProfile';
+import { AccountExistsNotice } from '@/components/auth/AccountExistsNotice';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
 import ForgotPasswordPanel, { ForgotPasswordLink } from '@/components/auth/ForgotPasswordPanel';
 import {
@@ -40,6 +41,8 @@ import { candidatePlaceLabel, candidateProfessionLabel } from '@/lib/candidateLa
 import { ProfessionField } from '@/components/site/ProfessionField';
 import { professionForSectorChange } from '@/lib/professions';
 import { homeCopy } from '@/lib/home-copy';
+import { checkCandidateDuplicate, registrationBlock } from '@/lib/duplicateCandidate';
+import { canonicalPassport, canonicalPhone } from '@/lib/loginIdentifier';
 import { canonicalNationality } from '@/lib/registrationCountries';
 import { candidateOfferResponse, offerMoney, offerStatusLabel } from '@/lib/offers';
 import { offerStatusTone } from '@/lib/status-tone';
@@ -73,8 +76,9 @@ export default function CandidateDashboard() {
 
   const [authenticated, setAuthenticated] = useState(false);
 
-  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'verify' | 'forgot'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'verify' | 'forgot' | 'exists'>('login');
   const [verifyEmail, setVerifyEmail] = useState('');
+  const [duplicateKind, setDuplicateKind] = useState<'email' | 'phone' | 'passport'>('email');
   const [linkIssue, setLinkIssue] = useState<'phone' | 'passport' | null>(null);
   const [fixValue, setFixValue] = useState('');
   
@@ -588,6 +592,10 @@ export default function CandidateDashboard() {
         body: JSON.stringify({ identifier, password }),
       });
       const body = await response.json().catch(() => ({} as { error?: string; email?: string; access_token?: string; refresh_token?: string }));
+      if (response.status === 503 && !identifier.includes('@')) {
+        alert(t.signInUnavailable);
+        return;
+      }
       if (response.status === 503 && identifier.includes('@')) {
         const email = identifier.toLowerCase();
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -649,7 +657,26 @@ export default function CandidateDashboard() {
     setLoading(true);
     const resume = pauseEmailGateListener();
     const email = regEmail.trim().toLowerCase();
+    const passport = canonicalPassport(regPassport);
+    const phone = canonicalPhone(regPhone);
+    const showDuplicate = (kind: 'email' | 'phone' | 'passport') => {
+      setDuplicateKind(kind);
+      if (kind === 'email') setLoginInput(email);
+      else if (kind === 'phone') setLoginInput(phone || regPhone.trim());
+      else setLoginInput(passport);
+      setAuthMode('exists');
+    };
     try {
+      const checked = await checkCandidateDuplicate({ email, passport, phone });
+      if (!checked.ok) {
+        alert(t.duplicateCheckFailed);
+        return;
+      }
+      const block = registrationBlock(checked.flags);
+      if (block) {
+        showDuplicate(block);
+        return;
+      }
       const result = await beginPasswordSignup({
         email,
         password: regPassword,
@@ -657,8 +684,8 @@ export default function CandidateDashboard() {
         metadata: {
           role: 'candidate',
           full_name: regFullName,
-          passport_number: regPassport.toUpperCase(),
-          phone: regPhone,
+          passport_number: passport,
+          phone,
           profession: regProfession,
           sector: regSector,
           nationality: canonicalNationality(regNationality) || '',
@@ -666,6 +693,10 @@ export default function CandidateDashboard() {
         },
         locale: currentLang,
       });
+      if (result.status === 'exists') {
+        showDuplicate('email');
+        return;
+      }
       if (result.status === 'error') {
         alert((t.signupError || '{message}').replace('{message}', result.message));
         return;
@@ -685,7 +716,9 @@ export default function CandidateDashboard() {
     setLoading(true);
     const resume = pauseEmailGateListener();
     try {
-      const data = linkIssue === 'phone' ? { phone: value } : { passport_number: value.toUpperCase() };
+      const data = linkIssue === 'phone'
+        ? { phone: canonicalPhone(value) }
+        : { passport_number: canonicalPassport(value) };
       const { error } = await supabase.auth.updateUser({ data });
       if (error) {
         alert(error.message);
@@ -1125,12 +1158,22 @@ export default function CandidateDashboard() {
                   onVerified={async () => {
                     await handleLinkResult(await loadLinkedCandidate(), true);
                   }}
+                  onSignIn={() => { setLoginInput(verifyEmail); setAuthMode('login'); }}
+                  onResetPassword={() => { setLoginInput(verifyEmail); setAuthMode('forgot'); }}
                 />
                 <button type="button" onClick={() => setAuthMode('login')} className="w-full text-xs font-bold text-muted-foreground cursor-pointer">
                   {t.verifyEmailBack}
                 </button>
                 <OAuthButtons redirectPath="/candidate" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} />
               </div>
+            ) : authMode === 'exists' ? (
+              <AccountExistsNotice
+                message={(duplicateKind === 'phone' ? t.phoneExists : duplicateKind === 'passport' ? t.passportExists : t.accountExists) || ''}
+                signInLabel={t.signInMenu || ''}
+                resetLabel={duplicateKind === 'email' ? (t.forgotPassword || '') : undefined}
+                onSignIn={() => setAuthMode('login')}
+                onReset={duplicateKind === 'email' ? () => setAuthMode('forgot') : undefined}
+              />
             ) : authMode === 'forgot' ? (
               <ForgotPasswordPanel
                 lang={currentLang}

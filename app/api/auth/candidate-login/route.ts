@@ -61,7 +61,11 @@ export async function POST(request: Request) {
       auth: { persistSession: false, autoRefreshToken: false },
     });
     const { data, error } = await admin.rpc('resolve_candidate_login_email', { p_identifier: classified.key });
-    if (error || typeof data !== 'string' || !data.includes('@')) {
+    if (error) {
+      console.error('candidate login lookup failed', error.code || 'rpc');
+      return NextResponse.json({ ok: false, error: 'unavailable' }, { status: 503 });
+    }
+    if (typeof data !== 'string' || !data.includes('@')) {
       await anonClient().auth.signInWithPassword({
         email: 'no-such-user@panovagroup.invalid',
         password,

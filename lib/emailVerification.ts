@@ -5,6 +5,7 @@ import { isGoogleProvedUser } from '@/lib/emailAddress';
 import { parseVerificationInput, type OtpType } from '@/lib/emailConfirmation';
 import type { EmailLocale } from '@/lib/email/email-copy';
 import { emailLocale } from '@/lib/email/email-copy';
+import { authErrorMeansExistingAccount, checkCandidateDuplicate, confirmedSignupObfuscated } from '@/lib/duplicateCandidate';
 
 export type VerifyChannel = 'signup' | 'otp';
 
@@ -103,7 +104,7 @@ export async function beginPasswordSignup(args: {
   metadata: Record<string, string>;
   /** Saved on the account so Auth templates can read {{ .Data.locale }}. */
   locale: string;
-}): Promise<{ status: 'verify'; email: string } | { status: 'error'; message: string }> {
+}): Promise<{ status: 'verify'; email: string } | { status: 'exists'; email: string } | { status: 'error'; message: string }> {
   const email = args.email.trim().toLowerCase();
   const locale = emailLocale(args.locale);
   const emailRedirectTo = redirectUrl(args.redirectPath);
@@ -115,9 +116,14 @@ export async function beginPasswordSignup(args: {
       options: { emailRedirectTo, data: { ...args.metadata, locale } },
     });
     if (error) {
-      const already = /already registered|already exists|user already/i.test(error.message);
-      if (!already) return { status: 'error', message: error.message };
-      return sendMailboxProof(email, emailRedirectTo, locale);
+      if (authErrorMeansExistingAccount(error)) return { status: 'exists', email };
+      return { status: 'error', message: error.message };
+    }
+
+    // Confirmed accounts come back with an empty identities list and no email.
+    if (confirmedSignupObfuscated(data.user)) {
+      if (data.session) await supabase.auth.signOut();
+      return { status: 'exists', email };
     }
 
     const confirmed = Boolean(data.user?.email_confirmed_at || data.user?.confirmed_at);
@@ -134,10 +140,12 @@ export async function beginPasswordSignup(args: {
   }
 }
 
-export async function resendVerification(email: string, redirectPath: string, locale: string): Promise<{ ok: boolean; message?: string }> {
+export async function resendVerification(email: string, redirectPath: string, locale: string): Promise<{ ok: boolean; code?: 'exists'; message?: string }> {
   const emailRedirectTo = redirectUrl(redirectPath);
   const target = email.trim().toLowerCase();
   const lang = emailLocale(locale);
+  const existing = await checkCandidateDuplicate({ email: target, passport: '', phone: '' });
+  if (existing.ok && existing.flags.email) return { ok: false, code: 'exists' };
   const signup = await supabase.auth.resend({
     type: 'signup',
     email: target,
@@ -147,6 +155,7 @@ export async function resendVerification(email: string, redirectPath: string, lo
     rememberVerifyEmail(target, 'signup');
     return { ok: true };
   }
+  if (authErrorMeansExistingAccount(signup.error)) return { ok: false, code: 'exists' };
   const otp = await supabase.auth.signInWithOtp({
     email: target,
     options: { shouldCreateUser: false, emailRedirectTo, data: { locale: lang } },
