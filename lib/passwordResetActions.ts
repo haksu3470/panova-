@@ -27,7 +27,7 @@ export async function verifyRecoveryProof(email: string, raw: string): Promise<'
   const proof = recoveryProofFromInput(raw, email);
   if (proof.kind === 'rejected') return 'rejected';
   const { data, error } = proof.kind === 'hash'
-    ? await supabase.auth.verifyOtp({ token_hash: proof.tokenHash, type: 'recovery' })
+    ? await supabase.auth.verifyOtp({ token_hash: proof.tokenHash, type: proof.otpType })
     : await supabase.auth.verifyOtp({ email: proof.email, token: proof.token, type: 'recovery' });
   if (error || !data.session) return 'rejected';
   markRecoveryPending();

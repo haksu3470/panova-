@@ -393,3 +393,17 @@ Sign in once as each role. Tabs come from `tabsForStaffRole`.
 
 Apply after review, not before: `supabase/migrations/20261109154616_phase2_offers_and_deletes.sql`. It lets a candidate update only a pending offer’s status, lets the employer read their offers, and limits delete to upper management. Demo cleanup SQL, also not applied: `supabase/scripts/delete_demo_records.sql`.
 
+## Employer login invitation
+
+**Role:** Upper management, or a target-country officer whose `scope_country` matches the employer. Apply `supabase/migrations/20261110140000_employer_login_invite.sql` by hand first. Do not apply it from CI.
+
+**Record:** `TEST İşveren A.Ş.`, id `7c0e1000-2026-1110-0001-000000000001`, contact `huseyinaksu+isveren2@gmail.com`. The row has no auth user until this invitation.
+
+1. Open `/portal/employers/7c0e1000-2026-1110-0001-000000000001`. The card **Giriş daveti gönder** is enabled. Clear the email, save, and the button is disabled with the missing-email hint. Put the address back and save.
+2. Send the invitation. The status shows the invite time. The mailbox receives one Panova card in the employer locale (Turkish when `locale` is empty). The button opens `/auth/reset-password/employer`.
+3. Set a password. The next screen asks for the KVKK notice if `kvkk_accepted_at` is empty, then opens `/employer` for this company (`employers.auth_user_id` and `profiles.linked_employer_id`, `profiles.role = employer`).
+4. Sign out. On `/employer-login`, **Forgot password** for that address now sends a reset. Google with the same address also reaches this employer when automatic linking is on.
+5. On the employer file the status is **Hesap bağlı**. **Şifre bağlantısı gönder** sends another link. A second click inside two minutes shows the cooldown.
+6. A source-country or field officer does not see the button. A target-country officer whose scope is a different country does not see it, and `POST /api/employer-invite` returns `forbidden`.
+7. Point a different employer at a staff email and send. The page shows the staff-account error and that profile stays `role = staff`.
+

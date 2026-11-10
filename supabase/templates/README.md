@@ -69,6 +69,29 @@ https://panovagroup.org/auth/reset-password/**
 http://localhost:3000/auth/reset-password/**
 ```
 
-## 3. Check
+## 3. Employer login invitation redirect
+
+Staff send this from the employer file (`Giriş daveti gönder`). The app does not use the Supabase Invite User template. It calls `auth.admin.generateLink` and sends the link with Resend through the same corporate card as the files above (`lib/email/layout.ts`), in the employer’s `locale` or Turkish when that is empty.
+
+The link’s redirect is exactly:
+
+```
+https://panovagroup.org/auth/reset-password/employer
+```
+
+That path is already covered by the wildcard in section 2:
+
+```
+https://panovagroup.org/auth/reset-password/**
+http://localhost:3000/auth/reset-password/**
+```
+
+Dashboard: **Authentication → URL Configuration** ([direct link](https://supabase.com/dashboard/project/vptcihlhkzfmwxpaituf/auth/url-configuration)).
+
+If the wildcard is missing, add both lines above. Do not append a query string to the redirect. A new invite also stores `app_metadata.invited_employer_id` so the first sign-in attaches that employer row when the confirmed email matches. Google sign-in with the same address depends on Supabase automatic identity linking (Authentication → Providers). This environment cannot read the live allow list; confirm the wildcard is saved before the first invitation.
+
+Apply `supabase/migrations/20261110140000_employer_login_invite.sql` by hand before using the button. Do not apply it from CI.
+
+## 4. Check
 
 Sign up once in Turkish and once in English. Each message should show the dark page, the white card, the Panova logo, one language, a 6-digit code in the dashed box, the green button, and the footer with Panova Group, panova@panovagroup.org, and panovagroup.org.

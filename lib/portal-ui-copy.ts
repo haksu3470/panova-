@@ -162,6 +162,29 @@ export type PortalUi = {
   noOpenRecords: string;
   dueOn: string;
   registeredOn: string;
+  employerInvite: {
+    title: string;
+    send: string;
+    resend: string;
+    noEmail: string;
+    linked: string;
+    invitedAt: string;
+    sentInvite: string;
+    sentReset: string;
+    emailFailed: string;
+    unavailable: string;
+    cooldown: string;
+    staffAccount: string;
+    emailTaken: string;
+    otherRole: string;
+    forbidden: string;
+    failed: string;
+    localeLabel: string;
+    consentTitle: string;
+    consentLead: string;
+    consentSave: string;
+    consentFailed: string;
+  };
   staffRestricted: string;
   staffInviteHint: string;
   sendInvite: string;
@@ -406,6 +429,29 @@ const tr: PortalUi = {
   presentationOn: 'Sunum {date}', awaitingResult: 'Sonuç bekleniyor', interviewCount: 'Görüşme kaydı: {n}',
   openIssuesTitle: 'Açık sorunlar ve görevler', noOpenRecords: 'Açık kayıt yok.', dueOn: 'Son {date}',
   registeredOn: 'Kayıt: {date}',
+  employerInvite: {
+    title: 'Giriş hesabı',
+    send: 'Giriş daveti gönder',
+    resend: 'Şifre bağlantısı gönder',
+    noEmail: 'İletişim e-postası yok. Davet için önce e-posta kaydedin.',
+    linked: 'Hesap bağlı',
+    invitedAt: 'Davet: {date}',
+    sentInvite: 'Davet e-postası gönderildi. Kişi bağlantıyla şifre belirler veya aynı adresle Google ile giriş yapar.',
+    sentReset: 'Şifre bağlantısı gönderildi.',
+    emailFailed: 'Kayıt güncellendi ancak e-posta gönderilemedi. Kısa bir süre sonra yeniden deneyin.',
+    unavailable: 'E-posta servisi şu an kullanılamıyor.',
+    cooldown: 'Yeniden göndermek için {seconds} saniye bekleyin.',
+    staffAccount: 'Bu e-posta bir personel hesabına ait. Personel hesabı işveren yapılmaz.',
+    emailTaken: 'Bu e-posta başka bir işveren kaydına bağlı.',
+    otherRole: 'Bu e-posta başka bir portal hesabına ait. Bağlanamaz.',
+    forbidden: 'Bu işveren için davet gönderme yetkiniz yok.',
+    failed: 'Davet gönderilemedi.',
+    localeLabel: 'Davet dili',
+    consentTitle: 'Aydınlatma metni',
+    consentLead: 'İşveren portalına girmeden önce KVKK aydınlatma metnini kabul edin.',
+    consentSave: 'Kabul edip devam et',
+    consentFailed: 'Onay kaydedilemedi. Yeniden deneyin.',
+  },
   staffRestricted: 'Bu alanı görüntülemek için üst yönetim yetkisi gereklidir.',
   staffInviteHint: 'Şifre belirlenmez. Kişiye davet e-postası gider; aynı e-posta ile Google veya e-posta kaydıyla portala girdiğinde hesabı otomatik bağlanır.',
   sendInvite: 'Davet gönder', edit: 'Düzenle', save: 'Kaydet', activeAccount: 'Aktif hesap',
@@ -643,6 +689,29 @@ const en: PortalUi = {
   presentationOn: 'Presented {date}', awaitingResult: 'Awaiting result', interviewCount: 'Interview records: {n}',
   openIssuesTitle: 'Open issues and tasks', noOpenRecords: 'No open records.', dueOn: 'Due {date}',
   registeredOn: 'Registered: {date}',
+  employerInvite: {
+    title: 'Portal login',
+    send: 'Send login invitation',
+    resend: 'Send password link',
+    noEmail: 'No contact email. Save an email before sending an invitation.',
+    linked: 'Account linked',
+    invitedAt: 'Invited: {date}',
+    sentInvite: 'Invitation sent. They set a password from the link, or sign in with Google using the same address.',
+    sentReset: 'Password link sent.',
+    emailFailed: 'The record was updated, but the email was not sent. Try again shortly.',
+    unavailable: 'Email delivery is unavailable right now.',
+    cooldown: 'Wait {seconds} seconds before sending again.',
+    staffAccount: 'This email belongs to a staff account. A staff account is not turned into an employer.',
+    emailTaken: 'This email is already linked to another employer.',
+    otherRole: 'This email belongs to another portal account and cannot be linked.',
+    forbidden: 'You cannot send an invitation for this employer.',
+    failed: 'The invitation could not be sent.',
+    localeLabel: 'Invitation language',
+    consentTitle: 'Privacy notice',
+    consentLead: 'Accept the privacy notice before entering the employer portal.',
+    consentSave: 'Accept and continue',
+    consentFailed: 'Consent could not be saved. Try again.',
+  },
   staffRestricted: 'Upper management permission is required to view this area.',
   staffInviteHint: 'No password is set. An invite email is sent. When they sign in with Google or email using that address, the account links automatically.',
   sendInvite: 'Send invite', edit: 'Edit', save: 'Save', activeAccount: 'Active account',
@@ -880,6 +949,29 @@ const sq: PortalUi = {
   presentationOn: 'Paraqitja {date}', awaitingResult: 'Pret rezultatin', interviewCount: 'Regjistrime intervistash: {n}',
   openIssuesTitle: 'Çështje dhe detyra të hapura', noOpenRecords: 'Nuk ka regjistrime të hapura.', dueOn: 'Afati {date}',
   registeredOn: 'Regjistruar: {date}',
+  employerInvite: {
+    title: 'Hyrja në portal',
+    send: 'Dërgo ftesën e hyrjes',
+    resend: 'Dërgo lidhjen e fjalëkalimit',
+    noEmail: 'Nuk ka email kontakti. Ruani një email para se të dërgoni ftesën.',
+    linked: 'Llogaria është lidhur',
+    invitedAt: 'Ftesa: {date}',
+    sentInvite: 'Ftesa u dërgua. Vendosin fjalëkalimin nga lidhja ose hyjnë me Google në të njëjtën adresë.',
+    sentReset: 'Lidhja e fjalëkalimit u dërgua.',
+    emailFailed: 'Regjistrimi u përditësua, por emaili nuk u dërgua. Provoni përsëri pas pak.',
+    unavailable: 'Dërgimi i emailit nuk është i disponueshëm tani.',
+    cooldown: 'Prisni {seconds} sekonda para se të dërgoni përsëri.',
+    staffAccount: 'Ky email i përket një llogarie stafi. Llogaria e stafit nuk kthehet në punëdhënës.',
+    emailTaken: 'Ky email është lidhur me një punëdhënës tjetër.',
+    otherRole: 'Ky email i përket një llogarie tjetër portali dhe nuk mund të lidhet.',
+    forbidden: 'Nuk mund të dërgoni ftesë për këtë punëdhënës.',
+    failed: 'Ftesa nuk u dërgua.',
+    localeLabel: 'Gjuha e ftesës',
+    consentTitle: 'Njoftimi i privatësisë',
+    consentLead: 'Pranoni njoftimin e privatësisë para se të hyni në portalin e punëdhënësit.',
+    consentSave: 'Prano dhe vazhdo',
+    consentFailed: 'Pëlqimi nuk u ruajt. Provoni përsëri.',
+  },
   staffRestricted: 'Për ta parë këtë zonë duhet leja e menaxhimit të lartë.',
   staffInviteHint: 'Nuk caktohet fjalëkalim. Dërgohet një email ftese. Kur hyjnë me Google ose email në atë adresë, llogaria lidhet vetë.',
   sendInvite: 'Dërgo ftesën', edit: 'Ndrysho', save: 'Ruaj', activeAccount: 'Llogari aktive',
@@ -1117,6 +1209,29 @@ const ar: PortalUi = {
   presentationOn: 'التقديم {date}', awaitingResult: 'بانتظار النتيجة', interviewCount: 'سجلات المقابلات: {n}',
   openIssuesTitle: 'المشكلات والمهام المفتوحة', noOpenRecords: 'لا توجد سجلات مفتوحة.', dueOn: 'الاستحقاق {date}',
   registeredOn: 'التسجيل: {date}',
+  employerInvite: {
+    title: 'دخول البوابة',
+    send: 'إرسال دعوة الدخول',
+    resend: 'إرسال رابط كلمة المرور',
+    noEmail: 'لا يوجد بريد اتصال. احفظ بريدًا قبل إرسال الدعوة.',
+    linked: 'الحساب مربوط',
+    invitedAt: 'الدعوة: {date}',
+    sentInvite: 'أُرسلت الدعوة. يحدد كلمة المرور من الرابط أو يدخل عبر Google بنفس العنوان.',
+    sentReset: 'أُرسل رابط كلمة المرور.',
+    emailFailed: 'تم تحديث السجل لكن لم يُرسل البريد. أعد المحاولة بعد قليل.',
+    unavailable: 'إرسال البريد غير متاح الآن.',
+    cooldown: 'انتظر {seconds} ثانية قبل الإرسال مرة أخرى.',
+    staffAccount: 'هذا البريد لحساب موظف. لا يُحوَّل حساب الموظف إلى صاحب عمل.',
+    emailTaken: 'هذا البريد مربوط بصاحب عمل آخر.',
+    otherRole: 'هذا البريد لحساب بوابة آخر ولا يمكن ربطه.',
+    forbidden: 'لا يمكنك إرسال دعوة لصاحب العمل هذا.',
+    failed: 'تعذر إرسال الدعوة.',
+    localeLabel: 'لغة الدعوة',
+    consentTitle: 'إشعار الخصوصية',
+    consentLead: 'اقبل إشعار الخصوصية قبل دخول بوابة صاحب العمل.',
+    consentSave: 'قبول ومتابعة',
+    consentFailed: 'تعذر حفظ الموافقة. أعد المحاولة.',
+  },
   staffRestricted: 'عرض هذا القسم يتطلب صلاحية الإدارة العليا.',
   staffInviteHint: 'لا تُحدَّد كلمة مرور. يُرسل بريد دعوة. عند الدخول عبر Google أو البريد على ذلك العنوان تُربط الحسابات تلقائيًا.',
   sendInvite: 'إرسال الدعوة', edit: 'تعديل', save: 'حفظ', activeAccount: 'حساب نشط',
@@ -1354,6 +1469,29 @@ const mk: PortalUi = {
   presentationOn: 'Презентација {date}', awaitingResult: 'Се чека резултат', interviewCount: 'Записи за интервју: {n}',
   openIssuesTitle: 'Отворени проблеми и задачи', noOpenRecords: 'Нема отворени записи.', dueOn: 'Рок {date}',
   registeredOn: 'Регистрација: {date}',
+  employerInvite: {
+    title: 'Најава на порталот',
+    send: 'Испрати покана за најава',
+    resend: 'Испрати врска за лозинка',
+    noEmail: 'Нема контакт е-пошта. Зачувајте е-пошта пред да испратите покана.',
+    linked: 'Сметката е поврзана',
+    invitedAt: 'Покана: {date}',
+    sentInvite: 'Поканата е испратена. Лозинката се поставува од врската, или се најавуваат со Google на истата адреса.',
+    sentReset: 'Врската за лозинка е испратена.',
+    emailFailed: 'Записот е ажуриран, но е-поштата не е испратена. Обидете се повторно наскоро.',
+    unavailable: 'Испраќањето е-пошта моментално не е достапно.',
+    cooldown: 'Почекајте {seconds} секунди пред повторно испраќање.',
+    staffAccount: 'Оваа е-пошта е на сметка на персонал. Сметка на персонал не се претвора во работодавач.',
+    emailTaken: 'Оваа е-пошта е веќе поврзана со друг работодавач.',
+    otherRole: 'Оваа е-пошта е на друга порталска сметка и не може да се поврзе.',
+    forbidden: 'Не можете да испратите покана за овој работодавач.',
+    failed: 'Поканата не може да се испрати.',
+    localeLabel: 'Јазик на поканата',
+    consentTitle: 'Известување за приватност',
+    consentLead: 'Прифатете го известувањето за приватност пред влез во порталот за работодавач.',
+    consentSave: 'Прифати и продолжи',
+    consentFailed: 'Согласноста не е зачувана. Обидете се повторно.',
+  },
   staffRestricted: 'За преглед на оваа област е потребна дозвола на висок менаџмент.',
   staffInviteHint: 'Не се поставува лозинка. Се испраќа покана по е-пошта. Кога ќе се најават со Google или е-пошта на таа адреса, сметката се поврзува автоматски.',
   sendInvite: 'Испрати покана', edit: 'Уреди', save: 'Зачувај', activeAccount: 'Активна сметка',

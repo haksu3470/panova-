@@ -23,6 +23,8 @@ import EmployerCandidateBrowser from './components/EmployerCandidateBrowser';
 import { guideNavLabel } from '@/lib/guides-nav';
 import CandidateYouTube from '@/components/candidate/CandidateYouTube';
 import { releaseCopy, supportStatusLabel } from '@/lib/release-copy';
+import EmployerConsentCard from '@/components/auth/EmployerConsentCard';
+import { needsEmployerConsent } from '@/lib/employerInvite';
 import {
   EMPLOYER_CANDIDATE_BROWSE_COLUMNS,
   isMissingBrowseRpc,
@@ -66,6 +68,7 @@ function EmployerPortalInner() {
   const [profileErrorDetail, setProfileErrorDetail] = useState('');
   const [profileSaving, setProfileSaving] = useState(false);
   const [staffView, setStaffView] = useState(false);
+  const [needsConsent, setNeedsConsent] = useState(false);
   const [employerOffers, setEmployerOffers] = useState<any[]>([]);
 
   const [editCompanyName, setEditCompanyName] = useState('');
@@ -110,8 +113,13 @@ function EmployerPortalInner() {
         const viewId = staffViewEmployerId(window.location.search, stored);
         const row = await employerService.loadEmployerForPortal(viewId);
         if (cancelled) return;
-        setStaffView(Boolean(viewId) && row.id === viewId && await isStaff());
+        const viewingAsStaff = Boolean(viewId) && row.id === viewId && await isStaff();
+        setStaffView(viewingAsStaff);
         rememberEmployer(row);
+        if (!viewingAsStaff) {
+          const consent = await supabase.from('employers').select('invited_at, kvkk_accepted_at').eq('id', row.id).maybeSingle();
+          if (!consent.error && needsEmployerConsent(consent.data)) setNeedsConsent(true);
+        }
       } catch (err) {
         console.error('Veri çekme hatası:', err);
         if (cancelled) return;
@@ -412,6 +420,14 @@ function EmployerPortalInner() {
 
     return { headcount, bound, offered: Math.min(offered, headcount), interviewing, selected, inProcess, travelReady, started };
   };
+
+  if (!profileLoading && needsConsent && employerProfile?.id) {
+    return (
+      <div className={`min-h-screen bg-slate-50 flex items-center justify-center p-4 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+        <EmployerConsentCard lang={currentLang} onAccepted={() => setNeedsConsent(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen bg-slate-50 text-slate-900 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>

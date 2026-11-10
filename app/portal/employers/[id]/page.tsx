@@ -13,6 +13,7 @@ import { useStaffRole } from '@/components/portal/useStaffRole';
 import { translations } from '@/lib/dictionary';
 import { fill, portalUi } from '@/lib/portal-ui-copy';
 import { useSiteLanguage } from '@/lib/site-language';
+import EmployerLoginInvite from '@/components/portal/EmployerLoginInvite';
 
 const EDITABLE = ['company_name', 'contact_person', 'contact_name', 'email', 'phone', 'country', 'city', 'website', 'address', 'tax_id', 'assigned_sector', 'compliance_status', 'suitability_status', 'notes'] as const;
 
@@ -143,6 +144,21 @@ function EmployerFileInner() {
           </div>
           <Field label={ui.employerFields.notes} value={form.notes || ''} onChange={(v) => setForm({ ...form, notes: v })} textarea />
         </Card>
+
+        <EmployerLoginInvite
+          employerId={emp.id}
+          email={emp.email}
+          country={emp.country}
+          locale={emp.locale}
+          authUserId={emp.auth_user_id}
+          invitedAt={emp.invited_at}
+          onSent={(result) => setEmp({
+            ...emp,
+            invited_at: result.invitedAt || emp.invited_at,
+            auth_user_id: result.linked ? (result.authUserId || emp.auth_user_id) : emp.auth_user_id,
+          })}
+          onLocale={(locale) => setEmp({ ...emp, locale })}
+        />
 
         <Card title={`${t.requestsTab} (${requests.length})`}>
           {requests.length === 0 ? <p className="text-xs text-slate-400">{ui.noRequests}</p> : (

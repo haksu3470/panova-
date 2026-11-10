@@ -106,6 +106,10 @@ test('recovery callbacks are recognized and other auth links are not', () => {
   );
   assert.equal(readRecoveryLocation('https://panovagroup.org/candidate?code=abc').kind, 'none');
   assert.deepEqual(
+    readRecoveryLocation('https://panovagroup.org/auth/reset-password/employer#access_token=a&refresh_token=b&type=invite'),
+    { kind: 'implicit' },
+  );
+  assert.deepEqual(
     readRecoveryLocation('https://panovagroup.org/auth/reset-password/employer?token_hash=deadbeefdeadbeef&type=recovery'),
     { kind: 'hash', tokenHash: 'deadbeefdeadbeef' },
   );
@@ -122,6 +126,13 @@ test('the code field accepts a recovery OTP or link and rejects a signup link', 
     '',
   );
   assert.equal(link.kind, 'hash');
+  if (link.kind === 'hash') assert.equal(link.otpType, 'recovery');
+  const inviteLink = recoveryProofFromInput(
+    'https://vptcihlhkzfmwxpaituf.supabase.co/auth/v1/verify?token=abc123def4567890&type=invite',
+    '',
+  );
+  assert.equal(inviteLink.kind, 'hash');
+  if (inviteLink.kind === 'hash') assert.equal(inviteLink.otpType, 'invite');
   assert.equal(recoveryProofFromInput('https://example.supabase.co/auth/v1/verify?token=abc123def4567890&type=signup', '').kind, 'rejected');
   assert.equal(recoveryProofFromInput('123456', 'not-an-email').kind, 'rejected');
 });

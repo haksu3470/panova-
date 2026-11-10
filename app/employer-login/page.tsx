@@ -26,6 +26,8 @@ import { AuthFooter } from '@/components/site/AuthFooter';
 import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
 import { phoneForStorage, phoneWithCountryDial } from '@/lib/europeanCountries';
 import KvkkConsent from '@/components/site/KvkkConsent';
+import EmployerConsentCard from '@/components/auth/EmployerConsentCard';
+import { needsEmployerConsent } from '@/lib/employerInvite';
 import { kvkkMetadata } from '@/lib/kvkk';
 import { releaseCopy } from '@/lib/release-copy';
 
@@ -52,7 +54,7 @@ export default function EmployerLoginPage() {
     writeStoredLanguage(lang);
   };
 
-  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify' | 'forgot'>('signin');
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify' | 'forgot' | 'consent'>('signin');
   const [verifyEmail, setVerifyEmail] = useState('');
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -95,7 +97,11 @@ export default function EmployerLoginPage() {
     }
     const employerId = (linked.data as string | null) ?? null;
     if (!employerId) return false;
-    if (!employerId) return false;
+    const consent = await supabase.from('employers').select('invited_at, kvkk_accepted_at').eq('id', employerId).maybeSingle();
+    if (!consent.error && needsEmployerConsent(consent.data)) {
+      setAuthMode('consent');
+      return false;
+    }
     await loadEmployerProfile(employerId, email);
     window.location.href = '/employer';
     return true;
@@ -253,7 +259,16 @@ export default function EmployerLoginPage() {
             <p className="text-slate-500 text-xs mt-1">{authMode === 'signup' ? (t.employerRegSub || t.signUpPortalSub) : (t.loginPortalSub || t.empPortalSub)}</p>
           </div>}
 
-          {authMode === 'verify' ? (
+          {authMode === 'consent' ? (
+            <EmployerConsentCard
+              lang={currentLang}
+              onAccepted={async () => {
+                const { data } = await supabase.auth.getUser();
+                const opened = await openEmployer(data.user?.email || loginEmail);
+                if (!opened && authMode === 'consent') return;
+              }}
+            />
+          ) : authMode === 'verify' ? (
             <div className="space-y-4">
               <EmailVerifyNotice
                 email={verifyEmail}
