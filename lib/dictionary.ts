@@ -45,6 +45,9 @@ export interface Translation {
   passportLabel?: string;
   sectorLabel?: string;
   professionLabel?: string;
+  professionSelect?: string;
+  professionOther?: string;
+  professionSpecify?: string;
   certNoLabel?: string;
   certNo?: string;
   certificateNo?: string;
@@ -402,6 +405,7 @@ export interface Translation {
   sectorHospitality?: string;
   sectorLogistics?: string;
   sectorManufacturing?: string;
+  sectorCare?: string;
 
   corporateDemandTitle?: string;
   corporateDemandDesc?: string;
@@ -601,6 +605,9 @@ export const translations: Record<Language, Translation> = {
     passportLabel: 'Pasaport No',
     sectorLabel: 'Sektör',
     professionLabel: 'Meslek',
+    professionSelect: 'Meslek seçin',
+    professionOther: 'Diğer (lütfen belirtin)',
+    professionSpecify: 'Mesleğinizi yazın',
     certNoLabel: 'Sertifika No',
     certNo: 'Sertifika No',
     certificateNo: 'Sertifika No',
@@ -981,6 +988,7 @@ export const translations: Record<Language, Translation> = {
     sectorHospitality: 'Turizm ve Otelcilik',
     sectorLogistics: 'Lojistik',
     sectorManufacturing: 'Üretim ve Sanayi',
+    sectorCare: 'Sağlık ve Bakım',
 
     corporateDemandTitle: 'Kurumsal İş Gücü Talep Formu',
     corporateDemandDesc: 'Sektör seçin, aradığınız pozisyonları, tecrübe, dil ve çalışma şartlarını belirleyin.',
@@ -1167,6 +1175,9 @@ export const translations: Record<Language, Translation> = {
     passportLabel: 'Passport No',
     sectorLabel: 'Sector',
     professionLabel: 'Profession',
+    professionSelect: 'Select a profession',
+    professionOther: 'Other (please specify)',
+    professionSpecify: 'Specify your profession',
     certNoLabel: 'Certificate No',
     certNo: 'Cert No',
     certificateNo: 'Cert No',
@@ -1547,6 +1558,7 @@ export const translations: Record<Language, Translation> = {
     sectorHospitality: 'Tourism & Hospitality',
     sectorLogistics: 'Logistics',
     sectorManufacturing: 'Manufacturing & Industry',
+    sectorCare: 'Health & Care',
 
     corporateDemandTitle: 'Corporate Workforce Demand Form',
     corporateDemandDesc: 'Select sector, specify positions, experience, language and working conditions.',
@@ -1733,6 +1745,9 @@ export const translations: Record<Language, Translation> = {
     passportLabel: 'Nr. Pasaportës',
     sectorLabel: 'Sektori',
     professionLabel: 'Profesioni',
+    professionSelect: 'Zgjidhni profesionin',
+    professionOther: 'Tjetër (ju lutem specifikoni)',
+    professionSpecify: 'Shkruani profesionin',
     certNoLabel: 'Nr. Certifikatës',
     certNo: 'Nr. Certifikatës',
     certificateNo: 'Nr. Certifikatës',
@@ -2113,6 +2128,7 @@ export const translations: Record<Language, Translation> = {
     sectorHospitality: 'Turizëm dhe Hoteleri',
     sectorLogistics: 'Logjistikë',
     sectorManufacturing: 'Prodhim dhe Industri',
+    sectorCare: 'Shëndet dhe kujdes',
 
     corporateDemandTitle: 'Formulari i Kërkesës për Fuqi Punëtore Korporative',
     corporateDemandDesc: 'Zgjidhni sektorin, pozicionet, eksperiencën, gjuhën dhe kushtet e punës.',
@@ -2299,6 +2315,9 @@ export const translations: Record<Language, Translation> = {
     passportLabel: 'رقم جواز السفر',
     sectorLabel: 'القطاع',
     professionLabel: 'المهنة',
+    professionSelect: 'اختر المهنة',
+    professionOther: 'أخرى (يرجى التحديد)',
+    professionSpecify: 'اكتب المهنة',
     certNoLabel: 'رقم الشهادة',
     certNo: 'رقم الشهادة',
     certificateNo: 'رقم الشهادة',
@@ -2739,6 +2758,7 @@ export const translations: Record<Language, Translation> = {
     sectorHospitality: 'السياحة والضيافة',
     sectorLogistics: 'الخدمات اللوجستية',
     sectorManufacturing: 'التصنيع والصناعة',
+    sectorCare: 'الصحة والرعاية',
     colPosSecTitle: 'المنصب / القطاع',
 
     verifyEmailTitle: 'تحقق من بريدك الوارد',
@@ -2855,6 +2875,9 @@ export const translations: Record<Language, Translation> = {
     passportLabel: 'Број на пасош',
     sectorLabel: 'Сектор',
     professionLabel: 'Професија',
+    professionSelect: 'Изберете професија',
+    professionOther: 'Друго (наведете)',
+    professionSpecify: 'Напишете ја професијата',
     certNoLabel: 'Број на сертификат',
     certNo: 'Бр. на сертификат',
     certificateNo: 'Бр. на сертификат',
@@ -3245,6 +3268,7 @@ export const translations: Record<Language, Translation> = {
     sectorHospitality: 'Туризам и хотелиерство',
     sectorLogistics: 'Логистика',
     sectorManufacturing: 'Производство и индустрија',
+    sectorCare: 'Здравство и нега',
     corporateDemandTitle: 'Образец за корпоративно барање на работна сила',
     corporateDemandDesc: 'Изберете сектор и наведете позиции, искуство, јазик и услови за работа.',
     totalActiveFiles: 'Вкупно активни досиеја',

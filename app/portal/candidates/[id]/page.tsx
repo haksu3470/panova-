@@ -18,7 +18,7 @@ import { normalizeReferralCode } from '@/lib/referralCode';
 import { ReferralCodeChip } from '@/components/portal/ReferralCodeChip';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
-import { candidatePlaceLabel } from '@/lib/candidateLabels';
+import { candidatePlaceLabel, candidateProfessionLabel } from '@/lib/candidateLabels';
 import {
   YouTubeUrlError,
   canManageCandidateVideo,
@@ -323,7 +323,7 @@ function CandidateDetailPageInner() {
       {
         candidate_id: candidateId,
         employer_name: offerEmployer,
-        position_title: candidate.profession || ui.general,
+        position_title: candidateProfessionLabel(candidate.profession, ui.general, currentLang),
         monthly_net_salary: Number(offerSalary),
         start_date: offerDate,
         terms_details: offerTerms,
@@ -426,7 +426,7 @@ function CandidateDetailPageInner() {
                     <span className="bg-slate-100 text-muted-foreground px-1.5 py-0.5 rounded">{ui.referralCodeNone}</span>
                   )}
                   <span>📍 {candidate.country || 'N/A'}, {candidate.city || 'N/A'}</span>
-                  <span>💼 {candidate.profession || ui.general}</span>
+                  <span>💼 {candidateProfessionLabel(candidate.profession, ui.general, currentLang)}</span>
                   <span>🌍 {candidatePlaceLabel(candidate.nationality, candidate.country, currentLang, ui.unspecified)}</span>
                 </div>
               </div>

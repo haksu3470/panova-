@@ -3,11 +3,14 @@
 import { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 import CandidateYouTube from '@/components/candidate/CandidateYouTube';
+import { candidateProfessionLabel } from '@/lib/candidateLabels';
+import type { Language } from '@/lib/dictionary';
 import { fill } from '@/lib/portal-ui-copy';
 import {
   EMPTY_EMPLOYER_CANDIDATE_FILTERS,
   filterEmployerCandidates,
   isEmployerCandidateFilterActive,
+  professionFilterOptions,
   uniqueFilterOptions,
   type EmployerCandidate,
   type EmployerCandidateFilters,
@@ -61,6 +64,7 @@ export type EmployerCandidateBrowserLabels = {
 type Props = {
   candidates: EmployerCandidate[];
   labels: EmployerCandidateBrowserLabels;
+  lang: Language;
   sectorLabel: (sector: string) => string;
   onInterview: (candidate: EmployerCandidate) => void;
   onSelect: (candidate: EmployerCandidate) => void;
@@ -84,6 +88,7 @@ function displayName(candidate: EmployerCandidate): string {
 export default function EmployerCandidateBrowser({
   candidates,
   labels,
+  lang,
   sectorLabel,
   onInterview,
   onSelect,
@@ -91,13 +96,23 @@ export default function EmployerCandidateBrowser({
   const [filters, setFilters] = useState<EmployerCandidateFilters>(EMPTY_EMPLOYER_CANDIDATE_FILTERS);
   const active = isEmployerCandidateFilterActive(filters);
   const filtered = useMemo(() => filterEmployerCandidates(candidates, filters), [candidates, filters]);
-  const professions = useMemo(() => uniqueFilterOptions(candidates.map((row) => row.profession)), [candidates]);
+  const professions = useMemo(
+    () => professionFilterOptions(candidates, filters.sector, lang),
+    [candidates, filters.sector, lang],
+  );
   const sectors = useMemo(() => uniqueFilterOptions(candidates.map((row) => row.sector)), [candidates]);
   const countries = useMemo(() => uniqueFilterOptions(candidates.map((row) => row.nationality)), [candidates]);
   const languages = useMemo(() => uniqueFilterOptions(candidates.map((row) => row.language_skills)), [candidates]);
 
   const set = <K extends keyof EmployerCandidateFilters>(key: K, value: EmployerCandidateFilters[K]) => {
-    setFilters((current) => ({ ...current, [key]: value }));
+    setFilters((current) => {
+      const next = { ...current, [key]: value };
+      if (key === 'sector' && next.profession !== 'all') {
+        const allowed = professionFilterOptions(candidates, String(value), lang);
+        if (!allowed.some((option) => option.value === next.profession)) next.profession = 'all';
+      }
+      return next;
+    });
   };
 
   const yearsLabel = (candidate: EmployerCandidate) =>
@@ -117,7 +132,7 @@ export default function EmployerCandidateBrowser({
   };
 
   const professionLine = (candidate: EmployerCandidate) => {
-    const profession = candidate.profession || labels.specialist;
+    const profession = candidateProfessionLabel(candidate.profession, labels.specialist, lang);
     const sector = candidate.sector ? sectorLabel(candidate.sector) : labels.general;
     return `${profession} (${sector})`;
   };

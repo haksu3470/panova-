@@ -219,6 +219,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
       { value: 'agriculture', label: 'Tarım ve Hayvancılık' },
       { value: 'manufacturing', label: 'Üretim & Sanayi' },
       { value: 'hospitality', label: 'Turizm & Otelcilik' },
+      { value: 'logistics', label: 'Lojistik & Taşımacılık' },
+      { value: 'care', label: 'Sağlık & Bakım' },
     ],
     supplier: {
       title: 'Yetkili Tedarikçi Aday Kayıt Paneli',
@@ -377,6 +379,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
       { value: 'agriculture', label: 'Agriculture & livestock' },
       { value: 'manufacturing', label: 'Manufacturing & industry' },
       { value: 'hospitality', label: 'Tourism & hospitality' },
+      { value: 'logistics', label: 'Logistics & transport' },
+      { value: 'care', label: 'Health & care' },
     ],
     supplier: {
       title: 'Authorised supplier candidate registration',
@@ -535,6 +539,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
       { value: 'agriculture', label: 'Bujqësi dhe blegtori' },
       { value: 'manufacturing', label: 'Prodhim & industri' },
       { value: 'hospitality', label: 'Turizëm & hoteleri' },
+      { value: 'logistics', label: 'Logjistikë & transport' },
+      { value: 'care', label: 'Shëndet & kujdes' },
     ],
     supplier: {
       title: 'Paneli i regjistrimit të kandidatëve për furnitorë',
@@ -693,6 +699,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
       { value: 'agriculture', label: 'الزراعة والثروة الحيوانية' },
       { value: 'manufacturing', label: 'الإنتاج والصناعة' },
       { value: 'hospitality', label: 'السياحة والفنادق' },
+      { value: 'logistics', label: 'اللوجستيات والنقل' },
+      { value: 'care', label: 'الصحة والرعاية' },
     ],
     supplier: {
       title: 'تسجيل مرشحي الموردين المعتمدين',
@@ -971,6 +979,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
         value: 'hospitality',
         label: 'Туризам и хотелиерство',
       },
+      { value: 'logistics', label: 'Логистика и транспорт' },
+      { value: 'care', label: 'Здравство и нега' },
     ],
     supplier: {
       title: 'Регистрација на кандидати од овластен добавувач',

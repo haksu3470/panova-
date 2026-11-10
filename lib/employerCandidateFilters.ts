@@ -1,4 +1,5 @@
-import type { Translation } from './dictionary';
+import type { Language, Translation } from './dictionary';
+import { professionByKey, professionSearchBlob, professionsForSector, PROFESSIONS, PROFESSION_LOCALES } from './professions';
 
 /**
  * Fields an employer may use to narrow the candidates already linked to their
@@ -61,6 +62,7 @@ const SECTOR_LABEL_KEY: Record<string, keyof Translation> = {
   hospitality: 'sectorHospitality',
   logistics: 'sectorLogistics',
   manufacturing: 'sectorManufacturing',
+  care: 'sectorCare',
 };
 
 /** Stable sector codes used by candidate and employer filters. */
@@ -150,6 +152,46 @@ function same(value: string | null | undefined, selected: string): boolean {
   return selected === 'all' || normalizeFilterText(value) === selected;
 }
 
+function professionFromLabel(value: string): (typeof PROFESSIONS)[number] | undefined {
+  const folded = normalizeFilterText(value);
+  if (!folded) return undefined;
+  return PROFESSIONS.find((item) => (
+    PROFESSION_LOCALES.some((lang) => normalizeFilterText(item.labels[lang]) === folded)
+  ));
+}
+
+/** Catalog keys match the key and every locale label. Legacy text matches itself. */
+export function sameProfession(stored: string | null | undefined, selected: string): boolean {
+  if (selected === 'all') return true;
+  const raw = (stored ?? '').trim();
+  if (normalizeFilterText(raw) === normalizeFilterText(selected)) return true;
+  const selectedItem = professionByKey(selected) ?? professionFromLabel(selected);
+  if (!selectedItem) return false;
+  if (professionByKey(raw)?.key === selectedItem.key) return true;
+  return PROFESSION_LOCALES.some((lang) => normalizeFilterText(selectedItem.labels[lang]) === normalizeFilterText(raw));
+}
+
+export function professionFilterOptions(
+  rows: readonly { profession?: string | null; sector?: string | null }[],
+  sector: string,
+  lang: Language,
+): { value: string; label: string }[] {
+  const catalog = sector === 'all' ? PROFESSIONS : professionsForSector(sector);
+  const options = catalog.map((item) => ({ value: item.key, label: item.labels[lang] }));
+  const seen = new Set(options.map((option) => normalizeFilterText(option.value)));
+  for (const row of rows) {
+    const raw = (row.profession ?? '').trim();
+    if (!raw || professionByKey(raw)) continue;
+    if (professionFromLabel(raw)) continue;
+    if (sector !== 'all' && normalizeFilterText(row.sector) !== normalizeFilterText(sector)) continue;
+    const value = normalizeFilterText(raw);
+    if (!value || seen.has(value)) continue;
+    seen.add(value);
+    options.push({ value, label: raw });
+  }
+  return options.sort((a, b) => a.label.localeCompare(b.label, lang, { sensitivity: 'base' }));
+}
+
 export function filterEmployerCandidates<T extends EmployerCandidate>(
   rows: readonly T[],
   filters: EmployerCandidateFilters,
@@ -157,11 +199,11 @@ export function filterEmployerCandidates<T extends EmployerCandidate>(
   const query = normalizeFilterText(filters.query);
   return rows.filter((row) => {
     if (query) {
-      const haystack = `${normalizeFilterText(row.full_name)} ${normalizeFilterText(row.profession)}`;
+      const haystack = `${normalizeFilterText(row.full_name)} ${normalizeFilterText(professionSearchBlob(row.profession))}`;
       if (!haystack.includes(query)) return false;
     }
     if (!matchesExperience(row.experience_years, filters.experience)) return false;
-    if (!same(row.profession, filters.profession)) return false;
+    if (!sameProfession(row.profession, filters.profession)) return false;
     if (!same(row.sector, filters.sector)) return false;
     if (!same(row.nationality, filters.nationality)) return false;
     if (!same(row.language_skills, filters.language)) return false;

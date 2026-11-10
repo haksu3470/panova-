@@ -20,6 +20,8 @@ import {
   candidateSectorLabel,
   sameSector,
 } from '@/lib/candidateLabels';
+import { ProfessionField } from '@/components/site/ProfessionField';
+import { professionForSectorChange, professionSearchBlob } from '@/lib/professions';
 import { fill, portalUi } from '@/lib/portal-ui-copy';
 import {
   isSourceCountryOfficer,
@@ -87,7 +89,7 @@ export default function CandidatesTab({
     const code = normalizeReferralCode(cand.referral_code) || '';
     const matchesSearch =
       (cand.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (cand.profession?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      professionSearchBlob(cand.profession).toLowerCase().includes(searchTerm.toLowerCase()) ||
       (cand.passport_no?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
       (cand.passport_number?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
       (cand.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
@@ -170,7 +172,10 @@ export default function CandidatesTab({
           <ListExportBar
             filename="candidates"
             title={t.candidatesTab || 'Candidates'}
-            rows={candidateExportRows(filteredCandidates)}
+            rows={candidateExportRows(filteredCandidates).map((row) => ({
+              ...row,
+              profession: candidateProfessionLabel(String(row.profession ?? ''), '', lang),
+            }))}
             labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty }}
           />
           <button
@@ -224,12 +229,15 @@ export default function CandidatesTab({
               className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm font-medium text-slate-900 bg-white outline-none focus:ring-2 focus:ring-[#2e7d32]"
             />
           </label>
-          <label className="block text-xs font-bold text-slate-700">
+          <label className="block text-xs font-bold text-slate-700" htmlFor="staff-profession">
             {ui.positionLabel}
-            <input
-              required
+            <ProfessionField
+              id="staff-profession"
+              lang={lang}
+              sector={draft.sector}
               value={draft.profession}
-              onChange={(e) => setDraft({ ...draft, profession: e.target.value })}
+              required
+              onChange={(profession) => setDraft({ ...draft, profession })}
               className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm font-medium text-slate-900 bg-white outline-none focus:ring-2 focus:ring-[#2e7d32]"
             />
           </label>
@@ -237,7 +245,10 @@ export default function CandidatesTab({
             {ui.sectorLabel}
             <select
               value={draft.sector}
-              onChange={(e) => setDraft({ ...draft, sector: e.target.value })}
+              onChange={(e) => {
+                const sector = e.target.value;
+                setDraft({ ...draft, sector, profession: professionForSectorChange(draft.profession, sector) });
+              }}
               className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm font-semibold text-slate-900 bg-white outline-none focus:ring-2 focus:ring-[#2e7d32]"
             >
               {ui.formSectors.map((sector) => (
@@ -432,7 +443,7 @@ export default function CandidatesTab({
                       <div className="text-[11px] text-muted-foreground">{candidatePlaceLabel(candidate.nationality, candidate.country, lang, ui.unspecified)}</div>
                     </td>
                     <td className="p-4">
-                      <span className="font-semibold text-slate-800">{candidateProfessionLabel(candidate.profession, ui.unspecified)}</span>
+                      <span className="font-semibold text-slate-800">{candidateProfessionLabel(candidate.profession, ui.unspecified, lang)}</span>
                       <div className="text-[11px] text-muted-foreground">{candidateSectorLabel(candidate.sector, ui, t)}</div>
                     </td>
                     <td className="p-4">

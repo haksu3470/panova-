@@ -5,6 +5,7 @@ import { X, CalendarPlus, FileSignature, Save } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
 import DemoBadge from './DemoBadge';
+import { candidateProfessionLabel } from '@/lib/candidateLabels';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { OFFER_CURRENCIES, offerCurrency, offerTermsPayload } from '@/lib/offers';
 import { releaseCopy } from '@/lib/release-copy';
@@ -33,7 +34,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
   const [of, setOf] = useState<any>({
     id: null,
     employer_name: request?.employer_name || '',
-    position_title: request?.position_title || candidate.profession || '',
+    position_title: request?.position_title || candidateProfessionLabel(candidate.profession, '', currentLang),
     monthly_net_salary: '',
     currency: 'EUR',
     start_date: '',

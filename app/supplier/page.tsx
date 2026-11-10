@@ -6,7 +6,9 @@ import { ArrowLeft, CheckCircle2, UserPlus, Send, Building } from 'lucide-react'
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
+import { ProfessionField } from '@/components/site/ProfessionField';
 import { fill, homeCopy } from '@/lib/home-copy';
+import { professionForSectorChange } from '@/lib/professions';
 import { isGmailAddress } from '@/lib/emailAddress';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 
@@ -43,7 +45,7 @@ export default function SupplierCandidateRegister() {
     passportNumber: '',
     phone: '',
     email: '',
-    profession: 'Electrician / Elektrikçi',
+    profession: '',
     sector: 'construction',
     expectedSalary: '',
   });
@@ -131,6 +133,42 @@ export default function SupplierCandidateRegister() {
                 <div>
                   <label className="block font-bold text-on-dark-muted uppercase mb-1">{s.email} *</label>
                   <input type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-on-dark-muted uppercase mb-1" htmlFor="supplier-sector">{t.sectorLabel} *</label>
+                  <select
+                    id="supplier-sector"
+                    required
+                    value={formData.sector}
+                    onChange={(e) => {
+                      const sector = e.target.value;
+                      setFormData((current) => ({
+                        ...current,
+                        sector,
+                        profession: professionForSectorChange(current.profession, sector),
+                      }));
+                    }}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none"
+                  >
+                    {homeCopy[currentLang].formSectors.map((sector) => (
+                      <option key={sector.value} value={sector.value}>{sector.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-bold text-on-dark-muted uppercase mb-1" htmlFor="supplier-profession">{t.professionLabel} *</label>
+                  <ProfessionField
+                    id="supplier-profession"
+                    lang={currentLang}
+                    sector={formData.sector}
+                    value={formData.profession}
+                    required
+                    onChange={(profession) => setFormData((current) => ({ ...current, profession }))}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none"
+                  />
                 </div>
               </div>
 
