@@ -7,9 +7,10 @@ import {
   inviteMailCopy,
   noticeMailCopy,
   staffRoleLabels,
+  supportReplyMailCopy,
   type EmailLocale,
 } from './email-copy';
-import { EMAIL_FONT, escapeHtml, portalUrl, renderLocaleEmail } from './layout';
+import { EMAIL_FONT, EMAIL_SITE_URL, escapeHtml, portalUrl, renderLocaleEmail } from './layout';
 
 const DATE_LOCALE: Record<EmailLocale, string> = {
   tr: 'tr-TR',
@@ -167,6 +168,37 @@ export function buildCandidateNoticeEmail(input: {
   });
   return {
     subject: `${copy.subjectPrefix}: ${safeSubject}`.slice(0, 180),
+    html: rendered.html,
+    text: rendered.text,
+  };
+}
+
+export function buildSupportReplyEmail(input: {
+  locale?: unknown;
+  candidateName?: string;
+  subject: string;
+  message: string;
+}): { subject: string; html: string; text: string } {
+  const locale = emailLocale(input.locale);
+  const copy = supportReplyMailCopy[locale];
+  const align = locale === 'ar' ? 'right' : 'left';
+  const name = input.candidateName?.trim() || copy.fallbackName;
+  const greeting = fillEmail(copy.greeting, { name });
+  const safeSubject = input.subject.replace(/[\r\n]+/g, ' ').trim();
+  const href = `${EMAIL_SITE_URL}/candidate`;
+  const bodyHtml = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f8fafc" style="margin:0;background-color:#f8fafc;border-radius:14px;"><tr><td style="padding:16px;text-align:${align};"><h2 style="margin:0 0 8px;font-size:16px;line-height:1.4;color:#0f172a;font-family:${EMAIL_FONT};">${escapeHtml(safeSubject)}</h2><p style="margin:0;font-size:15px;line-height:1.5;color:#0f172a;font-family:${EMAIL_FONT};white-space:pre-wrap;">${escapeHtml(input.message)}</p></td></tr></table>`;
+  const text = [greeting, copy.lead, '', safeSubject, input.message, '', `${copy.button}: ${href}`].join('\n');
+  const rendered = renderLocaleEmail({
+    locale,
+    preheader: copy.preheader,
+    title: copy.title,
+    paragraphs: [greeting, copy.lead],
+    bodyHtml,
+    text,
+    button: { href, label: copy.button },
+  });
+  return {
+    subject: fillEmail(copy.subject, { subject: safeSubject }).slice(0, 180),
     html: rendered.html,
     text: rendered.text,
   };

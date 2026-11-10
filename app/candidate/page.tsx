@@ -3,6 +3,7 @@
 import OAuthButtons from '@/components/auth/OAuthButtons';
 import { AuthFooter } from '@/components/site/AuthFooter';
 import CandidateYouTube from '@/components/candidate/CandidateYouTube';
+import { SupportRequestList } from '@/components/candidate/SupportRequestList';
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -52,6 +53,7 @@ import { guideNavLabel } from '@/lib/guides-nav';
 import KvkkConsent from '@/components/site/KvkkConsent';
 import { kvkkMetadata } from '@/lib/kvkk';
 import { releaseCopy } from '@/lib/release-copy';
+import { supportBadgeCount, supportThreadCopy, type SupportMessage } from '@/lib/supportTickets';
 import { openCandidateDocument, signedCandidateFileUrl, uploadCandidateFile } from '@/lib/candidateFiles';
 import { validateUpload } from '@/lib/uploads';
 
@@ -131,6 +133,7 @@ export default function CandidateDashboard() {
 
   const [notifications, setNotifications] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
+  const [supportMessages, setSupportMessages] = useState<SupportMessage[]>([]);
   const [jobOffers, setJobOffers] = useState<any[]>([]);
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMsg, setSupportMsg] = useState('');
@@ -771,7 +774,20 @@ export default function CandidateDashboard() {
       .eq('candidate_id', candId)
       .order('created_at', { ascending: false });
 
-    if (tickets) setSupportTickets(tickets);
+    if (tickets) {
+      setSupportTickets(tickets);
+      const ids = tickets.map((ticket: { id?: string }) => ticket.id).filter(Boolean);
+      if (ids.length) {
+        const { data: msgs } = await supabase
+          .from('support_ticket_messages')
+          .select('id, ticket_id, author_role, author_name, body, created_at, read_at')
+          .in('ticket_id', ids)
+          .order('created_at', { ascending: true });
+        if (msgs) setSupportMessages(msgs);
+      } else {
+        setSupportMessages([]);
+      }
+    }
 
     const { data: offers } = await supabase
       .from('job_offers')
@@ -829,6 +845,48 @@ export default function CandidateDashboard() {
       alert('Hata: ' + (error?.message || 'Bilinmeyen hata'));
     }
   };
+
+  const handleFollowUp = async (ticketId: string, body: string) => {
+    if (!candidate?.id) return;
+    const text = body.trim();
+    if (!text) return;
+    const { error: messageError } = await supabase.from('support_ticket_messages').insert({
+      ticket_id: ticketId,
+      author_role: 'candidate',
+      author_name: candidate.full_name,
+      body: text,
+    });
+    const { error: statusError } = await supabase
+      .from('candidate_support_tickets')
+      .update({ status: 'open' })
+      .eq('id', ticketId);
+    if (messageError || statusError) {
+      alert(supportThreadCopy[currentLang].replyFailed);
+      return;
+    }
+    await fetchCandidateData(candidate.id);
+  };
+
+  useEffect(() => {
+    if (activeTab !== 'support' || !candidate?.id) return;
+    const unreadIds = supportMessages
+      .filter((message) => message.author_role === 'staff' && !message.read_at)
+      .map((message) => message.id);
+    if (!unreadIds.length) return;
+    let cancel = false;
+    void (async () => {
+      const readAt = new Date().toISOString();
+      const { error } = await supabase
+        .from('support_ticket_messages')
+        .update({ read_at: readAt })
+        .in('id', unreadIds);
+      if (error || cancel) return;
+      setSupportMessages((current) => current.map((message) => (
+        unreadIds.includes(message.id) ? { ...message, read_at: readAt } : message
+      )));
+    })();
+    return () => { cancel = true; };
+  }, [activeTab, candidate?.id, supportMessages]);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1433,7 +1491,7 @@ export default function CandidateDashboard() {
             💼 {t.offers} ({jobOffers.length})
           </button>
           <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            💬 {t.support} ({supportTickets.length})
+            💬 {t.support}{supportBadgeCount(supportTickets, supportMessages) > 0 ? ` (${supportBadgeCount(supportTickets, supportMessages)})` : ''}
           </button>
           <Link href="/guides" className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition shrink-0 bg-white border text-slate-700 hover:bg-slate-50">
             <BookOpen className="w-3.5 h-3.5" aria-hidden /> {guideNavLabel[currentLang]}
@@ -1773,6 +1831,13 @@ export default function CandidateDashboard() {
               </div>
               <button type="submit" className="bg-brand-solid text-white px-6 py-2.5 rounded-xl font-bold cursor-pointer">{ct.sendSupportBtn}</button>
             </form>
+            <SupportRequestList
+              lang={currentLang}
+              tickets={supportTickets}
+              messages={supportMessages}
+              statusCopy={releaseCopy[currentLang]}
+              onFollowUp={handleFollowUp}
+            />
           </div>
         )}
 
