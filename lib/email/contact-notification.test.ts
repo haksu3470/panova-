@@ -25,6 +25,7 @@ const validBody = {
   email: 'Ada@Example.com',
   phone: '+90 555 000 00 00',
   notes: 'Merhaba\nikinci satır',
+  kvkkAccepted: true,
 };
 
 test('parse keeps a homepage submission and rejects junk', () => {
@@ -39,6 +40,8 @@ test('parse keeps a homepage submission and rejects junk', () => {
   assert.equal(parseContactSubmission({ ...validBody, email: 'not-an-email' }).ok, false);
   assert.equal(parseContactSubmission({ ...validBody, fullName: '  \n' }).ok, false);
   assert.equal(parseContactSubmission({ ...validBody, phone: '' }).ok, false);
+  assert.equal(parseContactSubmission({ ...validBody, kvkkAccepted: false }).ok, false);
+  assert.equal(parseContactSubmission({ ...validBody, kvkkAccepted: undefined }).ok, false);
   assert.equal(parseContactSubmission(null).ok, false);
 
   const hostile = parseContactSubmission({

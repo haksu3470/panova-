@@ -147,7 +147,7 @@ export default function MatchPanel({ request, onClose }: Props) {
                     <option className="bg-white text-slate-900" value="">— {ui.intNoResult} —</option>
                     {Object.entries(ui.matchResults).map(([value, label]) => <option key={value} className="bg-white text-slate-900" value={value}>{label}</option>)}
                   </select>
-                  {(m.employer_result === 'interview' || m.employer_result === 'selected') && (
+                  {m.presented_at && (m.employer_result === 'interview' || m.employer_result === 'selected') && (
                     <button disabled={busy} onClick={() => setIoMatch(m)} className="text-xs font-bold px-3 py-2 rounded-lg bg-amber-500 text-white whitespace-nowrap">
                       {m.employer_result === 'selected' ? `📄 ${ui.offer}` : `📅 ${ui.interview}`}
                     </button>

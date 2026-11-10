@@ -24,6 +24,7 @@ export type EmployerRow = {
   phone: string | null;
   country: string | null;
   logo: string | null;
+  compliance_status?: string | null;
 };
 
 export type CompanyProfileInput = {
@@ -88,6 +89,7 @@ export function toEmployerProfileView(row: EmployerRow) {
     phone: row.phone ?? '',
     country: row.country ?? '',
     companyLogo: row.logo ?? '',
+    complianceStatus: row.compliance_status ?? 'approved',
   };
 }
 

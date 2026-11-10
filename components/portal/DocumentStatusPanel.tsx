@@ -8,6 +8,8 @@ import { portalUi } from '@/lib/portal-ui-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 import DeleteRecordButton from './DeleteRecordButton';
 import { useStaffRole } from './useStaffRole';
+import { openCandidateDocument } from '@/lib/candidateFiles';
+import { releaseCopy } from '@/lib/release-copy';
 
 const DOC_TYPE_KEYS = ['passport', 'cv', 'certificate', 'diploma', 'criminal_record', 'health_report', 'photo', 'contract', 'apostille', 'other'] as const;
 const STATUS_KEYS = ['pending', 'uploaded', 'reviewing', 'approved', 'rejected', 'rerequested', 'expiring', 'expired'] as const;
@@ -70,7 +72,10 @@ export default function DocumentStatusPanel({ candidateId }: { candidateId: stri
               {typeName(d.doc_type)} <DemoBadge show={d.is_demo} />
             </span>
             <span className="flex items-center gap-2">
-              {d.file_url && <a href={d.file_url} target="_blank" rel="noreferrer" className="text-xs font-bold text-blue-600 underline hover:text-blue-800">{ui.docOpen}</a>}
+              {d.file_url && <button type="button" onClick={async () => {
+                const url = await openCandidateDocument(d.id, d.file_url);
+                if (url) window.open(url, '_blank', 'noopener,noreferrer');
+              }} className="text-xs font-bold text-blue-600 underline hover:text-blue-800">{ui.docOpen}</button>}
               <DeleteRecordButton table="candidate_documents" id={d.id} name={typeName(d.doc_type)} isDemo={d.is_demo} allowed={upper} onDeleted={load} />
             </span>
           </div>
@@ -83,6 +88,14 @@ export default function DocumentStatusPanel({ candidateId }: { candidateId: stri
             {STATUS_KEYS.map((key) => <option key={key} value={key}>{ui.docStatuses[key]}</option>)}
           </select>
 
+          <label className="block text-[11px] font-bold text-slate-700">
+            {releaseCopy[currentLang].docReason}
+            <input
+              defaultValue={d.review_note || ''}
+              onBlur={(e) => e.target.value !== (d.review_note || '') && update(d, { review_note: e.target.value }, e.target.value)}
+              className="mt-1 w-full border border-slate-300 rounded-md px-2 py-1 text-xs font-semibold bg-white text-slate-900 outline-none"
+            />
+          </label>
           <label className="flex items-center gap-2 text-xs text-slate-700 font-bold pt-0.5">
             {ui.docValidUntil}
             <input type="date" defaultValue={d.valid_until || ''} onBlur={(e) => e.target.value !== (d.valid_until || '') && update(d, { valid_until: e.target.value || null }, `${ui.docValidUntil} ${e.target.value}`)} className="border border-slate-300 rounded-md px-2 py-1 text-xs font-semibold bg-white text-slate-900 outline-none" />

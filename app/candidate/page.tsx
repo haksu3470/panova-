@@ -43,6 +43,11 @@ import { candidateOfferResponse, offerMoney, offerStatusLabel } from '@/lib/offe
 import { portalUi } from '@/lib/portal-ui-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { guideNavLabel } from '@/lib/guides-nav';
+import KvkkConsent from '@/components/site/KvkkConsent';
+import { kvkkMetadata } from '@/lib/kvkk';
+import { releaseCopy } from '@/lib/release-copy';
+import { openCandidateDocument, signedCandidateFileUrl, uploadCandidateFile } from '@/lib/candidateFiles';
+import { validateUpload } from '@/lib/uploads';
 
 
 // Aday belge slotları -> candidate_documents.doc_type
@@ -84,6 +89,8 @@ export default function CandidateDashboard() {
 
   const [candidate, setCandidate] = useState<any | null>(null);
   const [regPassword, setRegPassword] = useState('');
+  const [kvkkAccepted, setKvkkAccepted] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'profile' | 'documents' | 'jobs' | 'interviews' | 'offers' | 'process' | 'travel' | 'notifications' | 'support'>('overview');
@@ -97,6 +104,16 @@ export default function CandidateDashboard() {
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newPhoto, setNewPhoto] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    signedCandidateFileUrl(newPhoto).then((url) => {
+      if (!cancelled && url) setPhotoPreview(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [newPhoto]);
 
   const [newEmergencyName, setNewEmergencyName] = useState('');
   const [newEmergencyRelation, setNewEmergencyRelation] = useState('');
@@ -478,6 +495,14 @@ export default function CandidateDashboard() {
   };
 
   const loadLinkedCandidate = async (): Promise<'ok' | Exclude<CandidateLinkResult, { ok: true }>['failure']> => {
+    const storedKvkk = typeof window !== 'undefined' ? sessionStorage.getItem('panova_kvkk') : null;
+    if (storedKvkk) {
+      try {
+        await supabase.auth.updateUser({ data: JSON.parse(storedKvkk) });
+      } catch {
+        /* The link function reports a missing consent. */
+      }
+    }
     const linked = await linkMyCandidate();
     if (!linked.ok) {
       setLinkIssue(linked.failure === 'phone' || linked.failure === 'passport' ? linked.failure : null);
@@ -499,6 +524,11 @@ export default function CandidateDashboard() {
     announce: boolean,
   ) => {
     if (result === 'ok' || result === 'phone' || result === 'passport') return;
+    if (result === 'kvkk') {
+      alert(releaseCopy[readStoredLanguage('tr')].kvkkRequired);
+      await signOut('local');
+      return;
+    }
     if (!announce) return;
     const lang = readStoredLanguage('tr');
     alert(explainLinkFailure(result, translations[lang] || translations.tr));
@@ -547,21 +577,46 @@ export default function CandidateDashboard() {
     e.preventDefault();
     setLoading(true);
     const resume = pauseEmailGateListener();
-    const email = loginInput.trim().toLowerCase();
+    const identifier = loginInput.trim();
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        if (isEmailNotConfirmedMessage(error.message)) {
-          rememberVerifyEmail(email, 'signup');
-          showVerify(email);
+      const response = await fetch('/api/auth/candidate-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, password }),
+      });
+      const body = await response.json().catch(() => ({} as { error?: string; email?: string; access_token?: string; refresh_token?: string }));
+      if (response.status === 503 && identifier.includes('@')) {
+        const email = identifier.toLowerCase();
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          if (isEmailNotConfirmedMessage(error.message)) {
+            rememberVerifyEmail(email, 'signup');
+            showVerify(email);
+            return;
+          }
+          alert(t.authInvalidCredentials);
           return;
         }
+      } else if (body.error === 'email_not_confirmed' && body.email) {
+        rememberVerifyEmail(body.email, 'signup');
+        showVerify(body.email);
+        return;
+      } else if (!response.ok || !body.access_token || !body.refresh_token) {
         alert(t.authInvalidCredentials);
         return;
+      } else {
+        const { error } = await supabase.auth.setSession({
+          access_token: body.access_token,
+          refresh_token: body.refresh_token,
+        });
+        if (error) {
+          alert(t.authInvalidCredentials);
+          return;
+        }
       }
       const gate = await gateSession();
       if (gate.status === 'verify') {
-        showVerify(gate.email || email);
+        showVerify(gate.email || identifier);
         return;
       }
       await handleLinkResult(await loadLinkedCandidate(), true);
@@ -581,6 +636,12 @@ export default function CandidateDashboard() {
       alert(t.passwordTooShort);
       return;
     }
+    if (!kvkkAccepted) {
+      alert(releaseCopy[currentLang].kvkkRequired);
+      return;
+    }
+    const consent = kvkkMetadata();
+    if (typeof window !== 'undefined') sessionStorage.setItem('panova_kvkk', JSON.stringify(consent));
 
     setLoading(true);
     const resume = pauseEmailGateListener();
@@ -598,6 +659,7 @@ export default function CandidateDashboard() {
           profession: regProfession,
           sector: regSector,
           nationality: canonicalNationality(regNationality) || '',
+          ...consent,
         },
         locale: currentLang,
       });
@@ -732,14 +794,27 @@ export default function CandidateDashboard() {
     }
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setNewPhoto(event.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+    e.target.value = '';
+    if (!file || !candidate?.id) return;
+    const problem = validateUpload(file, 'photo');
+    const copy = releaseCopy[currentLang];
+    if (problem) {
+      alert(problem === 'size' ? copy.uploadSize : copy.uploadType);
+      return;
+    }
+    const local = URL.createObjectURL(file);
+    setPhotoPreview(local);
+    try {
+      const stored = await uploadCandidateFile(candidate.id, 'photo', file, 'photo');
+      setNewPhoto(stored);
+      const signed = await signedCandidateFileUrl(stored);
+      if (signed) setPhotoPreview(signed);
+    } catch {
+      setPhotoPreview('');
+      alert(copy.uploadFailed);
+    }
   };
 
   const loseCandidateSession = () => {
@@ -758,32 +833,36 @@ export default function CandidateDashboard() {
 
   const handleDocUpload = async (docIndex: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    event.target.value = '';
     if (!file || !candidate) return;
+    const copy = releaseCopy[currentLang];
+    const problem = validateUpload(file, 'document');
+    if (problem) {
+      alert(problem === 'size' ? copy.uploadSize : copy.uploadType);
+      return;
+    }
+    if (!(await requireCandidateSession())) return;
     const docType = DOC_SLOT_TYPES[docIndex] || 'other';
-
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      if (!(await requireCandidateSession())) return;
-      const fileUrl = e.target?.result as string;
+    try {
+      const fileUrl = await uploadCandidateFile(candidate.id, docType, file, 'document');
       const payload = { file_url: fileUrl, status: 'uploaded', uploaded_at: new Date().toISOString(), notes: file.name };
       const existing = docRows.find((r) => r.doc_type === docType && ['pending', 'uploaded', 'rerequested', 'rejected'].includes(r.status));
       const { error } = existing
         ? await supabase.from('candidate_documents').update(payload).eq('id', existing.id)
         : await supabase.from('candidate_documents').insert({ ...payload, candidate_id: candidate.id, doc_type: docType });
-
       if (!error) {
         await fetchCandidateData(candidate.id);
         alert(ct.docUploaded);
       } else if (isPermissionDenied(error)) {
         loseCandidateSession();
       } else {
-        const message = error && typeof error === 'object' && 'message' in error
-          ? String((error as { message?: string }).message || '')
-          : '';
-        alert(message || ct.profileNotSaved);
+        alert(copy.uploadFailed);
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      if (error === 'type') alert(copy.uploadType);
+      else if (error === 'size') alert(copy.uploadSize);
+      else alert(copy.uploadFailed);
+    }
   };
 
   const explainProfileError = (error: unknown) => {
@@ -1059,12 +1138,13 @@ export default function CandidateDashboard() {
             ) : authMode === 'login' ? (
               <><form onSubmit={handleCandidateLogin} className="space-y-4 text-left rtl:text-right">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.emailLabel}</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.emailOrPhone}</label>
                   <input 
-                    type="email" 
+                    type="text" 
                     value={loginInput} 
                     onChange={(e) => setLoginInput(e.target.value)} 
-                    placeholder={t.exampleGmail} 
+                    autoComplete="username"
+                    placeholder={t.loginDesc} 
                     required 
                     className="w-full px-4 py-3 rounded-xl border text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm font-medium" 
                   />
@@ -1091,6 +1171,7 @@ export default function CandidateDashboard() {
                 >
                   {loading ? '...' : t.loginBtn}
                 </button>
+                <p className="text-[11px] text-slate-500 leading-snug">{t.loginDesc}</p>
               </form>
               <div className="mt-4"><OAuthButtons redirectPath="/candidate" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} /></div></>
             ) : (
@@ -1189,6 +1270,12 @@ export default function CandidateDashboard() {
                   </div>
                 </div>
 
+                <KvkkConsent id="candidate-kvkk" checked={kvkkAccepted} onChange={(checked) => {
+                  setKvkkAccepted(checked);
+                  if (typeof window === 'undefined') return;
+                  if (checked) sessionStorage.setItem('panova_kvkk', JSON.stringify(kvkkMetadata()));
+                  else sessionStorage.removeItem('panova_kvkk');
+                }} copy={releaseCopy[currentLang]} />
                 <button 
                   type="submit" 
                   disabled={loading}
@@ -1218,7 +1305,7 @@ export default function CandidateDashboard() {
   if (docRows.length > 0) {
     candidateDocs = defaultDocs.map((d, i) => {
       const row = docRows.find((r) => r.doc_type === DOC_SLOT_TYPES[i]);
-      return row ? { ...d, status: row.status, file_url: row.file_url } : d;
+      return row ? { ...d, id: row.id, status: row.status, file_url: row.file_url, notes: row.notes, review_note: row.review_note } : d;
     });
   } else {
     try {
@@ -1249,8 +1336,8 @@ export default function CandidateDashboard() {
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm">
           <div className="flex items-center gap-3 sm:gap-4">
-            {newPhoto ? (
-              <img src={newPhoto} alt="Profil" className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border shadow" />
+            {photoPreview || (newPhoto.startsWith('data:') ? newPhoto : '') ? (
+              <img src={photoPreview || newPhoto} alt="Profil" className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border shadow" />
             ) : (
               <div className="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center font-bold text-lg sm:text-xl">
                 {candidate.full_name?.charAt(0)}
@@ -1310,7 +1397,7 @@ export default function CandidateDashboard() {
             <form onSubmit={handleUpdateProfile} onChange={() => { profileDirty.current = true; }} autoComplete="off" className="space-y-4 text-xs">
               <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border">
                 {newPhoto ? (
-                  <img src={newPhoto} alt="Önizleme" className="w-20 h-20 rounded-2xl object-cover border shadow-sm" />
+                  <img src={photoPreview || newPhoto} alt="Önizleme" className="w-20 h-20 rounded-2xl object-cover border shadow-sm" />
                 ) : (
                   <div className="w-20 h-20 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center font-bold text-2xl">
                     {candidate.full_name?.charAt(0)}
@@ -1319,7 +1406,7 @@ export default function CandidateDashboard() {
                 <div className="space-y-1 text-center sm:text-left">
                   <label className="block font-extrabold text-slate-900 uppercase">{ct.photoLabel}</label>
                   <p className="text-slate-500 text-[11px]">{ct.photoDesc}</p>
-                  <input type="file" accept="image/*" onChange={handlePhotoUpload} className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#2e7d32] hover:file:bg-emerald-100 cursor-pointer mt-1" />
+                  <input type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" onChange={handlePhotoUpload} className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#2e7d32] hover:file:bg-emerald-100 cursor-pointer mt-1" />
                 </div>
               </div>
 
@@ -1546,20 +1633,26 @@ export default function CandidateDashboard() {
                 <div key={doc.id || idx} className="p-4 bg-slate-50 rounded-2xl border space-y-2">
                   <div className="flex justify-between items-center font-bold text-slate-900 text-xs">
                     <span>{currentLangTitles[idx] || doc.name}</span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${DONE_STATUSES.includes(doc.status) ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                      {DONE_STATUSES.includes(doc.status) ? ct.uploadedStatus : ct.pendingStatus}
+                    <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${doc.status === 'rejected' ? 'bg-red-100 text-red-800' : DONE_STATUSES.includes(doc.status) ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                      {portalUi[currentLang].docStatuses[doc.status] || (DONE_STATUSES.includes(doc.status) ? ct.uploadedStatus : ct.pendingStatus)}
                     </span>
                   </div>
+                  {doc.notes ? <p className="text-[11px] text-slate-600">{releaseCopy[currentLang].docFile}: {doc.notes}</p> : null}
+                  {doc.review_note ? <p className="text-[11px] text-slate-800">{releaseCopy[currentLang].docReason}: {doc.review_note}</p> : null}
                   
                   <div className="flex items-center gap-2">
                     <input 
-                      type="file" 
+                      type="file"
+                      accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png"
                       onChange={(e) => handleDocUpload(idx, e)}
                       className="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#2e7d32] hover:file:bg-emerald-100 cursor-pointer"
                     />
                     {doc.file_url && (
                       <button 
-                        onClick={() => setPreviewDoc({ name: currentLangTitles[idx] || doc.name, url: doc.file_url })}
+                        onClick={async () => {
+                          const url = doc.id ? await openCandidateDocument(doc.id, doc.file_url) : await signedCandidateFileUrl(doc.file_url);
+                          if (url) setPreviewDoc({ name: currentLangTitles[idx] || doc.name, url });
+                        }}
                         className="px-3 py-1.5 bg-emerald-100 text-[#2e7d32] font-bold rounded-xl text-xs hover:bg-emerald-200 transition shrink-0 cursor-pointer"
                       >
                         {ct.previewDocBtn}
@@ -1638,7 +1731,7 @@ export default function CandidateDashboard() {
               <button onClick={() => setPreviewDoc(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
             </div>
             <div className="flex-1 bg-slate-100 rounded-2xl p-4 flex items-center justify-center overflow-auto">
-              {previewDoc.url.startsWith('data:image') ? (
+              {previewDoc.url.startsWith('data:image') || /\.(jpe?g|png)(\?|$)/i.test(previewDoc.url) ? (
                 <img src={previewDoc.url} alt={previewDoc.name} className="max-h-[60vh] object-contain rounded-xl shadow" />
               ) : (
                 <iframe src={previewDoc.url} className="w-full h-[60vh] rounded-xl border bg-white" title={previewDoc.name} />

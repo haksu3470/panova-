@@ -4,6 +4,8 @@ import { Plus } from 'lucide-react';
 import DemoBadge from './DemoBadge';
 import { translations, type Language, type Translation } from '@/lib/dictionary';
 import { portalUi } from '@/lib/portal-ui-copy';
+import { releaseCopy } from '@/lib/release-copy';
+import { taskIsOverdue } from '@/lib/demandStatus';
 import { useSiteLanguage } from '@/lib/site-language';
 
 const TASK_OPTIONS: { id: keyof Translation; legacy: string; group: 'source' | 'target' | 'field' | 'mgmt' }[] = [
@@ -179,7 +181,7 @@ export default function TasksTab({
         <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.taskListHeader}</h3>
         <div className="space-y-3">
           {tasks.map((task) => (
-            <div key={task.id} className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${task.status === 'completed' ? 'bg-slate-50 opacity-60' : 'bg-white shadow-sm'}`}>
+            <div key={task.id} className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${task.status === 'completed' ? 'bg-slate-50 opacity-60' : taskIsOverdue(task.due_date, task.status) ? 'bg-amber-50 border-amber-300 shadow-sm' : 'bg-white shadow-sm'}`}>
               <div className="flex items-start sm:items-center gap-3">
                 <input type="checkbox" checked={task.status === 'completed'} onChange={() => toggleTaskStatus(task.id, task.status)} className="w-5 h-5 accent-[#2e7d32] cursor-pointer mt-0.5 sm:mt-0 shrink-0" />
                 <div>
@@ -190,8 +192,8 @@ export default function TasksTab({
                   )}
                 </div>
               </div>
-              <span className={`px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold uppercase w-fit ${task.status === 'completed' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>
-                {task.status === 'completed' ? t.statusCompleted : t.statusPending}
+              <span className={`px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold uppercase w-fit ${task.status === 'completed' ? 'bg-emerald-50 text-emerald-800' : taskIsOverdue(task.due_date, task.status) ? 'bg-red-50 text-red-800' : 'bg-amber-50 text-amber-800'}`}>
+                {task.status === 'completed' ? t.statusCompleted : taskIsOverdue(task.due_date, task.status) ? releaseCopy[currentLang].overdue : t.statusPending}
               </span>
             </div>
           ))}

@@ -9,7 +9,7 @@ import {
   type EmployerRow,
 } from '@/lib/employerProfile';
 
-const EMPLOYER_COLUMNS = 'id, company_name, contact_person, email, phone, country, logo';
+const EMPLOYER_COLUMNS = 'id, company_name, contact_person, email, phone, country, logo, compliance_status';
 
 export const employerService = {
   async getAllEmployers() {

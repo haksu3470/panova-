@@ -47,6 +47,7 @@ test('candidate link errors map to the screen that can finish registration', () 
   assert.equal(classifyCandidateLinkError('Candidate already registered'), 'email');
   assert.equal(classifyCandidateLinkError('Email not confirmed'), 'unconfirmed');
   assert.equal(classifyCandidateLinkError('No unmatched candidate for this email'), 'missing');
+  assert.equal(classifyCandidateLinkError('kvkk_required'), 'kvkk');
   assert.equal(classifyCandidateLinkError('permission denied'), 'other');
   assert.equal(classifyCandidateLinkError(undefined), 'other');
 });

@@ -1,3 +1,4 @@
+import { KVKK_VERSION } from '@/lib/kvkk';
 import { buildContactEmail, formatContactSubmittedAt } from './app-messages';
 import type { EmailLocale } from './email-copy';
 import { emailLocale } from './email-copy';
@@ -29,6 +30,8 @@ export type ContactInsertRow = {
   email: string;
   phone: string;
   notes: string;
+  kvkk_accepted_at: string;
+  kvkk_version: string;
 };
 
 export type ContactNotification = {
@@ -78,6 +81,7 @@ export function parseContactSubmission(body: unknown): { ok: true; value: Contac
   const companyName = singleLine(raw.companyName ?? raw.company_name, LIMITS.companyName);
   const notes = multiline(raw.notes, LIMITS.notes);
   if (!fullName || !phone || !EMAIL_RE.test(email)) return { ok: false };
+  if (raw.kvkkAccepted !== true) return { ok: false };
 
   return {
     ok: true,
@@ -171,6 +175,8 @@ export async function acceptContactSubmission(
     email: fields.email,
     phone: fields.phone,
     notes: fields.notes,
+    kvkk_accepted_at: (deps.now ?? (() => new Date()))().toISOString(),
+    kvkk_version: KVKK_VERSION,
   });
   if (inserted.error) {
     console.error('Contact form insert failed');

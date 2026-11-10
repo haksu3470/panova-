@@ -437,13 +437,14 @@ export default function CandidatesTab({
                     </td>
                     <td className="p-4">
                       <select
-                        value={candidate.assigned_to || staffMembers[0]?.name}
+                        value={candidate.assigned_to || ''}
                         onChange={(e) => updateCandidateAssignee(candidate.id, e.target.value)}
                         aria-label={t.assigneeText}
                         className="px-3 py-1.5 rounded-lg border text-xs font-bold bg-emerald-50 text-emerald-900 cursor-pointer outline-none"
                       >
+                        <option value="" className="text-slate-900 bg-white">—</option>
                         {staffMembers.map((staff) => (
-                          <option key={staff.id} value={staff.name} className="text-slate-900 bg-white">{staff.name}</option>
+                          <option key={staff.id} value={staff.id} className="text-slate-900 bg-white">{staff.name}</option>
                         ))}
                       </select>
                     </td>

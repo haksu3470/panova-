@@ -4,7 +4,7 @@ import OAuthButtons from '@/components/auth/OAuthButtons';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { linkMyEmployer, signOut } from '@/lib/auth';
+import { signOut } from '@/lib/auth';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
 import ForgotPasswordPanel, { ForgotPasswordLink } from '@/components/auth/ForgotPasswordPanel';
 import {
@@ -25,6 +25,9 @@ import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@
 import { AuthFooter } from '@/components/site/AuthFooter';
 import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
 import { phoneForStorage, phoneWithCountryDial } from '@/lib/europeanCountries';
+import KvkkConsent from '@/components/site/KvkkConsent';
+import { kvkkMetadata } from '@/lib/kvkk';
+import { releaseCopy } from '@/lib/release-copy';
 
 export default function EmployerLoginPage() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
@@ -60,6 +63,7 @@ export default function EmployerLoginPage() {
   const [regPhone, setRegPhone] = useState(() => phoneWithCountryDial('', 'North Macedonia'));
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
+  const [kvkkAccepted, setKvkkAccepted] = useState(false);
 
 
   const loadEmployerProfile = async (employerId: string, fallbackEmail: string) => {
@@ -80,7 +84,17 @@ export default function EmployerLoginPage() {
   };
 
   const openEmployer = async (email: string) => {
-    const employerId = await linkMyEmployer();
+    const storedKvkk = sessionStorage.getItem('panova_kvkk');
+    if (storedKvkk) {
+      try { await supabase.auth.updateUser({ data: JSON.parse(storedKvkk) }); } catch { /* link reports missing consent */ }
+    }
+    const linked = await supabase.rpc('link_my_employer');
+    if (linked.error?.message?.includes('kvkk_required')) {
+      alert(releaseCopy[currentLang].kvkkRequired);
+      return false;
+    }
+    const employerId = (linked.data as string | null) ?? null;
+    if (!employerId) return false;
     if (!employerId) return false;
     await loadEmployerProfile(employerId, email);
     window.location.href = '/employer';
@@ -150,6 +164,16 @@ export default function EmployerLoginPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!regCompanyName || !regEmail || !regPassword) return;
+    if (regPassword.length < 8) {
+      alert(releaseCopy[currentLang].passwordMin);
+      return;
+    }
+    if (!kvkkAccepted) {
+      alert(releaseCopy[currentLang].kvkkRequired);
+      return;
+    }
+    const consent = kvkkMetadata();
+    sessionStorage.setItem('panova_kvkk', JSON.stringify(consent));
     const resume = pauseEmailGateListener();
     const email = regEmail.trim().toLowerCase();
     try {
@@ -164,6 +188,7 @@ export default function EmployerLoginPage() {
           contact_person: regContactPerson,
           phone: phoneForStorage(regPhone, regCountry),
           country: regCountry,
+          ...consent,
         },
         locale: currentLang,
       });
@@ -335,8 +360,15 @@ export default function EmployerLoginPage() {
 
               <div>
                 <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.passwordLabel} *</label>
-                <input type="password" required placeholder="••••••••" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                <input type="password" required minLength={8} placeholder="••••••••" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                <p className="text-[11px] text-slate-500 mt-1">{releaseCopy[currentLang].passwordMin}</p>
               </div>
+
+              <KvkkConsent id="employer-kvkk" checked={kvkkAccepted} onChange={(checked) => {
+                setKvkkAccepted(checked);
+                if (checked) sessionStorage.setItem('panova_kvkk', JSON.stringify(kvkkMetadata()));
+                else sessionStorage.removeItem('panova_kvkk');
+              }} copy={releaseCopy[currentLang]} />
 
               <button type="submit" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2">
                 {t.signUpBtn}
