@@ -49,8 +49,8 @@ export default function DemandsTable({ t, demands, lang = 'en' }: DemandsTablePr
               <tr key={item.id} className="hover:bg-slate-50 transition align-top">
                 <td className="p-3.5 font-medium text-slate-900">
                   <div className="font-bold">{item.position}</div>
-                  <div className="text-[10px] text-slate-400">{item.sector}</div>
-                  <div className="text-[10px] text-slate-500 mt-1">{ui.datePrefix} {item.date}</div>
+                  <div className="text-[10px] text-muted-foreground">{item.sector}</div>
+                  <div className="text-[10px] text-muted-foreground mt-1">{ui.datePrefix} {item.date}</div>
                 </td>
                 <td className="p-3.5 text-slate-700">
                   <div className="flex flex-wrap gap-1 mb-1.5">
@@ -60,7 +60,7 @@ export default function DemandsTable({ t, demands, lang = 'en' }: DemandsTablePr
                       </span>
                     )}
                   </div>
-                  <div className="text-[10px] text-slate-500">
+                  <div className="text-[10px] text-muted-foreground">
                     {Array.isArray(item.certificates) ? item.certificates.join(', ') : item.certificates}
                   </div>
                 </td>

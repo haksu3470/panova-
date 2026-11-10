@@ -63,7 +63,7 @@ export default function DocumentStatusPanel({ candidateId }: { candidateId: stri
         <span className="text-xs text-slate-600 font-bold">{approved}/{docs.length} {ui.docApproved}</span>
       </h3>
       {error && <p className="text-xs text-red-600 font-bold">{error}</p>}
-      {docs.length === 0 && <p className="text-xs text-slate-500 font-medium">{ui.docEmpty}</p>}
+      {docs.length === 0 && <p className="text-xs text-muted-foreground font-medium">{ui.docEmpty}</p>}
 
       {docs.map((d) => (
         <div key={d.id} className="border border-slate-200 rounded-xl p-3 space-y-2 bg-slate-50/50">

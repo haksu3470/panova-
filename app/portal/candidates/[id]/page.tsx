@@ -423,7 +423,7 @@ function CandidateDetailPageInner() {
                       copiedLabel={ui.referralCodeCopied}
                     />
                   ) : (
-                    <span className="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">{ui.referralCodeNone}</span>
+                    <span className="bg-slate-100 text-muted-foreground px-1.5 py-0.5 rounded">{ui.referralCodeNone}</span>
                   )}
                   <span>📍 {candidate.country || 'N/A'}, {candidate.city || 'N/A'}</span>
                   <span>💼 {candidate.profession || ui.general}</span>
@@ -436,7 +436,7 @@ function CandidateDetailPageInner() {
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
 
-            <button onClick={handleSaveDetail} disabled={saving} className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow flex items-center gap-2 cursor-pointer w-full sm:w-auto justify-center">
+            <button onClick={handleSaveDetail} disabled={saving} className="bg-brand-solid hover:bg-brand text-white px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow flex items-center gap-2 cursor-pointer w-full sm:w-auto justify-center">
               <Save className="w-4 h-4" /> {saving ? (t.saving) : (t.saveChanges)}
             </button>
           </div>
@@ -465,7 +465,7 @@ function CandidateDetailPageInner() {
             {/* Profil Yönetimi */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-                <User className="w-5 h-5 text-[#2e7d32]" /> {t.profileCredentialsManagement}
+                <User className="w-5 h-5 text-brand" /> {t.profileCredentialsManagement}
               </h3>
 
               <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-200">
@@ -477,7 +477,7 @@ function CandidateDetailPageInner() {
                       {candidate.full_name?.charAt(0)}
                     </div>
                   )}
-                  <label className="absolute -bottom-2 -end-2 bg-[#2e7d32] text-white p-2 rounded-xl cursor-pointer shadow hover:bg-[#1b5e20] transition" title={ui.photoUpload}>
+                  <label className="absolute -bottom-2 -end-2 bg-brand-solid text-white p-2 rounded-xl cursor-pointer shadow hover:bg-brand transition" title={ui.photoUpload}>
                     <Camera className="w-4 h-4" />
                     <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                   </label>
@@ -486,21 +486,21 @@ function CandidateDetailPageInner() {
                 <div className="flex-1 space-y-3 w-full text-xs">
                   <div>
                     <label className="font-bold text-slate-700 uppercase flex items-center gap-1 mb-1">
-                      <Phone className="w-3 h-3 text-slate-500" /> {t.phoneNumberGsm}
+                      <Phone className="w-3 h-3 text-muted-foreground" /> {t.phoneNumberGsm}
                     </label>
                     <input type="tel" value={candidatePhone} onChange={(e) => setCandidatePhone(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-900 outline-none text-xs sm:text-sm" />
                   </div>
 
                   <div>
                     <label className="font-bold text-slate-700 uppercase flex items-center gap-1 mb-1">
-                      <Mail className="w-3 h-3 text-slate-500" /> {t.emailAddress}
+                      <Mail className="w-3 h-3 text-muted-foreground" /> {t.emailAddress}
                     </label>
                     <input type="email" value={candidateEmail} onChange={(e) => setCandidateEmail(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-900 outline-none text-xs sm:text-sm" />
                   </div>
 
                   <div>
                     <label className="font-bold text-slate-700 uppercase flex items-center gap-1 mb-1">
-                      <KeyRound className="w-3 h-3 text-slate-500" /> {t.portalPassword}
+                      <KeyRound className="w-3 h-3 text-muted-foreground" /> {t.portalPassword}
                     </label>
                     <p className="text-[11px] text-slate-600 font-medium">{ui.passwordsManaged}</p>
                   </div>
@@ -589,7 +589,7 @@ function CandidateDetailPageInner() {
                           <option value="approved" className="bg-white text-slate-900">🟢 {ui.docStatuses.approved}</option>
                           <option value="rejected" className="bg-white text-slate-900">🔴 {ui.docStatuses.rejected}</option>
                         </select>
-                        <button onClick={() => handleDeleteDocument(doc.id)} className="p-1.5 text-slate-500 hover:text-red-600 cursor-pointer">
+                        <button onClick={() => handleDeleteDocument(doc.id)} className="p-1.5 text-muted-foreground hover:text-red-600 cursor-pointer">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -600,7 +600,7 @@ function CandidateDetailPageInner() {
                         <button type="button" onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url! })} className="text-emerald-800 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer">
                           <Eye className="w-3.5 h-3.5" /> {t.preview}
                         </button>
-                      ) : <span className="text-slate-500 font-medium italic">{t.noFileUploaded}</span>}
+                      ) : <span className="text-muted-foreground font-medium italic">{t.noFileUploaded}</span>}
 
                       <label className="bg-white hover:bg-slate-100 text-slate-800 px-3 py-1.5 rounded-lg border border-slate-300 font-bold cursor-pointer shadow-sm flex items-center gap-1">
                         <Upload className="w-3.5 h-3.5 text-indigo-600" /> {t.uploadFromComputer}
@@ -629,7 +629,7 @@ function CandidateDetailPageInner() {
             {/* Sertifika ve 3'lü Video Alanı */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-                <Award className="w-5 h-5 text-amber-500" /> {t.professionalEvaluationCertificate}
+                <Award className="w-5 h-5 text-amber-800" /> {t.professionalEvaluationCertificate}
               </h3>
               <div className="max-w-xl space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs">
                 <span className="block font-bold uppercase text-slate-700">{t.certificateInfo}</span>
@@ -689,7 +689,7 @@ function CandidateDetailPageInner() {
                 <p className="font-bold text-slate-900 text-sm">🤝 {ui.interviewOfferTitle}</p>
                 <p className="text-xs text-slate-600 font-medium">{ui.interviewOfferHint}</p>
               </div>
-              <button onClick={() => setShowIO(true)} className="text-xs font-bold px-4 py-2 rounded-lg bg-amber-500 text-white cursor-pointer hover:bg-amber-600 transition shadow">{ui.docOpen}</button>
+              <button onClick={() => setShowIO(true)} className="text-xs font-bold px-4 py-2 rounded-lg bg-amber-800 text-white cursor-pointer hover:bg-amber-900 transition shadow">{ui.docOpen}</button>
             </div>
             {showIO && candidate && <InterviewOfferPanel candidate={{ ...candidate, id: candidateId }} onClose={() => setShowIO(false)} />}
             <PlacementPanel candidateId={candidateId} />
@@ -709,7 +709,7 @@ function CandidateDetailPageInner() {
               <button 
                 type="button" 
                 onClick={() => { setIsClosed(true); handleSaveDetail(); }}
-                className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-xl font-bold text-xs transition cursor-pointer shadow"
+                className="w-full bg-amber-800 hover:bg-amber-900 text-white py-2.5 rounded-xl font-bold text-xs transition cursor-pointer shadow"
               >
                 {t.closeArchiveProcess}
               </button>
@@ -718,7 +718,7 @@ function CandidateDetailPageInner() {
             {/* Resmi İş Teklifi */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2">
-                <FileSignature className="w-4 h-4 text-[#2e7d32]" /> {t.sendOfficialJobOffer}
+                <FileSignature className="w-4 h-4 text-brand" /> {t.sendOfficialJobOffer}
               </h3>
               <div className="space-y-3 text-xs">
                 <div>
@@ -739,7 +739,7 @@ function CandidateDetailPageInner() {
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.termsConditions}</label>
                   <textarea rows={2} value={offerTerms} onChange={(e) => setOfferTerms(e.target.value)} placeholder={ui.exampleTerms} className="w-full px-3 py-2.5 rounded-xl border border-slate-300 outline-none bg-white font-medium text-slate-900" />
                 </div>
-                <button type="button" onClick={handleSendJobOffer} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow">
+                <button type="button" onClick={handleSendJobOffer} className="w-full bg-brand-solid hover:bg-brand text-white py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow">
                   <Send className="w-3.5 h-3.5" /> {t.sendOfferToCandidate}
                 </button>
               </div>
@@ -748,7 +748,7 @@ function CandidateDetailPageInner() {
             {/* Bildirim Gönder */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2">
-                <Bell className="w-4 h-4 text-[#2e7d32]" /> {t.sendNotification}
+                <Bell className="w-4 h-4 text-brand" /> {t.sendNotification}
               </h3>
               <form onSubmit={handleSendNotificationToCandidate} className="space-y-3 text-xs">
                 <div>
@@ -759,7 +759,7 @@ function CandidateDetailPageInner() {
                   <label className="block font-bold text-slate-700 uppercase mb-1">{t.message}</label>
                   <textarea rows={3} required value={notifMessage} onChange={(e) => setNotifMessage(e.target.value)} placeholder={ui.exampleMessage} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 outline-none bg-white font-medium text-slate-900" />
                 </div>
-                <button type="submit" disabled={notifSending} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow">
+                <button type="submit" disabled={notifSending} className="w-full bg-brand-solid hover:bg-brand text-white py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow">
                   <Send className="w-3.5 h-3.5" /> {notifSending ? t.sending : t.sendNotificationBtn}
                 </button>
               </form>
@@ -774,7 +774,7 @@ function CandidateDetailPageInner() {
           <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
             <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
               <h3 className="font-bold text-sm">{previewDoc.name}</h3>
-              <button onClick={() => setPreviewDoc(null)} className="p-1.5 bg-slate-800 rounded-full text-slate-300 cursor-pointer hover:bg-slate-700"><X className="w-5 h-5" /></button>
+              <button onClick={() => setPreviewDoc(null)} className="p-1.5 bg-slate-800 rounded-full text-on-dark-muted cursor-pointer hover:bg-slate-700"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-4 flex-1 overflow-auto flex justify-center items-center bg-slate-100">
               <iframe src={previewDoc.url} className="w-full h-[70vh] rounded-xl border bg-white" title={t.preview} />

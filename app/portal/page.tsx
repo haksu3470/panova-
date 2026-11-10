@@ -576,12 +576,12 @@ export default function PortalPage() {
 
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 max-w-md w-full text-center">
-            <div className="w-14 h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <div className="w-14 h-14 bg-emerald-100 text-brand rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
               <Lock className="w-7 h-7" />
             </div>
             {(authMode === 'signin' || authMode === 'signup') && <>
             <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1">{authMode === 'signup' ? t.staffSignupTitle : t.portalTitle}</h1>
-            <p className="text-slate-500 text-xs sm:text-sm mb-6">{authMode === 'signup' ? t.staffSignupSub : t.portalSub}</p>
+            <p className="text-muted-foreground text-xs sm:text-sm mb-6">{authMode === 'signup' ? t.staffSignupSub : t.portalSub}</p>
             </>}
 
             {authMode === 'verify' ? (
@@ -597,7 +597,7 @@ export default function PortalPage() {
                     await enterStaff(user.id, user.email || verifyEmail, regName || undefined, true, true, true);
                   }}
                 />
-                <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-slate-500 cursor-pointer">{t.verifyEmailBack}</button>
+                <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-muted-foreground cursor-pointer">{t.verifyEmailBack}</button>
                 <OAuthButtons redirectPath="/portal" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} />
               </div>
             ) : authMode === 'forgot' ? (
@@ -621,10 +621,10 @@ export default function PortalPage() {
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.passwordLabel}</label>
                   <input type="password" required minLength={8} value={regPassword} onChange={(e) => setRegPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium outline-none text-sm" />
                 </div>
-                <button type="submit" disabled={loading} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold text-sm cursor-pointer">
+                <button type="submit" disabled={loading} className="w-full bg-brand-solid hover:bg-brand text-white py-3.5 rounded-xl font-bold text-sm cursor-pointer">
                   {t.staffSignupBtn}
                 </button>
-                <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-slate-500 cursor-pointer">{t.verifyEmailBack}</button>
+                <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-muted-foreground cursor-pointer">{t.verifyEmailBack}</button>
               </form>
             ) : (
             <form onSubmit={handleLogin} className="space-y-4 text-left rtl:text-right">
@@ -654,7 +654,7 @@ export default function PortalPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 cursor-pointer text-sm"
+                className="w-full bg-brand-solid hover:bg-brand text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 cursor-pointer text-sm"
               >
                 {loading ? (t.submitting || t.signInBtn) : t.signInBtn}
               </button>
@@ -663,7 +663,7 @@ export default function PortalPage() {
             {authMode === 'signin' && (
               <div className="mt-4 space-y-3">
                 <OAuthButtons redirectPath="/portal" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} />
-                <button type="button" onClick={() => setAuthMode('signup')} className="w-full text-xs font-bold text-[#1b5e20] cursor-pointer">{t.staffSignupTitle}</button>
+                <button type="button" onClick={() => setAuthMode('signup')} className="w-full text-xs font-bold text-brand cursor-pointer">{t.staffSignupTitle}</button>
               </div>
             )}
           </div>
@@ -734,44 +734,44 @@ export default function PortalPage() {
         ) : null}
         <div className={`flex flex-wrap items-center gap-2 border-b pb-3 text-xs font-bold ${mfaMode === 'challenge' ? 'hidden' : ''}`}>
           {showTab('overview') && (
-          <button onClick={() => setActiveTab('overview')} className={`px-3 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('overview')} className={`px-3 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'overview' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
           </button>
           )}
           {showTab('candidates') && (
-          <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'candidates' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             👥 {t.candidatesTab} ({candidates.length})
           </button>
           )}
           {showTab('requests') && (
-          <button onClick={() => setActiveTab('requests')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'requests' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('requests')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'requests' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📁 {t.requestsTab} ({jobRequests.length})
           </button>
           )}
           
           {showTab('staff') && isUpperManagement && (
-            <button onClick={() => setActiveTab('staff')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'staff' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+            <button onClick={() => setActiveTab('staff')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'staff' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
               🛡️ {t.staffTab} ({staffMembers.length})
             </button>
           )}
 
           {showTab('tasks') && (
-          <button onClick={() => setActiveTab('tasks')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'tasks' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('tasks')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'tasks' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             ✅ {t.tasksTab} ({tasks.filter(t => t.status === 'pending').length})
           </button>
           )}
           {showTab('audit') && (
-          <button onClick={() => setActiveTab('audit')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'audit' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('audit')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'audit' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📜 {t.auditTab} ({auditLogs.length})
           </button>
           )}
           {showTab('employers') && (
-          <button onClick={() => setActiveTab('employers')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'employers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('employers')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'employers' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             🏢 {t.employersTab} ({employers.length})
           </button>
           )}
           {showTab('support') && (
-          <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'support' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             💬 {t.supportTab} ({supportTickets.length})
           </button>
           )}
@@ -785,7 +785,7 @@ export default function PortalPage() {
             <div className={`grid grid-cols-1 sm:grid-cols-2 ${isUpperManagement ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
               <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase">{t.totalCandidatesCard}</div>
+                  <div className="text-muted-foreground text-[11px] sm:text-xs font-bold uppercase">{t.totalCandidatesCard}</div>
                   <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">{candidates.length}</div>
                 </div>
                 <Users className="w-9 h-9 sm:w-10 sm:h-10 text-emerald-600 bg-emerald-50 p-2 rounded-xl" />
@@ -793,7 +793,7 @@ export default function PortalPage() {
 
               <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase">{t.activeEmployersCard}</div>
+                  <div className="text-muted-foreground text-[11px] sm:text-xs font-bold uppercase">{t.activeEmployersCard}</div>
                   <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">{employers.length}</div>
                 </div>
                 <Building2 className="w-9 h-9 sm:w-10 sm:h-10 text-blue-600 bg-blue-50 p-2 rounded-xl" />
@@ -802,7 +802,7 @@ export default function PortalPage() {
               {isUpperManagement && (
                 <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                   <div>
-                    <div className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase">{t.staffTab}</div>
+                    <div className="text-muted-foreground text-[11px] sm:text-xs font-bold uppercase">{t.staffTab}</div>
                     <div className="text-2xl sm:text-3xl font-extrabold text-indigo-600 mt-1">{staffMembers.length}</div>
                   </div>
                   <UserCheck className="w-9 h-9 sm:w-10 sm:h-10 text-indigo-600 bg-indigo-50 p-2 rounded-xl" />
@@ -811,7 +811,7 @@ export default function PortalPage() {
 
               <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase">{t.openSupportCard}</div>
+                  <div className="text-muted-foreground text-[11px] sm:text-xs font-bold uppercase">{t.openSupportCard}</div>
                   <div className="text-2xl sm:text-3xl font-extrabold text-emerald-700 mt-1">{tasks.filter(t => t.status === 'pending').length}</div>
                 </div>
                 <CheckSquare className="w-9 h-9 sm:w-10 sm:h-10 text-emerald-600 bg-emerald-50 p-2 rounded-xl" />
@@ -944,7 +944,7 @@ export default function PortalPage() {
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
               <History className="w-5 h-5 text-emerald-700" /> {t.auditLogTitle}
             </h3>
-            <p className="text-xs text-slate-500">{t.auditLogSub}</p>
+            <p className="text-xs text-muted-foreground">{t.auditLogSub}</p>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs sm:text-sm text-slate-600">
@@ -956,14 +956,14 @@ export default function PortalPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {auditLogs.length === 0 && (<tr><td colSpan={3} className="p-4 text-center text-slate-400">{ui.noAuditYet}</td></tr>)}
+                  {auditLogs.length === 0 && (<tr><td colSpan={3} className="p-4 text-center text-muted-foreground">{ui.noAuditYet}</td></tr>)}
                   {auditLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50">
                       <td className="p-4 font-bold text-slate-900">
                         {log.actionKey ? (t as any)[log.actionKey] || log.actionKey : log.action}
                       </td>
-                      <td className="p-4">{log.performer}{log.entity ? <span className="ml-1 text-[10px] text-slate-400">({log.entity})</span> : null}{log.is_demo ? <span className="ml-1 text-[10px] px-1 rounded bg-amber-100 text-amber-700">demo</span> : null}</td>
-                      <td className="p-4 text-[11px] text-slate-400">{log.time}</td>
+                      <td className="p-4">{log.performer}{log.entity ? <span className="ml-1 text-[10px] text-muted-foreground">({log.entity})</span> : null}{log.is_demo ? <span className="ml-1 text-[10px] px-1 rounded bg-amber-100 text-amber-700">demo</span> : null}</td>
+                      <td className="p-4 text-[11px] text-muted-foreground">{log.time}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -984,7 +984,7 @@ export default function PortalPage() {
               />
             </div>
             {employers.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs">{t.noEmployers}</div>
+              <div className="p-8 text-center text-muted-foreground text-xs">{t.noEmployers}</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {employers.map((emp) => (
@@ -1004,7 +1004,7 @@ export default function PortalPage() {
                           }));
                           window.location.href = `/employer?as=${emp.id}`;
                         }}
-                        className="px-3 py-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm"
+                        className="px-3 py-1.5 bg-brand-solid hover:bg-brand text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm"
                       >
                         {ui.viewEmployerPortal}
                       </button>
@@ -1017,7 +1017,7 @@ export default function PortalPage() {
                         onDeleted={fetchAllData}
                       />
                       {isUpperManagement && emp.compliance_status === 'pending' ? (
-                        <button type="button" className="px-3 py-1.5 bg-amber-600 text-white rounded-xl text-xs font-bold" onClick={async () => {
+                        <button type="button" className="px-3 py-1.5 bg-amber-800 text-on-dark rounded-xl text-xs font-bold" onClick={async () => {
                           const { error } = await supabase.from('employers').update({ compliance_status: 'approved' }).eq('id', emp.id);
                           if (error) alert(error.message);
                           else fetchAllData();
@@ -1025,7 +1025,7 @@ export default function PortalPage() {
                       ) : null}
                       </div>
                     </div>
-                    <p className="text-sm text-slate-800">Contact: <strong>{emp.contact_person}</strong> | Country: {emp.country}</p>
+                    <p className="text-sm text-muted-foreground">Contact: <strong>{emp.contact_person}</strong> | Country: {emp.country}</p>
                     <EmployerLoginInvite
                       compact
                       staff={{ role: userRole, scopeCountry: currentUser?.scope_country }}
@@ -1052,7 +1052,7 @@ export default function PortalPage() {
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.supportTab}</h3>
             {supportTickets.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs">{t.noSupport}</div>
+              <div className="p-8 text-center text-muted-foreground text-xs">{t.noSupport}</div>
             ) : (
               <div className="space-y-3">
                 {supportTickets.map((tkt) => (
@@ -1061,7 +1061,7 @@ export default function PortalPage() {
                       <span>{tkt.subject} ({tkt.candidate_name})</span>
                       <span className={`uppercase text-[10px] ${String(tkt.status).toLowerCase() === 'answered' ? 'text-emerald-700' : 'text-red-600'}`}>{tkt.status}</span>
                     </div>
-                    <p className="text-slate-500">{tkt.created_at ? String(tkt.created_at).slice(0, 16).replace('T', ' ') : ''}</p>
+                    <p className="text-muted-foreground">{tkt.created_at ? String(tkt.created_at).slice(0, 16).replace('T', ' ') : ''}</p>
                     <p className="text-slate-600">{t.message}: {tkt.message}</p>
                     <p className="text-slate-800">{releaseCopy[currentLang].supportReply}: {tkt.admin_reply || releaseCopy[currentLang].supportNoReply}</p>
                     {String(tkt.status).toLowerCase() !== 'closed' ? (
@@ -1109,7 +1109,7 @@ export default function PortalPage() {
                 </span>
                 <h3 className="text-xl font-extrabold text-slate-900 mt-1">{selectedDemandDetail.position_title} - {selectedDemandDetail.employer_name}</h3>
               </div>
-              <button onClick={() => setSelectedDemandDetail(null)} className="text-slate-400 hover:text-slate-600 font-bold text-xl cursor-pointer p-2">✕</button>
+              <button onClick={() => setSelectedDemandDetail(null)} className="text-muted-foreground hover:text-slate-600 font-bold text-xl cursor-pointer p-2">✕</button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
@@ -1156,15 +1156,15 @@ export default function PortalPage() {
                 <h4 className="font-extrabold text-emerald-900 uppercase text-xs border-b border-emerald-200 pb-1">📊 Process Counts & Metrics</h4>
                 <div className="grid grid-cols-3 gap-2 text-center text-xs">
                   <div className="bg-white p-2 rounded-xl border">
-                    <span className="block text-slate-500 text-[10px]">Requested</span>
+                    <span className="block text-muted-foreground text-[10px]">Requested</span>
                     <strong className="text-base text-slate-900">{selectedDemandDetail.headcount}</strong>
                   </div>
                   <div className="bg-white p-2 rounded-xl border">
-                    <span className="block text-slate-500 text-[10px]">Connected</span>
+                    <span className="block text-muted-foreground text-[10px]">Connected</span>
                     <strong className="text-base text-blue-600">{candidates.length}</strong>
                   </div>
                   <div className="bg-white p-2 rounded-xl border">
-                    <span className="block text-slate-500 text-[10px]">Approved</span>
+                    <span className="block text-muted-foreground text-[10px]">Approved</span>
                     <strong className="text-base text-emerald-700">{candidates.filter(c => c.status === 'approved').length}</strong>
                   </div>
                 </div>
@@ -1177,7 +1177,7 @@ export default function PortalPage() {
                 {candidates.slice(0, 3).map((cand) => (
                   <div key={cand.id} className="flex items-center justify-between bg-white p-3 rounded-xl border text-xs">
                     <div>
-                      <strong>{cand.full_name}</strong> ({cand.profession}) - <span className="text-slate-400">{cand.nationality || cand.country}</span>
+                      <strong>{cand.full_name}</strong> ({cand.profession}) - <span className="text-muted-foreground">{cand.nationality || cand.country}</span>
                     </div>
                     <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-lg font-bold uppercase text-[10px]">
                       {cand.status}
@@ -1185,7 +1185,7 @@ export default function PortalPage() {
                   </div>
                 ))}
                 {candidates.length === 0 && (
-                  <p className="text-xs text-slate-400 text-center py-2">No candidates assigned yet.</p>
+                  <p className="text-xs text-muted-foreground text-center py-2">No candidates assigned yet.</p>
                 )}
               </div>
             </div>
@@ -1204,7 +1204,7 @@ export default function PortalPage() {
             <div className="flex justify-end pt-4 border-t">
               <button
                 onClick={() => setSelectedDemandDetail(null)}
-                className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-6 py-2.5 rounded-xl text-xs font-bold transition shadow cursor-pointer"
+                className="bg-brand-solid hover:bg-brand text-white px-6 py-2.5 rounded-xl text-xs font-bold transition shadow cursor-pointer"
               >
                 Close
               </button>
@@ -1220,7 +1220,7 @@ export default function PortalPage() {
               <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
                 <Key className="w-4 h-4 text-emerald-700" /> Edit Staff & Password
               </h3>
-              <button onClick={() => setEditingStaff(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
+              <button onClick={() => setEditingStaff(null)} className="text-muted-foreground hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
             </div>
             <form onSubmit={handleSaveStaffEdit} className="space-y-3 text-xs">
               <div>
@@ -1243,7 +1243,7 @@ export default function PortalPage() {
                   <div className="mt-2 space-y-1">
                     <label className="block font-bold text-slate-700 uppercase mb-1">{releaseCopy[currentLang].scopeCountry}</label>
                     <input value={editingStaff.scope_country || ''} onChange={(e) => setEditingStaff({ ...editingStaff, scope_country: e.target.value })} placeholder="Turkey" className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white" />
-                    <p className="text-[11px] text-slate-500">{releaseCopy[currentLang].scopeHint}</p>
+                    <p className="text-[11px] text-muted-foreground">{releaseCopy[currentLang].scopeHint}</p>
                   </div>
                 ) : null}
                 {editingStaff.role_level === 'source_country' ? (
@@ -1252,13 +1252,13 @@ export default function PortalPage() {
                     {normalizeReferralCode(editingStaff.referral_code) ? (
                       <p className="font-mono font-bold text-slate-900">{normalizeReferralCode(editingStaff.referral_code)}</p>
                     ) : null}
-                    <p className="text-[11px] font-medium text-slate-500 leading-snug">
+                    <p className="text-[11px] font-medium text-muted-foreground leading-snug">
                       {normalizeReferralCode(editingStaff.referral_code) ? ui.referralCodeImmutable : ui.referralCodeOnInvite}
                     </p>
                   </div>
                 ) : null}
               </div>
-              <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs">
+              <button type="submit" className="w-full bg-brand-solid hover:bg-brand text-white py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs">
                 Save Changes and Password
               </button>
             </form>

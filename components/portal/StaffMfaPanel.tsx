@@ -91,11 +91,11 @@ export default function StaffMfaPanel({
       {error ? <p className="text-xs font-bold text-red-700">{error}</p> : null}
       <div className="flex flex-wrap gap-2">
         {!factorId ? (
-          <button type="button" disabled={busy} onClick={enroll} className="px-3 py-2 rounded-xl bg-[#2e7d32] text-white text-xs font-bold disabled:opacity-50">
+          <button type="button" disabled={busy} onClick={enroll} className="px-3 py-2 rounded-xl bg-brand-solid text-on-dark text-xs font-bold disabled:bg-disabled disabled:text-on-dark disabled:opacity-100">
             {copy.mfaEnroll}
           </button>
         ) : (
-          <button type="button" disabled={busy || code.trim().length < 6} onClick={() => verify(factorId)} className="px-3 py-2 rounded-xl bg-[#2e7d32] text-white text-xs font-bold disabled:opacity-50">
+          <button type="button" disabled={busy || code.trim().length < 6} onClick={() => verify(factorId)} className="px-3 py-2 rounded-xl bg-brand-solid text-on-dark text-xs font-bold disabled:bg-disabled disabled:text-on-dark disabled:opacity-100">
             {copy.mfaConfirm}
           </button>
         )}

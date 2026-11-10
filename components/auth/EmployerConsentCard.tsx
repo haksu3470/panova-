@@ -51,7 +51,7 @@ export default function EmployerConsentCard({
         onClick={() => { void save(); }}
         disabled={busy || !checked}
         aria-busy={busy}
-        className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] disabled:opacity-60 text-white font-bold py-3 rounded-xl text-sm"
+        className="w-full bg-brand-solid hover:bg-brand disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 text-white font-bold py-3 rounded-xl text-sm"
       >
         {busy ? '…' : copy.consentSave}
       </button>

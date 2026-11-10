@@ -57,7 +57,7 @@ export function VerificationCodeField({
           event.preventDefault();
           commit(text);
         }}
-        className="mt-1 w-full px-3.5 py-3 rounded-xl border border-slate-300 text-slate-900 bg-white font-medium outline-none text-sm tabular-nums tracking-[0.3em] text-center disabled:opacity-60"
+        className="mt-1 w-full px-3.5 py-3 rounded-xl border border-slate-300 text-slate-900 bg-white font-medium outline-none text-sm tabular-nums tracking-[0.3em] text-center disabled:bg-disabled disabled:text-on-dark disabled:opacity-100"
       />
     </div>
   );

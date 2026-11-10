@@ -36,13 +36,13 @@ export default function StaffGate({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (state === 'ok') return <>{children}</>;
-  if (state === 'loading') return <div className="min-h-screen flex items-center justify-center text-sm text-slate-500">{g.checking}</div>;
+  if (state === 'loading') return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">{g.checking}</div>;
   return (
     <div className={`min-h-screen flex items-center justify-center p-6 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-sm w-full bg-white border rounded-2xl p-6 text-center space-y-3 shadow-sm">
         <div className="flex justify-center"><LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} /></div>
         <h1 className="text-lg font-bold text-slate-900">{state === 'verify' ? t.verifyEmailTitle : state === 'noauth' ? g.loginRequired : g.noAccess}</h1>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           {state === 'verify' ? t.verifyEmailLinkLead : state === 'noauth' ? g.loginBody : g.noAccessBody}
         </p>
         <Link href={state === 'verify' ? '/portal?verify=1' : '/portal'} className="inline-block bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-xl">{state === 'verify' ? t.verifyEmailBack : g.staffLogin}</Link>

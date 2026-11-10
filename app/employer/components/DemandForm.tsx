@@ -56,7 +56,7 @@ export default function DemandForm({ t, lang, onSubmitDemand, successMsg }: Dema
         </div>
         <div>
           <h2 className="text-base font-black text-slate-900">{t.corporateDemandTitle || ui.positionLabel}</h2>
-          <p className="text-xs text-slate-500">{t.corporateDemandDesc}</p>
+          <p className="text-xs text-muted-foreground">{t.corporateDemandDesc}</p>
         </div>
       </div>
 
@@ -138,7 +138,7 @@ export default function DemandForm({ t, lang, onSubmitDemand, successMsg }: Dema
               className="w-4 h-4 accent-emerald-700 cursor-pointer"
             />
           </div>
-          <p className="text-[11px] text-slate-500">{ui.videoRequiredHint}</p>
+          <p className="text-[11px] text-muted-foreground">{ui.videoRequiredHint}</p>
         </div>
 
         <div className="space-y-2 pt-2">

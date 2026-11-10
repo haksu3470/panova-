@@ -88,7 +88,7 @@ export default function GuidesScreen() {
         </header>
 
         {gate === 'loading' && (
-          <p className="text-sm font-bold text-slate-500">{copy.loading}</p>
+          <p className="text-sm font-bold text-muted-foreground">{copy.loading}</p>
         )}
 
         {gate === 'ready' && viewer && viewer.kind !== 'unlinked' && (
@@ -128,7 +128,7 @@ function GateCard({
       <h2 className="text-lg font-extrabold text-slate-900">{title}</h2>
       <p className="text-sm leading-relaxed text-slate-600">{body}</p>
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-        <Link href="/portal" className="rounded-xl bg-[#2e7d32] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#1b5e20]">{copy.signInStaff}</Link>
+        <Link href="/portal" className="rounded-xl bg-brand-solid px-4 py-2.5 text-xs font-bold text-white hover:bg-brand">{copy.signInStaff}</Link>
         <Link href="/employer-login" className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-800 hover:bg-slate-100">{copy.signInEmployer}</Link>
         <Link href="/candidate" className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-800 hover:bg-slate-100">{copy.signInCandidate}</Link>
       </div>

@@ -37,9 +37,9 @@ export function resultLabel(ui: PortalUi, result?: string | null) {
 
 export function Card({ title, children, right }: { title: string; children: ReactNode; right?: ReactNode }) {
   return (
-    <section className="bg-white rounded-2xl border shadow-sm p-4 sm:p-6 space-y-3">
-      <div className="flex items-center justify-between gap-2 border-b pb-2">
-        <h2 className="text-sm sm:text-base font-extrabold text-slate-900">{title}</h2>
+    <section className="bg-card rounded-2xl border border-line shadow-sm p-4 sm:p-6 space-y-3 text-foreground">
+      <div className="flex items-center justify-between gap-2 border-b border-line pb-2">
+        <h2 className="text-sm sm:text-base font-extrabold text-foreground">{title}</h2>
         {right}
       </div>
       {children}
@@ -49,17 +49,17 @@ export function Card({ title, children, right }: { title: string; children: Reac
 
 export function Stat({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl border p-3 sm:p-4 shadow-sm">
-      <div className="text-[10px] sm:text-xs font-bold uppercase text-slate-500">{label}</div>
-      <div className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-1">{value}</div>
+    <div className="bg-card rounded-2xl border border-line p-3 sm:p-4 shadow-sm">
+      <div className="text-[10px] sm:text-xs font-bold uppercase text-muted-foreground">{label}</div>
+      <div className="text-xl sm:text-2xl font-extrabold text-foreground mt-1">{value}</div>
     </div>
   );
 }
 
 export function Field({ label, value, onChange, type = 'text', textarea }: { label: string; value: string; onChange: (v: string) => void; type?: string; textarea?: boolean }) {
-  const cls = 'w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500';
+  const cls = 'w-full rounded-xl border border-line bg-card px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-brand';
   return (
-    <label className="block text-xs font-bold text-slate-600 space-y-1">
+    <label className="block text-xs font-bold text-muted-foreground space-y-1">
       <span>{label}</span>
       {textarea ? (
         <textarea className={cls} rows={3} value={value} onChange={(e) => onChange(e.target.value)} />

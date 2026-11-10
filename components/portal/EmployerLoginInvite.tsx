@@ -185,7 +185,7 @@ export default function EmployerLoginInvite({
         disabled={busy || !hasEmail}
         aria-busy={busy}
         aria-describedby={hasEmail ? undefined : `invite-hint-${employerId}`}
-        className="bg-[#2e7d32] hover:bg-[#1b5e20] disabled:opacity-60 text-white px-3 py-2 rounded-xl text-xs font-bold"
+        className="bg-brand-solid hover:bg-brand disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 text-white px-3 py-2 rounded-xl text-xs font-bold"
       >
         {busy ? '…' : linked ? copy.resend : copy.send}
       </button>
