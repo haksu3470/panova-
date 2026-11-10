@@ -206,6 +206,7 @@ export interface Translation {
   completeReg?: string;
 
   empTabRequests?: string;
+  empTabNewRequest?: string;
   empTabCandidates?: string;
   empTabInterviews?: string;
   empTabSelected?: string;
@@ -418,6 +419,10 @@ export interface Translation {
   languageReqLabel?: string;
   cityLocationLabel?: string;
   durationLabel?: string;
+  headcountPlaceholder?: string;
+  cityPlaceholder?: string;
+  durationPlaceholder?: string;
+  selectSectorFirst?: string;
   providedFacilitiesLabel?: string;
   facilityAccommodation?: string;
   facilityFood?: string;
@@ -789,6 +794,7 @@ export const translations: Record<Language, Translation> = {
     goToSignInBtn: 'Giriş Sayfasına Git',
 
     empTabRequests: 'Personel Taleplerim',
+    empTabNewRequest: 'Yeni Talep',
     empTabCandidates: 'Adaylar / Eşleşmeler',
     empTabInterviews: 'Mülakatlar',
     empTabSelected: 'Seçtiğim Adaylar',
@@ -1001,6 +1007,10 @@ export const translations: Record<Language, Translation> = {
     languageReqLabel: 'Aranan Dil Becerisi',
     cityLocationLabel: 'Şehir / Lokasyon',
     durationLabel: 'Çalışma Süresi',
+    headcountPlaceholder: 'Örn: 5',
+    cityPlaceholder: 'Örn: Struga',
+    durationPlaceholder: 'Örn: 12 ay (sezonluk / tam zamanlı)',
+    selectSectorFirst: 'Pozisyonları görmek için önce bir sektör seçin.',
     providedFacilitiesLabel: 'Sağlanan İmkanlar',
     facilityAccommodation: 'Konaklama (Lojman / Daire)',
     facilityFood: 'Yemek (3 Öğün / Yemek Ücreti)',
@@ -1359,6 +1369,7 @@ export const translations: Record<Language, Translation> = {
     goToSignInBtn: 'Go to Sign In',
 
     empTabRequests: 'Personnel Requests',
+    empTabNewRequest: 'New Request',
     empTabCandidates: 'Candidates / Matching',
     empTabInterviews: 'Interviews',
     empTabSelected: 'Selected Candidates',
@@ -1571,6 +1582,10 @@ export const translations: Record<Language, Translation> = {
     languageReqLabel: 'Required Language Skill',
     cityLocationLabel: 'City / Location',
     durationLabel: 'Work Duration',
+    headcountPlaceholder: 'e.g. 5',
+    cityPlaceholder: 'e.g. Struga',
+    durationPlaceholder: 'e.g. 12 months (seasonal / full time)',
+    selectSectorFirst: 'Choose a sector to see positions.',
     providedFacilitiesLabel: 'Provided Facilities',
     facilityAccommodation: 'Accommodation (Housing / Apartment)',
     facilityFood: 'Food (3 Meals / Food Allowance)',
@@ -1929,6 +1944,7 @@ export const translations: Record<Language, Translation> = {
     goToSignInBtn: 'Shko te Hyrja',
 
     empTabRequests: 'Kërkesat e Personelit',
+    empTabNewRequest: 'Kërkesë e re',
     empTabCandidates: 'Kandidatët / Përputhja',
     empTabInterviews: 'Intervistat',
     empTabSelected: 'Kandidatët e Zgjedhur',
@@ -2141,6 +2157,10 @@ export const translations: Record<Language, Translation> = {
     languageReqLabel: 'Gjuha e Kërkuar',
     cityLocationLabel: 'Qyteti / Lokacioni',
     durationLabel: 'Koha e Punës',
+    headcountPlaceholder: 'p.sh. 5',
+    cityPlaceholder: 'p.sh. Struga',
+    durationPlaceholder: 'p.sh. 12 muaj (sezonale / kohë e plotë)',
+    selectSectorFirst: 'Zgjidhni një sektor për të parë pozicionet.',
     providedFacilitiesLabel: 'Kushtet e ofruara',
     facilityAccommodation: 'Akomodimi (strehim / apartament)',
     facilityFood: 'Ushqimi (3 vakte / pagesë ushqimi)',
@@ -2492,6 +2512,10 @@ export const translations: Record<Language, Translation> = {
     languageReqLabel: 'مهارة اللغة المطلوبة',
     cityLocationLabel: 'المدينة / الموقع',
     durationLabel: 'مدة العمل',
+    headcountPlaceholder: 'مثال: 5',
+    cityPlaceholder: 'مثال: ستروغا',
+    durationPlaceholder: 'مثال: 12 شهراً (موسمي / دوام كامل)',
+    selectSectorFirst: 'اختر قطاعاً لعرض الوظائف.',
     providedFacilitiesLabel: 'المرافق المقدمة',
     facilityAccommodation: 'الإقامة (سكن / شقة)',
     facilityFood: 'الطعام (3 وجبات / بدل طعام)',
@@ -2568,6 +2592,7 @@ export const translations: Record<Language, Translation> = {
     regSuccessText: 'تم إنشاء حساب شركتك. يمكنك الآن تسجيل الدخول.',
     goToSignInBtn: 'الانتقال لتسجيل الدخول',
     empTabRequests: 'طلبات الموظفين',
+    empTabNewRequest: 'طلب جديد',
     empTabCandidates: 'المرشحون / المطابقة',
     empTabInterviews: 'المقابلات',
     empTabSelected: 'المرشحون المختارون',
@@ -2895,7 +2920,7 @@ export const translations: Record<Language, Translation> = {
     approvedStatus: 'Одобрено',
     colPosSec: 'Позиција / сектор',
     colHeadcount: 'Број на лица',
-    newDemandBtn: 'Криј ново барање',
+    newDemandBtn: 'Креирај ново барање',
     modalDemandTitle: 'Детали за барањето',
     specifyCustomPos: 'Наведете посебна позиција',
     specialReqs: 'Посебни услови',
@@ -3077,6 +3102,7 @@ export const translations: Record<Language, Translation> = {
     regSuccessText: 'Сметката на компанијата е создадена. Сега можете да се најавите.',
     goToSignInBtn: 'Оди на најава',
     empTabRequests: 'Барања за персонал',
+    empTabNewRequest: 'Ново барање',
     empTabCandidates: 'Кандидати / спојување',
     empTabInterviews: 'Интервјуа',
     empTabSelected: 'Избрани кандидати',
@@ -3280,6 +3306,10 @@ export const translations: Record<Language, Translation> = {
     languageReqLabel: 'Потребно познавање на јазик',
     cityLocationLabel: 'Град / локација',
     durationLabel: 'Времетраење на работата',
+    headcountPlaceholder: 'на пр. 5',
+    cityPlaceholder: 'на пр. Струга',
+    durationPlaceholder: 'на пр. 12 месеци (сезонски / полно работно време)',
+    selectSectorFirst: 'Изберете сектор за да ги видите позициите.',
     providedFacilitiesLabel: 'Обезбедени услови',
     facilityAccommodation: 'Сместување (дом / стан)',
     facilityFood: 'Храна (3 оброка / додаток за храна)',

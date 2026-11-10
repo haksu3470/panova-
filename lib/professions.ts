@@ -197,3 +197,39 @@ export function professionLabel(value: string | null | undefined, lang: Language
   const label = item.labels[lang]?.trim();
   return label || null;
 }
+
+function foldCatalog(value: string): string {
+  return value.trim().toLocaleLowerCase('tr-TR').replaceAll('ı', 'i');
+}
+
+const BY_CATALOG_TEXT = new Map<string, Profession>();
+for (const item of PROFESSIONS) {
+  const aliases = [item.key, item.key.replaceAll('_', ' '), item.key.replaceAll('_', '-')];
+  for (const lang of PROFESSION_LOCALES) aliases.push(item.labels[lang]);
+  for (const alias of aliases) {
+    const key = foldCatalog(alias);
+    if (!key || BY_CATALOG_TEXT.has(key)) continue;
+    BY_CATALOG_TEXT.set(key, item);
+  }
+}
+
+/** Key or any locale label, so a stored English title such as "Cook" can be shown in the active language. */
+export function professionFromCatalogText(value: string | null | undefined): Profession | undefined {
+  const raw = (value ?? '').trim();
+  if (!raw || raw === OTHER_PROFESSION) return undefined;
+  return BY_CATALOG_TEXT.get(foldCatalog(raw));
+}
+
+/**
+ * Localize each comma-separated part that matches the profession catalog.
+ * Free text that does not match stays as entered.
+ */
+export function localizeCatalogTitle(value: string | null | undefined, lang: Language): string {
+  const raw = (value ?? '').trim();
+  if (!raw) return '';
+  return raw.split(/\s*,\s*/).map((part) => {
+    const trimmed = part.trim();
+    if (!trimmed) return '';
+    return professionFromCatalogText(trimmed)?.labels[lang]?.trim() || trimmed;
+  }).filter(Boolean).join(', ');
+}

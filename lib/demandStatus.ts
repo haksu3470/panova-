@@ -75,3 +75,15 @@ export function taskIsOverdue(due: string | null | undefined, status: string | n
   if (String(status ?? '').toLowerCase() === 'completed') return false;
   return targetStartIsPast(due, today);
 }
+
+/** Locale label for a stored status code, including NEW_REQUEST and PRESENTING_CANDIDATES. */
+export function demandStatusLabel(
+  status: string | null | undefined,
+  labels: Partial<Record<DemandStatus, string | undefined>>,
+): string {
+  const code = normalizeDemandStatus(status);
+  const raw = String(status ?? '').trim();
+  if (!code) return raw || '—';
+  const label = labels[code];
+  return typeof label === 'string' && label.trim() ? label : raw || '—';
+}
