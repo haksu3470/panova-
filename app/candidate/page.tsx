@@ -36,7 +36,9 @@ import Link from 'next/link';
 import { Language, translations, type Translation } from '@/lib/dictionary';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { RegistrationCountryOptions } from '@/components/site/RegistrationCountryOptions';
-import { candidatePlaceLabel } from '@/lib/candidateLabels';
+import { candidatePlaceLabel, candidateProfessionLabel } from '@/lib/candidateLabels';
+import { ProfessionField } from '@/components/site/ProfessionField';
+import { professionForSectorChange } from '@/lib/professions';
 import { homeCopy } from '@/lib/home-copy';
 import { canonicalNationality } from '@/lib/registrationCountries';
 import { candidateOfferResponse, offerMoney, offerStatusLabel } from '@/lib/offers';
@@ -1248,20 +1250,25 @@ export default function CandidateDashboard() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.professionLabel}</label>
-                    <input 
-                      type="text"
+                    <label className="block font-bold text-slate-700 uppercase mb-1" htmlFor="reg-profession">{t.professionLabel}</label>
+                    <ProfessionField
+                      id="reg-profession"
+                      lang={currentLang}
+                      sector={regSector}
                       value={regProfession}
-                      onChange={(e) => setRegProfession(e.target.value)}
-                      placeholder={t.exampleProfession}
-                      className="w-full px-3.5 py-3 rounded-xl border text-slate-900 bg-white font-medium outline-none text-sm"
+                      onChange={setRegProfession}
+                      className="w-full px-3.5 py-3 rounded-xl border text-slate-900 bg-white font-medium outline-none cursor-pointer text-sm"
                     />
                   </div>
                   <div>
                     <label className="block font-bold text-slate-700 uppercase mb-1">{t.sectorLabel}</label>
                     <select
                       value={regSector}
-                      onChange={(e) => setRegSector(e.target.value)}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        setRegSector(next);
+                        setRegProfession((current) => professionForSectorChange(current, next));
+                      }}
                       className="w-full px-3.5 py-3 rounded-xl border text-slate-900 bg-white font-medium outline-none cursor-pointer text-sm"
                     >
                       {homeCopy[currentLang].formSectors.map((sector) => (
@@ -1349,7 +1356,7 @@ export default function CandidateDashboard() {
               <div className="flex items-center gap-2 text-[11px] sm:text-xs text-muted-foreground">
                 <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">PNV-CAND-{candidate.id.substring(0, 6)}</span>
                 <span>{t.passportLabel}: {candidate.passport_number || 'N/A'}</span>
-                <span>{t.professionLabel}: {candidate.profession}</span>
+                <span>{t.professionLabel}: {candidateProfessionLabel(candidate.profession, portalUi[currentLang].unspecified, currentLang)}</span>
                 <span>{t.nationalityCol}: {candidatePlaceLabel(candidate.nationality, '', currentLang, portalUi[currentLang].unspecified)}</span>
               </div>
             </div>
@@ -1452,14 +1459,15 @@ export default function CandidateDashboard() {
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.professionLabel} *</label>
-                    <input
-                      type="text"
-                      required
+                    <label className="block font-bold text-slate-700 uppercase mb-1" htmlFor="profile-profession">{t.professionLabel} *</label>
+                    <ProfessionField
+                      id="profile-profession"
+                      lang={currentLang}
+                      sector={newSector}
                       value={newProfession}
-                      onChange={(e) => setNewProfession(e.target.value)}
-                      placeholder={t.exampleProfession}
-                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium"
+                      onChange={setNewProfession}
+                      required
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium outline-none cursor-pointer"
                     />
                   </div>
                   <div>
@@ -1467,7 +1475,11 @@ export default function CandidateDashboard() {
                     <select
                       required
                       value={newSector}
-                      onChange={(e) => setNewSector(e.target.value)}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        setNewSector(next);
+                        setNewProfession((current) => professionForSectorChange(current, next));
+                      }}
                       className="w-full px-3.5 py-2.5 rounded-xl border text-slate-900 bg-white font-medium outline-none cursor-pointer"
                     >
                       {homeCopy[currentLang].formSectors.some((sector) => sector.value === newSector) ? null : (

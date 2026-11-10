@@ -6,7 +6,9 @@ import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
 import DemoBadge from './DemoBadge';
 import InterviewOfferPanel from './InterviewOfferPanel';
+import { candidateProfessionLabel } from '@/lib/candidateLabels';
 import { fill, portalUi } from '@/lib/portal-ui-copy';
+import { professionSearchBlob } from '@/lib/professions';
 import { useSiteLanguage } from '@/lib/site-language';
 
 interface Props {
@@ -51,11 +53,11 @@ export default function MatchPanel({ request, onClose }: Props) {
     const q = search.trim().toLowerCase();
     return candidates
       .filter((c) => !matchedIds.has(c.id))
-      .filter((c) => !q || `${c.full_name} ${c.profession} ${c.nationality}`.toLowerCase().includes(q))
+      .filter((c) => !q || `${c.full_name} ${professionSearchBlob(c.profession)} ${c.nationality}`.toLowerCase().includes(q))
       .map((c) => {
         let score = 0;
         if (request.sector && c.sector?.toLowerCase() === String(request.sector).toLowerCase()) score += 2;
-        if (request.position_title && c.profession?.toLowerCase().includes(String(request.position_title).toLowerCase().split(' ')[0])) score += 2;
+        if (request.position_title && professionSearchBlob(c.profession).toLowerCase().includes(String(request.position_title).toLowerCase().split(' ')[0])) score += 2;
         if ((c.experience_years ?? 0) >= (request.required_experience_years ?? 0)) score += 1;
         return { ...c, score };
       })
@@ -136,7 +138,7 @@ export default function MatchPanel({ request, onClose }: Props) {
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-sm text-slate-900 truncate">{c?.full_name || m.candidate_id}<DemoBadge show={m.is_demo} /></p>
                   <p className="text-[11px] text-muted-foreground">
-                    {c?.profession} · {c?.nationality} · {m.presented_at ? fill(ui.presentedOn, { date: String(m.presented_at).substring(0, 10) }) : ui.notPresented}
+                    {candidateProfessionLabel(c?.profession, ui.general, currentLang)} · {c?.nationality} · {m.presented_at ? fill(ui.presentedOn, { date: String(m.presented_at).substring(0, 10) }) : ui.notPresented}
                   </p>
                 </div>
                 <div className="flex gap-2 items-center">
@@ -166,7 +168,7 @@ export default function MatchPanel({ request, onClose }: Props) {
             <div key={c.id} className="border rounded-xl p-3 flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm text-slate-900 truncate">{c.full_name}<DemoBadge show={c.is_demo} /></p>
-                <p className="text-[11px] text-muted-foreground">{c.profession} · {c.sector} · {fill(ui.yearsFit, { years: c.experience_years ?? 0, score: c.score })}</p>
+                <p className="text-[11px] text-muted-foreground">{candidateProfessionLabel(c.profession, ui.general, currentLang)} · {c.sector} · {fill(ui.yearsFit, { years: c.experience_years ?? 0, score: c.score })}</p>
               </div>
               <button disabled={busy} onClick={() => bind(c.id)} className="text-xs font-bold px-3 py-2 rounded-lg bg-emerald-700 text-white flex items-center gap-1 disabled:bg-disabled disabled:text-on-dark disabled:opacity-100">
                 <UserPlus className="w-4 h-4" /> {ui.bind}

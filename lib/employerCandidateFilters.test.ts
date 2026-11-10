@@ -1,17 +1,21 @@
 import assert from 'node:assert/strict';
+import { register } from 'node:module';
 import test from 'node:test';
 import { translations, type Language } from './dictionary.ts';
-import {
+import type { EmployerCandidate, EmployerCandidateFilters } from './employerCandidateFilters.ts';
+
+await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.url);
+
+const {
   EMPTY_EMPLOYER_CANDIDATE_FILTERS,
   filterEmployerCandidates,
   isEmployerCandidateFilterActive,
   isMissingBrowseRpc,
   matchesExperience,
+  professionFilterOptions,
   sectorFilterLabel,
   toEmployerCandidate,
-  type EmployerCandidate,
-  type EmployerCandidateFilters,
-} from './employerCandidateFilters.ts';
+} = await import('./employerCandidateFilters.ts');
 
 const LOCALES: Language[] = ['tr', 'en', 'sq', 'ar', 'mk'];
 const COPY_KEYS = [
@@ -132,12 +136,13 @@ test('an empty filter returns the authorized list in its original order', () => 
 });
 
 test('name and profession search narrows the list and clear restores it', () => {
-  assert.deepEqual(ids(apply({ query: 'elektrik' })), ['1']);
+  // The electrician catalog key is also found through its Turkish label.
+  assert.deepEqual(ids(apply({ query: 'elektrik' })), ['1', '4']);
   assert.deepEqual(ids(apply({ query: 'electric' })), ['4']);
   assert.deepEqual(ids(apply({ query: '  KALIP ' })), ['2']);
   assert.deepEqual(ids(apply({ query: 'istanbul' })), []);
   const narrowed = apply({ profession: 'elektrikçi' });
-  assert.deepEqual(ids(narrowed), ['1']);
+  assert.deepEqual(ids(narrowed), ['1', '4']);
   assert.deepEqual(ids(apply({})), ids(POOL));
 });
 
@@ -208,6 +213,26 @@ test('browse mapping drops identity columns and keeps filter fields', () => {
   assert.equal(sectorFilterLabel('hospitality', translations.en), 'Tourism & Hospitality');
   assert.equal(sectorFilterLabel('logistics', translations.mk), 'Логистика');
   assert.equal(sectorFilterLabel('custom-trade', translations.tr), 'custom-trade');
+});
+
+test('the employer profession filter uses the catalog and still shows legacy text', () => {
+  const rows = [
+    row({ id: 'k', full_name: 'Key', profession: 'electrician', sector: 'construction' }),
+    row({ id: 'l', full_name: 'Legacy', profession: 'Elektrikçi', sector: 'construction' }),
+    row({ id: 'c', full_name: 'Cook', profession: 'cook', sector: 'hospitality' }),
+    row({ id: 'u', full_name: 'Custom', profession: 'Elektrik mühendisi', sector: 'construction' }),
+  ];
+  assert.deepEqual(ids(filterEmployerCandidates(rows, { ...EMPTY_EMPLOYER_CANDIDATE_FILTERS, profession: 'electrician' })), ['k', 'l']);
+  assert.deepEqual(ids(filterEmployerCandidates(rows, { ...EMPTY_EMPLOYER_CANDIDATE_FILTERS, profession: 'elektrik mühendisi' })), ['u']);
+  assert.deepEqual(ids(filterEmployerCandidates(rows, { ...EMPTY_EMPLOYER_CANDIDATE_FILTERS, query: 'електричар' })), ['k']);
+  const options = professionFilterOptions(rows, 'all', 'tr');
+  assert.equal(options.some((option) => option.value === 'electrician' && option.label === 'Elektrikçi'), true);
+  assert.equal(options.filter((option) => option.label === 'Elektrikçi').length, 1);
+  assert.equal(options.some((option) => option.label === 'Elektrik mühendisi'), true);
+  const care = professionFilterOptions(rows, 'care', 'en');
+  assert.equal(care.some((option) => option.value === 'caregiver' && option.label === 'Caregiver'), true);
+  assert.equal(care.some((option) => option.value === 'electrician'), false);
+  assert.equal(care.some((option) => option.label === 'Elektrik mühendisi'), false);
 });
 
 test('a missing browse function is the only reason to use the row-level fallback', () => {

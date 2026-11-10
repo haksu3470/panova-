@@ -11,6 +11,7 @@ import { Card, Stat, Field, requestStatusLabel, resultLabel, fmtDate } from '@/c
 import { matchResultTone } from '@/lib/status-tone';
 import DeleteRecordButton from '@/components/portal/DeleteRecordButton';
 import { useStaffRole } from '@/components/portal/useStaffRole';
+import { candidateProfessionLabel } from '@/lib/candidateLabels';
 import { translations } from '@/lib/dictionary';
 import { fill, portalUi } from '@/lib/portal-ui-copy';
 import { useSiteLanguage } from '@/lib/site-language';
@@ -188,7 +189,7 @@ function EmployerFileInner() {
                     <div>
                       <Link href={`/portal/candidates/${m.candidate_id}`} className="font-bold text-slate-900 hover:underline">{c?.full_name || ui.candidateWord}</Link>
                       <DemoBadge show={m.is_demo} />
-                      <div className="text-[11px] text-muted-foreground">{c?.profession || '—'} · {reqTitle[m.request_id] || '—'} · {fill(ui.presentationOn, { date: fmtDate(m.presented_at) })}</div>
+                      <div className="text-[11px] text-muted-foreground">{candidateProfessionLabel(c?.profession, '—', currentLang)} · {reqTitle[m.request_id] || '—'} · {fill(ui.presentationOn, { date: fmtDate(m.presented_at) })}</div>
                     </div>
                     <span className={`inline-flex w-fit shrink-0 rounded-lg px-2 py-0.5 text-xs font-bold ${matchResultTone(m.employer_result)}`}>{resultLabel(ui, m.employer_result) || ui.awaitingResult}</span>
                   </li>

@@ -25,6 +25,7 @@ import CandidateYouTube from '@/components/candidate/CandidateYouTube';
 import { releaseCopy, supportStatusLabel } from '@/lib/release-copy';
 import EmployerConsentCard from '@/components/auth/EmployerConsentCard';
 import { needsEmployerConsent } from '@/lib/employerInvite';
+import { candidateProfessionLabel } from '@/lib/candidateLabels';
 import {
   EMPLOYER_CANDIDATE_BROWSE_COLUMNS,
   isMissingBrowseRpc,
@@ -389,7 +390,7 @@ function EmployerPortalInner() {
     const { error: intErr } = await supabase.rpc('employer_request_interview', {
       p_candidate_id: candidate.id,
       p_request_id: isUuid(candidate.active_request_id) ? candidate.active_request_id : null,
-      p_notes: `${ui.interview}: ${candidate.profession || ui.general} · ${ui.onlineMeeting}`,
+      p_notes: `${ui.interview}: ${candidateProfessionLabel(candidate.profession, ui.general, currentLang)} · ${ui.onlineMeeting}`,
     });
     if (intErr) {
       console.error('interview request failed', intErr);
@@ -857,6 +858,7 @@ function EmployerPortalInner() {
               videoWatch: t.youtubeVideoWatch || t.watchVideo,
               videoOpen: t.youtubeVideoOpen || '',
             }}
+            lang={currentLang}
             sectorLabel={(sector) => sectorFilterLabel(sector, t)}
             onInterview={handleRequestInterview}
             onSelect={handleSelectCandidate}
@@ -884,7 +886,7 @@ function EmployerPortalInner() {
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="font-extrabold text-slate-950 text-sm">{item.candidate_name || candidates.find((x: any) => x.id === item.candidate_id)?.full_name || ui.candidateWord}</span>
-                        <span className="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded">{item.position || candidates.find((x: any) => x.id === item.candidate_id)?.profession || ui.positionWord}</span>
+                        <span className="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded">{candidateProfessionLabel(item.position || candidates.find((x: any) => x.id === item.candidate_id)?.profession, ui.positionWord, currentLang)}</span>
                       </div>
                       <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5 text-muted-foreground" /> {item.scheduled_at ? new Date(item.scheduled_at).toLocaleString(dateLocale[currentLang]) : '—'} | 💻 {item.platform || ui.onlineMeeting}
@@ -941,7 +943,7 @@ function EmployerPortalInner() {
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="font-extrabold text-slate-950 text-sm">{cand.full_name || cand.name}</h4>
-                        <p className="text-xs text-muted-foreground">{cand.profession || ui.specialist} • {cand.nationality || '—'}</p>
+                        <p className="text-xs text-muted-foreground">{candidateProfessionLabel(cand.profession, ui.specialist, currentLang)} • {cand.nationality || '—'}</p>
                       </div>
                       <span className="bg-emerald-50 text-emerald-800 text-[10px] font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" /> {t.approvedAndProcessing}

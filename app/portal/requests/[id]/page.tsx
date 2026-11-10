@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
 import { Card, Stat, Field, REQUEST_STATUS_KEYS, requestStatusLabel, resultLabel, fmtDate } from '@/components/portal/file/ui';
 import { matchResultTone } from '@/lib/status-tone';
+import { candidateProfessionLabel } from '@/lib/candidateLabels';
 import { translations } from '@/lib/dictionary';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { benefitsAnswered } from '@/lib/workforceRequest';
@@ -197,7 +198,7 @@ function RequestFileInner() {
                     <div>
                       <Link href={`/portal/candidates/${m.candidate_id}`} className="font-bold text-slate-900 hover:underline">{c?.full_name || ui.candidateWord}</Link>
                       <DemoBadge show={m.is_demo} />
-                      <div className="text-[11px] text-muted-foreground">{c?.profession || '—'} · {c?.nationality || '—'} · {m.presented_at ? fill(ui.presentedOn, { date: fmtDate(m.presented_at) }) : ui.notPresented} · {ui.interview} {ivs.length}{of ? ` · ${ui.offer}: ${ui.offerStatus[of.status] || of.status}` : ''}</div>
+                      <div className="text-[11px] text-muted-foreground">{candidateProfessionLabel(c?.profession, '—', currentLang)} · {c?.nationality || '—'} · {m.presented_at ? fill(ui.presentedOn, { date: fmtDate(m.presented_at) }) : ui.notPresented} · {ui.interview} {ivs.length}{of ? ` · ${ui.offer}: ${ui.offerStatus[of.status] || of.status}` : ''}</div>
                     </div>
                     <span className={`inline-flex w-fit shrink-0 rounded-lg px-2 py-0.5 text-xs font-bold ${matchResultTone(m.employer_result)}`}>{resultLabel(ui, m.employer_result) || '—'}</span>
                   </li>

@@ -23,6 +23,7 @@ import {
   UserCheck, CheckSquare, History, ShieldAlert, Key, RefreshCw, Trash2, BookOpen
 } from 'lucide-react';
 import Link from 'next/link';
+import { candidateProfessionLabel } from '@/lib/candidateLabels';
 import { Language, translations } from '@/lib/dictionary';
 import { portalUi } from '@/lib/portal-ui-copy';
 import { benefitPhrase, displayedRequestSalary } from '@/lib/workforceRequest';
@@ -1177,7 +1178,7 @@ export default function PortalPage() {
                 {candidates.slice(0, 3).map((cand) => (
                   <div key={cand.id} className="flex items-center justify-between bg-white p-3 rounded-xl border text-xs">
                     <div>
-                      <strong>{cand.full_name}</strong> ({cand.profession}) - <span className="text-muted-foreground">{cand.nationality || cand.country}</span>
+                      <strong>{cand.full_name}</strong> ({candidateProfessionLabel(cand.profession, ui.general, currentLang)}) - <span className="text-muted-foreground">{cand.nationality || cand.country}</span>
                     </div>
                     <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-lg font-bold uppercase text-[10px]">
                       {cand.status}

@@ -77,6 +77,10 @@ test('unspecified sentinels localize and typed professions stay as entered', () 
     assert.equal(candidatePassportLabel('', unspecified), unspecified);
   }
   assert.equal(candidateProfessionLabel('Elektrik mühendisi', portalUi.mk.unspecified), 'Elektrik mühendisi');
+  assert.equal(candidateProfessionLabel('electrician', portalUi.mk.unspecified, 'mk'), 'Електричар');
+  assert.equal(candidateProfessionLabel('electrician', portalUi.en.unspecified, 'en'), 'Electrician');
+  assert.equal(candidateProfessionLabel('cook', portalUi.ar.unspecified, 'ar'), 'طبّاخ');
+  assert.equal(candidateProfessionLabel('Kalıp ustası', portalUi.tr.unspecified, 'tr'), 'Kalıp ustası');
   assert.equal(candidatePlaceLabel('Belirtilmedi', 'Turkey', 'mk', portalUi.mk.unspecified), 'Турција');
   assert.equal(candidatePlaceLabel('Türkiye', '', 'mk', portalUi.mk.unspecified), 'Турција');
   assert.equal(candidatePlaceLabel('North Macedonia', '', 'sq', portalUi.sq.unspecified), 'Maqedonia e Veriut');

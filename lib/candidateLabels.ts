@@ -2,9 +2,11 @@ import { translations, type Language, type Translation } from './dictionary';
 import { registrationCountries } from './registrationCountries';
 import { SECTOR_FILTER_CODES, normalizeFilterText, sectorFilterLabel } from './employerCandidateFilters';
 import { portalUi, type PortalUi } from './portal-ui-copy';
+import { professionLabel } from './professions';
 
 /**
  * Display labels for the staff candidate list and its sector / country filters.
+ * A catalog profession key renders in the active locale.
  * Stored free text (a profession someone typed) is left as entered.
  * Sector codes, known country names, and the Turkish "not specified" sentinel
  * follow the active locale.
@@ -102,10 +104,14 @@ export function sameSector(stored: string | null | undefined, selected: string):
   return normalizeFilterText(stored) === normalizeFilterText(selected);
 }
 
-export function candidateProfessionLabel(profession: string | null | undefined, unspecified: string): string {
+export function candidateProfessionLabel(
+  profession: string | null | undefined,
+  unspecified: string,
+  lang: Language = 'tr',
+): string {
   const raw = (profession ?? '').trim();
   if (!raw || isUnspecifiedLabel(raw)) return unspecified;
-  return raw;
+  return professionLabel(raw, lang) ?? raw;
 }
 
 export function candidatePlaceLabel(
