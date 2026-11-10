@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ensureStaff, signOut } from '@/lib/auth';
 import { consumeOAuthIntent, listenerMayRevokeSharedSession, PORTAL_OAUTH_PATH } from '@/lib/staffSession';
+import { AccountExistsNotice } from '@/components/auth/AccountExistsNotice';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
 import ForgotPasswordPanel, { ForgotPasswordLink } from '@/components/auth/ForgotPasswordPanel';
 import {
@@ -25,13 +26,14 @@ import {
 import Link from 'next/link';
 import { candidateProfessionLabel } from '@/lib/candidateLabels';
 import { Language, translations } from '@/lib/dictionary';
-import { portalUi } from '@/lib/portal-ui-copy';
+import { dateLocale, portalUi } from '@/lib/portal-ui-copy';
 import { benefitPhrase, displayedRequestSalary } from '@/lib/workforceRequest';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { guideNavLabel } from '@/lib/guides-nav';
 import { releaseCopy } from '@/lib/release-copy';
+import { threadForTicket, type SupportMessage } from '@/lib/supportTickets';
 import StaffMfaPanel from '@/components/portal/StaffMfaPanel';
 import EmployerLoginInvite from '@/components/portal/EmployerLoginInvite';
 import { taskIsOverdue } from '@/lib/demandStatus';
@@ -76,7 +78,7 @@ export default function PortalPage() {
   };
 
   const [authenticated, setAuthenticated] = useState(false);
-  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify' | 'forgot'>('signin');
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify' | 'forgot' | 'exists'>('signin');
   const [verifyEmail, setVerifyEmail] = useState('');
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
@@ -93,6 +95,7 @@ export default function PortalPage() {
   const [jobRequests, setJobRequests] = useState<any[]>([]);
   const [employers, setEmployers] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
+  const [supportMessages, setSupportMessages] = useState<SupportMessage[]>([]);
   const [staffMembers, setStaffMembers] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
 
@@ -175,7 +178,20 @@ export default function PortalPage() {
     if (empData) setEmployers(empData);
 
     const { data: ticketData } = await supabase.from('candidate_support_tickets').select('*').order('created_at', { ascending: false });
-    if (ticketData) setSupportTickets(ticketData);
+    if (ticketData) {
+      setSupportTickets(ticketData);
+      const ids = ticketData.map((ticket: { id?: string }) => ticket.id).filter(Boolean);
+      if (ids.length) {
+        const { data: msgs } = await supabase
+          .from('support_ticket_messages')
+          .select('id, ticket_id, author_role, author_name, body, created_at, read_at')
+          .in('ticket_id', ids)
+          .order('created_at', { ascending: true });
+        if (msgs) setSupportMessages(msgs);
+      } else {
+        setSupportMessages([]);
+      }
+    }
 
     const { data: staffData } = await supabase.from('staff_members').select('*').order('created_at', { ascending: false });
     if (staffData && staffData.length > 0) {
@@ -358,6 +374,11 @@ export default function PortalPage() {
         metadata: { role: 'staff', full_name: regName.trim() },
         locale: currentLang,
       });
+      if (result.status === 'exists') {
+        setUsername(email);
+        setAuthMode('exists');
+        return;
+      }
       if (result.status === 'error') {
         alert((t.signupError || '{message}').replace('{message}', result.message));
         return;
@@ -597,10 +618,20 @@ export default function PortalPage() {
                     if (!user) return;
                     await enterStaff(user.id, user.email || verifyEmail, regName || undefined, true, true, true);
                   }}
+                  onSignIn={() => { setUsername(verifyEmail); setAuthMode('signin'); }}
+                  onResetPassword={() => { setUsername(verifyEmail); setAuthMode('forgot'); }}
                 />
                 <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-muted-foreground cursor-pointer">{t.verifyEmailBack}</button>
                 <OAuthButtons redirectPath="/portal" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} />
               </div>
+            ) : authMode === 'exists' ? (
+              <AccountExistsNotice
+                message={t.accountExists || ''}
+                signInLabel={t.signInMenu || ''}
+                resetLabel={t.forgotPassword || ''}
+                onSignIn={() => setAuthMode('signin')}
+                onReset={() => setAuthMode('forgot')}
+              />
             ) : authMode === 'forgot' ? (
               <ForgotPasswordPanel
                 lang={currentLang}
@@ -1063,23 +1094,61 @@ export default function PortalPage() {
                       <span className={`uppercase text-[10px] ${String(tkt.status).toLowerCase() === 'answered' ? 'text-emerald-700' : 'text-red-600'}`}>{tkt.status}</span>
                     </div>
                     <p className="text-muted-foreground">{tkt.created_at ? String(tkt.created_at).slice(0, 16).replace('T', ' ') : ''}</p>
-                    <p className="text-slate-600">{t.message}: {tkt.message}</p>
-                    <p className="text-slate-800">{releaseCopy[currentLang].supportReply}: {tkt.admin_reply || releaseCopy[currentLang].supportNoReply}</p>
+                    <p className="text-foreground">{t.message}: {tkt.message}</p>
+                    {threadForTicket(tkt, supportMessages).length === 0 ? (
+                      <p className="text-muted-foreground">{releaseCopy[currentLang].supportNoReply}</p>
+                    ) : threadForTicket(tkt, supportMessages).map((message) => (
+                      <div key={message.id} className="rounded-xl border border-line bg-card px-3 py-2">
+                        <p className="font-bold text-foreground">
+                          {message.author_role === 'staff'
+                            ? (message.author_name || releaseCopy[currentLang].supportReply)
+                            : (message.author_name || tkt.candidate_name)}
+                          {message.created_at ? (
+                            <span className="ms-2 font-semibold text-muted-foreground">
+                              {new Date(message.created_at).toLocaleString(dateLocale[currentLang])}
+                            </span>
+                          ) : null}
+                        </p>
+                        <p className="mt-1 whitespace-pre-wrap text-foreground">{message.body}</p>
+                      </div>
+                    ))}
                     {String(tkt.status).toLowerCase() !== 'closed' ? (
                       <form className="flex flex-col sm:flex-row gap-2" onSubmit={async (event) => {
                         event.preventDefault();
-                        const reply = String(new FormData(event.currentTarget).get('reply') || '').trim();
+                        const form = event.currentTarget;
+                        const reply = String(new FormData(form).get('reply') || '').trim();
                         if (!reply) return;
+                        const repliedAt = new Date().toISOString();
+                        const userId = (await supabase.auth.getUser()).data.user?.id ?? null;
+                        await supabase.from('support_ticket_messages').insert({
+                          ticket_id: tkt.id,
+                          author_role: 'staff',
+                          author_name: currentUser?.name || null,
+                          body: reply,
+                        });
                         const { error } = await supabase.from('candidate_support_tickets').update({
                           admin_reply: reply,
                           status: 'answered',
-                          replied_at: new Date().toISOString(),
-                          replied_by: (await supabase.auth.getUser()).data.user?.id ?? null,
+                          replied_at: repliedAt,
+                          replied_by: userId,
                           replied_by_name: currentUser?.name || null,
                         }).eq('id', tkt.id);
                         if (error) {
                           alert(error.message);
                           return;
+                        }
+                        form.reset();
+                        if (tkt.candidate_id) {
+                          const { data: sess } = await supabase.auth.getSession();
+                          const sent = await fetch('/api/support/reply-email', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              Authorization: `Bearer ${sess.session?.access_token || ''}`,
+                            },
+                            body: JSON.stringify({ ticketId: tkt.id }),
+                          });
+                          if (!sent.ok) alert(releaseCopy[currentLang].supportEmailFailed);
                         }
                         fetchAllData();
                       }}>

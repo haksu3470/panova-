@@ -1,4 +1,5 @@
 import type { Language } from './dictionary';
+import { supportTicketStatus } from './supportTickets';
 
 export type ReleaseCopy = {
   kvkkBefore: string;
@@ -16,6 +17,7 @@ export type ReleaseCopy = {
   supportClose: string;
   supportReplied: string;
   supportNoReply: string;
+  supportEmailFailed: string;
   statusOpen: string;
   statusAnswered: string;
   statusClosed: string;
@@ -68,6 +70,7 @@ const tr: ReleaseCopy = {
   supportClose: 'Kapat',
   supportReplied: 'Yanıtlayan',
   supportNoReply: 'Henüz personel yanıtı yok.',
+  supportEmailFailed: 'Yanıt kaydedildi. Adaya e-posta gönderilemedi.',
   statusOpen: 'Açık',
   statusAnswered: 'Yanıtlandı',
   statusClosed: 'Kapatıldı',
@@ -120,6 +123,7 @@ const en: ReleaseCopy = {
   supportClose: 'Close',
   supportReplied: 'Replied by',
   supportNoReply: 'No staff reply yet.',
+  supportEmailFailed: 'The reply was saved. The email to the candidate could not be sent.',
   statusOpen: 'Open',
   statusAnswered: 'Answered',
   statusClosed: 'Closed',
@@ -172,6 +176,7 @@ const mk: ReleaseCopy = {
   supportClose: 'Затвори',
   supportReplied: 'Одговори',
   supportNoReply: 'Сè уште нема одговор.',
+  supportEmailFailed: 'Одговорот е зачуван. Е-поштата до кандидатот не можеше да се испрати.',
   statusOpen: 'Отворено',
   statusAnswered: 'Одговорено',
   statusClosed: 'Затворено',
@@ -224,6 +229,7 @@ const sq: ReleaseCopy = {
   supportClose: 'Mbyll',
   supportReplied: 'U përgjigj',
   supportNoReply: 'Ende nuk ka përgjigje nga stafi.',
+  supportEmailFailed: 'Përgjigjja u ruajt. E-maili te kandidati nuk u dërgua.',
   statusOpen: 'Hapur',
   statusAnswered: 'Përgjigjur',
   statusClosed: 'Mbyllur',
@@ -276,6 +282,7 @@ const ar: ReleaseCopy = {
   supportClose: 'إغلاق',
   supportReplied: 'ردّ بواسطة',
   supportNoReply: 'لا يوجد رد من الموظفين بعد.',
+  supportEmailFailed: 'حُفظ الرد. تعذر إرسال البريد إلى المرشح.',
   statusOpen: 'مفتوح',
   statusAnswered: 'تم الرد',
   statusClosed: 'مغلق',
@@ -315,7 +322,7 @@ const ar: ReleaseCopy = {
 export const releaseCopy: Record<Language, ReleaseCopy> = { tr, en, sq, ar, mk };
 
 export function supportStatusLabel(status: string | null | undefined, copy: ReleaseCopy): string {
-  const key = String(status ?? '').trim().toLowerCase();
+  const key = supportTicketStatus(status);
   if (key === 'answered') return copy.statusAnswered;
   if (key === 'closed') return copy.statusClosed;
   return copy.statusOpen;

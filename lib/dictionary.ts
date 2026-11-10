@@ -515,6 +515,11 @@ export interface Translation {
   forgotPasswordSent?: string;
   forgotPasswordFail?: string;
   forgotPasswordHaveCode?: string;
+  accountExists?: string;
+  passportExists?: string;
+  phoneExists?: string;
+  signInUnavailable?: string;
+  duplicateCheckFailed?: string;
   resetPasswordTitle?: string;
   resetPasswordLead?: string;
   resetPasswordProveLead?: string;
@@ -1095,6 +1100,11 @@ export const translations: Record<Language, Translation> = {
     forgotPasswordSent: 'Bu adresle bir şifre hesabı varsa, yeni şifre seçmeniz için bir bağlantı gönderdik. İletideki kodu da kullanabilirsiniz.',
     forgotPasswordFail: 'E-posta gönderilemedi. Biraz sonra tekrar deneyin.',
     forgotPasswordHaveCode: 'Kodum veya bağlantım var',
+    accountExists: 'Bu e-posta ile zaten bir hesap var. Giriş yapın veya şifrenizi sıfırlayın.',
+    passportExists: 'Bu pasaport numarası başka bir aday kaydında var. Pasaport numaranızla giriş yapın ya da Panova ile iletişime geçin.',
+    phoneExists: 'Bu telefon numarası başka bir aday kaydında var. Telefon numaranızla giriş yapın ya da Panova ile iletişime geçin.',
+    signInUnavailable: 'Giriş şu anda kullanılamıyor. Biraz sonra tekrar deneyin.',
+    duplicateCheckFailed: 'Kayıt kontrol edilemedi. Biraz sonra tekrar deneyin.',
     resetPasswordTitle: 'Yeni şifre belirleyin',
     resetPasswordLead: 'E-postadaki bağlantı bu sayfayı açtıysa yeni şifrenizi yazın. Bağlantı başka bir cihazdaysa kodu aşağıya girin.',
     resetPasswordProveLead: 'E-postadaki bağlantıya tıklayın veya 6 haneli kodu buraya girin. Bağlantı bu sayfayı açtıysa yeni şifre alanları kendiliğinden gelir.',
@@ -1665,6 +1675,11 @@ export const translations: Record<Language, Translation> = {
     forgotPasswordSent: 'If a password account exists for this address, we sent a link to choose a new password. You can also use the code in that message.',
     forgotPasswordFail: 'The email could not be sent. Try again shortly.',
     forgotPasswordHaveCode: 'I have a code or link',
+    accountExists: 'An account already exists for this email. Sign in or reset your password.',
+    passportExists: 'This passport number is already on a candidate record. Sign in with your passport or contact Panova.',
+    phoneExists: 'This phone number is already on a candidate record. Sign in with your phone or contact Panova.',
+    signInUnavailable: 'Sign-in is unavailable right now. Try again shortly.',
+    duplicateCheckFailed: 'Registration could not be checked. Try again shortly.',
     resetPasswordTitle: 'Choose a new password',
     resetPasswordLead: 'If the email link opened this page, enter a new password. If the link is on another device, enter the code below.',
     resetPasswordProveLead: 'Click the link in the email, or enter the 6-digit code here. If the link opened this page, the new-password fields appear on their own.',
@@ -2235,6 +2250,11 @@ export const translations: Record<Language, Translation> = {
     forgotPasswordSent: 'Nëse kjo adresë ka një llogari me fjalëkalim, dërguam një lidhje për fjalëkalim të ri. Mund të përdorni edhe kodin në atë letër.',
     forgotPasswordFail: 'E-maili nuk u dërgua. Provoni përsëri pas pak.',
     forgotPasswordHaveCode: 'Kam një kod ose lidhje',
+    accountExists: 'Me këtë e-mail ekziston tashmë një llogari. Hyni ose rivendosni fjalëkalimin.',
+    passportExists: 'Ky numër pasaporte është tashmë në një regjistrim kandidati. Hyni me pasaportën ose kontaktoni Panova.',
+    phoneExists: 'Ky numër telefoni është tashmë në një regjistrim kandidati. Hyni me telefonin ose kontaktoni Panova.',
+    signInUnavailable: 'Hyrja nuk është e disponueshme tani. Provoni përsëri pas pak.',
+    duplicateCheckFailed: 'Regjistrimi nuk u kontrollua. Provoni përsëri pas pak.',
     resetPasswordTitle: 'Vendosni një fjalëkalim të ri',
     resetPasswordLead: 'Nëse lidhja e email-it e hapi këtë faqe, shkruani fjalëkalimin e ri. Nëse lidhja është në një pajisje tjetër, vendosni kodin më poshtë.',
     resetPasswordProveLead: 'Klikoni lidhjen në e-mail, ose shkruani kodin 6-shifror këtu. Nëse lidhja e hapi këtë faqe, fushat e fjalëkalimit të ri shfaqen vetë.',
@@ -2795,6 +2815,11 @@ export const translations: Record<Language, Translation> = {
     forgotPasswordSent: 'إذا كان لهذا العنوان حساب بكلمة مرور، أرسلنا رابطًا لاختيار كلمة مرور جديدة. يمكنك أيضًا استخدام الرمز في الرسالة.',
     forgotPasswordFail: 'تعذر إرسال الرسالة. حاول مرة أخرى بعد قليل.',
     forgotPasswordHaveCode: 'لدي رمز أو رابط',
+    accountExists: 'يوجد حساب بالفعل لهذا البريد. سجّل الدخول أو أعد تعيين كلمة المرور.',
+    passportExists: 'رقم جواز السفر هذا مسجل لمرشح آخر. سجّل الدخول برقم الجواز أو تواصل مع بانوفا.',
+    phoneExists: 'رقم الهاتف هذا مسجل لمرشح آخر. سجّل الدخول بالهاتف أو تواصل مع بانوفا.',
+    signInUnavailable: 'تسجيل الدخول غير متاح الآن. حاول مرة أخرى بعد قليل.',
+    duplicateCheckFailed: 'تعذر التحقق من التسجيل. حاول مرة أخرى بعد قليل.',
     resetPasswordTitle: 'اختر كلمة مرور جديدة',
     resetPasswordLead: 'إذا فتح رابط البريد هذه الصفحة، اكتب كلمة المرور الجديدة. إذا كان الرابط على جهاز آخر، أدخل الرمز أدناه.',
     resetPasswordProveLead: 'انقر الرابط في البريد، أو أدخل الرمز المكوّن من 6 أرقام هنا. إذا فتح الرابط هذه الصفحة، تظهر حقول كلمة المرور الجديدة تلقائيًا.',
@@ -3370,6 +3395,11 @@ export const translations: Record<Language, Translation> = {
     forgotPasswordSent: 'Ако оваа адреса има сметка со лозинка, испративме врска за нова лозинка. Можете да го користите и кодот од пораката.',
     forgotPasswordFail: 'Е-поштата не можеше да се испрати. Обидете се повторно наскоро.',
     forgotPasswordHaveCode: 'Имам код или врска',
+    accountExists: 'Веќе постои сметка со оваа е-пошта. Најавете се или ресетирајте ја лозинката.',
+    passportExists: 'Овој број на пасош веќе е на запис за кандидат. Најавете се со пасошот или контактирајте ја Panova.',
+    phoneExists: 'Овој телефонски број веќе е на запис за кандидат. Најавете се со телефонот или контактирајте ја Panova.',
+    signInUnavailable: 'Најавата моментално не е достапна. Обидете се повторно наскоро.',
+    duplicateCheckFailed: 'Регистрацијата не можеше да се провери. Обидете се повторно наскоро.',
     resetPasswordTitle: 'Поставете нова лозинка',
     resetPasswordLead: 'Ако врската од е-поштата ја отвори оваа страница, внесете нова лозинка. Ако врската е на друг уред, внесете го кодот подолу.',
     resetPasswordProveLead: 'Кликнете на врската во е-поштата, или внесете го 6-цифрениот код тука. Ако врската ја отвори оваа страница, полињата за нова лозинка се појавуваат сами.',

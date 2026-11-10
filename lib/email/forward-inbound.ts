@@ -39,6 +39,9 @@ export function joinAddresses(value: unknown): string {
  * (for example `Panova <panova@panovagroup.org>` or a noreply address on the
  * same verified domain). Otherwise sends as the company mailbox.
  */
+/** Corporate card (template B) for messages the candidate should not reply to by mail. */
+export const NOREPLY_FROM = 'Panova <noreply@panovagroup.org>';
+
 export function forwardFromAddress(): string {
   const configured = process.env.RESEND_FROM?.trim();
   if (configured && /@panovagroup\.org\b/i.test(configured)) return configured;

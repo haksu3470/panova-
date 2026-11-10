@@ -1,3 +1,4 @@
+import { canonicalPassport, canonicalPhone } from './loginIdentifier';
 import { canonicalNationality } from './registrationCountries';
 
 /**
@@ -59,8 +60,8 @@ export function candidateRegistrationPayload(
   input: Omit<CandidateIdentityInput, 'email'>,
 ): CandidateRegistration {
   const full_name = required(input.fullName);
-  const passport_number = required(input.passport)?.toUpperCase() ?? null;
-  const phone = required(input.phone);
+  const passport_number = required(canonicalPassport(input.passport));
+  const phone = required(canonicalPhone(input.phone));
   const profession = required(input.profession);
   const sector = required(input.sector);
   const nationality = canonicalNationality(input.nationality);

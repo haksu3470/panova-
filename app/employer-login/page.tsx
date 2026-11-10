@@ -5,6 +5,7 @@ import OAuthButtons from '@/components/auth/OAuthButtons';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { signOut } from '@/lib/auth';
+import { AccountExistsNotice } from '@/components/auth/AccountExistsNotice';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
 import ForgotPasswordPanel, { ForgotPasswordLink } from '@/components/auth/ForgotPasswordPanel';
 import {
@@ -54,7 +55,7 @@ export default function EmployerLoginPage() {
     writeStoredLanguage(lang);
   };
 
-  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify' | 'forgot' | 'consent'>('signin');
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify' | 'forgot' | 'consent' | 'exists'>('signin');
   const [verifyEmail, setVerifyEmail] = useState('');
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -198,6 +199,11 @@ export default function EmployerLoginPage() {
         },
         locale: currentLang,
       });
+      if (result.status === 'exists') {
+        setLoginEmail(email);
+        setAuthMode('exists');
+        return;
+      }
       if (result.status === 'error') {
         alert((t.signupError || '{message}').replace('{message}', result.message));
         return;
@@ -278,11 +284,21 @@ export default function EmployerLoginPage() {
                   const opened = await openEmployer(verifyEmail);
                   if (!opened) alert(t.employerVerifiedUnlinked);
                 }}
+                onSignIn={() => { setLoginEmail(verifyEmail); setAuthMode('signin'); }}
+                onResetPassword={() => { setLoginEmail(verifyEmail); setAuthMode('forgot'); }}
               />
               <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-muted-foreground cursor-pointer">
                 {t.verifyEmailBack}
               </button>
             </div>
+          ) : authMode === 'exists' ? (
+            <AccountExistsNotice
+              message={t.accountExists || ''}
+              signInLabel={t.signInMenu || ''}
+              resetLabel={t.forgotPassword || ''}
+              onSignIn={() => setAuthMode('signin')}
+              onReset={() => setAuthMode('forgot')}
+            />
           ) : authMode === 'forgot' ? (
             <ForgotPasswordPanel
               lang={currentLang}

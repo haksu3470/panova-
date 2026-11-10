@@ -2,6 +2,7 @@
 
 import { useRef, useState, type FormEvent } from 'react';
 import { Mail } from 'lucide-react';
+import { AccountExistsNotice } from '@/components/auth/AccountExistsNotice';
 import { VerificationCodeField } from '@/components/auth/VerificationCodeField';
 import { Language, translations } from '@/lib/dictionary';
 import { EMAIL_OTP_LENGTH } from '@/lib/emailConfirmation';
@@ -12,15 +13,20 @@ export default function EmailVerifyNotice({
   lang,
   redirectPath,
   onVerified,
+  onSignIn,
+  onResetPassword,
 }: {
   email: string;
   lang: Language;
   redirectPath: string;
   onVerified: () => Promise<void> | void;
+  onSignIn?: () => void;
+  onResetPassword?: () => void;
 }) {
   const t = translations[lang] || translations.tr;
   const [code, setCode] = useState('');
   const [info, setInfo] = useState('');
+  const [exists, setExists] = useState(false);
   const [busy, setBusy] = useState(false);
   const [cooldown, setCooldown] = useState(false);
   const busyRef = useRef(false);
@@ -32,6 +38,11 @@ export default function EmailVerifyNotice({
     setInfo('');
     const result = await resendVerification(email, redirectPath, lang);
     setBusy(false);
+    if (result.code === 'exists') {
+      setExists(true);
+      setInfo('');
+      return;
+    }
     setInfo(result.ok ? (t.verifyEmailResent || '') : (result.message || t.verifyEmailResendFail || ''));
     if (result.ok) {
       setCooldown(true);
@@ -65,6 +76,18 @@ export default function EmailVerifyNotice({
     event.preventDefault();
     void submitCode(code, true);
   };
+
+  if (exists) {
+    return (
+      <AccountExistsNotice
+        message={t.accountExists || ''}
+        signInLabel={t.signInMenu || ''}
+        resetLabel={t.forgotPassword || ''}
+        onSignIn={onSignIn}
+        onReset={onResetPassword}
+      />
+    );
+  }
 
   return (
     <div className="space-y-4 text-left rtl:text-right">

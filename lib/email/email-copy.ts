@@ -499,6 +499,64 @@ export const noticeMailCopy: Record<EmailLocale, NoticeMailCopy> = {
   },
 };
 
+export type SupportReplyMailCopy = {
+  subject: string;
+  preheader: string;
+  title: string;
+  greeting: string;
+  lead: string;
+  button: string;
+  fallbackName: string;
+};
+
+export const supportReplyMailCopy: Record<EmailLocale, SupportReplyMailCopy> = {
+  tr: {
+    subject: 'Panova destek yanıtı: {subject}',
+    preheader: 'Destek talebinize bir yanıt var.',
+    title: 'Destek talebinize yanıt verildi',
+    greeting: 'Sayın {name},',
+    lead: 'Destek talebinize bir yanıt yazıldı. Taleplerim listesinden okuyup yanıtlayabilirsiniz.',
+    button: 'Taleplerimi aç',
+    fallbackName: 'Adayımız',
+  },
+  en: {
+    subject: 'Panova support reply: {subject}',
+    preheader: 'Your support request has a reply.',
+    title: 'Your support request was answered',
+    greeting: 'Dear {name},',
+    lead: 'A reply was added to your support request. You can read it and answer from My requests.',
+    button: 'Open my requests',
+    fallbackName: 'Candidate',
+  },
+  sq: {
+    subject: 'Përgjigje mbështetjeje Panova: {subject}',
+    preheader: 'Kërkesa juaj e mbështetjes ka një përgjigje.',
+    title: 'Kërkesës suaj iu përgjigjën',
+    greeting: 'I nderuar {name},',
+    lead: 'Kërkesës suaj të mbështetjes iu shtua një përgjigje. Mund ta lexoni dhe t’i përgjigjeni te Kërkesat e mia.',
+    button: 'Hap kërkesat e mia',
+    fallbackName: 'Kandidat',
+  },
+  ar: {
+    subject: 'رد دعم Panova: {subject}',
+    preheader: 'يوجد رد على طلب الدعم.',
+    title: 'تم الرد على طلب الدعم',
+    greeting: 'عزيزي {name}،',
+    lead: 'أُضيف رد إلى طلب الدعم. يمكنكم قراءته والرد عليه من طلباتي.',
+    button: 'فتح طلباتي',
+    fallbackName: 'المرشح',
+  },
+  mk: {
+    subject: 'Одговор за поддршка од Panova: {subject}',
+    preheader: 'Вашето барање за поддршка има одговор.',
+    title: 'Одговорено е на барањето за поддршка',
+    greeting: 'Почитуван {name},',
+    lead: 'На барањето за поддршка е додаден одговор. Можете да го прочитате и да одговорите од Мои барања.',
+    button: 'Отвори ги моите барања',
+    fallbackName: 'Кандидат',
+  },
+};
+
 export type ForwardMailCopy = {
   intro: string;
   contactIntro: string;

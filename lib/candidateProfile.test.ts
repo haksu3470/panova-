@@ -144,6 +144,19 @@ test('a returned row is the persisted candidate', () => {
   assert.equal(assertCandidatePersisted(row, null), row);
 });
 
+test('registration stores the phone and passport in the same shape login uses', () => {
+  const payload = candidateRegistrationPayload({
+    fullName: 'Ayse Yilmaz',
+    passport: 'u 1234567',
+    phone: '0532 461 50 35',
+    profession: 'Elektrikçi',
+    sector: 'construction',
+    nationality: 'Türkiye',
+  });
+  assert.equal(payload.passport_number, 'U1234567');
+  assert.equal(payload.phone, '+905324615035');
+});
+
 test('registration save does not include email, photo, or privileged columns', () => {
   const payload = candidateRegistrationPayload({
     fullName: '  Ayse Yilmaz ',

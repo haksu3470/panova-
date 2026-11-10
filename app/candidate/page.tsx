@@ -3,6 +3,7 @@
 import OAuthButtons from '@/components/auth/OAuthButtons';
 import { AuthFooter } from '@/components/site/AuthFooter';
 import CandidateYouTube from '@/components/candidate/CandidateYouTube';
+import { SupportRequestList } from '@/components/candidate/SupportRequestList';
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -16,6 +17,7 @@ import {
   changedCandidatePhoto,
   isPermissionDenied,
 } from '@/lib/candidateProfile';
+import { AccountExistsNotice } from '@/components/auth/AccountExistsNotice';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
 import ForgotPasswordPanel, { ForgotPasswordLink } from '@/components/auth/ForgotPasswordPanel';
 import {
@@ -40,6 +42,8 @@ import { candidatePlaceLabel, candidateProfessionLabel } from '@/lib/candidateLa
 import { ProfessionField } from '@/components/site/ProfessionField';
 import { professionForSectorChange } from '@/lib/professions';
 import { homeCopy } from '@/lib/home-copy';
+import { checkCandidateDuplicate, registrationBlock } from '@/lib/duplicateCandidate';
+import { canonicalPassport, canonicalPhone } from '@/lib/loginIdentifier';
 import { canonicalNationality } from '@/lib/registrationCountries';
 import { candidateOfferResponse, offerMoney, offerStatusLabel } from '@/lib/offers';
 import { offerStatusTone } from '@/lib/status-tone';
@@ -49,6 +53,7 @@ import { guideNavLabel } from '@/lib/guides-nav';
 import KvkkConsent from '@/components/site/KvkkConsent';
 import { kvkkMetadata } from '@/lib/kvkk';
 import { releaseCopy } from '@/lib/release-copy';
+import { supportBadgeCount, supportThreadCopy, type SupportMessage } from '@/lib/supportTickets';
 import { openCandidateDocument, signedCandidateFileUrl, uploadCandidateFile } from '@/lib/candidateFiles';
 import { validateUpload } from '@/lib/uploads';
 
@@ -73,8 +78,9 @@ export default function CandidateDashboard() {
 
   const [authenticated, setAuthenticated] = useState(false);
 
-  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'verify' | 'forgot'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'verify' | 'forgot' | 'exists'>('login');
   const [verifyEmail, setVerifyEmail] = useState('');
+  const [duplicateKind, setDuplicateKind] = useState<'email' | 'phone' | 'passport'>('email');
   const [linkIssue, setLinkIssue] = useState<'phone' | 'passport' | null>(null);
   const [fixValue, setFixValue] = useState('');
   
@@ -127,6 +133,7 @@ export default function CandidateDashboard() {
 
   const [notifications, setNotifications] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
+  const [supportMessages, setSupportMessages] = useState<SupportMessage[]>([]);
   const [jobOffers, setJobOffers] = useState<any[]>([]);
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMsg, setSupportMsg] = useState('');
@@ -588,6 +595,10 @@ export default function CandidateDashboard() {
         body: JSON.stringify({ identifier, password }),
       });
       const body = await response.json().catch(() => ({} as { error?: string; email?: string; access_token?: string; refresh_token?: string }));
+      if (response.status === 503 && !identifier.includes('@')) {
+        alert(t.signInUnavailable);
+        return;
+      }
       if (response.status === 503 && identifier.includes('@')) {
         const email = identifier.toLowerCase();
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -649,7 +660,26 @@ export default function CandidateDashboard() {
     setLoading(true);
     const resume = pauseEmailGateListener();
     const email = regEmail.trim().toLowerCase();
+    const passport = canonicalPassport(regPassport);
+    const phone = canonicalPhone(regPhone);
+    const showDuplicate = (kind: 'email' | 'phone' | 'passport') => {
+      setDuplicateKind(kind);
+      if (kind === 'email') setLoginInput(email);
+      else if (kind === 'phone') setLoginInput(phone || regPhone.trim());
+      else setLoginInput(passport);
+      setAuthMode('exists');
+    };
     try {
+      const checked = await checkCandidateDuplicate({ email, passport, phone });
+      if (!checked.ok) {
+        alert(t.duplicateCheckFailed);
+        return;
+      }
+      const block = registrationBlock(checked.flags);
+      if (block) {
+        showDuplicate(block);
+        return;
+      }
       const result = await beginPasswordSignup({
         email,
         password: regPassword,
@@ -657,8 +687,8 @@ export default function CandidateDashboard() {
         metadata: {
           role: 'candidate',
           full_name: regFullName,
-          passport_number: regPassport.toUpperCase(),
-          phone: regPhone,
+          passport_number: passport,
+          phone,
           profession: regProfession,
           sector: regSector,
           nationality: canonicalNationality(regNationality) || '',
@@ -666,6 +696,10 @@ export default function CandidateDashboard() {
         },
         locale: currentLang,
       });
+      if (result.status === 'exists') {
+        showDuplicate('email');
+        return;
+      }
       if (result.status === 'error') {
         alert((t.signupError || '{message}').replace('{message}', result.message));
         return;
@@ -685,7 +719,9 @@ export default function CandidateDashboard() {
     setLoading(true);
     const resume = pauseEmailGateListener();
     try {
-      const data = linkIssue === 'phone' ? { phone: value } : { passport_number: value.toUpperCase() };
+      const data = linkIssue === 'phone'
+        ? { phone: canonicalPhone(value) }
+        : { passport_number: canonicalPassport(value) };
       const { error } = await supabase.auth.updateUser({ data });
       if (error) {
         alert(error.message);
@@ -738,7 +774,20 @@ export default function CandidateDashboard() {
       .eq('candidate_id', candId)
       .order('created_at', { ascending: false });
 
-    if (tickets) setSupportTickets(tickets);
+    if (tickets) {
+      setSupportTickets(tickets);
+      const ids = tickets.map((ticket: { id?: string }) => ticket.id).filter(Boolean);
+      if (ids.length) {
+        const { data: msgs } = await supabase
+          .from('support_ticket_messages')
+          .select('id, ticket_id, author_role, author_name, body, created_at, read_at')
+          .in('ticket_id', ids)
+          .order('created_at', { ascending: true });
+        if (msgs) setSupportMessages(msgs);
+      } else {
+        setSupportMessages([]);
+      }
+    }
 
     const { data: offers } = await supabase
       .from('job_offers')
@@ -796,6 +845,48 @@ export default function CandidateDashboard() {
       alert('Hata: ' + (error?.message || 'Bilinmeyen hata'));
     }
   };
+
+  const handleFollowUp = async (ticketId: string, body: string) => {
+    if (!candidate?.id) return;
+    const text = body.trim();
+    if (!text) return;
+    const { error: messageError } = await supabase.from('support_ticket_messages').insert({
+      ticket_id: ticketId,
+      author_role: 'candidate',
+      author_name: candidate.full_name,
+      body: text,
+    });
+    const { error: statusError } = await supabase
+      .from('candidate_support_tickets')
+      .update({ status: 'open' })
+      .eq('id', ticketId);
+    if (messageError || statusError) {
+      alert(supportThreadCopy[currentLang].replyFailed);
+      return;
+    }
+    await fetchCandidateData(candidate.id);
+  };
+
+  useEffect(() => {
+    if (activeTab !== 'support' || !candidate?.id) return;
+    const unreadIds = supportMessages
+      .filter((message) => message.author_role === 'staff' && !message.read_at)
+      .map((message) => message.id);
+    if (!unreadIds.length) return;
+    let cancel = false;
+    void (async () => {
+      const readAt = new Date().toISOString();
+      const { error } = await supabase
+        .from('support_ticket_messages')
+        .update({ read_at: readAt })
+        .in('id', unreadIds);
+      if (error || cancel) return;
+      setSupportMessages((current) => current.map((message) => (
+        unreadIds.includes(message.id) ? { ...message, read_at: readAt } : message
+      )));
+    })();
+    return () => { cancel = true; };
+  }, [activeTab, candidate?.id, supportMessages]);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1125,12 +1216,22 @@ export default function CandidateDashboard() {
                   onVerified={async () => {
                     await handleLinkResult(await loadLinkedCandidate(), true);
                   }}
+                  onSignIn={() => { setLoginInput(verifyEmail); setAuthMode('login'); }}
+                  onResetPassword={() => { setLoginInput(verifyEmail); setAuthMode('forgot'); }}
                 />
                 <button type="button" onClick={() => setAuthMode('login')} className="w-full text-xs font-bold text-muted-foreground cursor-pointer">
                   {t.verifyEmailBack}
                 </button>
                 <OAuthButtons redirectPath="/candidate" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} />
               </div>
+            ) : authMode === 'exists' ? (
+              <AccountExistsNotice
+                message={(duplicateKind === 'phone' ? t.phoneExists : duplicateKind === 'passport' ? t.passportExists : t.accountExists) || ''}
+                signInLabel={t.signInMenu || ''}
+                resetLabel={duplicateKind === 'email' ? (t.forgotPassword || '') : undefined}
+                onSignIn={() => setAuthMode('login')}
+                onReset={duplicateKind === 'email' ? () => setAuthMode('forgot') : undefined}
+              />
             ) : authMode === 'forgot' ? (
               <ForgotPasswordPanel
                 lang={currentLang}
@@ -1390,7 +1491,7 @@ export default function CandidateDashboard() {
             💼 {t.offers} ({jobOffers.length})
           </button>
           <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-            💬 {t.support} ({supportTickets.length})
+            💬 {t.support}{supportBadgeCount(supportTickets, supportMessages) > 0 ? ` (${supportBadgeCount(supportTickets, supportMessages)})` : ''}
           </button>
           <Link href="/guides" className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition shrink-0 bg-white border text-slate-700 hover:bg-slate-50">
             <BookOpen className="w-3.5 h-3.5" aria-hidden /> {guideNavLabel[currentLang]}
@@ -1730,6 +1831,13 @@ export default function CandidateDashboard() {
               </div>
               <button type="submit" className="bg-brand-solid text-white px-6 py-2.5 rounded-xl font-bold cursor-pointer">{ct.sendSupportBtn}</button>
             </form>
+            <SupportRequestList
+              lang={currentLang}
+              tickets={supportTickets}
+              messages={supportMessages}
+              statusCopy={releaseCopy[currentLang]}
+              onFollowUp={handleFollowUp}
+            />
           </div>
         )}
 
