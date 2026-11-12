@@ -37,6 +37,7 @@ import {
   type EmployerCandidate,
   type EmployerDecision,
 } from '@/lib/employerCandidateFilters';
+import { indexPipelineCounts, pipelineCountsFor, type RequestPipelineCounts } from '@/lib/requestPipelineCounts';
 
 function EmployerPortalInner() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
@@ -145,6 +146,7 @@ function EmployerPortalInner() {
   >('home');
 
   const [jobDemands, setJobDemands] = useState<any[]>([]);
+  const [pipelineCounts, setPipelineCounts] = useState<Record<string, RequestPipelineCounts>>({});
   const [candidates, setCandidates] = useState<any[]>([]);
   const [interviews, setInterviews] = useState<any[]>([]);
   const [selectedCandidates, setSelectedCandidates] = useState<any[]>([]);
@@ -181,6 +183,12 @@ function EmployerPortalInner() {
       .order('created_at', { ascending: false });
 
     setJobDemands(demData || []);
+
+    // Per-request card counts. Missing view (migration not applied yet) or an
+    // error leaves the index empty, so the cards show zeros instead of failing.
+    const { data: countRows, error: countError } = await supabase.from('request_pipeline_counts').select('*');
+    if (countError) console.error('request pipeline counts failed', countError.code || countError.message);
+    setPipelineCounts(countError ? {} : indexPipelineCounts(countRows));
 
     const { data: pooled, error: poolError } = await supabase.rpc('employer_browse_candidates');
     let candData: unknown[] | null = pooled;
@@ -475,18 +483,19 @@ function EmployerPortalInner() {
   // Makes a decision staff entered on the employer's behalf the employer's own.
   const handleConfirmDecision = (candidate: EmployerCandidate) => saveDecision(candidate, candidate.employer_decision);
 
-  const getDemandMetrics = (demand: any) => {
-    const parsedHeadcount = Number(demand.headcount);
-    const headcount = Number.isFinite(parsedHeadcount) && parsedHeadcount > 0 ? parsedHeadcount : 0;
-    const bound = candidates.length;
-    const offered = candidates.filter(c => c.status === 'reviewing' || c.status === 'approved').length;
-    const interviewing = interviews.length;
-    const selected = selectedCandidates.length;
-    const inProcess = candidates.filter(c => c.status === 'visa_processing' || c.status === 'reviewing').length;
-    const travelReady = candidates.filter(c => c.travel_status === 'ticketed' || c.travel_status === 'completed').length;
-    const started = 0;
-
-    return { headcount, bound, offered: Math.min(offered, headcount), interviewing, selected, inProcess, travelReady, started };
+  // Counts for this one request, from request_pipeline_counts (same numbers as
+  // the management screens). The matched count is staff-only and not shown here.
+  const getDemandMetrics = (demand: { id?: string; headcount?: unknown }) => {
+    const c = pipelineCountsFor(pipelineCounts, demand.id, demand.headcount);
+    return {
+      headcount: c.headcount,
+      presented: c.presented,
+      interviewing: c.interviews,
+      selected: c.selected,
+      inProcess: c.in_process,
+      travelReady: c.travel_ready,
+      started: c.started,
+    };
   };
 
   const requestStatusText = (status?: string | null) => demandStatusLabel(status, {
@@ -534,18 +543,14 @@ function EmployerPortalInner() {
             <div className="text-[11px] text-muted-foreground mt-1">📅 {dem.created_at ? String(dem.created_at).substring(0, 10) : '—'}</div>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 bg-slate-50 p-3 rounded-xl border border-line text-center text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 bg-slate-50 p-3 rounded-xl border border-line text-center text-xs">
           <div className="bg-card p-2 rounded-lg border border-line">
             <div className="text-[9px] font-bold text-muted-foreground uppercase">{t.demandRequested}</div>
             <div className="text-sm font-black text-foreground">{metrics.headcount}</div>
           </div>
           <div className="bg-card p-2 rounded-lg border border-line">
-            <div className="text-[9px] font-bold text-indigo-800 uppercase">{t.demandBound}</div>
-            <div className="text-sm font-black text-indigo-700">{metrics.bound}</div>
-          </div>
-          <div className="bg-card p-2 rounded-lg border border-line">
             <div className="text-[9px] font-bold text-blue-800 uppercase">{t.demandOffered}</div>
-            <div className="text-sm font-black text-blue-700">{metrics.offered}</div>
+            <div className="text-sm font-black text-blue-700">{metrics.presented}</div>
           </div>
           <div className="bg-card p-2 rounded-lg border border-line">
             <div className="text-[9px] font-bold text-amber-800 uppercase">{t.demandInterviewing}</div>

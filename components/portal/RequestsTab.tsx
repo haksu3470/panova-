@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Building2, FileText, Link2 } from 'lucide-react';
 import Link from 'next/link';
 import MatchPanel from './MatchPanel';
@@ -14,6 +14,7 @@ import { releaseCopy } from '@/lib/release-copy';
 import { targetStartIsPast } from '@/lib/demandStatus';
 import { supabase } from '@/lib/supabase';
 import { useSiteLanguage } from '@/lib/site-language';
+import { indexPipelineCounts, pipelineCountsFor, type RequestPipelineCounts } from '@/lib/requestPipelineCounts';
 
 interface RequestsTabProps {
   jobRequests: any[];
@@ -33,11 +34,25 @@ export default function RequestsTab({
   onChanged,
 }: RequestsTabProps) {
   const [matchReq, setMatchReq] = useState<any | null>(null);
+  const [counts, setCounts] = useState<Record<string, RequestPipelineCounts>>({});
   const { currentLang } = useSiteLanguage('en');
   const ui = portalUi[currentLang];
+
+  // Per-request counts from the same view the employer cards use. A missing
+  // view or an error leaves zeros; the list itself still renders.
+  const loadCounts = useCallback(async () => {
+    const { data, error } = await supabase.from('request_pipeline_counts').select('*');
+    if (error) console.error('request pipeline counts failed', error.code || error.message);
+    setCounts(error ? {} : indexPipelineCounts(data));
+  }, []);
+
+  useEffect(() => {
+    loadCounts();
+  }, [loadCounts, jobRequests]);
+
   return (
     <div className="space-y-6">
-      {matchReq && <MatchPanel request={matchReq} onClose={() => setMatchReq(null)} />}
+      {matchReq && <MatchPanel request={matchReq} onClose={() => { setMatchReq(null); loadCounts(); }} />}
       <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-base sm:text-lg font-extrabold text-slate-900">📁 {t.demandFilesTitle}</h3>
@@ -97,6 +112,26 @@ export default function RequestsTab({
                   </span>
                 </div>
               </div>
+
+              {(() => {
+                const c = pipelineCountsFor(counts, req.id, req.headcount);
+                return (
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="bg-slate-50 rounded-lg border p-1.5">
+                      <div className="text-[9px] font-bold text-slate-600 uppercase">{ui.statMatched}</div>
+                      <div className="text-sm font-black text-slate-900">{c.matched ?? 0}</div>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg border p-1.5">
+                      <div className="text-[9px] font-bold text-slate-600 uppercase">{ui.statPresented}</div>
+                      <div className="text-sm font-black text-slate-900">{c.presented}</div>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg border p-1.5">
+                      <div className="text-[9px] font-bold text-slate-600 uppercase">{ui.statSelected}</div>
+                      <div className="text-sm font-black text-slate-900">{c.selected}/{c.headcount}</div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div className="grid grid-cols-2 gap-2 pt-2 border-t text-[11px] text-muted-foreground">
                 <div>📍 {req.city || 'N/A'}, {req.country || 'International'}</div>
