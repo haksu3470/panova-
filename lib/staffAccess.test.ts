@@ -4,7 +4,17 @@ import test from 'node:test';
 
 await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.url);
 
-const { canDecideForEmployer, canOpenStaffFile, isUpperManagementRole, tabsForStaffRole } = await import('./staffAccess.ts');
+const { canDecideForEmployer, canEditMeetingUrl, canOpenStaffFile, isUpperManagementRole, tabsForStaffRole } = await import('./staffAccess.ts');
+
+test('only upper management and target country may edit the meeting link', () => {
+  assert.equal(canEditMeetingUrl('upper_management'), true);
+  assert.equal(canEditMeetingUrl(' Target_Country '), true);
+  assert.equal(canEditMeetingUrl('source_country'), false);
+  assert.equal(canEditMeetingUrl('field_officer'), false);
+  assert.equal(canEditMeetingUrl('finance'), false);
+  assert.equal(canEditMeetingUrl(''), false);
+  assert.equal(canEditMeetingUrl(null), false);
+});
 
 test('only upper management and target country may decide for an employer', () => {
   assert.equal(canDecideForEmployer('upper_management'), true);
