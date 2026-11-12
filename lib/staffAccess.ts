@@ -71,3 +71,15 @@ export const MEETING_URL_ROLES = ['upper_management', 'target_country'] as const
 export function canEditMeetingUrl(role: string | null | undefined): boolean {
   return (MEETING_URL_ROLES as readonly string[]).includes((role || '').trim().toLowerCase());
 }
+
+/**
+ * Roles that may change a request's status by hand. The database
+ * (staff_set_request_status -> is_portal_manager) enforces the same set:
+ * profiles.staff_role or staff_members.role_level = 'upper_management'.
+ * Everyone else sees the status as a label; it moves forward on its own.
+ */
+export const REQUEST_STATUS_ROLES = ['upper_management'] as const;
+
+export function canUpdateRequestStatus(role: string | null | undefined): boolean {
+  return (REQUEST_STATUS_ROLES as readonly string[]).includes((role || '').trim().toLowerCase());
+}

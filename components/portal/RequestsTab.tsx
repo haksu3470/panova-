@@ -11,7 +11,10 @@ import { portalUi } from '@/lib/portal-ui-copy';
 import { offerExportRows, requestExportRows, toCsv } from '@/lib/exportLists';
 import { displayedRequestSalary } from '@/lib/workforceRequest';
 import { releaseCopy } from '@/lib/release-copy';
-import { targetStartIsPast } from '@/lib/demandStatus';
+import { normalizeDemandStatus, targetStartIsPast } from '@/lib/demandStatus';
+import type { StatusErrorKey } from '@/lib/requestStatusChange';
+import { requestStatusLabel } from './file/ui';
+import RequestStatusChangeForm from './RequestStatusChangeForm';
 import { supabase } from '@/lib/supabase';
 import { useSiteLanguage } from '@/lib/site-language';
 import { formatCount, indexPipelineCounts, pipelineCountsFor, type PipelineCountsIndex } from '@/lib/requestPipelineCounts';
@@ -19,9 +22,11 @@ import { formatCount, indexPipelineCounts, pipelineCountsFor, type PipelineCount
 interface RequestsTabProps {
   jobRequests: any[];
   t: any;
-  updateRequestStatus: (id: string, status: string, reason?: string) => void;
+  updateRequestStatus: (id: string, status: string, reason: string) => Promise<StatusErrorKey | null>;
   setSelectedDemandDetail: (detail: any) => void;
   isUpperManagement?: boolean;
+  /** canUpdateRequestStatus(role): shows the status select; others see a label. */
+  canChangeStatus?: boolean;
   onChanged?: () => void;
 }
 
@@ -31,6 +36,7 @@ export default function RequestsTab({
   updateRequestStatus,
   setSelectedDemandDetail,
   isUpperManagement = false,
+  canChangeStatus = false,
   onChanged,
 }: RequestsTabProps) {
   const [matchReq, setMatchReq] = useState<any | null>(null);
@@ -151,36 +157,24 @@ export default function RequestsTab({
 
               <div className="pt-2 border-t space-y-1.5">
                 <label className="block text-[10px] font-bold text-slate-600 uppercase">{t.lifecycleStatusLabel}</label>
-                <select
-                  value={req.status || 'new_request'}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === 'cancelled') {
-                      const reason = prompt(ui.cancelPrompt, ui.cancelReasonLabel);
-                      if (reason !== null) {
-                        updateRequestStatus(req.id, val, reason);
-                      }
-                    } else {
-                      updateRequestStatus(req.id, val);
-                    }
-                  }}
-                  className={`w-full px-3 py-2 rounded-xl border text-xs font-bold uppercase cursor-pointer outline-none ${
-                    req.status === 'completed' ? 'bg-emerald-50 text-emerald-800' :
-                    req.status === 'cancelled' ? 'bg-red-50 text-red-700' :
-                    'bg-slate-50 text-slate-900'
-                  }`}
-                >
-                  <option value="new_request">🟡 {t.stageNewRequest}</option>
-                  <option value="reviewing">🔵 {t.stageReviewing}</option>
-                  <option value="searching_candidates">🌍 {t.stageSearchingCandidates}</option>
-                  <option value="presenting_candidates">📤 {t.stagePresentingCandidates}</option>
-                  <option value="interviews">🤝 {t.stageInterviews}</option>
-                  <option value="selection_completed">⭐ {t.stageSelectionCompleted}</option>
-                  <option value="official_process">📋 {t.stageOfficialProcess}</option>
-                  <option value="travel_planning">✈️ {t.stageTravelPlanning}</option>
-                  <option value="completed">🟢 {t.stageCompleted}</option>
-                  <option value="cancelled">🔴 {t.stageCancelled}</option>
-                </select>
+                {canChangeStatus ? (
+                  <RequestStatusChangeForm
+                    t={t}
+                    compact
+                    currentStatus={req.status}
+                    onSubmit={(status, reason) => updateRequestStatus(req.id, status, reason)}
+                  />
+                ) : (
+                  <span
+                    className={`block w-full px-3 py-2 rounded-xl border text-xs font-bold uppercase ${
+                      req.status === 'completed' ? 'bg-emerald-50 text-emerald-800' :
+                      req.status === 'cancelled' ? 'bg-red-50 text-red-700' :
+                      'bg-slate-50 text-slate-900'
+                    }`}
+                  >
+                    {requestStatusLabel(t, normalizeDemandStatus(req.status) || req.status)}
+                  </span>
+                )}
                 {(req.closed_reason || req.cancellation_reason) && (
                   <p className="text-[10px] text-red-600 font-medium">{ui.cancelReasonLabel} {req.closed_reason || req.cancellation_reason}</p>
                 )}

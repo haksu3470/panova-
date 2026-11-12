@@ -8,7 +8,11 @@ import DemoBadge from '@/components/portal/DemoBadge';
 import MatchPanel from '@/components/portal/MatchPanel';
 import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
-import { Card, Stat, Field, REQUEST_STATUS_KEYS, requestStatusLabel, resultLabel, fmtDate } from '@/components/portal/file/ui';
+import { Card, Stat, Field, requestStatusLabel, resultLabel, fmtDate } from '@/components/portal/file/ui';
+import RequestStatusChangeForm from '@/components/portal/RequestStatusChangeForm';
+import { canUpdateRequestStatus } from '@/lib/staffAccess';
+import { normalizeDemandStatus } from '@/lib/demandStatus';
+import { statusErrorKey, type StatusErrorKey } from '@/lib/requestStatusChange';
 import { matchResultTone } from '@/lib/status-tone';
 import { candidateProfessionLabel } from '@/lib/candidateLabels';
 import { translations } from '@/lib/dictionary';
@@ -46,13 +50,14 @@ function RequestFileInner() {
   const { currentLang, isRtl } = useSiteLanguage('tr');
   const t = translations[currentLang] || translations.tr;
   const ui = portalUi[currentLang];
-  const { upper } = useStaffRole();
+  const { upper, role } = useStaffRole();
+  const mayChangeStatus = canUpdateRequestStatus(role);
 
   const load = async () => {
     const { data: r } = await supabase.from('job_requests').select('*').eq('id', id).maybeSingle();
     setReq(r);
     if (r) {
-      setForm({ ...r, special_requirements: r.special_requirements || '', closed_reason: r.closed_reason || '' });
+      setForm({ ...r, special_requirements: r.special_requirements || '' });
       const [m, iv, of, pc] = await Promise.all([
         supabase.from('request_matches').select('*').eq('request_id', id).order('created_at'),
         supabase.from('interviews').select('*').eq('request_id', id).order('scheduled_at'),
@@ -81,7 +86,9 @@ function RequestFileInner() {
     if (benefitGap === 'lodging') { setMsg(t.lodgingRequired || ''); return; }
     if (benefitGap === 'meals') { setMsg(t.mealsRequired || ''); return; }
     setSaving(true); setMsg('');
-    const keys = [...TEXT_FIELDS.map((f) => f[0]), ...BOOL_FIELDS, 'status', 'special_requirements', 'closed_reason'];
+    // status, closed_reason and closed_at are never saved from here: they
+    // change only through staff_set_request_status (below) or automatically.
+    const keys = [...TEXT_FIELDS.map((f) => f[0]), ...BOOL_FIELDS, 'special_requirements'];
     const changes: Record<string, any> = {};
     for (const k of keys) {
       let v = form[k];
@@ -89,15 +96,27 @@ function RequestFileInner() {
       else if (typeof v === 'string') v = v === '' ? null : v;
       if ((req[k] ?? null) !== (v ?? null)) changes[k] = v;
     }
-    if (changes.status === 'cancelled' || changes.status === 'completed') changes.closed_at = new Date().toISOString();
     if (!Object.keys(changes).length) { setSaving(false); setMsg(ui.noChanges); return; }
     const { error } = await supabase.from('job_requests').update(changes).eq('id', id);
     if (error) setMsg(`${ui.errorPrefix} ${error.message}`);
     else {
-      await writeAudit(`${ui.requestInfo}: ${req.position_title}`, 'job_request', id, { fields: Object.keys(changes), status: changes.status });
+      await writeAudit(`${ui.requestInfo}: ${req.position_title}`, 'job_request', id, { fields: Object.keys(changes) });
       setReq({ ...req, ...changes }); setMsg(t.savedSuccess || 'OK');
     }
     setSaving(false);
+  };
+
+  // Upper management only (canUpdateRequestStatus). The RPC writes the audit
+  // row and closed_reason / closed_at; reload so counts and status are fresh.
+  const changeStatus = async (status: string, reason: string): Promise<StatusErrorKey | null> => {
+    const { error } = await supabase.rpc('staff_set_request_status', {
+      p_request_id: id,
+      p_status: status,
+      p_reason: reason,
+    });
+    if (error) return statusErrorKey(error);
+    await load();
+    return null;
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground font-bold">{ui.loading}</div>;
@@ -155,16 +174,21 @@ function RequestFileInner() {
           <Stat label={ui.statOffers} value={`${offerCount} (${accepted})`} />
         </div>
 
+        <Card title={ui.status}>
+          <p className="text-xs text-slate-600">{t.statusAutoNote}</p>
+          <div className="text-sm font-extrabold text-slate-900">{requestStatusLabel(t, normalizeDemandStatus(req.status) || req.status)}</div>
+          {req.closed_reason ? (
+            <p className="text-xs text-slate-700"><span className="font-bold">{ui.closeReason}:</span> {req.closed_reason}</p>
+          ) : null}
+          {mayChangeStatus ? (
+            <div className="border-t border-line pt-3 space-y-2">
+              <h3 className="text-xs font-extrabold uppercase text-slate-700">{t.statusManualTitle}</h3>
+              <RequestStatusChangeForm t={t} currentStatus={req.status} onSubmit={changeStatus} />
+            </div>
+          ) : null}
+        </Card>
+
         <Card title={ui.requestInfo}>
-          <label className="block text-xs font-bold text-slate-600 space-y-1">
-            <span>{ui.status}</span>
-            <select value={form.status || 'new_request'} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm">
-              {REQUEST_STATUS_KEYS.map((key) => <option key={key} value={key}>{requestStatusLabel(t, key)}</option>)}
-            </select>
-          </label>
-          {(form.status === 'cancelled' || form.status === 'completed') && (
-            <Field label={ui.closeReason} value={form.closed_reason || ''} onChange={(v) => setForm({ ...form, closed_reason: v })} />
-          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {TEXT_FIELDS.map(([key, type]) => (
               <Field key={key} label={ui.requestFields[key] || key} type={type} value={form[key] == null ? '' : String(form[key]).substring(0, type === 'date' ? 10 : undefined)} onChange={(v) => setForm({ ...form, [key]: v })} />
