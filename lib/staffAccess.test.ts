@@ -4,7 +4,18 @@ import test from 'node:test';
 
 await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.url);
 
-const { canOpenStaffFile, isUpperManagementRole, tabsForStaffRole } = await import('./staffAccess.ts');
+const { canDecideForEmployer, canOpenStaffFile, isUpperManagementRole, tabsForStaffRole } = await import('./staffAccess.ts');
+
+test('only upper management and target country may decide for an employer', () => {
+  assert.equal(canDecideForEmployer('upper_management'), true);
+  assert.equal(canDecideForEmployer(' Target_Country '), true);
+  assert.equal(canDecideForEmployer('source_country'), false);
+  assert.equal(canDecideForEmployer('field_officer'), false);
+  assert.equal(canDecideForEmployer('finance'), false);
+  assert.equal(canDecideForEmployer('limited'), false);
+  assert.equal(canDecideForEmployer(''), false);
+  assert.equal(canDecideForEmployer(null), false);
+});
 
 test('portal tabs follow the role catalog', () => {
   assert.deepEqual(tabsForStaffRole('upper_management'), [

@@ -23,7 +23,51 @@ export type EmployerCandidate = {
   video_url_1: string | null;
   video_url_2: string | null;
   video_url_3: string | null;
+  /** The request match this row came from; null on the row-level fallback. */
+  match_id: string | null;
+  presented_at: string | null;
+  employer_decision: EmployerDecision;
+  /** Who entered the current decision: the employer, or staff on their behalf. */
+  decision_source: DecisionSource | null;
+  decided_at: string | null;
+  /** Position of the request this match belongs to (rows are per match). */
+  request_position_title: string | null;
 };
+
+/** Stable React key: a candidate can appear once per request. */
+export function employerCandidateRowKey(row: Pick<EmployerCandidate, 'id' | 'match_id'>): string {
+  return row.match_id || row.id;
+}
+
+export type DecisionSource = 'employer' | 'staff';
+
+export function normalizeDecisionSource(value: unknown): DecisionSource | null {
+  const v = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  return v === 'employer' || v === 'staff' ? v : null;
+}
+
+/** Shortest staff reason the database accepts (staff_decide_match). */
+export const STAFF_DECISION_REASON_MIN = 5;
+export const STAFF_DECISION_REASON_MAX = 1000;
+
+export function isValidStaffDecisionReason(reason: string): boolean {
+  const n = reason.trim().length;
+  return n >= STAFF_DECISION_REASON_MIN && n <= STAFF_DECISION_REASON_MAX;
+}
+
+export const EMPLOYER_DECISIONS = ['pending', 'selected', 'rejected'] as const;
+export type EmployerDecision = (typeof EMPLOYER_DECISIONS)[number];
+
+/** Anything unknown or missing reads as pending. */
+export function normalizeEmployerDecision(value: unknown): EmployerDecision {
+  const v = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  return (EMPLOYER_DECISIONS as readonly string[]).includes(v) ? (v as EmployerDecision) : 'pending';
+}
+
+/** The employer can decide only on a match that was presented to them. */
+export function canDecideOnMatch(candidate: Pick<EmployerCandidate, 'match_id' | 'presented_at'>): boolean {
+  return !!candidate.match_id && !!candidate.presented_at;
+}
 
 export const EMPLOYER_CANDIDATE_BROWSE_COLUMNS =
   'id, full_name, profession, sector, nationality, city, experience_years, language_skills, shift_suitable, status, travel_status, created_at, active_request_id, video_url, video_url_1, video_url_2, video_url_3';
@@ -106,6 +150,12 @@ export function toEmployerCandidate(row: Record<string, unknown>): EmployerCandi
     video_url_1: text(row.video_url_1),
     video_url_2: text(row.video_url_2),
     video_url_3: text(row.video_url_3),
+    match_id: text(row.match_id),
+    presented_at: text(row.presented_at),
+    employer_decision: normalizeEmployerDecision(row.employer_decision),
+    decision_source: normalizeDecisionSource(row.decision_source),
+    decided_at: text(row.decided_at),
+    request_position_title: text(row.request_position_title),
   };
 }
 

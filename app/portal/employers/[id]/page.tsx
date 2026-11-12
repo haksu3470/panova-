@@ -96,7 +96,7 @@ function EmployerFileInner() {
 
   const active = requests.filter((r) => !['completed', 'cancelled'].includes(r.status) && !r.archived_at);
   const presented = matches.filter((m) => m.presented_at);
-  const selected = matches.filter((m) => m.employer_result === 'selected');
+  const selected = matches.filter((m) => m.employer_decision === 'selected');
   const openTickets = tickets.filter((t) => !['closed', 'resolved'].includes(t.status));
   const openTasks = tasks.filter((t) => t.status !== 'completed' && t.status !== 'done');
   const reqTitle = Object.fromEntries(requests.map((r) => [r.id, r.position_title]));

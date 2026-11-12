@@ -10,6 +10,7 @@ import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { OFFER_CURRENCIES, offerCurrency, offerTermsPayload } from '@/lib/offers';
 import { releaseCopy } from '@/lib/release-copy';
 import { useSiteLanguage } from '@/lib/site-language';
+import { translations } from '@/lib/dictionary';
 
 const toLocal = (iso?: string | null) => (iso ? new Date(iso).toISOString().slice(0, 16) : '');
 
@@ -24,10 +25,12 @@ interface Props {
 export default function InterviewOfferPanel({ candidate, request, match, onClose }: Props) {
   const { currentLang } = useSiteLanguage('en');
   const ui = portalUi[currentLang];
+  const t = translations[currentLang] || translations.tr;
   const [interviews, setInterviews] = useState<any[]>([]);
   const [offers, setOffers] = useState<any[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const isDemo = !!(candidate.is_demo || request?.is_demo || match?.is_demo);
 
   const [iv, setIv] = useState<any>({ id: null, scheduled_at: '', status: 'scheduled', result: '', employer_notes: '', panova_notes: '' });
@@ -90,8 +93,10 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
       `${iv.id ? ui.ioEditInterview : ui.ioNewInterview}: ${candidate.full_name} (${iv.status}${iv.result ? '/' + iv.result : ''})`,
       'interview'
     );
-    if (ok && match?.id && iv.result === 'selected' && match.employer_result !== 'selected') {
-      await supabase.from('request_matches').update({ employer_result: 'selected' }).eq('id', match.id);
+    // The interview result does not decide the match. The decision is entered
+    // with a reason through staff_decide_match ("Decide for employer").
+    if (ok && match?.id && iv.result === 'selected' && match.employer_decision !== 'selected') {
+      setNotice(t.interviewDecisionNotice || '');
     }
     if (ok) setIv({ id: null, scheduled_at: '', status: 'scheduled', result: '', employer_notes: '', panova_notes: '' });
   };
@@ -147,6 +152,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
         </div>
 
         {error && <p className="text-xs text-red-800 bg-red-50 p-2 rounded-lg">{error}</p>}
+        {notice && <p className="text-xs text-amber-900 bg-amber-50 p-2 rounded-lg">{notice}</p>}
 
         <section className="space-y-2">
           <h4 className="text-xs font-bold uppercase tracking-wide text-slate-800">{ui.ioInterviews} ({interviews.length})</h4>
