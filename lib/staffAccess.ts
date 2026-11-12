@@ -60,3 +60,14 @@ export const STAFF_DECISION_ROLES = ['upper_management', 'target_country'] as co
 export function canDecideForEmployer(role: string | null | undefined): boolean {
   return (STAFF_DECISION_ROLES as readonly string[]).includes((role || '').trim().toLowerCase());
 }
+
+/**
+ * Roles that may add or change an interview's meeting link. The database
+ * (trigger interviews_guard_meeting_url) enforces the same list; this only
+ * hides the field from everyone else.
+ */
+export const MEETING_URL_ROLES = ['upper_management', 'target_country'] as const;
+
+export function canEditMeetingUrl(role: string | null | undefined): boolean {
+  return (MEETING_URL_ROLES as readonly string[]).includes((role || '').trim().toLowerCase());
+}

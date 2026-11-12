@@ -272,7 +272,6 @@ export type PortalUi = {
   interviewFailed: string;
   interviewSent: string;
   candidateSelectedAlert: string;
-  joiningCall: string;
   onlineMeeting: string;
   planned: string;
   arrivalSummary: string;
@@ -535,7 +534,6 @@ const tr: PortalUi = {
   interviewFailed: 'Görüşme talebi oluşturulamadı:',
   interviewSent: '"{name}" için görüşme talebi operasyon ekibine iletildi.',
   candidateSelectedAlert: '"{name}" seçilen adaylar listenize eklendi ve vize süreci başlatıldı.',
-  joiningCall: 'Canlı görüşme odasına bağlanılıyor...',
   onlineMeeting: 'Çevrimiçi video görüşme',
   planned: 'Planlandı',
   arrivalSummary: 'Varış tarihi: 2026-11-15 | Karşılama: Havalimanı / terminal | İşe başlama: 2026-11-16',
@@ -796,7 +794,6 @@ const en: PortalUi = {
   interviewFailed: 'Interview request failed:',
   interviewSent: 'The interview request for "{name}" was sent to our operations team.',
   candidateSelectedAlert: '"{name}" was added to your selected candidates and the visa process has started.',
-  joiningCall: 'Connecting to the live interview room...',
   onlineMeeting: 'Online video meeting',
   planned: 'Scheduled',
   arrivalSummary: 'Arrival date: 2026-11-15 | Meeting point: Airport / terminal | Start date: 2026-11-16',
@@ -1057,7 +1054,6 @@ const sq: PortalUi = {
   interviewFailed: 'Kërkesa për intervistë dështoi:',
   interviewSent: 'Kërkesa e intervistës për "{name}" iu dërgua ekipit të operacioneve.',
   candidateSelectedAlert: '"{name}" u shtua te kandidatët e zgjedhur dhe procesi i vizës filloi.',
-  joiningCall: 'Po lidhet me dhomën e intervistës së drejtpërdrejtë...',
   onlineMeeting: 'Takim video online',
   planned: 'Planifikuar',
   arrivalSummary: 'Data e mbërritjes: 2026-11-15 | Pritja: Aeroport / terminal | Fillimi i punës: 2026-11-16',
@@ -1318,7 +1314,6 @@ const ar: PortalUi = {
   interviewFailed: 'فشل طلب المقابلة:',
   interviewSent: 'أُرسل طلب مقابلة "{name}" إلى فريق العمليات.',
   candidateSelectedAlert: 'أُضيف "{name}" إلى المرشحين المختارين وبدأت إجراءات التأشيرة.',
-  joiningCall: 'جارٍ الاتصال بغرفة المقابلة المباشرة...',
   onlineMeeting: 'اجتماع فيديو عبر الإنترنت',
   planned: 'مجدولة',
   arrivalSummary: 'تاريخ الوصول: 2026-11-15 | الاستقبال: المطار / الصالة | بدء العمل: 2026-11-16',
@@ -1579,7 +1574,6 @@ const mk: PortalUi = {
   interviewFailed: 'Барањето за интервју не успеа:',
   interviewSent: 'Барањето за интервју за „{name}“ е испратено до оперативниот тим.',
   candidateSelectedAlert: '„{name}“ е додаден во избраните кандидати и визниот процес е започнат.',
-  joiningCall: 'Се поврзува со собата за интервју во живо...',
   onlineMeeting: 'Онлајн видео состанок',
   planned: 'Закажано',
   arrivalSummary: 'Датум на пристигнување: 2026-11-15 | Пречек: Аеродром / терминал | Почеток на работа: 2026-11-16',

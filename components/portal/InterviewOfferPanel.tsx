@@ -11,8 +11,11 @@ import { OFFER_CURRENCIES, offerCurrency, offerTermsPayload } from '@/lib/offers
 import { releaseCopy } from '@/lib/release-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 import { translations } from '@/lib/dictionary';
+import { normalizeMeetingUrl, toDateTimeLocalInput } from '@/lib/interviewMeeting';
+import { canEditMeetingUrl } from '@/lib/staffAccess';
+import { useStaffRole } from './useStaffRole';
 
-const toLocal = (iso?: string | null) => (iso ? new Date(iso).toISOString().slice(0, 16) : '');
+const EMPTY_INTERVIEW = { id: null, scheduled_at: '', status: 'scheduled', result: '', employer_notes: '', panova_notes: '', meeting_url: '' };
 
 interface Props {
   candidate: { id: string; full_name?: string; profession?: string; is_demo?: boolean };
@@ -26,6 +29,10 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
   const { currentLang } = useSiteLanguage('en');
   const ui = portalUi[currentLang];
   const t = translations[currentLang] || translations.tr;
+  // Source country and field officers do not see the link field; the
+  // database trigger rejects their writes to meeting_url as well.
+  const { role } = useStaffRole();
+  const mayEditMeetingUrl = canEditMeetingUrl(role);
   const [interviews, setInterviews] = useState<any[]>([]);
   const [offers, setOffers] = useState<any[]>([]);
   const [busy, setBusy] = useState(false);
@@ -33,7 +40,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
   const [notice, setNotice] = useState('');
   const isDemo = !!(candidate.is_demo || request?.is_demo || match?.is_demo);
 
-  const [iv, setIv] = useState<any>({ id: null, scheduled_at: '', status: 'scheduled', result: '', employer_notes: '', panova_notes: '' });
+  const [iv, setIv] = useState<any>(EMPTY_INTERVIEW);
   const [of, setOf] = useState<any>({
     id: null,
     employer_name: request?.employer_name || '',
@@ -77,7 +84,9 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
   const saveInterview = async () => {
     if (request?.id && match && !match.presented_at) return setError(releaseCopy[currentLang].mustPresent);
     if (!iv.scheduled_at) return setError(ui.ioScheduleRequired);
-    const row = {
+    const meetingUrl = mayEditMeetingUrl ? normalizeMeetingUrl(iv.meeting_url) : null;
+    if (meetingUrl === undefined) return setError(t.meetingUrlInvalid || '');
+    const row: Record<string, unknown> = {
       scheduled_at: new Date(iv.scheduled_at).toISOString(),
       status: iv.status,
       result: iv.result || null,
@@ -85,6 +94,12 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
       panova_notes: iv.panova_notes || null,
       updated_at: new Date().toISOString(),
     };
+    // Send meeting_url when a link was typed, or when the loaded rows show the
+    // column exists (so clearing a link works). Before the migration, an
+    // interview without a link still saves. Roles that may not edit the link
+    // never send the column, so their saves keep the existing link.
+    const hasMeetingColumn = interviews.some((x) => Object.prototype.hasOwnProperty.call(x, 'meeting_url'));
+    if (mayEditMeetingUrl && (meetingUrl !== null || hasMeetingColumn)) row.meeting_url = meetingUrl;
     const ok = await run(
       async () =>
         iv.id
@@ -98,7 +113,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
     if (ok && match?.id && iv.result === 'selected' && match.employer_decision !== 'selected') {
       setNotice(t.interviewDecisionNotice || '');
     }
-    if (ok) setIv({ id: null, scheduled_at: '', status: 'scheduled', result: '', employer_notes: '', panova_notes: '' });
+    if (ok) setIv(EMPTY_INTERVIEW);
   };
 
   const saveOffer = async () => {
@@ -157,7 +172,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
         <section className="space-y-2">
           <h4 className="text-xs font-bold uppercase tracking-wide text-slate-800">{ui.ioInterviews} ({interviews.length})</h4>
           {interviews.map((i) => (
-            <button key={i.id} onClick={() => setIv({ id: i.id, scheduled_at: toLocal(i.scheduled_at), status: i.status || 'scheduled', result: i.result || '', employer_notes: i.employer_notes || '', panova_notes: i.panova_notes || '' })}
+            <button key={i.id} onClick={() => setIv({ id: i.id, scheduled_at: toDateTimeLocalInput(i.scheduled_at), status: i.status || 'scheduled', result: i.result || '', employer_notes: i.employer_notes || '', panova_notes: i.panova_notes || '', meeting_url: i.meeting_url || '' })}
               className={`w-full text-start border border-slate-200 bg-white rounded-xl p-3 hover:bg-slate-50 ${iv.id === i.id ? 'ring-2 ring-blue-500' : ''}`}>
               <p className="text-sm font-bold text-slate-950">
                 {when(i.scheduled_at)}
@@ -168,6 +183,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
                 {i.result ? ` · ${ui.intResult[i.result] || i.result}` : ''}
                 {i.panova_notes ? ` · ${i.panova_notes}` : ''}
               </p>
+              {i.meeting_url ? <p className="text-[11px] font-medium text-blue-800 break-all">🔗 {i.meeting_url}</p> : null}
             </button>
           ))}
           <div className="border border-slate-200 rounded-xl p-3 bg-slate-50 space-y-2">
@@ -182,10 +198,24 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
                 {Object.entries(ui.intResult).map(([value, label]) => <option key={value} className="bg-white text-slate-900" value={value}>{label}</option>)}
               </select>
             </div>
+            {mayEditMeetingUrl && (
+              <label className="block text-[11px] font-bold text-slate-800 space-y-1">
+                <span>{t.meetingUrlLabel}</span>
+                <input
+                  type="url"
+                  inputMode="url"
+                  maxLength={2000}
+                  placeholder={t.meetingUrlPh}
+                  value={iv.meeting_url}
+                  onChange={(e) => setIv({ ...iv, meeting_url: e.target.value })}
+                  className={inp}
+                />
+              </label>
+            )}
             <textarea rows={2} placeholder={ui.ioEmployerNote} value={iv.employer_notes} onChange={(e) => setIv({ ...iv, employer_notes: e.target.value })} className={inp} />
             <textarea rows={2} placeholder={ui.ioPanovaNote} value={iv.panova_notes} onChange={(e) => setIv({ ...iv, panova_notes: e.target.value })} className={inp} />
             <div className="flex gap-2 justify-end">
-              {iv.id && <button onClick={() => setIv({ id: null, scheduled_at: '', status: 'scheduled', result: '', employer_notes: '', panova_notes: '' })} className="text-xs font-bold px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800">{ui.ioNewInterview}</button>}
+              {iv.id && <button onClick={() => setIv(EMPTY_INTERVIEW)} className="text-xs font-bold px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800">{ui.ioNewInterview}</button>}
               <button disabled={busy} onClick={saveInterview} className="text-xs font-bold px-3 py-2 rounded-lg bg-blue-600 text-white flex items-center gap-1 disabled:bg-disabled disabled:text-on-dark disabled:opacity-100">
                 {iv.id ? <Save className="w-4 h-4" /> : <CalendarPlus className="w-4 h-4" />} {iv.id ? ui.save : ui.ioPlan}
               </button>

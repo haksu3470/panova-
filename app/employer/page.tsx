@@ -44,6 +44,7 @@ import {
   sumPipelineCounts,
   type PipelineCountsIndex,
 } from '@/lib/requestPipelineCounts';
+import { formatInterviewTime, joinableMeetingUrl } from '@/lib/interviewMeeting';
 
 function EmployerPortalInner() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
@@ -1045,16 +1046,27 @@ function EmployerPortalInner() {
                         <span className="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded">{candidateProfessionLabel(item.position || candidates.find((x: any) => x.id === item.candidate_id)?.profession, ui.positionWord, currentLang)}</span>
                       </div>
                       <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-muted-foreground" /> {item.scheduled_at ? new Date(item.scheduled_at).toLocaleString(dateLocale[currentLang]) : '—'} | 💻 {item.platform || ui.onlineMeeting}
+                        <Calendar className="w-3.5 h-3.5 text-muted-foreground" /> {formatInterviewTime(item.scheduled_at, dateLocale[currentLang])} | 💻 {item.platform || ui.onlineMeeting}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-xl uppercase">
                         {ui.intStatus[item.status] || item.status || ui.planned}
                       </span>
-                      <a href="#video-call" onClick={(e) => { e.preventDefault(); alert(ui.joiningCall); }} className="bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-                        <Video className="w-3.5 h-3.5" /> {t.joinInterviewBtn}
-                      </a>
+                      {joinableMeetingUrl(item.meeting_url) ? (
+                        <a
+                          href={joinableMeetingUrl(item.meeting_url) || undefined}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={t.meetingOpensNewTab}
+                          className="bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Video className="w-3.5 h-3.5" aria-hidden /> {t.joinInterviewBtn}
+                          <span className="sr-only"> ({t.meetingOpensNewTab})</span>
+                        </a>
+                      ) : (
+                        <span className="text-xs font-semibold text-slate-700">{t.meetingLinkPending}</span>
+                      )}
                     </div>
                   </div>
                 ))

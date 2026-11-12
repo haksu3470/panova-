@@ -480,6 +480,11 @@ export interface Translation {
   decisionByEmployer?: string;
   decisionLockedHint?: string;
   interviewDecisionNotice?: string;
+  meetingUrlLabel?: string;
+  meetingUrlPh?: string;
+  meetingUrlInvalid?: string;
+  meetingLinkPending?: string;
+  meetingOpensNewTab?: string;
   forRequestLabel?: string;
   countsUnavailable?: string;
   interviewsTitle?: string;
@@ -1108,6 +1113,11 @@ export const translations: Record<Language, Translation> = {
     decisionByEmployer: 'İşveren kararı',
     decisionLockedHint: 'Karar verildiği için süreç notu kilitli.',
     interviewDecisionNotice: 'Görüşme sonucu kaydedildi. Adayı seçmek için talep eşleştirme ekranında "İşveren adına karar gir" düğmesini kullanın.',
+    meetingUrlLabel: 'Görüşme bağlantısı',
+    meetingUrlPh: 'https://… (ör. Meet, Zoom, Teams)',
+    meetingUrlInvalid: 'Bağlantı geçersiz. Yalnız http:// veya https:// ile başlayan bir adres girin.',
+    meetingLinkPending: 'Görüşme bağlantısı henüz eklenmedi.',
+    meetingOpensNewTab: 'Yeni sekmede açılır',
     forRequestLabel: 'Talep: {position}',
     countsUnavailable: 'Sayılar şu an yüklenemedi. Sayfayı yenileyin.',
     interviewsTitle: 'Planlanan ve Tamamlanan Görüşmeler',
@@ -1723,6 +1733,11 @@ export const translations: Record<Language, Translation> = {
     decisionByEmployer: 'Employer decision',
     decisionLockedHint: 'A decision stands, so the pipeline note is locked.',
     interviewDecisionNotice: 'The interview result was saved. To select the candidate, use "Decide for employer" on the request matching screen.',
+    meetingUrlLabel: 'Meeting link',
+    meetingUrlPh: 'https://… (e.g. Meet, Zoom, Teams)',
+    meetingUrlInvalid: 'Invalid link. Enter an address that starts with http:// or https://.',
+    meetingLinkPending: 'The meeting link has not been added yet.',
+    meetingOpensNewTab: 'Opens in a new tab',
     forRequestLabel: 'Request: {position}',
     countsUnavailable: 'The counts could not be loaded right now. Refresh the page.',
     interviewsTitle: 'Scheduled and Completed Interviews',
@@ -2338,6 +2353,11 @@ export const translations: Record<Language, Translation> = {
     decisionByEmployer: 'Vendim i punëdhënësit',
     decisionLockedHint: 'Ekziston një vendim, prandaj shënimi i procesit është i kyçur.',
     interviewDecisionNotice: 'Rezultati i intervistës u ruajt. Për ta zgjedhur kandidatin, përdorni "Vendos në emër të punëdhënësit" te ekrani i përputhjes së kërkesës.',
+    meetingUrlLabel: 'Lidhja e takimit',
+    meetingUrlPh: 'https://… (p.sh. Meet, Zoom, Teams)',
+    meetingUrlInvalid: 'Lidhje e pavlefshme. Shkruani një adresë që fillon me http:// ose https://.',
+    meetingLinkPending: 'Lidhja e takimit nuk është shtuar ende.',
+    meetingOpensNewTab: 'Hapet në një skedë të re',
     forRequestLabel: 'Kërkesa: {position}',
     countsUnavailable: 'Numrat nuk mund të ngarkoheshin tani. Rifreskoni faqen.',
     interviewsTitle: 'Intervistat e Planifikuara dhe të Përfunduara',
@@ -2733,6 +2753,11 @@ export const translations: Record<Language, Translation> = {
     decisionByEmployer: 'قرار صاحب العمل',
     decisionLockedHint: 'يوجد قرار قائم، لذا فإن ملاحظة المسار مقفلة.',
     interviewDecisionNotice: 'تم حفظ نتيجة المقابلة. لاختيار المرشح، استخدموا "إدخال قرار نيابة عن صاحب العمل" في شاشة مطابقة الطلب.',
+    meetingUrlLabel: 'رابط الاجتماع',
+    meetingUrlPh: 'https://… (مثل Meet أو Zoom أو Teams)',
+    meetingUrlInvalid: 'رابط غير صالح. أدخل عنوانًا يبدأ بـ http:// أو https://.',
+    meetingLinkPending: 'لم تتم إضافة رابط الاجتماع بعد.',
+    meetingOpensNewTab: 'يُفتح في علامة تبويب جديدة',
     forRequestLabel: 'الطلب: {position}',
     countsUnavailable: 'تعذّر تحميل الأرقام الآن. حدّثوا الصفحة.',
     interviewsTitle: 'المقابلات المجدولة والمكتملة',
@@ -3567,6 +3592,11 @@ export const translations: Record<Language, Translation> = {
     decisionByEmployer: 'Одлука на работодавачот',
     decisionLockedHint: 'Постои одлука, па белешката за процесот е заклучена.',
     interviewDecisionNotice: 'Резултатот од интервјуто е зачуван. За да го изберете кандидатот, користете „Одлука во име на работодавачот“ на екранот за поврзување на барањето.',
+    meetingUrlLabel: 'Врска за состанокот',
+    meetingUrlPh: 'https://… (на пр. Meet, Zoom, Teams)',
+    meetingUrlInvalid: 'Неважечка врска. Внесете адреса што почнува со http:// или https://.',
+    meetingLinkPending: 'Врската за состанокот сè уште не е додадена.',
+    meetingOpensNewTab: 'Се отвора во нова картичка',
     forRequestLabel: 'Барање: {position}',
     countsUnavailable: 'Бројките не можат да се вчитаат во моментов. Освежете ја страницата.',
     interviewsTitle: 'Закажани и завршени интервјуа',
