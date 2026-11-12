@@ -49,3 +49,14 @@ export function canOpenStaffFile(role: string | null | undefined, route: StaffFi
 export function isUpperManagementRole(role: string | null | undefined): boolean {
   return (role || '').trim().toLowerCase() === 'upper_management';
 }
+
+/**
+ * Roles that may enter a decision on the employer's behalf. The database
+ * (staff_decide_match) enforces the same list and the target-country scope;
+ * this only hides the button from everyone else.
+ */
+export const STAFF_DECISION_ROLES = ['upper_management', 'target_country'] as const;
+
+export function canDecideForEmployer(role: string | null | undefined): boolean {
+  return (STAFF_DECISION_ROLES as readonly string[]).includes((role || '').trim().toLowerCase());
+}

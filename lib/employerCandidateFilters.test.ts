@@ -7,11 +7,15 @@ import type { EmployerCandidate, EmployerCandidateFilters } from './employerCand
 await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.url);
 
 const {
+  canDecideOnMatch,
   EMPTY_EMPLOYER_CANDIDATE_FILTERS,
+  employerCandidateRowKey,
   filterEmployerCandidates,
   isEmployerCandidateFilterActive,
   isMissingBrowseRpc,
+  isValidStaffDecisionReason,
   matchesExperience,
+  normalizeEmployerDecision,
   professionFilterOptions,
   sectorFilterLabel,
   toEmployerCandidate,
@@ -263,4 +267,51 @@ test('filter labels exist in TR, EN, SQ, AR, and MK', () => {
   assert.match(String(translations.mk.empCandNoMatch), cyrillic);
   assert.notEqual(translations.en.empCandClear, translations.tr.empCandClear);
   assert.notEqual(translations.sq.empCandClear, translations.tr.empCandClear);
+});
+
+test('browse mapping keeps the match and its employer decision', () => {
+  const mapped = toEmployerCandidate({
+    id: 'abc',
+    match_id: 'm-1',
+    presented_at: '2026-11-10T09:00:00Z',
+    employer_decision: 'selected',
+    decided_at: '2026-11-11T09:00:00Z',
+  });
+  assert.equal(mapped.match_id, 'm-1');
+  assert.equal(mapped.employer_decision, 'selected');
+  assert.equal(mapped.decided_at, '2026-11-11T09:00:00Z');
+  assert.equal(canDecideOnMatch(mapped), true);
+
+  const fallback = toEmployerCandidate({ id: 'abc', status: 'approved' });
+  assert.equal(fallback.match_id, null);
+  assert.equal(fallback.employer_decision, 'pending');
+  assert.equal(canDecideOnMatch(fallback), false);
+  assert.equal(canDecideOnMatch({ match_id: 'm-2', presented_at: null }), false);
+});
+
+test('decision source and staff reason rules', () => {
+  assert.equal(toEmployerCandidate({ id: 'a', decision_source: 'staff' }).decision_source, 'staff');
+  assert.equal(toEmployerCandidate({ id: 'a', decision_source: 'EMPLOYER' }).decision_source, 'employer');
+  assert.equal(toEmployerCandidate({ id: 'a', decision_source: 'admin' }).decision_source, null);
+  assert.equal(toEmployerCandidate({ id: 'a' }).decision_source, null);
+  assert.equal(isValidStaffDecisionReason('    '), false);
+  assert.equal(isValidStaffDecisionReason(' abcd '), false);
+  assert.equal(isValidStaffDecisionReason('Telefonla onay'), true);
+  assert.equal(isValidStaffDecisionReason('x'.repeat(1001)), false);
+});
+
+test('browse rows are per match: key and request position', () => {
+  const a = toEmployerCandidate({ id: 'cand-1', match_id: 'm-a', request_position_title: ' Aşçı ' });
+  const b = toEmployerCandidate({ id: 'cand-1', match_id: 'm-b', request_position_title: 'Garson' });
+  assert.equal(a.request_position_title, 'Aşçı');
+  assert.notEqual(employerCandidateRowKey(a), employerCandidateRowKey(b));
+  assert.equal(employerCandidateRowKey(toEmployerCandidate({ id: 'cand-2' })), 'cand-2');
+});
+
+test('unknown employer decisions read as pending', () => {
+  assert.equal(normalizeEmployerDecision(' Selected '), 'selected');
+  assert.equal(normalizeEmployerDecision('rejected'), 'rejected');
+  assert.equal(normalizeEmployerDecision('approved'), 'pending');
+  assert.equal(normalizeEmployerDecision(null), 'pending');
+  assert.equal(normalizeEmployerDecision(3), 'pending');
 });

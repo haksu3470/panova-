@@ -97,7 +97,7 @@ function RequestFileInner() {
   if (!req) return <div className="min-h-screen flex items-center justify-center text-red-700 font-bold">{ui.requestNotFound}</div>;
 
   const presented = matches.filter((m) => m.presented_at).length;
-  const selected = matches.filter((m) => m.employer_result === 'selected').length;
+  const selected = matches.filter((m) => m.employer_decision === 'selected').length;
   const accepted = offers.filter((o) => o.status === 'accepted').length;
 
   return (

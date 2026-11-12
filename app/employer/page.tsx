@@ -29,11 +29,13 @@ import EmployerConsentCard from '@/components/auth/EmployerConsentCard';
 import { needsEmployerConsent } from '@/lib/employerInvite';
 import { candidateProfessionLabel, candidateSectorLabel } from '@/lib/candidateLabels';
 import {
+  canDecideOnMatch,
   EMPLOYER_CANDIDATE_BROWSE_COLUMNS,
   isMissingBrowseRpc,
   sectorFilterLabel,
   toEmployerCandidate,
   type EmployerCandidate,
+  type EmployerDecision,
 } from '@/lib/employerCandidateFilters';
 
 function EmployerPortalInner() {
@@ -199,7 +201,7 @@ function EmployerPortalInner() {
       .map((row) => toEmployerCandidate((row ?? {}) as Record<string, unknown>))
       .filter((row) => row.id);
     setCandidates(rows);
-    setSelectedCandidates(rows.filter((c) => c.status === 'approved' || c.status === 'selected'));
+    setSelectedCandidates(rows.filter((c) => c.employer_decision === 'selected'));
 
     const { data: intData } = await supabase.from('interviews').select('*').eq('employer_id', employerProfile.id).order('created_at', { ascending: false });
     setInterviews(intData || []);
@@ -433,12 +435,45 @@ function EmployerPortalInner() {
     setActiveTab('interviews');
   };
 
-  const handleSelectCandidate = async (candidate: any) => {
-    await supabase.from('job_candidates').update({ status: 'approved', is_selected: true }).eq('id', candidate.id);
-    alert(fill(ui.candidateSelectedAlert, { name: candidate.full_name || candidate.name || '' }));
-    fetchEmployerData();
-    setActiveTab('selected');
+  const [decidingMatchId, setDecidingMatchId] = useState<string | null>(null);
+
+  // Saves the employer decision on the request match through the guarded RPC.
+  const saveDecision = async (candidate: EmployerCandidate, decision: EmployerDecision) => {
+    const name = candidate.full_name || '';
+    if (!canDecideOnMatch(candidate)) {
+      alert(t.selectionNotPresented || '');
+      return;
+    }
+    const previous = candidate.employer_decision;
+    const confirmingStaff = candidate.decision_source === 'staff' && previous === decision;
+    if (decision === 'rejected' && !confirmingStaff && !confirm(fill(t.rejectConfirm || '', { name }))) return;
+    setDecidingMatchId(candidate.match_id);
+    const { error } = await supabase.rpc('employer_decide_match', {
+      p_match_id: candidate.match_id,
+      p_decision: decision,
+    });
+    setDecidingMatchId(null);
+    if (error) {
+      console.error('employer decision failed', error.code || error.message);
+      alert(error.message?.includes('not_presented') ? t.selectionNotPresented || '' : t.selectionSaveFailed || '');
+      return;
+    }
+    const message =
+      confirmingStaff ? t.candidateDecisionConfirmed
+      : decision === 'selected' ? t.candidateSelectedSaved
+      : decision === 'rejected' ? t.candidateRejectedSaved
+      : previous === 'selected' ? t.candidateSelectionRemoved
+      : t.candidateDecisionReset;
+    alert(fill(message || '', { name }));
+    await fetchEmployerData();
+    if (decision === 'selected' && !confirmingStaff) setActiveTab('selected');
   };
+
+  const handleSelectCandidate = (candidate: EmployerCandidate) => saveDecision(candidate, 'selected');
+  const handleRejectCandidate = (candidate: EmployerCandidate) => saveDecision(candidate, 'rejected');
+  const handleUnselectCandidate = (candidate: EmployerCandidate) => saveDecision(candidate, 'pending');
+  // Makes a decision staff entered on the employer's behalf the employer's own.
+  const handleConfirmDecision = (candidate: EmployerCandidate) => saveDecision(candidate, candidate.employer_decision);
 
   const getDemandMetrics = (demand: any) => {
     const parsedHeadcount = Number(demand.headcount);
@@ -937,6 +972,15 @@ function EmployerPortalInner() {
               action: t.actionCol || '',
               interview: t.interviewReqBtn || '',
               select: t.selectBtn || '',
+              selected: t.selectedBtn || '',
+              unselect: t.unselectBtn || '',
+              notPresented: t.selectionNotPresented || '',
+              reject: t.rejectBtn || '',
+              rejected: t.rejectedBtn || '',
+              undo: t.undoDecisionBtn || '',
+              enteredByStaff: t.enteredByStaffBadge || '',
+              confirm: t.confirmDecisionBtn || '',
+              forRequest: t.forRequestLabel || '{position}',
               specialist: ui.specialist,
               general: ui.general,
               videoTitle: t.youtubeVideoTitle || '',
@@ -948,6 +992,10 @@ function EmployerPortalInner() {
             sectorLabel={(sector) => sectorFilterLabel(sector, t)}
             onInterview={handleRequestInterview}
             onSelect={handleSelectCandidate}
+            onUnselect={handleUnselectCandidate}
+            onReject={handleRejectCandidate}
+            onConfirm={handleConfirmDecision}
+            busyMatchId={decidingMatchId}
           />
         )}
 
@@ -1025,11 +1073,16 @@ function EmployerPortalInner() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {selectedCandidates.map((cand, idx) => (
-                  <div key={cand.id || idx} className="p-4 bg-white rounded-2xl border shadow-sm space-y-3">
+                  <div key={cand.match_id || cand.id || idx} className="p-4 bg-white rounded-2xl border shadow-sm space-y-3">
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="font-extrabold text-slate-950 text-sm">{cand.full_name || cand.name}</h4>
                         <p className="text-xs text-muted-foreground">{candidateProfessionLabel(cand.profession, ui.specialist, currentLang)} • {cand.nationality || '—'}</p>
+                        {cand.request_position_title && (
+                          <p className="text-xs font-semibold text-slate-700">
+                            {fill(t.forRequestLabel || '{position}', { position: localizeCatalogTitle(cand.request_position_title, currentLang) })}
+                          </p>
+                        )}
                       </div>
                       <span className="bg-emerald-50 text-emerald-800 text-[10px] font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" /> {t.approvedAndProcessing}
@@ -1045,6 +1098,31 @@ function EmployerPortalInner() {
                       }}
                       compact
                     />
+                    <div className="flex flex-wrap items-center justify-end gap-2">
+                      {cand.decision_source === 'staff' && (
+                        <>
+                          <span className="mr-auto rounded-full bg-status-info-bg px-2.5 py-1 text-[10px] font-extrabold text-status-info">
+                            {t.enteredByStaffBadge}
+                          </span>
+                          <button
+                            type="button"
+                            disabled={decidingMatchId === cand.match_id}
+                            onClick={() => handleConfirmDecision(cand)}
+                            className="cursor-pointer rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-800 disabled:cursor-wait disabled:bg-disabled disabled:text-on-dark"
+                          >
+                            {t.confirmDecisionBtn}
+                          </button>
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        disabled={decidingMatchId === cand.match_id}
+                        onClick={() => handleUnselectCandidate(cand)}
+                        className="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-50 disabled:cursor-wait disabled:border-transparent disabled:bg-disabled disabled:text-on-dark"
+                      >
+                        {t.unselectBtn}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

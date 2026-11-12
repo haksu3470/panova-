@@ -1,13 +1,16 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Check, Search } from 'lucide-react';
 import CandidateYouTube from '@/components/candidate/CandidateYouTube';
 import { candidateProfessionLabel } from '@/lib/candidateLabels';
+import { localizeCatalogTitle } from '@/lib/professions';
 import type { Language } from '@/lib/dictionary';
 import { fill } from '@/lib/portal-ui-copy';
 import {
+  canDecideOnMatch,
   EMPTY_EMPLOYER_CANDIDATE_FILTERS,
+  employerCandidateRowKey,
   filterEmployerCandidates,
   isEmployerCandidateFilterActive,
   professionFilterOptions,
@@ -53,6 +56,15 @@ export type EmployerCandidateBrowserLabels = {
   action: string;
   interview: string;
   select: string;
+  selected: string;
+  unselect: string;
+  notPresented: string;
+  reject: string;
+  rejected: string;
+  undo: string;
+  enteredByStaff: string;
+  confirm: string;
+  forRequest: string;
   specialist: string;
   general: string;
   videoTitle: string;
@@ -68,6 +80,11 @@ type Props = {
   sectorLabel: (sector: string) => string;
   onInterview: (candidate: EmployerCandidate) => void;
   onSelect: (candidate: EmployerCandidate) => void;
+  onUnselect: (candidate: EmployerCandidate) => void;
+  onReject: (candidate: EmployerCandidate) => void;
+  onConfirm: (candidate: EmployerCandidate) => void;
+  /** Match whose decision is being saved; its buttons are disabled meanwhile. */
+  busyMatchId?: string | null;
 };
 
 function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
@@ -92,7 +109,23 @@ export default function EmployerCandidateBrowser({
   sectorLabel,
   onInterview,
   onSelect,
+  onUnselect,
+  onReject,
+  onConfirm,
+  busyMatchId = null,
 }: Props) {
+  const actions = (candidate: EmployerCandidate) => (
+    <CandidateActions
+      candidate={candidate}
+      labels={labels}
+      onInterview={onInterview}
+      onSelect={onSelect}
+      onUnselect={onUnselect}
+      onReject={onReject}
+      onConfirm={onConfirm}
+      busy={!!candidate.match_id && candidate.match_id === busyMatchId}
+    />
+  );
   const [filters, setFilters] = useState<EmployerCandidateFilters>(EMPTY_EMPLOYER_CANDIDATE_FILTERS);
   const active = isEmployerCandidateFilterActive(filters);
   const filtered = useMemo(() => filterEmployerCandidates(candidates, filters), [candidates, filters]);
@@ -135,6 +168,12 @@ export default function EmployerCandidateBrowser({
     const profession = candidateProfessionLabel(candidate.profession, labels.specialist, lang);
     const sector = candidate.sector ? sectorLabel(candidate.sector) : labels.general;
     return `${profession} (${sector})`;
+  };
+
+  // Rows are per request match; say which request this row decides on.
+  const requestLine = (candidate: EmployerCandidate) => {
+    const position = localizeCatalogTitle(candidate.request_position_title, lang);
+    return position ? fill(labels.forRequest, { position }) : '';
   };
 
   const countryLine = (candidate: EmployerCandidate) => {
@@ -281,11 +320,12 @@ export default function EmployerCandidateBrowser({
         <>
           <ul className="space-y-3 lg:hidden">
             {filtered.map((candidate) => (
-              <li key={candidate.id} className="space-y-3 rounded-2xl border border-slate-200 p-4">
+              <li key={employerCandidateRowKey(candidate)} className="space-y-3 rounded-2xl border border-slate-200 p-4">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
                     <h4 className="text-sm font-extrabold text-slate-950">{displayName(candidate)}</h4>
                     <p className="text-xs text-slate-600">{professionLine(candidate)}</p>
+                    {requestLine(candidate) && <p className="text-xs font-semibold text-slate-700">{requestLine(candidate)}</p>}
                   </div>
                   <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-700">
                     {yearsLabel(candidate)}
@@ -306,7 +346,7 @@ export default function EmployerCandidateBrowser({
                   </div>
                 </dl>
                 <CandidateYouTube videos={candidate} labels={videoLabels} compact />
-                <CandidateActions candidate={candidate} labels={labels} onInterview={onInterview} onSelect={onSelect} />
+                {actions(candidate)}
               </li>
             ))}
           </ul>
@@ -327,8 +367,11 @@ export default function EmployerCandidateBrowser({
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filtered.map((candidate) => (
-                  <tr key={candidate.id} className="hover:bg-slate-50/50">
-                    <td className="p-4 font-bold text-slate-950">{displayName(candidate)}</td>
+                  <tr key={employerCandidateRowKey(candidate)} className="hover:bg-slate-50/50">
+                    <td className="p-4 font-bold text-slate-950">
+                      {displayName(candidate)}
+                      {requestLine(candidate) && <div className="text-xs font-semibold text-slate-700">{requestLine(candidate)}</div>}
+                    </td>
                     <td className="p-4">{professionLine(candidate)}</td>
                     <td className="p-4">{yearsLabel(candidate)}</td>
                     <td className="p-4">{countryLine(candidate)}</td>
@@ -340,7 +383,7 @@ export default function EmployerCandidateBrowser({
                       </div>
                     </td>
                     <td className="p-4">
-                      <CandidateActions candidate={candidate} labels={labels} onInterview={onInterview} onSelect={onSelect} />
+                      {actions(candidate)}
                     </td>
                   </tr>
                 ))}
@@ -358,12 +401,55 @@ function CandidateActions({
   labels,
   onInterview,
   onSelect,
+  onUnselect,
+  onReject,
+  onConfirm,
+  busy,
 }: {
   candidate: EmployerCandidate;
   labels: EmployerCandidateBrowserLabels;
   onInterview: (candidate: EmployerCandidate) => void;
   onSelect: (candidate: EmployerCandidate) => void;
+  onUnselect: (candidate: EmployerCandidate) => void;
+  onReject: (candidate: EmployerCandidate) => void;
+  onConfirm: (candidate: EmployerCandidate) => void;
+  busy: boolean;
 }) {
+  const selectable = canDecideOnMatch(candidate);
+  const isSelected = candidate.employer_decision === 'selected';
+  const isRejected = candidate.employer_decision === 'rejected';
+  const byStaff = candidate.decision_source === 'staff' && (isSelected || isRejected);
+  const undoClass =
+    'cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-bold text-slate-800 hover:bg-slate-50 disabled:cursor-wait disabled:border-transparent disabled:bg-disabled disabled:text-on-dark';
+  // A decision staff entered for the employer: badge, plus a way to make it their own.
+  const staffNote = byStaff ? (
+    <>
+      <span className="inline-flex items-center rounded-full bg-status-info-bg px-2.5 py-1 text-[11px] font-extrabold text-status-info">
+        {labels.enteredByStaff}
+      </span>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => onConfirm(candidate)}
+        className="cursor-pointer rounded-lg bg-emerald-700 px-3 py-1.5 font-bold text-white hover:bg-emerald-800 disabled:cursor-wait disabled:bg-disabled disabled:text-on-dark"
+      >
+        {labels.confirm}
+      </button>
+    </>
+  ) : null;
+  if (isRejected) {
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="inline-flex items-center rounded-lg bg-status-bad-bg px-3 py-1.5 font-bold text-status-bad">
+          {labels.rejected}
+        </span>
+        {staffNote}
+        <button type="button" disabled={busy} onClick={() => onUnselect(candidate)} className={undoClass}>
+          {labels.undo}
+        </button>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-wrap items-center gap-2">
       <button
@@ -373,13 +459,38 @@ function CandidateActions({
       >
         {labels.interview}
       </button>
-      <button
-        type="button"
-        onClick={() => onSelect(candidate)}
-        className="cursor-pointer rounded-lg bg-emerald-50 px-3 py-1.5 font-bold text-emerald-700 hover:bg-emerald-100"
-      >
-        {labels.select}
-      </button>
+      {isSelected ? (
+        <>
+          <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-700 px-3 py-1.5 font-bold text-white">
+            <Check className="h-3.5 w-3.5" aria-hidden /> {labels.selected}
+          </span>
+          {staffNote}
+          <button type="button" disabled={busy} onClick={() => onUnselect(candidate)} className={undoClass}>
+            {labels.unselect}
+          </button>
+        </>
+      ) : (
+        <>
+          <button
+            type="button"
+            disabled={busy || !selectable}
+            title={selectable ? undefined : labels.notPresented}
+            onClick={() => onSelect(candidate)}
+            className="cursor-pointer rounded-lg bg-emerald-50 px-3 py-1.5 font-bold text-emerald-700 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-on-dark"
+          >
+            {labels.select}
+          </button>
+          <button
+            type="button"
+            disabled={busy || !selectable}
+            title={selectable ? undefined : labels.notPresented}
+            onClick={() => onReject(candidate)}
+            className="cursor-pointer rounded-lg bg-status-bad-bg px-3 py-1.5 font-bold text-status-bad disabled:cursor-not-allowed disabled:bg-disabled disabled:text-on-dark"
+          >
+            {labels.reject}
+          </button>
+        </>
+      )}
     </div>
   );
 }
