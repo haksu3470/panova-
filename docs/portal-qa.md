@@ -143,7 +143,9 @@ In-app guide: `dossier-review`.
 
 **Beklenen / Expected:** `request_matches` gains the bind. Present sets `presented_at`. The interview and offer panels list the new rows. `employer_request_interview` inserts an interview only when the candidate is matched to that employer’s request; otherwise the UI reports that the person was not presented. The demand file counts matches, interviews, and offers.
 
-**Bilinen engel / Known blocker:** Employer “select” does not use this match result. See S08. The employer Interviews “join” control only raises an alert (`ui.joiningCall`); it does not open a meeting. Candidate accept/reject needs migration `20261109154616_phase2_offers_and_deletes.sql` on the hosted database. Until it is applied, the update matches no row and the candidate sees `offerUpdateFailed`.
+**Mülakata Katıl / Join interview:** On the employer Interviews tab, an interview with no `meeting_url` shows the “link pending” text (`meetingLinkPending`) and no join button. With a link, **Mülakata Katıl** opens it in a new tab (`target="_blank"`, `rel="noopener noreferrer"`). Only upper management and target-country staff can add or change the link (`canEditMeetingUrl`; the trigger `interviews_guard_meeting_url` refuses everyone else). Only `http`/`https` links are accepted.
+
+**Bilinen engel / Known blocker:** Employer “select” does not use this match result. See S08. Candidate accept/reject needs migration `20261109154616_phase2_offers_and_deletes.sql` on the hosted database. Until it is applied, the update matches no row and the candidate sees `offerUpdateFailed`.
 
 In-app guide: `matching-offers`.
 
@@ -283,6 +285,23 @@ Automated: `lib/passwordReset.test.ts` and `lib/qa-entrypoints.test.ts`.
 
 Automated: `lib/referralCode.test.ts`.
 
+## S15. Talep durumu / Request status
+
+**Rol / Role:** Source country, target country, field officer, upper management, and the employer who owns the request.
+
+**Önkoşul / Preconditions:** Migrations `20261114120000_request_status_auto.sql` (A), `20261114130000_request_status_manual_guard.sql` (B), and `20261114140000_pipeline_stage_travel_ready.sql` (C) are applied. A test request with headcount 2 and status `new_request`.
+
+**Adımlar ve beklenen / Steps and expected:**
+
+1. **Kendiliğinden ilerleme / Automatic.** As source country, match a candidate: the status becomes searching candidates. Present it: presenting candidates. As target country, schedule an interview: interviews. As the employer, select 2 of 2: selection completed. As target country, enter a process record (for example documents collecting): official process. Enter a ticket (`travel_status = ticketed`): travel planning. The status never moves back (undoing a selection keeps it), and completed or cancelled are never set automatically. Saving a candidate file with travel `planned` moves nothing.
+2. **Elle değiştirme yok / No manual change.** As source country, target country, or field officer, open **Requests** and `/portal/requests/[id]`. The status is a label only, with no list and no “change status manually” section. A direct `update job_requests set status` from the app is refused with `demand_status_use_rpc`; the RPC `staff_set_request_status` returns `staff_role_not_allowed`.
+3. **Üst Yönetim gerekçeyle / Upper management with a reason.** As upper management, pick another status. A reason box opens; the button stays disabled below 5 characters and above 1000. With a valid reason the status changes. The audit log has a row with `mode = manual`, `manual_override = true`, old and new status, the reason, and the staff name and role. Cancelled stores the reason as the close reason.
+4. **Kayıtsız seçim yok / No selection without records.** On a request with no selected candidate, upper management picks selection completed. The change is refused with the `demand_status_transition` message and the status stays. Presenting candidates without a presented match and interviews without an interview are refused the same way.
+
+**Bilinen engel / Known blocker:** None in the app. The status advances on the next record, so a request that was behind before A moves only when one of its records changes (see `supabase/verification/request_status_auto.sql`, section 2).
+
+Automated: `lib/requestStatusChange.test.ts`, `lib/staffAccess.test.ts`. Database scenario (ends in rollback): `supabase/verification/request_status_scenario.sql`.
+
 ---
 
 ## Boşluk analizi / Gap analysis
@@ -299,7 +318,6 @@ Only items checked in this repository. Hosted database policies that were never 
 ### Validation and authorization the UI does not finish
 
 - Employer select ignores the update error and alerts success (`handleSelectCandidate`). **Selected** is derived from `status === 'approved' || status === 'selected'` on the browse rows. `is_selected` is written but not read back.
-- Employer interview join is an alert, not a call.
 - If `employer_browse_candidates` is missing, the employer page queries `job_candidates` with no employer predicate. The RPC itself returns only matched, non-archived candidates and omits passport, phone, and email.
 - This repo’s `job_candidates` policies in `supabase/migrations/20261026240000_email_proof_gate.sql` allow a candidate to update only their own row. No employer update policy is added. Candidate accept/reject on `job_offers` has no policy in these migrations.
 - `DemandForm.tsx` (video-required checkbox) and `EmployerHeader.tsx` are unused. The live demand form does not store a video-required flag.
