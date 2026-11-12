@@ -14,7 +14,7 @@ import { releaseCopy } from '@/lib/release-copy';
 import { targetStartIsPast } from '@/lib/demandStatus';
 import { supabase } from '@/lib/supabase';
 import { useSiteLanguage } from '@/lib/site-language';
-import { indexPipelineCounts, pipelineCountsFor, type RequestPipelineCounts } from '@/lib/requestPipelineCounts';
+import { formatCount, indexPipelineCounts, pipelineCountsFor, type PipelineCountsIndex } from '@/lib/requestPipelineCounts';
 
 interface RequestsTabProps {
   jobRequests: any[];
@@ -34,16 +34,18 @@ export default function RequestsTab({
   onChanged,
 }: RequestsTabProps) {
   const [matchReq, setMatchReq] = useState<any | null>(null);
-  const [counts, setCounts] = useState<Record<string, RequestPipelineCounts>>({});
+  const [counts, setCounts] = useState<PipelineCountsIndex>(null);
+  const [countsFailed, setCountsFailed] = useState(false);
   const { currentLang } = useSiteLanguage('en');
   const ui = portalUi[currentLang];
 
-  // Per-request counts from the same view the employer cards use. A missing
-  // view or an error leaves zeros; the list itself still renders.
+  // Per-request counts, only from the view the employer cards use. An error
+  // shows a dash and a notice; the list itself still renders.
   const loadCounts = useCallback(async () => {
     const { data, error } = await supabase.from('request_pipeline_counts').select('*');
     if (error) console.error('request pipeline counts failed', error.code || error.message);
-    setCounts(error ? {} : indexPipelineCounts(data));
+    setCounts(error ? null : indexPipelineCounts(data));
+    setCountsFailed(!!error);
   }, []);
 
   useEffect(() => {
@@ -92,6 +94,10 @@ export default function RequestsTab({
         </div>
       </div>
 
+      {countsFailed ? (
+        <p role="status" className="text-xs font-semibold text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">{t.countsUnavailable}</p>
+      ) : null}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {jobRequests.map((req) => (
           <div key={req.id} className="bg-white rounded-2xl border p-5 shadow-sm space-y-4 flex flex-col justify-between hover:shadow-md transition">
@@ -119,15 +125,15 @@ export default function RequestsTab({
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="bg-slate-50 rounded-lg border p-1.5">
                       <div className="text-[9px] font-bold text-slate-600 uppercase">{ui.statMatched}</div>
-                      <div className="text-sm font-black text-slate-900">{c.matched ?? 0}</div>
+                      <div className="text-sm font-black text-slate-900">{formatCount(c?.matched)}</div>
                     </div>
                     <div className="bg-slate-50 rounded-lg border p-1.5">
                       <div className="text-[9px] font-bold text-slate-600 uppercase">{ui.statPresented}</div>
-                      <div className="text-sm font-black text-slate-900">{c.presented}</div>
+                      <div className="text-sm font-black text-slate-900">{formatCount(c?.presented)}</div>
                     </div>
                     <div className="bg-slate-50 rounded-lg border p-1.5">
                       <div className="text-[9px] font-bold text-slate-600 uppercase">{ui.statSelected}</div>
-                      <div className="text-sm font-black text-slate-900">{c.selected}/{c.headcount}</div>
+                      <div className="text-sm font-black text-slate-900">{formatCount(c?.selected)}/{req.headcount || 0}</div>
                     </div>
                   </div>
                 );

@@ -67,15 +67,67 @@ export function indexPipelineCounts(rows: unknown[] | null | undefined): Record<
   return out;
 }
 
-/** Counts for one request; zeros (not an error) when the view has no row yet. */
+/**
+ * Index state on screen: null while loading or after the view failed (the
+ * cards then show COUNT_UNKNOWN), otherwise the rows keyed by request id.
+ */
+export type PipelineCountsIndex = Record<string, RequestPipelineCounts> | null;
+
+/**
+ * Counts for one request, or null when they are not known: the view failed,
+ * is still loading, or returned no row for this request. Never zeros made up
+ * on the client.
+ */
 export function pipelineCountsFor(
-  index: Record<string, RequestPipelineCounts>,
+  index: PipelineCountsIndex,
   requestId: string | null | undefined,
   headcount?: unknown,
-): RequestPipelineCounts {
-  const id = String(requestId ?? '');
-  const row = index[id];
-  if (!row) return emptyPipelineCounts(id, headcount);
+): RequestPipelineCounts | null {
+  if (!index) return null;
+  const row = index[String(requestId ?? '')];
+  if (!row) return null;
   // The request row is the source for headcount; the view copies it.
   return headcount === undefined ? row : { ...row, headcount: count(headcount) };
+}
+
+export type PipelineTotals = {
+  /** Requests among those given that the view returned and that are still open. */
+  open_requests: number;
+  presented: number;
+  interviews: number;
+  selected: number;
+};
+
+const CLOSED_STATUSES = new Set(['completed', 'cancelled']);
+
+/**
+ * Summary cards: totals over the given requests, from the same view rows as
+ * the request cards. Null when the view failed or is still loading, so the
+ * cards show a dash. Requests the view returned no row for are left out.
+ */
+export function sumPipelineCounts(
+  index: PipelineCountsIndex,
+  requests: ReadonlyArray<{ id?: string | null; status?: string | null }>,
+): PipelineTotals | null {
+  if (!index) return null;
+  const totals: PipelineTotals = { open_requests: 0, presented: 0, interviews: 0, selected: 0 };
+  const seen = new Set<string>();
+  for (const request of requests) {
+    const id = String(request.id ?? '');
+    const row = index[id];
+    if (!row || seen.has(id)) continue;
+    seen.add(id);
+    if (!CLOSED_STATUSES.has(String(request.status ?? ''))) totals.open_requests += 1;
+    totals.presented += row.presented;
+    totals.interviews += row.interviews;
+    totals.selected += row.selected;
+  }
+  return totals;
+}
+
+/** Shown instead of a number when the count is not known. */
+export const COUNT_UNKNOWN = '—';
+
+export function formatCount(value: number | null | undefined): string {
+  return typeof value === 'number' && Number.isFinite(value) ? String(value) : COUNT_UNKNOWN;
 }

@@ -37,7 +37,13 @@ import {
   type EmployerCandidate,
   type EmployerDecision,
 } from '@/lib/employerCandidateFilters';
-import { indexPipelineCounts, pipelineCountsFor, type RequestPipelineCounts } from '@/lib/requestPipelineCounts';
+import {
+  formatCount,
+  indexPipelineCounts,
+  pipelineCountsFor,
+  sumPipelineCounts,
+  type PipelineCountsIndex,
+} from '@/lib/requestPipelineCounts';
 
 function EmployerPortalInner() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
@@ -146,7 +152,8 @@ function EmployerPortalInner() {
   >('home');
 
   const [jobDemands, setJobDemands] = useState<any[]>([]);
-  const [pipelineCounts, setPipelineCounts] = useState<Record<string, RequestPipelineCounts>>({});
+  const [pipelineCounts, setPipelineCounts] = useState<PipelineCountsIndex>(null);
+  const [countsFailed, setCountsFailed] = useState(false);
   const [candidates, setCandidates] = useState<any[]>([]);
   const [interviews, setInterviews] = useState<any[]>([]);
   const [selectedCandidates, setSelectedCandidates] = useState<any[]>([]);
@@ -184,11 +191,12 @@ function EmployerPortalInner() {
 
     setJobDemands(demData || []);
 
-    // Per-request card counts. Missing view (migration not applied yet) or an
-    // error leaves the index empty, so the cards show zeros instead of failing.
+    // Per-request card counts, only from request_pipeline_counts. On an error
+    // the cards show a dash and a notice, never client-side or zero counts.
     const { data: countRows, error: countError } = await supabase.from('request_pipeline_counts').select('*');
     if (countError) console.error('request pipeline counts failed', countError.code || countError.message);
-    setPipelineCounts(countError ? {} : indexPipelineCounts(countRows));
+    setPipelineCounts(countError ? null : indexPipelineCounts(countRows));
+    setCountsFailed(!!countError);
 
     const { data: pooled, error: poolError } = await supabase.rpc('employer_browse_candidates');
     let candData: unknown[] | null = pooled;
@@ -485,16 +493,20 @@ function EmployerPortalInner() {
 
   // Counts for this one request, from request_pipeline_counts (same numbers as
   // the management screens). The matched count is staff-only and not shown here.
+  const pipelineTotals = sumPipelineCounts(pipelineCounts, jobDemands);
+
+  // A dash replaces any count the view did not return.
   const getDemandMetrics = (demand: { id?: string; headcount?: unknown }) => {
     const c = pipelineCountsFor(pipelineCounts, demand.id, demand.headcount);
+    const parsedHeadcount = Number(demand.headcount);
     return {
-      headcount: c.headcount,
-      presented: c.presented,
-      interviewing: c.interviews,
-      selected: c.selected,
-      inProcess: c.in_process,
-      travelReady: c.travel_ready,
-      started: c.started,
+      headcount: Number.isFinite(parsedHeadcount) && parsedHeadcount > 0 ? parsedHeadcount : 0,
+      presented: formatCount(c?.presented),
+      interviewing: formatCount(c?.interviews),
+      selected: formatCount(c?.selected),
+      inProcess: formatCount(c?.in_process),
+      travelReady: formatCount(c?.travel_ready),
+      started: formatCount(c?.started),
     };
   };
 
@@ -722,27 +734,32 @@ function EmployerPortalInner() {
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {countsFailed ? (
+                    <p role="status" className="text-xs font-semibold text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">{t.countsUnavailable}</p>
+                  ) : null}
                   {jobDemands.map((dem) => renderDemandCard(dem))}
                 </div>
               )}
             </section>
 
+            {/* Summary cards: totals of the same request_pipeline_counts rows as
+                the request cards above; a dash when those counts are unknown. */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
                 <span className="text-xs font-bold text-muted-foreground uppercase">{t.openRequestsCard}</span>
-                <div className="text-2xl font-black text-emerald-700">{jobDemands.length}</div>
+                <div className="text-2xl font-black text-emerald-700">{formatCount(pipelineTotals?.open_requests)}</div>
               </div>
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
                 <span className="text-xs font-bold text-muted-foreground uppercase">{t.totalCandidatesCard}</span>
-                <div className="text-2xl font-black text-blue-700">{candidates.length}</div>
+                <div className="text-2xl font-black text-blue-700">{formatCount(pipelineTotals?.presented)}</div>
               </div>
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
                 <span className="text-xs font-bold text-muted-foreground uppercase">{t.empTabInterviews}</span>
-                <div className="text-2xl font-black text-amber-600">{interviews.length}</div>
+                <div className="text-2xl font-black text-amber-600">{formatCount(pipelineTotals?.interviews)}</div>
               </div>
               <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
                 <span className="text-xs font-bold text-muted-foreground uppercase">{t.empTabSelected}</span>
-                <div className="text-2xl font-black text-purple-700">{selectedCandidates.length}</div>
+                <div className="text-2xl font-black text-purple-700">{formatCount(pipelineTotals?.selected)}</div>
               </div>
             </div>
 

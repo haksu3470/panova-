@@ -481,6 +481,7 @@ export interface Translation {
   decisionLockedHint?: string;
   interviewDecisionNotice?: string;
   forRequestLabel?: string;
+  countsUnavailable?: string;
   interviewsTitle?: string;
   selectedCandidatesTitle?: string;
   selectedCandidatesDesc?: string;
@@ -1108,6 +1109,7 @@ export const translations: Record<Language, Translation> = {
     decisionLockedHint: 'Karar verildiği için süreç notu kilitli.',
     interviewDecisionNotice: 'Görüşme sonucu kaydedildi. Adayı seçmek için talep eşleştirme ekranında "İşveren adına karar gir" düğmesini kullanın.',
     forRequestLabel: 'Talep: {position}',
+    countsUnavailable: 'Sayılar şu an yüklenemedi. Sayfayı yenileyin.',
     interviewsTitle: 'Planlanan ve Tamamlanan Görüşmeler',
     selectedCandidatesTitle: 'Onayladığınız / Seçtiğiniz Adaylar',
     selectedCandidatesDesc: 'Şu an onaylanmış adaylarınız için vize ve çalışma izni işlemleri yürütülmektedir.',
@@ -1722,6 +1724,7 @@ export const translations: Record<Language, Translation> = {
     decisionLockedHint: 'A decision stands, so the pipeline note is locked.',
     interviewDecisionNotice: 'The interview result was saved. To select the candidate, use "Decide for employer" on the request matching screen.',
     forRequestLabel: 'Request: {position}',
+    countsUnavailable: 'The counts could not be loaded right now. Refresh the page.',
     interviewsTitle: 'Scheduled and Completed Interviews',
     selectedCandidatesTitle: 'Approved / Selected Candidates',
     selectedCandidatesDesc: 'Visa and work permit procedures are currently underway for your approved candidates.',
@@ -2336,6 +2339,7 @@ export const translations: Record<Language, Translation> = {
     decisionLockedHint: 'Ekziston një vendim, prandaj shënimi i procesit është i kyçur.',
     interviewDecisionNotice: 'Rezultati i intervistës u ruajt. Për ta zgjedhur kandidatin, përdorni "Vendos në emër të punëdhënësit" te ekrani i përputhjes së kërkesës.',
     forRequestLabel: 'Kërkesa: {position}',
+    countsUnavailable: 'Numrat nuk mund të ngarkoheshin tani. Rifreskoni faqen.',
     interviewsTitle: 'Intervistat e Planifikuara dhe të Përfunduara',
     selectedCandidatesTitle: 'Kandidatët e Miratuar / Zgjedhur',
     selectedCandidatesDesc: 'Procedurat e vizave dhe lejeve të punës janë duke u zhvilluar për kandidatët tuaj të miratuar.',
@@ -2730,6 +2734,7 @@ export const translations: Record<Language, Translation> = {
     decisionLockedHint: 'يوجد قرار قائم، لذا فإن ملاحظة المسار مقفلة.',
     interviewDecisionNotice: 'تم حفظ نتيجة المقابلة. لاختيار المرشح، استخدموا "إدخال قرار نيابة عن صاحب العمل" في شاشة مطابقة الطلب.',
     forRequestLabel: 'الطلب: {position}',
+    countsUnavailable: 'تعذّر تحميل الأرقام الآن. حدّثوا الصفحة.',
     interviewsTitle: 'المقابلات المجدولة والمكتملة',
     selectedCandidatesTitle: 'المرشحون الموافق عليهم / المختارون',
     selectedCandidatesDesc: 'إجراءات التأشيرة وتصريح العمل جارية حالياً للمرشحين الموافق عليهم.',
@@ -3563,6 +3568,7 @@ export const translations: Record<Language, Translation> = {
     decisionLockedHint: 'Постои одлука, па белешката за процесот е заклучена.',
     interviewDecisionNotice: 'Резултатот од интервјуто е зачуван. За да го изберете кандидатот, користете „Одлука во име на работодавачот“ на екранот за поврзување на барањето.',
     forRequestLabel: 'Барање: {position}',
+    countsUnavailable: 'Бројките не можат да се вчитаат во моментов. Освежете ја страницата.',
     interviewsTitle: 'Закажани и завршени интервјуа',
     selectedCandidatesTitle: 'Одобрени / избрани кандидати',
     selectedCandidatesDesc: 'За одобрените кандидати во тек се постапките за виза и дозвола за работа.',

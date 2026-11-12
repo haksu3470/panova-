@@ -17,7 +17,7 @@ import { benefitsAnswered } from '@/lib/workforceRequest';
 import { useSiteLanguage } from '@/lib/site-language';
 import DeleteRecordButton from '@/components/portal/DeleteRecordButton';
 import { useStaffRole } from '@/components/portal/useStaffRole';
-import { toPipelineCounts, type RequestPipelineCounts } from '@/lib/requestPipelineCounts';
+import { formatCount, toPipelineCounts, type RequestPipelineCounts } from '@/lib/requestPipelineCounts';
 
 const TEXT_FIELDS: [string, string?][] = [
   ['position_title'], ['sector'], ['headcount', 'number'],
@@ -38,6 +38,7 @@ function RequestFileInner() {
   const [interviews, setInterviews] = useState<any[]>([]);
   const [offers, setOffers] = useState<any[]>([]);
   const [counts, setCounts] = useState<RequestPipelineCounts | null>(null);
+  const [countsFailed, setCountsFailed] = useState(false);
   const [showMatch, setShowMatch] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -61,6 +62,7 @@ function RequestFileInner() {
       setMatches(m.data || []); setInterviews(iv.data || []); setOffers(of.data || []);
       if (pc.error) console.error('request pipeline counts failed', pc.error.code || pc.error.message);
       setCounts(pc.data && !pc.error ? toPipelineCounts(pc.data) : null);
+      setCountsFailed(!!pc.error);
       const cids = Array.from(new Set((m.data || []).map((x) => x.candidate_id)));
       if (cids.length) {
         const { data: c } = await supabase.from('job_candidates').select('id, full_name, profession, nationality, is_demo').in('id', cids);
@@ -101,14 +103,14 @@ function RequestFileInner() {
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground font-bold">{ui.loading}</div>;
   if (!req) return <div className="min-h-screen flex items-center justify-center text-red-700 font-bold">{ui.requestNotFound}</div>;
 
-  // Same numbers as the employer card (request_pipeline_counts). Until that
-  // view exists, fall back to counting the rows loaded on this page.
-  const matched = counts?.matched ?? matches.length;
-  const presented = counts?.presented ?? matches.filter((m) => m.presented_at).length;
-  const selected = counts?.selected ?? matches.filter((m) => m.employer_decision === 'selected').length;
-  const interviewCount = counts?.interviews ?? new Set(interviews.map((i) => i.candidate_id)).size;
-  const offerCount = counts?.offers ?? new Set(offers.map((o) => o.candidate_id)).size;
-  const accepted = counts?.offers_accepted ?? new Set(offers.filter((o) => o.status === 'accepted').map((o) => o.candidate_id)).size;
+  // Same numbers as the employer card, only from request_pipeline_counts.
+  // No row or an error shows a dash, never a client-side count.
+  const matched = formatCount(counts?.matched);
+  const presented = formatCount(counts?.presented);
+  const selected = formatCount(counts?.selected);
+  const interviewCount = formatCount(counts?.interviews);
+  const offerCount = formatCount(counts?.offers);
+  const accepted = formatCount(counts?.offers_accepted);
 
   return (
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -142,6 +144,9 @@ function RequestFileInner() {
         </div>
         {msg && <div className="text-xs font-bold text-slate-700">{msg}</div>}
 
+        {countsFailed ? (
+          <p role="status" className="text-xs font-semibold text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">{t.countsUnavailable}</p>
+        ) : null}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <Stat label={ui.statMatched} value={matched} />
           <Stat label={ui.statPresented} value={presented} />
