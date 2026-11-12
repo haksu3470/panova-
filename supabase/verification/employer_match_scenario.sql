@@ -69,7 +69,9 @@ declare
   v_name_a text;
   v_name_b text;
   v_country text;
-  v_c uuid[];
+  v_c uuid[] := '{}';
+  v_missing text;
+  v_run text := substr(md5(clock_timestamp()::text || random()::text), 1, 8);
   v_r1 uuid; v_rb uuid; v_r3 uuid; v_r4 uuid;
   v_id uuid;
 begin
@@ -124,27 +126,51 @@ begin
   -- what blocks scenario 4.
   v_country := coalesce(nullif(pg_temp.ctx('scope_target'), ''), v_country);
 
-  -- Nine candidates not yet linked to employer A or B, demo ones first.
-  select array_agg(id) into v_c from (
-    select c.id
-    from public.job_candidates c
-    where c.archived_at is null
-      and not exists (
-        select 1 from public.request_matches m
-        join public.job_requests jr on jr.id = m.request_id
-        where m.candidate_id = c.id and jr.employer_id in (v_emp_a, v_emp_b)
-      )
-    order by c.is_demo desc nulls last, c.id
-    limit 9
-  ) s;
-  if coalesce(array_length(v_c, 1), 0) < 9 then
-    raise exception 'En az 9 uygun aday gerekli, bulunan: %.', coalesce(array_length(v_c, 1), 0);
+  -- Pre-check before ANY insert: every NOT NULL column without a default must
+  -- be in that table's insert column list below. Keep these lists in sync
+  -- with the inserts. A missing column stops the script here, by name.
+  select string_agg(t.tbl || '.' || col.column_name, ', ' order by t.tbl, col.column_name) into v_missing
+  from (values
+    ('job_candidates',  array['full_name', 'nationality', 'phone', 'email', 'profession',
+                              'sector', 'passport_number', 'status', 'is_demo']),
+    ('job_requests',    array['employer_id', 'employer_name', 'sector', 'position_title', 'headcount',
+                              'monthly_net_salary', 'accommodation_provided', 'food_provided',
+                              'status', 'country', 'is_demo']),
+    ('request_matches', array['request_id', 'candidate_id', 'bound_at', 'presented_at', 'is_demo']),
+    ('interviews',      array['request_id', 'candidate_id', 'employer_id', 'scheduled_at', 'status', 'is_demo'])
+  ) as t(tbl, covered)
+  join information_schema.columns col
+    on col.table_schema = 'public' and col.table_name = t.tbl
+  where col.is_nullable = 'NO' and col.column_default is null
+    and col.is_identity = 'NO' and col.is_generated = 'NEVER'
+    and col.column_name <> all (t.covered);
+  if v_missing is not null then
+    raise exception 'Zorunlu, varsayılansız sütun betiğin insert''lerinde yok: %. Betiği bu sütunlarla güncelleyin.', v_missing;
   end if;
+
+  -- Nine candidates of our own. Inserted inside this transaction, so the final
+  -- rollback removes them. No auth.users row: auth_user_id stays null.
+
+  -- phone 'p-scn-...' gives phone_key null and the passport is unique per run,
+  -- so the unique indexes on phone and passport cannot collide.
+  for i in 1..9 loop
+    insert into public.job_candidates (full_name, nationality, phone, email, profession, sector,
+                                       passport_number, status, is_demo)
+    values ('TEST senaryo aday ' || i, 'Belirtilmedi', 'p-scn-' || v_run || '-' || i,
+            'test-senaryo-' || v_run || '-' || i || '@example.invalid', 'Belirtilmedi', 'construction',
+            'TSCN' || upper(v_run) || i, 'pending', true)
+    returning id into v_id;
+    v_c := array_append(v_c, v_id);
+  end loop;
+  if coalesce(array_length(v_c, 1), 0) <> 9 then
+    raise exception 'Betik 9 test adayı ekleyemedi, eklenen: %.', coalesce(array_length(v_c, 1), 0);
+  end if;
+  raise notice 'Betik 9 test adayı ekledi (TEST senaryo aday 1-9, is_demo = true).';
 
   -- R1: employer A, headcount 5. M1-M4 presented, M5 not presented.
   insert into public.job_requests (employer_id, employer_name, sector, position_title, headcount,
-                                   accommodation_provided, food_provided, status, country, is_demo)
-  values (v_emp_a, v_name_a, 'construction', 'TEST senaryo R1', 5, true, true, 'searching_candidates', v_country, true)
+                                   monthly_net_salary, accommodation_provided, food_provided, status, country, is_demo)
+  values (v_emp_a, v_name_a, 'construction', 'TEST senaryo R1', 5, 1000, true, true, 'searching_candidates', v_country, true)
   returning id into v_r1;
   perform pg_temp.put('r1', v_r1::text);
   for i in 1..5 loop
@@ -156,8 +182,8 @@ begin
 
   -- RB: employer B, one presented match.
   insert into public.job_requests (employer_id, employer_name, sector, position_title, headcount,
-                                   accommodation_provided, food_provided, status, country, is_demo)
-  values (v_emp_b, v_name_b, 'construction', 'TEST senaryo RB', 1, true, true, 'searching_candidates', v_country, true)
+                                   monthly_net_salary, accommodation_provided, food_provided, status, country, is_demo)
+  values (v_emp_b, v_name_b, 'construction', 'TEST senaryo RB', 1, 1000, true, true, 'searching_candidates', v_country, true)
   returning id into v_rb;
   perform pg_temp.put('rb', v_rb::text);
   insert into public.request_matches (request_id, candidate_id, bound_at, presented_at, is_demo)
@@ -166,8 +192,8 @@ begin
 
   -- R3: employer A, headcount 2, two presented matches, status presenting.
   insert into public.job_requests (employer_id, employer_name, sector, position_title, headcount,
-                                   accommodation_provided, food_provided, status, country, is_demo)
-  values (v_emp_a, v_name_a, 'construction', 'TEST senaryo R3', 2, true, true, 'searching_candidates', v_country, true)
+                                   monthly_net_salary, accommodation_provided, food_provided, status, country, is_demo)
+  values (v_emp_a, v_name_a, 'construction', 'TEST senaryo R3', 2, 1000, true, true, 'searching_candidates', v_country, true)
   returning id into v_r3;
   perform pg_temp.put('r3', v_r3::text);
   insert into public.request_matches (request_id, candidate_id, bound_at, presented_at, is_demo)
@@ -187,8 +213,8 @@ begin
 
   -- R4: employer A, cancelled, one presented match.
   insert into public.job_requests (employer_id, employer_name, sector, position_title, headcount,
-                                   accommodation_provided, food_provided, status, country, is_demo)
-  values (v_emp_a, v_name_a, 'construction', 'TEST senaryo R4', 1, true, true, 'cancelled', v_country, true)
+                                   monthly_net_salary, accommodation_provided, food_provided, status, country, is_demo)
+  values (v_emp_a, v_name_a, 'construction', 'TEST senaryo R4', 1, 1000, true, true, 'cancelled', v_country, true)
   returning id into v_r4;
   perform pg_temp.put('r4', v_r4::text);
   insert into public.request_matches (request_id, candidate_id, bound_at, presented_at, is_demo)
@@ -507,11 +533,15 @@ begin
   reset role;
 
   -- At this point R1 has 5 matches, 4 presented, 2 selected (M1, M2).
+  -- Decision B: matched (unpresented included) is staff-only, null for the
+  -- employer. Every other column must be identical for both.
   perform pg_temp.rec('5', 'Kart sayıları işveren ve yönetimde aynı, talep başına doğru',
-    v_err is null and j_emp is not null and j_emp = j_up and v_emp_sees_b = 0
-      and (not (j_emp ? 'matched') or (j_emp ->> 'matched')::int = 5)
-      and (not (j_emp ? 'presented') or (j_emp ->> 'presented')::int = 4)
-      and (not (j_emp ? 'selected') or (j_emp ->> 'selected')::int = 2),
+    v_err is null and j_emp is not null and j_up is not null and v_emp_sees_b = 0
+      and (j_emp - 'matched') = (j_up - 'matched')
+      and j_emp ? 'matched' and jsonb_typeof(j_emp -> 'matched') = 'null'
+      and (j_up ->> 'matched')::int = 5
+      and (j_emp ->> 'presented')::int = 4
+      and (j_emp ->> 'selected')::int = 2,
     format('hata=%s işveren=%s yönetim=%s işveren_B_talebini_görüyor=%s',
       coalesce(v_err, '-'), j_emp, j_up, v_emp_sees_b));
 end $$;
