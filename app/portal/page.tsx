@@ -50,7 +50,8 @@ import ListExportBar from '@/components/portal/ListExportBar';
 import StaffTab from '../../components/portal/StaffTab';
 import TasksTab from '../../components/portal/TasksTab';
 import { employerExportRows, offerExportRows, requestExportRows } from '@/lib/exportLists';
-import { isUpperManagementRole, tabsForStaffRole, type StaffTab as StaffTabId } from '@/lib/staffAccess';
+import { canUpdateRequestStatus, isUpperManagementRole, tabsForStaffRole, type StaffTab as StaffTabId } from '@/lib/staffAccess';
+import { statusErrorKey, type StatusErrorKey } from '@/lib/requestStatusChange';
 
 export default function PortalPage() {
   const [currentLang, setCurrentLang] = useState<Language>('en');
@@ -407,22 +408,27 @@ export default function PortalPage() {
     logAudit(`${ui.candidateWord} → ${newStatus}`, currentUser?.name);
   };
 
-  const updateRequestStatus = async (id: string, newStatus: string, cancellationReason: string = '') => {
-    const updatePayload: any = { status: newStatus };
-    if (newStatus === 'cancelled' && cancellationReason) {
-      updatePayload.closed_reason = cancellationReason;
-      updatePayload.closed_at = new Date().toISOString();
-    }
-    const { error } = await supabase.from('job_requests').update(updatePayload).eq('id', id);
-    if (error) {
-      alert(error.message.includes('demand_status_transition') ? releaseCopy[currentLang].demandBlocked : error.message);
-      return;
-    }
-    setJobRequests(jobRequests.map(r => r.id === id ? { ...r, ...updatePayload } : r));
-    logAudit(`${ui.linkRequest} → ${newStatus}`, currentUser?.name);
+  // Manual status change, upper management only. The RPC checks the role and
+  // the reason, sets closed_reason / closed_at itself and writes the audit
+  // row, so nothing else is sent from here. Resolves to an error key or null.
+  const updateRequestStatus = async (id: string, newStatus: string, reason: string): Promise<StatusErrorKey | null> => {
+    const { error } = await supabase.rpc('staff_set_request_status', {
+      p_request_id: id,
+      p_status: newStatus,
+      p_reason: reason,
+    });
+    if (error) return statusErrorKey(error);
+    const { data: row } = await supabase
+      .from('job_requests')
+      .select('id, status, closed_reason, closed_at')
+      .eq('id', id)
+      .maybeSingle();
+    const patch = row || { status: newStatus };
+    setJobRequests((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } : r)));
     if (selectedDemandDetail && selectedDemandDetail.id === id) {
-      setSelectedDemandDetail({ ...selectedDemandDetail, ...updatePayload });
+      setSelectedDemandDetail({ ...selectedDemandDetail, ...patch });
     }
+    return null;
   };
 
   const updateCandidateAssignee = async (id: string, assignee: string) => {
@@ -917,6 +923,7 @@ export default function PortalPage() {
             updateRequestStatus={updateRequestStatus}
             setSelectedDemandDetail={setSelectedDemandDetail}
             isUpperManagement={isUpperManagement}
+            canChangeStatus={canUpdateRequestStatus(userRole)}
             onChanged={fetchAllData}
           />
         )}

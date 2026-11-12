@@ -24,16 +24,6 @@ export const demandService = {
     return data;
   },
 
-  // Talep durumunu güncelle (onay, iptal, sebep vb.)
-  async updateDemandStatus(id: string, payload: any) {
-    const { error } = await supabase
-      .from('job_requests')
-      .update(payload)
-      .eq('id', id);
-    
-    if (error) throw error;
-  },
-
   // Yeni kurumsal talep oluştur
   async createDemand(payload: any) {
     const { data, error } = await supabase

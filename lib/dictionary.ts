@@ -362,6 +362,22 @@ export interface Translation {
   stageTravelPlanning?: string;
   stageCompleted?: string;
   stageCancelled?: string;
+  statusAutoNote?: string;
+  statusManualTitle?: string;
+  statusNewLabel?: string;
+  statusReasonLabel?: string;
+  statusReasonHint?: string;
+  statusApplyBtn?: string;
+  statusCancelBtn?: string;
+  statusChangedOk?: string;
+  statusErrUseRpc?: string;
+  statusErrRole?: string;
+  statusErrReasonRequired?: string;
+  statusErrReasonTooLong?: string;
+  statusErrTransition?: string;
+  statusErrInvalid?: string;
+  statusErrNotFound?: string;
+  statusErrGeneric?: string;
   openDemandFilesBtn?: string;
   taskGroupTarget?: string;
   taskGroupField?: string;
@@ -995,6 +1011,22 @@ export const translations: Record<Language, Translation> = {
     stageTravelPlanning: 'Seyahat Planlanıyor',
     stageCompleted: 'Tamamlandı',
     stageCancelled: 'İptal Edildi',
+    statusAutoNote: 'Durum kayıtlara göre kendiliğinden ilerler: eşleşme, sunum, görüşme, seçim ve süreç kayıtları. Geri gitmez; tamamlama ve iptali yalnız Üst Yönetim gerekçeyle yapar.',
+    statusManualTitle: 'Durumu elle değiştir',
+    statusNewLabel: 'Yeni durum',
+    statusReasonLabel: 'Gerekçe',
+    statusReasonHint: 'En az 5, en çok 1000 karakter. Kayıt geçmişine yazılır.',
+    statusApplyBtn: 'Durumu değiştir',
+    statusCancelBtn: 'Vazgeç',
+    statusChangedOk: 'Durum değiştirildi.',
+    statusErrUseRpc: 'Durum doğrudan değiştirilemez. "Durumu elle değiştir" bölümünü kullanın.',
+    statusErrRole: 'Durumu elle yalnız Üst Yönetim değiştirebilir.',
+    statusErrReasonRequired: 'Gerekçe en az 5 karakter olmalı.',
+    statusErrReasonTooLong: 'Gerekçe en çok 1000 karakter olabilir.',
+    statusErrTransition: 'Bu duruma geçilemez: kayıtlar yetmiyor (ör. sunum, görüşme veya seçilen aday yok).',
+    statusErrInvalid: 'Geçersiz durum.',
+    statusErrNotFound: 'Talep bulunamadı ya da görme yetkiniz yok.',
+    statusErrGeneric: 'Durum değiştirilemedi. Lütfen tekrar deneyin.',
     openDemandFilesBtn: 'Dosyaları Aç',
     taskGroupTarget: 'Hedef Ülke Ekibi',
     taskGroupField: 'Saha Ekibi',
@@ -1615,6 +1647,22 @@ export const translations: Record<Language, Translation> = {
     stageTravelPlanning: 'Travel Planning',
     stageCompleted: 'Completed',
     stageCancelled: 'Cancelled',
+    statusAutoNote: 'The status moves forward on its own from the records: matches, presentations, interviews, selections and process updates. It never moves back; only upper management completes or cancels a request, with a reason.',
+    statusManualTitle: 'Change status manually',
+    statusNewLabel: 'New status',
+    statusReasonLabel: 'Reason',
+    statusReasonHint: 'At least 5 and at most 1000 characters. Saved in the audit log.',
+    statusApplyBtn: 'Change status',
+    statusCancelBtn: 'Back',
+    statusChangedOk: 'Status changed.',
+    statusErrUseRpc: 'The status cannot be changed directly. Use "Change status manually".',
+    statusErrRole: 'Only upper management can change the status manually.',
+    statusErrReasonRequired: 'The reason must be at least 5 characters.',
+    statusErrReasonTooLong: 'The reason can be at most 1000 characters.',
+    statusErrTransition: 'This status is not possible yet: the records do not support it (for example no presentation, interview or selected candidate).',
+    statusErrInvalid: 'Invalid status.',
+    statusErrNotFound: 'Request not found, or you cannot view it.',
+    statusErrGeneric: 'The status could not be changed. Please try again.',
     openDemandFilesBtn: 'Open Files',
     taskGroupTarget: 'Target Country Team',
     taskGroupField: 'Field Team',
@@ -2235,6 +2283,22 @@ export const translations: Record<Language, Translation> = {
     stageTravelPlanning: 'Planifikimi i Udhëtimit',
     stageCompleted: 'Përfunduar',
     stageCancelled: 'Anuluar',
+    statusAutoNote: 'Statusi përparon vetvetiu sipas regjistrimeve: përputhjet, prezantimet, intervistat, përzgjedhjet dhe hapat e procesit. Nuk kthehet kurrë mbrapa; përfundimin dhe anulimin e bën vetëm menaxhimi i lartë, me arsye.',
+    statusManualTitle: 'Ndrysho statusin manualisht',
+    statusNewLabel: 'Statusi i ri',
+    statusReasonLabel: 'Arsyeja',
+    statusReasonHint: 'Të paktën 5 dhe më së shumti 1000 karaktere. Ruhet në regjistrin e auditimit.',
+    statusApplyBtn: 'Ndrysho statusin',
+    statusCancelBtn: 'Kthehu',
+    statusChangedOk: 'Statusi u ndryshua.',
+    statusErrUseRpc: 'Statusi nuk mund të ndryshohet drejtpërdrejt. Përdorni "Ndrysho statusin manualisht".',
+    statusErrRole: 'Vetëm menaxhimi i lartë mund ta ndryshojë statusin manualisht.',
+    statusErrReasonRequired: 'Arsyeja duhet të ketë të paktën 5 karaktere.',
+    statusErrReasonTooLong: 'Arsyeja mund të ketë më së shumti 1000 karaktere.',
+    statusErrTransition: 'Ky status nuk lejohet ende: regjistrimet nuk e mbështesin (p.sh. nuk ka prezantim, intervistë ose kandidat të përzgjedhur).',
+    statusErrInvalid: 'Status i pavlefshëm.',
+    statusErrNotFound: 'Kërkesa nuk u gjet ose nuk keni leje ta shihni.',
+    statusErrGeneric: 'Statusi nuk u ndryshua. Ju lutemi provoni përsëri.',
     openDemandFilesBtn: 'Hap Skedarët',
     taskGroupTarget: 'Ekipi i Vendit të Synuar',
     taskGroupField: 'Ekipi i Fushës',
@@ -2963,6 +3027,22 @@ export const translations: Record<Language, Translation> = {
     stageTravelPlanning: 'تخطيط السفر',
     stageCompleted: 'مكتمل',
     stageCancelled: 'ملغي',
+    statusAutoNote: 'تتقدّم الحالة تلقائيًا وفق السجلات: المطابقات والعروض والمقابلات والاختيارات وخطوات الإجراءات. لا تعود إلى الوراء أبدًا، ولا يُكمل الطلب أو يُلغيه إلا الإدارة العليا مع ذكر السبب.',
+    statusManualTitle: 'تغيير الحالة يدويًا',
+    statusNewLabel: 'الحالة الجديدة',
+    statusReasonLabel: 'السبب',
+    statusReasonHint: 'من 5 إلى 1000 حرف. يُحفظ في سجل التدقيق.',
+    statusApplyBtn: 'تغيير الحالة',
+    statusCancelBtn: 'رجوع',
+    statusChangedOk: 'تم تغيير الحالة.',
+    statusErrUseRpc: 'لا يمكن تغيير الحالة مباشرة. استخدموا قسم «تغيير الحالة يدويًا».',
+    statusErrRole: 'لا يغيّر الحالة يدويًا إلا الإدارة العليا.',
+    statusErrReasonRequired: 'يجب أن يتكوّن السبب من 5 أحرف على الأقل.',
+    statusErrReasonTooLong: 'لا يمكن أن يتجاوز السبب 1000 حرف.',
+    statusErrTransition: 'لا يمكن الانتقال إلى هذه الحالة بعد: السجلات لا تدعمها (مثلًا لا يوجد عرض أو مقابلة أو مرشح مختار).',
+    statusErrInvalid: 'حالة غير صالحة.',
+    statusErrNotFound: 'لم يُعثر على الطلب أو لا تملكون صلاحية عرضه.',
+    statusErrGeneric: 'تعذّر تغيير الحالة. يُرجى المحاولة مرة أخرى.',
     openDemandFilesBtn: 'فتح الملفات',
     taskGroupTarget: 'فريق البلد المستهدف',
     taskGroupField: 'الفريق الميداني',
@@ -3478,6 +3558,22 @@ export const translations: Record<Language, Translation> = {
     stageTravelPlanning: 'Планирање на патување',
     stageCompleted: 'Завршено',
     stageCancelled: 'Откажано',
+    statusAutoNote: 'Статусот напредува сам според записите: спојувања, презентации, интервјуа, избори и чекори од постапката. Никогаш не се враќа назад; завршување и откажување прави само врвното раководство, со причина.',
+    statusManualTitle: 'Рачно промени го статусот',
+    statusNewLabel: 'Нов статус',
+    statusReasonLabel: 'Причина',
+    statusReasonHint: 'Најмалку 5, најмногу 1000 знаци. Се зачувува во ревизорскиот дневник.',
+    statusApplyBtn: 'Промени статус',
+    statusCancelBtn: 'Назад',
+    statusChangedOk: 'Статусот е променет.',
+    statusErrUseRpc: 'Статусот не може да се менува директно. Користете „Рачно промени го статусот“.',
+    statusErrRole: 'Само врвното раководство може рачно да го менува статусот.',
+    statusErrReasonRequired: 'Причината мора да има најмалку 5 знаци.',
+    statusErrReasonTooLong: 'Причината може да има најмногу 1000 знаци.',
+    statusErrTransition: 'Овој статус сè уште не е можен: записите не го поддржуваат (на пр. нема презентација, интервју или избран кандидат).',
+    statusErrInvalid: 'Неважечки статус.',
+    statusErrNotFound: 'Барањето не е пронајдено или немате право да го видите.',
+    statusErrGeneric: 'Статусот не можеше да се промени. Обидете се повторно.',
     openDemandFilesBtn: 'Отвори досиеја',
     taskGroupTarget: 'Тим за целна земја',
     taskGroupField: 'Теренски тим',
