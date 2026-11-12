@@ -22,7 +22,7 @@ export default function KvkkView() {
           </Link>
           <div className="flex items-center gap-3">
             <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
-            <Link href="/" className="text-sm font-semibold text-[#1b5e20]">{k.home}</Link>
+            <Link href="/" className="text-sm font-semibold text-brand">{k.home}</Link>
           </div>
         </div>
       </header>
@@ -39,28 +39,28 @@ export default function KvkkView() {
           <p>{k.address}: {company.address}</p>
           <p>
             {k.email}:{' '}
-            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.email}`}>{company.email}</a>
+            <a className="text-brand font-semibold" href={`mailto:${company.email}`}>{company.email}</a>
           </p>
           <ul>
             {company.phones.map((p) => (
               <li key={p.tel}>
-                <a className="text-[#1b5e20] font-semibold" href={`tel:${p.tel}`}>{p.display}</a>
+                <a className="text-brand font-semibold" href={`tel:${p.tel}`}>{p.display}</a>
               </li>
             ))}
           </ul>
           <p>EMBS: {company.embs} · {k.taxId}: {company.taxId}</p>
           <p className="pt-2">
             {a.turkeyOffice}: {company.turkey.addressLines.join(', ')}. {a.phone}:{' '}
-            <a className="text-[#1b5e20] font-semibold" href={`tel:${company.turkey.phone.tel}`}>{company.turkey.phone.display}</a>
+            <a className="text-brand font-semibold" href={`tel:${company.turkey.phone.tel}`}>{company.turkey.phone.display}</a>
             . {k.email}:{' '}
-            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.turkey.email}`}>{company.turkey.email}</a>
+            <a className="text-brand font-semibold" href={`mailto:${company.turkey.email}`}>{company.turkey.email}</a>
             . {a.siteTaxOffice}, {a.vkn} {company.turkey.vkn}.
           </p>
           <p>
             {a.bangladeshOffice}: {company.bangladesh.addressLines.join(', ')}. {a.phone}:{' '}
-            <a className="text-[#1b5e20] font-semibold" href={`tel:${company.bangladesh.phone.tel}`}>{company.bangladesh.phone.display}</a>
+            <a className="text-brand font-semibold" href={`tel:${company.bangladesh.phone.tel}`}>{company.bangladesh.phone.display}</a>
             . {k.email}:{' '}
-            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.bangladesh.email}`}>{company.bangladesh.email}</a>.
+            <a className="text-brand font-semibold" href={`mailto:${company.bangladesh.email}`}>{company.bangladesh.email}</a>.
           </p>
         </section>
 
@@ -73,11 +73,11 @@ export default function KvkkView() {
           <h2 className="font-extrabold text-slate-900">{k.rightsTitle}</h2>
           <p>
             {k.rightsBefore}{' '}
-            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.email}`}>{company.email}</a>
+            <a className="text-brand font-semibold" href={`mailto:${company.email}`}>{company.email}</a>
             {', '}
-            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.turkey.email}`}>{company.turkey.email}</a>
+            <a className="text-brand font-semibold" href={`mailto:${company.turkey.email}`}>{company.turkey.email}</a>
             {' '}{k.rightsOr}{' '}
-            <a className="text-[#1b5e20] font-semibold" href={`mailto:${company.bangladesh.email}`}>{company.bangladesh.email}</a>
+            <a className="text-brand font-semibold" href={`mailto:${company.bangladesh.email}`}>{company.bangladesh.email}</a>
             {' '}{k.rightsAfter}
           </p>
         </section>

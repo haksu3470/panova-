@@ -6,7 +6,9 @@ import { ArrowLeft, CheckCircle2, UserPlus, Send, Building } from 'lucide-react'
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
-import { homeCopy } from '@/lib/home-copy';
+import { ProfessionField } from '@/components/site/ProfessionField';
+import { fill, homeCopy } from '@/lib/home-copy';
+import { professionForSectorChange } from '@/lib/professions';
 import { isGmailAddress } from '@/lib/emailAddress';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 
@@ -30,6 +32,7 @@ export default function SupplierCandidateRegister() {
   };
 
   const [submitted, setSubmitted] = useState(false);
+  const [savedCode, setSavedCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [supplierName, setSupplierName] = useState('');
 
@@ -42,7 +45,7 @@ export default function SupplierCandidateRegister() {
     passportNumber: '',
     phone: '',
     email: '',
-    profession: 'Electrician / Elektrikçi',
+    profession: '',
     sector: 'construction',
     expectedSalary: '',
   });
@@ -51,7 +54,7 @@ export default function SupplierCandidateRegister() {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.from('job_candidates').insert([
+    const { data, error } = await supabase.from('job_candidates').insert([
       {
         full_name: formData.fullName,
         passport_number: formData.passportNumber,
@@ -63,11 +66,13 @@ export default function SupplierCandidateRegister() {
         status: 'pending',
         notes: `Tedarikçi Partner Tarafından Kaydedildi: ${supplierName || 'Yetkili Tedarikçi'}`,
       },
-    ]);
+    ]).select('referral_code').single();
 
     setLoading(false);
-    if (!error) setSubmitted(true);
-    else alert('Hata: ' + error.message);
+    if (!error) {
+      setSavedCode(data?.referral_code?.trim() || null);
+      setSubmitted(true);
+    } else alert('Hata: ' + error.message);
   };
 
   return (
@@ -76,7 +81,7 @@ export default function SupplierCandidateRegister() {
         
         {/* Üst Bar */}
         <div className="flex items-center justify-between">
-          <Link href="/" className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition">
+          <Link href="/" className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-on-dark-muted hover:text-on-dark transition">
             <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
           </Link>
 
@@ -90,7 +95,7 @@ export default function SupplierCandidateRegister() {
             </div>
             <div>
               <h1 className="text-lg sm:text-2xl font-black text-white">{s.title}</h1>
-              <p className="text-slate-400 text-xs mt-0.5">{s.subtitle}</p>
+              <p className="text-on-dark-muted text-xs mt-0.5">{s.subtitle}</p>
             </div>
           </div>
 
@@ -98,35 +103,72 @@ export default function SupplierCandidateRegister() {
             <div className="bg-emerald-950 p-6 sm:p-8 rounded-2xl text-center space-y-3">
               <CheckCircle2 className="w-14 h-14 sm:w-16 sm:h-16 text-emerald-400 mx-auto" />
               <h2 className="text-base sm:text-lg font-bold text-white">{s.success}</h2>
+              <p className="text-xs text-emerald-100 leading-relaxed">{savedCode ? fill(s.linkedCode, { code: savedCode }) : s.openRegistration}</p>
               {!isGmailAddress(formData.email) ? <p className="text-xs text-emerald-100 leading-relaxed">{t.supplierNonGmailHint}</p> : null}
-              <button onClick={() => setSubmitted(false)} className="bg-[#2e7d32] text-white px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition hover:bg-[#1b5e20]">{s.another}</button>
+              <button onClick={() => setSubmitted(false)} className="bg-brand-solid text-white px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition hover:bg-brand">{s.another}</button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4 text-xs sm:text-sm">
               <div>
-                <label className="block font-bold text-slate-300 uppercase mb-1">{s.company} *</label>
+                <label className="block font-bold text-on-dark-muted uppercase mb-1">{s.company} *</label>
                 <input type="text" required value={supplierName} onChange={(e) => setSupplierName(e.target.value)} placeholder={s.companyPh} className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none" />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-300 uppercase mb-1">{s.name} *</label>
+                  <label className="block font-bold text-on-dark-muted uppercase mb-1">{s.name} *</label>
                   <input type="text" required value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-300 uppercase mb-1">{s.passport}</label>
+                  <label className="block font-bold text-on-dark-muted uppercase mb-1">{s.passport}</label>
                   <input type="text" value={formData.passportNumber} onChange={(e) => setFormData({ ...formData, passportNumber: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-300 uppercase mb-1">{s.phone} *</label>
+                  <label className="block font-bold text-on-dark-muted uppercase mb-1">{s.phone} *</label>
                   <input type="tel" required value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="+389..." className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none" />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-300 uppercase mb-1">{s.email} *</label>
+                  <label className="block font-bold text-on-dark-muted uppercase mb-1">{s.email} *</label>
                   <input type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-on-dark-muted uppercase mb-1" htmlFor="supplier-sector">{t.sectorLabel} *</label>
+                  <select
+                    id="supplier-sector"
+                    required
+                    value={formData.sector}
+                    onChange={(e) => {
+                      const sector = e.target.value;
+                      setFormData((current) => ({
+                        ...current,
+                        sector,
+                        profession: professionForSectorChange(current.profession, sector),
+                      }));
+                    }}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none"
+                  >
+                    {homeCopy[currentLang].formSectors.map((sector) => (
+                      <option key={sector.value} value={sector.value}>{sector.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-bold text-on-dark-muted uppercase mb-1" htmlFor="supplier-profession">{t.professionLabel} *</label>
+                  <ProfessionField
+                    id="supplier-profession"
+                    lang={currentLang}
+                    sector={formData.sector}
+                    value={formData.profession}
+                    required
+                    onChange={(profession) => setFormData((current) => ({ ...current, profession }))}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm outline-none"
+                  />
                 </div>
               </div>
 

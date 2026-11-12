@@ -6,7 +6,10 @@ import { AuthFooter } from '@/components/site/AuthFooter';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ensureStaff, signOut } from '@/lib/auth';
+import { consumeOAuthIntent, listenerMayRevokeSharedSession, PORTAL_OAUTH_PATH } from '@/lib/staffSession';
+import { AccountExistsNotice } from '@/components/auth/AccountExistsNotice';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
+import ForgotPasswordPanel, { ForgotPasswordLink } from '@/components/auth/ForgotPasswordPanel';
 import {
   beginPasswordSignup,
   emailGateListenerPaused,
@@ -18,21 +21,36 @@ import {
 } from '@/lib/emailVerification';
 import { 
   Lock, ShieldCheck, ArrowLeft, Building2, Users, FileText, 
-  UserCheck, CheckSquare, History, ShieldAlert, Key, RefreshCw, Trash2 
+  UserCheck, CheckSquare, History, ShieldAlert, Key, RefreshCw, Trash2, BookOpen
 } from 'lucide-react';
 import Link from 'next/link';
+import { candidateProfessionLabel } from '@/lib/candidateLabels';
 import { Language, translations } from '@/lib/dictionary';
+import { dateLocale, portalUi } from '@/lib/portal-ui-copy';
+import { benefitPhrase, displayedRequestSalary } from '@/lib/workforceRequest';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
+import { guideNavLabel } from '@/lib/guides-nav';
+import { releaseCopy } from '@/lib/release-copy';
+import { threadForTicket, type SupportMessage } from '@/lib/supportTickets';
+import StaffMfaPanel from '@/components/portal/StaffMfaPanel';
+import EmployerLoginInvite from '@/components/portal/EmployerLoginInvite';
+import { taskIsOverdue } from '@/lib/demandStatus';
 
 // Modüler Bileşenlerimiz (Kök dizindeki components klasörüne göre göreceli yol)
 import CandidatesTab from '../../components/portal/CandidatesTab';
+import { ReferralCodeChip } from '../../components/portal/ReferralCodeChip';
+import { isSourceCountryOfficer, normalizeReferralCode } from '@/lib/referralCode';
 import RequestsTab from '../../components/portal/RequestsTab';
 import { writeAudit } from '@/lib/audit';
 import DemoBadge from '@/components/portal/DemoBadge';
+import DeleteRecordButton from '@/components/portal/DeleteRecordButton';
+import ListExportBar from '@/components/portal/ListExportBar';
 import StaffTab from '../../components/portal/StaffTab';
 import TasksTab from '../../components/portal/TasksTab';
+import { employerExportRows, offerExportRows, requestExportRows } from '@/lib/exportLists';
+import { isUpperManagementRole, tabsForStaffRole, type StaffTab as StaffTabId } from '@/lib/staffAccess';
 
 export default function PortalPage() {
   const [currentLang, setCurrentLang] = useState<Language>('en');
@@ -51,6 +69,7 @@ export default function PortalPage() {
   }, []);
 
   const t = translations[currentLang] || translations.en;
+  const ui = portalUi[currentLang];
   const isRtl = currentLang === 'ar';
 
   const changeLanguage = (lang: Language) => {
@@ -59,7 +78,7 @@ export default function PortalPage() {
   };
 
   const [authenticated, setAuthenticated] = useState(false);
-  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify'>('signin');
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify' | 'forgot' | 'exists'>('signin');
   const [verifyEmail, setVerifyEmail] = useState('');
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
@@ -76,6 +95,7 @@ export default function PortalPage() {
   const [jobRequests, setJobRequests] = useState<any[]>([]);
   const [employers, setEmployers] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
+  const [supportMessages, setSupportMessages] = useState<SupportMessage[]>([]);
   const [staffMembers, setStaffMembers] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
 
@@ -86,6 +106,27 @@ export default function PortalPage() {
   const [newTaskLinkId, setNewTaskLinkId] = useState('');
 
   const [loading, setLoading] = useState(false);
+  const [mfaMode, setMfaMode] = useState<'off' | 'challenge' | 'optional'>('off');
+
+  useEffect(() => {
+    if (!authenticated) return;
+    let alive = true;
+    (async () => {
+      const [level, factors, required] = await Promise.all([
+        supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+        supabase.auth.mfa.listFactors(),
+        supabase.rpc('staff_mfa_required'),
+      ]);
+      if (!alive) return;
+      const verified = (factors.data?.totp ?? []).some((factor) => factor.status === 'verified');
+      if (verified && level.data?.currentLevel !== 'aal2') setMfaMode('challenge');
+      else if (required.data === true && !verified) setMfaMode('challenge');
+      else setMfaMode('optional');
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [authenticated]);
 
   const [newStaffName, setNewStaffName] = useState('');
   const [newStaffEmail, setNewStaffEmail] = useState('');
@@ -100,7 +141,15 @@ export default function PortalPage() {
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
   
   const userRole = currentUser?.role_level?.toLowerCase() || '';
-  const isUpperManagement = userRole === 'upper_management' || currentUser?.isAdmin || currentUser?.email === 'admin';
+  const isUpperManagement = isUpperManagementRole(userRole);
+  const allowedTabs = tabsForStaffRole(userRole);
+  const showTab = (tab: StaffTabId) => !currentUser || allowedTabs.includes(tab);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const tabs = tabsForStaffRole(userRole);
+    if (!tabs.includes(activeTab)) setActiveTab(tabs[0]);
+  }, [currentUser, userRole, activeTab]);
 
   const getRoleDisplayName = (role: string) => {
     const r = role?.toLowerCase() || '';
@@ -129,11 +178,29 @@ export default function PortalPage() {
     if (empData) setEmployers(empData);
 
     const { data: ticketData } = await supabase.from('candidate_support_tickets').select('*').order('created_at', { ascending: false });
-    if (ticketData) setSupportTickets(ticketData);
+    if (ticketData) {
+      setSupportTickets(ticketData);
+      const ids = ticketData.map((ticket: { id?: string }) => ticket.id).filter(Boolean);
+      if (ids.length) {
+        const { data: msgs } = await supabase
+          .from('support_ticket_messages')
+          .select('id, ticket_id, author_role, author_name, body, created_at, read_at')
+          .in('ticket_id', ids)
+          .order('created_at', { ascending: true });
+        if (msgs) setSupportMessages(msgs);
+      } else {
+        setSupportMessages([]);
+      }
+    }
 
     const { data: staffData } = await supabase.from('staff_members').select('*').order('created_at', { ascending: false });
     if (staffData && staffData.length > 0) {
       setStaffMembers(staffData);
+      setCurrentUser((prev: any) => {
+        if (!prev) return prev;
+        const mine = staffData.find((member: any) => member.id === prev.id || (prev.auth_user_id && member.auth_user_id === prev.auth_user_id));
+        return mine ? { ...prev, ...mine } : prev;
+      });
       if (!newTaskAssignee && staffData[0]) {
         setNewTaskAssignee(staffData[0].name);
         setNewTaskBackup(staffData[1]?.name || staffData[0].name);
@@ -152,8 +219,8 @@ export default function PortalPage() {
       setTasks(taskData);
     } else {
       setTasks([
-        { id: '1', title: 'Pasaportu kontrol et', assignee: 'Hüseyin Aksu', backup_assignee: 'Aleksandar Petrov', due_date: '2026-10-01', status: 'pending' },
-        { id: '2', title: 'İşvereni ara', assignee: 'Mehmet Çitil', backup_assignee: 'Rabia Aksu', due_date: '2026-09-25', status: 'completed' }
+        { id: '1', title: 'taskPassportCheck', assignee: 'Hüseyin Aksu', backup_assignee: 'Aleksandar Petrov', due_date: '2026-10-01', status: 'pending' },
+        { id: '2', title: 'taskSaveDemand', assignee: 'Mehmet Citil', backup_assignee: 'Rabia Aksu', due_date: '2026-09-25', status: 'completed' }
       ]);
     }
 
@@ -177,21 +244,30 @@ export default function PortalPage() {
     fullName?: string,
     announce = false,
     audit = announce,
+    revokeOnFailure = false,
   ) => {
     const staffOk = await ensureStaff(fullName || email || undefined);
     if (!staffOk) {
+      // signOut is global for this browser. Only an explicit portal login,
+      // or OAuth that this tab started, may revoke. A candidate signed in
+      // on /candidate shares this session.
+      if (revokeOnFailure) await signOut();
       if (announce) {
-        await signOut();
         const copy = translations[langRef.current] || translations.en;
         alert(copy.staffNotInvited);
       }
       return false;
     }
     const { data: staffData } = await supabase.from('staff_members').select('*').eq('auth_user_id', userId).maybeSingle();
-    const loggedUser = staffData || { name: fullName || email, email, role_level: 'upper_management' };
+    let roleLevel = staffData?.role_level as string | undefined;
+    if (!roleLevel) {
+      const { data: profile } = await supabase.from('profiles').select('staff_role').eq('id', userId).maybeSingle();
+      roleLevel = profile?.staff_role || undefined;
+    }
+    const loggedUser = { ...(staffData || { name: fullName || email, email }), role_level: roleLevel || 'limited' };
     setAuthenticated(true);
     setCurrentUser(loggedUser);
-    if (audit) logAudit('Sisteme Supabase Auth ile Giriş Yapıldı', loggedUser.name);
+    if (audit) logAudit(portalUi[langRef.current].signedIn, loggedUser.name);
     return true;
   };
 
@@ -207,6 +283,9 @@ export default function PortalPage() {
       if (event !== 'INITIAL_SESSION' && event !== 'SIGNED_IN') return;
       setTimeout(async () => {
         if (!alive || emailGateListenerPaused() || !session) return;
+        // A hidden portal tab hears every sign-in on this origin. Adopting it
+        // would run claim_first_staff and, previously, signOut the candidate.
+        if (document.visibilityState !== 'visible') return;
         const gate = await gateSession();
         if (!alive) return;
         if (gate.status === 'verify') {
@@ -218,17 +297,21 @@ export default function PortalPage() {
         if (gate.status !== 'ready') return;
         // Google dönüşü INITIAL_SESSION veya SIGNED_IN olabilir. Personel değilse
         // ikisinde de uyarı göster; sessiz dönüş giriş formunda kalmasın.
+        // Oturumu silmek yalnız bu sekmenin kendi Google dönüşünde olur.
         // Denetim kaydı yalnız yeni oturumda yazılır, sayfa yenilemesinde değil.
         if (handledUserId === session.user.id) return;
         handledUserId = session.user.id;
-        const opened = await enterStaff(
+        const revoke = listenerMayRevokeSharedSession(consumeOAuthIntent(PORTAL_OAUTH_PATH), true);
+        // handledUserId stays set so the paired INITIAL_SESSION / SIGNED_IN
+        // does not alert twice. The portal form still calls enterStaff itself.
+        await enterStaff(
           session.user.id,
           session.user.email || undefined,
           undefined,
           true,
           event === 'SIGNED_IN',
+          revoke,
         );
-        if (!opened) handledUserId = null;
       }, 0);
     });
     return () => {
@@ -265,7 +348,7 @@ export default function PortalPage() {
         setAuthMode('verify');
         return;
       }
-      await enterStaff(authData.user.id, authData.user.email || loginEmail, undefined, true);
+      await enterStaff(authData.user.id, authData.user.email || loginEmail, undefined, true, true, true);
     } catch (err: any) {
       alert((t.loginError || '{message}').replace('{message}', err.message));
     } finally {
@@ -289,7 +372,13 @@ export default function PortalPage() {
         password: regPassword,
         redirectPath: '/portal',
         metadata: { role: 'staff', full_name: regName.trim() },
+        locale: currentLang,
       });
+      if (result.status === 'exists') {
+        setUsername(email);
+        setAuthMode('exists');
+        return;
+      }
       if (result.status === 'error') {
         alert((t.signupError || '{message}').replace('{message}', result.message));
         return;
@@ -309,45 +398,74 @@ export default function PortalPage() {
   };
 
   const updateCandidateStatus = async (id: string, newStatus: string) => {
-    await supabase.from('job_candidates').update({ status: newStatus }).eq('id', id);
+    const { error } = await supabase.from('job_candidates').update({ status: newStatus }).eq('id', id);
+    if (error) {
+      alert(error.message.includes('visa_requires_accepted_offer') ? releaseCopy[currentLang].visaNeedsOffer : error.message);
+      return;
+    }
     setCandidates(candidates.map(c => c.id === id ? { ...c, status: newStatus } : c));
-    logAudit(`Aday Durumu Değiştirildi -> ${newStatus}`, currentUser?.name);
+    logAudit(`${ui.candidateWord} → ${newStatus}`, currentUser?.name);
   };
 
   const updateRequestStatus = async (id: string, newStatus: string, cancellationReason: string = '') => {
     const updatePayload: any = { status: newStatus };
     if (newStatus === 'cancelled' && cancellationReason) {
-      updatePayload.cancellation_reason = cancellationReason;
+      updatePayload.closed_reason = cancellationReason;
       updatePayload.closed_at = new Date().toISOString();
     }
-    await supabase.from('job_requests').update(updatePayload).eq('id', id);
+    const { error } = await supabase.from('job_requests').update(updatePayload).eq('id', id);
+    if (error) {
+      alert(error.message.includes('demand_status_transition') ? releaseCopy[currentLang].demandBlocked : error.message);
+      return;
+    }
     setJobRequests(jobRequests.map(r => r.id === id ? { ...r, ...updatePayload } : r));
-    logAudit(`Talep Durumu Değiştirildi -> ${newStatus}`, currentUser?.name);
+    logAudit(`${ui.linkRequest} → ${newStatus}`, currentUser?.name);
     if (selectedDemandDetail && selectedDemandDetail.id === id) {
       setSelectedDemandDetail({ ...selectedDemandDetail, ...updatePayload });
     }
   };
 
   const updateCandidateAssignee = async (id: string, assignee: string) => {
-    await supabase.from('job_candidates').update({ assigned_to: assignee }).eq('id', id);
+    const { error } = await supabase.from('job_candidates').update({ assigned_to: assignee || null }).eq('id', id);
+    if (error) {
+      alert(error.message);
+      return;
+    }
     setCandidates(candidates.map(c => c.id === id ? { ...c, assigned_to: assignee } : c));
-    logAudit(`Aday Sorumlusu Atandı -> ${assignee}`, currentUser?.name);
+    logAudit(`${ui.candidateWord} → ${assignee}`, currentUser?.name);
   };
 
   const updateStaffRoleLevel = async (staffId: string, newLevel: string) => {
     if (!isUpperManagement) {
-      alert('Bu işlem için Üst Yönetim yetkisi gereklidir!');
+      alert(ui.upperManagementOnly);
       return;
     }
-    await supabase.from('staff_members').update({ role_level: newLevel }).eq('id', staffId);
-    setStaffMembers(staffMembers.map(s => s.id === staffId ? { ...s, role_level: newLevel } : s));
-    logAudit(`Personel Rol Seviyesi Güncellendi`, currentUser?.name);
+    const { data, error } = await supabase
+      .from('staff_members')
+      .update({ role_level: newLevel })
+      .eq('id', staffId)
+      .select('id, role_level, referral_code')
+      .maybeSingle();
+    if (error) {
+      const detail = /source_officer|referral_code_role|referral_code_immutable/.test(error.message)
+        ? ui.sourceOfficerMissingCode
+        : error.message;
+      alert(`${ui.updateFailed} ${detail}`);
+      return;
+    }
+    if (newLevel === 'source_country' && !normalizeReferralCode(data?.referral_code)) {
+      alert(ui.sourceOfficerMissingCode);
+      return;
+    }
+    setStaffMembers(staffMembers.map(s => s.id === staffId ? { ...s, ...data, role_level: newLevel } : s));
+    logAudit(ui.staffUpdated, currentUser?.name);
+    fetchAllData();
   };
 
   const handleAddStaff = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isUpperManagement) {
-      alert('Bu işlem için Üst Yönetim yetkisi gereklidir!');
+      alert(ui.upperManagementOnly);
       return;
     }
     if (!newStaffName.trim() || !newStaffEmail.trim()) return;
@@ -356,11 +474,11 @@ export default function PortalPage() {
     const res = await fetch('/api/staff-invite', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sess.session?.access_token || ''}` },
-      body: JSON.stringify({ name: newStaffName, email: newStaffEmail.trim().toLowerCase(), role: newStaffRoleLevel }),
+      body: JSON.stringify({ name: newStaffName, email: newStaffEmail.trim().toLowerCase(), role: newStaffRoleLevel, locale: currentLang }),
     });
-    const result = await res.json().catch(() => ({ error: 'Sunucu yanıtı okunamadı.' }));
+    const result = await res.json().catch(() => ({ error: ui.serverUnreadable }));
     if (!res.ok || result.error) {
-      alert('Hata: ' + (result.error || res.statusText));
+      alert(`${ui.errorPrefix} ${result.error || res.statusText}`);
       return;
     }
 
@@ -368,9 +486,7 @@ export default function PortalPage() {
     setNewStaffName('');
     setNewStaffEmail('');
     setNewStaffPassword('');
-    alert(result.emailSent
-      ? 'Davet e-postası gönderildi. Personel bu e-posta ile Google veya e-posta kaydıyla portala giriş yaptığında hesabı otomatik bağlanır.'
-      : result.warning);
+    alert(result.emailSent ? ui.inviteSent : result.warning);
     fetchAllData();
   };
 
@@ -379,37 +495,47 @@ export default function PortalPage() {
     if (!isUpperManagement || !editingStaff) return;
 
     try {
-      const { error } = await supabase.from('staff_members').update({
+      let saved = await supabase.from('staff_members').update({
         name: editingStaff.name,
         email: editingStaff.email,
-        role_level: editingStaff.role_level
-      }).eq('id', editingStaff.id);
+        role_level: editingStaff.role_level,
+        scope_country: editingStaff.scope_country || null,
+      }).eq('id', editingStaff.id).select('id, role_level, referral_code, scope_country').maybeSingle();
 
-      if (error) {
-        await supabase.from('staff_members').update({
+      if (saved.error) {
+        saved = await supabase.from('staff_members').update({
           name: editingStaff.name,
           role_level: editingStaff.role_level
-        }).eq('email', editingStaff.email);
+        }).eq('email', editingStaff.email).select('id, role_level, referral_code').maybeSingle();
       }
 
-      logAudit(`Personel Bilgileri Düzenlendi: ${editingStaff.name}`, currentUser?.name);
+      if (saved.error) {
+        alert(`${ui.updateFailed} ${saved.error.message}`);
+        return;
+      }
+      if (editingStaff.role_level === 'source_country' && !normalizeReferralCode(saved.data?.referral_code)) {
+        alert(ui.sourceOfficerMissingCode);
+        return;
+      }
+
+      logAudit(`${ui.staffUpdated} ${editingStaff.name}`, currentUser?.name);
       setEditingStaff(null);
-      alert('Personel bilgileri başarıyla güncellendi!');
+      alert(ui.staffUpdated);
       fetchAllData();
     } catch (err: any) {
-      alert('Güncelleme hatası: ' + err.message);
+      alert(`${ui.updateFailed} ${err.message}`);
     }
   };
 
   const handleDeleteStaff = async (staffId: string) => {
     if (!isUpperManagement) {
-      alert('Bu işlem için Üst Yönetim yetkisi gereklidir!');
+      alert(ui.upperManagementOnly);
       return;
     }
-    if (confirm('Bu personel kaydını silmek istediğinizden emin misiniz?')) {
+    if (confirm(ui.confirmDeleteStaff)) {
       await supabase.from('staff_members').delete().eq('id', staffId);
       setStaffMembers(staffMembers.filter(s => s.id !== staffId));
-      logAudit('Personel Kaydı Silindi', currentUser?.name);
+      logAudit(ui.staffDeleted, currentUser?.name);
       fetchAllData();
     }
   };
@@ -434,16 +560,16 @@ export default function PortalPage() {
     const { error } = await supabase.from('tasks').insert([newTaskPayload]);
 
     if (error) {
-      alert('Görev kaydedilirken hata oluştu: ' + error.message);
+      alert(`${ui.taskSaveFailed} ${error.message}`);
       return;
     }
 
-    logAudit(`Yeni Görev Atandı: ${newTaskTitle} (${newTaskPayload.assignee})`, currentUser?.name);
+    logAudit(`${ui.taskSaved} ${newTaskTitle} (${newTaskPayload.assignee})`, currentUser?.name);
     setNewTaskTitle('');
     setNewTaskDueDate('');
     setNewTaskLinkType('');
     setNewTaskLinkId('');
-    alert('Görev kaydedildi ve sorumlu personele iletildi!');
+    alert(ui.taskSaved);
     fetchAllData();
   };
 
@@ -451,7 +577,7 @@ export default function PortalPage() {
     const nextStatus = currentStatus === 'pending' ? 'completed' : 'pending';
     await supabase.from('tasks').update({ status: nextStatus }).eq('id', taskId);
     setTasks(tasks.map(t => t.id === taskId ? { ...t, status: nextStatus } : t));
-    logAudit('Görev durumu güncellendi', currentUser?.name);
+    logAudit(ui.taskSaved, currentUser?.name);
   };
 
   if (!authenticated) {
@@ -472,12 +598,12 @@ export default function PortalPage() {
 
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 max-w-md w-full text-center">
-            <div className="w-14 h-14 bg-emerald-100 text-[#2e7d32] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <div className="w-14 h-14 bg-emerald-100 text-brand rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
               <Lock className="w-7 h-7" />
             </div>
-            {authMode !== 'verify' && <>
+            {(authMode === 'signin' || authMode === 'signup') && <>
             <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1">{authMode === 'signup' ? t.staffSignupTitle : t.portalTitle}</h1>
-            <p className="text-slate-500 text-xs sm:text-sm mb-6">{authMode === 'signup' ? t.staffSignupSub : t.portalSub}</p>
+            <p className="text-muted-foreground text-xs sm:text-sm mb-6">{authMode === 'signup' ? t.staffSignupSub : t.portalSub}</p>
             </>}
 
             {authMode === 'verify' ? (
@@ -490,12 +616,29 @@ export default function PortalPage() {
                     const { data } = await supabase.auth.getSession();
                     const user = data.session?.user;
                     if (!user) return;
-                    await enterStaff(user.id, user.email || verifyEmail, regName || undefined, true);
+                    await enterStaff(user.id, user.email || verifyEmail, regName || undefined, true, true, true);
                   }}
+                  onSignIn={() => { setUsername(verifyEmail); setAuthMode('signin'); }}
+                  onResetPassword={() => { setUsername(verifyEmail); setAuthMode('forgot'); }}
                 />
-                <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-slate-500 cursor-pointer">{t.verifyEmailBack}</button>
+                <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-muted-foreground cursor-pointer">{t.verifyEmailBack}</button>
                 <OAuthButtons redirectPath="/portal" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} />
               </div>
+            ) : authMode === 'exists' ? (
+              <AccountExistsNotice
+                message={t.accountExists || ''}
+                signInLabel={t.signInMenu || ''}
+                resetLabel={t.forgotPassword || ''}
+                onSignIn={() => setAuthMode('signin')}
+                onReset={() => setAuthMode('forgot')}
+              />
+            ) : authMode === 'forgot' ? (
+              <ForgotPasswordPanel
+                lang={currentLang}
+                initialEmail={username}
+                audience="portal"
+                onBack={() => setAuthMode('signin')}
+              />
             ) : authMode === 'signup' ? (
               <form onSubmit={handleStaffSignup} className="space-y-4 text-left rtl:text-right">
                 <div>
@@ -510,10 +653,10 @@ export default function PortalPage() {
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">{t.passwordLabel}</label>
                   <input type="password" required minLength={8} value={regPassword} onChange={(e) => setRegPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 bg-white font-medium outline-none text-sm" />
                 </div>
-                <button type="submit" disabled={loading} className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold text-sm cursor-pointer">
+                <button type="submit" disabled={loading} className="w-full bg-brand-solid hover:bg-brand text-white py-3.5 rounded-xl font-bold text-sm cursor-pointer">
                   {t.staffSignupBtn}
                 </button>
-                <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-slate-500 cursor-pointer">{t.verifyEmailBack}</button>
+                <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-muted-foreground cursor-pointer">{t.verifyEmailBack}</button>
               </form>
             ) : (
             <form onSubmit={handleLogin} className="space-y-4 text-left rtl:text-right">
@@ -539,10 +682,11 @@ export default function PortalPage() {
                   placeholder="••••••••"
                 />
               </div>
+              <ForgotPasswordLink label={t.forgotPassword || ''} onClick={() => setAuthMode('forgot')} />
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 cursor-pointer text-sm"
+                className="w-full bg-brand-solid hover:bg-brand text-white py-3.5 rounded-xl font-bold transition shadow-lg mt-2 cursor-pointer text-sm"
               >
                 {loading ? (t.submitting || t.signInBtn) : t.signInBtn}
               </button>
@@ -551,7 +695,7 @@ export default function PortalPage() {
             {authMode === 'signin' && (
               <div className="mt-4 space-y-3">
                 <OAuthButtons redirectPath="/portal" orLabel={homeCopy[currentLang].oauthOr} googleLabel={homeCopy[currentLang].oauthGoogle} />
-                <button type="button" onClick={() => setAuthMode('signup')} className="w-full text-xs font-bold text-[#1b5e20] cursor-pointer">{t.staffSignupTitle}</button>
+                <button type="button" onClick={() => setAuthMode('signup')} className="w-full text-xs font-bold text-brand cursor-pointer">{t.staffSignupTitle}</button>
               </div>
             )}
           </div>
@@ -585,6 +729,17 @@ export default function PortalPage() {
                 <span className="text-[10px] text-emerald-800 uppercase font-semibold">
                   {getRoleDisplayName(currentUser?.role_level)}
                 </span>
+                {isSourceCountryOfficer(currentUser?.role_level) && normalizeReferralCode(currentUser?.referral_code) ? (
+                  <span className="mt-1 block normal-case">
+                    <ReferralCodeChip
+                      code={normalizeReferralCode(currentUser.referral_code) as string}
+                      label={ui.referralCodeYours}
+                      copyLabel={ui.referralCodeCopy}
+                      copiedLabel={ui.referralCodeCopied}
+                    />
+                    <span className="mt-0.5 block text-[10px] font-medium text-emerald-900">{ui.referralCodeImmutable}</span>
+                  </span>
+                ) : null}
               </div>
             </div>
 
@@ -606,43 +761,63 @@ export default function PortalPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
-          <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+        {mfaMode === 'challenge' ? (
+          <StaffMfaPanel copy={releaseCopy[currentLang]} blocking onVerified={() => setMfaMode('optional')} />
+        ) : null}
+        <div className={`flex flex-wrap items-center gap-2 border-b pb-3 text-xs font-bold ${mfaMode === 'challenge' ? 'hidden' : ''}`}>
+          {showTab('overview') && (
+          <button onClick={() => setActiveTab('overview')} className={`px-3 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'overview' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
           </button>
-          <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'candidates' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          )}
+          {showTab('candidates') && (
+          <button onClick={() => setActiveTab('candidates')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'candidates' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             👥 {t.candidatesTab} ({candidates.length})
           </button>
-          <button onClick={() => setActiveTab('requests')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'requests' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          )}
+          {showTab('requests') && (
+          <button onClick={() => setActiveTab('requests')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'requests' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📁 {t.requestsTab} ({jobRequests.length})
           </button>
+          )}
           
-          {isUpperManagement && (
-            <button onClick={() => setActiveTab('staff')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'staff' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          {showTab('staff') && isUpperManagement && (
+            <button onClick={() => setActiveTab('staff')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'staff' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
               🛡️ {t.staffTab} ({staffMembers.length})
             </button>
           )}
 
-          <button onClick={() => setActiveTab('tasks')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'tasks' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          {showTab('tasks') && (
+          <button onClick={() => setActiveTab('tasks')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'tasks' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             ✅ {t.tasksTab} ({tasks.filter(t => t.status === 'pending').length})
           </button>
-          <button onClick={() => setActiveTab('audit')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'audit' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          )}
+          {showTab('audit') && (
+          <button onClick={() => setActiveTab('audit')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'audit' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📜 {t.auditTab} ({auditLogs.length})
           </button>
-          <button onClick={() => setActiveTab('employers')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'employers' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          )}
+          {showTab('employers') && (
+          <button onClick={() => setActiveTab('employers')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'employers' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             🏢 {t.employersTab} ({employers.length})
           </button>
-          <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'support' ? 'bg-[#2e7d32] text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
+          )}
+          {showTab('support') && (
+          <button onClick={() => setActiveTab('support')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'support' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             💬 {t.supportTab} ({supportTickets.length})
           </button>
+          )}
+          <Link href="/guides" className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition text-start leading-snug whitespace-normal bg-white border text-slate-700 hover:bg-slate-50">
+            <BookOpen className="w-3.5 h-3.5" aria-hidden /> {guideNavLabel[currentLang]}
+          </Link>
         </div>
 
-        {activeTab === 'overview' && (
+        {mfaMode !== 'challenge' && activeTab === 'overview' && showTab('overview') && (
           <div className="space-y-6">
             <div className={`grid grid-cols-1 sm:grid-cols-2 ${isUpperManagement ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
               <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase">{t.totalCandidatesCard}</div>
+                  <div className="text-muted-foreground text-[11px] sm:text-xs font-bold uppercase">{t.totalCandidatesCard}</div>
                   <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">{candidates.length}</div>
                 </div>
                 <Users className="w-9 h-9 sm:w-10 sm:h-10 text-emerald-600 bg-emerald-50 p-2 rounded-xl" />
@@ -650,7 +825,7 @@ export default function PortalPage() {
 
               <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase">{t.activeEmployersCard}</div>
+                  <div className="text-muted-foreground text-[11px] sm:text-xs font-bold uppercase">{t.activeEmployersCard}</div>
                   <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">{employers.length}</div>
                 </div>
                 <Building2 className="w-9 h-9 sm:w-10 sm:h-10 text-blue-600 bg-blue-50 p-2 rounded-xl" />
@@ -659,7 +834,7 @@ export default function PortalPage() {
               {isUpperManagement && (
                 <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                   <div>
-                    <div className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase">{t.staffTab}</div>
+                    <div className="text-muted-foreground text-[11px] sm:text-xs font-bold uppercase">{t.staffTab}</div>
                     <div className="text-2xl sm:text-3xl font-extrabold text-indigo-600 mt-1">{staffMembers.length}</div>
                   </div>
                   <UserCheck className="w-9 h-9 sm:w-10 sm:h-10 text-indigo-600 bg-indigo-50 p-2 rounded-xl" />
@@ -668,19 +843,49 @@ export default function PortalPage() {
 
               <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
                 <div>
-                  <div className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase">{t.openSupportCard}</div>
+                  <div className="text-muted-foreground text-[11px] sm:text-xs font-bold uppercase">{t.openSupportCard}</div>
                   <div className="text-2xl sm:text-3xl font-extrabold text-emerald-700 mt-1">{tasks.filter(t => t.status === 'pending').length}</div>
                 </div>
                 <CheckSquare className="w-9 h-9 sm:w-10 sm:h-10 text-emerald-600 bg-emerald-50 p-2 rounded-xl" />
               </div>
             </div>
 
-            <div className="bg-amber-50 border border-amber-200 p-4 sm:p-6 rounded-2xl shadow-sm flex items-start gap-4">
-              <ShieldAlert className="w-6 h-6 sm:w-7 sm:h-7 text-amber-600 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <h4 className="font-extrabold text-amber-900 text-xs sm:text-sm">{t.delayAlertsTitle}</h4>
-                <p className="text-xs text-amber-800">{t.delayAlertsDesc}</p>
+            {mfaMode === 'optional' ? (
+              <StaffMfaPanel
+                copy={releaseCopy[currentLang]}
+                blocking={false}
+                onVerified={() => setMfaMode('optional')}
+              />
+            ) : null}
+            <div className="bg-amber-50 border border-amber-200 p-4 sm:p-6 rounded-2xl shadow-sm space-y-3">
+              <div className="flex items-start gap-4">
+                <ShieldAlert className="w-6 h-6 sm:w-7 sm:h-7 text-amber-600 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="font-extrabold text-amber-900 text-xs sm:text-sm">{t.delayAlertsTitle}</h4>
+                  <p className="text-xs text-amber-800">{t.delayAlertsDesc}</p>
+                </div>
               </div>
+              {(() => {
+                const copy = releaseCopy[currentLang];
+                const now = Date.now();
+                const visaLate = candidates.filter((cand) => cand.status === 'visa_processing' && cand.updated_at && now - new Date(cand.updated_at).getTime() > 15 * 86400000);
+                const missingDocs = candidates.filter((cand) => !cand.passport_number);
+                const lateTasks = tasks.filter((task) => taskIsOverdue(task.due_date, task.status));
+                const lateDemands = jobRequests.filter((req) => taskIsOverdue(req.target_start_date, req.status === 'completed' ? 'completed' : 'pending'));
+                const blocks = [
+                  [copy.delayVisa, visaLate.map((cand) => cand.full_name)],
+                  [copy.delayDocs, missingDocs.map((cand) => cand.full_name)],
+                  [copy.delayTasks, lateTasks.map((task) => task.title)],
+                  [copy.delayDemands, lateDemands.map((req) => req.position_title)],
+                ].filter(([, names]) => (names as string[]).length);
+                if (!blocks.length) return <p className="text-xs text-amber-900">{copy.delayNone}</p>;
+                return blocks.map(([title, names]) => (
+                  <div key={String(title)} className="text-xs text-amber-950">
+                    <p className="font-bold">{title}</p>
+                    <p>{(names as string[]).filter(Boolean).join(', ')}</p>
+                  </div>
+                ));
+              })()}
             </div>
 
             <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
@@ -690,7 +895,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {activeTab === 'candidates' && (
+        {mfaMode !== 'challenge' && activeTab === 'candidates' && showTab('candidates') && (
           <CandidatesTab 
             candidates={candidates}
             staffMembers={staffMembers}
@@ -701,19 +906,22 @@ export default function PortalPage() {
             updateCandidateStatus={updateCandidateStatus}
             logAudit={logAudit}
             currentUser={currentUser}
+            isUpperManagement={isUpperManagement}
           />
         )}
 
-        {activeTab === 'requests' && (
+        {mfaMode !== 'challenge' && activeTab === 'requests' && showTab('requests') && (
           <RequestsTab 
             jobRequests={jobRequests}
             t={t}
             updateRequestStatus={updateRequestStatus}
             setSelectedDemandDetail={setSelectedDemandDetail}
+            isUpperManagement={isUpperManagement}
+            onChanged={fetchAllData}
           />
         )}
 
-        {activeTab === 'staff' && isUpperManagement && (
+        {mfaMode !== 'challenge' && activeTab === 'staff' && showTab('staff') && isUpperManagement && (
           <StaffTab 
             staffMembers={staffMembers}
             isUpperManagement={isUpperManagement}
@@ -730,10 +938,11 @@ export default function PortalPage() {
             updateStaffRoleLevel={updateStaffRoleLevel}
             setEditingStaff={setEditingStaff}
             handleDeleteStaff={handleDeleteStaff}
+            onChanged={fetchAllData}
           />
         )}
 
-        {activeTab === 'tasks' && (
+        {mfaMode !== 'challenge' && activeTab === 'tasks' && showTab('tasks') && (
           <TasksTab 
             tasks={tasks}
             staffMembers={staffMembers}
@@ -762,12 +971,12 @@ export default function PortalPage() {
           />
         )}
 
-        {activeTab === 'audit' && (
+        {mfaMode !== 'challenge' && activeTab === 'audit' && showTab('audit') && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
               <History className="w-5 h-5 text-emerald-700" /> {t.auditLogTitle}
             </h3>
-            <p className="text-xs text-slate-500">{t.auditLogSub}</p>
+            <p className="text-xs text-muted-foreground">{t.auditLogSub}</p>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs sm:text-sm text-slate-600">
@@ -779,14 +988,14 @@ export default function PortalPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {auditLogs.length === 0 && (<tr><td colSpan={3} className="p-4 text-center text-slate-400">Henüz kayıt yok.</td></tr>)}
+                  {auditLogs.length === 0 && (<tr><td colSpan={3} className="p-4 text-center text-muted-foreground">{ui.noAuditYet}</td></tr>)}
                   {auditLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50">
                       <td className="p-4 font-bold text-slate-900">
                         {log.actionKey ? (t as any)[log.actionKey] || log.actionKey : log.action}
                       </td>
-                      <td className="p-4">{log.performer}{log.entity ? <span className="ml-1 text-[10px] text-slate-400">({log.entity})</span> : null}{log.is_demo ? <span className="ml-1 text-[10px] px-1 rounded bg-amber-100 text-amber-700">demo</span> : null}</td>
-                      <td className="p-4 text-[11px] text-slate-400">{log.time}</td>
+                      <td className="p-4">{log.performer}{log.entity ? <span className="ml-1 text-[10px] text-muted-foreground">({log.entity})</span> : null}{log.is_demo ? <span className="ml-1 text-[10px] px-1 rounded bg-amber-100 text-amber-700">demo</span> : null}</td>
+                      <td className="p-4 text-[11px] text-muted-foreground">{log.time}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -795,41 +1004,75 @@ export default function PortalPage() {
           </div>
         )}
 
-        {activeTab === 'employers' && (
+        {mfaMode !== 'challenge' && activeTab === 'employers' && showTab('employers') && (
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden p-4 sm:p-6 space-y-4">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.employersTab}</h3>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">{t.employersTab}</h3>
+              <ListExportBar
+                filename="employers"
+                title={t.employersTab || 'Employers'}
+                rows={employerExportRows(employers)}
+                labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty }}
+              />
+            </div>
             {employers.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs">{t.noEmployers}</div>
+              <div className="p-8 text-center text-muted-foreground text-xs">{t.noEmployers}</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {employers.map((emp) => (
                   <div key={emp.id} className="p-4 bg-slate-50 rounded-2xl border space-y-2 text-xs sm:text-sm">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-extrabold text-slate-900">{emp.company_name}<DemoBadge show={emp.is_demo} /></h4>
+                    <div className="flex items-start justify-between gap-2">
+                      <Link href={`/portal/employers/${emp.id}`} className="font-extrabold text-slate-900 hover:underline">
+                        {emp.company_name}<DemoBadge show={emp.is_demo} />
+                      </Link>
                       <div className="flex flex-wrap gap-1.5 justify-end">
-                      <Link href={`/portal/employers/${emp.id}`} className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm">📂 İşveren Dosyası</Link>
+                      <Link href={`/portal/employers/${emp.id}`} className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm">📂 {ui.employerFile}</Link>
                       <button
                         onClick={() => {
-                          const employerSessionData = {
+                          localStorage.setItem('panova_employer_user', JSON.stringify({
                             id: emp.id,
                             company_name: emp.company_name,
-                            email: emp.email || 'huseyinaksu@gmail.com',
-                            contact_person: emp.contact_person,
-                            country: emp.country,
-                            sector: emp.sector || 'Tarım / İnşaat',
-                            isAdminImpersonation: true
-                          };
-                          localStorage.setItem('panova_employer_auth', 'true');
-                          localStorage.setItem('panova_employer_user', JSON.stringify(employerSessionData));
-                          window.location.href = '/employer';
+                            isAdminImpersonation: true,
+                          }));
+                          window.location.href = `/employer?as=${emp.id}`;
                         }}
-                        className="px-3 py-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm"
+                        className="px-3 py-1.5 bg-brand-solid hover:bg-brand text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm"
                       >
-                        İşveren Portalını Gör
+                        {ui.viewEmployerPortal}
                       </button>
+                      <DeleteRecordButton
+                        table="employers"
+                        id={emp.id}
+                        name={emp.company_name || emp.id}
+                        isDemo={emp.is_demo}
+                        allowed={isUpperManagement}
+                        onDeleted={fetchAllData}
+                      />
+                      {isUpperManagement && emp.compliance_status === 'pending' ? (
+                        <button type="button" className="px-3 py-1.5 bg-amber-800 text-on-dark rounded-xl text-xs font-bold" onClick={async () => {
+                          const { error } = await supabase.from('employers').update({ compliance_status: 'approved' }).eq('id', emp.id);
+                          if (error) alert(error.message);
+                          else fetchAllData();
+                        }}>{releaseCopy[currentLang].employerApprove}</button>
+                      ) : null}
                       </div>
                     </div>
-                    <p className="text-slate-500">Contact: <strong>{emp.contact_person}</strong> | Country: {emp.country}</p>
+                    <p className="text-sm text-muted-foreground">Contact: <strong>{emp.contact_person}</strong> | Country: {emp.country}</p>
+                    <EmployerLoginInvite
+                      compact
+                      staff={{ role: userRole, scopeCountry: currentUser?.scope_country }}
+                      employerId={emp.id}
+                      email={emp.email}
+                      country={emp.country}
+                      locale={emp.locale}
+                      authUserId={emp.auth_user_id}
+                      invitedAt={emp.invited_at}
+                      onSent={(result) => setEmployers((rows) => rows.map((row) => row.id === emp.id ? {
+                        ...row,
+                        invited_at: result.invitedAt || row.invited_at,
+                        auth_user_id: result.linked ? (result.authUserId || row.auth_user_id) : row.auth_user_id,
+                      } : row))}
+                    />
                   </div>
                 ))}
               </div>
@@ -837,20 +1080,86 @@ export default function PortalPage() {
           </div>
         )}
 
-        {activeTab === 'support' && (
+        {mfaMode !== 'challenge' && activeTab === 'support' && showTab('support') && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.supportTab}</h3>
             {supportTickets.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs">{t.noSupport}</div>
+              <div className="p-8 text-center text-muted-foreground text-xs">{t.noSupport}</div>
             ) : (
               <div className="space-y-3">
                 {supportTickets.map((tkt) => (
-                  <div key={tkt.id} className="p-4 bg-slate-50 rounded-2xl border space-y-1 text-xs">
-                    <div className="flex justify-between font-bold text-slate-900">
+                  <div key={tkt.id} className="p-4 bg-slate-50 rounded-2xl border space-y-2 text-xs">
+                    <div className="flex justify-between font-bold text-slate-900 gap-2">
                       <span>{tkt.subject} ({tkt.candidate_name})</span>
-                      <span className="text-red-600 uppercase text-[10px]">{tkt.status}</span>
+                      <span className={`uppercase text-[10px] ${String(tkt.status).toLowerCase() === 'answered' ? 'text-emerald-700' : 'text-red-600'}`}>{tkt.status}</span>
                     </div>
-                    <p className="text-slate-600">{t.message}: {tkt.message}</p>
+                    <p className="text-muted-foreground">{tkt.created_at ? String(tkt.created_at).slice(0, 16).replace('T', ' ') : ''}</p>
+                    <p className="text-foreground">{t.message}: {tkt.message}</p>
+                    {threadForTicket(tkt, supportMessages).length === 0 ? (
+                      <p className="text-muted-foreground">{releaseCopy[currentLang].supportNoReply}</p>
+                    ) : threadForTicket(tkt, supportMessages).map((message) => (
+                      <div key={message.id} className="rounded-xl border border-line bg-card px-3 py-2">
+                        <p className="font-bold text-foreground">
+                          {message.author_role === 'staff'
+                            ? (message.author_name || releaseCopy[currentLang].supportReply)
+                            : (message.author_name || tkt.candidate_name)}
+                          {message.created_at ? (
+                            <span className="ms-2 font-semibold text-muted-foreground">
+                              {new Date(message.created_at).toLocaleString(dateLocale[currentLang])}
+                            </span>
+                          ) : null}
+                        </p>
+                        <p className="mt-1 whitespace-pre-wrap text-foreground">{message.body}</p>
+                      </div>
+                    ))}
+                    {String(tkt.status).toLowerCase() !== 'closed' ? (
+                      <form className="flex flex-col sm:flex-row gap-2" onSubmit={async (event) => {
+                        event.preventDefault();
+                        const form = event.currentTarget;
+                        const reply = String(new FormData(form).get('reply') || '').trim();
+                        if (!reply) return;
+                        const repliedAt = new Date().toISOString();
+                        const userId = (await supabase.auth.getUser()).data.user?.id ?? null;
+                        await supabase.from('support_ticket_messages').insert({
+                          ticket_id: tkt.id,
+                          author_role: 'staff',
+                          author_name: currentUser?.name || null,
+                          body: reply,
+                        });
+                        const { error } = await supabase.from('candidate_support_tickets').update({
+                          admin_reply: reply,
+                          status: 'answered',
+                          replied_at: repliedAt,
+                          replied_by: userId,
+                          replied_by_name: currentUser?.name || null,
+                        }).eq('id', tkt.id);
+                        if (error) {
+                          alert(error.message);
+                          return;
+                        }
+                        form.reset();
+                        if (tkt.candidate_id) {
+                          const { data: sess } = await supabase.auth.getSession();
+                          const sent = await fetch('/api/support/reply-email', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              Authorization: `Bearer ${sess.session?.access_token || ''}`,
+                            },
+                            body: JSON.stringify({ ticketId: tkt.id }),
+                          });
+                          if (!sent.ok) alert(releaseCopy[currentLang].supportEmailFailed);
+                        }
+                        fetchAllData();
+                      }}>
+                        <input name="reply" required placeholder={releaseCopy[currentLang].supportReplyPh} className="flex-1 px-3 py-2 rounded-xl border bg-white text-slate-900" />
+                        <button type="submit" className="px-3 py-2 rounded-xl bg-[#2e7d32] text-white font-bold">{releaseCopy[currentLang].supportSendReply}</button>
+                        <button type="button" className="px-3 py-2 rounded-xl border font-bold" onClick={async () => {
+                          await supabase.from('candidate_support_tickets').update({ status: 'closed' }).eq('id', tkt.id);
+                          fetchAllData();
+                        }}>{releaseCopy[currentLang].supportClose}</button>
+                      </form>
+                    ) : null}
                   </div>
                 ))}
               </div>
@@ -870,7 +1179,7 @@ export default function PortalPage() {
                 </span>
                 <h3 className="text-xl font-extrabold text-slate-900 mt-1">{selectedDemandDetail.position_title} - {selectedDemandDetail.employer_name}</h3>
               </div>
-              <button onClick={() => setSelectedDemandDetail(null)} className="text-slate-400 hover:text-slate-600 font-bold text-xl cursor-pointer p-2">✕</button>
+              <button onClick={() => setSelectedDemandDetail(null)} className="text-muted-foreground hover:text-slate-600 font-bold text-xl cursor-pointer p-2">✕</button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm">
@@ -891,14 +1200,15 @@ export default function PortalPage() {
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
                 <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">💼 Working Conditions & Benefits</h4>
                 <div className="grid grid-cols-2 gap-2 text-slate-700">
-                  <div><strong>Salary:</strong> {selectedDemandDetail.salary || 'Negotiable'}</div>
+                  <div><strong>Salary:</strong> {displayedRequestSalary(selectedDemandDetail) || 'Negotiable'}</div>
                   <div><strong>Working Hours:</strong> {selectedDemandDetail.working_hours || '40-45 hrs/week'}</div>
                   <div><strong>Weekly Days:</strong> {selectedDemandDetail.weekly_days || '5-6 Days'}</div>
                   <div><strong>Overtime:</strong> {selectedDemandDetail.overtime_policy || 'Standard Legal'}</div>
-                  <div><strong>Accommodation:</strong> {selectedDemandDetail.accommodation ? '✅ Provided' : '❌ Not Provided'}</div>
-                  <div><strong>Food / Transport:</strong> {selectedDemandDetail.food_allowance ? '✅ Yes' : '❌ No'} / {selectedDemandDetail.transportation ? '✅ Yes' : '❌ No'}</div>
+                  <div><strong>{t.facilityAccommodation}:</strong> {benefitPhrase({ provided: t.benefitProvided || '', notProvided: t.benefitNotProvided || '', unanswered: t.benefitUnanswered || '' }, selectedDemandDetail.accommodation_provided ?? selectedDemandDetail.accommodation)}</div>
+                  <div><strong>{t.facilityFood}:</strong> {benefitPhrase({ provided: t.benefitProvided || '', notProvided: t.benefitNotProvided || '', unanswered: t.benefitUnanswered || '' }, selectedDemandDetail.food_provided ?? selectedDemandDetail.food_allowance)}</div>
+                  <div><strong>{t.facilityTransport}:</strong> {benefitPhrase({ provided: t.benefitProvided || '', notProvided: t.benefitNotProvided || '', unanswered: t.benefitUnanswered || '' }, selectedDemandDetail.transport_provided ?? selectedDemandDetail.transportation)}</div>
                   <div><strong>Flight Ticket:</strong> {selectedDemandDetail.flight_ticket ? '✅ Employer Covers' : 'Candidate'}</div>
-                  <div><strong>Contract Term:</strong> {selectedDemandDetail.contract_term || '1 Year'}</div>
+                  <div><strong>Contract Term:</strong> {selectedDemandDetail.contract_type || selectedDemandDetail.contract_term || '1 Year'}</div>
                 </div>
               </div>
 
@@ -907,7 +1217,7 @@ export default function PortalPage() {
                 <div className="space-y-1 text-slate-700">
                   <div><strong>Experience:</strong> {selectedDemandDetail.experience_required || 'Min 2 years'}</div>
                   <div><strong>Certificate:</strong> {selectedDemandDetail.certificate_required || 'Professional Certificate Required'}</div>
-                  <div><strong>Language:</strong> {selectedDemandDetail.language_required || 'Basic English or Local Language'}</div>
+                  <div><strong>Language:</strong> {selectedDemandDetail.required_language || selectedDemandDetail.language_required || 'Basic English or Local Language'}</div>
                   <div><strong>Special Req:</strong> {selectedDemandDetail.special_requirements || selectedDemandDetail.special_reqs || 'Shift suitability.'}</div>
                 </div>
               </div>
@@ -916,15 +1226,15 @@ export default function PortalPage() {
                 <h4 className="font-extrabold text-emerald-900 uppercase text-xs border-b border-emerald-200 pb-1">📊 Process Counts & Metrics</h4>
                 <div className="grid grid-cols-3 gap-2 text-center text-xs">
                   <div className="bg-white p-2 rounded-xl border">
-                    <span className="block text-slate-500 text-[10px]">Requested</span>
+                    <span className="block text-muted-foreground text-[10px]">Requested</span>
                     <strong className="text-base text-slate-900">{selectedDemandDetail.headcount}</strong>
                   </div>
                   <div className="bg-white p-2 rounded-xl border">
-                    <span className="block text-slate-500 text-[10px]">Connected</span>
+                    <span className="block text-muted-foreground text-[10px]">Connected</span>
                     <strong className="text-base text-blue-600">{candidates.length}</strong>
                   </div>
                   <div className="bg-white p-2 rounded-xl border">
-                    <span className="block text-slate-500 text-[10px]">Approved</span>
+                    <span className="block text-muted-foreground text-[10px]">Approved</span>
                     <strong className="text-base text-emerald-700">{candidates.filter(c => c.status === 'approved').length}</strong>
                   </div>
                 </div>
@@ -937,7 +1247,7 @@ export default function PortalPage() {
                 {candidates.slice(0, 3).map((cand) => (
                   <div key={cand.id} className="flex items-center justify-between bg-white p-3 rounded-xl border text-xs">
                     <div>
-                      <strong>{cand.full_name}</strong> ({cand.profession}) - <span className="text-slate-400">{cand.nationality || cand.country}</span>
+                      <strong>{cand.full_name}</strong> ({candidateProfessionLabel(cand.profession, ui.general, currentLang)}) - <span className="text-muted-foreground">{cand.nationality || cand.country}</span>
                     </div>
                     <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-lg font-bold uppercase text-[10px]">
                       {cand.status}
@@ -945,7 +1255,7 @@ export default function PortalPage() {
                   </div>
                 ))}
                 {candidates.length === 0 && (
-                  <p className="text-xs text-slate-400 text-center py-2">No candidates assigned yet.</p>
+                  <p className="text-xs text-muted-foreground text-center py-2">No candidates assigned yet.</p>
                 )}
               </div>
             </div>
@@ -964,7 +1274,7 @@ export default function PortalPage() {
             <div className="flex justify-end pt-4 border-t">
               <button
                 onClick={() => setSelectedDemandDetail(null)}
-                className="bg-[#2e7d32] hover:bg-[#1b5e20] text-white px-6 py-2.5 rounded-xl text-xs font-bold transition shadow cursor-pointer"
+                className="bg-brand-solid hover:bg-brand text-white px-6 py-2.5 rounded-xl text-xs font-bold transition shadow cursor-pointer"
               >
                 Close
               </button>
@@ -980,7 +1290,7 @@ export default function PortalPage() {
               <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
                 <Key className="w-4 h-4 text-emerald-700" /> Edit Staff & Password
               </h3>
-              <button onClick={() => setEditingStaff(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
+              <button onClick={() => setEditingStaff(null)} className="text-muted-foreground hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
             </div>
             <form onSubmit={handleSaveStaffEdit} className="space-y-3 text-xs">
               <div>
@@ -999,8 +1309,26 @@ export default function PortalPage() {
                   <option value="target_country" className="text-slate-900 bg-white">🏢 {t.roleTargetCountry}</option>
                   <option value="field_officer" className="text-slate-900 bg-white">✈️ {t.roleFieldOfficer}</option>
                 </select>
+                {(editingStaff.role_level === 'source_country' || editingStaff.role_level === 'target_country') ? (
+                  <div className="mt-2 space-y-1">
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{releaseCopy[currentLang].scopeCountry}</label>
+                    <input value={editingStaff.scope_country || ''} onChange={(e) => setEditingStaff({ ...editingStaff, scope_country: e.target.value })} placeholder="Turkey" className="w-full px-3.5 py-2.5 rounded-xl border font-medium text-slate-900 bg-white" />
+                    <p className="text-[11px] text-muted-foreground">{releaseCopy[currentLang].scopeHint}</p>
+                  </div>
+                ) : null}
+                {editingStaff.role_level === 'source_country' ? (
+                  <div className="mt-2 space-y-1">
+                    <p className="font-bold text-slate-700 uppercase">{ui.referralCode}</p>
+                    {normalizeReferralCode(editingStaff.referral_code) ? (
+                      <p className="font-mono font-bold text-slate-900">{normalizeReferralCode(editingStaff.referral_code)}</p>
+                    ) : null}
+                    <p className="text-[11px] font-medium text-muted-foreground leading-snug">
+                      {normalizeReferralCode(editingStaff.referral_code) ? ui.referralCodeImmutable : ui.referralCodeOnInvite}
+                    </p>
+                  </div>
+                ) : null}
               </div>
-              <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs">
+              <button type="submit" className="w-full bg-brand-solid hover:bg-brand text-white py-3 rounded-xl font-bold transition shadow cursor-pointer text-xs">
                 Save Changes and Password
               </button>
             </form>

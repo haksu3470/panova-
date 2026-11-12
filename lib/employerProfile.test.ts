@@ -5,6 +5,7 @@ import {
   assertEmployerPersisted,
   companyProfilePayload,
   resolveLinkedEmployerId,
+  staffViewEmployerId,
   toEmployerProfileView,
 } from './employerProfile.ts';
 
@@ -93,6 +94,21 @@ test('a unique email collision is reported and not treated as saved', () => {
     }),
     (error: unknown) => error instanceof EmployerWriteError && error.code === 'email_taken',
   );
+});
+
+test('staff view opens the employer id in the address, not a stored company', () => {
+  const clicked = '6af7766b-50d8-42ca-bbb5-6c13ef47f4b6';
+  const akay = '428c22db-e80e-4bfe-813a-c73cf0129d53';
+  assert.equal(
+    staffViewEmployerId(`?as=${clicked}`, { isAdminImpersonation: true, id: akay, company_name: 'AKAY EĞİTİM' }),
+    clicked,
+  );
+  assert.equal(
+    staffViewEmployerId('', { isAdminImpersonation: true, id: clicked }),
+    clicked,
+  );
+  assert.equal(staffViewEmployerId('', { isAdminImpersonation: false, id: akay }), null);
+  assert.equal(staffViewEmployerId('?as=not-a-uuid', null), null);
 });
 
 test('a returned row is the persisted employer', () => {

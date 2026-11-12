@@ -45,6 +45,9 @@ export interface Translation {
   passportLabel?: string;
   sectorLabel?: string;
   professionLabel?: string;
+  professionSelect?: string;
+  professionOther?: string;
+  professionSpecify?: string;
   certNoLabel?: string;
   certNo?: string;
   certificateNo?: string;
@@ -167,6 +170,21 @@ export interface Translation {
   dateFormatPlaceholder: string;
   message: string;
 
+  corporateYouTubeVideos?: string;
+  video1GenIntro?: string;
+  video2Skill?: string;
+  video3Field?: string;
+  previewBtn?: string;
+  youtubeVideoTitle?: string;
+  youtubeVideoEmpty?: string;
+  youtubeVideoWatch?: string;
+  youtubeVideoOpen?: string;
+  youtubeVideoClear?: string;
+  youtubeVideoInvalid?: string;
+  youtubeVideoSupervisorNote?: string;
+  youtubeVideoReadOnly?: string;
+  youtubeVideoLabel?: string;
+
   signInMenu?: string;
   signUpMenu?: string;
   loginPortalTitle?: string;
@@ -188,6 +206,7 @@ export interface Translation {
   completeReg?: string;
 
   empTabRequests?: string;
+  empTabNewRequest?: string;
   empTabCandidates?: string;
   empTabInterviews?: string;
   empTabSelected?: string;
@@ -197,6 +216,25 @@ export interface Translation {
   empNoRequests?: string;
   empCandidatesPoolTitle?: string;
   empNoCandidates?: string;
+  empCandSearch?: string;
+  empCandExperience?: string;
+  empCandAnyExperience?: string;
+  empCandProfession?: string;
+  empCandAnyProfession?: string;
+  empCandSector?: string;
+  empCandAnySector?: string;
+  empCandCountry?: string;
+  empCandAnyCountry?: string;
+  empCandLanguage?: string;
+  empCandAnyLanguage?: string;
+  empCandShift?: string;
+  empCandAnyShift?: string;
+  empCandShiftYes?: string;
+  empCandShiftNo?: string;
+  empCandClear?: string;
+  empCandShowing?: string;
+  empCandNoMatch?: string;
+  empCandYears?: string;
   empInterviewRequestBtn?: string;
   empShortlistBtn?: string;
   empInterviewsTitle?: string;
@@ -269,6 +307,7 @@ export interface Translation {
   docProfessionalCert?: string;
   docCriminalRecord?: string;
   docHealthReport?: string;
+  docApostille?: string;
   savedSuccess?: string;
   fillEmployerAndSalary?: string;
   offerSentSuccess?: string;
@@ -364,6 +403,10 @@ export interface Translation {
   sectorConstruction?: string;
   sectorTrade?: string;
   sectorHR?: string;
+  sectorHospitality?: string;
+  sectorLogistics?: string;
+  sectorManufacturing?: string;
+  sectorCare?: string;
 
   corporateDemandTitle?: string;
   corporateDemandDesc?: string;
@@ -376,10 +419,23 @@ export interface Translation {
   languageReqLabel?: string;
   cityLocationLabel?: string;
   durationLabel?: string;
+  headcountPlaceholder?: string;
+  cityPlaceholder?: string;
+  durationPlaceholder?: string;
+  selectSectorFirst?: string;
   providedFacilitiesLabel?: string;
   facilityAccommodation?: string;
   facilityFood?: string;
   facilityTransport?: string;
+  benefitSelectPlaceholder?: string;
+  benefitProvided?: string;
+  benefitNotProvided?: string;
+  benefitUnanswered?: string;
+  lodgingRequired?: string;
+  mealsRequired?: string;
+  lodgingAndMealsRequired?: string;
+  salaryAmountRequired?: string;
+  demandSaveFailed?: string;
   submitDemandBtn?: string;
   activeDemandFilesTitle?: string;
   peopleUnit?: string;
@@ -432,7 +488,6 @@ export interface Translation {
 
   verifyEmailTitle?: string;
   verifyEmailLinkLead?: string;
-  verifyEmailBody?: string;
   verifyEmailResend?: string;
   verifyEmailResent?: string;
   verifyEmailResendFail?: string;
@@ -456,6 +511,36 @@ export interface Translation {
   candidateRecordMissing?: string;
   fillRequiredFields?: string;
   passwordTooShort?: string;
+  forgotPassword?: string;
+  forgotPasswordTitle?: string;
+  forgotPasswordLead?: string;
+  forgotPasswordGoogle?: string;
+  forgotPasswordSend?: string;
+  forgotPasswordSentTitle?: string;
+  forgotPasswordSent?: string;
+  forgotPasswordFail?: string;
+  forgotPasswordHaveCode?: string;
+  accountExists?: string;
+  passportExists?: string;
+  phoneExists?: string;
+  signInUnavailable?: string;
+  duplicateCheckFailed?: string;
+  resetPasswordTitle?: string;
+  resetPasswordLead?: string;
+  resetPasswordProveLead?: string;
+  resetPasswordChecking?: string;
+  resetPasswordCode?: string;
+  resetPasswordCodeBtn?: string;
+  resetPasswordCodeFail?: string;
+  resetPasswordNew?: string;
+  resetPasswordConfirm?: string;
+  resetPasswordSave?: string;
+  resetPasswordSaved?: string;
+  resetPasswordMismatch?: string;
+  resetPasswordFail?: string;
+  resetPasswordLinkError?: string;
+  resetPasswordGoogle?: string;
+  resetPasswordContinue?: string;
   candidateVerifiedUnlinked?: string;
   candidatePhoneTaken?: string;
   candidatePassportTaken?: string;
@@ -474,8 +559,6 @@ export interface Translation {
   staffSignupFieldsRequired?: string;
 }
 
-// `name` is the one short code shown beside the flag. `flag` is only data:
-// do not render it. Windows draws those emoji as the same two letters as `name`.
 export const languages = [
   { code: 'tr' as Language, name: 'TR', label: 'Türkçe', flag: '🇹🇷' },
   { code: 'en' as Language, name: 'GB', label: 'English', flag: '🇬🇧' },
@@ -532,6 +615,9 @@ export const translations: Record<Language, Translation> = {
     passportLabel: 'Pasaport No',
     sectorLabel: 'Sektör',
     professionLabel: 'Meslek',
+    professionSelect: 'Meslek seçin',
+    professionOther: 'Diğer (lütfen belirtin)',
+    professionSpecify: 'Mesleğinizi yazın',
     certNoLabel: 'Sertifika No',
     certNo: 'Sertifika No',
     certificateNo: 'Sertifika No',
@@ -584,6 +670,20 @@ export const translations: Record<Language, Translation> = {
     successDesc: 'talebinizi aldı. En kısa sürede dönüş yapacağız.',
     formSubmitError: 'Mesajınız gönderilemedi. Lütfen tekrar deneyin veya bize e-posta ile ulaşın.',
     notesLabel: 'Not',
+    corporateYouTubeVideos: 'Kurumsal YouTube Videoları',
+    video1GenIntro: '1. Video: Genel Tanıtım',
+    video2Skill: '2. Video: Mesleki Beceri',
+    video3Field: '3. Video: Saha Mülakatı',
+    previewBtn: 'Önizle',
+    youtubeVideoTitle: 'YouTube videosu',
+    youtubeVideoEmpty: 'Bu aday için henüz YouTube videosu eklenmedi.',
+    youtubeVideoWatch: 'YouTube’da izle',
+    youtubeVideoOpen: 'Video bağlantısını aç',
+    youtubeVideoClear: 'Temizle',
+    youtubeVideoInvalid: 'Geçerli bir YouTube bağlantısı girin: youtube.com/watch, youtu.be, shorts veya embed.',
+    youtubeVideoSupervisorNote: 'Yalnızca bölge ve ülke sorumluları bu videoyu değiştirebilir. Bağlantı Panova YouTube kanalından olmalıdır (panova@panovagroup.org).',
+    youtubeVideoReadOnly: 'Bu videoyu yalnızca bölge ve ülke sorumluları düzenleyebilir.',
+    youtubeVideoLabel: 'YouTube video bağlantısı',
     companies: {
       hr: {
         name: 'Panova HR',
@@ -699,6 +799,7 @@ export const translations: Record<Language, Translation> = {
     goToSignInBtn: 'Giriş Sayfasına Git',
 
     empTabRequests: 'Personel Taleplerim',
+    empTabNewRequest: 'Yeni Talep',
     empTabCandidates: 'Adaylar / Eşleşmeler',
     empTabInterviews: 'Mülakatlar',
     empTabSelected: 'Seçtiğim Adaylar',
@@ -708,6 +809,25 @@ export const translations: Record<Language, Translation> = {
     empNoRequests: 'Kayıtlı personel talebiniz bulunmuyor.',
     empCandidatesPoolTitle: 'Taleplerinize Sunulan Aday Havuzu',
     empNoCandidates: 'Henüz eşleşen aday bulunmuyor.',
+    empCandSearch: 'Ad veya meslek ara',
+    empCandExperience: 'Tecrübe',
+    empCandAnyExperience: 'Tüm tecrübe',
+    empCandProfession: 'Meslek',
+    empCandAnyProfession: 'Tüm meslekler',
+    empCandSector: 'Sektör',
+    empCandAnySector: 'Tüm sektörler',
+    empCandCountry: 'Uyruk / ülke',
+    empCandAnyCountry: 'Tüm ülkeler',
+    empCandLanguage: 'Dil',
+    empCandAnyLanguage: 'Tüm diller',
+    empCandShift: 'Vardiya',
+    empCandAnyShift: 'Fark etmez',
+    empCandShiftYes: 'Vardiyaya uygun',
+    empCandShiftNo: 'Vardiyaya uygun değil',
+    empCandClear: 'Filtreleri temizle',
+    empCandShowing: '{shown} / {total} aday',
+    empCandNoMatch: 'Bu filtrelere uyan aday yok. Filtreleri temizleyerek tüm listeye dönebilirsiniz.',
+    empCandYears: '{years} yıl',
     empInterviewRequestBtn: 'Görüşme İste',
     empShortlistBtn: 'Kısa Listeye Al',
     empInterviewsTitle: 'Planlanan ve Tamamlanan Görüşmeler',
@@ -780,6 +900,7 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'Mesleki Sertifika',
     docCriminalRecord: 'Adli Sicil Kaydı',
     docHealthReport: 'Sağlık Raporu',
+    docApostille: 'e-Apostil / Dışişleri Bakanlığı Tasdiki',
     savedSuccess: 'Başarıyla Kaydedildi',
     fillEmployerAndSalary: 'Lütfen İşveren ve Maaş Bilgilerini Doldurun',
     offerSentSuccess: 'İş Teklifi Başarıyla Gönderildi',
@@ -875,6 +996,10 @@ export const translations: Record<Language, Translation> = {
     sectorConstruction: 'İnşaat ve Yapı',
     sectorTrade: 'Dış Ticaret ve Lojistik',
     sectorHR: 'İnsan Kaynakları',
+    sectorHospitality: 'Turizm ve Otelcilik',
+    sectorLogistics: 'Lojistik',
+    sectorManufacturing: 'Üretim ve Sanayi',
+    sectorCare: 'Sağlık ve Bakım',
 
     corporateDemandTitle: 'Kurumsal İş Gücü Talep Formu',
     corporateDemandDesc: 'Sektör seçin, aradığınız pozisyonları, tecrübe, dil ve çalışma şartlarını belirleyin.',
@@ -887,10 +1012,23 @@ export const translations: Record<Language, Translation> = {
     languageReqLabel: 'Aranan Dil Becerisi',
     cityLocationLabel: 'Şehir / Lokasyon',
     durationLabel: 'Çalışma Süresi',
+    headcountPlaceholder: 'Örn: 5',
+    cityPlaceholder: 'Örn: Struga',
+    durationPlaceholder: 'Örn: 12 ay (sezonluk / tam zamanlı)',
+    selectSectorFirst: 'Pozisyonları görmek için önce bir sektör seçin.',
     providedFacilitiesLabel: 'Sağlanan İmkanlar',
     facilityAccommodation: 'Konaklama (Lojman / Daire)',
     facilityFood: 'Yemek (3 Öğün / Yemek Ücreti)',
     facilityTransport: 'Ulaşım (Servis / Yol Masrafı)',
+    benefitSelectPlaceholder: 'Seçin',
+    benefitProvided: 'Sağlanıyor',
+    benefitNotProvided: 'Sağlanmıyor',
+    benefitUnanswered: 'Belirtilmedi',
+    lodgingRequired: 'Konaklama seçimi zorunludur.',
+    mealsRequired: 'Yemek seçimi zorunludur.',
+    lodgingAndMealsRequired: 'Konaklama ve yemek seçimi zorunludur.',
+    salaryAmountRequired: 'Aylık net maaşı sayı olarak girin.',
+    demandSaveFailed: 'Talep kaydedilemedi. Lütfen tekrar deneyin.',
     submitDemandBtn: 'Kurumsal Personel Talebini PANOVA Operasyona Gönder',
     activeDemandFilesTitle: 'Aktif İş Gücü Talep Dosyalarınız',
     peopleUnit: 'Kişi',
@@ -939,12 +1077,11 @@ export const translations: Record<Language, Translation> = {
     approvedAndProcessing: 'Onaylandı & İşlemde',
 
     verifyEmailTitle: 'Gelen kutunuzu kontrol edin',
-    verifyEmailLinkLead: 'E-postadaki bağlantıyı açın. Sayısal kod varsa onu da yazın.',
-    verifyEmailBody: 'Bağlantı bu cihazda kaydı tamamlar. İletideki kısa kodu aşağıya da yazabilirsiniz. Google ile girişte bu adım yoktur.',
+    verifyEmailLinkLead: 'E-postadaki bağlantıya tıklayın veya 6 haneli kodu buraya girin.',
     verifyEmailResend: 'Doğrulama e-postasını yeniden gönder',
     verifyEmailResent: 'Doğrulama e-postası yeniden gönderildi.',
     verifyEmailResendFail: 'E-posta gönderilemedi. Biraz sonra tekrar deneyin.',
-    verifyEmailCodeLabel: 'Sayısal kod',
+    verifyEmailCodeLabel: '6 haneli kod',
     verifyEmailCodeBtn: 'Kodu doğrula',
     verifyEmailCodeFail: 'Kod kabul edilmedi. Bağlantıyı açın veya yeni bir ileti isteyin.',
     verifyEmailProofFail: 'Doğrulama oturumu kaydedilemedi. Yeni bir e-posta isteyip tekrar deneyin.',
@@ -960,10 +1097,40 @@ export const translations: Record<Language, Translation> = {
     employerRecordMissing: 'Bu e-posta ile eşleşen bir işveren kaydı bulunamadı. Lütfen Panova ekibiyle iletişime geçin.',
     signupError: 'Kayıt oluşturulurken hata: {message}',
     employerVerifiedUnlinked: 'E-posta doğrulandı. İşveren kaydı bağlanamadı; Panova ekibiyle iletişime geçin.',
-    authInvalidCredentials: 'Hatalı e-posta veya şifre!',
+    authInvalidCredentials: 'E-posta, telefon, pasaport veya şifre hatalı.',
     candidateRecordMissing: 'Bu e-posta ile eşleşen aday kaydı bulunamadı!',
     fillRequiredFields: 'Lütfen zorunlu alanları doldurun.',
     passwordTooShort: 'Şifre en az 8 karakter olmalıdır.',
+    forgotPassword: 'Şifremi unuttum',
+    forgotPasswordTitle: 'Şifrenizi sıfırlayın',
+    forgotPasswordLead: 'E-posta adresinizi yazın. Bu adresle bir şifre hesabı varsa sıfırlama bağlantısı göndeririz.',
+    forgotPasswordGoogle: 'Google ile giriş yapan hesapların şifresi yoktur. Google düğmesini kullanın.',
+    forgotPasswordSend: 'Sıfırlama e-postası gönder',
+    forgotPasswordSentTitle: 'Gelen kutunuzu kontrol edin',
+    forgotPasswordSent: 'Bu adresle bir şifre hesabı varsa, yeni şifre seçmeniz için bir bağlantı gönderdik. İletideki kodu da kullanabilirsiniz.',
+    forgotPasswordFail: 'E-posta gönderilemedi. Biraz sonra tekrar deneyin.',
+    forgotPasswordHaveCode: 'Kodum veya bağlantım var',
+    accountExists: 'Bu e-posta ile zaten bir hesap var. Giriş yapın veya şifrenizi sıfırlayın.',
+    passportExists: 'Bu pasaport numarası başka bir aday kaydında var. Pasaport numaranızla giriş yapın ya da Panova ile iletişime geçin.',
+    phoneExists: 'Bu telefon numarası başka bir aday kaydında var. Telefon numaranızla giriş yapın ya da Panova ile iletişime geçin.',
+    signInUnavailable: 'Giriş şu anda kullanılamıyor. Biraz sonra tekrar deneyin.',
+    duplicateCheckFailed: 'Kayıt kontrol edilemedi. Biraz sonra tekrar deneyin.',
+    resetPasswordTitle: 'Yeni şifre belirleyin',
+    resetPasswordLead: 'E-postadaki bağlantı bu sayfayı açtıysa yeni şifrenizi yazın. Bağlantı başka bir cihazdaysa kodu aşağıya girin.',
+    resetPasswordProveLead: 'E-postadaki bağlantıya tıklayın veya 6 haneli kodu buraya girin. Bağlantı bu sayfayı açtıysa yeni şifre alanları kendiliğinden gelir.',
+    resetPasswordChecking: 'Sıfırlama bağlantısı kontrol ediliyor.',
+    resetPasswordCode: '6 haneli kod',
+    resetPasswordCodeBtn: 'Kodu doğrula',
+    resetPasswordCodeFail: 'Kod kabul edilmedi. Bağlantıyı açın veya yeni bir e-posta isteyin.',
+    resetPasswordNew: 'Yeni şifre',
+    resetPasswordConfirm: 'Yeni şifre (tekrar)',
+    resetPasswordSave: 'Şifreyi kaydet',
+    resetPasswordSaved: 'Şifreniz güncellendi. Giriş sayfasına yönlendiriliyorsunuz.',
+    resetPasswordMismatch: 'Şifreler eşleşmiyor.',
+    resetPasswordFail: 'Şifre güncellenemedi. Bağlantının süresi dolmuş olabilir. Yeni bir e-posta isteyin.',
+    resetPasswordLinkError: 'Sıfırlama bağlantısı geçersiz veya süresi dolmuş. Yeni bir e-posta isteyin.',
+    resetPasswordGoogle: 'Bu hesap Google ile açılıyor ve şifre kullanmıyor. Google düğmesiyle devam edin.',
+    resetPasswordContinue: 'Devam et',
     candidateVerifiedUnlinked: 'E-posta doğrulandı. Aday kaydınız ekip tarafından bağlanacak.',
     candidatePhoneTaken: 'Bu telefon numarası başka bir adaya kayıtlı. Bitirmek için farklı bir numara girin.',
     candidatePassportTaken: 'Bu pasaport numarası başka bir adaya kayıtlı. Bitirmek için farklı bir pasaport numarası girin.',
@@ -1028,6 +1195,9 @@ export const translations: Record<Language, Translation> = {
     passportLabel: 'Passport No',
     sectorLabel: 'Sector',
     professionLabel: 'Profession',
+    professionSelect: 'Select a profession',
+    professionOther: 'Other (please specify)',
+    professionSpecify: 'Specify your profession',
     certNoLabel: 'Certificate No',
     certNo: 'Cert No',
     certificateNo: 'Cert No',
@@ -1080,6 +1250,20 @@ export const translations: Record<Language, Translation> = {
     successDesc: 'has received your request. We will reply shortly.',
     formSubmitError: 'Your message could not be sent. Please try again or email us directly.',
     notesLabel: 'Note',
+    corporateYouTubeVideos: 'Corporate YouTube Videos',
+    video1GenIntro: '1. Video: General Intro',
+    video2Skill: '2. Video: Professional Skill',
+    video3Field: '3. Video: Field Interview',
+    previewBtn: 'Preview',
+    youtubeVideoTitle: 'YouTube video',
+    youtubeVideoEmpty: 'No YouTube video has been added for this candidate yet.',
+    youtubeVideoWatch: 'Watch on YouTube',
+    youtubeVideoOpen: 'Open the video link',
+    youtubeVideoClear: 'Clear',
+    youtubeVideoInvalid: 'Enter a valid YouTube link: youtube.com/watch, youtu.be, shorts, or embed.',
+    youtubeVideoSupervisorNote: 'Only region and country supervisors can change this video. Use a link from the Panova YouTube channel (panova@panovagroup.org).',
+    youtubeVideoReadOnly: 'Only region and country supervisors can edit this video.',
+    youtubeVideoLabel: 'YouTube video link',
     companies: {
       hr: {
         name: 'Panova HR',
@@ -1195,6 +1379,7 @@ export const translations: Record<Language, Translation> = {
     goToSignInBtn: 'Go to Sign In',
 
     empTabRequests: 'Personnel Requests',
+    empTabNewRequest: 'New Request',
     empTabCandidates: 'Candidates / Matching',
     empTabInterviews: 'Interviews',
     empTabSelected: 'Selected Candidates',
@@ -1204,6 +1389,25 @@ export const translations: Record<Language, Translation> = {
     empNoRequests: 'No active workforce requests found.',
     empCandidatesPoolTitle: 'Candidate Pool Offered for Your Demands',
     empNoCandidates: 'No matching candidates found yet.',
+    empCandSearch: 'Search name or profession',
+    empCandExperience: 'Experience',
+    empCandAnyExperience: 'Any experience',
+    empCandProfession: 'Profession',
+    empCandAnyProfession: 'Any profession',
+    empCandSector: 'Sector',
+    empCandAnySector: 'All sectors',
+    empCandCountry: 'Nationality / country',
+    empCandAnyCountry: 'All countries',
+    empCandLanguage: 'Language',
+    empCandAnyLanguage: 'All languages',
+    empCandShift: 'Shift',
+    empCandAnyShift: 'Any',
+    empCandShiftYes: 'Suitable for shifts',
+    empCandShiftNo: 'Not suitable for shifts',
+    empCandClear: 'Clear filters',
+    empCandShowing: '{shown} / {total} candidates',
+    empCandNoMatch: 'No candidates match these filters. Clear the filters to see the full list.',
+    empCandYears: '{years} years',
     empInterviewRequestBtn: 'Request Interview',
     empShortlistBtn: 'Shortlist',
     empInterviewsTitle: 'Scheduled and Completed Interviews',
@@ -1276,6 +1480,7 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'Professional Certificate',
     docCriminalRecord: 'Criminal Record',
     docHealthReport: 'Health Report',
+    docApostille: 'e-Apostille / Ministry of Foreign Affairs Attestation',
     savedSuccess: 'Successfully Saved',
     fillEmployerAndSalary: 'Please Fill Employer and Salary Details',
     offerSentSuccess: 'Job Offer Sent Successfully',
@@ -1371,6 +1576,10 @@ export const translations: Record<Language, Translation> = {
     sectorConstruction: 'Construction & Building',
     sectorTrade: 'Foreign Trade & Logistics',
     sectorHR: 'Human Resources',
+    sectorHospitality: 'Tourism & Hospitality',
+    sectorLogistics: 'Logistics',
+    sectorManufacturing: 'Manufacturing & Industry',
+    sectorCare: 'Health & Care',
 
     corporateDemandTitle: 'Corporate Workforce Demand Form',
     corporateDemandDesc: 'Select sector, specify positions, experience, language and working conditions.',
@@ -1383,10 +1592,23 @@ export const translations: Record<Language, Translation> = {
     languageReqLabel: 'Required Language Skill',
     cityLocationLabel: 'City / Location',
     durationLabel: 'Work Duration',
+    headcountPlaceholder: 'e.g. 5',
+    cityPlaceholder: 'e.g. Struga',
+    durationPlaceholder: 'e.g. 12 months (seasonal / full time)',
+    selectSectorFirst: 'Choose a sector to see positions.',
     providedFacilitiesLabel: 'Provided Facilities',
     facilityAccommodation: 'Accommodation (Housing / Apartment)',
     facilityFood: 'Food (3 Meals / Food Allowance)',
     facilityTransport: 'Transport (Shuttle / Travel Expense)',
+    benefitSelectPlaceholder: 'Select',
+    benefitProvided: 'Provided',
+    benefitNotProvided: 'Not provided',
+    benefitUnanswered: 'Not specified',
+    lodgingRequired: 'Choose whether accommodation is provided.',
+    mealsRequired: 'Choose whether meals are provided.',
+    lodgingAndMealsRequired: 'Choose whether accommodation and meals are provided.',
+    salaryAmountRequired: 'Enter the monthly net salary as a number.',
+    demandSaveFailed: 'The request could not be saved. Please try again.',
     submitDemandBtn: 'Send Corporate Personnel Demand to PANOVA Operations',
     activeDemandFilesTitle: 'Your Active Workforce Demand Files',
     peopleUnit: 'Person(s)',
@@ -1435,12 +1657,11 @@ export const translations: Record<Language, Translation> = {
     approvedAndProcessing: 'Approved & In Process',
 
     verifyEmailTitle: 'Check your inbox',
-    verifyEmailLinkLead: 'Open the link in the email. If it also shows a numeric code, enter it below.',
-    verifyEmailBody: 'The link finishes registration on this device. You can also type the short code from that message. Google sign-in does not need this step.',
+    verifyEmailLinkLead: 'Click the link in the email, or enter the 6-digit code here.',
     verifyEmailResend: 'Resend verification email',
     verifyEmailResent: 'Verification email sent again.',
     verifyEmailResendFail: 'The email could not be sent. Try again shortly.',
-    verifyEmailCodeLabel: 'Numeric code',
+    verifyEmailCodeLabel: '6-digit code',
     verifyEmailCodeBtn: 'Verify code',
     verifyEmailCodeFail: 'That code was not accepted. Open the link or request a new message.',
     verifyEmailProofFail: 'The verification session could not be saved. Request a new email and try again.',
@@ -1456,10 +1677,40 @@ export const translations: Record<Language, Translation> = {
     employerRecordMissing: 'No employer record matches this email. Please contact the Panova team.',
     signupError: 'Could not create the account: {message}',
     employerVerifiedUnlinked: 'Email verified. The employer record could not be linked. Please contact the Panova team.',
-    authInvalidCredentials: 'Incorrect email or password.',
+    authInvalidCredentials: 'The email, phone, passport, or password is incorrect.',
     candidateRecordMissing: 'No candidate record is linked to this email.',
     fillRequiredFields: 'Please fill in the required fields.',
     passwordTooShort: 'Password must be at least 8 characters.',
+    forgotPassword: 'Forgot password',
+    forgotPasswordTitle: 'Reset your password',
+    forgotPasswordLead: 'Enter your email. If a password account exists for it, we will send a reset link.',
+    forgotPasswordGoogle: 'Google sign-in accounts do not have a password. Use the Google button.',
+    forgotPasswordSend: 'Send reset email',
+    forgotPasswordSentTitle: 'Check your inbox',
+    forgotPasswordSent: 'If a password account exists for this address, we sent a link to choose a new password. You can also use the code in that message.',
+    forgotPasswordFail: 'The email could not be sent. Try again shortly.',
+    forgotPasswordHaveCode: 'I have a code or link',
+    accountExists: 'An account already exists for this email. Sign in or reset your password.',
+    passportExists: 'This passport number is already on a candidate record. Sign in with your passport or contact Panova.',
+    phoneExists: 'This phone number is already on a candidate record. Sign in with your phone or contact Panova.',
+    signInUnavailable: 'Sign-in is unavailable right now. Try again shortly.',
+    duplicateCheckFailed: 'Registration could not be checked. Try again shortly.',
+    resetPasswordTitle: 'Choose a new password',
+    resetPasswordLead: 'If the email link opened this page, enter a new password. If the link is on another device, enter the code below.',
+    resetPasswordProveLead: 'Click the link in the email, or enter the 6-digit code here. If the link opened this page, the new-password fields appear on their own.',
+    resetPasswordChecking: 'Checking the reset link.',
+    resetPasswordCode: '6-digit code',
+    resetPasswordCodeBtn: 'Verify code',
+    resetPasswordCodeFail: 'That code was not accepted. Open the link or request a new email.',
+    resetPasswordNew: 'New password',
+    resetPasswordConfirm: 'New password (again)',
+    resetPasswordSave: 'Save password',
+    resetPasswordSaved: 'Your password is updated. Taking you to the sign-in page.',
+    resetPasswordMismatch: 'The passwords do not match.',
+    resetPasswordFail: 'The password could not be updated. The link may have expired. Request a new email.',
+    resetPasswordLinkError: 'This reset link is invalid or has expired. Request a new email.',
+    resetPasswordGoogle: 'This account signs in with Google and does not use a password. Continue with the Google button.',
+    resetPasswordContinue: 'Continue',
     candidateVerifiedUnlinked: 'Email verified. Your candidate record will be linked by our team.',
     candidatePhoneTaken: 'This phone number is already registered to another candidate. Enter a different number to finish.',
     candidatePassportTaken: 'This passport number is already registered. Enter a different passport number to finish.',
@@ -1524,6 +1775,9 @@ export const translations: Record<Language, Translation> = {
     passportLabel: 'Nr. Pasaportës',
     sectorLabel: 'Sektori',
     professionLabel: 'Profesioni',
+    professionSelect: 'Zgjidhni profesionin',
+    professionOther: 'Tjetër (ju lutem specifikoni)',
+    professionSpecify: 'Shkruani profesionin',
     certNoLabel: 'Nr. Certifikatës',
     certNo: 'Nr. Certifikatës',
     certificateNo: 'Nr. Certifikatës',
@@ -1577,6 +1831,20 @@ export const translations: Record<Language, Translation> = {
     formSubmitError: 'Mesazhi nuk u dërgua. Ju lutemi provoni përsëri ose na shkruani me email.',
     notesLabel: 'Shënim',
     notesPlaceholder: 'P.sh. orari i punës, detajet e turnit...',
+    corporateYouTubeVideos: 'Videot e Korporatës YouTube',
+    video1GenIntro: '1. Video: Prezantimi i Përgjithshëm',
+    video2Skill: '2. Video: Aftësia Profesionale',
+    video3Field: '3. Video: Intervista në Terren',
+    previewBtn: 'Parapamje',
+    youtubeVideoTitle: 'Video YouTube',
+    youtubeVideoEmpty: 'Për këtë kandidat ende nuk është shtuar një video YouTube.',
+    youtubeVideoWatch: 'Shiko në YouTube',
+    youtubeVideoOpen: 'Hap lidhjen e videos',
+    youtubeVideoClear: 'Pastro',
+    youtubeVideoInvalid: 'Vendosni një lidhje të vlefshme YouTube: youtube.com/watch, youtu.be, shorts ose embed.',
+    youtubeVideoSupervisorNote: 'Vetëm mbikëqyrësit e rajonit dhe të vendit mund ta ndryshojnë këtë video. Përdorni një lidhje nga kanali YouTube i Panova (panova@panovagroup.org).',
+    youtubeVideoReadOnly: 'Këtë video mund ta ndryshojnë vetëm mbikëqyrësit e rajonit dhe të vendit.',
+    youtubeVideoLabel: 'Lidhja e videos në YouTube',
     companies: {
       hr: {
         name: 'Panova HR',
@@ -1691,6 +1959,7 @@ export const translations: Record<Language, Translation> = {
     goToSignInBtn: 'Shko te Hyrja',
 
     empTabRequests: 'Kërkesat e Personelit',
+    empTabNewRequest: 'Kërkesë e re',
     empTabCandidates: 'Kandidatët / Përputhja',
     empTabInterviews: 'Intervistat',
     empTabSelected: 'Kandidatët e Zgjedhur',
@@ -1700,6 +1969,25 @@ export const translations: Record<Language, Translation> = {
     empNoRequests: 'Nuk u gjet asnjë kërkesë aktive për personel.',
     empCandidatesPoolTitle: 'Grupi i Kandidatëve për Kërkesat Tuaja',
     empNoCandidates: 'Ende nuk ka kandidatë përputhës.',
+    empCandSearch: 'Kërko emrin ose profesionin',
+    empCandExperience: 'Eksperienca',
+    empCandAnyExperience: 'Çdo eksperiencë',
+    empCandProfession: 'Profesioni',
+    empCandAnyProfession: 'Të gjitha profesionet',
+    empCandSector: 'Sektori',
+    empCandAnySector: 'Të gjithë sektorët',
+    empCandCountry: 'Kombësia / vendi',
+    empCandAnyCountry: 'Të gjitha vendet',
+    empCandLanguage: 'Gjuha',
+    empCandAnyLanguage: 'Të gjitha gjuhët',
+    empCandShift: 'Turni',
+    empCandAnyShift: 'Pa rëndësi',
+    empCandShiftYes: 'I përshtatshëm për turne',
+    empCandShiftNo: 'Jo i përshtatshëm për turne',
+    empCandClear: 'Pastro filtrat',
+    empCandShowing: '{shown} / {total} kandidatë',
+    empCandNoMatch: 'Asnjë kandidat nuk përputhet me këto filtra. Pastro filtrat për të parë listën e plotë.',
+    empCandYears: '{years} vite',
     empInterviewRequestBtn: 'Kërko Intervistë',
     empShortlistBtn: 'Shto në Listë të Shkurtër',
     empInterviewsTitle: 'Intervistat e Planifikuara dhe të Përfunduara',
@@ -1772,6 +2060,7 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'Certifikata Profesionale',
     docCriminalRecord: 'Dëshmi Penaliteti',
     docHealthReport: 'Raporti Mjekësor',
+    docApostille: 'e-Apostil / Vërtetim i Ministrisë së Punëve të Jashtme',
     savedSuccess: 'U Ruajt me Sukses',
     fillEmployerAndSalary: 'Ju lutemi plotësoni detajet e punëdhënësit dhe pagës',
     offerSentSuccess: 'Oferta e punës u dërgua me sukses',
@@ -1867,6 +2156,10 @@ export const translations: Record<Language, Translation> = {
     sectorConstruction: 'Ndërtim dhe Objekte',
     sectorTrade: 'Tregti e Jashtme dhe Logjistikë',
     sectorHR: 'Burimet Njerëzore',
+    sectorHospitality: 'Turizëm dhe Hoteleri',
+    sectorLogistics: 'Logjistikë',
+    sectorManufacturing: 'Prodhim dhe Industri',
+    sectorCare: 'Shëndet dhe kujdes',
 
     corporateDemandTitle: 'Formulari i Kërkesës për Fuqi Punëtore Korporative',
     corporateDemandDesc: 'Zgjidhni sektorin, pozicionet, eksperiencën, gjuhën dhe kushtet e punës.',
@@ -1879,10 +2172,23 @@ export const translations: Record<Language, Translation> = {
     languageReqLabel: 'Gjuha e Kërkuar',
     cityLocationLabel: 'Qyteti / Lokacioni',
     durationLabel: 'Koha e Punës',
-    providedFacilitiesLabel: 'Mjetet e Ofera',
-    facilityAccommodation: 'Akomodimi (Konak / Apartament)',
-    facilityFood: 'Ushqimi (3 Vaktet / Pagesë Ushqimi)',
-    facilityTransport: 'Transporti (Servis / Shpenzime Udhëtimi)',
+    headcountPlaceholder: 'p.sh. 5',
+    cityPlaceholder: 'p.sh. Struga',
+    durationPlaceholder: 'p.sh. 12 muaj (sezonale / kohë e plotë)',
+    selectSectorFirst: 'Zgjidhni një sektor për të parë pozicionet.',
+    providedFacilitiesLabel: 'Kushtet e ofruara',
+    facilityAccommodation: 'Akomodimi (strehim / apartament)',
+    facilityFood: 'Ushqimi (3 vakte / pagesë ushqimi)',
+    facilityTransport: 'Transporti (autobus / shpenzime udhëtimi)',
+    benefitSelectPlaceholder: 'Zgjidhni',
+    benefitProvided: 'Ofrohet',
+    benefitNotProvided: 'Nuk ofrohet',
+    benefitUnanswered: 'Nuk është caktuar',
+    lodgingRequired: 'Zgjidhni nëse ofrohet akomodimi.',
+    mealsRequired: 'Zgjidhni nëse ofrohet ushqimi.',
+    lodgingAndMealsRequired: 'Zgjidhni nëse ofrohen akomodimi dhe ushqimi.',
+    salaryAmountRequired: 'Shkruani pagën neto mujore si numër.',
+    demandSaveFailed: 'Kërkesa nuk u ruajt. Ju lutemi provoni përsëri.',
     submitDemandBtn: 'Dërgo Kërkesën e Personelit te Operacionet PANOVA',
     activeDemandFilesTitle: 'Skedarët tuaj aktivë të kërkesave për fuqi punëtore',
     peopleUnit: 'Persona',
@@ -1931,12 +2237,11 @@ export const translations: Record<Language, Translation> = {
     approvedAndProcessing: 'Miratuar & Në Proçes',
 
     verifyEmailTitle: 'Kontrolloni kutinë tuaj',
-    verifyEmailLinkLead: 'Hapni lidhjen në e-mail. Nëse shfaqet edhe një kod numerik, shkruajeni më poshtë.',
-    verifyEmailBody: 'Lidhja e përfundon regjistrimin në këtë pajisje. Mund të shkruani edhe kodin e shkurtër nga ajo letër. Hyrja me Google nuk e kërkon këtë hap.',
+    verifyEmailLinkLead: 'Klikoni lidhjen në e-mail, ose shkruani kodin 6-shifror këtu.',
     verifyEmailResend: 'Ridërgo e-mailin e verifikimit',
     verifyEmailResent: 'E-maili i verifikimit u dërgua përsëri.',
     verifyEmailResendFail: 'E-maili nuk u dërgua. Provoni përsëri pas pak.',
-    verifyEmailCodeLabel: 'Kodi numerik',
+    verifyEmailCodeLabel: 'Kodi 6-shifror',
     verifyEmailCodeBtn: 'Verifiko kodin',
     verifyEmailCodeFail: 'Kodi nuk u pranua. Hapni lidhjen ose kërkoni një letër të re.',
     verifyEmailProofFail: 'Sesioni i verifikimit nuk u ruajt. Kërkoni një email të ri dhe provoni përsëri.',
@@ -1952,10 +2257,40 @@ export const translations: Record<Language, Translation> = {
     employerRecordMissing: 'Nuk u gjet një regjistrim punëdhënësi për këtë email. Ju lutemi kontaktoni ekipin e Panova.',
     signupError: 'Gabim gjatë regjistrimit: {message}',
     employerVerifiedUnlinked: 'E-maili u verifikua. Regjistrimi i punëdhënësit nuk u lidh. Kontaktoni ekipin e Panova.',
-    authInvalidCredentials: 'Email-i ose fjalëkalimi është i pasaktë.',
+    authInvalidCredentials: 'Email-i, telefoni, pasaporta ose fjalëkalimi është i pasaktë.',
     candidateRecordMissing: 'Nuk u gjet një regjistrim kandidati për këtë email.',
     fillRequiredFields: 'Ju lutemi plotësoni fushat e detyrueshme.',
     passwordTooShort: 'Fjalëkalimi duhet të ketë të paktën 8 karaktere.',
+    forgotPassword: 'Kam harruar fjalëkalimin',
+    forgotPasswordTitle: 'Rivendosni fjalëkalimin',
+    forgotPasswordLead: 'Shkruani email-in. Nëse ekziston një llogari me fjalëkalim, dërgojmë një lidhje rivendosjeje.',
+    forgotPasswordGoogle: 'Llogaritë me Google nuk kanë fjalëkalim. Përdorni butonin Google.',
+    forgotPasswordSend: 'Dërgo email-in e rivendosjes',
+    forgotPasswordSentTitle: 'Kontrolloni kutinë tuaj',
+    forgotPasswordSent: 'Nëse kjo adresë ka një llogari me fjalëkalim, dërguam një lidhje për fjalëkalim të ri. Mund të përdorni edhe kodin në atë letër.',
+    forgotPasswordFail: 'E-maili nuk u dërgua. Provoni përsëri pas pak.',
+    forgotPasswordHaveCode: 'Kam një kod ose lidhje',
+    accountExists: 'Me këtë e-mail ekziston tashmë një llogari. Hyni ose rivendosni fjalëkalimin.',
+    passportExists: 'Ky numër pasaporte është tashmë në një regjistrim kandidati. Hyni me pasaportën ose kontaktoni Panova.',
+    phoneExists: 'Ky numër telefoni është tashmë në një regjistrim kandidati. Hyni me telefonin ose kontaktoni Panova.',
+    signInUnavailable: 'Hyrja nuk është e disponueshme tani. Provoni përsëri pas pak.',
+    duplicateCheckFailed: 'Regjistrimi nuk u kontrollua. Provoni përsëri pas pak.',
+    resetPasswordTitle: 'Vendosni një fjalëkalim të ri',
+    resetPasswordLead: 'Nëse lidhja e email-it e hapi këtë faqe, shkruani fjalëkalimin e ri. Nëse lidhja është në një pajisje tjetër, vendosni kodin më poshtë.',
+    resetPasswordProveLead: 'Klikoni lidhjen në e-mail, ose shkruani kodin 6-shifror këtu. Nëse lidhja e hapi këtë faqe, fushat e fjalëkalimit të ri shfaqen vetë.',
+    resetPasswordChecking: 'Po kontrollohet lidhja e rivendosjes.',
+    resetPasswordCode: 'Kodi 6-shifror',
+    resetPasswordCodeBtn: 'Verifiko kodin',
+    resetPasswordCodeFail: 'Kodi nuk u pranua. Hapni lidhjen ose kërkoni një email të ri.',
+    resetPasswordNew: 'Fjalëkalimi i ri',
+    resetPasswordConfirm: 'Fjalëkalimi i ri (përsëri)',
+    resetPasswordSave: 'Ruaj fjalëkalimin',
+    resetPasswordSaved: 'Fjalëkalimi u përditësua. Po ju çojmë te faqja e hyrjes.',
+    resetPasswordMismatch: 'Fjalëkalimet nuk përputhen.',
+    resetPasswordFail: 'Fjalëkalimi nuk u përditësua. Lidhja mund të ketë skaduar. Kërkoni një email të ri.',
+    resetPasswordLinkError: 'Lidhja e rivendosjes është e pavlefshme ose ka skaduar. Kërkoni një email të ri.',
+    resetPasswordGoogle: 'Kjo llogari hyn me Google dhe nuk përdor fjalëkalim. Vazhdoni me butonin Google.',
+    resetPasswordContinue: 'Vazhdo',
     candidateVerifiedUnlinked: 'E-maili u verifikua. Ekipi ynë do ta lidhë regjistrimin tuaj si kandidat.',
     candidatePhoneTaken: 'Ky numër telefoni është i regjistruar te një kandidat tjetër. Vendosni një numër tjetër për të përfunduar.',
     candidatePassportTaken: 'Ky numër pasaporte është i regjistruar. Vendosni një numër tjetër pasaporte për të përfunduar.',
@@ -2020,6 +2355,9 @@ export const translations: Record<Language, Translation> = {
     passportLabel: 'رقم جواز السفر',
     sectorLabel: 'القطاع',
     professionLabel: 'المهنة',
+    professionSelect: 'اختر المهنة',
+    professionOther: 'أخرى (يرجى التحديد)',
+    professionSpecify: 'اكتب المهنة',
     certNoLabel: 'رقم الشهادة',
     certNo: 'رقم الشهادة',
     certificateNo: 'رقم الشهادة',
@@ -2072,6 +2410,20 @@ export const translations: Record<Language, Translation> = {
     successDesc: 'استلم طلبكم. سنرد في أقرب وقت.',
     formSubmitError: 'تعذر إرسال رسالتكم. يرجى المحاولة مرة أخرى أو مراسلتنا بالبريد.',
     notesLabel: 'ملاحظة',
+    corporateYouTubeVideos: 'فيديوهات يوتيوب المؤسسية',
+    video1GenIntro: '1. فيديو: التعريف العام',
+    video2Skill: '2. فيديو: المهارة المهنية',
+    video3Field: '3. فيديو: المقابلة الميدانية',
+    previewBtn: 'معاينة',
+    youtubeVideoTitle: 'فيديو يوتيوب',
+    youtubeVideoEmpty: 'لم يُضف فيديو يوتيوب لهذا المرشح بعد.',
+    youtubeVideoWatch: 'المشاهدة على يوتيوب',
+    youtubeVideoOpen: 'افتح رابط الفيديو',
+    youtubeVideoClear: 'مسح',
+    youtubeVideoInvalid: 'أدخل رابط يوتيوب صالحاً: youtube.com/watch أو youtu.be أو shorts أو embed.',
+    youtubeVideoSupervisorNote: 'يمكن لمشرفي المنطقة والبلد فقط تغيير هذا الفيديو. استخدم رابطاً من قناة يوتيوب بانوفا (panova@panovagroup.org).',
+    youtubeVideoReadOnly: 'يمكن لمشرفي المنطقة والبلد فقط تعديل هذا الفيديو.',
+    youtubeVideoLabel: 'رابط فيديو يوتيوب',
     companies: {
       hr: {
         name: 'Panova HR',
@@ -2180,10 +2532,23 @@ export const translations: Record<Language, Translation> = {
     languageReqLabel: 'مهارة اللغة المطلوبة',
     cityLocationLabel: 'المدينة / الموقع',
     durationLabel: 'مدة العمل',
+    headcountPlaceholder: 'مثال: 5',
+    cityPlaceholder: 'مثال: ستروغا',
+    durationPlaceholder: 'مثال: 12 شهراً (موسمي / دوام كامل)',
+    selectSectorFirst: 'اختر قطاعاً لعرض الوظائف.',
     providedFacilitiesLabel: 'المرافق المقدمة',
     facilityAccommodation: 'الإقامة (سكن / شقة)',
     facilityFood: 'الطعام (3 وجبات / بدل طعام)',
     facilityTransport: 'المواصلات (حافلة / بدل نقل)',
+    benefitSelectPlaceholder: 'اختر',
+    benefitProvided: 'متوفر',
+    benefitNotProvided: 'غير متوفر',
+    benefitUnanswered: 'غير محدد',
+    lodgingRequired: 'حدد ما إذا كانت الإقامة متوفرة.',
+    mealsRequired: 'حدد ما إذا كانت الوجبات متوفرة.',
+    lodgingAndMealsRequired: 'حدد ما إذا كانت الإقامة والوجبات متوفرة.',
+    salaryAmountRequired: 'أدخل صافي الراتب الشهري كرقم.',
+    demandSaveFailed: 'تعذر حفظ الطلب. يرجى المحاولة مرة أخرى.',
     submitDemandBtn: 'إرسال طلب الموظفين المؤسسي إلى عمليات بانوفا',
     activeDemandFilesTitle: 'ملفات طلبات القوى العاملة النشطة',
     peopleUnit: 'أفراد',
@@ -2247,6 +2612,7 @@ export const translations: Record<Language, Translation> = {
     regSuccessText: 'تم إنشاء حساب شركتك. يمكنك الآن تسجيل الدخول.',
     goToSignInBtn: 'الانتقال لتسجيل الدخول',
     empTabRequests: 'طلبات الموظفين',
+    empTabNewRequest: 'طلب جديد',
     empTabCandidates: 'المرشحون / المطابقة',
     empTabInterviews: 'المقابلات',
     empTabSelected: 'المرشحون المختارون',
@@ -2256,6 +2622,25 @@ export const translations: Record<Language, Translation> = {
     empNoRequests: 'لا توجد طلبات قوى عاملة نشطة.',
     empCandidatesPoolTitle: 'قائمة المرشحين المقدمة لطلباتك',
     empNoCandidates: 'لا يوجد مرشحون مطابقون حتى الآن.',
+    empCandSearch: 'ابحث بالاسم أو المهنة',
+    empCandExperience: 'الخبرة',
+    empCandAnyExperience: 'أي خبرة',
+    empCandProfession: 'المهنة',
+    empCandAnyProfession: 'كل المهن',
+    empCandSector: 'القطاع',
+    empCandAnySector: 'كل القطاعات',
+    empCandCountry: 'الجنسية / الدولة',
+    empCandAnyCountry: 'كل الدول',
+    empCandLanguage: 'اللغة',
+    empCandAnyLanguage: 'كل اللغات',
+    empCandShift: 'نوبات العمل',
+    empCandAnyShift: 'الكل',
+    empCandShiftYes: 'مناسب للنوبات',
+    empCandShiftNo: 'غير مناسب للنوبات',
+    empCandClear: 'مسح عوامل التصفية',
+    empCandShowing: '{shown} / {total} مرشح',
+    empCandNoMatch: 'لا يوجد مرشحون يطابقون عوامل التصفية. امسحها لعرض القائمة كاملة.',
+    empCandYears: '{years} سنوات',
     empInterviewRequestBtn: 'طلب مقابلة',
     empShortlistBtn: 'إضافة للقائمة المختصرة',
     empInterviewsTitle: 'المقابلات المجدولة والمكتملة',
@@ -2283,7 +2668,7 @@ export const translations: Record<Language, Translation> = {
     updatingBtn: 'جاري التحديث...',
     saveChangesBtn: 'حفظ التغييرات',
     profileUpdatedSuccess: 'تم تحديث ملف الشركة بنجاح!',
-    profileSaveFailed: 'لم يتم حفظ ملف الشركة. لم تُحدَّث قاعدة البيانات.',
+    profileSaveFailed: 'لم يتم حفظ ملف الشركة. لم تُحدَّث قاعدة البيانات.',
     profileEmailTaken: 'هذا البريد مستخدم في سجل صاحب عمل آخر. لم يُكتب أي تغيير.',
     profileNotLinked: 'لا يوجد صاحب عمل مرتبط بهذا الحساب. لم يُحفظ الملف.',
     completed: 'مكتمل',
@@ -2323,6 +2708,7 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'الشهادة المهنية',
     docCriminalRecord: 'السجل الجنائي',
     docHealthReport: 'التقرير الطبي',
+    docApostille: 'التصديق الإلكتروني / تصديق وزارة الخارجية',
     savedSuccess: 'تم الحفظ بنجاح',
     fillEmployerAndSalary: 'يرجى ملء تفاصيل صاحب العمل والراتب',
     offerSentSuccess: 'تم إرسال عرض العمل بنجاح',
@@ -2414,15 +2800,18 @@ export const translations: Record<Language, Translation> = {
     sectorConstruction: 'البناء والتشييد',
     sectorTrade: 'التجارة الخارجية والخدمات اللوجستية',
     sectorHR: 'الموارد البشرية',
+    sectorHospitality: 'السياحة والضيافة',
+    sectorLogistics: 'الخدمات اللوجستية',
+    sectorManufacturing: 'التصنيع والصناعة',
+    sectorCare: 'الصحة والرعاية',
     colPosSecTitle: 'المنصب / القطاع',
 
     verifyEmailTitle: 'تحقق من بريدك الوارد',
-    verifyEmailLinkLead: 'افتح الرابط في البريد. إذا ظهر رمز رقمي، أدخله أدناه.',
-    verifyEmailBody: 'الرابط يُكمل التسجيل على هذا الجهاز. يمكنك أيضًا كتابة الرمز القصير من الرسالة. تسجيل الدخول عبر Google لا يحتاج هذه الخطوة.',
+    verifyEmailLinkLead: 'انقر الرابط في البريد، أو أدخل الرمز المكوّن من 6 أرقام هنا.',
     verifyEmailResend: 'إعادة إرسال رسالة التحقق',
     verifyEmailResent: 'أُعيد إرسال رسالة التحقق.',
     verifyEmailResendFail: 'تعذر إرسال الرسالة. حاول مرة أخرى بعد قليل.',
-    verifyEmailCodeLabel: 'الرمز الرقمي',
+    verifyEmailCodeLabel: 'رمز من 6 أرقام',
     verifyEmailCodeBtn: 'تأكيد الرمز',
     verifyEmailCodeFail: 'لم يُقبل الرمز. افتح الرابط أو اطلب رسالة جديدة.',
     verifyEmailProofFail: 'تعذر حفظ جلسة التحقق. اطلب رسالة جديدة وحاول مرة أخرى.',
@@ -2438,10 +2827,40 @@ export const translations: Record<Language, Translation> = {
     employerRecordMissing: 'لا يوجد سجل صاحب عمل يطابق هذا البريد. يرجى التواصل مع فريق بانوفا.',
     signupError: 'تعذر إنشاء الحساب: {message}',
     employerVerifiedUnlinked: 'تم تأكيد البريد. تعذر ربط سجل صاحب العمل. يرجى التواصل مع فريق بانوفا.',
-    authInvalidCredentials: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+    authInvalidCredentials: 'البريد أو الهاتف أو جواز السفر أو كلمة المرور غير صحيحة.',
     candidateRecordMissing: 'لا يوجد سجل مرشح مرتبط بهذا البريد.',
     fillRequiredFields: 'يرجى ملء الحقول المطلوبة.',
     passwordTooShort: 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.',
+    forgotPassword: 'نسيت كلمة المرور',
+    forgotPasswordTitle: 'إعادة تعيين كلمة المرور',
+    forgotPasswordLead: 'أدخل بريدك الإلكتروني. إذا وُجد حساب بكلمة مرور لهذا العنوان، نرسل رابط إعادة التعيين.',
+    forgotPasswordGoogle: 'حسابات تسجيل الدخول عبر Google لا تملك كلمة مرور. استخدم زر Google.',
+    forgotPasswordSend: 'إرسال رسالة إعادة التعيين',
+    forgotPasswordSentTitle: 'تحقق من بريدك الوارد',
+    forgotPasswordSent: 'إذا كان لهذا العنوان حساب بكلمة مرور، أرسلنا رابطًا لاختيار كلمة مرور جديدة. يمكنك أيضًا استخدام الرمز في الرسالة.',
+    forgotPasswordFail: 'تعذر إرسال الرسالة. حاول مرة أخرى بعد قليل.',
+    forgotPasswordHaveCode: 'لدي رمز أو رابط',
+    accountExists: 'يوجد حساب بالفعل لهذا البريد. سجّل الدخول أو أعد تعيين كلمة المرور.',
+    passportExists: 'رقم جواز السفر هذا مسجل لمرشح آخر. سجّل الدخول برقم الجواز أو تواصل مع بانوفا.',
+    phoneExists: 'رقم الهاتف هذا مسجل لمرشح آخر. سجّل الدخول بالهاتف أو تواصل مع بانوفا.',
+    signInUnavailable: 'تسجيل الدخول غير متاح الآن. حاول مرة أخرى بعد قليل.',
+    duplicateCheckFailed: 'تعذر التحقق من التسجيل. حاول مرة أخرى بعد قليل.',
+    resetPasswordTitle: 'اختر كلمة مرور جديدة',
+    resetPasswordLead: 'إذا فتح رابط البريد هذه الصفحة، اكتب كلمة المرور الجديدة. إذا كان الرابط على جهاز آخر، أدخل الرمز أدناه.',
+    resetPasswordProveLead: 'انقر الرابط في البريد، أو أدخل الرمز المكوّن من 6 أرقام هنا. إذا فتح الرابط هذه الصفحة، تظهر حقول كلمة المرور الجديدة تلقائيًا.',
+    resetPasswordChecking: 'جارٍ التحقق من رابط إعادة التعيين.',
+    resetPasswordCode: 'رمز من 6 أرقام',
+    resetPasswordCodeBtn: 'تأكيد الرمز',
+    resetPasswordCodeFail: 'لم يُقبل الرمز. افتح الرابط أو اطلب رسالة جديدة.',
+    resetPasswordNew: 'كلمة المرور الجديدة',
+    resetPasswordConfirm: 'كلمة المرور الجديدة (مرة أخرى)',
+    resetPasswordSave: 'حفظ كلمة المرور',
+    resetPasswordSaved: 'تم تحديث كلمة المرور. ننقلك إلى صفحة تسجيل الدخول.',
+    resetPasswordMismatch: 'كلمتا المرور غير متطابقتين.',
+    resetPasswordFail: 'تعذر تحديث كلمة المرور. قد تكون صلاحية الرابط انتهت. اطلب رسالة جديدة.',
+    resetPasswordLinkError: 'رابط إعادة التعيين غير صالح أو انتهت صلاحيته. اطلب رسالة جديدة.',
+    resetPasswordGoogle: 'هذا الحساب يدخل عبر Google ولا يستخدم كلمة مرور. تابع بزر Google.',
+    resetPasswordContinue: 'متابعة',
     candidateVerifiedUnlinked: 'تم تأكيد البريد. سيربط فريقنا سجل المرشح الخاص بك.',
     candidatePhoneTaken: 'رقم الهاتف هذا مسجل لمرشح آخر. أدخل رقمًا مختلفًا للإكمال.',
     candidatePassportTaken: 'رقم جواز السفر هذا مسجل بالفعل. أدخل رقم جواز مختلف للإكمال.',
@@ -2506,6 +2925,9 @@ export const translations: Record<Language, Translation> = {
     passportLabel: 'Број на пасош',
     sectorLabel: 'Сектор',
     professionLabel: 'Професија',
+    professionSelect: 'Изберете професија',
+    professionOther: 'Друго (наведете)',
+    professionSpecify: 'Напишете ја професијата',
     certNoLabel: 'Број на сертификат',
     certNo: 'Бр. на сертификат',
     certificateNo: 'Бр. на сертификат',
@@ -2558,6 +2980,20 @@ export const translations: Record<Language, Translation> = {
     successDesc: 'го прими вашето барање. Ќе одговориме наскоро.',
     formSubmitError: 'Пораката не можеше да се испрати. Обидете се повторно или пишете ни на е-пошта.',
     notesLabel: 'Белешка',
+    corporateYouTubeVideos: 'Корпоративни YouTube видеа',
+    video1GenIntro: '1. Видео: Општо претставување',
+    video2Skill: '2. Видео: Професионална вештина',
+    video3Field: '3. Видео: Теренско интервју',
+    previewBtn: 'Преглед',
+    youtubeVideoTitle: 'YouTube видео',
+    youtubeVideoEmpty: 'За овој кандидат сè уште нема додадено YouTube видео.',
+    youtubeVideoWatch: 'Гледај на YouTube',
+    youtubeVideoOpen: 'Отвори го линкот на видеото',
+    youtubeVideoClear: 'Избриши',
+    youtubeVideoInvalid: 'Внесете валиден YouTube линк: youtube.com/watch, youtu.be, shorts или embed.',
+    youtubeVideoSupervisorNote: 'Само регионалните и државните одговорни можат да го менуваат ова видео. Користете линк од YouTube каналот на Panova (panova@panovagroup.org).',
+    youtubeVideoReadOnly: 'Ова видео можат да го уредуваат само регионалните и државните одговорни.',
+    youtubeVideoLabel: 'Линк до YouTube видео',
     companies: {
       hr: {
         name: 'Panova HR',
@@ -2691,6 +3127,7 @@ export const translations: Record<Language, Translation> = {
     regSuccessText: 'Сметката на компанијата е создадена. Сега можете да се најавите.',
     goToSignInBtn: 'Оди на најава',
     empTabRequests: 'Барања за персонал',
+    empTabNewRequest: 'Ново барање',
     empTabCandidates: 'Кандидати / спојување',
     empTabInterviews: 'Интервјуа',
     empTabSelected: 'Избрани кандидати',
@@ -2700,6 +3137,25 @@ export const translations: Record<Language, Translation> = {
     empNoRequests: 'Нема активни барања за работна сила.',
     empCandidatesPoolTitle: 'База на кандидати понудена за вашите барања',
     empNoCandidates: 'Сè уште нема соодветни кандидати.',
+    empCandSearch: 'Пребарај име или професија',
+    empCandExperience: 'Искуство',
+    empCandAnyExperience: 'Секое искуство',
+    empCandProfession: 'Професија',
+    empCandAnyProfession: 'Сите професии',
+    empCandSector: 'Сектор',
+    empCandAnySector: 'Сите сектори',
+    empCandCountry: 'Државјанство / држава',
+    empCandAnyCountry: 'Сите држави',
+    empCandLanguage: 'Јазик',
+    empCandAnyLanguage: 'Сите јазици',
+    empCandShift: 'Смени',
+    empCandAnyShift: 'Сите',
+    empCandShiftYes: 'Погоден за смени',
+    empCandShiftNo: 'Не е погоден за смени',
+    empCandClear: 'Исчисти филтри',
+    empCandShowing: '{shown} / {total} кандидати',
+    empCandNoMatch: 'Ниту еден кандидат не одговара на овие филтри. Исчистете ги филтрите за целата листа.',
+    empCandYears: '{years} години',
     empInterviewRequestBtn: 'Побарај интервју',
     empShortlistBtn: 'На кратка листа',
     empInterviewsTitle: 'Закажани и завршени интервјуа',
@@ -2767,6 +3223,7 @@ export const translations: Record<Language, Translation> = {
     docProfessionalCert: 'Професионален сертификат',
     docCriminalRecord: 'Уверение за неосудуваност',
     docHealthReport: 'Здравствен извештај',
+    docApostille: 'е-Апостил / Министерство за надворешни работи',
     savedSuccess: 'Успешно зачувано',
     fillEmployerAndSalary: 'Пополнете ги податоците за работодавач и плата',
     offerSentSuccess: 'Понудата за работа е успешно испратена',
@@ -2859,6 +3316,10 @@ export const translations: Record<Language, Translation> = {
     sectorConstruction: 'Градежништво',
     sectorTrade: 'Надворешна трговија и логистика',
     sectorHR: 'Човечки ресурси',
+    sectorHospitality: 'Туризам и хотелиерство',
+    sectorLogistics: 'Логистика',
+    sectorManufacturing: 'Производство и индустрија',
+    sectorCare: 'Здравство и нега',
     corporateDemandTitle: 'Образец за корпоративно барање на работна сила',
     corporateDemandDesc: 'Изберете сектор и наведете позиции, искуство, јазик и услови за работа.',
     totalActiveFiles: 'Вкупно активни досиеја',
@@ -2870,10 +3331,23 @@ export const translations: Record<Language, Translation> = {
     languageReqLabel: 'Потребно познавање на јазик',
     cityLocationLabel: 'Град / локација',
     durationLabel: 'Времетраење на работата',
+    headcountPlaceholder: 'на пр. 5',
+    cityPlaceholder: 'на пр. Струга',
+    durationPlaceholder: 'на пр. 12 месеци (сезонски / полно работно време)',
+    selectSectorFirst: 'Изберете сектор за да ги видите позициите.',
     providedFacilitiesLabel: 'Обезбедени услови',
     facilityAccommodation: 'Сместување (дом / стан)',
     facilityFood: 'Храна (3 оброка / додаток за храна)',
     facilityTransport: 'Превоз (превоз / патни трошоци)',
+    benefitSelectPlaceholder: 'Изберете',
+    benefitProvided: 'Се обезбедува',
+    benefitNotProvided: 'Не се обезбедува',
+    benefitUnanswered: 'Не е наведено',
+    lodgingRequired: 'Изберете дали се обезбедува сместување.',
+    mealsRequired: 'Изберете дали се обезбедува храна.',
+    lodgingAndMealsRequired: 'Изберете дали се обезбедуваат сместување и храна.',
+    salaryAmountRequired: 'Внесете ја месечната нето плата како број.',
+    demandSaveFailed: 'Барањето не е зачувано. Обидете се повторно.',
     submitDemandBtn: 'Испрати корпоративно барање за персонал до операциите на PANOVA',
     activeDemandFilesTitle: 'Вашите активни досиеја за работна сила',
     peopleUnit: 'лица',
@@ -2919,12 +3393,11 @@ export const translations: Record<Language, Translation> = {
     totalSelected: 'Вкупно избрани',
     approvedAndProcessing: 'Одобрени и во постапка',
     verifyEmailTitle: 'Проверете ја е-поштата',
-    verifyEmailLinkLead: 'Отворете ја врската во е-поштата. Ако има и бројчен код, внесете го подолу.',
-    verifyEmailBody: 'Врската ја завршува регистрацијата на овој уред. Можете и да го внесете краткиот код од пораката. Најавата со Google не бара дополнителен чекор.',
+    verifyEmailLinkLead: 'Кликнете на врската во е-поштата, или внесете го 6-цифрениот код тука.',
     verifyEmailResend: 'Испрати повторно е-пошта за потврда',
     verifyEmailResent: 'Е-поштата за потврда е испратена повторно.',
     verifyEmailResendFail: 'Е-поштата не можеше да се испрати. Обидете се повторно наскоро.',
-    verifyEmailCodeLabel: 'Бројчен код',
+    verifyEmailCodeLabel: '6-цифрен код',
     verifyEmailCodeBtn: 'Потврди го кодот',
     verifyEmailCodeFail: 'Кодот не е прифатен. Отворете ја врската или побарајте нова порака.',
     verifyEmailProofFail: 'Сесијата за потврда не можеше да се зачува. Побарајте нова е-пошта и обидете се повторно.',
@@ -2939,10 +3412,40 @@ export const translations: Record<Language, Translation> = {
     employerRecordMissing: 'Нема запис за работодавач со оваа е-пошта. Контактирајте го тимот на Panova.',
     signupError: 'Сметката не можеше да се создаде: {message}',
     employerVerifiedUnlinked: 'Е-поштата е потврдена. Записот за работодавач не можеше да се поврзе. Контактирајте го тимот на Panova.',
-    authInvalidCredentials: 'Неточна е-пошта или лозинка.',
+    authInvalidCredentials: 'Е-поштата, телефонот, пасошот или лозинката се неточни.',
     candidateRecordMissing: 'Нема запис за кандидат поврзан со оваа е-пошта.',
     fillRequiredFields: 'Пополнете ги задолжителните полиња.',
     passwordTooShort: 'Лозинката мора да има најмалку 8 знаци.',
+    forgotPassword: 'Ја заборавив лозинката',
+    forgotPasswordTitle: 'Ресетирајте ја лозинката',
+    forgotPasswordLead: 'Внесете ја е-поштата. Ако постои сметка со лозинка, ќе испратиме врска за ресетирање.',
+    forgotPasswordGoogle: 'Сметките со Google немаат лозинка. Користете го копчето Google.',
+    forgotPasswordSend: 'Испрати е-пошта за ресетирање',
+    forgotPasswordSentTitle: 'Проверете ја е-поштата',
+    forgotPasswordSent: 'Ако оваа адреса има сметка со лозинка, испративме врска за нова лозинка. Можете да го користите и кодот од пораката.',
+    forgotPasswordFail: 'Е-поштата не можеше да се испрати. Обидете се повторно наскоро.',
+    forgotPasswordHaveCode: 'Имам код или врска',
+    accountExists: 'Веќе постои сметка со оваа е-пошта. Најавете се или ресетирајте ја лозинката.',
+    passportExists: 'Овој број на пасош веќе е на запис за кандидат. Најавете се со пасошот или контактирајте ја Panova.',
+    phoneExists: 'Овој телефонски број веќе е на запис за кандидат. Најавете се со телефонот или контактирајте ја Panova.',
+    signInUnavailable: 'Најавата моментално не е достапна. Обидете се повторно наскоро.',
+    duplicateCheckFailed: 'Регистрацијата не можеше да се провери. Обидете се повторно наскоро.',
+    resetPasswordTitle: 'Поставете нова лозинка',
+    resetPasswordLead: 'Ако врската од е-поштата ја отвори оваа страница, внесете нова лозинка. Ако врската е на друг уред, внесете го кодот подолу.',
+    resetPasswordProveLead: 'Кликнете на врската во е-поштата, или внесете го 6-цифрениот код тука. Ако врската ја отвори оваа страница, полињата за нова лозинка се појавуваат сами.',
+    resetPasswordChecking: 'Се проверува врската за ресетирање.',
+    resetPasswordCode: '6-цифрен код',
+    resetPasswordCodeBtn: 'Потврди го кодот',
+    resetPasswordCodeFail: 'Кодот не е прифатен. Отворете ја врската или побарајте нова е-пошта.',
+    resetPasswordNew: 'Нова лозинка',
+    resetPasswordConfirm: 'Нова лозинка (повторно)',
+    resetPasswordSave: 'Зачувај ја лозинката',
+    resetPasswordSaved: 'Лозинката е ажурирана. Ве носиме на страницата за најава.',
+    resetPasswordMismatch: 'Лозинките не се совпаѓаат.',
+    resetPasswordFail: 'Лозинката не можеше да се ажурира. Врската можеби е истечена. Побарајте нова е-пошта.',
+    resetPasswordLinkError: 'Врската за ресетирање е неважечка или е истечена. Побарајте нова е-пошта.',
+    resetPasswordGoogle: 'Оваа сметка се најавува со Google и не користи лозинка. Продолжете со копчето Google.',
+    resetPasswordContinue: 'Продолжи',
     candidateVerifiedUnlinked: 'Е-поштата е потврдена. Нашиот тим ќе го поврзе вашиот запис за кандидат.',
     candidatePhoneTaken: 'Овој телефонски број е веќе регистриран кај друг кандидат. Внесете друг број за да завршите.',
     candidatePassportTaken: 'Овој број на пасош е веќе регистриран. Внесете друг број на пасош за да завршите.',

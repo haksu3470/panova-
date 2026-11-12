@@ -1,4 +1,8 @@
 import { company } from '@/lib/company';
+import { contactSubjectPrefixes, emailLocale, forwardMailCopy, type EmailLocale } from './email-copy';
+import { EMAIL_FONT, escapeHtml, renderLocaleEmail } from './layout';
+
+export { escapeHtml };
 
 /** General company mailbox. Also the default From address for forwards. */
 export const INBOX_ADDRESS = company.email;
@@ -35,6 +39,9 @@ export function joinAddresses(value: unknown): string {
  * (for example `Panova <panova@panovagroup.org>` or a noreply address on the
  * same verified domain). Otherwise sends as the company mailbox.
  */
+/** Corporate card (template B) for messages the candidate should not reply to by mail. */
+export const NOREPLY_FROM = 'Panova <noreply@panovagroup.org>';
+
 export function forwardFromAddress(): string {
   const configured = process.env.RESEND_FROM?.trim();
   if (configured && /@panovagroup\.org\b/i.test(configured)) return configured;
@@ -159,16 +166,15 @@ export function contactFormSubmissionId(headers: unknown): string | null {
   return CONTACT_FORM_ID.test(value) ? value.toLowerCase() : null;
 }
 
-const CONTACT_FORM_SUBJECT = 'yeni iletişim formu:';
-
 /**
  * True for the homepage notification. The header is the primary mark.
- * The Turkish subject is a fallback when a receiver drops custom headers.
+ * A subject that starts with a locale's contact prefix is the fallback when a receiver drops custom headers.
+ * The forwarded copy is prefixed with [Panova], so it does not match this rule again.
  */
 export function isHomepageContactNotice(input: { headers?: unknown; subject?: unknown }): boolean {
   if (contactFormSubmissionId(input.headers)) return true;
   const subject = String(input.subject ?? '').replace(/[\r\n]+/g, ' ').trim().toLowerCase();
-  return subject.startsWith(CONTACT_FORM_SUBJECT);
+  return contactSubjectPrefixes().some((prefix) => subject.startsWith(prefix));
 }
 
 /**
@@ -197,7 +203,7 @@ export function forwardReplyAddress(input: {
  * Drop mail that would loop, or that was not sent to a shared company mailbox.
  * Personal inboxes return `not-company` (they are not forwarded).
  * from-self still treats every panovagroup.org sender as our own mail, except a
- * homepage contact notification (X-Panova-Contact-Form, or the Turkish subject).
+ * homepage contact notification (X-Panova-Contact-Form, or a localized contact subject).
  */
 export function skipReason(input: {
   from?: unknown;
@@ -227,14 +233,8 @@ export function skipReason(input: {
   return null;
 }
 
-export function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, (c) => (
-    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] ?? c
-  ));
-}
-
-export function prefixedSubject(subject: string | null | undefined): string {
-  const raw = (subject || '').replace(/[\r\n]+/g, ' ').trim() || '(konu yok)';
+export function prefixedSubject(subject: string | null | undefined, emptySubject = forwardMailCopy.tr.noSubject): string {
+  const raw = (subject || '').replace(/[\r\n]+/g, ' ').trim() || emptySubject;
   if (raw.toLowerCase().startsWith(SUBJECT_PREFIX.toLowerCase())) return raw.slice(0, 900);
   return `${SUBJECT_PREFIX} ${raw}`.slice(0, 900);
 }
@@ -268,39 +268,50 @@ export function buildForwardContent(input: {
   html?: string | null;
   attachmentNote?: string;
   intro?: string;
+  locale?: EmailLocale;
 }): { text: string; html: string } {
-  const intro = input.intro?.trim() || 'Panova gelen kutusu iletisi. Yanıt, özgün gönderene gider.';
-  const plainBody = (input.text || '').trim() || (input.html ? htmlToText(input.html) : '') || '(gövde yok)';
+  const locale = emailLocale(input.locale);
+  const copy = forwardMailCopy[locale];
+  const align = locale === 'ar' ? 'right' : 'left';
+  const intro = input.intro?.trim() || copy.intro;
+  const plainBody = (input.text || '').trim() || (input.html ? htmlToText(input.html) : '') || copy.emptyBody;
   const text = [
     intro,
     '',
-    `Kimden: ${input.from || '—'}`,
-    `Kime: ${input.to || '—'}`,
-    ...(input.cc ? [`Cc: ${input.cc}`] : []),
-    `Konu: ${input.subject || '—'}`,
-    ...(input.date ? [`Tarih: ${input.date}`] : []),
+    `${copy.from}: ${input.from || '—'}`,
+    `${copy.to}: ${input.to || '—'}`,
+    ...(input.cc ? [`${copy.cc}: ${input.cc}`] : []),
+    `${copy.subject}: ${input.subject || '—'}`,
+    ...(input.date ? [`${copy.date}: ${input.date}`] : []),
     ...(input.attachmentNote ? ['', input.attachmentNote] : []),
     '',
-    '---------- Özgün ileti ----------',
+    `---------- ${copy.original} ----------`,
     '',
     plainBody,
   ].join('\n');
 
-  const html = `
-<div style="font-family:Arial,sans-serif;color:#333;font-size:14px;line-height:1.5">
-  <p style="margin:0 0 12px"><strong>${escapeHtml(intro)}</strong></p>
-  <p style="margin:0">Kimden: ${escapeHtml(input.from || '—')}</p>
-  <p style="margin:0">Kime: ${escapeHtml(input.to || '—')}</p>
-  ${input.cc ? `<p style="margin:0">Cc: ${escapeHtml(input.cc)}</p>` : ''}
-  <p style="margin:0">Konu: ${escapeHtml(input.subject || '—')}</p>
-  ${input.date ? `<p style="margin:0">Tarih: ${escapeHtml(input.date)}</p>` : ''}
-  ${input.attachmentNote ? `<p style="margin:12px 0 0">${escapeHtml(input.attachmentNote)}</p>` : ''}
-  <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0" />
-  ${input.html?.trim()
+  const metaStyle = `margin:0 0 4px;font-size:14px;line-height:1.5;color:#0f172a;font-family:${EMAIL_FONT};text-align:${align};`;
+  const originalHtml = input.html?.trim()
     ? input.html
-    : `<pre style="white-space:pre-wrap;font-family:Arial,sans-serif">${escapeHtml(plainBody)}</pre>`}
-</div>`.trim();
+    : `<pre style="white-space:pre-wrap;font-family:${EMAIL_FONT};font-size:14px;line-height:1.5;color:#0f172a;text-align:${align};">${escapeHtml(plainBody)}</pre>`;
+  const bodyHtml = [
+    `<p style="${metaStyle}"><strong>${escapeHtml(copy.from)}:</strong> ${escapeHtml(input.from || '—')}</p>`,
+    `<p style="${metaStyle}"><strong>${escapeHtml(copy.to)}:</strong> ${escapeHtml(input.to || '—')}</p>`,
+    input.cc ? `<p style="${metaStyle}"><strong>${escapeHtml(copy.cc)}:</strong> ${escapeHtml(input.cc)}</p>` : '',
+    `<p style="${metaStyle}"><strong>${escapeHtml(copy.subject)}:</strong> ${escapeHtml(input.subject || '—')}</p>`,
+    input.date ? `<p style="${metaStyle}"><strong>${escapeHtml(copy.date)}:</strong> ${escapeHtml(input.date)}</p>` : '',
+    input.attachmentNote ? `<p style="${metaStyle}">${escapeHtml(input.attachmentNote)}</p>` : '',
+    `<h2 style="margin:16px 0 8px;font-size:16px;line-height:1.4;color:#0f172a;font-family:${EMAIL_FONT};text-align:${align};">${escapeHtml(copy.original)}</h2>`,
+    originalHtml,
+  ].join('');
 
-  return { text, html };
+  return renderLocaleEmail({
+    locale,
+    preheader: intro,
+    title: input.subject?.trim() || copy.noSubject,
+    paragraphs: [intro],
+    bodyHtml,
+    text,
+  });
 }
 

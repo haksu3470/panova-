@@ -24,6 +24,7 @@ export type EmployerRow = {
   phone: string | null;
   country: string | null;
   logo: string | null;
+  compliance_status?: string | null;
 };
 
 export type CompanyProfileInput = {
@@ -38,6 +39,22 @@ export type CompanyProfileInput = {
 function nonempty(value: string | null | undefined): string | null {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
+}
+
+const EMPLOYER_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Staff "view portal" must open the clicked employer.
+ * The query `as` id wins. A stored impersonation id is only a fallback.
+ * A hardcoded company is never used.
+ */
+export function staffViewEmployerId(search: string, stored: unknown): string | null {
+  const fromQuery = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search).get('as');
+  if (fromQuery && EMPLOYER_UUID.test(fromQuery)) return fromQuery;
+  if (!stored || typeof stored !== 'object') return null;
+  const record = stored as { isAdminImpersonation?: boolean; id?: string };
+  if (record.isAdminImpersonation && record.id && EMPLOYER_UUID.test(record.id)) return record.id;
+  return null;
 }
 
 /** Profile link first, then the employers row owned by this auth user. Never a form email or "first row". */
@@ -72,6 +89,7 @@ export function toEmployerProfileView(row: EmployerRow) {
     phone: row.phone ?? '',
     country: row.country ?? '',
     companyLogo: row.logo ?? '',
+    complianceStatus: row.compliance_status ?? 'approved',
   };
 }
 

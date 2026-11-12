@@ -4,8 +4,10 @@ import OAuthButtons from '@/components/auth/OAuthButtons';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { linkMyEmployer, signOut } from '@/lib/auth';
+import { signOut } from '@/lib/auth';
+import { AccountExistsNotice } from '@/components/auth/AccountExistsNotice';
 import EmailVerifyNotice from '@/components/auth/EmailVerifyNotice';
+import ForgotPasswordPanel, { ForgotPasswordLink } from '@/components/auth/ForgotPasswordPanel';
 import {
   beginPasswordSignup,
   emailGateListenerPaused,
@@ -24,6 +26,11 @@ import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@
 import { AuthFooter } from '@/components/site/AuthFooter';
 import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
 import { phoneForStorage, phoneWithCountryDial } from '@/lib/europeanCountries';
+import KvkkConsent from '@/components/site/KvkkConsent';
+import EmployerConsentCard from '@/components/auth/EmployerConsentCard';
+import { needsEmployerConsent } from '@/lib/employerInvite';
+import { kvkkMetadata } from '@/lib/kvkk';
+import { releaseCopy } from '@/lib/release-copy';
 
 export default function EmployerLoginPage() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
@@ -48,7 +55,7 @@ export default function EmployerLoginPage() {
     writeStoredLanguage(lang);
   };
 
-  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify'>('signin');
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'verify' | 'forgot' | 'consent' | 'exists'>('signin');
   const [verifyEmail, setVerifyEmail] = useState('');
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -59,6 +66,7 @@ export default function EmployerLoginPage() {
   const [regPhone, setRegPhone] = useState(() => phoneWithCountryDial('', 'North Macedonia'));
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
+  const [kvkkAccepted, setKvkkAccepted] = useState(false);
 
 
   const loadEmployerProfile = async (employerId: string, fallbackEmail: string) => {
@@ -79,8 +87,22 @@ export default function EmployerLoginPage() {
   };
 
   const openEmployer = async (email: string) => {
-    const employerId = await linkMyEmployer();
+    const storedKvkk = sessionStorage.getItem('panova_kvkk');
+    if (storedKvkk) {
+      try { await supabase.auth.updateUser({ data: JSON.parse(storedKvkk) }); } catch { /* link reports missing consent */ }
+    }
+    const linked = await supabase.rpc('link_my_employer');
+    if (linked.error?.message?.includes('kvkk_required')) {
+      alert(releaseCopy[currentLang].kvkkRequired);
+      return false;
+    }
+    const employerId = (linked.data as string | null) ?? null;
     if (!employerId) return false;
+    const consent = await supabase.from('employers').select('invited_at, kvkk_accepted_at').eq('id', employerId).maybeSingle();
+    if (!consent.error && needsEmployerConsent(consent.data)) {
+      setAuthMode('consent');
+      return false;
+    }
     await loadEmployerProfile(employerId, email);
     window.location.href = '/employer';
     return true;
@@ -149,6 +171,16 @@ export default function EmployerLoginPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!regCompanyName || !regEmail || !regPassword) return;
+    if (regPassword.length < 8) {
+      alert(releaseCopy[currentLang].passwordMin);
+      return;
+    }
+    if (!kvkkAccepted) {
+      alert(releaseCopy[currentLang].kvkkRequired);
+      return;
+    }
+    const consent = kvkkMetadata();
+    sessionStorage.setItem('panova_kvkk', JSON.stringify(consent));
     const resume = pauseEmailGateListener();
     const email = regEmail.trim().toLowerCase();
     try {
@@ -163,8 +195,15 @@ export default function EmployerLoginPage() {
           contact_person: regContactPerson,
           phone: phoneForStorage(regPhone, regCountry),
           country: regCountry,
+          ...consent,
         },
+        locale: currentLang,
       });
+      if (result.status === 'exists') {
+        setLoginEmail(email);
+        setAuthMode('exists');
+        return;
+      }
       if (result.status === 'error') {
         alert((t.signupError || '{message}').replace('{message}', result.message));
         return;
@@ -195,12 +234,12 @@ export default function EmployerLoginPage() {
 
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 border border-slate-200 w-full">
-          {authMode !== 'verify' && <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-8">
+          {(authMode === 'signin' || authMode === 'signup') && <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-8">
             <button
               type="button"
               onClick={() => setAuthMode('signin')}
               className={`flex-1 py-3 rounded-xl text-xs font-bold transition cursor-pointer ${
-                authMode === 'signin' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-800'
+                authMode === 'signin' ? 'bg-white text-slate-900 shadow-md' : 'text-muted-foreground hover:text-slate-800'
               }`}
             >
               {t.signInMenu || t.signInBtn}
@@ -209,24 +248,33 @@ export default function EmployerLoginPage() {
               type="button"
               onClick={() => setAuthMode('signup')}
               className={`flex-1 py-3 rounded-xl text-xs font-bold transition cursor-pointer ${
-                authMode === 'signup' ? 'bg-emerald-700 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
+                authMode === 'signup' ? 'bg-emerald-700 text-white shadow-md' : 'text-muted-foreground hover:text-slate-800'
               }`}
             >
               {t.signUpMenu || t.signUpBtn}
             </button>
           </div>}
 
-          {authMode !== 'verify' && <div className="text-center mb-6">
+          {(authMode === 'signin' || authMode === 'signup') && <div className="text-center mb-6">
             <div className="inline-block p-3 bg-blue-50 text-blue-700 rounded-2xl mb-2 text-xl font-bold shadow-sm">
               🏢
             </div>
             <h1 className="text-xl font-black text-slate-900">
               {authMode === 'signup' ? (t.employerRegTitle || t.signUpPortalTitle) : (t.loginPortalTitle || t.empPortalTitle)}
             </h1>
-            <p className="text-slate-500 text-xs mt-1">{authMode === 'signup' ? (t.employerRegSub || t.signUpPortalSub) : (t.loginPortalSub || t.empPortalSub)}</p>
+            <p className="text-muted-foreground text-xs mt-1">{authMode === 'signup' ? (t.employerRegSub || t.signUpPortalSub) : (t.loginPortalSub || t.empPortalSub)}</p>
           </div>}
 
-          {authMode === 'verify' ? (
+          {authMode === 'consent' ? (
+            <EmployerConsentCard
+              lang={currentLang}
+              onAccepted={async () => {
+                const { data } = await supabase.auth.getUser();
+                const opened = await openEmployer(data.user?.email || loginEmail);
+                if (!opened && authMode === 'consent') return;
+              }}
+            />
+          ) : authMode === 'verify' ? (
             <div className="space-y-4">
               <EmailVerifyNotice
                 email={verifyEmail}
@@ -236,11 +284,28 @@ export default function EmployerLoginPage() {
                   const opened = await openEmployer(verifyEmail);
                   if (!opened) alert(t.employerVerifiedUnlinked);
                 }}
+                onSignIn={() => { setLoginEmail(verifyEmail); setAuthMode('signin'); }}
+                onResetPassword={() => { setLoginEmail(verifyEmail); setAuthMode('forgot'); }}
               />
-              <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-slate-500 cursor-pointer">
+              <button type="button" onClick={() => setAuthMode('signin')} className="w-full text-xs font-bold text-muted-foreground cursor-pointer">
                 {t.verifyEmailBack}
               </button>
             </div>
+          ) : authMode === 'exists' ? (
+            <AccountExistsNotice
+              message={t.accountExists || ''}
+              signInLabel={t.signInMenu || ''}
+              resetLabel={t.forgotPassword || ''}
+              onSignIn={() => setAuthMode('signin')}
+              onReset={() => setAuthMode('forgot')}
+            />
+          ) : authMode === 'forgot' ? (
+            <ForgotPasswordPanel
+              lang={currentLang}
+              initialEmail={loginEmail}
+              audience="employer"
+              onBack={() => setAuthMode('signin')}
+            />
           ) : authMode === 'signin' ? (
             <><form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
               <div>
@@ -265,6 +330,8 @@ export default function EmployerLoginPage() {
                   className="w-full px-3.5 py-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-slate-50 text-slate-900 font-medium"
                 />
               </div>
+
+              <ForgotPasswordLink label={t.forgotPassword || ''} onClick={() => setAuthMode('forgot')} />
 
               <button
                 type="submit"
@@ -324,8 +391,15 @@ export default function EmployerLoginPage() {
 
               <div>
                 <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">{t.passwordLabel} *</label>
-                <input type="password" required placeholder="••••••••" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                <input type="password" required minLength={8} placeholder="••••••••" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} className="w-full px-3 py-2.5 border rounded-xl text-xs bg-slate-50 text-slate-900 font-medium" />
+                <p className="text-[11px] text-muted-foreground mt-1">{releaseCopy[currentLang].passwordMin}</p>
               </div>
+
+              <KvkkConsent id="employer-kvkk" checked={kvkkAccepted} onChange={(checked) => {
+                setKvkkAccepted(checked);
+                if (checked) sessionStorage.setItem('panova_kvkk', JSON.stringify(kvkkMetadata()));
+                else sessionStorage.removeItem('panova_kvkk');
+              }} copy={releaseCopy[currentLang]} />
 
               <button type="submit" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl transition text-xs shadow-lg cursor-pointer mt-2">
                 {t.signUpBtn}

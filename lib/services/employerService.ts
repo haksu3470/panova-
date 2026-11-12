@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { isStaff } from '@/lib/auth';
 import {
   EmployerWriteError,
   assertEmployerPersisted,
@@ -8,7 +9,7 @@ import {
   type EmployerRow,
 } from '@/lib/employerProfile';
 
-const EMPLOYER_COLUMNS = 'id, company_name, contact_person, email, phone, country, logo';
+const EMPLOYER_COLUMNS = 'id, company_name, contact_person, email, phone, country, logo, compliance_status';
 
 export const employerService = {
   async getAllEmployers() {
@@ -93,12 +94,42 @@ export const employerService = {
     return assertEmployerPersisted(data, error);
   },
 
-  async saveMyCompanyProfile(input: CompanyProfileInput, expectedId: string) {
-    const mine = await this.getMyEmployer();
-    if (mine.id !== expectedId) {
-      throw new EmployerWriteError('not_linked', 'Loaded employer does not match the signed-in link');
+  async loadEmployerForPortal(staffViewId: string | null): Promise<EmployerRow> {
+    if (staffViewId && await isStaff()) {
+      const { data, error } = await supabase
+        .from('employers')
+        .select(EMPLOYER_COLUMNS)
+        .eq('id', staffViewId)
+        .maybeSingle();
+      if (error) throw new EmployerWriteError('write_failed', error.message);
+      if (!data) throw new EmployerWriteError('not_linked', 'Employer is not visible');
+      return data;
     }
-    return this.updateEmployer(mine.id, companyProfilePayload(input));
+    return this.getMyEmployer();
+  },
+
+  async saveMyCompanyProfile(input: CompanyProfileInput, expectedId: string, options?: { staffView?: boolean }) {
+    const payload = companyProfilePayload(input);
+    let previousName: string | null = null;
+    if (options?.staffView) {
+      if (!(await isStaff())) throw new EmployerWriteError('not_linked', 'Staff view is not allowed');
+      const { data: current } = await supabase.from('employers').select('company_name').eq('id', expectedId).maybeSingle();
+      previousName = current?.company_name ?? null;
+    } else {
+      const mine = await this.getMyEmployer();
+      if (mine.id !== expectedId) {
+        throw new EmployerWriteError('not_linked', 'Loaded employer does not match the signed-in link');
+      }
+      previousName = mine.company_name;
+    }
+    const saved = await this.updateEmployer(expectedId, payload);
+    if ((saved.company_name || '') !== payload.company_name) {
+      throw new EmployerWriteError('write_failed', 'company_name was not stored');
+    }
+    if (previousName && previousName !== payload.company_name) {
+      await supabase.from('job_requests').update({ employer_name: payload.company_name }).eq('employer_id', expectedId);
+    }
+    return saved;
   },
 
   async createEmployer(payload: Record<string, unknown>) {

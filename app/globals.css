@@ -1,32 +1,63 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  Panova design tokens — one light color scheme.
+  prefers-color-scheme used to set body text to #ededed while cards stayed
+  bg-white, so uncolored labels such as "Sonuç bekleniyor" failed WCAG AA.
+  Dark panels (hero, footer, admin, supplier) set their own background and
+  text-on-dark / text-on-dark-muted. Do not add a dark media query.
+*/
+
+@theme {
+  --font-sans: var(--font-geist-sans), var(--font-arabic), Arial, Helvetica, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --color-background: #f8fafc;
+  --color-foreground: #0f172a;
+  --color-muted-foreground: #475569;
+  --color-on-dark: #f8fafc;
+  --color-on-dark-muted: #cbd5e1;
+  --color-card: #ffffff;
+  --color-line: #e2e8f0;
+  --color-brand: #1b5e20;
+  --color-brand-solid: #2e7d32;
+  --color-brand-bright: #7cb342;
+  --color-disabled: #475569;
+  --color-status-pending: #92400e;
+  --color-status-pending-bg: #fef3c7;
+  --color-status-ok: #065f46;
+  --color-status-ok-bg: #d1fae5;
+  --color-status-bad: #991b1b;
+  --color-status-bad-bg: #fee2e2;
+  --color-status-info: #1e3a8a;
+  --color-status-info-bg: #dbeafe;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), var(--font-arabic), Arial, Helvetica, sans-serif;
 }
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
+@layer base {
+  /* Uncolored text inside a surface stays readable if a parent color is wrong. */
+  :where(.bg-white, .bg-slate-50, .bg-slate-100, .bg-card, .bg-background) {
+    color: var(--color-foreground);
+  }
+  :where(.bg-slate-800, .bg-slate-900, .bg-slate-950, .bg-black) {
+    color: var(--color-on-dark);
+  }
+  input,
+  textarea,
+  select,
+  button {
+    color-scheme: light;
+  }
+}
 
 :root {
   --panova-green: #7cb342;

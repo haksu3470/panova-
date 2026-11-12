@@ -3,6 +3,7 @@
 import React from 'react';
 import { signOut } from '@/lib/auth';
 import { Language } from '@/lib/dictionary';
+import { portalUi } from '@/lib/portal-ui-copy';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 
 interface EmployerHeaderProps {
@@ -32,6 +33,7 @@ export default function EmployerHeader({
   onLogout,
   onReturnToAdmin,
 }: EmployerHeaderProps) {
+  const ui = portalUi[lang] ?? portalUi.en;
   return (
     <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
       <div className="flex items-center gap-4">
@@ -60,7 +62,7 @@ export default function EmployerHeader({
             onClick={onReturnToAdmin}
             className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-md flex items-center gap-1.5"
           >
-            <span>🛡️</span> Admin Paneline Dön
+            <span>🛡️</span> {ui.returnToAdmin}
           </button>
         )}
 
@@ -70,7 +72,7 @@ export default function EmployerHeader({
           onClick={() => window.location.href = '/'}
           className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition cursor-pointer"
         >
-          {t.returnHomeBtn || 'Ana Sayfaya Dön'}
+          {t.returnHome}
         </button>
 
         {isLoggedIn && (
@@ -80,7 +82,7 @@ export default function EmployerHeader({
                 onClick={onNewDemandClick}
                 className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition shadow-md cursor-pointer"
               >
-                + {t.newDemandBtn || 'Yeni Talep Oluştur'}
+                + {t.newDemandBtn}
               </button>
             )}
 
@@ -92,7 +94,7 @@ export default function EmployerHeader({
                 }}
                 className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl text-xs transition cursor-pointer border border-rose-200"
               >
-                {t.logoutBtn || 'Çıkış Yap'}
+                {t.logoutBtn}
               </button>
             )}
           </>

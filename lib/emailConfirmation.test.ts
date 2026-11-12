@@ -1,8 +1,18 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { classifyCandidateLinkError, parseVerificationInput } from './emailConfirmation.ts';
+import { EMAIL_OTP_LENGTH, classifyCandidateLinkError, otpDigits, parseVerificationInput } from './emailConfirmation.ts';
 
-test('a numeric code is the OTP the form submits to verifyOtp', () => {
+test('the code field keeps six digits and drops spaces and other characters', () => {
+  assert.equal(otpDigits(' 917 346 '), '917346');
+  assert.equal(otpDigits('91-73-46'), '917346');
+  assert.equal(otpDigits('Kod: 917346'), '917346');
+  assert.equal(otpDigits('91734678'), '917346');
+  assert.equal(otpDigits('12a3'), '123');
+  assert.equal(otpDigits(''), '');
+});
+
+test('a 6-digit code is the OTP, and a code issued before the length change still parses', () => {
+  assert.equal(EMAIL_OTP_LENGTH, 6);
   assert.deepEqual(parseVerificationInput(' 123 456 '), { kind: 'otp', token: '123456' });
   assert.deepEqual(parseVerificationInput('1234-5678'), { kind: 'otp', token: '12345678' });
   assert.deepEqual(parseVerificationInput(''), { kind: 'empty' });
@@ -37,6 +47,7 @@ test('candidate link errors map to the screen that can finish registration', () 
   assert.equal(classifyCandidateLinkError('Candidate already registered'), 'email');
   assert.equal(classifyCandidateLinkError('Email not confirmed'), 'unconfirmed');
   assert.equal(classifyCandidateLinkError('No unmatched candidate for this email'), 'missing');
+  assert.equal(classifyCandidateLinkError('kvkk_required'), 'kvkk');
   assert.equal(classifyCandidateLinkError('permission denied'), 'other');
   assert.equal(classifyCandidateLinkError(undefined), 'other');
 });

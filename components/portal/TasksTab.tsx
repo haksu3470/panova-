@@ -2,6 +2,35 @@
 
 import { Plus } from 'lucide-react';
 import DemoBadge from './DemoBadge';
+import { translations, type Language, type Translation } from '@/lib/dictionary';
+import { portalUi } from '@/lib/portal-ui-copy';
+import { releaseCopy } from '@/lib/release-copy';
+import { taskIsOverdue } from '@/lib/demandStatus';
+import { useSiteLanguage } from '@/lib/site-language';
+
+const TASK_OPTIONS: { id: keyof Translation; legacy: string; group: 'source' | 'target' | 'field' | 'mgmt' }[] = [
+  { id: 'taskPassportCheck', legacy: 'Pasaportu kontrol et', group: 'source' },
+  { id: 'taskInterviewPlan', legacy: 'Aday ön görüşmesi planla', group: 'source' },
+  { id: 'taskUpdateCandidate', legacy: 'Aday bilgilerini güncelle', group: 'source' },
+  { id: 'taskRequestDocs', legacy: 'Eksik evrak talep et', group: 'source' },
+  { id: 'taskSaveDemand', legacy: 'İşveren talebini kaydet', group: 'target' },
+  { id: 'taskMatchCandidate', legacy: 'Aday eşleştirme yap', group: 'target' },
+  { id: 'taskPrepareOffer', legacy: 'İş teklifi hazırla', group: 'target' },
+  { id: 'taskTrackPerformance', legacy: 'Performans ve uyum takibi yap', group: 'target' },
+  { id: 'taskEnterTravelDate', legacy: 'Seyahat tarihini gir', group: 'field' },
+  { id: 'taskPlanAccommodation', legacy: 'Konaklama ve karşılama planla', group: 'field' },
+  { id: 'taskManageSupport', legacy: 'Destek taleplerini yönet', group: 'field' },
+  { id: 'taskUpdateFieldStatus', legacy: 'Saha görev durumunu güncelle', group: 'field' },
+  { id: 'taskAuditSystem', legacy: 'Sistem ve logları denetle', group: 'mgmt' },
+  { id: 'taskApproveStrategic', legacy: 'Mali ve stratejik kararları onayla', group: 'mgmt' },
+];
+
+const LOCALES: Language[] = ['tr', 'en', 'sq', 'ar', 'mk'];
+
+function taskLabel(t: Translation, stored: string) {
+  const hit = TASK_OPTIONS.find((item) => item.id === stored || item.legacy === stored || LOCALES.some((lang) => translations[lang][item.id] === stored));
+  return hit ? String(t[hit.id] || stored) : stored;
+}
 
 interface TasksTabProps {
   tasks: any[];
@@ -26,7 +55,6 @@ interface TasksTabProps {
   linkOptions?: Record<string, { id: string; label: string }[]>;
 }
 
-const LINK_LABELS: Record<string, string> = { candidate: 'Aday', request: 'Talep', employer: 'İşveren' };
 const isUuid = (v: any) => typeof v === 'string' && /^[0-9a-f-]{36}$/i.test(v);
 
 export default function TasksTab({
@@ -51,7 +79,11 @@ export default function TasksTab({
   setLinkId,
   linkOptions = {},
 }: TasksTabProps) {
+  const { currentLang } = useSiteLanguage('en');
+  const ui = portalUi[currentLang];
+  const linkLabels: Record<string, string> = { candidate: ui.linkCandidate, request: ui.linkRequest, employer: ui.linkEmployer };
   const findLabel = (type?: string, id?: string) => (type && id ? (linkOptions[type] || []).find(o => o.id === id)?.label : undefined);
+  const optionsFor = (group: 'source' | 'target' | 'field' | 'mgmt') => TASK_OPTIONS.filter((item) => item.group === group);
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
@@ -71,35 +103,25 @@ export default function TasksTab({
               
               {(isUpperManagement || userRole === 'source_country') && (
                 <optgroup label={t.taskGroupSource}>
-                  <option value="Pasaportu kontrol et">{t.taskPassportCheck}</option>
-                  <option value="Aday ön görüşmesi planla">{t.taskInterviewPlan}</option>
-                  <option value="Aday bilgilerini güncelle">{t.taskUpdateCandidate}</option>
-                  <option value="Eksik evrak talep et">{t.taskRequestDocs}</option>
+                  {optionsFor('source').map((item) => <option key={item.id} value={item.id}>{t[item.id]}</option>)}
                 </optgroup>
               )}
 
               {(isUpperManagement || userRole === 'target_country') && (
                 <optgroup label={t.taskGroupTarget}>
-                  <option value="İşveren talebini kaydet">{t.taskSaveDemand}</option>
-                  <option value="Aday eşleştirme yap">{t.taskMatchCandidate}</option>
-                  <option value="İş teklifi hazırla">{t.taskPrepareOffer}</option>
-                  <option value="Performans ve uyum takibi yap">{t.taskTrackPerformance}</option>
+                  {optionsFor('target').map((item) => <option key={item.id} value={item.id}>{t[item.id]}</option>)}
                 </optgroup>
               )}
 
               {(isUpperManagement || userRole === 'field_officer') && (
                 <optgroup label={t.taskGroupField}>
-                  <option value="Seyahat tarihini gir">{t.taskEnterTravelDate}</option>
-                  <option value="Konaklama ve karşılama planla">{t.taskPlanAccommodation}</option>
-                  <option value="Destek taleplerini yönet">{t.taskManageSupport}</option>
-                  <option value="Saha görev durumunu güncelle">{t.taskUpdateFieldStatus}</option>
+                  {optionsFor('field').map((item) => <option key={item.id} value={item.id}>{t[item.id]}</option>)}
                 </optgroup>
               )}
 
               {isUpperManagement && (
                 <optgroup label={t.taskGroupManagement}>
-                  <option value="Sistem ve logları denetle">{t.taskAuditSystem}</option>
-                  <option value="Mali ve stratejik kararları onayla">{t.taskApproveStrategic}</option>
+                  {optionsFor('mgmt').map((item) => <option key={item.id} value={item.id}>{t[item.id]}</option>)}
                 </optgroup>
               )}
             </select>
@@ -132,24 +154,24 @@ export default function TasksTab({
           </div>
           {setLinkType && setLinkId && (
             <div>
-              <label className="block font-bold text-slate-700 uppercase mb-1">Bağlı Kayıt (opsiyonel)</label>
+              <label className="block font-bold text-slate-700 uppercase mb-1">{ui.linkedRecord}</label>
               <div className="flex flex-col sm:flex-row gap-2">
                 <select value={linkType} onChange={(e) => setLinkType(e.target.value)} className="sm:w-1/3 px-3 py-2.5 rounded-xl border bg-white text-xs sm:text-sm text-slate-900">
-                  <option value="">— Yok —</option>
-                  <option value="candidate">Aday</option>
-                  <option value="request">Talep</option>
-                  <option value="employer">İşveren</option>
+                  <option value="">— {ui.noneOption} —</option>
+                  <option value="candidate">{ui.linkCandidate}</option>
+                  <option value="request">{ui.linkRequest}</option>
+                  <option value="employer">{ui.linkEmployer}</option>
                 </select>
                 {linkType && (
                   <select value={linkId} onChange={(e) => setLinkId(e.target.value)} className="flex-1 min-w-0 px-3 py-2.5 rounded-xl border bg-white text-xs sm:text-sm text-slate-900">
-                    <option value="">Seçin…</option>
+                    <option value="">{ui.selectOption}</option>
                     {(linkOptions[linkType] || []).filter(o => isUuid(o.id)).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
                   </select>
                 )}
               </div>
             </div>
           )}
-          <button type="submit" className="w-full bg-[#2e7d32] hover:bg-[#1b5e20] text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-xs sm:text-sm">
+          <button type="submit" className="w-full bg-brand-solid hover:bg-brand text-white py-3.5 rounded-xl font-bold transition cursor-pointer shadow-md text-xs sm:text-sm">
             {t.saveTaskBtn}
           </button>
         </form>
@@ -159,19 +181,19 @@ export default function TasksTab({
         <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.taskListHeader}</h3>
         <div className="space-y-3">
           {tasks.map((task) => (
-            <div key={task.id} className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${task.status === 'completed' ? 'bg-slate-50 opacity-60' : 'bg-white shadow-sm'}`}>
+            <div key={task.id} className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${task.status === 'completed' ? 'bg-slate-100' : taskIsOverdue(task.due_date, task.status) ? 'bg-amber-50 border-amber-300 shadow-sm' : 'bg-white shadow-sm'}`}>
               <div className="flex items-start sm:items-center gap-3">
                 <input type="checkbox" checked={task.status === 'completed'} onChange={() => toggleTaskStatus(task.id, task.status)} className="w-5 h-5 accent-[#2e7d32] cursor-pointer mt-0.5 sm:mt-0 shrink-0" />
                 <div>
-                  <h4 className={`font-bold text-xs sm:text-sm ${task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-900'}`}>{task.title}<DemoBadge show={task.is_demo} /></h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5">{t.assigneeText}: <strong>{task.assignee}</strong> | {t.backupText}: <strong>{task.backup_assignee}</strong> | {t.dueDateText}: {task.due_date}</p>
+                  <h4 className={`font-bold text-xs sm:text-sm ${task.status === 'completed' ? 'line-through text-muted-foreground' : 'text-slate-900'}`}>{taskLabel(t, task.title)}<DemoBadge show={task.is_demo} /></h4>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{t.assigneeText}: <strong>{task.assignee}</strong> | {t.backupText}: <strong>{task.backup_assignee}</strong> | {t.dueDateText}: {task.due_date}</p>
                   {task.related_entity_type && (
-                    <p className="text-[11px] text-emerald-700 mt-0.5">🔗 {LINK_LABELS[task.related_entity_type] || task.related_entity_type}: {findLabel(task.related_entity_type, task.related_entity_id) || String(task.related_entity_id || '').slice(0, 8)}</p>
+                    <p className="text-[11px] text-emerald-700 mt-0.5">🔗 {linkLabels[task.related_entity_type] || task.related_entity_type}: {findLabel(task.related_entity_type, task.related_entity_id) || String(task.related_entity_id || '').slice(0, 8)}</p>
                   )}
                 </div>
               </div>
-              <span className={`px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold uppercase w-fit ${task.status === 'completed' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>
-                {task.status === 'completed' ? t.statusCompleted : t.statusPending}
+              <span className={`px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold uppercase w-fit ${task.status === 'completed' ? 'bg-emerald-50 text-emerald-800' : taskIsOverdue(task.due_date, task.status) ? 'bg-red-50 text-red-800' : 'bg-amber-50 text-amber-800'}`}>
+                {task.status === 'completed' ? t.statusCompleted : taskIsOverdue(task.due_date, task.status) ? releaseCopy[currentLang].overdue : t.statusPending}
               </span>
             </div>
           ))}

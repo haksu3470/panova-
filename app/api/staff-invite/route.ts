@@ -2,20 +2,12 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
+import { buildStaffInviteEmail } from '@/lib/email/app-messages';
+import { emailLocale } from '@/lib/email/email-copy';
+import { forwardFromAddress } from '@/lib/email/forward-inbound';
+import { portalUrl } from '@/lib/email/layout';
 import { validUrl as SUPABASE_URL, supabaseAnonKey as SUPABASE_ANON } from '@/lib/supabase';
-const PORTAL_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://panova-xi.vercel.app') + '/portal';
-
-const ROLE_TR: Record<string, string> = {
-  upper_management: 'Üst Yönetim',
-  source_country: 'Kaynak Ülke Sorumlusu',
-  target_country: 'Hedef Ülke Sorumlusu',
-  field_officer: 'Saha Görevlisi',
-  finance: 'Finans',
-  limited: 'Sınırlı Erişim',
-};
-
-const esc = (s: string) =>
-  s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+const PORTAL_URL = portalUrl();
 
 export async function POST(request: Request) {
   const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
@@ -26,6 +18,7 @@ export async function POST(request: Request) {
   const email = String(body?.email || '').trim().toLowerCase();
   const name = String(body?.name || '').trim();
   const role = String(body?.role || '');
+  const locale = emailLocale(body?.locale);
   if (!email) return NextResponse.json({ error: 'E-posta zorunludur.' }, { status: 400 });
 
   // Kullanıcının kendi oturumuyla RPC çağrılır; yetki kontrolü veritabanında (invite_staff) yapılır.
@@ -39,6 +32,7 @@ export async function POST(request: Request) {
       : /already active/.test(error.message) ? 'Bu e-posta zaten aktif bir personel hesabına bağlı.'
       : /Invalid email/.test(error.message) ? 'Geçersiz e-posta adresi.'
       : /Invalid staff_role/.test(error.message) ? 'Geçersiz rol.'
+      : /source_officer_code_missing|referral_code_role/.test(error.message) ? 'Kaynak ülke sorumlusu için yönlendirme kodu atanamadı. Daveti yeniden deneyin.'
       : 'Davet kaydedilemedi: ' + error.message;
     return NextResponse.json({ error: msg }, { status: 403 });
   }
@@ -52,24 +46,14 @@ export async function POST(request: Request) {
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const from = process.env.RESEND_FROM || 'PANOVA Portal <onboarding@resend.dev>';
-    const roleTr = ROLE_TR[role] || role;
+    const from = forwardFromAddress();
+    const message = buildStaffInviteEmail({ locale, name, email, role, portalUrl: PORTAL_URL });
     const { error: sendErr } = await resend.emails.send({
-      from, to: [email],
-      subject: 'PANOVA Yönetim Portalı davetiniz',
-      html: `
-<div style="font-family:Arial,sans-serif;padding:20px;color:#333;max-width:600px;margin:0 auto;border:1px solid #e2e8f0;border-radius:12px">
-  <h2 style="color:#2e7d32;margin-top:0">PANOVA Yönetim Portalı'na davet edildiniz</h2>
-  <p>Merhaba <strong>${esc(name || email)}</strong>,</p>
-  <p>PANOVA ekibine <strong>${esc(roleTr)}</strong> rolüyle eklendiniz.</p>
-  <p>Hesabınızı etkinleştirmek için aşağıdaki bağlantıya gidin ve <strong>bu e-posta adresiyle (${esc(email)})</strong>
-     Google ile giriş yapın veya e-posta + şifre ile kayıt olun. Google dışı (ve şifreyle açılan Gmail) hesaplar, portala girmeden önce e-postadaki doğrulamayı tamamlamalıdır. Farklı bir adres kullanırsanız hesabınız bağlanamaz.</p>
-  <p style="text-align:center;margin:28px 0">
-    <a href="${PORTAL_URL}" style="background:#2e7d32;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold">Portala Git</a>
-  </p>
-  <p style="font-size:12px;color:#64748b">${PORTAL_URL}</p>
-  <p style="font-size:12px;color:#64748b;border-top:1px solid #e2e8f0;padding-top:12px">Bu daveti beklemiyorsanız e-postayı yok sayabilirsiniz.</p>
-</div>`,
+      from,
+      to: [email],
+      subject: message.subject,
+      html: message.html,
+      text: message.text,
     });
     if (sendErr) throw new Error(sendErr.message);
     return NextResponse.json({ success: true, emailSent: true, staff });
