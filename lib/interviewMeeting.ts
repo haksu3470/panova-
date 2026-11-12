@@ -29,6 +29,32 @@ export function joinableMeetingUrl(value: unknown): string | null {
   return isSafeMeetingUrl(text) ? text : null;
 }
 
+/**
+ * Interview time for display, with the viewer's time zone name.
+ * Uses field options on purpose: dateStyle/timeStyle cannot be combined with
+ * timeZoneName (Intl throws a TypeError, which crashed the employer page).
+ * Never throws; empty or invalid input gives '—'.
+ */
+const INTERVIEW_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZoneName: 'short',
+};
+
+export function formatInterviewTime(iso: string | null | undefined, locale?: string): string {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleString(locale, INTERVIEW_TIME_OPTIONS) || '—';
+  } catch {
+    return '—';
+  }
+}
+
 const pad = (n: number) => String(n).padStart(2, '0');
 
 /**

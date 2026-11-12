@@ -44,7 +44,7 @@ import {
   sumPipelineCounts,
   type PipelineCountsIndex,
 } from '@/lib/requestPipelineCounts';
-import { joinableMeetingUrl } from '@/lib/interviewMeeting';
+import { formatInterviewTime, joinableMeetingUrl } from '@/lib/interviewMeeting';
 
 function EmployerPortalInner() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
@@ -1046,7 +1046,7 @@ function EmployerPortalInner() {
                         <span className="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded">{candidateProfessionLabel(item.position || candidates.find((x: any) => x.id === item.candidate_id)?.profession, ui.positionWord, currentLang)}</span>
                       </div>
                       <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-muted-foreground" /> {item.scheduled_at ? new Date(item.scheduled_at).toLocaleString(dateLocale[currentLang], { dateStyle: 'medium', timeStyle: 'short', timeZoneName: 'short' }) : '—'} | 💻 {item.platform || ui.onlineMeeting}
+                        <Calendar className="w-3.5 h-3.5 text-muted-foreground" /> {formatInterviewTime(item.scheduled_at, dateLocale[currentLang])} | 💻 {item.platform || ui.onlineMeeting}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">

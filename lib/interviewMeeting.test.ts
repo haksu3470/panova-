@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { dateLocale } from './portal-ui-copy.ts';
 import {
+  formatInterviewTime,
   isSafeMeetingUrl,
   joinableMeetingUrl,
   MEETING_URL_MAX,
@@ -47,6 +49,23 @@ test('join button only for a safe link', () => {
   assert.equal(joinableMeetingUrl(null), null);
   assert.equal(joinableMeetingUrl('javascript:alert(1)'), null);
   assert.equal(joinableMeetingUrl('https://meet.ornek.com/abc'), 'https://meet.ornek.com/abc');
+});
+
+test('interview time formats in every portal locale without throwing', () => {
+  const iso = '2026-11-20T09:30:00.000Z';
+  const locales = new Set(['tr-TR', 'en-US', 'ar', ...Object.values(dateLocale)]);
+  for (const locale of locales) {
+    let text = '';
+    assert.doesNotThrow(() => { text = formatInterviewTime(iso, locale); }, locale);
+    assert.equal(typeof text, 'string', locale);
+    assert.ok(text.length > 0 && text !== '—', `${locale}: ${text}`);
+  }
+});
+
+test('interview time is a dash for empty or invalid input', () => {
+  for (const value of [null, undefined, '', 'geçersiz']) {
+    assert.equal(formatInterviewTime(value, 'tr-TR'), '—', String(value));
+  }
 });
 
 test('datetime-local input uses local time and round-trips', () => {
