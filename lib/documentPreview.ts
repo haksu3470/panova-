@@ -107,6 +107,43 @@ export function looksLikePdf(firstBytes: ArrayLike<number>): boolean {
   return sig.every((b, i) => firstBytes[i] === b);
 }
 
+export const PDF_MIME = 'application/pdf';
+
+/**
+ * A PDF Blob built from the file's bytes, always typed application/pdf.
+ * Storage often answers with application/octet-stream; Chrome's viewer only
+ * opens a blob: URL whose Blob type is application/pdf.
+ */
+export function pdfBlobFromBytes(bytes: ArrayBuffer | Uint8Array): Blob {
+  return new Blob([bytes as BlobPart], { type: PDF_MIME });
+}
+
+/** Name for the "Download" link: the original file name, else the title. */
+export function downloadFileName(fileName: string | null | undefined, title: string | null | undefined, kind: PreviewKind): string {
+  const name = String(fileName ?? '').trim() || String(title ?? '').trim() || 'document';
+  return kind === 'pdf' && extensionOf(name) !== 'pdf' ? `${name}.pdf` : name;
+}
+
+/**
+ * Address for the "Download" link. blob: and data: addresses download through
+ * the link's download attribute. A Supabase signed URL is cross-origin, where
+ * that attribute is ignored, so the storage `download` parameter asks for an
+ * attachment instead. Other addresses are returned as is.
+ */
+export function downloadHref(url: string, fileName: string): string {
+  if (!/\/storage\/v1\/object\/sign\//.test(url) || /[?&]download=/.test(url)) return url;
+  return `${url}${url.includes('?') ? '&' : '?'}download=${encodeURIComponent(fileName)}`;
+}
+
+/**
+ * "Open in new tab" never carries a download attribute (that made Chrome
+ * save the PDF instead of opening it). Only data: addresses get one, because
+ * Chrome does not open data: addresses in a new tab.
+ */
+export function openInTabDownloadAttr(url: string, fileName: string): string | undefined {
+  return url.startsWith('data:') ? fileName : undefined;
+}
+
 /**
  * Holds at most one blob: URL and revokes it when replaced or cleared, so a
  * closed or unmounted preview never leaks the file in memory.

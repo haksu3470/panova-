@@ -15,6 +15,7 @@ import {
   isDirectFileUrl,
   looksLikePdf,
   PDF_INLINE_MAX_BYTES,
+  pdfBlobFromBytes,
   storageRefFor,
 } from '@/lib/documentPreview';
 
@@ -119,8 +120,9 @@ export async function candidatePdfBlob(url: string, storagePath?: string | null)
   }
   if (!blob) return { ok: false, code: 'fetch_failed', detail };
   if (blob.size > PDF_INLINE_MAX_BYTES) return { ok: false, code: 'too_large' };
-  const head = new Uint8Array(await blob.slice(0, 5).arrayBuffer());
-  if (!looksLikePdf(head)) return { ok: false, code: 'not_pdf' };
-  // Re-typed so the browser always treats it as a PDF, never as a page.
-  return { ok: true, blob: new Blob([blob], { type: 'application/pdf' }) };
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  if (!looksLikePdf(bytes.subarray(0, 5))) return { ok: false, code: 'not_pdf' };
+  // Rebuilt from the bytes with type application/pdf: storage may answer
+  // application/octet-stream, which Chrome's viewer does not open.
+  return { ok: true, blob: pdfBlobFromBytes(bytes) };
 }

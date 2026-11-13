@@ -362,6 +362,22 @@ Automated: `lib/portalOverview.test.ts` (open request count, card to tab, role c
 
 Automated: `lib/candidateDocuments.test.ts` (no-file rule, five slots plus other rows, counter, upload target row, open request, titles in five languages, `documents_json` kept, RLS refusal, no base64 or free-text add in the source, dictionary keys).
 
+## S20. PDF önizleme / PDF preview
+
+**Rol / Role:** Staff on `/portal/candidates/[id]`, in Chrome (desktop). S20 replaces the link parts of S17 item 4: there are now two separate links, **Open in new tab** and **Download**.
+
+**Adımlar ve beklenen / Steps and expected:**
+
+1. **Boş kalmaz / Never blank.** Open TEST Rahman Hasan > **Passport scan** > **Preview** (a PDF in `candidate-files`). After the loading text the PDF shows in Chrome's PDF viewer inside the window. There is no blocked-page icon and no empty frame. DevTools > Console shows no `Refused to frame` / `object-src` CSP error. The viewer's address is `blob:`.
+2. **Yeni sekmede açılır / Opens in a new tab.** Press **Open in new tab** in the header: the PDF opens in a new tab in Chrome's viewer. No **Save as** dialog appears.
+3. **İndir ayrı / Download is separate.** Press **Download**: the file is saved under its original name (or the document title with `.pdf`), and it opens in Acrobat.
+4. **Temizlik / Clean-up.** Close the window and open it again: it loads again. The old `blob:` address no longer opens (it was released).
+5. **Yedek mesaj / Fallback.** On a browser without a PDF viewer (for example Chrome on Android, or Chrome with "Download PDFs" turned on), the window shows "The PDF cannot be shown here. Open it in a new tab or download it." with both links instead of an empty frame. When the file cannot be fetched, the red error box shows its reason and a **Download** button.
+6. **JPG ve erişim kaydı / JPG and access log.** A JPG preview still fits inside the window; **Download** saves it. Each preview open still writes one `log_document_access` row for `candidate_documents` files.
+7. **Başka gevşetme yok / Nothing else loosened.** In the response headers of any page, `object-src` is `blob:` and `frame-src` adds only `blob:`; `frame-ancestors 'none'` is unchanged.
+
+Automated: `lib/documentPreview.test.ts` (PDF blob typed `application/pdf` from octet-stream bytes, no download attribute on "open in new tab", storage download address, no sandbox, fallback text, CSP), `lib/securityHeaders.test.ts`.
+
 ---
 
 ## Boşluk analizi / Gap analysis

@@ -3,12 +3,16 @@
  * script-src keeps 'unsafe-inline' because the App Router still emits inline
  * bootstrap scripts. frame-ancestors none stops other sites embedding us.
  * frame-src still allows the Google OAuth redirect host and YouTube players.
+ * frame-src and object-src allow blob: (and nothing else new) so the staff
+ * PDF preview can show a PDF the page itself fetched and checked.
  */
 export function contentSecurityPolicy(): string {
   return [
     "default-src 'self'",
     "base-uri 'self'",
-    "object-src 'none'",
+    // blob: only: staff PDF preview (DocumentPreviewModal). A blob: document
+    // inherits this policy, and Chrome's PDF viewer is refused under 'none'.
+    "object-src blob:",
     "frame-ancestors 'none'",
     "form-action 'self' https://accounts.google.com",
     "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://vitals.vercel-insights.com",
@@ -16,7 +20,7 @@ export function contentSecurityPolicy(): string {
     "img-src 'self' data: blob: https://*.supabase.co https://i.ytimg.com https://img.youtube.com",
     "font-src 'self' data:",
     "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://vitals.vercel-insights.com https://accounts.google.com",
-    "frame-src 'self' https://accounts.google.com https://www.youtube.com https://www.youtube-nocookie.com",
+    "frame-src 'self' blob: https://accounts.google.com https://www.youtube.com https://www.youtube-nocookie.com",
     "media-src 'self' blob: https://*.supabase.co",
     "worker-src 'self' blob:",
     "manifest-src 'self'",
