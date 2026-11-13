@@ -17,7 +17,20 @@ import { Language, translations } from '@/lib/dictionary';
 import { demandStatusLabel } from '@/lib/demandStatus';
 import { localizeCatalogTitle, professionLabel, professionsForSector, sectorOptions } from '@/lib/professions';
 import { dateLocale, fill, optionLabel, portalUi } from '@/lib/portal-ui-copy';
-import { benefitPhrase, buildEmployerDemandInsert, displayedRequestSalary, type DemandBlock, type YesNo } from '@/lib/workforceRequest';
+import {
+  benefitPhrase,
+  buildEmployerDemandInsert,
+  demandFieldMessage,
+  demandRuleFromDbError,
+  displayedRequestSalary,
+  firstInvalidDemandField,
+  HEADCOUNT_MAX,
+  HEADCOUNT_MIN,
+  validateDemandForm,
+  type DemandField,
+  type DemandFieldErrors,
+  type YesNo,
+} from '@/lib/workforceRequest';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
@@ -182,7 +195,10 @@ function EmployerPortalInner() {
   const [demandLanguageReq, setDemandLanguageReq] = useState('');
   const [demandAccommodation, setDemandAccommodation] = useState<YesNo>('');
   const [demandFood, setDemandFood] = useState<YesNo>('');
-  const [demandError, setDemandError] = useState<DemandBlock | 'save' | ''>('');
+  /** Form-level message: fields to fix, company name missing, or save failed. */
+  const [demandError, setDemandError] = useState<'invalid' | 'company' | 'save' | ''>('');
+  /** One message per field, shown under that field. */
+  const [demandFieldErrors, setDemandFieldErrors] = useState<DemandFieldErrors>({});
 
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMessage, setSupportMessage] = useState('');
@@ -340,13 +356,58 @@ function EmployerPortalInner() {
     }
   };
 
-  const demandErrorMessage = (code: DemandBlock | 'save') => {
-    if (code === 'position') return t.fillRequiredFields || '';
-    if (code === 'lodging') return t.lodgingRequired || '';
-    if (code === 'meals') return t.mealsRequired || '';
-    if (code === 'both') return t.lodgingAndMealsRequired || '';
-    if (code === 'salary') return t.salaryAmountRequired || '';
+  const demandErrorMessage = (code: 'invalid' | 'company' | 'save') => {
+    if (code === 'invalid') return t.demandErrSummary || '';
+    if (code === 'company') return t.demandErrCompanyName || '';
     return t.demandSaveFailed || '';
+  };
+
+  /** Element that gets focus for each field (the first sector button for the sector group). */
+  const DEMAND_FIELD_FOCUS: Record<DemandField, string> = {
+    sector: 'demand-sector-first',
+    position: selectedSector ? 'demand-position-pick' : 'demand-position-custom',
+    experience: 'demand-experience',
+    language: 'demand-language',
+    headcount: 'demand-headcount',
+    city: 'demand-city',
+    salary: 'demand-salary',
+    duration: 'demand-duration',
+    lodging: 'demand-lodging',
+    meals: 'demand-meals',
+  };
+  const demandErrorId = (field: DemandField) => `demand-${field}-error`;
+  /** aria-invalid / aria-describedby for a field with an error. */
+  const demandAria = (field: DemandField) => (demandFieldErrors[field]
+    ? { 'aria-invalid': true as const, 'aria-describedby': demandErrorId(field) }
+    : {});
+  const demandFieldNote = (field: DemandField) => {
+    const error = demandFieldErrors[field];
+    if (!error) return null;
+    return (
+      <p id={demandErrorId(field)} className="mt-1 text-xs font-bold text-status-bad">
+        {demandFieldMessage(field, error, t)}
+      </p>
+    );
+  };
+  const demandFieldClass = (field: DemandField) => (demandFieldErrors[field] ? 'border-status-bad ring-1 ring-status-bad' : 'border-line');
+  /** Editing a field clears its own message (and the form-level summary). */
+  const clearDemandField = (field: DemandField) => {
+    setDemandFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+    setDemandError((prev) => (prev === 'save' || prev === 'company' ? prev : ''));
+  };
+  const showDemandErrors = (errors: DemandFieldErrors) => {
+    setDemandFieldErrors(errors);
+    setDemandError('invalid');
+    const first = firstInvalidDemandField(errors);
+    if (first) {
+      const id = DEMAND_FIELD_FOCUS[first];
+      window.setTimeout(() => document.getElementById(id)?.focus(), 0);
+    }
   };
 
   const benefitText = (value: unknown) => benefitPhrase({
@@ -369,6 +430,7 @@ function EmployerPortalInner() {
     setDemandAccommodation('');
     setDemandFood('');
     setDemandError('');
+    setDemandFieldErrors({});
   };
 
   const handleCreateCorporateDemand = async (e: React.FormEvent) => {
@@ -377,17 +439,25 @@ function EmployerPortalInner() {
     const headcount = Number(demandHeadcount);
     // Catalog keys (localized wherever the title is shown), then the free text as typed.
     const positionTitle = [...selectedPositions, customPosition.trim()].filter(Boolean).join(', ');
-    if (
-      !selectedSector
-      || !positionTitle
-      || !demandExperience
-      || !demandLanguageReq
-      || !demandCity.trim()
-      || !demandDuration.trim()
-      || !Number.isFinite(headcount)
-      || headcount < 1
-    ) {
-      setDemandError('position');
+    const fieldErrors = validateDemandForm({
+      sector: selectedSector,
+      positionTitle,
+      experience: demandExperience,
+      language: demandLanguageReq,
+      headcountText: demandHeadcount,
+      city: demandCity,
+      salaryText: demandSalary,
+      duration: demandDuration,
+      lodging: demandAccommodation,
+      meals: demandFood,
+    });
+    if (firstInvalidDemandField(fieldErrors)) {
+      showDemandErrors(fieldErrors);
+      return;
+    }
+    setDemandFieldErrors({});
+    if (!employerProfile?.companyName?.trim()) {
+      setDemandError('company');
       return;
     }
 
@@ -407,7 +477,9 @@ function EmployerPortalInner() {
       meals: demandFood,
     });
     if (!built.ok) {
-      setDemandError(built.error);
+      // validateDemandForm already covers these; kept as a safety net.
+      const field: DemandField = built.error === 'salary' ? 'salary' : built.error === 'position' ? 'position' : built.error === 'meals' ? 'meals' : 'lodging';
+      showDemandErrors({ [field]: built.error === 'salary' ? 'salary_number' : 'required' });
       return;
     }
     if (!employerProfile?.id) {
@@ -423,7 +495,11 @@ function EmployerPortalInner() {
     const { error } = await supabase.from('job_requests').insert([built.row]);
     if (error) {
       console.error('job request insert failed', error);
-      setDemandError('save');
+      // A database rule refusal (23514, job_requests_* rule) is shown under its field.
+      const rule = demandRuleFromDbError(error);
+      if (rule?.field === 'company') setDemandError('company');
+      else if (rule) showDemandErrors({ [rule.field]: rule.error });
+      else setDemandError('save');
       return;
     }
 
@@ -803,14 +879,16 @@ function EmployerPortalInner() {
 
               <form noValidate onSubmit={handleCreateCorporateDemand} className="space-y-6">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-2">1. {t.selectSectorLabel} *</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {sectorOptions(currentLang).map((sector) => (
+                  <p id="demand-sector-label" className="block text-xs font-bold uppercase tracking-wider text-foreground mb-2">1. {t.selectSectorLabel} *</p>
+                  <div role="group" aria-labelledby="demand-sector-label" {...demandAria('sector')} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {sectorOptions(currentLang).map((sector, index) => (
                       <button
                         type="button"
                         key={sector.value}
+                        id={index === 0 ? 'demand-sector-first' : undefined}
                         aria-pressed={selectedSector === sector.value}
-                        onClick={() => { setSelectedSector(sector.value); setCatalogPick(''); }}
+                        aria-describedby={index === 0 && demandFieldErrors.sector ? demandErrorId('sector') : undefined}
+                        onClick={() => { setSelectedSector(sector.value); setCatalogPick(''); clearDemandField('sector'); }}
                         className={`p-4 rounded-xl border text-start transition cursor-pointer flex items-center justify-between gap-2 ${
                           selectedSector === sector.value ? 'bg-status-ok-bg border-brand ring-2 ring-brand text-status-ok font-extrabold' : 'bg-slate-50 border-line text-foreground font-semibold'
                         }`}
@@ -820,6 +898,7 @@ function EmployerPortalInner() {
                       </button>
                     ))}
                   </div>
+                  {demandFieldNote('sector')}
                 </div>
 
                 <div>
@@ -859,11 +938,13 @@ function EmployerPortalInner() {
                       id="demand-position-pick"
                       value={catalogPick}
                       disabled={!selectedSector}
+                      {...demandAria('position')}
                       onChange={(e) => {
                         if (e.target.value && !selectedPositions.includes(e.target.value)) togglePositionSelection(e.target.value);
                         setCatalogPick('');
+                        clearDemandField('position');
                       }}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-line text-xs bg-card text-foreground font-semibold cursor-pointer disabled:cursor-not-allowed disabled:bg-slate-100"
+                      className={`w-full px-3.5 py-2.5 rounded-xl border ${demandFieldClass('position')} text-xs bg-card text-foreground font-semibold cursor-pointer disabled:cursor-not-allowed disabled:bg-slate-100`}
                     >
                       <option value="">{selectedSector ? t.positionPickPlaceholder : t.selectSectorFirst}</option>
                       {professionsForSector(selectedSector)
@@ -874,48 +955,58 @@ function EmployerPortalInner() {
                     </select>
 
                     <input
+                      id="demand-position-custom"
                       type="text"
                       placeholder={t.otherPositionPlaceholder}
+                      aria-label={t.otherPositionPlaceholder}
+                      {...demandAria('position')}
                       value={customPosition}
-                      onChange={(e) => setCustomPosition(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-line text-xs bg-card text-foreground font-medium"
+                      onChange={(e) => { setCustomPosition(e.target.value); clearDemandField('position'); }}
+                      className={`w-full px-3.5 py-2.5 rounded-xl border ${demandFieldClass('position')} text-xs bg-card text-foreground font-medium`}
                     />
                   </div>
+                  {demandFieldNote('position')}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase text-foreground mb-1">⏱️ {t.experienceLabel} *</label>
-                    <select required value={demandExperience} onChange={(e) => setDemandExperience(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground cursor-pointer">
+                    <label htmlFor="demand-experience" className="block text-xs font-bold uppercase text-foreground mb-1">⏱️ {t.experienceLabel} *</label>
+                    <select id="demand-experience" required aria-required="true" {...demandAria('experience')} value={demandExperience} onChange={(e) => { setDemandExperience(e.target.value); clearDemandField('experience'); }} className={`w-full px-3.5 py-2.5 rounded-xl border ${demandFieldClass('experience')} text-xs font-semibold bg-card text-foreground cursor-pointer`}>
                       <option value="">{t.benefitSelectPlaceholder}</option>
                       {experienceOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
                     </select>
+                    {demandFieldNote('experience')}
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-foreground mb-1">🗣️ {t.languageReqLabel} *</label>
-                    <select required value={demandLanguageReq} onChange={(e) => setDemandLanguageReq(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground cursor-pointer">
+                    <label htmlFor="demand-language" className="block text-xs font-bold uppercase text-foreground mb-1">🗣️ {t.languageReqLabel} *</label>
+                    <select id="demand-language" required aria-required="true" {...demandAria('language')} value={demandLanguageReq} onChange={(e) => { setDemandLanguageReq(e.target.value); clearDemandField('language'); }} className={`w-full px-3.5 py-2.5 rounded-xl border ${demandFieldClass('language')} text-xs font-semibold bg-card text-foreground cursor-pointer`}>
                       <option value="">{t.benefitSelectPlaceholder}</option>
                       {ui.languageOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
                     </select>
+                    {demandFieldNote('language')}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase text-foreground mb-1">{t.headcountLabel} *</label>
-                    <input type="number" min="1" required placeholder={t.headcountPlaceholder} value={demandHeadcount} onChange={(e) => setDemandHeadcount(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground" />
+                    <label htmlFor="demand-headcount" className="block text-xs font-bold uppercase text-foreground mb-1">{t.headcountLabel} *</label>
+                    <input id="demand-headcount" type="number" inputMode="numeric" min={HEADCOUNT_MIN} max={HEADCOUNT_MAX} step="1" required aria-required="true" {...demandAria('headcount')} placeholder={t.headcountPlaceholder} value={demandHeadcount} onChange={(e) => { setDemandHeadcount(e.target.value); clearDemandField('headcount'); }} className={`w-full px-3 py-2.5 rounded-xl border ${demandFieldClass('headcount')} text-xs font-semibold bg-card text-foreground`} />
+                    {demandFieldNote('headcount')}
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-foreground mb-1">{t.cityLocationLabel} *</label>
-                    <input type="text" required placeholder={t.cityPlaceholder} value={demandCity} onChange={(e) => setDemandCity(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground" />
+                    <label htmlFor="demand-city" className="block text-xs font-bold uppercase text-foreground mb-1">{t.cityLocationLabel} *</label>
+                    <input id="demand-city" type="text" required aria-required="true" {...demandAria('city')} placeholder={t.cityPlaceholder} value={demandCity} onChange={(e) => { setDemandCity(e.target.value); clearDemandField('city'); }} className={`w-full px-3 py-2.5 rounded-xl border ${demandFieldClass('city')} text-xs font-semibold bg-card text-foreground`} />
+                    {demandFieldNote('city')}
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-foreground mb-1">{t.salaryOfferLabel} *</label>
-                    <input type="text" required placeholder={t.salaryPlaceholder} value={demandSalary} onChange={(e) => { setDemandSalary(e.target.value); setDemandError(''); }} className="w-full px-3 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground" />
+                    <label htmlFor="demand-salary" className="block text-xs font-bold uppercase text-foreground mb-1">{t.salaryOfferLabel} *</label>
+                    <input id="demand-salary" type="text" inputMode="decimal" required aria-required="true" {...demandAria('salary')} placeholder={t.salaryPlaceholder} value={demandSalary} onChange={(e) => { setDemandSalary(e.target.value); clearDemandField('salary'); }} className={`w-full px-3 py-2.5 rounded-xl border ${demandFieldClass('salary')} text-xs font-semibold bg-card text-foreground`} />
+                    {demandFieldNote('salary')}
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-foreground mb-1">{t.durationLabel} *</label>
-                    <input type="text" required placeholder={t.durationPlaceholder} value={demandDuration} onChange={(e) => setDemandDuration(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground" />
+                    <label htmlFor="demand-duration" className="block text-xs font-bold uppercase text-foreground mb-1">{t.durationLabel} *</label>
+                    <input id="demand-duration" type="text" required aria-required="true" {...demandAria('duration')} placeholder={t.durationPlaceholder} value={demandDuration} onChange={(e) => { setDemandDuration(e.target.value); clearDemandField('duration'); }} className={`w-full px-3 py-2.5 rounded-xl border ${demandFieldClass('duration')} text-xs font-semibold bg-card text-foreground`} />
+                    {demandFieldNote('duration')}
                   </div>
                 </div>
 
@@ -928,15 +1019,16 @@ function EmployerPortalInner() {
                         id="demand-lodging"
                         required
                         aria-required="true"
-                        aria-invalid={demandError === 'lodging' || demandError === 'both'}
+                        {...demandAria('lodging')}
                         value={demandAccommodation}
-                        onChange={(e) => { setDemandAccommodation(e.target.value as YesNo); setDemandError(''); }}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground cursor-pointer"
+                        onChange={(e) => { setDemandAccommodation(e.target.value as YesNo); clearDemandField('lodging'); }}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border ${demandFieldClass('lodging')} text-xs font-semibold bg-card text-foreground cursor-pointer`}
                       >
                         <option value="">{t.benefitSelectPlaceholder}</option>
                         <option value="yes">{t.benefitProvided}</option>
                         <option value="no">{t.benefitNotProvided}</option>
                       </select>
+                      {demandFieldNote('lodging')}
                     </div>
                     <div>
                       <label htmlFor="demand-meals" className="block text-xs font-bold uppercase text-foreground mb-1">{t.facilityFood} *</label>
@@ -944,15 +1036,16 @@ function EmployerPortalInner() {
                         id="demand-meals"
                         required
                         aria-required="true"
-                        aria-invalid={demandError === 'meals' || demandError === 'both'}
+                        {...demandAria('meals')}
                         value={demandFood}
-                        onChange={(e) => { setDemandFood(e.target.value as YesNo); setDemandError(''); }}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-line text-xs font-semibold bg-card text-foreground cursor-pointer"
+                        onChange={(e) => { setDemandFood(e.target.value as YesNo); clearDemandField('meals'); }}
+                        className={`w-full px-3.5 py-2.5 rounded-xl border ${demandFieldClass('meals')} text-xs font-semibold bg-card text-foreground cursor-pointer`}
                       >
                         <option value="">{t.benefitSelectPlaceholder}</option>
                         <option value="yes">{t.benefitProvided}</option>
                         <option value="no">{t.benefitNotProvided}</option>
                       </select>
+                      {demandFieldNote('meals')}
                     </div>
                   </div>
                 </fieldset>

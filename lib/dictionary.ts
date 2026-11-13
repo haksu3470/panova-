@@ -494,6 +494,16 @@ export interface Translation {
   lodgingAndMealsRequired?: string;
   salaryAmountRequired?: string;
   demandSaveFailed?: string;
+  demandErrRequired?: string;
+  demandErrSector?: string;
+  demandErrPosition?: string;
+  demandErrHeadcount?: string;
+  demandErrCity?: string;
+  demandErrDuration?: string;
+  demandErrSalaryRange?: string;
+  demandErrExperience?: string;
+  demandErrCompanyName?: string;
+  demandErrSummary?: string;
   submitDemandBtn?: string;
   activeDemandFilesTitle?: string;
   peopleUnit?: string;
@@ -1216,6 +1226,16 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'Konaklama ve yemek seçimi zorunludur.',
     salaryAmountRequired: 'Aylık net maaşı sayı olarak girin.',
     demandSaveFailed: 'Talep kaydedilemedi. Lütfen tekrar deneyin.',
+    demandErrRequired: 'Bu alan zorunludur.',
+    demandErrSector: 'Bir sektör seçin.',
+    demandErrPosition: 'En az bir pozisyon seçin ya da yazın.',
+    demandErrHeadcount: 'Kişi sayısı 1 ile 500 arasında tam sayı olmalıdır.',
+    demandErrCity: 'Şehir boş bırakılamaz.',
+    demandErrDuration: 'Çalışma süresi boş bırakılamaz.',
+    demandErrSalaryRange: 'Aylık net maaş 0\'dan büyük ve en fazla 100.000 olmalıdır.',
+    demandErrExperience: 'Tecrübe 0 ile 60 yıl arasında olmalıdır.',
+    demandErrCompanyName: 'Şirket adınız eksik. Önce Şirket Bilgileri bölümünden doldurun.',
+    demandErrSummary: 'Talep gönderilmedi. İşaretli alanları düzeltin.',
     submitDemandBtn: 'Kurumsal Personel Talebini PANOVA Operasyona Gönder',
     activeDemandFilesTitle: 'Aktif İş Gücü Talep Dosyalarınız',
     peopleUnit: 'Kişi',
@@ -1925,6 +1945,16 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'Choose whether accommodation and meals are provided.',
     salaryAmountRequired: 'Enter the monthly net salary as a number.',
     demandSaveFailed: 'The request could not be saved. Please try again.',
+    demandErrRequired: 'This field is required.',
+    demandErrSector: 'Select a sector.',
+    demandErrPosition: 'Select or type at least one position.',
+    demandErrHeadcount: 'Headcount must be a whole number from 1 to 500.',
+    demandErrCity: 'City cannot be empty.',
+    demandErrDuration: 'Work duration cannot be empty.',
+    demandErrSalaryRange: 'Monthly net salary must be more than 0 and at most 100,000.',
+    demandErrExperience: 'Experience must be from 0 to 60 years.',
+    demandErrCompanyName: 'Your company name is missing. Fill it in under Company Information first.',
+    demandErrSummary: 'The request was not sent. Fix the marked fields.',
     submitDemandBtn: 'Send Corporate Personnel Demand to PANOVA Operations',
     activeDemandFilesTitle: 'Your Active Workforce Demand Files',
     peopleUnit: 'Person(s)',
@@ -2634,6 +2664,16 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'Zgjidhni nëse ofrohen akomodimi dhe ushqimi.',
     salaryAmountRequired: 'Shkruani pagën neto mujore si numër.',
     demandSaveFailed: 'Kërkesa nuk u ruajt. Ju lutemi provoni përsëri.',
+    demandErrRequired: 'Kjo fushë është e detyrueshme.',
+    demandErrSector: 'Zgjidhni një sektor.',
+    demandErrPosition: 'Zgjidhni ose shkruani të paktën një pozicion.',
+    demandErrHeadcount: 'Numri i personave duhet të jetë numër i plotë nga 1 deri në 500.',
+    demandErrCity: 'Qyteti nuk mund të jetë bosh.',
+    demandErrDuration: 'Kohëzgjatja e punës nuk mund të jetë bosh.',
+    demandErrSalaryRange: 'Paga neto mujore duhet të jetë më e madhe se 0 dhe jo më shumë se 100.000.',
+    demandErrExperience: 'Përvoja duhet të jetë nga 0 deri në 60 vjet.',
+    demandErrCompanyName: 'Mungon emri i kompanisë. Plotësojeni fillimisht te Informacioni i Kompanisë.',
+    demandErrSummary: 'Kërkesa nuk u dërgua. Korrigjoni fushat e shënuara.',
     submitDemandBtn: 'Dërgo Kërkesën e Personelit te Operacionet PANOVA',
     activeDemandFilesTitle: 'Skedarët tuaj aktivë të kërkesave për fuqi punëtore',
     peopleUnit: 'Persona',
@@ -3069,6 +3109,16 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'حدد ما إذا كانت الإقامة والوجبات متوفرة.',
     salaryAmountRequired: 'أدخل صافي الراتب الشهري كرقم.',
     demandSaveFailed: 'تعذر حفظ الطلب. يرجى المحاولة مرة أخرى.',
+    demandErrRequired: 'هذا الحقل مطلوب.',
+    demandErrSector: 'اختر قطاعًا.',
+    demandErrPosition: 'اختر وظيفة واحدة على الأقل أو اكتبها.',
+    demandErrHeadcount: 'يجب أن يكون عدد الأشخاص عددًا صحيحًا من 1 إلى 500.',
+    demandErrCity: 'لا يمكن ترك المدينة فارغة.',
+    demandErrDuration: 'لا يمكن ترك مدة العمل فارغة.',
+    demandErrSalaryRange: 'يجب أن يكون صافي الراتب الشهري أكبر من 0 ولا يتجاوز 100,000.',
+    demandErrExperience: 'يجب أن تكون الخبرة من 0 إلى 60 سنة.',
+    demandErrCompanyName: 'اسم شركتكم مفقود. أكملوه أولًا في قسم معلومات الشركة.',
+    demandErrSummary: 'لم يُرسل الطلب. صحّحوا الحقول المحددة.',
     submitDemandBtn: 'إرسال طلب الموظفين المؤسسي إلى عمليات بانوفا',
     activeDemandFilesTitle: 'ملفات طلبات القوى العاملة النشطة',
     peopleUnit: 'أفراد',
@@ -4051,6 +4101,16 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'Изберете дали се обезбедуваат сместување и храна.',
     salaryAmountRequired: 'Внесете ја месечната нето плата како број.',
     demandSaveFailed: 'Барањето не е зачувано. Обидете се повторно.',
+    demandErrRequired: 'Ова поле е задолжително.',
+    demandErrSector: 'Изберете сектор.',
+    demandErrPosition: 'Изберете или напишете барем една позиција.',
+    demandErrHeadcount: 'Бројот на лица мора да биде цел број од 1 до 500.',
+    demandErrCity: 'Градот не може да биде празен.',
+    demandErrDuration: 'Времетраењето на работата не може да биде празно.',
+    demandErrSalaryRange: 'Месечната нето плата мора да биде поголема од 0 и најмногу 100.000.',
+    demandErrExperience: 'Искуството мора да биде од 0 до 60 години.',
+    demandErrCompanyName: 'Недостасува името на компанијата. Прво пополнете го во Информации за компанијата.',
+    demandErrSummary: 'Барањето не е испратено. Поправете ги означените полиња.',
     submitDemandBtn: 'Испрати корпоративно барање за персонал до операциите на PANOVA',
     activeDemandFilesTitle: 'Вашите активни досиеја за работна сила',
     peopleUnit: 'лица',

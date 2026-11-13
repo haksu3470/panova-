@@ -378,6 +378,22 @@ Automated: `lib/candidateDocuments.test.ts` (no-file rule, five slots plus other
 
 Automated: `lib/documentPreview.test.ts` (PDF blob typed `application/pdf` from octet-stream bytes, no download attribute on "open in new tab", storage download address, no sandbox, fallback text, CSP), `lib/securityHeaders.test.ts`.
 
+## S21. İşveren talep formu / Employer request form
+
+**Rol / Role:** Employer on `/employer`, **New request** tab. Rules in the database: `supabase/migrations/20261113180000_job_requests_guards.sql`.
+
+**Adımlar ve beklenen / Steps and expected:**
+
+1. **Alan altında hata / Message under each field.** Press **Submit** on the empty form. The button is never greyed out; nothing is sent. Every empty field shows its own red message under it (sector, position, experience, language, headcount, city, salary, work duration, accommodation, meals) and a summary "The request was not sent. Fix the marked fields." shows above the button. Focus moves to the first sector button. A screen reader reads the field's message with the field (`aria-invalid`, `aria-describedby`).
+2. **Sınırlar / Limits.** Headcount `0`, `501` or `2.5`: "Headcount must be a whole number from 1 to 500." `1` and `500` are accepted. Salary `0` or `150000`: "Monthly net salary must be more than 0 and at most 100,000."; `negotiable`: "Enter the monthly net salary as a number."; `100000` is accepted. City or work duration with only spaces: the "cannot be empty" message.
+3. **Düzeltince kaybolur / Clears on edit.** Change a marked field: its message disappears; the other messages stay. Focus goes to the first remaining field on the next **Submit**.
+4. **Sunucu kuralı / Server rule.** With the client check bypassed (for example a request sent with headcount 600 from DevTools, or an older open tab), the database refuses it (`23514`, `job_requests_headcount_range`). The form shows the headcount message under **Headcount**, not a generic error. Company name empty in the profile: "Your company name is missing…" above the button.
+5. **Personel alanları / Staff-only fields.** As an employer, a request sent with `assigned_to`, `assigned_backup` or `is_demo` set is saved with those reset (null, null, false). Changing them on an existing request is refused with `request_fields_staff_only`. Staff can still assign requests from the portal.
+6. **Silme / Delete.** An employer can delete their own request only while it has no match, interview or offer; after that the delete removes nothing.
+7. **Diller / Languages.** Repeat item 1 in TR, EN, SQ, AR, MK: every message is translated.
+
+Automated: `lib/workforceRequest.test.ts` (per-field errors, limits 1–500 / 0–100000 / 0–60, first invalid field, database rule to field, five languages, page wiring).
+
 ---
 
 ## Boşluk analizi / Gap analysis

@@ -130,6 +130,143 @@ export function buildEmployerDemandInsert(
   };
 }
 
+/** Limits shared with the job_requests check rules (20261113180000_job_requests_guards.sql). */
+export const HEADCOUNT_MIN = 1;
+export const HEADCOUNT_MAX = 500;
+export const SALARY_MAX = 100000;
+export const EXPERIENCE_MAX_YEARS = 60;
+
+/** Form fields, in the order they appear (the first invalid one gets focus). */
+export const DEMAND_FIELDS = [
+  'sector', 'position', 'experience', 'language', 'headcount', 'city', 'salary', 'duration', 'lodging', 'meals',
+] as const;
+export type DemandField = (typeof DEMAND_FIELDS)[number];
+
+/** What is wrong with a field; each maps to one message. */
+export type DemandFieldError =
+  | 'required'
+  | 'headcount_range'
+  | 'salary_number'
+  | 'salary_range'
+  | 'experience_range';
+
+export type DemandFieldErrors = Partial<Record<DemandField, DemandFieldError>>;
+
+export type DemandFormInput = {
+  sector: string;
+  positionTitle: string;
+  experience: string;
+  language: string;
+  /** As typed: must be a whole number from 1 to 500. */
+  headcountText: string;
+  city: string;
+  salaryText: string;
+  duration: string;
+  lodging: YesNo;
+  meals: YesNo;
+};
+
+/** Every problem in the form at once, per field (empty object when valid). */
+export function validateDemandForm(input: DemandFormInput): DemandFieldErrors {
+  const errors: DemandFieldErrors = {};
+  const blank = (value: string) => !String(value ?? '').trim();
+
+  if (blank(input.sector)) errors.sector = 'required';
+  if (blank(input.positionTitle)) errors.position = 'required';
+
+  if (blank(input.experience)) errors.experience = 'required';
+  else if (!(input.experience in EXPERIENCE_YEARS)) errors.experience = 'experience_range';
+  else {
+    const years = experienceYearsFromChoice(input.experience);
+    if (years < 0 || years > EXPERIENCE_MAX_YEARS) errors.experience = 'experience_range';
+  }
+
+  if (blank(input.language)) errors.language = 'required';
+
+  const headcount = String(input.headcountText ?? '').trim();
+  if (!headcount) errors.headcount = 'required';
+  else if (!/^\d+$/.test(headcount) || Number(headcount) < HEADCOUNT_MIN || Number(headcount) > HEADCOUNT_MAX) {
+    errors.headcount = 'headcount_range';
+  }
+
+  if (blank(input.city)) errors.city = 'required';
+
+  if (blank(input.salaryText)) errors.salary = 'required';
+  else {
+    const salary = parseMonthlyNetSalary(input.salaryText);
+    if (salary == null) errors.salary = /\d/.test(input.salaryText) ? 'salary_range' : 'salary_number';
+    else if (salary > SALARY_MAX) errors.salary = 'salary_range';
+  }
+
+  if (blank(input.duration)) errors.duration = 'required';
+  if (input.lodging !== 'yes' && input.lodging !== 'no') errors.lodging = 'required';
+  if (input.meals !== 'yes' && input.meals !== 'no') errors.meals = 'required';
+  return errors;
+}
+
+/** The first invalid field in form order, or null. */
+export function firstInvalidDemandField(errors: DemandFieldErrors): DemandField | null {
+  return DEMAND_FIELDS.find((field) => errors[field]) ?? null;
+}
+
+/** job_requests check rules and the form field each one belongs to. */
+export const JOB_REQUEST_RULES: Record<string, { field: DemandField | 'company'; error: DemandFieldError }> = {
+  job_requests_headcount_range: { field: 'headcount', error: 'headcount_range' },
+  job_requests_position_title_nonblank: { field: 'position', error: 'required' },
+  job_requests_employer_name_nonblank: { field: 'company', error: 'required' },
+  job_requests_sector_nonblank: { field: 'sector', error: 'required' },
+  job_requests_salary_range: { field: 'salary', error: 'salary_range' },
+  job_requests_experience_range: { field: 'experience', error: 'experience_range' },
+  job_requests_city_nonblank: { field: 'city', error: 'required' },
+  job_requests_contract_type_nonblank: { field: 'duration', error: 'required' },
+};
+
+/**
+ * A rule refusal from the database (23514 check_violation naming one of the
+ * job_requests_* rules), as the form field it belongs to. 'company' is the
+ * company name from the employer profile, not a form field. Null for any
+ * other error.
+ */
+export function demandRuleFromDbError(
+  error: unknown,
+): { field: DemandField | 'company'; error: DemandFieldError; rule: string } | null {
+  if (!error || typeof error !== 'object') return null;
+  const e = error as { code?: unknown; message?: unknown; details?: unknown; hint?: unknown };
+  const text = [e.message, e.details, e.hint].map((v) => String(v ?? '')).join(' ');
+  if (e.code !== '23514' && !/check_violation|violates check constraint/i.test(text)) return null;
+  const rule = Object.keys(JOB_REQUEST_RULES).find((name) => text.includes(name));
+  return rule ? { ...JOB_REQUEST_RULES[rule], rule } : null;
+}
+
+type DemandCopyKey =
+  | 'demandErrRequired' | 'demandErrSector' | 'demandErrPosition' | 'demandErrHeadcount' | 'demandErrCity'
+  | 'demandErrDuration' | 'demandErrSalaryRange' | 'demandErrExperience' | 'demandErrCompanyName'
+  | 'salaryAmountRequired' | 'lodgingRequired' | 'mealsRequired';
+
+/** The message shown under a field (dictionary keys above). */
+export function demandFieldMessage(
+  field: DemandField | 'company',
+  error: DemandFieldError,
+  t: Partial<Record<DemandCopyKey, string>>,
+): string {
+  const key: DemandCopyKey = (() => {
+    switch (field) {
+      case 'sector': return 'demandErrSector';
+      case 'position': return 'demandErrPosition';
+      case 'headcount': return 'demandErrHeadcount';
+      case 'city': return 'demandErrCity';
+      case 'duration': return 'demandErrDuration';
+      case 'company': return 'demandErrCompanyName';
+      case 'lodging': return 'lodgingRequired';
+      case 'meals': return 'mealsRequired';
+      case 'salary': return error === 'salary_range' ? 'demandErrSalaryRange' : 'salaryAmountRequired';
+      case 'experience': return error === 'experience_range' ? 'demandErrExperience' : 'demandErrRequired';
+      default: return 'demandErrRequired';
+    }
+  })();
+  return t[key] || t.demandErrRequired || '';
+}
+
 export function benefitPhrase(
   labels: { provided: string; notProvided: string; unanswered: string },
   value: unknown,
