@@ -1,71 +1,49 @@
 # Kılavuz çeviri listesi (en, sq, ar, mk)
 
-Kaynak: `lib/guides-copy.ts`. Türkçe metin `tr` bloğundadır. Çeviri bitince ilgili satırı bu dosyadan silin.
+**Durum: çeviri tamamlandı, ana dili konuşan kişi incelemesi bekliyor.**
 
-## 1. Yeni anahtarlar: şimdilik Türkçe gösteriliyor
+Kaynak: `lib/guides-copy.ts`. Türkçe metin `tr` bloğundadır; `en`, `sq`, `ar`, `mk` blokları onun çevirisidir. Geçici Türkçe gösterim (`withPendingTr`, `GUIDES_PENDING_TRANSLATION`) kaldırıldı. Kılavuzlar ekranı (`/guides`) ve yazdırma sayfası (`/guides/print`) aynı metni kullanır.
 
-Bu yollar `GUIDES_PENDING_TRANSLATION` listesindedir. `withPendingTr()` diğer dillere Türkçe metni koyar; testler bu yollarda Türkçe harfe ve yazı sistemine bakmaz.
+## Çeviri kuralları (uygulananlar)
 
-Çevirmek için: yolu ilgili dilin bloğuna (`en`, `sq`, `ar`, `mk`) çevrilmiş metinle ekleyin. Dört dilin hepsi bitince yolu `GUIDES_PENDING_TRANSLATION` listesinden ve buradan silin.
+- Adım, akış ve şema satırı sayıları her dilde Türkçe ile aynıdır (`lib/guides.test.ts` denetler). Adım rolleri (`GUIDE_STEP_ACTORS`, `lib/guides-model.ts`) adım sırasına bağlıdır; bir dilde adım eklemeyin, silmeyin, sırasını değiştirmeyin.
+- Ekrandaki sekme ve düğme adları o dilin portal metninden alındı, tahmin edilmedi:
+  - Personel sekmeleri: `lib/dictionary.ts` → `overviewTab`, `candidatesTab`, `requestsTab`, `staffTab`, `tasksTab`, `auditTab`, `employersTab`, `supportTab`.
+  - İşveren sekmeleri: `overview`, `empTabNewRequest`, `candidatesTab`, `empTabInterviews`, `empTabSelected`, `process`, `travel`, `employeesTab`, `support`, `empTabProfile`.
+  - Aday sekmeleri: `overview`, `profile`, `documents`, `offers`, `support`.
+  - Düğmeler ve durumlar: `candStatusManualBtn`, `previewBtn`, `docDownload`, `docOpenNewTab`, `empRequestDelete`, `empRequestHasActivity`, `interviewReqBtn`, `selectBtn`, `rejectBtn`, `decisionSelectedOpt`, `decisionRejectedOpt`, `statusPending`, `reviewing`, `approved`, `stage*`, `demoDataTitle` (`lib/dictionary.ts`); `docRequest`, `present`, `matchCandidates`, `send`, `deleteRecord`, `docStatuses`, `offerStatus`, `documents_collecting` (`lib/portal-ui-copy.ts`).
+  - Roller: `roleUpperManagement`, `roleSourceCountry`, `roleTargetCountry`, `roleFieldOfficer` (`lib/dictionary.ts`); Finans ve Sınırlı erişim `lib/email/email-copy.ts`.
+  - Sektörler ve meslekler: `lib/professions.ts` (Kalıpçı → `formwork` takma adı, Aşçı → `cook`).
+- Çevrilmeyenler: yollar (`/portal`, `/candidate` …), para birimi ve tutarlar (EUR, USD, €, $), `{roles}` yer tutucusu, `http/https`, `30/60/90`, ürün adları (Google, YouTube, Meet, Zoom, Teams, Panova).
+- Demo kayıt adları (`DEMO Balkan Yapı DOO`, `DEMO Adriyatik Otel`, `Demo Aday Bir / İki / Dört`) veritabanındaki yazımla aynı kaldı; ekranda da böyle görünürler. Testlerde bilinen istisnadır.
+- Sayı biçimi: İngilizcede binlik ayırıcı virgüldür (1,300; 100,000); sq, ar, mk Türkçe gibi nokta kullanır (1.300; 100.000).
+- Arapça: sıralı adımları gösteren oklar metin içinde `←` olarak yazıldı (sağdan sola okunur). "Nerede" satırı (`where`) yol gibi soldan sağa gösterilir (`dir="ltr"`, ekranda ve yazdırmada).
 
-- [ ] `exampleLabel`
-- [ ] `stepDoneBy` (adım rol notu, `{roles}` yer tutucusu kalmalı)
-- [ ] `stepOthersNote`
-- [ ] `roleLabels.finance`
-- [ ] `roleLabels.limited`
-- [ ] `roles.finance`
-- [ ] `roles.limited`
-- [ ] `roles.employer.screens.newRequest`
-- [ ] `guides.staff-login.example`
-- [ ] `guides.staff-invite.example`
-- [ ] `guides.dossier-review.example`
-- [ ] `guides.dossier-review.steps` (6 adım; adım rolleri için bölüm 5)
-- [ ] `guides.matching-offers.example`
-- [ ] `guides.matching-offers.steps` (7 adım; adım rolleri için bölüm 5)
-- [ ] `guides.employer-request.example`
-- [ ] `guides.employer-browse.example`
-- [ ] `guides.candidate-register.example`
-- [ ] `guides.request-to-offer`
-- [ ] `guides.document-request`
+## Ana dili konuşan kişi incelemesi
 
-## 2. Türkçesi değişen metinler: diğer dillerde eski hali duruyor
+Her dil için aşağıdaki yerleri bir kez okuyun. Düzeltme yaparken adım sayısını ve sırasını koruyun; ekrandaki sekme ve düğme adını değiştirmek gerekirse önce `lib/dictionary.ts` (veya `lib/portal-ui-copy.ts`) içinde değiştirin, kılavuzu ona uydurun.
 
-Bu anahtarlar dört dilde zaten var, ama eski içeriği anlatıyor. Yeni Türkçe metne göre yeniden çevrilmeli. Test bunları yakalamaz.
+- [ ] **en** (`const en` bloğu)
+- [ ] **sq** (`const sq` bloğu)
+- [ ] **ar** (`const ar` bloğu), ayrıca `/guides` ve `/guides/print` sayfalarında sağdan sola görünüm
+- [ ] **mk** (`const mk` bloğu)
 
-- **(üst düzey)**: `mapNote`, `howToLead`
-- **roles.upper_management**: `summary`, `screens.overview.does`, `screens.candidates.does`, `screens.requests.does`, `screens.employers.does`
-- **roles.source_country**: `summary`, `screens.candidates.does`, `screens.dossier.does`, `screens.requests.does`
-- **roles.target_country**: `summary`, `screens.request.does`, `screens.employer.does`
-- **roles.field_officer**: `summary`, `screens.dossier.does`, `screens.overview.does`
-- **roles.employer**: `summary`, `screens.home.does`, `screens.candidates.does`, `screens.interviews.name`, `screens.interviews.does`, `screens.selected.name`, `screens.selected.does`, `screens.process.name`, `screens.process.does`, `screens.travel.name`, `screens.employees.name`, `screens.employees.does`, `screens.support.name`, `screens.company.name`
-- **roles.candidate**: `summary`, `screens.profile.does`, `screens.documents.does`, `screens.offers.does`
-- **guides.staff-login**: `steps[3].body`, `flow[3]`, `mock.rows[2].value`
-- **guides.dossier-review**: `summary`, `flow[1]`, `flow[2]`, `flow[3]`, `mock.caption`, `mock.chrome`, `mock.rows[0].label`, `mock.rows[0].value`, `mock.rows[1].label`, `mock.rows[1].value`, `mock.rows[2].label`, `mock.rows[2].value`
-- **guides.matching-offers**: `title`, `summary`, `flow[1]`, `flow[2]`, `flow[3]`, `mock.rows[0].label`, `mock.rows[0].value`, `mock.rows[1].label`, `mock.rows[1].value`, `mock.rows[2].label`, `mock.rows[2].value`
-- **guides.employer-request**: `summary`, `where`, `steps[1].title`, `steps[1].body`, `steps[2].body`, `steps[3].title`, `steps[3].body`, `steps[4].body`, `flow[0]`, `flow[1]`, `flow[2]`, `mock.chrome`, `mock.rows[0].value`, `mock.rows[1].label`, `mock.rows[1].value`
-- **guides.employer-browse**: `summary`, `steps[0].body`, `steps[2].body`, `steps[3].body`, `flow[1]`, `flow[2]`, `flow[3]`, `mock.rows[2].value`
-- **guides.candidate-register**: `steps[1].body`, `steps[3].body`, `steps[4].title`, `steps[4].body`, `flow[3]`, `mock.caption`, `mock.rows[0].label`, `mock.rows[0].value`, `mock.rows[1].value`, `mock.rows[2].value`
+Her blokta yeni yazılan veya yeniden çevrilen anahtarlar:
 
-## 3. Kaldırılan anahtar
+- **Üst düzey:** `mapNote`, `howToLead`, `exampleLabel`, `stepDoneBy` (`{roles}` kalmalı), `stepOthersNote`
+- **roleLabels:** tümü (rol adları sözlükteki karşılıklarla değişti), yeni `finance`, `limited`
+- **roles:** tüm `title`, `summary`, `screens.*.name`, `screens.*.does`; yeni `finance`, `limited`, `employer.screens.newRequest`
+- **guides:** dokuz rehberin tamamı (`staff-login`, `staff-invite`, `dossier-review`, `matching-offers`, `request-to-offer`, `document-request`, `employer-request`, `employer-browse`, `candidate-register`): `title`, `summary`, `where`, `steps`, `flow`, `mock`, `example`
 
-- `roles.employer.screens.demands`: işveren portalında "Talepler" sekmesi yok. Dört dilden de silindi; yerini `roles.employer.screens.newRequest` (Yeni talep) aldı ve yukarıdaki listede.
+Değişmeyenler (önceki çeviri duruyor): `navLabel`, `hubTitle`, `hubLead`, `mapTitle`, `mapLead`, `unknownRoleNote`, `howToTitle`, `sessionLabel`, `screensLabel`, `upperOnly`, `stepsLabel`, `whereLabel`, `flowLabel`, `print.*` (13 anahtar), `loading`, `signedOut*`, `signIn*`, `back*`, `unlinked*`, `verify*`.
 
-## 4. Yazdırma sayfası (`print.*`)
+### Özellikle bakılacaklar
 
-`/guides/print` için eklenen `print` grubundaki 13 anahtar (`print.printButton`, `print.allRoles`, `print.ownGuide`, `print.back`, `print.coverSubtitle`, `print.languageLabel`, `print.createdLabel`, `print.sessionRoleLabel`, `print.scopeLabel`, `print.roleFilterLabel`, `print.contentsTitle`, `print.hint`, `print.pageLabel`) beş dilde yazıldı; geçici Türkçe yok, `GUIDES_PENDING_TRANSLATION` listesine girmedi.
+- Türkçe kılavuz bazı sekmeleri kısa adla anar ("Adaylar", "Talepler", "Personel"); portalda Türkçe sekme adları "Aday Havuzu", "Personel Talepleri", "Ekip & Yetkiler". Çeviriler portaldaki adları kullanır. Türkçe metin bu çalışmada değiştirilmedi; uyumlu hale getirilmesi ayrı bir iş.
+- Meslek adı: Türkçe "Kalıpçı" için `formwork` karşılığı kullanıldı (en Formwork carpenter, sq Usta kallëpi, ar نجار قوالب, mk Опажувач).
+- Aday tarafındaki teklif kabul / ret düğmeleri ve işveren "aday seç / reddet" metinleri genel fiille yazıldı ("accept or reject"); düğmenin kendi adı sözlükte farklıysa uydurun.
+- Arapça ve Makedonca metinlerde Latin harfli demo adları ve kodlar arasında yön ve noktalama.
 
-- [ ] en, sq, ar, mk metinlerini ana dili konuşan biri gözden geçirsin.
-- Not: `print.coverSubtitle` şirket adını (Panova Group) Latin harfle tutar.
+## Kaldırılan anahtar
 
-## 5. Adım yetkileri (`GUIDE_STEP_ACTORS`)
-
-Rehber adımlarının hangi rolce yapıldığı `lib/guides-model.ts` içindeki `GUIDE_STEP_ACTORS` listesindedir ve adım sırasına bağlıdır. Bir dilde adım çevirirken adım sayısını ve sırasını Türkçe ile aynı tutun; test (`lib/guides.test.ts`) adım sayısı farklıysa düşer.
-
-- `guides.dossier-review.steps` ve `guides.matching-offers.steps` yeniden yazıldı (durumu elle değiştirme, YouTube, aday bağlama, sunma, işveren adına karar, mülakat ve toplantı bağlantısı ayrı adım oldu). Eski çeviriler (4 adım) şimdilik Türkçe metinle değiştirildi; bölüm 2'deki eski `steps[...]` satırları bu yüzden kaldırıldı.
-- `guides.request-to-offer` (7 adım; "Toplantı bağlantısı" yeni adım) ve `guides.document-request` (6 adım; "Belgeyi silin" yeni adım) zaten bölüm 1'de bütün olarak bekliyor.
-
-## Rol görünürlüğü (`mapNote`, `unknownRoleNote`)
-
-`mapNote` (Türkçesi değişti) ve yeni `unknownRoleNote` beş dilde yazıldı; geçici Türkçe yok, `GUIDES_PENDING_TRANSLATION` listesine girmedi.
-
-- [ ] en, sq, ar, mk metinlerini ana dili konuşan biri gözden geçirsin.
+- `roles.employer.screens.demands`: işveren portalında "Talepler" sekmesi yok; yerini `roles.employer.screens.newRequest` (Yeni talep) aldı.
