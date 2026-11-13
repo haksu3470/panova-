@@ -1,12 +1,21 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import test from 'node:test';
 import { translations, type Language } from './dictionary.ts';
 import {
   benefitPhrase,
   benefitsAnswered,
   buildEmployerDemandInsert,
+  DEMAND_FIELDS,
+  demandFieldMessage,
+  demandRuleFromDbError,
   displayedRequestSalary,
+  firstInvalidDemandField,
+  JOB_REQUEST_RULES,
   parseMonthlyNetSalary,
+  validateDemandForm,
+  type DemandFormInput,
   type EmployerDemandDraft,
 } from './workforceRequest.ts';
 
@@ -23,6 +32,16 @@ const COPY_KEYS = [
   'demandSaveFailed',
   'facilityAccommodation',
   'facilityFood',
+  'demandErrRequired',
+  'demandErrSector',
+  'demandErrPosition',
+  'demandErrHeadcount',
+  'demandErrCity',
+  'demandErrDuration',
+  'demandErrSalaryRange',
+  'demandErrExperience',
+  'demandErrCompanyName',
+  'demandErrSummary',
 ] as const;
 const TURKISH_LETTERS = /[ğışöüĞİŞÖÜ]/;
 
@@ -117,4 +136,93 @@ test('view labels distinguish provided, not provided, and unanswered', () => {
   assert.equal(displayedRequestSalary({ monthly_net_salary: 1300 }), '1300');
   assert.equal(displayedRequestSalary({ salary: '950 EUR', monthly_net_salary: 1 }), '950 EUR');
   assert.equal(displayedRequestSalary({}), '');
+});
+
+const form = (overrides: Partial<DemandFormInput> = {}): DemandFormInput => ({
+  sector: 'agriculture',
+  positionTitle: 'Harvest worker',
+  experience: '1-3',
+  language: 'english_basic',
+  headcountText: '5',
+  city: 'Struga',
+  salaryText: '1200 EUR',
+  duration: '12 months',
+  lodging: 'yes',
+  meals: 'no',
+  ...overrides,
+});
+
+test('a valid form has no field errors', () => {
+  assert.deepEqual(validateDemandForm(form()), {});
+  assert.equal(firstInvalidDemandField({}), null);
+});
+
+test('blank required fields are each reported under their own field', () => {
+  const errors = validateDemandForm(form({
+    sector: '', positionTitle: '  ', experience: '', language: '', headcountText: '', city: '   ', salaryText: '', duration: ' ', lodging: '', meals: '',
+  }));
+  assert.deepEqual(Object.keys(errors).sort(), [...DEMAND_FIELDS].sort());
+  assert.ok(Object.values(errors).every((e) => e === 'required'));
+  assert.equal(firstInvalidDemandField(errors), 'sector');
+  assert.equal(firstInvalidDemandField({ salary: 'salary_range', city: 'required' }), 'city');
+});
+
+test('headcount: whole number from 1 to 500', () => {
+  for (const ok of ['1', '500', ' 42 ']) assert.equal(validateDemandForm(form({ headcountText: ok })).headcount, undefined, ok);
+  for (const bad of ['0', '501', '2.5', '-3', 'abc', '1e2']) assert.equal(validateDemandForm(form({ headcountText: bad })).headcount, 'headcount_range', bad);
+});
+
+test('salary: more than 0 and at most 100000', () => {
+  for (const ok of ['1', '100000', '100.000', '1.200,50 EUR']) assert.equal(validateDemandForm(form({ salaryText: ok })).salary, undefined, ok);
+  for (const bad of ['0', '100000.01', '150.000', '250000']) assert.equal(validateDemandForm(form({ salaryText: bad })).salary, 'salary_range', bad);
+  assert.equal(validateDemandForm(form({ salaryText: 'negotiable' })).salary, 'salary_number');
+});
+
+test('experience: one of the choices (0 to 60 years)', () => {
+  for (const ok of ['none', '1-3', '3-5', '5+']) assert.equal(validateDemandForm(form({ experience: ok })).experience, undefined, ok);
+  assert.equal(validateDemandForm(form({ experience: '70' })).experience, 'experience_range');
+});
+
+test('database rule refusals map to the field they belong to', () => {
+  for (const [rule, target] of Object.entries(JOB_REQUEST_RULES)) {
+    const error = { code: '23514', message: `new row for relation "job_requests" violates check constraint "${rule}"`, details: null };
+    assert.deepEqual(demandRuleFromDbError(error), { ...target, rule }, rule);
+  }
+  assert.equal(Object.keys(JOB_REQUEST_RULES).length, 8);
+  assert.equal(demandRuleFromDbError({ code: '23514', message: 'violates check constraint "other_rule"' }), null);
+  assert.equal(demandRuleFromDbError({ code: '42501', message: 'request_fields_staff_only' }), null);
+  assert.equal(demandRuleFromDbError({ message: 'check_violation', details: 'job_requests_salary_range' })?.field, 'salary');
+  assert.equal(demandRuleFromDbError(null), null);
+});
+
+test('every field error has a translated message in five languages', () => {
+  const cases: [Parameters<typeof demandFieldMessage>[0], Parameters<typeof demandFieldMessage>[1]][] = [
+    ...DEMAND_FIELDS.map((f) => [f, 'required'] as [typeof f, 'required']),
+    ['headcount', 'headcount_range'], ['salary', 'salary_range'], ['salary', 'salary_number'], ['experience', 'experience_range'], ['company', 'required'],
+  ];
+  for (const lang of LOCALES) {
+    for (const [field, error] of cases) {
+      const text = demandFieldMessage(field, error, translations[lang]);
+      assert.ok(text.trim(), `${lang} ${field} ${error}`);
+      if (lang !== 'en') assert.notEqual(text, demandFieldMessage(field, error, translations.en), `${lang} ${field} ${error} is English`);
+    }
+  }
+  assert.equal(demandFieldMessage('salary', 'salary_range', translations.tr), translations.tr.demandErrSalaryRange);
+  assert.equal(demandFieldMessage('headcount', 'required', translations.tr), translations.tr.demandErrHeadcount);
+});
+
+test('employer form: messages under fields, aria wiring, focus, submit never disabled', () => {
+  const page = readFileSync(join(import.meta.dirname, '..', 'app/employer/page.tsx'), 'utf8');
+  const start = page.indexOf('onSubmit={handleCreateCorporateDemand}');
+  const formSrc = page.slice(start, page.indexOf('</form>', start));
+  for (const field of DEMAND_FIELDS) {
+    assert.ok(formSrc.includes(`demandFieldNote('${field}')`), `note under ${field}`);
+    assert.ok(formSrc.includes(`demandAria('${field}')`), `aria on ${field}`);
+  }
+  assert.ok(page.includes("'aria-describedby': demandErrorId(field)"));
+  assert.ok(page.includes('document.getElementById(id)?.focus()'));
+  assert.ok(page.includes('validateDemandForm('));
+  assert.ok(page.includes('demandRuleFromDbError(error)'));
+  const submit = formSrc.slice(formSrc.lastIndexOf('<button type="submit"'));
+  assert.equal(/disabled/.test(submit.slice(0, submit.indexOf('>'))), false);
 });
