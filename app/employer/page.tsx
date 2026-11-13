@@ -10,7 +10,7 @@ import { offerMoney, offerStatusLabel } from '@/lib/offers';
 import { employerService } from '@/lib/services/employerService';
 import { 
   Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, 
-  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, Plane, ShieldCheck, HeartHandshake, UploadCloud, Check, Video, Star, CheckCircle2, BookOpen
+  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, ShieldCheck, HeartHandshake, UploadCloud, Check, Video, Star, CheckCircle2, BookOpen
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
@@ -45,6 +45,8 @@ import {
   type PipelineCountsIndex,
 } from '@/lib/requestPipelineCounts';
 import { formatInterviewTime, joinableMeetingUrl } from '@/lib/interviewMeeting';
+import { toPlacements, type EmployerPlacement } from '@/lib/employerPlacements';
+import EmployerPlacementTabs, { type PlacementsLoad } from './components/EmployerPlacementTabs';
 
 function EmployerPortalInner() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
@@ -159,6 +161,9 @@ function EmployerPortalInner() {
   const [interviews, setInterviews] = useState<any[]>([]);
   const [selectedCandidates, setSelectedCandidates] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
+  // İşlem Durumu / Seyahat / Aktif Çalışanlar: only from employer_placements().
+  const [placements, setPlacements] = useState<EmployerPlacement[]>([]);
+  const [placementsLoad, setPlacementsLoad] = useState<PlacementsLoad>('loading');
 
   const [selectedSector, setSelectedSector] = useState<'' | 'agriculture' | 'construction' | 'trade'>('');
   const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
@@ -219,6 +224,12 @@ function EmployerPortalInner() {
       .filter((row) => row.id);
     setCandidates(rows);
     setSelectedCandidates(rows.filter((c) => c.employer_decision === 'selected'));
+
+    // On an error the three tabs show a notice, never placeholder rows.
+    const { data: placementRows, error: placementError } = await supabase.rpc('employer_placements');
+    if (placementError) console.error('employer placements failed', placementError.code || placementError.message);
+    setPlacements(placementError ? [] : toPlacements(placementRows));
+    setPlacementsLoad(placementError ? 'error' : 'ready');
 
     const { data: intData } = await supabase.from('interviews').select('*').eq('employer_id', employerProfile.id).order('created_at', { ascending: false });
     setInterviews(intData || []);
@@ -1164,45 +1175,18 @@ function EmployerPortalInner() {
           </div>
         )}
 
-        {/* 6. BELGE VE İŞLEM DURUMLARI */}
-        {activeTab === 'status' && (
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">{t.processStatusTitle}</h3>
-            <div className="space-y-2 text-xs">
-              <div className="p-3.5 bg-slate-50 rounded-xl border flex justify-between items-center">
-                <span className="font-bold text-slate-900">{t.statusWorkPermit}</span>
-                <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-md font-bold">{t.statusApproved}</span>
-              </div>
-              <div className="p-3.5 bg-slate-50 rounded-xl border flex justify-between items-center">
-                <span className="font-bold text-slate-900">{t.statusVisa}</span>
-                <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-md font-bold">{t.statusPending}</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 7. SEYAHAT VE İŞE BAŞLANGIÇ */}
-        {activeTab === 'travel' && (
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">{t.travelStartTitle}</h3>
-            <div className="p-4 bg-slate-50 rounded-2xl border text-xs space-y-2">
-              <div className="font-bold text-slate-950 flex items-center gap-1.5"><Plane className="w-4 h-4 text-blue-600" /> {t.groupTravelPlan}</div>
-              <p className="text-slate-700">{ui.arrivalSummary}</p>
-            </div>
-          </div>
-        )}
-
-        {/* 8. AKTİF ÇALIŞANLAR */}
-        {activeTab === 'employees' && (
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-950 border-b pb-3">{t.activeEmployeesTitle}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div className="p-4 bg-slate-50 rounded-2xl border space-y-1">
-                <div className="font-extrabold text-slate-950">{ui.employeeName}</div>
-                <div className="text-muted-foreground">{ui.employeeLine}</div>
-              </div>
-            </div>
-          </div>
+        {/* 6-8. İŞLEM DURUMU, SEYAHAT, AKTİF ÇALIŞANLAR (employer_placements) */}
+        {(activeTab === 'status' || activeTab === 'travel' || activeTab === 'employees') && (
+          <EmployerPlacementTabs
+            tab={activeTab}
+            rows={placements}
+            load={placementsLoad}
+            staffView={staffView}
+            t={t}
+            steps={ui.steps}
+            isRtl={isRtl}
+            lang={currentLang}
+          />
         )}
 
         {/* 9. DESTEK / BİLDİRİM */}

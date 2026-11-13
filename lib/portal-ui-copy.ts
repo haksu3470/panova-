@@ -274,9 +274,6 @@ export type PortalUi = {
   candidateSelectedAlert: string;
   onlineMeeting: string;
   planned: string;
-  arrivalSummary: string;
-  employeeName: string;
-  employeeLine: string;
   supportSubjectPh: string;
   supportMessagePh: string;
   demandSuccess: string;
@@ -536,9 +533,6 @@ const tr: PortalUi = {
   candidateSelectedAlert: '"{name}" seçilen adaylar listenize eklendi ve vize süreci başlatıldı.',
   onlineMeeting: 'Çevrimiçi video görüşme',
   planned: 'Planlandı',
-  arrivalSummary: 'Varış tarihi: 2026-11-15 | Karşılama: Havalimanı / terminal | İşe başlama: 2026-11-16',
-  employeeName: 'Mehmet Demir (kaynakçı)',
-  employeeLine: 'İşe başlama: 2026-06-01 | Uyum raporu: 90 gün tamamlandı (başarılı)',
   supportSubjectPh: 'Örn: Yeni ihtiyaç / çalışan sorunu',
   supportMessagePh: 'Detayları yazın...',
   demandSuccess: 'Talep oluşturuldu ve panele eklendi.',
@@ -796,9 +790,6 @@ const en: PortalUi = {
   candidateSelectedAlert: '"{name}" was added to your selected candidates and the visa process has started.',
   onlineMeeting: 'Online video meeting',
   planned: 'Scheduled',
-  arrivalSummary: 'Arrival date: 2026-11-15 | Meeting point: Airport / terminal | Start date: 2026-11-16',
-  employeeName: 'Mehmet Demir (welder)',
-  employeeLine: 'Start date: 2026-06-01 | Compliance report: 90 days completed (successful)',
   supportSubjectPh: 'e.g. New need / employee issue',
   supportMessagePh: 'Write the details...',
   demandSuccess: 'The request was created and added to the board.',
@@ -1056,9 +1047,6 @@ const sq: PortalUi = {
   candidateSelectedAlert: '"{name}" u shtua te kandidatët e zgjedhur dhe procesi i vizës filloi.',
   onlineMeeting: 'Takim video online',
   planned: 'Planifikuar',
-  arrivalSummary: 'Data e mbërritjes: 2026-11-15 | Pritja: Aeroport / terminal | Fillimi i punës: 2026-11-16',
-  employeeName: 'Mehmet Demir (saldues)',
-  employeeLine: 'Fillimi i punës: 2026-06-01 | Raporti i përputhjes: 90 ditë të përfunduara (me sukses)',
   supportSubjectPh: 'p.sh. Nevojë e re / problem i punonjësit',
   supportMessagePh: 'Shkruani detajet...',
   demandSuccess: 'Kërkesa u krijua dhe u shtua në panel.',
@@ -1316,9 +1304,6 @@ const ar: PortalUi = {
   candidateSelectedAlert: 'أُضيف "{name}" إلى المرشحين المختارين وبدأت إجراءات التأشيرة.',
   onlineMeeting: 'اجتماع فيديو عبر الإنترنت',
   planned: 'مجدولة',
-  arrivalSummary: 'تاريخ الوصول: 2026-11-15 | الاستقبال: المطار / الصالة | بدء العمل: 2026-11-16',
-  employeeName: 'محمد دمير (لحّام)',
-  employeeLine: 'بدء العمل: 2026-06-01 | تقرير الالتزام: اكتملت 90 يومًا (ناجح)',
   supportSubjectPh: 'مثال: احتياج جديد / مشكلة موظف',
   supportMessagePh: 'اكتبوا التفاصيل...',
   demandSuccess: 'أُنشئ الطلب وأُضيف إلى اللوحة.',
@@ -1576,9 +1561,6 @@ const mk: PortalUi = {
   candidateSelectedAlert: '„{name}“ е додаден во избраните кандидати и визниот процес е започнат.',
   onlineMeeting: 'Онлајн видео состанок',
   planned: 'Закажано',
-  arrivalSummary: 'Датум на пристигнување: 2026-11-15 | Пречек: Аеродром / терминал | Почеток на работа: 2026-11-16',
-  employeeName: 'Мехмет Демир (заварувач)',
-  employeeLine: 'Почеток на работа: 2026-06-01 | Извештај за усогласеност: 90 дена завршени (успешно)',
   supportSubjectPh: 'пр. Нова потреба / проблем со вработен',
   supportMessagePh: 'Напишете ги деталите...',
   demandSuccess: 'Барањето е создадено и додадено на таблата.',
