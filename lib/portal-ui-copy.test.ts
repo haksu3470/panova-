@@ -56,9 +56,10 @@ test('screenshot leftovers are translated for Albanian, English, Arabic and Mace
   assert.equal(portalUi.mk.steps.not_started, 'Не е започнато');
   assert.equal(portalUi.tr.steps.not_started, 'Başlamadı');
   for (const lang of LOCALES) {
+    assert.equal('positions' in portalUi[lang], false, `${lang}: request positions come from lib/professions.ts`);
     assert.deepEqual(
-      portalUi[lang].positions.construction.map((item) => item.id),
-      portalUi.en.positions.construction.map((item) => item.id),
+      portalUi[lang].formSectors.map((item) => item.value),
+      portalUi.en.formSectors.map((item) => item.value),
     );
     assert.deepEqual(
       portalUi[lang].languageOptions.map((item) => item.value),

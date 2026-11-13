@@ -13,7 +13,6 @@ export function fill(template: string, vars: Record<string, string | number>) {
 }
 
 type Opt = { value: string; label: string };
-type Pos = { id: string; label: string };
 
 export type PortalUi = {
   loading: string;
@@ -263,7 +262,6 @@ export type PortalUi = {
   returnToAdmin: string;
   authorized: string;
   languageOptions: Opt[];
-  positions: { agriculture: Pos[]; construction: Pos[]; trade: Pos[] };
   durationDefault: string;
   yes: string;
   no: string;
@@ -296,20 +294,6 @@ export type PortalUi = {
   demoHarvestLead: string;
   sectorFallback: string;
 };
-
-const positions = {
-  agriculture: ['harvest', 'greenhouse', 'pruning', 'tractor', 'mushroom', 'packing'],
-  construction: ['formwork', 'rebar', 'masonry', 'welder', 'electrician', 'engineer', 'siteChief'],
-  trade: ['warehouse', 'forklift', 'foreignTrade', 'logistics', 'accounting', 'sales'],
-} as const;
-
-function pos(labels: Record<(typeof positions.agriculture)[number] | (typeof positions.construction)[number] | (typeof positions.trade)[number], string>): PortalUi['positions'] {
-  return {
-    agriculture: positions.agriculture.map((id) => ({ id, label: labels[id] })),
-    construction: positions.construction.map((id) => ({ id, label: labels[id] })),
-    trade: positions.trade.map((id) => ({ id, label: labels[id] })),
-  };
-}
 
 const tr: PortalUi = {
   loading: 'Yükleniyor...',
@@ -517,13 +501,6 @@ const tr: PortalUi = {
     { value: 'tr-good', label: 'Türkçe (iyi derece)' },
     { value: 'local', label: 'Yerel dil (Arnavutça / Makedonca)' },
   ],
-  positions: pos({
-    harvest: 'Hasat işçisi', greenhouse: 'Sera sorumlusu', pruning: 'Budama uzmanı', tractor: 'Traktör operatörü',
-    mushroom: 'Mantar yetiştirme uzmanı', packing: 'Paketleme elemanı', formwork: 'Kalıp ustası', rebar: 'Demirci',
-    masonry: 'Duvarcı / sıvacı', welder: 'Kaynakçı', electrician: 'Elektrikçi', engineer: 'İnşaat mühendisi',
-    siteChief: 'Şantiye şefi', warehouse: 'Depo sorumlusu', forklift: 'Forklift operatörü', foreignTrade: 'Dış ticaret uzmanı',
-    logistics: 'Lojistik sorumlusu', accounting: 'Ön muhasebe', sales: 'Satış temsilcisi',
-  }),
   durationDefault: '12 ay (sezonluk / tam zamanlı)',
   yes: 'Var', no: 'Yok',
   jobDesc: 'Süre: {duration} | Tecrübe: {experience} | Dil: {language} | Konaklama: {stay} | Yemek: {food} | Ulaşım: {transport} | Notlar: {notes}',
@@ -555,12 +532,17 @@ const tr: PortalUi = {
     { value: '10+', label: '10+ yıl (usta)' },
   ],
   formSectors: [
-    { value: 'agriculture', label: 'Tarım ve hayvancılık' },
     { value: 'construction', label: 'İnşaat ve yapı' },
-    { value: 'hospitality', label: 'Turizm ve otelcilik' },
+    { value: 'agriculture', label: 'Tarım ve hayvancılık' },
+    { value: 'hospitality', label: 'Otelcilik ve gıda hizmetleri' },
+    { value: 'manufacturing', label: 'İmalat ve sanayi' },
+    { value: 'textile', label: 'Tekstil ve hazır giyim' },
     { value: 'logistics', label: 'Lojistik ve taşımacılık' },
-    { value: 'manufacturing', label: 'Genel üretim ve sanayi' },
-    { value: 'care', label: 'Sağlık ve bakım' },
+    { value: 'warehouse_retail', label: 'Depo ve perakende' },
+    { value: 'care', label: 'Bakım ve sağlık hizmetleri' },
+    { value: 'cleaning_security', label: 'Temizlik ve güvenlik' },
+    { value: 'automotive', label: 'Otomotiv ve teknik servis' },
+    { value: 'office_engineering', label: 'Ofis, mühendislik ve dış ticaret' },
   ],
   datePrefix: 'Tarih:', activeStatus: 'Aktif',
   demoConstruction: 'İnşaat ustası (kalıpçı)', demoAgriculture: 'Tarım işçisi (hasat)',
@@ -774,13 +756,6 @@ const en: PortalUi = {
     { value: 'tr-good', label: 'Turkish (good)' },
     { value: 'local', label: 'Local language (Albanian / Macedonian)' },
   ],
-  positions: pos({
-    harvest: 'Harvest worker', greenhouse: 'Greenhouse lead', pruning: 'Pruning specialist', tractor: 'Tractor operator',
-    mushroom: 'Mushroom growing specialist', packing: 'Packing worker', formwork: 'Formwork carpenter', rebar: 'Rebar worker',
-    masonry: 'Mason / plasterer', welder: 'Welder', electrician: 'Electrician', engineer: 'Civil engineer',
-    siteChief: 'Site manager', warehouse: 'Warehouse lead', forklift: 'Forklift operator', foreignTrade: 'Foreign trade specialist',
-    logistics: 'Logistics lead', accounting: 'Bookkeeping', sales: 'Sales representative',
-  }),
   durationDefault: '12 months (seasonal / full time)',
   yes: 'Yes', no: 'No',
   jobDesc: 'Duration: {duration} | Experience: {experience} | Language: {language} | Accommodation: {stay} | Meals: {food} | Transport: {transport} | Notes: {notes}',
@@ -812,12 +787,17 @@ const en: PortalUi = {
     { value: '10+', label: '10+ years (master)' },
   ],
   formSectors: [
+    { value: 'construction', label: 'Construction and building' },
     { value: 'agriculture', label: 'Agriculture and livestock' },
-    { value: 'construction', label: 'Construction' },
-    { value: 'hospitality', label: 'Tourism and hospitality' },
+    { value: 'hospitality', label: 'Hospitality and food services' },
+    { value: 'manufacturing', label: 'Manufacturing and industry' },
+    { value: 'textile', label: 'Textiles and garments' },
     { value: 'logistics', label: 'Logistics and transport' },
-    { value: 'manufacturing', label: 'Manufacturing' },
-    { value: 'care', label: 'Health and care' },
+    { value: 'warehouse_retail', label: 'Warehousing and retail' },
+    { value: 'care', label: 'Care and health services' },
+    { value: 'cleaning_security', label: 'Cleaning and security' },
+    { value: 'automotive', label: 'Automotive and technical service' },
+    { value: 'office_engineering', label: 'Office, engineering and foreign trade' },
   ],
   datePrefix: 'Date:', activeStatus: 'Active',
   demoConstruction: 'Construction carpenter (formwork)', demoAgriculture: 'Farm worker (harvest)',
@@ -1031,13 +1011,6 @@ const sq: PortalUi = {
     { value: 'tr-good', label: 'Turqisht (mirë)' },
     { value: 'local', label: 'Gjuhë lokale (shqip / maqedonisht)' },
   ],
-  positions: pos({
-    harvest: 'Punëtor korrjeje', greenhouse: 'Përgjegjës sere', pruning: 'Specialist krasitjeje', tractor: 'Operator traktori',
-    mushroom: 'Specialist i kultivimit të kërpudhave', packing: 'Punëtor paketimi', formwork: 'Usta kallëpi', rebar: 'Hekurkthyes',
-    masonry: 'Murator / suvatues', welder: 'Saldues', electrician: 'Elektricist', engineer: 'Inxhinier ndërtimi',
-    siteChief: 'Shef kantieri', warehouse: 'Përgjegjës magazine', forklift: 'Operator forklifti', foreignTrade: 'Specialist i tregtisë së jashtme',
-    logistics: 'Përgjegjës logjistike', accounting: 'Kontabilitet bazë', sales: 'Përfaqësues shitjesh',
-  }),
   durationDefault: '12 muaj (sezonale / kohë e plotë)',
   yes: 'Po', no: 'Jo',
   jobDesc: 'Kohëzgjatja: {duration} | Përvoja: {experience} | Gjuha: {language} | Akomodimi: {stay} | Ushqimi: {food} | Transporti: {transport} | Shënime: {notes}',
@@ -1069,12 +1042,17 @@ const sq: PortalUi = {
     { value: '10+', label: '10+ vite (usta)' },
   ],
   formSectors: [
+    { value: 'construction', label: 'Ndërtim dhe objekte' },
     { value: 'agriculture', label: 'Bujqësi dhe blegtori' },
-    { value: 'construction', label: 'Ndërtim' },
-    { value: 'hospitality', label: 'Turizëm dhe hoteleri' },
+    { value: 'hospitality', label: 'Hoteleri dhe shërbime ushqimore' },
+    { value: 'manufacturing', label: 'Prodhim dhe industri' },
+    { value: 'textile', label: 'Tekstil dhe konfeksione' },
     { value: 'logistics', label: 'Logjistikë dhe transport' },
-    { value: 'manufacturing', label: 'Prodhim i përgjithshëm' },
-    { value: 'care', label: 'Shëndet dhe kujdes' },
+    { value: 'warehouse_retail', label: 'Magazinim dhe shitje me pakicë' },
+    { value: 'care', label: 'Kujdes dhe shërbime shëndetësore' },
+    { value: 'cleaning_security', label: 'Pastrim dhe siguri' },
+    { value: 'automotive', label: 'Automjete dhe shërbim teknik' },
+    { value: 'office_engineering', label: 'Zyrë, inxhinieri dhe tregti e jashtme' },
   ],
   datePrefix: 'Data:', activeStatus: 'Aktive',
   demoConstruction: 'Usta ndërtimi (kallëp)', demoAgriculture: 'Punëtor bujqësie (korrje)',
@@ -1288,13 +1266,6 @@ const ar: PortalUi = {
     { value: 'tr-good', label: 'التركية (جيد)' },
     { value: 'local', label: 'لغة محلية (الألبانية / المقدونية)' },
   ],
-  positions: pos({
-    harvest: 'عامل حصاد', greenhouse: 'مسؤول البيوت المحمية', pruning: 'أخصائي تقليم', tractor: 'مشغّل جرار',
-    mushroom: 'أخصائي زراعة الفطر', packing: 'عامل تعبئة', formwork: 'نجار قوالب', rebar: 'حداد تسليح',
-    masonry: 'بنّاء / مليس', welder: 'لحّام', electrician: 'كهربائي', engineer: 'مهندس مدني',
-    siteChief: 'رئيس موقع', warehouse: 'مسؤول مستودع', forklift: 'مشغّل رافعة شوكية', foreignTrade: 'أخصائي تجارة خارجية',
-    logistics: 'مسؤول لوجستيات', accounting: 'محاسبة أولية', sales: 'مندوب مبيعات',
-  }),
   durationDefault: '12 شهرًا (موسمي / دوام كامل)',
   yes: 'نعم', no: 'لا',
   jobDesc: 'المدة: {duration} | الخبرة: {experience} | اللغة: {language} | السكن: {stay} | الوجبات: {food} | النقل: {transport} | ملاحظات: {notes}',
@@ -1326,12 +1297,17 @@ const ar: PortalUi = {
     { value: '10+', label: '10+ سنوات (خبير)' },
   ],
   formSectors: [
+    { value: 'construction', label: 'البناء والتشييد' },
     { value: 'agriculture', label: 'الزراعة والثروة الحيوانية' },
-    { value: 'construction', label: 'الإنشاءات' },
-    { value: 'hospitality', label: 'السياحة والفنادق' },
-    { value: 'logistics', label: 'اللوجستيات والنقل' },
-    { value: 'manufacturing', label: 'التصنيع العام' },
-    { value: 'care', label: 'الصحة والرعاية' },
+    { value: 'hospitality', label: 'الضيافة والخدمات الغذائية' },
+    { value: 'manufacturing', label: 'التصنيع والصناعة' },
+    { value: 'textile', label: 'النسيج والملابس الجاهزة' },
+    { value: 'logistics', label: 'الخدمات اللوجستية والنقل' },
+    { value: 'warehouse_retail', label: 'المستودعات وتجارة التجزئة' },
+    { value: 'care', label: 'الرعاية والخدمات الصحية' },
+    { value: 'cleaning_security', label: 'التنظيف والأمن' },
+    { value: 'automotive', label: 'السيارات والخدمة الفنية' },
+    { value: 'office_engineering', label: 'المكاتب والهندسة والتجارة الخارجية' },
   ],
   datePrefix: 'التاريخ:', activeStatus: 'نشط',
   demoConstruction: 'نجار إنشاء (قوالب)', demoAgriculture: 'عامل زراعة (حصاد)',
@@ -1545,13 +1521,6 @@ const mk: PortalUi = {
     { value: 'tr-good', label: 'Турски (добро)' },
     { value: 'local', label: 'Локален јазик (албански / македонски)' },
   ],
-  positions: pos({
-    harvest: 'Жетвар', greenhouse: 'Одговорен за оранжерии', pruning: 'Специјалист за кроење', tractor: 'Оператор на трактор',
-    mushroom: 'Специјалист за одгледување печурки', packing: 'Пакувач', formwork: 'Опажувач', rebar: 'Арматурист',
-    masonry: 'Ѕидар / малтерџија', welder: 'Заварувач', electrician: 'Електричар', engineer: 'Градежен инженер',
-    siteChief: 'Раководител на градилиште', warehouse: 'Одговорен за магацин', forklift: 'Оператор на вилушкар', foreignTrade: 'Специјалист за надворешна трговија',
-    logistics: 'Одговорен за логистика', accounting: 'Основно сметководство', sales: 'Продажен претставник',
-  }),
   durationDefault: '12 месеци (сезонски / полно работно време)',
   yes: 'Да', no: 'Не',
   jobDesc: 'Траење: {duration} | Искуство: {experience} | Јазик: {language} | Сместување: {stay} | Храна: {food} | Превоз: {transport} | Белешки: {notes}',
@@ -1583,12 +1552,17 @@ const mk: PortalUi = {
     { value: '10+', label: '10+ години (мајстор)' },
   ],
   formSectors: [
+    { value: 'construction', label: 'Градежништво и објекти' },
     { value: 'agriculture', label: 'Земјоделство и сточарство' },
-    { value: 'construction', label: 'Градежништво' },
-    { value: 'hospitality', label: 'Туризам и хотелиерство' },
+    { value: 'hospitality', label: 'Угостителство и прехранбени услуги' },
+    { value: 'manufacturing', label: 'Производство и индустрија' },
+    { value: 'textile', label: 'Текстил и конфекција' },
     { value: 'logistics', label: 'Логистика и транспорт' },
-    { value: 'manufacturing', label: 'Општо производство' },
-    { value: 'care', label: 'Здравство и нега' },
+    { value: 'warehouse_retail', label: 'Магацинско работење и малопродажба' },
+    { value: 'care', label: 'Нега и здравствени услуги' },
+    { value: 'cleaning_security', label: 'Чистење и обезбедување' },
+    { value: 'automotive', label: 'Автомобилски и технички сервис' },
+    { value: 'office_engineering', label: 'Канцелариско работење, инженерство и надворешна трговија' },
   ],
   datePrefix: 'Датум:', activeStatus: 'Активно',
   demoConstruction: 'Градежен мајстор (опажување)', demoAgriculture: 'Земјоделски работник (жетва)',
@@ -1600,9 +1574,4 @@ export const portalUi: Record<Language, PortalUi> = { tr, en, sq, ar, mk };
 
 export function optionLabel(options: Opt[], value: string) {
   return options.find((option) => option.value === value)?.label || value;
-}
-
-export function positionLabel(ui: PortalUi, id: string) {
-  const all = [...ui.positions.agriculture, ...ui.positions.construction, ...ui.positions.trade];
-  return all.find((item) => item.id === id)?.label || id;
 }

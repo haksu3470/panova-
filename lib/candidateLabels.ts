@@ -2,7 +2,7 @@ import { translations, type Language, type Translation } from './dictionary';
 import { registrationCountries } from './registrationCountries';
 import { SECTOR_FILTER_CODES, normalizeFilterText, sectorFilterLabel } from './employerCandidateFilters';
 import { portalUi, type PortalUi } from './portal-ui-copy';
-import { professionLabel } from './professions';
+import { LEGACY_SECTOR_LABELS, professionLabel } from './professions';
 
 /**
  * Display labels for the staff candidate list and its sector / country filters.
@@ -57,6 +57,9 @@ for (const copy of Object.values(translations)) {
   for (const code of SECTOR_FILTER_CODES) {
     rememberSectorAlias(sectorFilterLabel(code, copy), code);
   }
+}
+for (const [code, labels] of Object.entries(LEGACY_SECTOR_LABELS)) {
+  for (const label of labels) rememberSectorAlias(label, code);
 }
 
 export function isUnspecifiedLabel(value: string | null | undefined): boolean {

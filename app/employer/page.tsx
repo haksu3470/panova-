@@ -10,13 +10,13 @@ import { offerMoney, offerStatusLabel } from '@/lib/offers';
 import { employerService } from '@/lib/services/employerService';
 import { 
   Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, 
-  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, ShieldCheck, HeartHandshake, UploadCloud, Check, Video, Star, CheckCircle2, BookOpen
+  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, ShieldCheck, HeartHandshake, UploadCloud, Check, Video, Star, CheckCircle2, BookOpen, X
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
 import { demandStatusLabel } from '@/lib/demandStatus';
-import { localizeCatalogTitle } from '@/lib/professions';
-import { dateLocale, fill, optionLabel, portalUi, positionLabel } from '@/lib/portal-ui-copy';
+import { localizeCatalogTitle, professionLabel, professionsForSector, sectorOptions } from '@/lib/professions';
+import { dateLocale, fill, optionLabel, portalUi } from '@/lib/portal-ui-copy';
 import { benefitPhrase, buildEmployerDemandInsert, displayedRequestSalary, type DemandBlock, type YesNo } from '@/lib/workforceRequest';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
@@ -47,6 +47,11 @@ import {
 import { formatInterviewTime, joinableMeetingUrl } from '@/lib/interviewMeeting';
 import { toPlacements, type EmployerPlacement } from '@/lib/employerPlacements';
 import EmployerPlacementTabs, { type PlacementsLoad } from './components/EmployerPlacementTabs';
+
+const SECTOR_ICON: Record<string, string> = {
+  construction: '🏗️', agriculture: '🌱', hospitality: '🍽️', manufacturing: '🏭', textile: '🧵', logistics: '🚚',
+  warehouse_retail: '📦', care: '🩺', cleaning_security: '🛡️', automotive: '🔧', office_engineering: '💼',
+};
 
 function EmployerPortalInner() {
   const [currentLang, setCurrentLang] = useState<Language>('tr');
@@ -165,7 +170,7 @@ function EmployerPortalInner() {
   const [placements, setPlacements] = useState<EmployerPlacement[]>([]);
   const [placementsLoad, setPlacementsLoad] = useState<PlacementsLoad>('loading');
 
-  const [selectedSector, setSelectedSector] = useState<'' | 'agriculture' | 'construction' | 'trade'>('');
+  const [selectedSector, setSelectedSector] = useState('');
   const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
   const [customPosition, setCustomPosition] = useState('');
   const [catalogPick, setCatalogPick] = useState('');
@@ -370,7 +375,8 @@ function EmployerPortalInner() {
     e.preventDefault();
 
     const headcount = Number(demandHeadcount);
-    const positionTitle = [...selectedPositions.map((id) => positionLabel(ui, id)), customPosition.trim()].filter(Boolean).join(', ');
+    // Catalog keys (localized wherever the title is shown), then the free text as typed.
+    const positionTitle = [...selectedPositions, customPosition.trim()].filter(Boolean).join(', ');
     if (
       !selectedSector
       || !positionTitle
@@ -798,78 +804,73 @@ function EmployerPortalInner() {
               <form noValidate onSubmit={handleCreateCorporateDemand} className="space-y-6">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-2">1. {t.selectSectorLabel} *</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => { setSelectedSector('agriculture'); setSelectedPositions([]); }}
-                      className={`p-4 rounded-xl border text-start transition cursor-pointer flex items-center justify-between ${
-                        selectedSector === 'agriculture' ? 'bg-status-ok-bg border-brand ring-2 ring-brand text-status-ok font-extrabold' : 'bg-slate-50 border-line text-foreground font-semibold'
-                      }`}
-                    >
-                      <span>🌱 {t.sectorAgriculture}</span>
-                      {selectedSector === 'agriculture' && <Check className="w-4 h-4 text-status-ok" aria-hidden />}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setSelectedSector('construction'); setSelectedPositions([]); }}
-                      className={`p-4 rounded-xl border text-start transition cursor-pointer flex items-center justify-between ${
-                        selectedSector === 'construction' ? 'bg-status-ok-bg border-brand ring-2 ring-brand text-status-ok font-extrabold' : 'bg-slate-50 border-line text-foreground font-semibold'
-                      }`}
-                    >
-                      <span>🏗️ {t.sectorConstruction}</span>
-                      {selectedSector === 'construction' && <Check className="w-4 h-4 text-status-ok" aria-hidden />}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setSelectedSector('trade'); setSelectedPositions([]); }}
-                      className={`p-4 rounded-xl border text-start transition cursor-pointer flex items-center justify-between ${
-                        selectedSector === 'trade' ? 'bg-status-ok-bg border-brand ring-2 ring-brand text-status-ok font-extrabold' : 'bg-slate-50 border-line text-foreground font-semibold'
-                      }`}
-                    >
-                      <span>📦 {t.sectorTrade}</span>
-                      {selectedSector === 'trade' && <Check className="w-4 h-4 text-status-ok" aria-hidden />}
-                    </button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {sectorOptions(currentLang).map((sector) => (
+                      <button
+                        type="button"
+                        key={sector.value}
+                        aria-pressed={selectedSector === sector.value}
+                        onClick={() => { setSelectedSector(sector.value); setCatalogPick(''); }}
+                        className={`p-4 rounded-xl border text-start transition cursor-pointer flex items-center justify-between gap-2 ${
+                          selectedSector === sector.value ? 'bg-status-ok-bg border-brand ring-2 ring-brand text-status-ok font-extrabold' : 'bg-slate-50 border-line text-foreground font-semibold'
+                        }`}
+                      >
+                        <span>{SECTOR_ICON[sector.value] || '•'} {sector.label}</span>
+                        {selectedSector === sector.value && <Check className="w-4 h-4 shrink-0 text-status-ok" aria-hidden />}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-2">2. {t.selectPositionsLabel} *</label>
-                  {selectedSector ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 mb-3">
-                      {ui.positions[selectedSector].map((pos) => {
-                        const isSelected = selectedPositions.includes(pos.id);
-                        return (
-                          <button
-                            type="button"
-                            key={pos.id}
-                            onClick={() => togglePositionSelection(pos.id)}
-                            className={`p-3 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-between ${
-                              isSelected ? 'bg-brand-solid text-on-dark shadow-md border-brand-solid' : 'bg-slate-50 border-line text-foreground hover:bg-slate-100'
-                            }`}
-                          >
-                            <span>{pos.label}</span>
-                            {isSelected && <Check className="w-3.5 h-3.5" aria-hidden />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : (
+                  <label htmlFor="demand-position-pick" className="block text-xs font-bold uppercase tracking-wider text-foreground mb-2">2. {t.selectPositionsLabel} *</label>
+                  {!selectedSector && (
                     <p className="text-xs font-semibold text-muted-foreground mb-3">{t.selectSectorFirst}</p>
                   )}
-                  
+
+                  <div className="mb-3">
+                    <p className="text-xs font-bold text-foreground mb-1.5">{t.selectedPositionsLabel}</p>
+                    {selectedPositions.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">{t.noPositionsSelected}</p>
+                    ) : (
+                      <ul className="flex flex-wrap gap-2">
+                        {selectedPositions.map((key) => {
+                          const label = professionLabel(key, currentLang) || key;
+                          return (
+                            <li key={key} className="inline-flex items-center gap-1.5 ps-3 pe-1 py-1 rounded-full bg-brand-solid text-on-dark text-xs font-bold">
+                              <span>{label}</span>
+                              <button
+                                type="button"
+                                onClick={() => togglePositionSelection(key)}
+                                aria-label={fill(t.removePositionAria || '', { name: label })}
+                                className="w-6 h-6 rounded-full inline-flex items-center justify-center hover:bg-white/20 cursor-pointer"
+                              >
+                                <X className="w-3.5 h-3.5" aria-hidden />
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <select
+                      id="demand-position-pick"
                       value={catalogPick}
+                      disabled={!selectedSector}
                       onChange={(e) => {
-                        if (e.target.value) togglePositionSelection(e.target.value);
+                        if (e.target.value && !selectedPositions.includes(e.target.value)) togglePositionSelection(e.target.value);
                         setCatalogPick('');
                       }}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-line text-xs bg-card text-foreground font-semibold cursor-pointer"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-line text-xs bg-card text-foreground font-semibold cursor-pointer disabled:cursor-not-allowed disabled:bg-slate-100"
                     >
-                      <option value="">{t.benefitSelectPlaceholder}</option>
-                      {(['agriculture', 'construction', 'trade'] as const).flatMap((key) => ui.positions[key]).map((item) => (
-                        <option key={item.id} value={item.id}>{item.label}</option>
-                      ))}
+                      <option value="">{selectedSector ? t.positionPickPlaceholder : t.selectSectorFirst}</option>
+                      {professionsForSector(selectedSector)
+                        .filter((item) => !selectedPositions.includes(item.key))
+                        .map((item) => (
+                          <option key={item.key} value={item.key}>{item.labels[currentLang]}</option>
+                        ))}
                     </select>
 
                     <input
@@ -1087,7 +1088,7 @@ function EmployerPortalInner() {
               <h4 className="text-sm font-extrabold text-slate-950">{ui.ioJobOffers} ({employerOffers.length})</h4>
               {employerOffers.map((offer) => (
                 <div key={offer.id} className="p-3 bg-slate-50 rounded-xl border text-sm text-slate-900">
-                  <div className="font-extrabold">{releaseCopy[currentLang].offerCandidate}: {offer.candidate_name || '—'} — {offer.position_title || '—'}</div>
+                  <div className="font-extrabold">{releaseCopy[currentLang].offerCandidate}: {offer.candidate_name || '—'} — {localizeCatalogTitle(offer.position_title, currentLang) || '—'}</div>
                   <div className="text-xs font-semibold text-slate-800">
                     {ui.offerSalary}: {offerMoney(offer) || ui.salaryNotSet} · {ui.status}: {offerStatusLabel(offer.status, ui.offerStatus)}
                   </div>

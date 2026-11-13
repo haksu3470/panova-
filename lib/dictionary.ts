@@ -423,6 +423,11 @@ export interface Translation {
   sectorLogistics?: string;
   sectorManufacturing?: string;
   sectorCare?: string;
+  sectorTextile?: string;
+  sectorWarehouseRetail?: string;
+  sectorCleaningSecurity?: string;
+  sectorAutomotive?: string;
+  sectorOfficeEngineering?: string;
 
   corporateDemandTitle?: string;
   corporateDemandDesc?: string;
@@ -439,6 +444,10 @@ export interface Translation {
   cityPlaceholder?: string;
   durationPlaceholder?: string;
   selectSectorFirst?: string;
+  positionPickPlaceholder?: string;
+  selectedPositionsLabel?: string;
+  noPositionsSelected?: string;
+  removePositionAria?: string;
   providedFacilitiesLabel?: string;
   facilityAccommodation?: string;
   facilityFood?: string;
@@ -1087,14 +1096,19 @@ export const translations: Record<Language, Translation> = {
     expOpt3: '3 - 5 Yıl Tecrübe',
     expOpt4: '5+ Yıl Uzman / Kıdemli',
 
-    sectorAgriculture: 'Tarım ve Hayvancılık',
-    sectorConstruction: 'İnşaat ve Yapı',
+    sectorAgriculture: 'Tarım ve hayvancılık',
+    sectorConstruction: 'İnşaat ve yapı',
     sectorTrade: 'Dış Ticaret ve Lojistik',
     sectorHR: 'İnsan Kaynakları',
-    sectorHospitality: 'Turizm ve Otelcilik',
-    sectorLogistics: 'Lojistik',
-    sectorManufacturing: 'Üretim ve Sanayi',
-    sectorCare: 'Sağlık ve Bakım',
+    sectorHospitality: 'Otelcilik ve gıda hizmetleri',
+    sectorLogistics: 'Lojistik ve taşımacılık',
+    sectorManufacturing: 'İmalat ve sanayi',
+    sectorCare: 'Bakım ve sağlık hizmetleri',
+    sectorTextile: 'Tekstil ve hazır giyim',
+    sectorWarehouseRetail: 'Depo ve perakende',
+    sectorCleaningSecurity: 'Temizlik ve güvenlik',
+    sectorAutomotive: 'Otomotiv ve teknik servis',
+    sectorOfficeEngineering: 'Ofis, mühendislik ve dış ticaret',
 
     corporateDemandTitle: 'Kurumsal İş Gücü Talep Formu',
     corporateDemandDesc: 'Sektör seçin, aradığınız pozisyonları, tecrübe, dil ve çalışma şartlarını belirleyin.',
@@ -1111,6 +1125,10 @@ export const translations: Record<Language, Translation> = {
     cityPlaceholder: 'Örn: Struga',
     durationPlaceholder: 'Örn: 12 ay (sezonluk / tam zamanlı)',
     selectSectorFirst: 'Pozisyonları görmek için önce bir sektör seçin.',
+    positionPickPlaceholder: 'Bu sektörden pozisyon ekleyin',
+    selectedPositionsLabel: 'Seçilen pozisyonlar',
+    noPositionsSelected: 'Henüz pozisyon seçilmedi.',
+    removePositionAria: '{name} pozisyonunu kaldır',
     providedFacilitiesLabel: 'Sağlanan İmkanlar',
     facilityAccommodation: 'Konaklama (Lojman / Daire)',
     facilityFood: 'Yemek (3 Öğün / Yemek Ücreti)',
@@ -1746,14 +1764,19 @@ export const translations: Record<Language, Translation> = {
     expOpt3: '3 - 5 Years Experience',
     expOpt4: '5+ Years Senior / Expert',
 
-    sectorAgriculture: 'Agriculture & Livestock',
-    sectorConstruction: 'Construction & Building',
+    sectorAgriculture: 'Agriculture and livestock',
+    sectorConstruction: 'Construction and building',
     sectorTrade: 'Foreign Trade & Logistics',
     sectorHR: 'Human Resources',
-    sectorHospitality: 'Tourism & Hospitality',
-    sectorLogistics: 'Logistics',
-    sectorManufacturing: 'Manufacturing & Industry',
-    sectorCare: 'Health & Care',
+    sectorHospitality: 'Hospitality and food services',
+    sectorLogistics: 'Logistics and transport',
+    sectorManufacturing: 'Manufacturing and industry',
+    sectorCare: 'Care and health services',
+    sectorTextile: 'Textiles and garments',
+    sectorWarehouseRetail: 'Warehousing and retail',
+    sectorCleaningSecurity: 'Cleaning and security',
+    sectorAutomotive: 'Automotive and technical service',
+    sectorOfficeEngineering: 'Office, engineering and foreign trade',
 
     corporateDemandTitle: 'Corporate Workforce Demand Form',
     corporateDemandDesc: 'Select sector, specify positions, experience, language and working conditions.',
@@ -1770,6 +1793,10 @@ export const translations: Record<Language, Translation> = {
     cityPlaceholder: 'e.g. Struga',
     durationPlaceholder: 'e.g. 12 months (seasonal / full time)',
     selectSectorFirst: 'Choose a sector to see positions.',
+    positionPickPlaceholder: 'Add a position from this sector',
+    selectedPositionsLabel: 'Selected positions',
+    noPositionsSelected: 'No position selected yet.',
+    removePositionAria: 'Remove {name}',
     providedFacilitiesLabel: 'Provided Facilities',
     facilityAccommodation: 'Accommodation (Housing / Apartment)',
     facilityFood: 'Food (3 Meals / Food Allowance)',
@@ -2405,14 +2432,19 @@ export const translations: Record<Language, Translation> = {
     expOpt3: '3 - 5 Vite Eksperiencë',
     expOpt4: '5+ Vite Ekspert / I Lartë',
 
-    sectorAgriculture: 'Bujqësi dhe Blegtori',
-    sectorConstruction: 'Ndërtim dhe Objekte',
+    sectorAgriculture: 'Bujqësi dhe blegtori',
+    sectorConstruction: 'Ndërtim dhe objekte',
     sectorTrade: 'Tregti e Jashtme dhe Logjistikë',
     sectorHR: 'Burimet Njerëzore',
-    sectorHospitality: 'Turizëm dhe Hoteleri',
-    sectorLogistics: 'Logjistikë',
-    sectorManufacturing: 'Prodhim dhe Industri',
-    sectorCare: 'Shëndet dhe kujdes',
+    sectorHospitality: 'Hoteleri dhe shërbime ushqimore',
+    sectorLogistics: 'Logjistikë dhe transport',
+    sectorManufacturing: 'Prodhim dhe industri',
+    sectorCare: 'Kujdes dhe shërbime shëndetësore',
+    sectorTextile: 'Tekstil dhe konfeksione',
+    sectorWarehouseRetail: 'Magazinim dhe shitje me pakicë',
+    sectorCleaningSecurity: 'Pastrim dhe siguri',
+    sectorAutomotive: 'Automjete dhe shërbim teknik',
+    sectorOfficeEngineering: 'Zyrë, inxhinieri dhe tregti e jashtme',
 
     corporateDemandTitle: 'Formulari i Kërkesës për Fuqi Punëtore Korporative',
     corporateDemandDesc: 'Zgjidhni sektorin, pozicionet, eksperiencën, gjuhën dhe kushtet e punës.',
@@ -2429,6 +2461,10 @@ export const translations: Record<Language, Translation> = {
     cityPlaceholder: 'p.sh. Struga',
     durationPlaceholder: 'p.sh. 12 muaj (sezonale / kohë e plotë)',
     selectSectorFirst: 'Zgjidhni një sektor për të parë pozicionet.',
+    positionPickPlaceholder: 'Shtoni një pozicion nga ky sektor',
+    selectedPositionsLabel: 'Pozicionet e zgjedhura',
+    noPositionsSelected: 'Ende nuk është zgjedhur asnjë pozicion.',
+    removePositionAria: 'Hiq {name}',
     providedFacilitiesLabel: 'Kushtet e ofruara',
     facilityAccommodation: 'Akomodimi (strehim / apartament)',
     facilityFood: 'Ushqimi (3 vakte / pagesë ushqimi)',
@@ -2852,6 +2888,10 @@ export const translations: Record<Language, Translation> = {
     cityPlaceholder: 'مثال: ستروغا',
     durationPlaceholder: 'مثال: 12 شهراً (موسمي / دوام كامل)',
     selectSectorFirst: 'اختر قطاعاً لعرض الوظائف.',
+    positionPickPlaceholder: 'أضف وظيفة من هذا القطاع',
+    selectedPositionsLabel: 'الوظائف المختارة',
+    noPositionsSelected: 'لم يتم اختيار أي وظيفة بعد.',
+    removePositionAria: 'إزالة {name}',
     providedFacilitiesLabel: 'المرافق المقدمة',
     facilityAccommodation: 'الإقامة (سكن / شقة)',
     facilityFood: 'الطعام (3 وجبات / بدل طعام)',
@@ -3195,10 +3235,15 @@ export const translations: Record<Language, Translation> = {
     sectorConstruction: 'البناء والتشييد',
     sectorTrade: 'التجارة الخارجية والخدمات اللوجستية',
     sectorHR: 'الموارد البشرية',
-    sectorHospitality: 'السياحة والضيافة',
-    sectorLogistics: 'الخدمات اللوجستية',
+    sectorHospitality: 'الضيافة والخدمات الغذائية',
+    sectorLogistics: 'الخدمات اللوجستية والنقل',
     sectorManufacturing: 'التصنيع والصناعة',
-    sectorCare: 'الصحة والرعاية',
+    sectorCare: 'الرعاية والخدمات الصحية',
+    sectorTextile: 'النسيج والملابس الجاهزة',
+    sectorWarehouseRetail: 'المستودعات وتجارة التجزئة',
+    sectorCleaningSecurity: 'التنظيف والأمن',
+    sectorAutomotive: 'السيارات والخدمة الفنية',
+    sectorOfficeEngineering: 'المكاتب والهندسة والتجارة الخارجية',
     colPosSecTitle: 'المنصب / القطاع',
 
     verifyEmailTitle: 'تحقق من بريدك الوارد',
@@ -3724,13 +3769,18 @@ export const translations: Record<Language, Translation> = {
     expOpt3: '3 – 5 години искуство',
     expOpt4: '5+ години, висок стручњак',
     sectorAgriculture: 'Земјоделство и сточарство',
-    sectorConstruction: 'Градежништво',
+    sectorConstruction: 'Градежништво и објекти',
     sectorTrade: 'Надворешна трговија и логистика',
     sectorHR: 'Човечки ресурси',
-    sectorHospitality: 'Туризам и хотелиерство',
-    sectorLogistics: 'Логистика',
+    sectorHospitality: 'Угостителство и прехранбени услуги',
+    sectorLogistics: 'Логистика и транспорт',
     sectorManufacturing: 'Производство и индустрија',
-    sectorCare: 'Здравство и нега',
+    sectorCare: 'Нега и здравствени услуги',
+    sectorTextile: 'Текстил и конфекција',
+    sectorWarehouseRetail: 'Магацинско работење и малопродажба',
+    sectorCleaningSecurity: 'Чистење и обезбедување',
+    sectorAutomotive: 'Автомобилски и технички сервис',
+    sectorOfficeEngineering: 'Канцелариско работење, инженерство и надворешна трговија',
     corporateDemandTitle: 'Образец за корпоративно барање на работна сила',
     corporateDemandDesc: 'Изберете сектор и наведете позиции, искуство, јазик и услови за работа.',
     totalActiveFiles: 'Вкупно активни досиеја',
@@ -3746,6 +3796,10 @@ export const translations: Record<Language, Translation> = {
     cityPlaceholder: 'на пр. Струга',
     durationPlaceholder: 'на пр. 12 месеци (сезонски / полно работно време)',
     selectSectorFirst: 'Изберете сектор за да ги видите позициите.',
+    positionPickPlaceholder: 'Додадете позиција од овој сектор',
+    selectedPositionsLabel: 'Избрани позиции',
+    noPositionsSelected: 'Сè уште не е избрана позиција.',
+    removePositionAria: 'Отстрани {name}',
     providedFacilitiesLabel: 'Обезбедени услови',
     facilityAccommodation: 'Сместување (дом / стан)',
     facilityFood: 'Храна (3 оброка / додаток за храна)',

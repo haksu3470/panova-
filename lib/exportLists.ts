@@ -1,4 +1,6 @@
+import type { Language } from './dictionary';
 import { offerAmount, offerCurrency } from './offers';
+import { localizeCatalogTitle, professionLabel } from './professions';
 
 function cell(value: unknown): string {
   if (value == null) return '';
@@ -57,12 +59,22 @@ export function toPrintHtml(title: string, rows: readonly Record<string, unknown
 </style></head><body><h1>${escapeHtml(title)}</h1>${toExcelHtml(title, rows).replace(/^[\s\S]*<table>/, '<table>').replace(/<\/table>[\s\S]*$/, '</table>')}</body></html>`;
 }
 
-export function candidateExportRows(rows: readonly Record<string, unknown>[]): Record<string, unknown>[] {
+function text(value: unknown): string {
+  return typeof value === 'string' ? value : value == null ? '' : String(value);
+}
+
+/** Catalog key -> label in the export language; free text stays as entered. */
+function professionCell(value: unknown, lang: Language): string {
+  const raw = text(value).trim();
+  return professionLabel(raw, lang) ?? raw;
+}
+
+export function candidateExportRows(rows: readonly Record<string, unknown>[], lang: Language = 'tr'): Record<string, unknown>[] {
   return rows.map((row) => ({
     id: row.id ?? '',
     full_name: row.full_name ?? '',
     nationality: row.nationality ?? row.country ?? '',
-    profession: row.profession ?? '',
+    profession: professionCell(row.profession, lang),
     sector: row.sector ?? '',
     status: row.status ?? '',
     email: row.email ?? '',
@@ -84,11 +96,11 @@ export function employerExportRows(rows: readonly Record<string, unknown>[]): Re
   }));
 }
 
-export function requestExportRows(rows: readonly Record<string, unknown>[]): Record<string, unknown>[] {
+export function requestExportRows(rows: readonly Record<string, unknown>[], lang: Language = 'tr'): Record<string, unknown>[] {
   return rows.map((row) => ({
     id: row.id ?? '',
     employer_name: row.employer_name ?? '',
-    position_title: row.position_title ?? '',
+    position_title: localizeCatalogTitle(text(row.position_title), lang),
     headcount: row.headcount ?? '',
     country: row.country ?? '',
     city: row.city ?? '',
@@ -98,12 +110,12 @@ export function requestExportRows(rows: readonly Record<string, unknown>[]): Rec
   }));
 }
 
-export function offerExportRows(rows: readonly Record<string, unknown>[]): Record<string, unknown>[] {
+export function offerExportRows(rows: readonly Record<string, unknown>[], lang: Language = 'tr'): Record<string, unknown>[] {
   return rows.map((row) => ({
     id: row.id ?? '',
     candidate_id: row.candidate_id ?? '',
     employer_name: row.employer_name ?? '',
-    position_title: row.position_title ?? '',
+    position_title: localizeCatalogTitle(text(row.position_title), lang),
     monthly_net_salary: offerAmount(row),
     currency: offerCurrency(row),
     status: row.status ?? '',

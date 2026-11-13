@@ -12,6 +12,7 @@ import { matchResultTone } from '@/lib/status-tone';
 import DeleteRecordButton from '@/components/portal/DeleteRecordButton';
 import { useStaffRole } from '@/components/portal/useStaffRole';
 import { candidateProfessionLabel } from '@/lib/candidateLabels';
+import { localizeCatalogTitle } from '@/lib/professions';
 import { translations } from '@/lib/dictionary';
 import { fill, portalUi } from '@/lib/portal-ui-copy';
 import { useSiteLanguage } from '@/lib/site-language';
@@ -99,7 +100,7 @@ function EmployerFileInner() {
   const selected = matches.filter((m) => m.employer_decision === 'selected');
   const openTickets = tickets.filter((t) => !['closed', 'resolved'].includes(t.status));
   const openTasks = tasks.filter((t) => t.status !== 'completed' && t.status !== 'done');
-  const reqTitle = Object.fromEntries(requests.map((r) => [r.id, r.position_title]));
+  const reqTitle = Object.fromEntries(requests.map((r) => [r.id, localizeCatalogTitle(r.position_title, currentLang)]));
 
   return (
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -168,7 +169,7 @@ function EmployerFileInner() {
               {requests.map((r) => (
                 <li key={r.id} className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-sm">
                   <div>
-                    <Link href={`/portal/requests/${r.id}`} className="font-bold text-emerald-700 hover:underline">{r.position_title}</Link>
+                    <Link href={`/portal/requests/${r.id}`} className="font-bold text-emerald-700 hover:underline">{localizeCatalogTitle(r.position_title, currentLang)}</Link>
                     <DemoBadge show={r.is_demo} />
                     <div className="text-[11px] text-muted-foreground">{fill(ui.headcountLine, { n: r.headcount || 0, place: [r.city, r.country].filter(Boolean).join(', ') || '—', date: fmtDate(r.target_start_date) })}</div>
                   </div>

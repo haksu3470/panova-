@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { candidateProfessionLabel } from '@/lib/candidateLabels';
+import { localizeCatalogTitle } from '@/lib/professions';
 import { Language, translations } from '@/lib/dictionary';
 import { dateLocale, portalUi } from '@/lib/portal-ui-copy';
 import { benefitPhrase, displayedRequestSalary } from '@/lib/workforceRequest';
@@ -882,7 +883,7 @@ export default function PortalPage() {
                   [copy.delayVisa, visaLate.map((cand) => cand.full_name)],
                   [copy.delayDocs, missingDocs.map((cand) => cand.full_name)],
                   [copy.delayTasks, lateTasks.map((task) => task.title)],
-                  [copy.delayDemands, lateDemands.map((req) => req.position_title)],
+                  [copy.delayDemands, lateDemands.map((req) => localizeCatalogTitle(req.position_title, currentLang))],
                 ].filter(([, names]) => (names as string[]).length);
                 if (!blocks.length) return <p className="text-xs text-amber-900">{copy.delayNone}</p>;
                 return blocks.map(([title, names]) => (
@@ -972,7 +973,7 @@ export default function PortalPage() {
             setLinkId={setNewTaskLinkId}
             linkOptions={{
               candidate: candidates.map((c: any) => ({ id: c.id, label: c.full_name || c.name || c.id })),
-              request: jobRequests.map((r: any) => ({ id: r.id, label: `${r.position_title || 'Talep'} · ${r.employer_name || ''}` })),
+              request: jobRequests.map((r: any) => ({ id: r.id, label: `${localizeCatalogTitle(r.position_title, currentLang) || 'Talep'} · ${r.employer_name || ''}` })),
               employer: employers.map((e: any) => ({ id: e.id, label: e.company_name || e.name || e.id })),
             }}
           />
@@ -1184,7 +1185,7 @@ export default function PortalPage() {
                 <span className="text-xs font-bold text-emerald-700 uppercase bg-emerald-50 px-2.5 py-1 rounded-lg">
                   Personnel Demand Dossier (ID: {selectedDemandDetail.id})
                 </span>
-                <h3 className="text-xl font-extrabold text-slate-900 mt-1">{selectedDemandDetail.position_title} - {selectedDemandDetail.employer_name}</h3>
+                <h3 className="text-xl font-extrabold text-slate-900 mt-1">{localizeCatalogTitle(selectedDemandDetail.position_title, currentLang)} - {selectedDemandDetail.employer_name}</h3>
               </div>
               <button onClick={() => setSelectedDemandDetail(null)} className="text-muted-foreground hover:text-slate-600 font-bold text-xl cursor-pointer p-2">✕</button>
             </div>
@@ -1196,7 +1197,7 @@ export default function PortalPage() {
                   <div><strong>Employer:</strong> {selectedDemandDetail.employer_name}</div>
                   <div><strong>Country / City:</strong> {selectedDemandDetail.country} / {selectedDemandDetail.city || 'Center'}</div>
                   <div><strong>Sector:</strong> {selectedDemandDetail.sector}</div>
-                  <div><strong>Position:</strong> {selectedDemandDetail.position_title}</div>
+                  <div><strong>Position:</strong> {localizeCatalogTitle(selectedDemandDetail.position_title, currentLang)}</div>
                   <div><strong>Headcount:</strong> {selectedDemandDetail.headcount}</div>
                   <div><strong>Created Date:</strong> {selectedDemandDetail.created_at ? selectedDemandDetail.created_at.substring(0, 10) : 'N/A'}</div>
                   <div><strong>Target Start:</strong> {selectedDemandDetail.target_start_date || '2026-10-15'}</div>
