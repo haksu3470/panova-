@@ -50,6 +50,25 @@ export type ScreenCopy = { name: string; does: string; limitedDoes?: string };
 
 export type RoleCopy = { title: string; summary: string; screens: Record<string, ScreenCopy> };
 
+export type GuidesPrintCopy = {
+  /** Button text on /guides and the print toolbar. */
+  printButton: string;
+  /** Upper management: every role card and every how-to. */
+  allRoles: string;
+  /** Everyone else: what their own session may read. */
+  ownGuide: string;
+  back: string;
+  coverSubtitle: string;
+  languageLabel: string;
+  createdLabel: string;
+  sessionRoleLabel: string;
+  scopeLabel: string;
+  roleFilterLabel: string;
+  contentsTitle: string;
+  hint: string;
+  pageLabel: string;
+};
+
 export type GuidesCopy = {
   navLabel: string;
   hubTitle: string;
@@ -83,6 +102,8 @@ export type GuidesCopy = {
   unlinkedBody: string;
   verifyTitle: string;
   verifyBody: string;
+  /** Print / PDF page (/guides/print). */
+  print: GuidesPrintCopy;
   roleLabels: Record<string, string>;
   roles: Record<string, RoleCopy>;
   guides: Record<string, GuideArticle>;
@@ -315,4 +336,68 @@ export function portalGuideView(copy: GuidesCopy, viewer: PortalViewer): { roles
   }));
 
   return { roles, guides };
+}
+
+export const GUIDES_PRINT_PATH = '/guides/print';
+
+/** The session a role card stands for, used to pick that role's how-tos. */
+export function viewerForRole(roleId: string): PortalViewer {
+  if (roleId === 'employer') return { kind: 'employer', upperManagement: false, roleId };
+  if (roleId === 'candidate') return { kind: 'candidate', upperManagement: false, roleId };
+  return { kind: 'staff', upperManagement: roleId === 'upper_management', roleId };
+}
+
+export type GuidePrintScope = 'all' | 'role' | 'own';
+
+export type GuidePrintView = {
+  scope: GuidePrintScope;
+  /** The role picked with ?role=, when upper management asked for one. */
+  roleId: string | null;
+  roles: VisibleRole[];
+  guides: VisibleGuide[];
+};
+
+/** Button text on /guides: "all roles" for upper management, "my guide" for everyone else. */
+export function printButtonLabel(copy: GuidesCopy, viewer: PortalViewer): string {
+  return viewer.kind === 'staff' && viewer.upperManagement ? copy.print.allRoles : copy.print.ownGuide;
+}
+
+/**
+ * What the print page shows. It only ever narrows portalGuideView (the /guides
+ * rule), so it never opens anything the session cannot already read there.
+ * - upper management: everything, or one role with ?role=<id>
+ * - other staff: their own role card (all staff cards if the role is unknown) and their how-tos
+ * - employer / candidate: their own role (portalGuideView already limits it)
+ * ?role= is ignored for everyone but upper management.
+ */
+export function guidePrintView(copy: GuidesCopy, viewer: PortalViewer, requestedRole?: string | null): GuidePrintView {
+  const base = portalGuideView(copy, viewer);
+  if (viewer.kind === 'unlinked') return { scope: 'own', roleId: null, roles: [], guides: [] };
+
+  if (viewer.kind === 'staff' && viewer.upperManagement) {
+    const role = requestedRole ? base.roles.find((item) => item.id === requestedRole) : undefined;
+    if (!role) return { scope: 'all', roleId: null, ...base };
+    const allowed = new Set(portalGuideView(copy, viewerForRole(role.id)).guides.map((guide) => guide.id));
+    return {
+      scope: 'role',
+      roleId: role.id,
+      roles: [role],
+      guides: base.guides.filter((guide) => allowed.has(guide.id)),
+    };
+  }
+
+  if (viewer.kind === 'staff') {
+    const own = base.roles.filter((role) => role.id === viewer.roleId);
+    return { scope: 'own', roleId: null, roles: own.length ? own : base.roles, guides: base.guides };
+  }
+
+  return { scope: 'own', roleId: null, ...base };
+}
+
+/** Link to the print page; the role filter is only kept for upper management. */
+export function guidesPrintHref(viewer: PortalViewer, roleId?: string | null): string {
+  if (roleId && viewer.kind === 'staff' && viewer.upperManagement) {
+    return `${GUIDES_PRINT_PATH}?role=${encodeURIComponent(roleId)}`;
+  }
+  return GUIDES_PRINT_PATH;
 }

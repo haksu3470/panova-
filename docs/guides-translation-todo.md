@@ -46,6 +46,13 @@ Bu anahtarlar dört dilde zaten var, ama eski içeriği anlatıyor. Yeni Türkç
 
 - `roles.employer.screens.demands`: işveren portalında "Talepler" sekmesi yok. Dört dilden de silindi; yerini `roles.employer.screens.newRequest` (Yeni talep) aldı ve yukarıdaki listede.
 
+## 4. Yazdırma sayfası (`print.*`)
+
+`/guides/print` için eklenen `print` grubundaki 13 anahtar (`print.printButton`, `print.allRoles`, `print.ownGuide`, `print.back`, `print.coverSubtitle`, `print.languageLabel`, `print.createdLabel`, `print.sessionRoleLabel`, `print.scopeLabel`, `print.roleFilterLabel`, `print.contentsTitle`, `print.hint`, `print.pageLabel`) beş dilde yazıldı; geçici Türkçe yok, `GUIDES_PENDING_TRANSLATION` listesine girmedi.
+
+- [ ] en, sq, ar, mk metinlerini ana dili konuşan biri gözden geçirsin.
+- Not: `print.coverSubtitle` şirket adını (Panova Group) Latin harfle tutar.
+
 ## Rol görünürlüğü (`mapNote`, `unknownRoleNote`)
 
 `mapNote` (Türkçesi değişti) ve yeni `unknownRoleNote` beş dilde yazıldı; geçici Türkçe yok, `GUIDES_PENDING_TRANSLATION` listesine girmedi.
