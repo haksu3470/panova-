@@ -52,6 +52,11 @@ test('signed-in pages pass log out; sign-in pages do not', () => {
   for (const name of ['employerLogin', 'reset', 'kvkk', 'admin', 'supplier'] as const) {
     assert.equal(/onLogout=\{/.test(source(HEADER_FILES[name])), false, name);
   }
+  // guides: log out only with a session, same signOut() as /portal
+  const guides = source(HEADER_FILES.guides);
+  assert.match(guides, /onLogout=\{gate === 'ready' \? handleLogout : undefined\}/);
+  assert.match(guides, /const handleLogout = async \(\) => \{\s*await signOut\(\);/);
+  assert.match(guides, /logoutLabel=\{translations\[currentLang\]\.logoutBtn\}/);
   // same logout behaviour as before
   assert.match(source(HEADER_FILES.portal), /onLogout=\{handleLogout\}/);
   assert.match(source(HEADER_FILES.employer), /onLogout=\{handleLogout\}/);

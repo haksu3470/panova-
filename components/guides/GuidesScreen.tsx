@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, BookOpen, Printer } from 'lucide-react';
 import { HeaderActions, PageHeader, headerButtonClass } from '@/components/site/PageHeader';
 import { translations } from '@/lib/dictionary';
+import { signOut } from '@/lib/auth';
 import { guidesCopy } from '@/lib/guides-copy';
 import { guidesHome, guidesPrintHref, printButtonLabel, type GuidesCopy } from '@/lib/guides-model';
 import { useSiteLanguage } from '@/lib/site-language';
@@ -15,6 +16,10 @@ export default function GuidesScreen() {
   const copy = guidesCopy[currentLang];
   const { gate, viewer } = useGuidesViewer();
   const canPrint = gate === 'ready' && !!viewer && viewer.kind !== 'unlinked';
+
+  const handleLogout = async () => {
+    await signOut();
+  };
 
   const backHref = guidesHome(gate === 'ready' ? viewer : null);
   const backLabel = viewer?.kind === 'employer'
@@ -46,6 +51,9 @@ export default function GuidesScreen() {
               lang={currentLang}
               onLanguageChange={changeLanguage}
               homeLabel={translations[currentLang].returnHome}
+              // same sign-out as /portal; the session listener then shows the signed-out card
+              logoutLabel={translations[currentLang].logoutBtn}
+              onLogout={gate === 'ready' ? handleLogout : undefined}
               extra={
                 <>
                   {canPrint && viewer && (

@@ -224,17 +224,17 @@ const VISIBILITY: [PortalViewer, string[], string[]][] = [
   [
     { kind: 'staff', upperManagement: false, roleId: 'source_country' },
     ['source_country'],
-    ['staff-login', 'dossier-review', 'matching-offers', 'request-to-offer', 'document-request', 'candidate-register'],
+    ['staff-login', 'dossier-review', 'matching-offers', 'request-to-offer', 'document-request'],
   ],
   [
     { kind: 'staff', upperManagement: false, roleId: 'target_country' },
     ['target_country'],
-    ['staff-login', 'dossier-review', 'matching-offers', 'request-to-offer', 'document-request', 'employer-request', 'employer-browse', 'candidate-register'],
+    ['staff-login', 'dossier-review', 'matching-offers', 'request-to-offer', 'document-request'],
   ],
   [
     { kind: 'staff', upperManagement: false, roleId: 'field_officer' },
     ['field_officer'],
-    ['staff-login', 'dossier-review', 'document-request', 'candidate-register'],
+    ['staff-login', 'dossier-review', 'document-request'],
   ],
   [{ kind: 'staff', upperManagement: false, roleId: 'finance' }, ['finance'], ['staff-login']],
   [{ kind: 'staff', upperManagement: false, roleId: 'limited' }, ['limited'], ['staff-login']],
@@ -268,11 +268,14 @@ test('staff how-to needs follow the real portal tabs and file routes', () => {
     const ids = portalGuideView(guidesCopy.en, viewer).guides.map((guide) => guide.id);
     assert.equal(ids.includes('dossier-review'), canOpenStaffFile(role.id, 'dossier'), role.id);
     assert.equal(ids.includes('matching-offers'), canOpenStaffFile(role.id, 'requestFile'), role.id);
-    assert.equal(ids.includes('employer-browse'), canOpenStaffFile(role.id, 'employerFile'), role.id);
+    // employer / candidate own-screen how-tos are never staff work, whatever files the role opens
+    for (const id of ['employer-request', 'employer-browse', 'candidate-register']) assert.equal(ids.includes(id), false, `${role.id} ${id}`);
     assert.equal(ids.includes('staff-invite'), false, role.id);
   }
   for (const guide of GUIDE_CATALOG) {
     if (guide.audiences.includes('staff') && guide.id !== 'staff-login') assert.ok(guide.staffNeeds, `${guide.id} names a need`);
+    // only staff-perspective how-tos are open to staff below upper management
+    if (guide.perspective !== 'staff') assert.equal(guide.audiences.includes('staff'), false, guide.id);
   }
   assert.equal(isKnownStaffRole('staff'), false);
   assert.equal(isKnownStaffRole('employer'), false);
@@ -286,4 +289,27 @@ test('unknown staff role gets a note; mapNote says who sees what', () => {
   assert.match(guidesCopy.tr.mapNote, /Üst Yönetim burada tüm rollerin kartlarını/);
   assert.match(guidesCopy.tr.mapNote, /yalnızca kendi rolünün kartını/);
   assert.match(guidesCopy.en.mapNote, /only their own role card/);
+});
+
+test('perspective: each how-to is tagged with whose screen it walks through', () => {
+  const perspectives = Object.fromEntries(GUIDE_CATALOG.map((guide) => [guide.id, guide.perspective]));
+  assert.deepEqual(perspectives, {
+    'staff-login': 'staff',
+    'staff-invite': 'staff',
+    'dossier-review': 'staff',
+    'matching-offers': 'staff',
+    'request-to-offer': 'staff',
+    'document-request': 'staff',
+    'employer-request': 'employer',
+    'employer-browse': 'employer',
+    'candidate-register': 'candidate',
+  });
+  // the employer / candidate how-tos describe those portals
+  for (const guide of GUIDE_CATALOG) {
+    const where = guidesCopy.tr.guides[guide.id].where;
+    if (guide.perspective === 'employer') assert.ok(where.startsWith('/employer'), guide.id);
+    if (guide.perspective === 'candidate') assert.ok(where.startsWith('/candidate'), guide.id);
+  }
+  // upper management keeps every how-to
+  assert.deepEqual(portalGuideView(guidesCopy.tr, upper).guides.map((guide) => guide.id), GUIDE_CATALOG.map((guide) => guide.id));
 });

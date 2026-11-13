@@ -26,8 +26,16 @@ export type RoleDef = {
  */
 export type StaffNeed = 'candidates' | 'requests' | 'employers';
 
+/** Whose own screen a how-to walks through. */
+export type GuidePerspective = 'staff' | 'employer' | 'candidate';
+
 export type GuideDef = {
   id: string;
+  /**
+   * staff: portal work. employer / candidate: that account's own portal;
+   * shown to that account and to upper management only.
+   */
+  perspective: GuidePerspective;
   audiences: GuideAudience[];
   /** For staff below upper management: only roles with this list see the how-to. */
   staffNeeds?: StaffNeed;
@@ -208,15 +216,17 @@ export const ROLE_CATALOG: RoleDef[] = [
 ];
 
 export const GUIDE_CATALOG: GuideDef[] = [
-  { id: 'staff-login', audiences: ['staff'] },
-  { id: 'staff-invite', audiences: ['upper_management'] },
-  { id: 'dossier-review', audiences: ['staff'], staffNeeds: 'candidates' },
-  { id: 'matching-offers', audiences: ['staff'], staffNeeds: 'requests' },
-  { id: 'request-to-offer', audiences: ['staff'], staffNeeds: 'requests' },
-  { id: 'document-request', audiences: ['staff'], staffNeeds: 'candidates' },
-  { id: 'employer-request', audiences: ['staff', 'employer'], staffNeeds: 'employers' },
-  { id: 'employer-browse', audiences: ['staff', 'employer'], staffNeeds: 'employers' },
-  { id: 'candidate-register', audiences: ['staff', 'candidate'], staffNeeds: 'candidates' },
+  { id: 'staff-login', perspective: 'staff', audiences: ['staff'] },
+  { id: 'staff-invite', perspective: 'staff', audiences: ['upper_management'] },
+  { id: 'dossier-review', perspective: 'staff', audiences: ['staff'], staffNeeds: 'candidates' },
+  { id: 'matching-offers', perspective: 'staff', audiences: ['staff'], staffNeeds: 'requests' },
+  { id: 'request-to-offer', perspective: 'staff', audiences: ['staff'], staffNeeds: 'requests' },
+  { id: 'document-request', perspective: 'staff', audiences: ['staff'], staffNeeds: 'candidates' },
+  // These three describe the employer's / candidate's own screens, not staff work:
+  // only that account and upper management see them.
+  { id: 'employer-request', perspective: 'employer', audiences: ['upper_management', 'employer'] },
+  { id: 'employer-browse', perspective: 'employer', audiences: ['upper_management', 'employer'] },
+  { id: 'candidate-register', perspective: 'candidate', audiences: ['upper_management', 'candidate'] },
 ];
 
 const NEED_SCREENS: Record<StaffNeed, string[]> = {
@@ -253,8 +263,10 @@ export function roleCardVisible(role: RoleDef, viewer: PortalViewer): boolean {
  */
 export function guideVisible(guide: GuideDef, viewer: PortalViewer): boolean {
   if (!audienceAllows(guide.audiences, viewer)) return false;
-  if (viewer.kind !== 'staff' || viewer.upperManagement || !guide.staffNeeds) return true;
-  return staffRoleHas(viewer.roleId, guide.staffNeeds);
+  if (viewer.kind !== 'staff' || viewer.upperManagement) return true;
+  // Staff below upper management: only staff-side how-tos, for a list their role has.
+  if (guide.perspective !== 'staff') return false;
+  return !guide.staffNeeds || staffRoleHas(viewer.roleId, guide.staffNeeds);
 }
 
 /** Path fragment each how-to must keep, in every locale, so the steps stay tied to the app. */
