@@ -1,68 +1,50 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { writeAudit } from '@/lib/audit';
-import DemoBadge from './DemoBadge';
-import { portalUi } from '@/lib/portal-ui-copy';
-import { useSiteLanguage } from '@/lib/site-language';
-import DeleteRecordButton from './DeleteRecordButton';
-import { useStaffRole } from './useStaffRole';
-import { openCandidateDocument } from '@/lib/candidateFiles';
-import { releaseCopy } from '@/lib/release-copy';
-import { translations } from '@/lib/dictionary';
-import { canApproveDocument, documentCounts, isApprovedWithoutFile, type DocumentLike } from '@/lib/candidateDocuments';
+import { useState } from 'react';
+import type { Translation } from '@/lib/dictionary';
+import type { PortalUi } from '@/lib/portal-ui-copy';
+import {
+  documentCounts,
+  documentTypeTitle,
+  isApprovedWithoutFile,
+  REQUESTABLE_DOC_TYPES,
+  type CandidateDocumentRow,
+  type DocumentListItem,
+} from '@/lib/candidateDocuments';
+import { requestCandidateDocument } from '@/lib/candidateDocumentActions';
 
-const DOC_TYPE_KEYS = ['passport', 'cv', 'certificate', 'diploma', 'criminal_record', 'health_report', 'photo', 'contract', 'apostille', 'other'] as const;
-const STATUS_KEYS = ['pending', 'uploaded', 'reviewing', 'approved', 'rejected', 'rerequested', 'expiring', 'expired'] as const;
+interface Props {
+  candidateId: string;
+  /** The same list the document section shows (mergeDocumentSlots). */
+  items: DocumentListItem[];
+  rows: CandidateDocumentRow[];
+  reload: () => Promise<void>;
+  t: Translation;
+  ui: PortalUi;
+}
 
 /**
- * candidate_documents status tracking for staff. When the candidate has no
- * rows there yet, the page passes the legacy documents_json list so the
- * count matches the list shown on the left (approved = approved with a file).
+ * Summary of the staff document list: approved = approved with a file,
+ * total = every line of that list (five slots + other rows). Editing happens
+ * in the list itself; this card only counts and can request a new type.
  */
-export default function DocumentStatusPanel({ candidateId, legacyDocs }: { candidateId: string; legacyDocs?: readonly DocumentLike[] }) {
-  const { currentLang } = useSiteLanguage('en');
-  const ui = portalUi[currentLang];
-  const t = translations[currentLang] || translations.en;
-  const { upper } = useStaffRole();
+export default function DocumentStatusPanel({ candidateId, items, rows, reload, t, ui }: Props) {
+  const [newType, setNewType] = useState<string>('photo');
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
+  const { total, approved } = documentCounts(items.map((item) => ({ status: item.status, file_url: item.file_url })));
+  const title = (docType: string) => documentTypeTitle(docType, t, ui.docTypes);
 
-  const [docs, setDocs] = useState<any[]>([]);
-  const [newType, setNewType] = useState('passport');
-  const [error, setError] = useState('');
-
-  const load = async () => {
-    const { data, error: loadError } = await supabase.from('candidate_documents').select('*').eq('candidate_id', candidateId).order('created_at');
-    if (loadError) setError(loadError.message);
-    setDocs(data || []);
+  const request = async () => {
+    setBusy(true);
+    setMessage(null);
+    const result = await requestCandidateDocument(candidateId, newType, rows, `${ui.docRequest} ${title(newType)}`);
+    if (result.ok) await reload();
+    setBusy(false);
+    setMessage(result.ok
+      ? { kind: 'ok', text: t.docRequestedOk || '' }
+      : { kind: 'error', text: (result.code === 'denied' ? t.docNoPermission : result.code === 'already' ? t.docAlreadyRequested : t.docSaveFailed) || '' });
   };
-
-  useEffect(() => {
-    load();
-  }, [candidateId]);
-
-  const typeName = (key: string) => ui.docTypes[key] || key;
-  const statusName = (key: string) => ui.docStatuses[key] || key;
-
-  const update = async (d: any, patch: Record<string, unknown>, label: string) => {
-    setError('');
-    const { data: u } = await supabase.auth.getUser();
-    const { error: updateError } = await supabase.from('candidate_documents').update({ ...patch, reviewed_at: new Date().toISOString(), reviewed_by: u.user?.id ?? null }).eq('id', d.id);
-    if (updateError) return setError(updateError.message);
-    await writeAudit(`${ui.docTitle} ${typeName(d.doc_type)}: ${label}`, 'candidate', candidateId, { document_id: d.id, ...patch });
-    load();
-  };
-
-  const add = async () => {
-    setError('');
-    const { error: insertError } = await supabase.from('candidate_documents').insert({ candidate_id: candidateId, doc_type: newType, status: 'pending' });
-    if (insertError) return setError(insertError.message);
-    await writeAudit(`${ui.docRequest} ${typeName(newType)}`, 'candidate', candidateId);
-    load();
-  };
-
-  const counted = docs.length > 0 ? docs : (legacyDocs ?? []);
-  const { total, approved } = documentCounts(counted);
 
   return (
     <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
@@ -70,65 +52,37 @@ export default function DocumentStatusPanel({ candidateId, legacyDocs }: { candi
         <span className="flex items-center gap-1.5">📄 {ui.docTitle}</span>
         <span className="text-xs text-slate-600 font-bold">{approved}/{total} {ui.docApproved}</span>
       </h3>
-      {error && <p className="text-xs text-red-600 font-bold">{error}</p>}
-      {counted.length === 0 && <p className="text-xs text-muted-foreground font-medium">{ui.docEmpty}</p>}
 
-      {docs.map((d) => (
-        <div key={d.id} className="border border-slate-200 rounded-xl p-3 space-y-2 bg-slate-50/50">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
-              {typeName(d.doc_type)} <DemoBadge show={d.is_demo} />
+      <ul className="space-y-1.5">
+        {items.map((item) => (
+          <li key={item.key} className="flex items-center justify-between gap-2 text-xs">
+            <span className="font-semibold text-slate-800 truncate">{title(item.docType)}</span>
+            <span className="flex items-center gap-1 shrink-0">
+              {item.row && isApprovedWithoutFile(item.row) ? <span className="font-bold text-red-700">⚠️ {t.docNoFileShort}</span> : null}
+              <span className="font-bold text-slate-700 bg-slate-100 rounded-md px-2 py-0.5">
+                {item.status ? (ui.docStatuses[item.status] || item.status) : t.docNotRequested}
+              </span>
             </span>
-            <span className="flex items-center gap-2">
-              {d.file_url && <button type="button" onClick={async () => {
-                const url = await openCandidateDocument(d.id, d.file_url);
-                if (url) window.open(url, '_blank', 'noopener,noreferrer');
-              }} className="text-xs font-bold text-blue-600 underline hover:text-blue-800">{ui.docOpen}</button>}
-              <DeleteRecordButton table="candidate_documents" id={d.id} name={typeName(d.doc_type)} isDemo={d.is_demo} allowed={upper} onDeleted={load} />
-            </span>
-          </div>
-
-          <select
-            value={d.status}
-            onChange={(e) => {
-              if (e.target.value === 'approved' && !canApproveDocument(d)) return;
-              update(d, { status: e.target.value }, statusName(e.target.value));
-            }}
-            className="w-full text-xs font-bold border border-slate-300 rounded-lg px-2.5 py-2 bg-white text-slate-900 outline-none cursor-pointer"
-          >
-            {STATUS_KEYS.map((key) => (
-              <option key={key} value={key} disabled={key === 'approved' && !canApproveDocument(d)}>{ui.docStatuses[key]}</option>
-            ))}
-          </select>
-          {isApprovedWithoutFile(d) ? (
-            <p role="status" className="text-[11px] font-bold text-red-700 bg-red-50 border border-red-200 rounded-md px-2 py-0.5">⚠️ {t.docNoFileWarning}</p>
-          ) : !canApproveDocument(d) ? (
-            <p className="text-[11px] font-semibold text-slate-600">{t.docApproveNeedsFile}</p>
-          ) : null}
-
-          <label className="block text-[11px] font-bold text-slate-700">
-            {releaseCopy[currentLang].docReason}
-            <input
-              defaultValue={d.review_note || ''}
-              onBlur={(e) => e.target.value !== (d.review_note || '') && update(d, { review_note: e.target.value }, e.target.value)}
-              className="mt-1 w-full border border-slate-300 rounded-md px-2 py-1 text-xs font-semibold bg-white text-slate-900 outline-none"
-            />
-          </label>
-          <label className="flex items-center gap-2 text-xs text-slate-700 font-bold pt-0.5">
-            {ui.docValidUntil}
-            <input type="date" defaultValue={d.valid_until || ''} onBlur={(e) => e.target.value !== (d.valid_until || '') && update(d, { valid_until: e.target.value || null }, `${ui.docValidUntil} ${e.target.value}`)} className="border border-slate-300 rounded-md px-2 py-1 text-xs font-semibold bg-white text-slate-900 outline-none" />
-          </label>
-        </div>
-      ))}
+          </li>
+        ))}
+      </ul>
 
       <div className="flex gap-2 pt-2 border-t border-slate-100">
-        <select value={newType} onChange={(e) => setNewType(e.target.value)} className="flex-1 text-xs font-bold border border-slate-300 rounded-xl px-3 py-2.5 bg-white text-slate-900 outline-none cursor-pointer">
-          {DOC_TYPE_KEYS.map((key) => <option key={key} value={key}>{ui.docTypes[key]}</option>)}
+        <select
+          value={newType}
+          onChange={(e) => { setNewType(e.target.value); setMessage(null); }}
+          aria-label={ui.docRequest}
+          className="flex-1 text-xs font-bold border border-slate-300 rounded-xl px-3 py-2.5 bg-white text-slate-900 outline-none cursor-pointer"
+        >
+          {REQUESTABLE_DOC_TYPES.map((key) => <option key={key} value={key}>{title(key)}</option>)}
         </select>
-        <button onClick={add} className="text-xs font-bold px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white cursor-pointer shadow">
+        <button onClick={request} disabled={busy} className="text-xs font-bold px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white cursor-pointer shadow disabled:cursor-wait">
           {ui.docRequest}
         </button>
       </div>
+      {message ? (
+        <p role={message.kind === 'error' ? 'alert' : 'status'} className={`text-[11px] font-bold ${message.kind === 'error' ? 'text-red-700' : 'text-emerald-700'}`}>{message.text}</p>
+      ) : null}
     </div>
   );
 }

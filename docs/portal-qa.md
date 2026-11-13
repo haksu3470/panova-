@@ -345,6 +345,23 @@ Automated: `lib/candidateDocuments.test.ts` (approval rule, counter, default lis
 
 Automated: `lib/portalOverview.test.ts` (open request count, card to tab, role check, five languages).
 
+## S19. Personel belge listesi tek sistem / Staff documents in one system
+
+**Rol / Role:** Staff on `/portal/candidates/[id]`. Upper management for deletion. S19 replaces the list parts of S17 item 1 (the old default list no longer exists).
+
+**Adımlar ve beklenen / Steps and expected:**
+
+1. **Tek liste / One list.** Open a candidate with no `candidate_documents` rows. **Document tracking** shows the five documents (passport, professional certificate, criminal record, health report, apostille) as "Not requested / not uploaded yet". The **Document status** card on the right lists the same five lines and shows **0/5**. There is no free-text "add document" box. Titles come from the document type and match the candidate's own page in every language.
+2. **Sayaç tutarlılığı / Counter matches.** Request **Photo** from the card: it appears under the five slots in the body list and on the card; the card shows 0/6. Approve a document with a file: 1/6 on the card, and the body list shows the same status. A row saved earlier as approved without a file shows the red "No file" warning in both places and is not counted.
+3. **Personel yüklemesi / Staff upload.** Upload a **JPG** and then a **PDF** on two slots. "File uploaded" shows next to the line; status becomes **Uploaded**; the file name shows. The new row (or the updated open request row) has `file_url` starting with `storage:candidate-files/`, never `data:`. **Preview** opens both files as in S17 item 4, and each open writes one access row. A file of a wrong type or over the size limit is refused with the same message as on the candidate page; nothing is written.
+4. **Anında kayıt / Instant save.** Change a status: it saves at once and "Saved" shows next to the line; `reviewed_by` and `reviewed_at` are filled. **Approved** and **Reviewing** cannot be picked while the line has no file, and the hint "Upload a file before reviewing or approving" shows. Type a review note or a valid-until date and leave the field: it saves with the same feedback. Reload the page: the values stay.
+5. **Talep et / Request.** On a virtual slot press **+ Request**: a pending row is added and the line shows **Pending**. Request the same type again from the card: "There is already an open request for this type" shows and no second row is added.
+6. **Silme / Delete.** As upper management, delete a line: a confirm dialog shows first; after confirming the row is gone from both lists (a slot returns to "Not requested"). The file in storage is kept. As any other staff role, the delete button is not shown.
+7. **Yetki / Role scope.** As a staff role that RLS does not allow to write this candidate's documents, change a status, upload or request: "You are not allowed to change this candidate's documents" shows next to the line or card, nothing changes, and the console has a `[candidate-documents]` line.
+8. **documents_json korunur / documents_json kept.** Close a candidate's file or change details and press **Save**. In the database `documents_json` still holds `closure_meta`, `profile_meta` and any old `docs` list exactly as before; no new `docs` key is written. Old `docs` entries (base64 files) are not shown in the staff list and are not moved.
+
+Automated: `lib/candidateDocuments.test.ts` (no-file rule, five slots plus other rows, counter, upload target row, open request, titles in five languages, `documents_json` kept, RLS refusal, no base64 or free-text add in the source, dictionary keys).
+
 ---
 
 ## Boşluk analizi / Gap analysis

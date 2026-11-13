@@ -16,9 +16,12 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { candidateService } from '@/lib/services/candidateService';
-import { canApproveDocument, defaultDocumentList, isApprovedWithoutFile } from '@/lib/candidateDocuments';
+import { keepDocumentsJson, mergeDocumentSlots } from '@/lib/candidateDocuments';
+import CandidateDocumentsPanel, { type DocumentPreviewRequest } from '@/components/portal/CandidateDocumentsPanel';
+import { useCandidateDocuments } from '@/components/portal/useCandidateDocuments';
+import { releaseCopy } from '@/lib/release-copy';
 import { canPickTravelStatus, hasFlightInfo, staffTravelDisplay, toTravelFields } from '@/lib/employerPlacements';
-import { User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Video, Trash2, Upload, Eye, Plus, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert } from 'lucide-react';
+import { User, Save, Camera, Mail, Phone, KeyRound, FileText, Video, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
 import { portalUi } from '@/lib/portal-ui-copy';
@@ -26,7 +29,7 @@ import { normalizeReferralCode } from '@/lib/referralCode';
 import { ReferralCodeChip } from '@/components/portal/ReferralCodeChip';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
-import { candidateDocumentTitle, candidatePlaceLabel, candidateProfessionLabel } from '@/lib/candidateLabels';
+import { candidatePlaceLabel, candidateProfessionLabel } from '@/lib/candidateLabels';
 import {
   YouTubeUrlError,
   canManageCandidateVideo,
@@ -34,14 +37,6 @@ import {
   isMissingVideoPermissionRpc,
   youtubeSaveFailure,
 } from '@/lib/youtube';
-
-interface CandidateDocument {
-  id: string;
-  name: string;
-  status: 'pending' | 'uploaded' | 'reviewing' | 'approved' | 'rejected' | 're_requested';
-  file_url?: string;
-  file_name?: string;
-}
 
 function CandidateDetailPageInner() {
   const params = useParams();
@@ -67,12 +62,11 @@ function CandidateDetailPageInner() {
 
   const [candidate, setCandidate] = useState<any | null>(null);
   const [showIO, setShowIO] = useState(false);
-  const [documents, setDocuments] = useState<CandidateDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const [status, setStatus] = useState('pending');
-  const { role: staffRole } = useStaffRole();
+  const { role: staffRole, upper: isUpperStaff } = useStaffRole();
   const mayChangeStatus = canUpdateRequestStatus(staffRole);
   const [candidatePhoto, setCandidatePhoto] = useState('');
   const [candidatePhone, setCandidatePhone] = useState('');
@@ -101,16 +95,13 @@ function CandidateDetailPageInner() {
   const [offerDate, setOfferDate] = useState('');
   const [offerTerms, setOfferTerms] = useState('');
 
-  const [newDocName, setNewDocName] = useState('');
-  const [hasTableDocs, setHasTableDocs] = useState<boolean | null>(null);
-  
-  useEffect(() => {
-    supabase.from('candidate_documents').select('id', { count: 'exact', head: true }).eq('candidate_id', candidateId)
-      .then(({ count }) => setHasTableDocs((count ?? 0) > 0));
-  }, [candidateId]);
+  // One document list (candidate_documents) for the body section and the
+  // summary card on the right.
+  const docs = useCandidateDocuments(candidateId);
+  const docItems = mergeDocumentSlots(docs.rows);
 
   // file_url may be a private storage reference; DocumentPreviewModal signs it.
-  const [previewDoc, setPreviewDoc] = useState<{ key: string; name: string; fileUrl: string; fileName?: string; documentId?: string } | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<DocumentPreviewRequest | null>(null);
   const [canEditVideo, setCanEditVideo] = useState(false);
 
   const [notifTitle, setNotifTitle] = useState('');
@@ -192,24 +183,6 @@ function CandidateDetailPageInner() {
             setClosureReason(parsedMeta.closure_meta.closure_reason || '');
           }
         } catch (e) {}
-
-        // Every default document starts as pending. (The passport used to be
-        // marked approved whenever a passport number existed, with no file.)
-        const defaultDocs: CandidateDocument[] = defaultDocumentList([
-          t.docPassportScan || '',
-          t.docProfessionalCert || '',
-          t.docCriminalRecord || '',
-          t.docHealthReport || '',
-          t.docApostille || '',
-        ]);
-        
-        try {
-          const parsed = data.documents_json ? JSON.parse(data.documents_json) : {};
-          const parsedDocs = Array.isArray(parsed) ? parsed : (parsed.docs || defaultDocs);
-          setDocuments(parsedDocs);
-        } catch {
-          setDocuments(defaultDocs);
-        }
       }
     } catch (err: any) {
       console.error('Aday detay yükleme hatası:', err.message);
@@ -225,48 +198,6 @@ function CandidateDetailPageInner() {
       setCandidatePhoto(event.target?.result as string);
     };
     reader.readAsDataURL(file);
-  };
-
-  const handleDocStatusChange = (docId: string, newStatus: CandidateDocument['status']) => {
-    // A document without a file cannot be approved (the option is disabled too).
-    setDocuments(documents.map(doc => (doc.id === docId && (newStatus !== 'approved' || canApproveDocument(doc)) ? { ...doc, status: newStatus } : doc)));
-  };
-
-  const handleFileUpload = (docId: string, event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const fileUrl = e.target?.result as string;
-      setDocuments(documents.map(doc => {
-        if (doc.id === docId) {
-          return {
-            ...doc,
-            file_url: fileUrl,
-            file_name: file.name,
-            status: 'uploaded',
-          };
-        }
-        return doc;
-      }));
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleAddDocument = () => {
-    if (!newDocName.trim()) return;
-    const newDoc: CandidateDocument = {
-      id: Date.now().toString(),
-      name: newDocName,
-      status: 'pending',
-    };
-    setDocuments([...documents, newDoc]);
-    setNewDocName('');
-  };
-
-  const handleDeleteDocument = (docId: string) => {
-    setDocuments(documents.filter(d => d.id !== docId));
   };
 
   // Upper management only (canUpdateRequestStatus). The RPC checks the role
@@ -288,19 +219,12 @@ function CandidateDetailPageInner() {
   };
 
   const handleSaveDetail = async () => {
-    let existingMeta = {};
-    try {
-      const parsed = candidate?.documents_json ? JSON.parse(candidate.documents_json) : {};
-      if (!Array.isArray(parsed)) existingMeta = parsed;
-    } catch (e) {}
-
-    const payloadDocumentsJson = JSON.stringify({
-      docs: documents,
-      closure_meta: {
-        is_closed: isClosed,
-        closure_reason: closureReason
-      },
-      ...existingMeta
+    // documents_json also holds closure_meta and profile_meta (emergency
+    // contact). Documents now live in candidate_documents: the old `docs`
+    // key is neither read nor written here, but kept exactly as stored.
+    const payloadDocumentsJson = keepDocumentsJson(candidate?.documents_json, {
+      is_closed: isClosed,
+      closure_reason: closureReason,
     });
 
     const payload: Record<string, unknown> = {
@@ -616,87 +540,20 @@ function CandidateDetailPageInner() {
               </div>
             </div>
 
-            {/* Belge Takip Mekanizması */}
-            {hasTableDocs === false && (
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <FileCheck className="w-5 h-5 text-indigo-600" /> {t.documentTrackingMechanism}
-                </h3>
-              </div>
-
-              <div className="space-y-3">
-                {documents.map((doc) => (
-                  <div key={doc.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm">
-                      <div className="flex items-center gap-3">
-                        <FileText className="w-5 h-5 text-indigo-600 shrink-0" />
-                        <div>
-                          <div className="font-extrabold text-slate-900">{candidateDocumentTitle(doc, t)}</div>
-                          {doc.file_name && <div className="text-[11px] text-slate-600 font-medium truncate max-w-[200px]">{t.file}: {doc.file_name}</div>}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col items-start sm:items-end gap-1">
-                        <div className="flex items-center gap-2">
-                          <select
-                            value={doc.status}
-                            onChange={(e) => handleDocStatusChange(doc.id, e.target.value as CandidateDocument['status'])}
-                            aria-describedby={canApproveDocument(doc) ? undefined : `doc-approve-hint-${doc.id}`}
-                            className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer outline-none bg-amber-100 text-amber-900 border-amber-300"
-                          >
-                            <option value="pending" className="bg-white text-slate-900">🟡 {ui.docStatuses.pending}</option>
-                            <option value="uploaded" className="bg-white text-slate-900">📤 {ui.docStatuses.uploaded}</option>
-                            <option value="reviewing" className="bg-white text-slate-900">🔵 {ui.docStatuses.reviewing}</option>
-                            <option value="approved" disabled={!canApproveDocument(doc)} className="bg-white text-slate-900">🟢 {ui.docStatuses.approved}</option>
-                            <option value="rejected" className="bg-white text-slate-900">🔴 {ui.docStatuses.rejected}</option>
-                          </select>
-                          <button onClick={() => handleDeleteDocument(doc.id)} className="p-1.5 text-muted-foreground hover:text-red-600 cursor-pointer">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                        {isApprovedWithoutFile(doc) ? (
-                          <span id={`doc-approve-hint-${doc.id}`} role="status" className="text-[11px] font-bold text-red-700 bg-red-50 border border-red-200 rounded-md px-2 py-0.5">
-                            ⚠️ {t.docNoFileWarning}
-                          </span>
-                        ) : !canApproveDocument(doc) ? (
-                          <span id={`doc-approve-hint-${doc.id}`} className="text-[11px] font-semibold text-slate-600">
-                            {t.docApproveNeedsFile}
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs">
-                      {doc.file_url ? (
-                        <button type="button" onClick={() => setPreviewDoc({ key: `${doc.id}:${Date.now()}`, name: candidateDocumentTitle(doc, t), fileUrl: doc.file_url!, fileName: doc.file_name, documentId: doc.id })} className="text-emerald-800 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer">
-                          <Eye className="w-3.5 h-3.5" /> {t.preview}
-                        </button>
-                      ) : <span className="text-muted-foreground font-medium italic">{t.noFileUploaded}</span>}
-
-                      <label className="bg-white hover:bg-slate-100 text-slate-800 px-3 py-1.5 rounded-lg border border-slate-300 font-bold cursor-pointer shadow-sm flex items-center gap-1">
-                        <Upload className="w-3.5 h-3.5 text-indigo-600" /> {t.uploadFromComputer}
-                        <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleFileUpload(doc.id, e)} className="hidden" />
-                      </label>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex gap-2">
-                <input
-                  type="text"
-                  placeholder={t.newDocNamePlaceholder}
-                  value={newDocName}
-                  onChange={(e) => setNewDocName(e.target.value)}
-                  className="flex-1 px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 text-slate-900 bg-white outline-none font-medium"
-                />
-                <button onClick={handleAddDocument} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
-                  <Plus className="w-4 h-4" /> {t.add}
-                </button>
-              </div>
-            </div>
-            )}
+            {/* Belge Takip Mekanizması: candidate_documents (aday ekranıyla aynı kayıtlar) */}
+            <CandidateDocumentsPanel
+              candidateId={candidateId}
+              items={docItems}
+              rows={docs.rows}
+              loaded={docs.loaded}
+              loadError={docs.error}
+              reload={docs.reload}
+              t={t}
+              ui={ui}
+              copy={releaseCopy[currentLang]}
+              canDelete={isUpperStaff}
+              onPreview={setPreviewDoc}
+            />
 
             {/* Video tanıtımı (3 YouTube videosu) */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -751,7 +608,7 @@ function CandidateDetailPageInner() {
               <p className="text-[11px] text-slate-600 font-medium">{t.officialProcessHint}</p>
             </div>
 
-            <DocumentStatusPanel candidateId={candidateId} legacyDocs={hasTableDocs === false ? documents : undefined} />
+            <DocumentStatusPanel candidateId={candidateId} items={docItems} rows={docs.rows} reload={docs.reload} t={t} ui={ui} />
             <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm">
               <div>
                 <p className="font-bold text-slate-900 text-sm">🤝 {ui.interviewOfferTitle}</p>

@@ -138,7 +138,9 @@ test('the candidate page and the staff page both use the shared document title h
   const candidatePage = readFileSync(join(root, 'app/candidate/page.tsx'), 'utf8');
   const staffPage = readFileSync(join(root, 'app/portal/candidates/[id]/page.tsx'), 'utf8');
   assert.equal(candidatePage.includes('candidateDocumentTitle('), true);
-  assert.equal(staffPage.includes('candidateDocumentTitle('), true);
+  // The staff list is keyed by doc_type (candidate_documents) and uses the same title keys.
+  const staffList = readFileSync(join(root, 'components/portal/CandidateDocumentsPanel.tsx'), 'utf8');
+  assert.equal(staffList.includes('documentTypeTitle('), true);
   assert.equal(candidatePage.includes('docTitlesByLang'), false);
   assert.equal(candidatePage.includes('<strong>{doc.name}</strong>'), false);
   assert.equal(staffPage.includes("'1': t.docPassportScan"), false);
