@@ -72,6 +72,11 @@ export function candidateStatusErrorKey(
   return 'candStatusErrGeneric';
 }
 
+/** Reason errors are shown under the reason field, not above the buttons. */
+export function isReasonErrorKey(key: CandidateStatusErrorKey | null | undefined): boolean {
+  return key === 'candStatusErrReasonRequired' || key === 'candStatusErrReasonTooLong';
+}
+
 export function candidateReasonErrorKey(check: ReasonCheck): CandidateStatusErrorKey | null {
   if (check === 'required') return 'candStatusErrReasonRequired';
   if (check === 'too_long') return 'candStatusErrReasonTooLong';

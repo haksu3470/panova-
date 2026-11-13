@@ -7,6 +7,7 @@ import {
   candidateReasonErrorKey,
   candidateStatusErrorKey,
   candidateStatusLabel,
+  isReasonErrorKey,
   normalizeCandidateStatus,
 } from './candidateStatusChange.ts';
 import { checkStatusReason, STATUS_REASON_MAX } from './requestStatusChange.ts';
@@ -29,6 +30,34 @@ test('reason must be 5..1000 characters after trimming', () => {
   assert.equal(candidateReasonErrorKey(checkStatusReason('')), 'candStatusErrReasonRequired');
   assert.equal(candidateReasonErrorKey(checkStatusReason('a'.repeat(1001))), 'candStatusErrReasonTooLong');
   assert.equal(candidateReasonErrorKey('ok'), null);
+});
+
+test('reason boundaries: empty, 4, 5, 1000 and 1001 characters', () => {
+  const cases: [string, string | null][] = [
+    ['', 'candStatusErrReasonRequired'],
+    ['     ', 'candStatusErrReasonRequired'],
+    ['abcd', 'candStatusErrReasonRequired'],
+    ['abcde', null],
+    ['a'.repeat(1000), null],
+    ['a'.repeat(1001), 'candStatusErrReasonTooLong'],
+  ];
+  for (const [reason, expected] of cases) {
+    assert.equal(candidateReasonErrorKey(checkStatusReason(reason)), expected, `length ${reason.length}`);
+  }
+  assert.equal(isReasonErrorKey('candStatusErrReasonRequired'), true);
+  assert.equal(isReasonErrorKey('candStatusErrReasonTooLong'), true);
+  assert.equal(isReasonErrorKey('candStatusErrVisaOffer'), false);
+  assert.equal(isReasonErrorKey(null), false);
+});
+
+test('Save is not disabled by the reason; the error is written, linked and focused', () => {
+  const src = readFileSync(join(ROOT, 'components/portal/CandidateStatusControl.tsx'), 'utf8');
+  assert.match(src, /onClick=\{submit\}\s*disabled=\{busy\}/);
+  assert.equal(/disabled=\{[^}]*check/.test(src), false);
+  assert.ok(src.includes("aria-invalid={reasonError ? 'true' : 'false'}"));
+  assert.ok(src.includes('aria-describedby={reasonError ? `${reasonErrorId} ${hintId}` : hintId}'));
+  assert.ok(src.includes('id={reasonErrorId}'));
+  assert.ok(src.includes('reasonRef.current?.focus()'));
 });
 
 test('every RPC error code maps to its own message, others to the generic one', () => {
