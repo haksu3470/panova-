@@ -137,3 +137,16 @@ test('print page: shared session rule, print css, page breaks and hidden toolbar
   assert.ok(screen.includes("dir={isRtl ? 'rtl' : 'ltr'}"));
   assert.ok(hub.includes('guidesPrintHref(viewer)') && hub.includes('printButtonLabel(copy, viewer)'));
 });
+
+test('?role=target_country prints no employer or candidate own-screen how-to', () => {
+  const view = guidePrintView(copy, upper, 'target_country');
+  assert.deepEqual(roleIds(view), ['target_country']);
+  assert.deepEqual(guideIds(view), ['staff-login', 'dossier-review', 'matching-offers', 'request-to-offer', 'document-request']);
+  for (const role of ['source_country', 'field_officer', 'finance', 'limited']) {
+    const ids = guideIds(guidePrintView(copy, upper, role));
+    for (const id of ['employer-request', 'employer-browse', 'candidate-register']) assert.equal(ids.includes(id), false, `${role} ${id}`);
+  }
+  // the employer and candidate role views still print their own how-tos
+  assert.deepEqual(guideIds(guidePrintView(copy, upper, 'employer')), ['employer-request', 'employer-browse']);
+  assert.deepEqual(guideIds(guidePrintView(copy, upper, 'candidate')), ['candidate-register']);
+});

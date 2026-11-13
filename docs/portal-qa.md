@@ -222,20 +222,20 @@ Automated: `lib/youtube.test.ts`.
 
    | Session | Role cards | How-tos |
    | --- | --- | --- |
-   | upper_management | all 8 | all 9 |
-   | source_country | Kaynak ülke only | staff-login, dossier-review, matching-offers, request-to-offer, document-request, candidate-register |
-   | target_country | Hedef ülke only | staff-login, dossier-review, matching-offers, request-to-offer, document-request, employer-request, employer-browse, candidate-register |
-   | field_officer | Saha görevlisi only | staff-login, dossier-review, document-request, candidate-register |
+   | upper_management | all 8 | all 9 (employer and candidate how-tos included) |
+   | source_country | Kaynak ülke only | staff-login, dossier-review, matching-offers, request-to-offer, document-request |
+   | target_country | Hedef ülke only | staff-login, dossier-review, matching-offers, request-to-offer, document-request |
+   | field_officer | Saha görevlisi only | staff-login, dossier-review, document-request |
    | finance, limited | their own card only | staff-login |
    | unknown `role_level` | none, amber note "personel rolü tanınmadı" | staff-login |
    | employer | İşveren | employer-request, employer-browse |
    | candidate | Aday | candidate-register |
 
-   No staff session below upper management sees another staff role's card, the employer or candidate card, or `staff-invite`. The map note says that upper management sees all roles and other staff only their own.
+   Every how-to has a perspective (`GUIDE_CATALOG.perspective`): `employer-request` and `employer-browse` walk through the employer's own portal, `candidate-register` the candidate's own registration, so only that account and upper management see them. `/guides/print?role=target_country` prints the same five staff how-tos, no employer how-to. No staff session below upper management sees another staff role's card, the employer or candidate card, `staff-invite`, or an employer / candidate how-to. The map note says that upper management sees all roles and other staff only their own.
 
-**Beklenen / Expected:** Signed out: title, body, and three links (`/portal`, `/employer-login`, `/candidate`). Unconfirmed: the verify card, no articles. Unlinked: the unlinked card, no articles. A linked user sees the usage map and the how-tos for that audience. Upper management sees `staff-invite` and every role card. Other staff see only their own card and do not see `staff-invite` (step 5). Employers see `employer-request` and `employer-browse`, not dossier or staff invite. Candidates see `candidate-register` only. Back returns to `/portal`, `/employer`, `/candidate`, or `/` for a signed-out viewer. Switching language reloads `guidesCopy` for that locale. Screen paths in the map point at `app/.../page.tsx` files.
+**Beklenen / Expected:** Signed out: title, body, and three links (`/portal`, `/employer-login`, `/candidate`). Unconfirmed: the verify card, no articles. Unlinked: the unlinked card, no articles. A linked user sees the usage map and the how-tos for that audience. Upper management sees `staff-invite` and every role card. Other staff see only their own card and do not see `staff-invite` (step 5). Employers see `employer-request` and `employer-browse`, not dossier or staff invite. Candidates see `candidate-register` only. Signed in, the header shows **Çıkış Yap** after the language switcher and **Ana Sayfaya Dön**; it signs out like `/portal` and the page shows the signed-out card. Back returns to `/portal`, `/employer`, `/candidate`, or `/` for a signed-out viewer. Switching language reloads `guidesCopy` for that locale. Screen paths in the map point at `app/.../page.tsx` files.
 
-**Bilinen engel / Known blocker:** The guides page has no logout control. Sign out from the portal you came from (S11). There is no how-to for logout, forgot password, or the OTP field. A staff row whose `role_level` is not a guide role is labeled with the generic staff name (`resolvePortalViewer`) and only sees the sign-in how-to.
+**Bilinen engel / Known blocker:** There is no how-to for logout, forgot password, or the OTP field. A staff row whose `role_level` is not a guide role is labeled with the generic staff name (`resolvePortalViewer`) and only sees the sign-in how-to. There is no staff-side how-to for registering a candidate on the candidate's behalf (the candidate registration how-to is the candidate's own screen).
 
 Automated: `lib/guides.test.ts`.
 
@@ -479,7 +479,7 @@ Automated: `lib/guides-print.test.ts` (upper management all or one role, ?role i
 
 1. **Sıra / Order.** On `/portal`, `/portal/candidates/{id}`, `/portal/requests/{id}`, `/portal/employers/{id}`, `/employer` and `/candidate` the right-hand group ends with: language switcher, **Ana Sayfaya Dön**, **Çıkış Yap**, same look on every page. Page buttons come first: **Portala Dön** and save (plus match and delete on a request, delete on an employer) on the staff files; **Yönetim paneline dön** on `/employer` opened from the portal; print and back to portal on `/guides`.
 2. **Kullanıcı / User.** The staff name and role badge on `/portal` and the "Yetkili: …" label on `/employer` sit on the left, next to the logo and the title, not in the button group.
-3. **Girişsiz sayfalar / Signed-out pages.** `/portal` and `/candidate` sign-in, `/employer-login`, `/auth/reset-password`, `/kvkk`, `/admin`, `/supplier` and `/guides` show language switcher and **Ana Sayfaya Dön** only (no log out).
+3. **Girişsiz sayfalar / Signed-out pages.** `/portal` and `/candidate` sign-in, `/employer-login`, `/auth/reset-password`, `/kvkk`, `/admin` and `/supplier` show language switcher and **Ana Sayfaya Dön** only (no log out). `/guides` adds **Çıkış Yap** once signed in.
 4. **Davranış / Behaviour.** Log out on `/portal` and `/candidate` shows the sign-in screen, on `/employer` it opens `/employer-login`, on a staff file it opens `/portal` signed out. **Ana Sayfaya Dön** opens `/` (on reset-password it also clears the pending recovery).
 5. **Mobil ve RTL / Mobile and RTL.** At 360 px width the buttons wrap to a new row and nothing scrolls sideways. In Arabic the group mirrors and the arrows turn.
 6. **Yazdırma / Print.** `/guides/print` keeps its own toolbar; it is still hidden in the printout (S25).
