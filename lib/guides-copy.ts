@@ -8,6 +8,8 @@ import type { GuideArticle, GuidesCopy } from './guides-model';
  */
 export const GUIDES_PENDING_TRANSLATION = [
   'exampleLabel',
+  'stepDoneBy',
+  'stepOthersNote',
   'roleLabels.finance',
   'roleLabels.limited',
   'roles.finance',
@@ -16,7 +18,9 @@ export const GUIDES_PENDING_TRANSLATION = [
   'guides.staff-login.example',
   'guides.staff-invite.example',
   'guides.dossier-review.example',
+  'guides.dossier-review.steps',
   'guides.matching-offers.example',
+  'guides.matching-offers.steps',
   'guides.employer-request.example',
   'guides.employer-browse.example',
   'guides.candidate-register.example',
@@ -32,7 +36,7 @@ export function isPendingTranslation(path: string): boolean {
 }
 
 /** A locale written before the pending keys existed. */
-type LegacyGuidesCopy = Omit<GuidesCopy, 'exampleLabel' | 'guides'> & {
+type LegacyGuidesCopy = Omit<GuidesCopy, 'exampleLabel' | 'stepDoneBy' | 'stepOthersNote' | 'guides'> & {
   guides: Record<string, Omit<GuideArticle, 'example'>>;
 };
 
@@ -368,6 +372,8 @@ const tr: GuidesCopy = {
     pageLabel: 'Sayfa',
   },
   exampleLabel: 'Örnek',
+  stepDoneBy: 'Bu adımı {roles} yapar.',
+  stepOthersNote: 'Rolünüzün yapmadığı adımlar soluk gösterilir ve altında o adımı kimin yaptığı yazar; başka bir personel rolünün adımında yalnızca başlık kalır.',
   loading: 'Oturum kontrol ediliyor…',
   signedOutTitle: 'Kılavuzlar için giriş yapın',
   signedOutBody: 'Kılavuzlar girişten sonra açılır. Her portal yalnızca o hesabın bölümlerini gösterir.',
@@ -538,9 +544,11 @@ const tr: GuidesCopy = {
       where: '/portal → Adaylar → /portal/candidates/[id]',
       steps: [
         { title: 'Adaylar sekmesini açın', body: 'Ad, meslek, pasaport veya e-posta ile arayın. Sektör, durum veya ülkeye göre süzün.' },
-        { title: 'Durumu resmî süreçten izleyin', body: 'Aday durumu (Bekliyor, İnceleniyor, Onaylandı) resmî süreç aşamasından kendiliğinden belirlenir. Elle değiştirmek yalnız Üst Yönetimdedir: "Elle değiştir" seçilir ve en az 5 karakterlik gerekçe yazılır; gerekçe kayıt geçmişine düşer. Sorumluyu listeden değiştirebilirsiniz.' },
-        { title: 'Dosyayı açın, belgelere bakın', body: 'İsim /portal/candidates/[id] dosyasını açar. Belgeler tek listededir: eksik türü "+ Talep et" ile isteyin; dosya yokken Onaylandı veya İnceleniyor seçilemez. Dosyayı önizleyin, yeni sekmede açın veya indirin. Belge silmek yalnız Üst Yönetimdedir.' },
-        { title: 'İnceleyip kaydedin', body: 'Profil, resmî süreç ve seyahati kontrol edip kaydedin. Üst yönetim ile kaynak veya hedef ülke sorumluları YouTube bağlantısını kaydedebilir, değiştirebilir veya silebilir. Saha görevlisi videoları izler, düzenleyemez.' },
+        { title: 'Durumu resmî süreçten izleyin', body: 'Aday durumu (Bekliyor, İnceleniyor, Onaylandı) resmî süreç aşamasından kendiliğinden belirlenir. Sorumluyu listeden değiştirebilirsiniz.' },
+        { title: 'Durumu elle değiştirin', body: 'Durum satırında "Elle değiştir" seçin, yeni durumu seçin ve en az 5 karakterlik gerekçe yazın; gerekçe kayıt geçmişine düşer.' },
+        { title: 'Dosyayı açın, belgelere bakın', body: 'İsim /portal/candidates/[id] dosyasını açar. Belgeler tek listededir: eksik türü "+ Talep et" ile isteyin; dosya yokken Onaylandı veya İnceleniyor seçilemez. Dosyayı önizleyin, yeni sekmede açın veya indirin.' },
+        { title: 'İnceleyip kaydedin', body: 'Profil, resmî süreç ve seyahati kontrol edip kaydedin.' },
+        { title: 'YouTube bağlantısını yönetin', body: 'Dosyadaki video alanına YouTube bağlantısını kaydedin, değiştirin veya silin. Bu adımı yapmayan roller videoları izler, düzenleyemez.' },
       ],
       flow: ['Adaylar', 'Dosyayı aç', 'Belgeler', 'Kaydet'],
       mock: {
@@ -560,8 +568,11 @@ const tr: GuidesCopy = {
       where: '/portal → Talepler → /portal/requests/[id]',
       steps: [
         { title: 'Talebi açın', body: 'Taleplerden /portal/requests/[id] dosyasını açın ve Aday eşleştir seçin.' },
-        { title: 'Bağlayın ve sunun', body: 'Önerilen adayı bu talebe ekleyin, sonra sunun ki işverene gösterilmiş sayılsın. İlk eşleşmede talep "Aday Aranıyor", ilk sunumda "Adaylar Sunuluyor" olur.' },
-        { title: 'Karar ve mülakat', body: 'Seçildi veya reddedildi kararını işveren kendi portalından verir; Üst Yönetim ve hedef ülke sorumlusu işveren adına da girebilir. Mülakat planlayın; toplantı bağlantısını (Meet, Zoom, Teams) Üst Yönetim veya hedef ülke sorumlusu ekler. İlk mülakatla talep "Görüşmeler Yapılıyor" olur.' },
+        { title: 'Adayı bağlayın', body: 'Önerilen adayı bu talebe ekleyin. İlk eşleşmede talep kendiliğinden "Aday Aranıyor" olur. Hedef ülke sorumlusu yalnızca kendi ülkesindeki taleplere zaten bağlı adayları görür; yeni adayı bu yüzden kaynak ülke sorumlusu veya Üst Yönetim bağlar.' },
+        { title: 'Adayı sunun', body: 'Bağlı adayda Sun seçin; aday işverene gösterilmiş sayılır ve işverenin Adaylar sekmesinde çıkar. İlk sunumda talep "Adaylar Sunuluyor" olur. Sunulmamış adaya mülakat veya teklif açılamaz.' },
+        { title: 'İşveren adına karar girin', body: 'Seçildi veya reddedildi kararını işveren kendi portalından verir. İşveren adına karar girmek için sunulan adayda kararı seçin ve en az 5 karakterlik gerekçe yazın; işveren sonra kendi kararıyla değiştirebilir.' },
+        { title: 'Mülakat planlayın', body: 'Sunulan aday için mülakat tarihini kaydedin. İlk mülakatla talep "Görüşmeler Yapılıyor" olur; işveren tarihi Mülakatlar sekmesinde görür.' },
+        { title: 'Toplantı bağlantısı ekleyin', body: 'Mülakata Meet, Zoom veya Teams bağlantısını (yalnız http/https) ekleyin; işveren onu Mülakatlar sekmesinde görür. Bu alan diğer rollere kapalıdır, mülakat bağlantısız da kaydedilir.' },
         { title: 'Teklif gönderin', body: 'Yeni teklifte maaş talepten dolu gelir, değiştirebilirsiniz; para birimi talebinkidir ve değiştirilemez. Tutar her ekranda para birimiyle görünür. Aday teklifi kendi portalında kabul veya reddeder.' },
       ],
       flow: ['Talep dosyası', 'Bağla ve sun', 'Mülakat', 'Teklif'],
@@ -584,7 +595,8 @@ const tr: GuidesCopy = {
         { title: 'İşveren talebi gönderir', body: 'DEMO Balkan Yapı DOO, Yeni talep sekmesinde İnşaat ve yapı → Kalıpçı seçer: 2 kişi, 1300, EUR, konaklama evet, yemek evet. Talep "Yeni Talep" durumuyla gelir.' },
         { title: 'Personel adayı bağlar', body: 'Talepler → /portal/requests/[id] → Aday eşleştir: Demo Aday İki bağlanır. Talep kendiliğinden "Aday Aranıyor" olur.' },
         { title: 'Aday sunulur', body: 'Eşleşme sunulur; işveren adayı Adaylar sekmesinde görür. Talep "Adaylar Sunuluyor" olur.' },
-        { title: 'Mülakat', body: 'Mülakat planlanır ve toplantı bağlantısı eklenir. İşveren tarihi ve bağlantıyı Mülakatlar sekmesinde görür; talep "Görüşmeler Yapılıyor" olur.' },
+        { title: 'Mülakat', body: 'Demo Aday İki için mülakat planlanır. İşveren tarihi Mülakatlar sekmesinde görür; talep "Görüşmeler Yapılıyor" olur.' },
+        { title: 'Toplantı bağlantısı', body: 'Mülakata Meet, Zoom veya Teams bağlantısı eklenir; işveren onu Mülakatlar sekmesinde mülakatın yanında görür.' },
         { title: 'Teklif', body: 'Teklif formunda maaş 1300 dolu gelir, para birimi EUR ve kilitlidir. Gönderilen teklif adayda ve işverende €1.300 olarak görünür.' },
         { title: 'Kabul', body: 'Demo Aday İki Teklifler sekmesinde teklifi kabul eder. Teklif "Kabul edildi" olur; aday resmî sürece (evrak, çalışma izni, vize) geçer.' },
       ],
@@ -609,7 +621,8 @@ const tr: GuidesCopy = {
         { title: 'Belgeyi isteyin', body: 'Listede olmayan tür için "+ Talep et" seçin (ör. Diploma). Belge "Bekleniyor" olarak eklenir ve adayın Belgeler sekmesinde çıkar. Aynı türde bekleyen bir talep varsa ikinci kez istenemez.' },
         { title: 'Aday yükler', body: 'Aday dosyayı kendi portalından yükler; durum "Yüklendi" olur.' },
         { title: 'Önizleyin', body: 'Önizle ile dosyayı açın. PDF burada gösterilemezse yeni sekmede açın veya İndir’i kullanın. Her açılış erişim kaydına yazılır.' },
-        { title: 'Onaylayın veya yeniden isteyin', body: 'Durumu İnceleniyor veya Onaylandı yapın; dosya yokken bu iki durum seçilemez. Uygun değilse "Yeniden istendi" seçin, aday yeni dosya yükler. Belge silmek yalnız Üst Yönetimdedir.' },
+        { title: 'Onaylayın veya yeniden isteyin', body: 'Durumu İnceleniyor veya Onaylandı yapın; dosya yokken bu iki durum seçilemez. Uygun değilse "Yeniden istendi" seçin, aday yeni dosya yükler.' },
+        { title: 'Belgeyi silin', body: 'Belge satırındaki Sil düğmesi kaydı adıyla gösterir ve onay ister. Diğer rollerde bu düğme görünmez.' },
       ],
       flow: ['+ Talep et', 'Aday yükler', 'Önizle', 'Onayla'],
       mock: {

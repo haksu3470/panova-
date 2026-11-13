@@ -10,8 +10,11 @@ import { register } from 'node:module';
 import {
   GUIDE_CATALOG,
   GUIDE_ROUTES,
+  GUIDE_STEP_ACTORS,
   ROLE_CATALOG,
   audienceAllows,
+  guidePrintView,
+  type StepActor,
   guidesHome,
   isKnownStaffRole,
   staffRoleHas,
@@ -20,7 +23,15 @@ import {
 } from './guides-model.ts';
 
 await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.url);
-const { canOpenStaffFile, tabsForStaffRole } = await import('./staffAccess.ts');
+const {
+  MEETING_URL_ROLES,
+  STAFF_DECISION_ROLES,
+  canOpenStaffFile,
+  canUpdateRequestStatus,
+  isUpperManagementRole,
+  tabsForStaffRole,
+} = await import('./staffAccess.ts');
+const { canManageCandidateVideo } = await import('./youtube.ts');
 
 const LOCALES: Language[] = ['tr', 'en', 'sq', 'ar', 'mk'];
 const TURKISH_LETTERS = /[ğışöüĞİŞÖÜ]/;
@@ -312,4 +323,135 @@ test('perspective: each how-to is tagged with whose screen it walks through', ()
   }
   // upper management keeps every how-to
   assert.deepEqual(portalGuideView(guidesCopy.tr, upper).guides.map((guide) => guide.id), GUIDE_CATALOG.map((guide) => guide.id));
+});
+
+const STAFF_STEP_ROLES = ['upper_management', 'source_country', 'target_country', 'field_officer'] as const;
+const staffActors = (actors: StepActor[]) => actors.filter((actor) => (STAFF_STEP_ROLES as readonly string[]).includes(actor)).sort();
+const rolesWhere = (check: (role: string) => boolean) => STAFF_STEP_ROLES.filter(check).slice().sort();
+const viewerOf = (roleId: string): PortalViewer => ({ kind: 'staff', upperManagement: roleId === 'upper_management', roleId });
+const guideOf = (viewer: PortalViewer, id: string, lang: Language = 'tr') => {
+  const guide = portalGuideView(guidesCopy[lang], viewer).guides.find((item) => item.id === id);
+  assert.ok(guide, `${viewer.roleId} sees ${id}`);
+  return guide!;
+};
+
+test('step roles: one entry per step, in every locale', () => {
+  for (const [id, actors] of Object.entries(GUIDE_STEP_ACTORS)) {
+    assert.ok(GUIDE_CATALOG.some((guide) => guide.id === id && guide.perspective === 'staff'), id);
+    for (const lang of LOCALES) assert.equal(guidesCopy[lang].guides[id].steps.length, actors.length, `${lang} ${id}`);
+    for (const step of actors) assert.ok(step.length > 0, id);
+  }
+});
+
+test('step roles match the permission helpers', () => {
+  // [guide, step index, roles that may do it according to the app / database helpers]
+  const checks: [string, number, string[]][] = [
+    ['matching-offers', 3, [...STAFF_DECISION_ROLES].sort()],
+    ['matching-offers', 5, [...MEETING_URL_ROLES].sort()],
+    ['request-to-offer', 4, [...MEETING_URL_ROLES].sort()],
+    ['dossier-review', 2, rolesWhere(canUpdateRequestStatus)],
+    ['dossier-review', 5, rolesWhere(canManageCandidateVideo)],
+    ['document-request', 5, rolesWhere(isUpperManagementRole)],
+  ];
+  for (const [id, index, roles] of checks) {
+    assert.deepEqual(staffActors(GUIDE_STEP_ACTORS[id][index]), roles, `${id} step ${index + 1}`);
+  }
+  // request-file steps only for roles that open the request file
+  for (const id of ['matching-offers', 'request-to-offer']) {
+    for (const step of GUIDE_STEP_ACTORS[id]) {
+      for (const actor of staffActors(step)) assert.ok(canOpenStaffFile(actor, 'requestFile'), `${id} ${actor}`);
+    }
+  }
+  // dossier steps only for roles that open the dossier
+  for (const id of ['dossier-review', 'document-request']) {
+    for (const step of GUIDE_STEP_ACTORS[id]) {
+      for (const actor of staffActors(step)) assert.ok(canOpenStaffFile(actor, 'dossier'), `${id} ${actor}`);
+    }
+  }
+  // binding a new candidate: not the target-country officer (it only reads candidates already on its requests)
+  assert.deepEqual(staffActors(GUIDE_STEP_ACTORS['matching-offers'][1]), ['source_country', 'upper_management']);
+  assert.deepEqual(staffActors(GUIDE_STEP_ACTORS['request-to-offer'][1]), ['source_country', 'upper_management']);
+});
+
+test('a role does not read the steps it cannot do', () => {
+  for (const lang of LOCALES) {
+    for (const [id, actors] of Object.entries(GUIDE_STEP_ACTORS)) {
+      for (const roleId of STAFF_STEP_ROLES) {
+        const viewer = viewerOf(roleId);
+        const guide = portalGuideView(guidesCopy[lang], viewer).guides.find((item) => item.id === id);
+        if (!guide) continue;
+        guide.steps.forEach((step, index) => {
+          const source = guidesCopy[lang].guides[id].steps[index];
+          const stepActors = actors[index];
+          const where = `${lang} ${roleId} ${id} step ${index + 1}`;
+          assert.equal(step.title, source.title, where);
+          if (roleId === 'upper_management') {
+            // nothing is lost for upper management: full text plus who does it
+            assert.equal(step.body, source.body, where);
+            assert.ok(step.doneBy, where);
+            return;
+          }
+          if (stepActors.includes(roleId)) {
+            assert.equal(step.own, true, where);
+            assert.equal(step.body, source.body, where);
+            assert.equal(step.doneBy, null, where);
+          } else if (staffActors(stepActors).length) {
+            assert.equal(step.own, false, where);
+            assert.equal(step.body, '', where);
+            assert.ok(step.doneBy, where);
+          } else {
+            // the employer / candidate does it: kept for context, with who does it
+            assert.equal(step.own, false, where);
+            assert.equal(step.body, source.body, where);
+            assert.ok(step.doneBy, where);
+          }
+        });
+      }
+    }
+  }
+});
+
+test('source and target country: the matching how-to names who does the other steps', () => {
+  const source = guideOf(viewerOf('source_country'), 'matching-offers');
+  assert.deepEqual(source.steps.map((step) => step.own), [true, true, true, false, true, false, true]);
+  assert.equal(source.steps[3].doneBy, 'Bu adımı Üst yönetim, Hedef ülke sorumlusu yapar.');
+  assert.equal(source.steps[5].body, '');
+  assert.equal(source.hasOthersSteps, true);
+
+  const target = guideOf(viewerOf('target_country'), 'matching-offers');
+  assert.deepEqual(target.steps.map((step) => step.own), [true, false, true, true, true, true, true]);
+  assert.equal(target.steps[1].doneBy, 'Bu adımı Üst yönetim, Kaynak ülke sorumlusu yapar.');
+
+  const flow = guideOf(viewerOf('source_country'), 'request-to-offer');
+  assert.equal(flow.steps[0].doneBy, 'Bu adımı İşveren yapar.');
+  assert.ok(flow.steps[0].body.includes('DEMO Balkan Yapı DOO'));
+  assert.equal(flow.steps[4].body, '');
+
+  const field = guideOf(viewerOf('field_officer'), 'document-request');
+  assert.equal(field.steps[5].body, '');
+  assert.equal(field.steps[2].doneBy, 'Bu adımı Aday yapar.');
+  const fieldDossier = guideOf(viewerOf('field_officer'), 'dossier-review');
+  assert.equal(fieldDossier.steps[2].body, '');
+  assert.equal(fieldDossier.steps[5].body, '');
+
+  const upperView = guideOf(upper, 'matching-offers');
+  assert.equal(upperView.hasOthersSteps, false);
+  assert.equal(upperView.steps.every((step) => step.own && step.body), true);
+  // how-tos without step roles stay as written
+  assert.deepEqual(guideOf(viewerOf('source_country'), 'staff-login').steps.map((step) => step.doneBy), [null, null, null, null]);
+});
+
+test('print uses the same step rule; a role print shows that role\'s steps', () => {
+  for (const roleId of ['source_country', 'target_country', 'field_officer']) {
+    const own = portalGuideView(guidesCopy.tr, viewerOf(roleId)).guides;
+    assert.deepEqual(guidePrintView(guidesCopy.tr, viewerOf(roleId)).guides, own, roleId);
+    assert.deepEqual(guidePrintView(guidesCopy.tr, upper, roleId).guides, own, `upper ?role=${roleId}`);
+  }
+  assert.deepEqual(guidePrintView(guidesCopy.tr, upper).guides, portalGuideView(guidesCopy.tr, upper).guides);
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  for (const file of ['components/guides/GuidesHub.tsx', 'components/guides/GuidesPrintScreen.tsx']) {
+    const source = readFileSync(path.join(root, file), 'utf8');
+    assert.ok(source.includes('{step.doneBy}') && source.includes('{copy.stepOthersNote}'), file);
+  }
+  for (const lang of LOCALES) assert.ok(guidesCopy[lang].stepDoneBy.includes('{roles}'), lang);
 });

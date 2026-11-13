@@ -232,6 +232,19 @@ Automated: `lib/youtube.test.ts`.
    | candidate | Aday | candidate-register |
 
    Every how-to has a perspective (`GUIDE_CATALOG.perspective`): `employer-request` and `employer-browse` walk through the employer's own portal, `candidate-register` the candidate's own registration, so only that account and upper management see them. `/guides/print?role=target_country` prints the same five staff how-tos, no employer how-to. No staff session below upper management sees another staff role's card, the employer or candidate card, `staff-invite`, or an employer / candidate how-to. The map note says that upper management sees all roles and other staff only their own.
+6. **Adım yetkileri / Step permissions.** The shared staff how-tos mark each step with who does it (`GUIDE_STEP_ACTORS`, from `lib/staffAccess.ts`, `lib/youtube.ts` and the RLS / guard functions). A step another staff role does keeps its title, is shown muted, and its text is replaced by "Bu adımı … yapar."; an employer or candidate step keeps its text with the same note. Above the steps the note "Rolünüzün yapmadığı adımlar soluk gösterilir…" appears. Check:
+
+   | Session | How-to | Steps with only the title and "Bu adımı … yapar." |
+   | --- | --- | --- |
+   | source_country | Eşleştirme, mülakat ve teklif | 4 İşveren adına karar, 6 Toplantı bağlantısı (Üst yönetim, Hedef ülke sorumlusu) |
+   | source_country | Talepten teklife uçtan uca | 5 Toplantı bağlantısı; steps 1 (İşveren) and 7 (Aday) keep their text |
+   | target_country | Eşleştirme, mülakat ve teklif | 2 Adayı bağlayın (Üst yönetim, Kaynak ülke sorumlusu) |
+   | target_country | Talepten teklife uçtan uca | 2 Personel adayı bağlar |
+   | source / target / field | Aday dosyasını inceleme | 3 Durumu elle değiştirin (Üst yönetim); field also 6 YouTube |
+   | source / target / field | Belge isteme ve onaylama | 6 Belgeyi silin (Üst yönetim); step 3 Aday yükler keeps its text |
+   | upper_management | all | none: every step in full, each with "Bu adımı … yapar." |
+
+   `/guides/print` follows the same rule: a staff session prints its own steps the same way, and upper management with `?role=source_country` prints the source-country version; without `?role` every step is in full.
 
 **Beklenen / Expected:** Signed out: title, body, and three links (`/portal`, `/employer-login`, `/candidate`). Unconfirmed: the verify card, no articles. Unlinked: the unlinked card, no articles. A linked user sees the usage map and the how-tos for that audience. Upper management sees `staff-invite` and every role card. Other staff see only their own card and do not see `staff-invite` (step 5). Employers see `employer-request` and `employer-browse`, not dossier or staff invite. Candidates see `candidate-register` only. Signed in, the header shows **Çıkış Yap** after the language switcher and **Ana Sayfaya Dön**; it signs out like `/portal` and the page shows the signed-out card. Back returns to `/portal`, `/employer`, `/candidate`, or `/` for a signed-out viewer. Switching language reloads `guidesCopy` for that locale. Screen paths in the map point at `app/.../page.tsx` files.
 

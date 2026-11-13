@@ -85,15 +85,20 @@ export default function GuidesHub({
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
                 <div className="space-y-3 lg:col-span-3">
                   <h4 className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{copy.stepsLabel}</h4>
+                  {guide.hasOthersSteps ? <p className="text-xs font-semibold text-slate-700">{copy.stepOthersNote}</p> : null}
                   <ol className="space-y-3">
                     {guide.steps.map((step, index) => (
-                      <li key={step.title} className="flex gap-3">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-solid text-[11px] font-extrabold text-white" aria-hidden>
+                      <li key={step.title} className="flex gap-3" data-own={step.own ? 'true' : 'false'}>
+                        <span
+                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold ${step.own ? 'bg-brand-solid text-white' : 'bg-slate-100 text-slate-700 ring-1 ring-slate-300'}`}
+                          aria-hidden
+                        >
                           {index + 1}
                         </span>
                         <div className="space-y-0.5">
-                          <p className="text-sm font-extrabold text-slate-900">{step.title}</p>
-                          <p className="text-xs leading-relaxed text-slate-600">{step.body}</p>
+                          <p className={`text-sm font-extrabold ${step.own ? 'text-slate-900' : 'text-slate-700'}`}>{step.title}</p>
+                          {step.body ? <p className="text-xs leading-relaxed text-slate-600">{step.body}</p> : null}
+                          {step.doneBy ? <p className="text-[11px] font-bold text-slate-700">{step.doneBy}</p> : null}
                         </div>
                       </li>
                     ))}

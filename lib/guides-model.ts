@@ -43,6 +43,21 @@ export type GuideDef = {
 
 export type GuideStep = { title: string; body: string };
 
+/** Who carries out a how-to step: a staff role, or the employer / candidate on their own portal. */
+export type StepActor = 'upper_management' | 'source_country' | 'target_country' | 'field_officer' | 'employer' | 'candidate';
+
+const STAFF_ACTORS: readonly StepActor[] = ['upper_management', 'source_country', 'target_country', 'field_officer'];
+
+/** A step as one session reads it. */
+export type VisibleStep = GuideStep & {
+  /** Who does this step; empty when the how-to has no step roles. */
+  actors: StepActor[];
+  /** False when the session's role does not do this step itself. */
+  own: boolean;
+  /** "This step is done by …", or null when nothing needs saying. */
+  doneBy: string | null;
+};
+
 export type GuideArticle = {
   title: string;
   summary: string;
@@ -96,6 +111,10 @@ export type GuidesCopy = {
   flowLabel: string;
   /** Heading of the example box on every how-to. */
   exampleLabel: string;
+  /** Under a step: who does it. {roles} is the list of role names. */
+  stepDoneBy: string;
+  /** Above the steps when some of them belong to another role. */
+  stepOthersNote: string;
   loading: string;
   signedOutTitle: string;
   signedOutBody: string;
@@ -229,6 +248,95 @@ export const GUIDE_CATALOG: GuideDef[] = [
   { id: 'candidate-register', perspective: 'candidate', audiences: ['upper_management', 'candidate'] },
 ];
 
+const UM: StepActor = 'upper_management';
+const SOURCE: StepActor = 'source_country';
+const TARGET: StepActor = 'target_country';
+const FIELD: StepActor = 'field_officer';
+
+/**
+ * Who may do each step, index by index (the step order is the same in every
+ * locale). Only the staff how-tos that several roles read are listed; the
+ * others are one role's own work. Derived from the permission checks, not
+ * decided here:
+ * - request file: canOpenStaffFile('requestFile'); RLS staff_can_read_request
+ * - bind a candidate: request_matches insert needs the request AND the candidate
+ *   readable (staff_can_read_candidate). A target-country officer only reads
+ *   candidates already on its country's requests, so new candidates are bound
+ *   by upper management or the source-country officer.
+ * - present / interview / offer: request_matches update, interviews and
+ *   job_offers insert (staff_can_read_candidate; guard_presented_pipeline)
+ * - decision for the employer: STAFF_DECISION_ROLES / staff_decide_match
+ * - meeting link: MEETING_URL_ROLES / guard_interview_meeting_url
+ * - manual candidate status: canUpdateRequestStatus / staff_set_candidate_status
+ * - YouTube: canManageCandidateVideo / can_manage_candidate_video
+ * - document request, review: candidate_documents insert / update
+ *   (staff_can_read_candidate); delete: upper_delete_documents (is_portal_manager)
+ */
+export const GUIDE_STEP_ACTORS: Record<string, StepActor[][]> = {
+  'dossier-review': [
+    [UM, SOURCE, TARGET, FIELD],
+    [UM, SOURCE, TARGET, FIELD],
+    [UM],
+    [UM, SOURCE, TARGET, FIELD],
+    [UM, SOURCE, TARGET, FIELD],
+    [UM, SOURCE, TARGET],
+  ],
+  'matching-offers': [
+    [UM, SOURCE, TARGET],
+    [UM, SOURCE],
+    [UM, SOURCE, TARGET],
+    [UM, TARGET],
+    [UM, SOURCE, TARGET],
+    [UM, TARGET],
+    [UM, SOURCE, TARGET],
+  ],
+  'request-to-offer': [
+    ['employer'],
+    [UM, SOURCE],
+    [UM, SOURCE, TARGET],
+    [UM, SOURCE, TARGET],
+    [UM, TARGET],
+    [UM, SOURCE, TARGET],
+    ['candidate'],
+  ],
+  'document-request': [
+    [UM, SOURCE, TARGET, FIELD],
+    [UM, SOURCE, TARGET, FIELD],
+    ['candidate'],
+    [UM, SOURCE, TARGET, FIELD],
+    [UM, SOURCE, TARGET, FIELD],
+    [UM],
+  ],
+};
+
+/** The staff role that does a step, for a session; null for upper management and non-staff. */
+function stepRoleOf(viewer: PortalViewer): StepActor | null {
+  if (viewer.kind !== 'staff' || viewer.upperManagement) return null;
+  return (STAFF_ACTORS as readonly string[]).includes(viewer.roleId) ? (viewer.roleId as StepActor) : null;
+}
+
+/**
+ * Steps as a session reads them.
+ * - upper management: every step in full, each with who does it
+ * - a staff role: its own steps in full; a step another staff role does keeps
+ *   its title (so the flow still reads) but its body is replaced by who does it
+ * - an employer / candidate step stays in full for staff, marked with who does it
+ */
+export function visibleSteps(copy: GuidesCopy, guideId: string, viewer: PortalViewer): VisibleStep[] {
+  const steps = copy.guides[guideId].steps;
+  const actorsByStep = GUIDE_STEP_ACTORS[guideId];
+  const role = stepRoleOf(viewer);
+  return steps.map((step, index) => {
+    const actors = actorsByStep?.[index] ?? [];
+    if (!actors.length) return { ...step, actors, own: true, doneBy: null };
+    const doneBy = copy.stepDoneBy.replace('{roles}', actors.map((actor) => copy.roleLabels[actor] || actor).join(', '));
+    if (viewer.kind === 'staff' && viewer.upperManagement) return { ...step, actors, own: true, doneBy };
+    if (role && actors.includes(role)) return { ...step, actors, own: true, doneBy: null };
+    const staffStep = actors.some((actor) => STAFF_ACTORS.includes(actor));
+    return { ...step, body: staffStep ? '' : step.body, actors, own: false, doneBy };
+  });
+}
+
 const NEED_SCREENS: Record<StaffNeed, string[]> = {
   candidates: ['candidates', 'dossier'],
   requests: ['requests', 'request'],
@@ -319,7 +427,12 @@ export type VisibleRole = {
   screens: VisibleScreen[];
 };
 
-export type VisibleGuide = GuidesCopy['guides'][string] & { id: string };
+export type VisibleGuide = Omit<GuidesCopy['guides'][string], 'steps'> & {
+  id: string;
+  steps: VisibleStep[];
+  /** True when some steps are done by another role (they keep only their title). */
+  hasOthersSteps: boolean;
+};
 
 export function portalGuideView(copy: GuidesCopy, viewer: PortalViewer): { roles: VisibleRole[]; guides: VisibleGuide[] } {
   const roles = ROLE_CATALOG.filter((role) => roleCardVisible(role, viewer)).map((role) => {
@@ -342,10 +455,15 @@ export function portalGuideView(copy: GuidesCopy, viewer: PortalViewer): { roles
     };
   });
 
-  const guides = GUIDE_CATALOG.filter((guide) => guideVisible(guide, viewer)).map((guide) => ({
-    id: guide.id,
-    ...copy.guides[guide.id],
-  }));
+  const guides = GUIDE_CATALOG.filter((guide) => guideVisible(guide, viewer)).map((guide) => {
+    const steps = visibleSteps(copy, guide.id, viewer);
+    return {
+      id: guide.id,
+      ...copy.guides[guide.id],
+      steps,
+      hasOthersSteps: steps.some((step) => !step.own),
+    };
+  });
 
   return { roles, guides };
 }
@@ -377,7 +495,7 @@ export function printButtonLabel(copy: GuidesCopy, viewer: PortalViewer): string
 /**
  * What the print page shows. It only ever narrows portalGuideView (the /guides
  * rule), so it never opens anything the session cannot already read there.
- * - upper management: everything, or one role with ?role=<id>
+ * - upper management: everything, or one role with ?role=<id> (that role's how-tos and steps)
  * - other staff: their own role card (all staff cards if the role is unknown) and their how-tos
  * - employer / candidate: their own role (portalGuideView already limits it)
  * ?role= is ignored for everyone but upper management.
@@ -389,12 +507,12 @@ export function guidePrintView(copy: GuidesCopy, viewer: PortalViewer, requested
   if (viewer.kind === 'staff' && viewer.upperManagement) {
     const role = requestedRole ? base.roles.find((item) => item.id === requestedRole) : undefined;
     if (!role) return { scope: 'all', roleId: null, ...base };
-    const allowed = new Set(portalGuideView(copy, viewerForRole(role.id)).guides.map((guide) => guide.id));
+    // That role's how-tos, with the steps as that role reads them (the print is for that role).
     return {
       scope: 'role',
       roleId: role.id,
       roles: [role],
-      guides: base.guides.filter((guide) => allowed.has(guide.id)),
+      guides: portalGuideView(copy, viewerForRole(role.id)).guides,
     };
   }
 
