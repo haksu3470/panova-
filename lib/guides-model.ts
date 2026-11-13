@@ -19,9 +19,18 @@ export type RoleDef = {
   screens: ScreenDef[];
 };
 
+/**
+ * Portal list a staff role must have for a how-to to be about its work.
+ * Same derivation as tabsForStaffRole / canOpenStaffFile: a file screen
+ * (dossier, request, employer) counts as its list.
+ */
+export type StaffNeed = 'candidates' | 'requests' | 'employers';
+
 export type GuideDef = {
   id: string;
   audiences: GuideAudience[];
+  /** For staff below upper management: only roles with this list see the how-to. */
+  staffNeeds?: StaffNeed;
 };
 
 export type GuideStep = { title: string; body: string };
@@ -67,6 +76,8 @@ export type GuidesCopy = {
   mapTitle: string;
   mapLead: string;
   mapNote: string;
+  /** Shown to staff whose role is unknown: only the sign-in how-to is open. */
+  unknownRoleNote: string;
   howToTitle: string;
   howToLead: string;
   sessionLabel: string;
@@ -199,14 +210,52 @@ export const ROLE_CATALOG: RoleDef[] = [
 export const GUIDE_CATALOG: GuideDef[] = [
   { id: 'staff-login', audiences: ['staff'] },
   { id: 'staff-invite', audiences: ['upper_management'] },
-  { id: 'dossier-review', audiences: ['staff'] },
-  { id: 'matching-offers', audiences: ['staff'] },
-  { id: 'request-to-offer', audiences: ['staff'] },
-  { id: 'document-request', audiences: ['staff'] },
-  { id: 'employer-request', audiences: ['staff', 'employer'] },
-  { id: 'employer-browse', audiences: ['staff', 'employer'] },
-  { id: 'candidate-register', audiences: ['staff', 'candidate'] },
+  { id: 'dossier-review', audiences: ['staff'], staffNeeds: 'candidates' },
+  { id: 'matching-offers', audiences: ['staff'], staffNeeds: 'requests' },
+  { id: 'request-to-offer', audiences: ['staff'], staffNeeds: 'requests' },
+  { id: 'document-request', audiences: ['staff'], staffNeeds: 'candidates' },
+  { id: 'employer-request', audiences: ['staff', 'employer'], staffNeeds: 'employers' },
+  { id: 'employer-browse', audiences: ['staff', 'employer'], staffNeeds: 'employers' },
+  { id: 'candidate-register', audiences: ['staff', 'candidate'], staffNeeds: 'candidates' },
 ];
+
+const NEED_SCREENS: Record<StaffNeed, string[]> = {
+  candidates: ['candidates', 'dossier'],
+  requests: ['requests', 'request'],
+  employers: ['employers', 'employer'],
+};
+
+/** True when the staff role's card (and so its tabs) includes that list. Unknown roles have none. */
+export function staffRoleHas(roleId: string, need: StaffNeed): boolean {
+  if (roleId === 'employer' || roleId === 'candidate') return false;
+  const role = ROLE_CATALOG.find((item) => item.id === roleId);
+  return !!role && role.screens.some((screen) => NEED_SCREENS[need].includes(screen.id));
+}
+
+/** A staff role id with its own card. 'staff' and unknown values are not. */
+export function isKnownStaffRole(roleId: string): boolean {
+  return roleId !== 'employer' && roleId !== 'candidate' && ROLE_CATALOG.some((role) => role.id === roleId);
+}
+
+/**
+ * Role card rule. Upper management: every card. Other staff: their own card
+ * only. Employer and candidate: their own card (by audience).
+ */
+export function roleCardVisible(role: RoleDef, viewer: PortalViewer): boolean {
+  if (viewer.kind === 'staff') return viewer.upperManagement || (isKnownStaffRole(viewer.roleId) && role.id === viewer.roleId);
+  return audienceAllows(role.audiences, viewer);
+}
+
+/**
+ * How-to rule. Audience first; then staff below upper management only see
+ * how-tos for a list their role has (staffNeeds). An unknown staff role
+ * keeps only the how-tos without a need (staff sign-in).
+ */
+export function guideVisible(guide: GuideDef, viewer: PortalViewer): boolean {
+  if (!audienceAllows(guide.audiences, viewer)) return false;
+  if (viewer.kind !== 'staff' || viewer.upperManagement || !guide.staffNeeds) return true;
+  return staffRoleHas(viewer.roleId, guide.staffNeeds);
+}
 
 /** Path fragment each how-to must keep, in every locale, so the steps stay tied to the app. */
 export const GUIDE_ROUTES: Record<string, string> = {
@@ -261,7 +310,7 @@ export type VisibleRole = {
 export type VisibleGuide = GuidesCopy['guides'][string] & { id: string };
 
 export function portalGuideView(copy: GuidesCopy, viewer: PortalViewer): { roles: VisibleRole[]; guides: VisibleGuide[] } {
-  const roles = ROLE_CATALOG.filter((role) => audienceAllows(role.audiences, viewer)).map((role) => {
+  const roles = ROLE_CATALOG.filter((role) => roleCardVisible(role, viewer)).map((role) => {
     const text = copy.roles[role.id];
     return {
       id: role.id,
@@ -281,7 +330,7 @@ export function portalGuideView(copy: GuidesCopy, viewer: PortalViewer): { roles
     };
   });
 
-  const guides = GUIDE_CATALOG.filter((guide) => audienceAllows(guide.audiences, viewer)).map((guide) => ({
+  const guides = GUIDE_CATALOG.filter((guide) => guideVisible(guide, viewer)).map((guide) => ({
     id: guide.id,
     ...copy.guides[guide.id],
   }));

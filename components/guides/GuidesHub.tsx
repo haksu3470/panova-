@@ -1,6 +1,6 @@
 import { ChevronRight } from 'lucide-react';
 import type { GuidesCopy, PortalViewer } from '@/lib/guides-model';
-import { portalGuideView, sessionName } from '@/lib/guides-model';
+import { isKnownStaffRole, portalGuideView, sessionName } from '@/lib/guides-model';
 
 export default function GuidesHub({
   copy,
@@ -24,6 +24,9 @@ export default function GuidesHub({
           <h2 id="guides-map-title" className="text-lg font-extrabold text-slate-900">{copy.mapTitle}</h2>
           <p className="text-sm text-slate-600">{copy.mapLead}</p>
           {viewer.kind === 'staff' && <p className="text-xs text-muted-foreground">{copy.mapNote}</p>}
+          {viewer.kind === 'staff' && !viewer.upperManagement && !isKnownStaffRole(viewer.roleId) && (
+            <p role="note" className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-950">{copy.unknownRoleNote}</p>
+          )}
         </div>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {view.roles.map((role) => (

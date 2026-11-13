@@ -13,12 +13,14 @@ import {
   ROLE_CATALOG,
   audienceAllows,
   guidesHome,
+  isKnownStaffRole,
+  staffRoleHas,
   portalGuideView,
   type PortalViewer,
 } from './guides-model.ts';
 
 await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.url);
-const { tabsForStaffRole } = await import('./staffAccess.ts');
+const { canOpenStaffFile, tabsForStaffRole } = await import('./staffAccess.ts');
 
 const LOCALES: Language[] = ['tr', 'en', 'sq', 'ar', 'mk'];
 const TURKISH_LETTERS = /[ğışöüĞİŞÖÜ]/;
@@ -125,7 +127,8 @@ test('guides stay inside the signed-in role', () => {
   assert.equal(ids(staff).includes('staff-invite'), false);
   assert.equal(ids(upper).includes('staff-invite'), true);
   assert.equal(ids(staff).includes('dossier-review'), true);
-  assert.equal(ids(staff).includes('employer-request'), true);
+  // source country has no employers list, so the employer how-tos are not its work
+  assert.equal(ids(staff).includes('employer-request'), false);
   assert.equal(ids(employer).includes('staff-invite'), false);
   assert.equal(ids(employer).includes('dossier-review'), false);
   assert.equal(ids(employer).includes('employer-request'), true);
@@ -138,10 +141,8 @@ test('guides stay inside the signed-in role', () => {
   const staffScreen = upperStaff?.screens.find((screen) => screen.id === 'staff');
   assert.match(staffScreen?.does || '', /Invite/);
 
-  const hidden = portalGuideView(guidesCopy.en, staff).roles.find((role) => role.id === 'upper_management');
-  const hiddenStaff = hidden?.screens.find((screen) => screen.id === 'staff');
-  assert.equal((hiddenStaff?.does || '').includes('Invite'), false);
-  assert.match(hiddenStaff?.does || '', /Only upper management/);
+  // other staff no longer get the upper management card at all
+  assert.equal(portalGuideView(guidesCopy.en, staff).roles.some((role) => role.id === 'upper_management'), false);
 
   assert.equal(guidesHome(staff), '/portal');
   assert.equal(guidesHome(employer), '/employer');
@@ -212,4 +213,77 @@ test('the two new how-tos are for staff and use demo records', () => {
   }
   const docs = JSON.stringify(guidesCopy.tr.guides['document-request']);
   for (const part of ['+ Talep et', 'Aday yükler', 'Önizle', 'Onaylandı']) assert.ok(docs.includes(part), part);
+});
+
+const ALL_GUIDES = GUIDE_CATALOG.map((guide) => guide.id);
+const ALL_ROLES = ROLE_CATALOG.map((role) => role.id);
+
+// What each session sees on /guides (and on the print page, which uses the same function).
+const VISIBILITY: [PortalViewer, string[], string[]][] = [
+  [upper, ALL_ROLES, ALL_GUIDES],
+  [
+    { kind: 'staff', upperManagement: false, roleId: 'source_country' },
+    ['source_country'],
+    ['staff-login', 'dossier-review', 'matching-offers', 'request-to-offer', 'document-request', 'candidate-register'],
+  ],
+  [
+    { kind: 'staff', upperManagement: false, roleId: 'target_country' },
+    ['target_country'],
+    ['staff-login', 'dossier-review', 'matching-offers', 'request-to-offer', 'document-request', 'employer-request', 'employer-browse', 'candidate-register'],
+  ],
+  [
+    { kind: 'staff', upperManagement: false, roleId: 'field_officer' },
+    ['field_officer'],
+    ['staff-login', 'dossier-review', 'document-request', 'candidate-register'],
+  ],
+  [{ kind: 'staff', upperManagement: false, roleId: 'finance' }, ['finance'], ['staff-login']],
+  [{ kind: 'staff', upperManagement: false, roleId: 'limited' }, ['limited'], ['staff-login']],
+  [{ kind: 'staff', upperManagement: false, roleId: 'staff' }, [], ['staff-login']],
+  [{ kind: 'staff', upperManagement: false, roleId: 'employer' }, [], ['staff-login']],
+  [employer, ['employer'], ['employer-request', 'employer-browse']],
+  [candidate, ['candidate'], ['candidate-register']],
+  [unlinked, [], []],
+];
+
+test('each role sees its own card and the how-tos for its own work', () => {
+  for (const [viewer, roles, guides] of VISIBILITY) {
+    for (const lang of LOCALES) {
+      const view = portalGuideView(guidesCopy[lang], viewer);
+      assert.deepEqual(view.roles.map((role) => role.id), roles, `${lang} ${viewer.roleId} cards`);
+      assert.deepEqual(view.guides.map((guide) => guide.id), guides, `${lang} ${viewer.roleId} guides`);
+    }
+  }
+});
+
+test('staff how-to needs follow the real portal tabs and file routes', () => {
+  const NEED_TAB = { candidates: 'candidates', requests: 'requests', employers: 'employers' } as const;
+  for (const role of ROLE_CATALOG) {
+    if (role.id === 'employer' || role.id === 'candidate') continue;
+    const tabs: string[] = tabsForStaffRole(role.id);
+    for (const need of Object.keys(NEED_TAB) as (keyof typeof NEED_TAB)[]) {
+      assert.equal(staffRoleHas(role.id, need), tabs.includes(NEED_TAB[need]), `${role.id} ${need}`);
+    }
+    if (role.id === 'upper_management') continue;
+    const viewer: PortalViewer = { kind: 'staff', upperManagement: false, roleId: role.id };
+    const ids = portalGuideView(guidesCopy.en, viewer).guides.map((guide) => guide.id);
+    assert.equal(ids.includes('dossier-review'), canOpenStaffFile(role.id, 'dossier'), role.id);
+    assert.equal(ids.includes('matching-offers'), canOpenStaffFile(role.id, 'requestFile'), role.id);
+    assert.equal(ids.includes('employer-browse'), canOpenStaffFile(role.id, 'employerFile'), role.id);
+    assert.equal(ids.includes('staff-invite'), false, role.id);
+  }
+  for (const guide of GUIDE_CATALOG) {
+    if (guide.audiences.includes('staff') && guide.id !== 'staff-login') assert.ok(guide.staffNeeds, `${guide.id} names a need`);
+  }
+  assert.equal(isKnownStaffRole('staff'), false);
+  assert.equal(isKnownStaffRole('employer'), false);
+  assert.equal(isKnownStaffRole('field_officer'), true);
+});
+
+test('unknown staff role gets a note; mapNote says who sees what', () => {
+  const hub = readFileSync(path.join(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), 'components/guides/GuidesHub.tsx'), 'utf8');
+  assert.ok(hub.includes('!isKnownStaffRole(viewer.roleId)') && hub.includes('{copy.unknownRoleNote}'));
+  for (const lang of LOCALES) assert.ok(guidesCopy[lang].unknownRoleNote.trim(), lang);
+  assert.match(guidesCopy.tr.mapNote, /Üst Yönetim burada tüm rollerin kartlarını/);
+  assert.match(guidesCopy.tr.mapNote, /yalnızca kendi rolünün kartını/);
+  assert.match(guidesCopy.en.mapNote, /only their own role card/);
 });

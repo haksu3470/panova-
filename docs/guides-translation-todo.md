@@ -52,3 +52,9 @@ Bu anahtarlar dört dilde zaten var, ama eski içeriği anlatıyor. Yeni Türkç
 
 - [ ] en, sq, ar, mk metinlerini ana dili konuşan biri gözden geçirsin.
 - Not: `print.coverSubtitle` şirket adını (Panova Group) Latin harfle tutar.
+
+## Rol görünürlüğü (`mapNote`, `unknownRoleNote`)
+
+`mapNote` (Türkçesi değişti) ve yeni `unknownRoleNote` beş dilde yazıldı; geçici Türkçe yok, `GUIDES_PENDING_TRANSLATION` listesine girmedi.
+
+- [ ] en, sq, ar, mk metinlerini ana dili konuşan biri gözden geçirsin.
