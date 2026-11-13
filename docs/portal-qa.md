@@ -423,6 +423,22 @@ Automated: `lib/employerOverview.test.ts` (card order, targets, numbers from the
 
 Automated: `lib/money.test.ts` (formatSalary by locale, numbers-only input and limits, currency sent with the request, offer salary and currency from the request, EUR without one, screens use the page locale, five languages, SQL files), `lib/workforceRequest.test.ts`, `lib/offers.test.ts`.
 
+## S24. Demo verisi / Demo data (Üst Yönetim)
+
+**Rol / Role:** Upper management on `/portal` → **Overview**. RPCs `staff_demo_data_summary`, `staff_seed_demo_data`, `staff_delete_demo_data` (`supabase/migrations/20261113200000_demo_data_tools.sql`, applied by hand). Use a test project or agree the timing first: delete removes demo rows for everyone.
+
+**Adımlar ve beklenen / Steps and expected:**
+
+1. **Görünürlük / Visibility.** As upper management the **Demo data** card is under the overview cards. Sign in as source-country, target-country, field officer, finance: there is no card. Calling one of the RPCs as such a user returns `staff_role_not_allowed` (42501); if it ever reaches the card it shows "Only upper management can do this.", not a silent failure.
+2. **Özet / Summary.** On open the card shows counts for employers, requests, candidates, matches, interviews, offers, documents, tasks and support tickets (the `is_demo` rows). Audit logs, staff, portal users and applicants are not shown.
+3. **Oluştur / Create.** **Create demo data** → a confirm dialog → OK. While it runs both buttons are disabled and "Working, please wait…" is shown; a double click does nothing extra. On a clean database the result reads "26 records created." (2 employers, 3 requests, 5 candidates, 5 matches, 2 interviews, 3 offers, 6 documents) and the counts go up. Click again: "Demo data already exists. No new records were created." Cancel in the dialog changes nothing.
+4. **Sil, onay / Delete, confirm.** **Delete all demo data** is red. Its dialog states the number of records (up to the deletable total), that deleted records are backed up first, that demo employers and candidates linked to a login account are not deleted, and that the uploaded files of the deleted demo candidates are removed. Cancel changes nothing. With nothing to delete the button is disabled and "There is no demo data to delete." is shown.
+5. **Sil, sıra / Delete, order.** OK: first every file under `candidate-files/<id>/` of the demo candidates without a login (`is_demo = true and auth_user_id is null`) is removed, then the RPC runs. The result reads "N demo records deleted." and the counts drop (linked demo accounts stay). `demo_data_backup` has one row per table, and `audit_logs` has "Üst Yönetim demo verisini sildi" with the counts.
+6. **Dosya hatası / File error.** Make the storage delete fail (e.g. revoke the storage delete policy on a test project). The card shows "Demo candidate files could not be deleted; no records were deleted from the database. Error: …" in red and the RPC is not called: the counts are unchanged.
+7. **Diller / Languages.** Repeat 2–4 in TR, EN, SQ, AR, MK: titles, buttons, dialogs and results are translated; Arabic stays right-to-left.
+
+Automated: `lib/demoData.test.ts` (count reading, seed result and "already exists", untouched tables, permission error, recursive file listing and stop on a storage error, files before the RPC, upper-management gate, five languages).
+
 ---
 
 ## Boşluk analizi / Gap analysis

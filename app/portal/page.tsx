@@ -54,6 +54,7 @@ import { employerExportRows, offerExportRows, requestExportRows } from '@/lib/ex
 import { canUpdateRequestStatus, isUpperManagementRole, overviewCardTarget, tabsForStaffRole, type OverviewCard as OverviewCardId, type StaffTab as StaffTabId } from '@/lib/staffAccess';
 import { countOpenRequests } from '@/lib/requestPipelineCounts';
 import OverviewCard from '@/components/portal/OverviewCard';
+import DemoDataCard from '@/components/portal/DemoDataCard';
 import { statusErrorKey, type StatusErrorKey } from '@/lib/requestStatusChange';
 import type { CandidateStatusErrorKey } from '@/lib/candidateStatusChange';
 import { candidateService } from '@/lib/services/candidateService';
@@ -926,6 +927,8 @@ export default function PortalPage() {
               <h3 className="text-base sm:text-lg font-extrabold text-slate-900">{t.portalSummaryTitle}</h3>
               <p className="text-xs sm:text-sm text-slate-600">{t.portalSummaryDesc}</p>
             </div>
+
+            {isUpperManagement && <DemoDataCard t={t} onChanged={fetchAllData} />}
           </div>
         )}
 
