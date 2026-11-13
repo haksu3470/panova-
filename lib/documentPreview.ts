@@ -59,6 +59,77 @@ export function previewKind(fileName: string | null | undefined, url: string | n
   return fromExt(extensionOf(value)) ?? 'other';
 }
 
+/**
+ * Above this size a PDF is not pulled into memory for the inline viewer;
+ * the window offers "open in new tab / download" instead.
+ */
+export const PDF_INLINE_MAX_BYTES = 25 * 1024 * 1024;
+
+/**
+ * How a resolved address is shown:
+ * - 'direct'    : images and other types use the address as is
+ * - 'blob'      : PDFs are fetched, re-wrapped as application/pdf and shown
+ *                 from a blob: URL (storage files carry a sandbox CSP that
+ *                 Chrome's PDF viewer refuses inside a frame; long data:
+ *                 PDFs fail too)
+ * - 'too_large' : PDF over the limit (size known up front): link only
+ */
+export type PreviewStrategy = 'direct' | 'blob' | 'too_large';
+
+export function previewStrategy(kind: PreviewKind, sizeBytes?: number | null): PreviewStrategy {
+  if (kind !== 'pdf') return 'direct';
+  if (typeof sizeBytes === 'number' && Number.isFinite(sizeBytes) && sizeBytes > PDF_INLINE_MAX_BYTES) return 'too_large';
+  return 'blob';
+}
+
+/** Decoded size of a base64 data: address, or null when it is not one. */
+export function dataUrlByteSize(url: string | null | undefined): number | null {
+  const value = String(url ?? '');
+  const comma = value.indexOf(',');
+  if (!value.startsWith('data:') || comma < 0) return null;
+  const head = value.slice(0, comma);
+  const body = value.length - comma - 1;
+  if (!/;base64$/i.test(head)) return body;
+  const padding = value.endsWith('==') ? 2 : value.endsWith('=') ? 1 : 0;
+  return Math.max(0, Math.floor((body * 3) / 4) - padding);
+}
+
+/** Content-Length header as a number, or null when missing or invalid. */
+export function contentLength(header: string | null | undefined): number | null {
+  const n = Number(String(header ?? '').trim());
+  return header != null && String(header).trim() !== '' && Number.isFinite(n) && n >= 0 ? n : null;
+}
+
+/** A real PDF starts with "%PDF-" (checked before showing it inline). */
+export function looksLikePdf(firstBytes: ArrayLike<number>): boolean {
+  const sig = [0x25, 0x50, 0x44, 0x46, 0x2d];
+  if (firstBytes.length < sig.length) return false;
+  return sig.every((b, i) => firstBytes[i] === b);
+}
+
+/**
+ * Holds at most one blob: URL and revokes it when replaced or cleared, so a
+ * closed or unmounted preview never leaks the file in memory.
+ */
+export function objectUrlHolder(
+  create: (blob: Blob) => string,
+  revoke: (url: string) => void,
+): { set: (blob: Blob) => string; clear: () => void; current: () => string | null } {
+  let url: string | null = null;
+  return {
+    set(blob) {
+      if (url) revoke(url);
+      url = create(blob);
+      return url;
+    },
+    clear() {
+      if (url) revoke(url);
+      url = null;
+    },
+    current: () => url,
+  };
+}
+
 /** candidate_documents ids are UUIDs; legacy documents_json ids are not. */
 export function isDocumentRowId(id: string | null | undefined): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(id ?? ''));

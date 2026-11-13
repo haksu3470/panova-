@@ -9,7 +9,14 @@ import {
   type UploadKind,
   type UploadRejection,
 } from '@/lib/uploads';
-import { isDirectFileUrl, storageRefFor } from '@/lib/documentPreview';
+import {
+  contentLength,
+  dataUrlByteSize,
+  isDirectFileUrl,
+  looksLikePdf,
+  PDF_INLINE_MAX_BYTES,
+  storageRefFor,
+} from '@/lib/documentPreview';
 
 export async function uploadCandidateFile(candidateId: string, slot: string, file: File, kind: UploadKind): Promise<string> {
   const problem = validateUpload(file, kind);
@@ -36,7 +43,7 @@ export async function signedCandidateFileUrl(fileUrl: string | null | undefined)
 }
 
 export type PreviewUrlResult =
-  | { ok: true; url: string }
+  | { ok: true; url: string; /** storage object path, when the file is in the private bucket */ path?: string }
   | { ok: false; code: 'no_file' | 'bad_path' | 'access_denied' | 'sign_failed'; detail?: string };
 
 /**
@@ -62,7 +69,7 @@ export async function candidatePreviewUrl(fileUrl: string | null | undefined, do
     const denied = status === 400 || status === 403 || status === 404 || status === '400' || status === '403' || status === '404';
     return { ok: false, code: denied ? 'access_denied' : 'sign_failed', detail: error?.message || String(status ?? '') };
   }
-  return { ok: true, url: data.signedUrl };
+  return { ok: true, url: data.signedUrl, path };
 }
 
 export async function openCandidateDocument(documentId: string, fileUrl: string | null | undefined): Promise<string | null> {
@@ -70,4 +77,50 @@ export async function openCandidateDocument(documentId: string, fileUrl: string 
   const stored = typeof data === 'string' && data ? data : fileUrl;
   if (error && !stored) return null;
   return signedCandidateFileUrl(stored);
+}
+
+export type PdfBlobResult =
+  | { ok: true; blob: Blob }
+  | { ok: false; code: 'too_large' | 'fetch_failed' | 'not_pdf'; detail?: string };
+
+/**
+ * The PDF behind a resolved preview address, as a Blob typed
+ * application/pdf (for a blob: URL in the inline viewer). Call it only after
+ * candidatePreviewUrl, which already logged the access. Tries fetch first;
+ * if that fails (for example CORS) and the file is in the private bucket,
+ * downloads it with the storage client instead. Files over
+ * PDF_INLINE_MAX_BYTES are not read when the size is known up front.
+ */
+export async function candidatePdfBlob(url: string, storagePath?: string | null): Promise<PdfBlobResult> {
+  const inlineSize = dataUrlByteSize(url);
+  if (inlineSize !== null && inlineSize > PDF_INLINE_MAX_BYTES) return { ok: false, code: 'too_large' };
+
+  let blob: Blob | null = null;
+  let detail = '';
+  try {
+    const res = await fetch(url, { credentials: 'omit', cache: 'no-store' });
+    if (res.ok) {
+      const size = contentLength(res.headers.get('content-length'));
+      if (size !== null && size > PDF_INLINE_MAX_BYTES) {
+        await res.body?.cancel().catch(() => undefined);
+        return { ok: false, code: 'too_large' };
+      }
+      blob = await res.blob();
+    } else {
+      detail = `http_${res.status}`;
+    }
+  } catch (error) {
+    detail = error instanceof Error ? error.message : String(error);
+  }
+  if (!blob && storagePath) {
+    const { data, error } = await supabase.storage.from('candidate-files').download(storagePath);
+    if (data) blob = data;
+    else detail = error?.message || detail;
+  }
+  if (!blob) return { ok: false, code: 'fetch_failed', detail };
+  if (blob.size > PDF_INLINE_MAX_BYTES) return { ok: false, code: 'too_large' };
+  const head = new Uint8Array(await blob.slice(0, 5).arrayBuffer());
+  if (!looksLikePdf(head)) return { ok: false, code: 'not_pdf' };
+  // Re-typed so the browser always treats it as a PDF, never as a page.
+  return { ok: true, blob: new Blob([blob], { type: 'application/pdf' }) };
 }

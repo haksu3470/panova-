@@ -396,6 +396,9 @@ export interface Translation {
   docPreviewUnsupported?: string;
   docOpenNewTab?: string;
   docPreviewClose?: string;
+  docPreviewErrFetch?: string;
+  docPreviewErrNotPdf?: string;
+  docPreviewTooLarge?: string;
   videoIntroductionTitle?: string;
   openDemandFilesBtn?: string;
   taskGroupTarget?: string;
@@ -1104,6 +1107,9 @@ export const translations: Record<Language, Translation> = {
     docPreviewUnsupported: 'Bu dosya türü için önizleme desteklenmiyor.',
     docOpenNewTab: 'Yeni sekmede aç / indir',
     docPreviewClose: 'Önizlemeyi kapat',
+    docPreviewErrFetch: 'Dosya indirilemedi. Bağlantınızı kontrol edip tekrar deneyin.',
+    docPreviewErrNotPdf: 'Dosya geçerli bir PDF değil.',
+    docPreviewTooLarge: 'Dosya 25 MB\'tan büyük, burada önizlenmiyor. Yeni sekmede açın veya indirin.',
     videoIntroductionTitle: 'Video tanıtımı',
     openDemandFilesBtn: 'Dosyaları Aç',
     taskGroupTarget: 'Hedef Ülke Ekibi',
@@ -1799,6 +1805,9 @@ export const translations: Record<Language, Translation> = {
     docPreviewUnsupported: 'Preview is not supported for this file type.',
     docOpenNewTab: 'Open in new tab / download',
     docPreviewClose: 'Close preview',
+    docPreviewErrFetch: 'The file could not be downloaded. Check your connection and try again.',
+    docPreviewErrNotPdf: 'The file is not a valid PDF.',
+    docPreviewTooLarge: 'The file is larger than 25 MB and is not previewed here. Open it in a new tab or download it.',
     videoIntroductionTitle: 'Video introduction',
     openDemandFilesBtn: 'Open Files',
     taskGroupTarget: 'Target Country Team',
@@ -2494,6 +2503,9 @@ export const translations: Record<Language, Translation> = {
     docPreviewUnsupported: 'Parapamja nuk mbështetet për këtë lloj skedari.',
     docOpenNewTab: 'Hape në skedë të re / shkarko',
     docPreviewClose: 'Mbyll parapamjen',
+    docPreviewErrFetch: 'Skedari nuk u shkarkua. Kontrolloni lidhjen dhe provoni përsëri.',
+    docPreviewErrNotPdf: 'Skedari nuk është PDF i vlefshëm.',
+    docPreviewTooLarge: 'Skedari është më i madh se 25 MB dhe nuk shfaqet këtu. Hapeni në skedë të re ose shkarkojeni.',
     videoIntroductionTitle: 'Prezantimi me video',
     openDemandFilesBtn: 'Hap Skedarët',
     taskGroupTarget: 'Ekipi i Vendit të Synuar',
@@ -3332,6 +3344,9 @@ export const translations: Record<Language, Translation> = {
     docPreviewUnsupported: 'المعاينة غير مدعومة لهذا النوع من الملفات.',
     docOpenNewTab: 'فتح في علامة تبويب جديدة / تنزيل',
     docPreviewClose: 'إغلاق المعاينة',
+    docPreviewErrFetch: 'تعذّر تنزيل الملف. تحقّقوا من الاتصال وحاولوا مرة أخرى.',
+    docPreviewErrNotPdf: 'الملف ليس ملف PDF صالحًا.',
+    docPreviewTooLarge: 'حجم الملف أكبر من 25 ميغابايت ولا تتم معاينته هنا. افتحوه في علامة تبويب جديدة أو نزّلوه.',
     videoIntroductionTitle: 'التعريف بالفيديو',
     openDemandFilesBtn: 'فتح الملفات',
     taskGroupTarget: 'فريق البلد المستهدف',
@@ -3887,6 +3902,9 @@ export const translations: Record<Language, Translation> = {
     docPreviewUnsupported: 'Прегледот не е поддржан за овој тип датотека.',
     docOpenNewTab: 'Отвори во нова картичка / преземи',
     docPreviewClose: 'Затвори преглед',
+    docPreviewErrFetch: 'Датотеката не можеше да се преземе. Проверете ја врската и обидете се повторно.',
+    docPreviewErrNotPdf: 'Датотеката не е важечки PDF.',
+    docPreviewTooLarge: 'Датотеката е поголема од 25 MB и не се прикажува тука. Отворете ја во нова картичка или преземете ја.',
     videoIntroductionTitle: 'Видео претставување',
     openDemandFilesBtn: 'Отвори досиеја',
     taskGroupTarget: 'Тим за целна земја',
