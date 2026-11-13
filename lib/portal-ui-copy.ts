@@ -200,6 +200,8 @@ export type PortalUi = {
   exportExcel: string;
   exportPrint: string;
   exportEmpty: string;
+  /** Print / PDF: the browser blocked the print window. */
+  exportPopupBlocked: string;
   offersExport: string;
   deleteRecord: string;
   deleteConfirmTitle: string;
@@ -441,6 +443,7 @@ const tr: PortalUi = {
   exportExcel: 'Excel indir',
   exportPrint: 'Yazdır / PDF',
   exportEmpty: 'Dışa aktarılacak kayıt yok.',
+  exportPopupBlocked: 'Yazdırma penceresi engellendi. Bu site için açılır pencerelere izin verip yeniden deneyin.',
   offersExport: 'Teklifleri dışa aktar',
   deleteRecord: 'Sil',
   deleteConfirmTitle: 'Kayıt silinsin mi?',
@@ -694,6 +697,7 @@ const en: PortalUi = {
   exportExcel: 'Download Excel',
   exportPrint: 'Print / PDF',
   exportEmpty: 'Nothing to export.',
+  exportPopupBlocked: 'The print window was blocked. Allow pop-ups for this site and try again.',
   offersExport: 'Export offers',
   deleteRecord: 'Delete',
   deleteConfirmTitle: 'Delete this record?',
@@ -947,6 +951,7 @@ const sq: PortalUi = {
   exportExcel: 'Shkarko Excel',
   exportPrint: 'Printo / PDF',
   exportEmpty: 'Nuk ka të dhëna për eksport.',
+  exportPopupBlocked: 'Dritarja e printimit u bllokua. Lejoni dritaret pop-up për këtë faqe dhe provoni përsëri.',
   offersExport: 'Eksporto ofertat',
   deleteRecord: 'Fshi',
   deleteConfirmTitle: 'Të fshihet ky regjistrim?',
@@ -1200,6 +1205,7 @@ const ar: PortalUi = {
   exportExcel: 'تنزيل Excel',
   exportPrint: 'طباعة / PDF',
   exportEmpty: 'لا توجد سجلات للتصدير.',
+  exportPopupBlocked: 'تم حظر نافذة الطباعة. اسمح بالنوافذ المنبثقة لهذا الموقع ثم حاول مرة أخرى.',
   offersExport: 'تصدير العروض',
   deleteRecord: 'حذف',
   deleteConfirmTitle: 'حذف هذا السجل؟',
@@ -1453,6 +1459,7 @@ const mk: PortalUi = {
   exportExcel: 'Преземи Excel',
   exportPrint: 'Печати / PDF',
   exportEmpty: 'Нема записи за извоз.',
+  exportPopupBlocked: 'Прозорецот за печатење е блокиран. Дозволете скокачки прозорци за оваа страница и обидете се повторно.',
   offersExport: 'Извези понуди',
   deleteRecord: 'Избриши',
   deleteConfirmTitle: 'Да се избрише овој запис?',
