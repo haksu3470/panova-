@@ -2,7 +2,7 @@ import { isStaff } from '@/lib/auth';
 import type { PortalViewer } from '@/lib/guides-model';
 import { supabase } from '@/lib/supabase';
 
-const KNOWN_STAFF_ROLES = new Set(['upper_management', 'source_country', 'target_country', 'field_officer']);
+const KNOWN_STAFF_ROLES = new Set(['upper_management', 'source_country', 'target_country', 'field_officer', 'finance', 'limited']);
 
 /**
  * Reads the signed-in portal role. Does not call link/claim RPCs, so opening

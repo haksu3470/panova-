@@ -1,7 +1,58 @@
 import type { Language } from './dictionary';
-import type { GuidesCopy } from './guides-model';
+import type { GuideArticle, GuidesCopy } from './guides-model';
 
-const en: GuidesCopy = {
+/**
+ * Turkish text that en / sq / ar / mk still show until it is translated.
+ * Each entry is a path in GuidesCopy; withPendingTr() copies the Turkish
+ * value there. Keep docs/guides-translation-todo.md in step with this list.
+ */
+export const GUIDES_PENDING_TRANSLATION = [
+  'exampleLabel',
+  'roleLabels.finance',
+  'roleLabels.limited',
+  'roles.finance',
+  'roles.limited',
+  'roles.employer.screens.newRequest',
+  'guides.staff-login.example',
+  'guides.staff-invite.example',
+  'guides.dossier-review.example',
+  'guides.matching-offers.example',
+  'guides.employer-request.example',
+  'guides.employer-browse.example',
+  'guides.candidate-register.example',
+  'guides.request-to-offer',
+  'guides.document-request',
+] as const;
+
+/** True for a leaf path (e.g. "guides.request-to-offer.steps[0].body") inside a pending entry. */
+export function isPendingTranslation(path: string): boolean {
+  return GUIDES_PENDING_TRANSLATION.some(
+    (entry) => path === entry || path.startsWith(`${entry}.`) || path.startsWith(`${entry}[`),
+  );
+}
+
+/** A locale written before the pending keys existed. */
+type LegacyGuidesCopy = Omit<GuidesCopy, 'exampleLabel' | 'guides'> & {
+  guides: Record<string, Omit<GuideArticle, 'example'>>;
+};
+
+function withPendingTr(base: LegacyGuidesCopy, source: GuidesCopy): GuidesCopy {
+  const out = structuredClone(base) as unknown as Record<string, unknown>;
+  for (const entry of GUIDES_PENDING_TRANSLATION) {
+    const keys = entry.split('.');
+    let from: unknown = source;
+    for (const key of keys) from = (from as Record<string, unknown>)[key];
+    let to = out;
+    for (const key of keys.slice(0, -1)) {
+      to[key] ??= {};
+      to = to[key] as Record<string, unknown>;
+    }
+    to[keys[keys.length - 1]] = structuredClone(from);
+  }
+  return out as unknown as GuidesCopy;
+}
+
+const en: LegacyGuidesCopy = {
   navLabel: 'Guides',
   hubTitle: 'Portal guides',
   hubLead: 'A map of who uses which screen, and short steps for the work this account can do.',
@@ -94,7 +145,6 @@ const en: GuidesCopy = {
       summary: 'Requests workers and reviews the people Panova presents.',
       screens: {
         home: { name: 'Home', does: 'Counts of your requests, candidates, interviews, and selections.' },
-        demands: { name: 'Requests', does: 'The form for a new labor demand, then the list you sent.' },
         candidates: { name: 'Candidates', does: 'Filter people, ask for an interview, or mark someone selected. A YouTube video shows when a supervisor added one.' },
         interviews: { name: 'Interviews', does: 'Interviews you asked for.' },
         selected: { name: 'Selected', does: 'People you marked as selected.' },
@@ -276,15 +326,16 @@ const tr: GuidesCopy = {
   hubLead: 'Hangi rolün hangi ekranı kullandığı ve bu hesapla yapılabilecek işlerin kısa adımları.',
   mapTitle: 'Kullanım haritası',
   mapLead: 'Her kart bir roldür. Yol, portaldaki gerçek ekrandır.',
-  mapNote: 'Tüm personel rolleri /portal adresinden girer ve aynı sekmeleri paylaşır. Yalnızca Personel sekmesi üst yönetime özeldir. Kartlar, her rolün en çok kullandığı ekranları gösterir.',
+  mapNote: 'Tüm personel /portal adresinden girer, ama sekmeler role göre değişir: her kart o rolün gördüğü sekmeleri ve açabildiği dosyaları gösterir. Genel bakış sekmesi olmayan roller girişte kendi ilk sekmelerine düşer. Personel sekmesi, kayıt silme, durumu elle değiştirme ve Demo verisi kartı yalnızca Üst Yönetimdedir.',
   howToTitle: 'Nasıl yapılır',
-  howToLead: 'Numaralı adımları izleyin. Çerçeveler ekran şemasıdır, fotoğraf değildir.',
+  howToLead: 'Numaralı adımları izleyin. Çerçeveler ekran şemasıdır, fotoğraf değildir. Örnekler demo kayıtlarını kullanır, gerçek kişi değildir.',
   sessionLabel: 'Oturum',
   screensLabel: 'Ana ekranlar',
   upperOnly: 'Yalnızca üst yönetim',
   stepsLabel: 'Adımlar',
   whereLabel: 'Nerede',
   flowLabel: 'Akış',
+  exampleLabel: 'Örnek',
   loading: 'Oturum kontrol ediliyor…',
   signedOutTitle: 'Kılavuzlar için giriş yapın',
   signedOutBody: 'Kılavuzlar girişten sonra açılır. Her portal yalnızca o hesabın bölümlerini gösterir.',
@@ -304,6 +355,8 @@ const tr: GuidesCopy = {
     source_country: 'Kaynak ülke sorumlusu',
     target_country: 'Hedef ülke sorumlusu',
     field_officer: 'Saha görevlisi',
+    finance: 'Finans',
+    limited: 'Sınırlı erişim',
     staff: 'Personel',
     employer: 'İşveren',
     candidate: 'Aday',
@@ -312,11 +365,11 @@ const tr: GuidesCopy = {
   roles: {
     upper_management: {
       title: 'Üst yönetim',
-      summary: 'Davetler dahil tüm personel sekmelerini kullanır; işveren ve aday dosyalarını açabilir.',
+      summary: 'Tüm personel sekmelerini kullanır ve her dosyayı açar. Davet, kayıt silme, durumu elle değiştirme ve demo verisi yalnızca bu roldedir.',
       screens: {
-        overview: { name: 'Genel bakış', does: 'Aday, işveren, personel ve açık görev sayıları.' },
-        candidates: { name: 'Adaylar', does: 'Aday listesi. İsim, kişinin dosyasını açar.' },
-        requests: { name: 'Talepler', does: 'İşgücü talepleri. Her talebin eşleştirme dosyası vardır.' },
+        overview: { name: 'Genel bakış', does: 'Aday, talep (açık / toplam), işveren, personel ve açık görev kartları; karta tıklamak ilgili sekmeyi açar. Altta gecikme uyarıları ve Demo verisi kartı vardır: demo verisi oluşturulur veya tümü silinir. Silmeden önce kayıtlar yedeklenir; giriş hesabı bağlı demo işveren ve adaylar silinmez.' },
+        candidates: { name: 'Adaylar', does: 'Aday listesi; isim dosyayı açar. Aday durumunu yalnız siz "Elle değiştir" ile ve gerekçe yazarak değiştirirsiniz. Sil düğmesi kaydı adıyla gösterir ve onay ister.' },
+        requests: { name: 'Talepler', does: 'İşgücü talepleri ve eşleştirme dosyaları. Talep durumu kayıtlarla kendiliğinden ilerler; elle değiştirmek ve talebi silmek yalnız sizdedir.' },
         staff: {
           name: 'Personel',
           does: 'Ad ve e-posta ile davet gönderin, rol seçin veya personel satırını silin.',
@@ -324,64 +377,80 @@ const tr: GuidesCopy = {
         },
         tasks: { name: 'Görevler', does: 'Sahibi, yedeği ve tarihi olan takip işi.' },
         audit: { name: 'Denetim', does: 'Son işlemler, kim yaptı ve ne zaman.' },
-        employers: { name: 'İşverenler', does: 'Şirket dosyası veya o şirketin kendi işveren portalı.' },
+        employers: { name: 'İşverenler', does: 'Şirket dosyası veya o şirketin işveren portalı. Dosyadaki "Giriş daveti gönder" işverene şifre belirleme bağlantısı yollar. İşveren kaydı silinebilir.' },
         support: { name: 'Destek', does: 'Aday hesaplarından gelen iletiler.' },
       },
     },
     source_country: {
       title: 'Kaynak ülke sorumlusu',
-      summary: 'İnsanların alındığı ülkedeki aday hattını yürütür.',
+      summary: 'İnsanların alındığı ülkedeki aday hattını yürütür. Girişte Adaylar sekmesi açılır.',
       screens: {
-        candidates: { name: 'Adaylar', does: 'Sektör, durum ve ülkeye göre süzün. Listeden durum veya sorumluyu güncelleyin.' },
-        dossier: { name: 'Aday dosyası', does: 'Profil, belgeler ve seyahat. Bu dosyaya YouTube bağlantısı kaydedebilirsiniz.' },
-        requests: { name: 'Talepler', does: 'Aday eşleştirebileceğiniz açık talepler.' },
+        candidates: { name: 'Adaylar', does: 'Sektör, durum ve ülkeye göre süzün; sorumluyu listeden değiştirin. Aday durumu resmî süreçten otomatik gelir.' },
+        dossier: { name: 'Aday dosyası', does: 'Profil, resmî süreç, belgeler ve seyahat. Eksik belgeyi "+ Talep et" ile isteyin, dosyayı önizleyin veya indirin. YouTube bağlantısı kaydedebilirsiniz.' },
+        requests: { name: 'Talepler', does: 'Aday eşleştirebileceğiniz açık talepler; durum kendiliğinden ilerler.' },
         tasks: { name: 'Görevler', does: 'Size atanan iş, yedeği ve tarihiyle.' },
       },
     },
     target_country: {
       title: 'Hedef ülke sorumlusu',
-      summary: 'İnsanların yerleştirileceği ülkedeki işverenlerle çalışır.',
+      summary: 'İnsanların yerleştirileceği ülkedeki işverenlerle çalışır. Girişte Adaylar sekmesi açılır.',
       screens: {
-        request: { name: 'Talep dosyası', does: 'Talep koşulları, bağlı adaylar, görüşmeler ve teklifler.' },
-        employer: { name: 'İşveren dosyası', does: 'Şirket kaydı ve ona bağlı talepler.' },
+        request: { name: 'Talep dosyası', does: 'Talep koşulları (maaş para birimiyle), bağlı adaylar, mülakatlar ve teklifler. Mülakata toplantı bağlantısı ekleyebilir, işveren adına seçildi / reddedildi kararı girebilirsiniz.' },
+        employer: { name: 'İşveren dosyası', does: 'Şirket kaydı ve bağlı talepler. Kendi ülkenizdeki işverene giriş daveti gönderebilirsiniz.' },
         candidates: { name: 'Adaylar', does: 'Yerleştirme hattındaki kişilerin dosyaları. YouTube bağlantısını burada kaydedebilirsiniz.' },
         tasks: { name: 'Görevler', does: 'Bu yerleştirmelere ait takipler.' },
       },
     },
     field_officer: {
       title: 'Saha görevlisi',
-      summary: 'Belgeler, seyahat notları ve atanan görevler. Dosyadaki YouTube bağlantıları salt okunurdur.',
+      summary: 'Belgeler, seyahat notları ve atanan görevler. Talep ve işveren dosyalarını açamaz; dosyadaki YouTube bağlantıları salt okunurdur.',
       screens: {
         tasks: { name: 'Görevler', does: 'Adınızın veya yedeğinizin olduğu bekleyen iş.' },
-        dossier: { name: 'Aday dosyası', does: 'Belgeler ve seyahat. YouTube bağlantıları görünür, düzenlenemez.' },
+        dossier: { name: 'Aday dosyası', does: 'Belgeler ve seyahat. YouTube bağlantıları görünür, düzenlenemez. Talep ve işveren dosyaları bu role kapalıdır.' },
         support: { name: 'Destek', does: 'Yanıt bekleyen aday iletileri.' },
-        overview: { name: 'Genel bakış', does: 'Ana kartlardaki açık görev sayısı.' },
+        overview: { name: 'Genel bakış', does: 'Özet kartları; bu rolün sekmesi olmayan kartlar tıklanmaz.' },
+      },
+    },
+    finance: {
+      title: 'Finans',
+      summary: 'Yalnızca Genel bakış ve Görevler sekmelerini görür. Aday, talep ve işveren dosyalarını açamaz.',
+      screens: {
+        overview: { name: 'Genel bakış', does: 'Özet sayılar. Bu rolün sekmesi olmayan kartlar tıklanmaz.' },
+        tasks: { name: 'Görevler', does: 'Size atanan işler, yedeği ve tarihiyle.' },
+      },
+    },
+    limited: {
+      title: 'Sınırlı erişim',
+      summary: 'Rolü belirlenmemiş personel hesabı. Yalnızca Genel bakış ve Görevler görünür; hiçbir dosya açılmaz.',
+      screens: {
+        overview: { name: 'Genel bakış', does: 'Özet sayılar. Kartlar başka sekme açmaz.' },
+        tasks: { name: 'Görevler', does: 'Size atanan işler. Daha fazla erişim için Üst Yönetim rolünüzü değiştirir.' },
       },
     },
     employer: {
       title: 'İşveren',
-      summary: 'Çalışan talep eder ve Panova’nın sunduğu kişileri inceler.',
+      summary: 'Çalışan talep eder, Panova’nın sunduğu kişileri inceler ve karar verir.',
       screens: {
-        home: { name: 'Ana sayfa', does: 'Talep, aday, görüşme ve seçim sayılarınız.' },
-        demands: { name: 'Talepler', does: 'Yeni işgücü talebi formu, ardından gönderdiğiniz liste.' },
-        candidates: { name: 'Adaylar', does: 'Kişileri süzün, görüşme isteyin veya seçildi olarak işaretleyin. Sorumlu video eklediyse YouTube burada görünür.' },
-        interviews: { name: 'Görüşmeler', does: 'İstediğiniz görüşmeler.' },
-        selected: { name: 'Seçilenler', does: 'Seçildi işaretlediğiniz kişiler.' },
-        process: { name: 'Süreç', does: 'Seçimden sonraki durum.' },
-        travel: { name: 'Seyahat', does: 'Seçilen kişiler için kaydedilen seyahat.' },
-        employees: { name: 'Çalışanlar', does: 'İşe başlamış kişiler.' },
-        support: { name: 'Destek', does: 'Panova’ya ileti.' },
-        company: { name: 'Şirket', does: 'Şirket adı, yetkili, ülke ve logo.' },
+        home: { name: 'Ana sayfa', does: 'Üstte tıklanabilir özet kartları (açık talep, aday, mülakat, seçilen); kart ilgili bölüme götürür. Altta talepleriniz, maaş para birimiyle. Henüz işlem görmemiş talepte "Talebi sil" görünür; bu arada eşleşme veya süreç başladıysa "Bu talebe bağlı süreç var, silinemez." uyarısı çıkar.' },
+        newRequest: { name: 'Yeni talep', does: 'İşgücü talep formu. Maaş yalnız rakamla yazılır, para birimi EUR veya USD seçilir (0’dan büyük, en çok 100.000). Hatalı alanın altında hata yazar.' },
+        candidates: { name: 'Adaylar', does: 'Size sunulan kişileri süzün, mülakat isteyin, adayı seçin veya reddedin. Sorumlu video eklediyse YouTube burada görünür.' },
+        interviews: { name: 'Mülakatlar', does: 'İstediğiniz mülakatlar, tarih ve varsa toplantı bağlantısıyla. Teklifler de burada, tutar para birimiyle.' },
+        selected: { name: 'Seçtiğim adaylar', does: 'Seçtiğiniz kişiler.' },
+        process: { name: 'İşlem durumu', does: 'Seçimden sonraki resmî süreç aşaması.' },
+        travel: { name: 'Seyahat ve başlangıç', does: 'Seçilen kişiler için kaydedilen seyahat.' },
+        employees: { name: 'Aktif çalışanlar', does: 'İşe başlamış kişiler ve 30/60/90 gün takibi.' },
+        support: { name: 'Destek / bildirim', does: 'Panova’ya ileti.' },
+        company: { name: 'Şirket profili', does: 'Şirket adı, yetkili, ülke ve logo.' },
       },
     },
     candidate: {
       title: 'Aday',
-      summary: 'Kayıt olur, profilini ve belgelerini tutar, teklifleri okur.',
+      summary: 'Kayıt olur, profilini ve belgelerini tutar, teklifleri kabul veya reddeder.',
       screens: {
         overview: { name: 'Genel bakış', does: 'Girişten sonra kısa özet; sorumlu videosu varsa o da burada.' },
-        profile: { name: 'Profil', does: 'İletişim, acil durum kişisi ve sorumlunun eklediği YouTube videoları.' },
-        documents: { name: 'Belgeler', does: 'Pasaport, mesleki sertifika, adli sicil, sağlık raporu ve apostil.' },
-        offers: { name: 'Teklifler', does: 'Size gönderilen iş teklifleri.' },
+        profile: { name: 'Profil', does: 'Uyruk, iletişim, acil durum kişisi ve sorumlunun eklediği YouTube videoları.' },
+        documents: { name: 'Belgeler', does: 'Pasaport, mesleki sertifika, adli sicil, sağlık raporu ve apostil. Personel CV, diploma veya fotoğraf gibi ek belge isterse burada çıkar; "Yeniden istendi" yazan belgeyi tekrar yükleyin.' },
+        offers: { name: 'Teklifler', does: 'Size gönderilen iş teklifleri, tutar para birimiyle (€ veya $). Bekleyen teklifi kabul veya reddedersiniz.' },
         support: { name: 'Destek', does: 'Panova ekibine ileti.' },
       },
     },
@@ -395,18 +464,19 @@ const tr: GuidesCopy = {
         { title: 'Personel portalını açın', body: '/portal adresine gidin.' },
         { title: 'Davetli e-posta ile girin', body: 'Şifre kullanın veya aynı e-posta ile Google’ı seçin. Davet sizin için şifre belirlemez.' },
         { title: 'İstenirse e-postayı doğrulayın', body: 'İletiyi açıp onaylayın, sonra /portal adresine dönün. Adres zaten doğrulanmışsa bu adım atlanır.' },
-        { title: 'Rol rozetine bakın', body: 'Genel bakış açılır. Adınız ve rolünüz yeşil rozettedir.' },
+        { title: 'Rol rozetine bakın', body: 'Rolünüzün ilk sekmesi açılır: Üst Yönetim, saha, finans ve sınırlı erişimde Genel bakış; kaynak ve hedef ülke sorumlusunda Adaylar. Adınız ve rolünüz yeşil rozettedir.' },
       ],
-      flow: ['Davet e-postası', '/portal', 'İstenirse doğrula', 'Genel bakış'],
+      flow: ['Davet e-postası', '/portal', 'İstenirse doğrula', 'İlk sekme'],
       mock: {
         caption: 'Personel giriş ekranının şeması.',
         chrome: '/portal',
         rows: [
           { label: 'E-posta', value: 'Davetteki adres' },
           { label: 'Giriş', value: 'Şifre veya Google' },
-          { label: 'Sonra', value: 'Genel bakış' },
+          { label: 'Sonra', value: 'Rolünüzün ilk sekmesi' },
         ],
       },
+      example: 'Bir kaynak ülke sorumlusu davetteki adresle Google’ı seçer. Genel bakış yerine Adaylar açılır; sekme çubuğunda yalnız Adaylar, Talepler ve Görevler vardır.',
     },
     'staff-invite': {
       title: 'Personel davet etme',
@@ -428,91 +498,143 @@ const tr: GuidesCopy = {
           { label: 'Rol', value: 'Dört rolden biri' },
         ],
       },
+      example: '"Demo Personel" adını, kişinin giriş e-postasını ve Saha görevlisi rolünü yazıp gönderin. Kişi aynı adresle /portal’a girince rozetinde Saha görevlisi yazar; rolü sonra kartından değiştirebilirsiniz.',
     },
     'dossier-review': {
       title: 'Aday dosyasını inceleme',
-      summary: 'Liste, hızlı durum veya sorumlu değişikliği içindir. Dosyada profil, belgeler, seyahat ve sorumlu videoları vardır.',
+      summary: 'Liste, arama ve sorumlu değişikliği içindir. Dosyada profil, resmî süreç, belgeler, seyahat ve videolar vardır. Aday durumu resmî süreçten otomatik gelir.',
       where: '/portal → Adaylar → /portal/candidates/[id]',
       steps: [
         { title: 'Adaylar sekmesini açın', body: 'Ad, meslek, pasaport veya e-posta ile arayın. Sektör, durum veya ülkeye göre süzün.' },
-        { title: 'Liste yeterliyse oradan güncelleyin', body: 'Durumu bekliyor, inceleniyor, vize sürecinde veya onaylandı yapın ya da sorumluyu değiştirin.' },
-        { title: 'İsmi açın', body: 'Dosya adresi /portal/candidates/[id] şeklindedir.' },
-        { title: 'İnceleyip kaydedin', body: 'Profil, belgeler ve seyahati kontrol edin, sonra kaydedin. Üst yönetim ile kaynak veya hedef ülke sorumluları YouTube bağlantısını kaydedebilir, değiştirebilir veya silebilir. Saha görevlisi videoları izler, düzenleyemez.' },
+        { title: 'Durumu resmî süreçten izleyin', body: 'Aday durumu (Bekliyor, İnceleniyor, Onaylandı) resmî süreç aşamasından kendiliğinden belirlenir. Elle değiştirmek yalnız Üst Yönetimdedir: "Elle değiştir" seçilir ve en az 5 karakterlik gerekçe yazılır; gerekçe kayıt geçmişine düşer. Sorumluyu listeden değiştirebilirsiniz.' },
+        { title: 'Dosyayı açın, belgelere bakın', body: 'İsim /portal/candidates/[id] dosyasını açar. Belgeler tek listededir: eksik türü "+ Talep et" ile isteyin; dosya yokken Onaylandı veya İnceleniyor seçilemez. Dosyayı önizleyin, yeni sekmede açın veya indirin. Belge silmek yalnız Üst Yönetimdedir.' },
+        { title: 'İnceleyip kaydedin', body: 'Profil, resmî süreç ve seyahati kontrol edip kaydedin. Üst yönetim ile kaynak veya hedef ülke sorumluları YouTube bağlantısını kaydedebilir, değiştirebilir veya silebilir. Saha görevlisi videoları izler, düzenleyemez.' },
       ],
-      flow: ['Adaylar', 'Süz', 'İsmi aç', 'Dosyayı kaydet'],
+      flow: ['Adaylar', 'Dosyayı aç', 'Belgeler', 'Kaydet'],
       mock: {
-        caption: 'Aday listesindeki bir satırın şeması.',
-        chrome: '/portal · Adaylar',
+        caption: 'Aday dosyasındaki durum ve belge satırlarının şeması.',
+        chrome: '/portal/candidates/[id]',
         rows: [
-          { label: 'Ad', value: 'Dosyayı açar' },
-          { label: 'Pasaport', value: 'Numara ve ülke' },
-          { label: 'Durum', value: 'Beklemeden onaya' },
+          { label: 'Durum', value: 'Resmî süreçten otomatik' },
+          { label: 'Belge', value: '+ Talep et, Önizle, İndir' },
+          { label: 'Onay', value: 'Yalnız dosya varken' },
         ],
       },
+      example: 'Demo Aday İki’nin resmî süreci "Evrak toplanıyor"; bu yüzden durumu İnceleniyor görünür. Pasaportu "Yeniden istendi", sağlık raporu "Bekleniyor" ve dosyasız: aday yükleyene kadar ikisi için de Onaylandı seçilemez.',
     },
     'matching-offers': {
-      title: 'Eşleştirme, görüşme ve teklif',
-      summary: 'Eşleştirme ayrı bir sekmede değil, talep dosyasındadır. Görüşme ve teklif bir eşleşmeden kaydedilir.',
+      title: 'Eşleştirme, mülakat ve teklif',
+      summary: 'Eşleştirme talep dosyasındadır. Talep durumu eşleşme, sunum ve mülakatla kendiliğinden ilerler. Teklifin para birimi talepten gelir.',
       where: '/portal → Talepler → /portal/requests/[id]',
       steps: [
         { title: 'Talebi açın', body: 'Taleplerden /portal/requests/[id] dosyasını açın ve Aday eşleştir seçin.' },
-        { title: 'Kişiyi bağlayın', body: 'Önerilen bir adayı bu talebe ekleyin.' },
-        { title: 'Sunun ve sonucu yazın', body: 'Eşleşmeyi sunun ki gösterilmiş sayılsın. İşveren sonucunu, seçildi dahil, kaydedin.' },
-        { title: 'Görüşme ve teklif', body: 'Bu eşleşmeden görüşme planlayın ve iş teklifi gönderin. Dosya; eşleşme, sunum, seçim, görüşme ve teklif sayılarını gösterir.' },
+        { title: 'Bağlayın ve sunun', body: 'Önerilen adayı bu talebe ekleyin, sonra sunun ki işverene gösterilmiş sayılsın. İlk eşleşmede talep "Aday Aranıyor", ilk sunumda "Adaylar Sunuluyor" olur.' },
+        { title: 'Karar ve mülakat', body: 'Seçildi veya reddedildi kararını işveren kendi portalından verir; Üst Yönetim ve hedef ülke sorumlusu işveren adına da girebilir. Mülakat planlayın; toplantı bağlantısını (Meet, Zoom, Teams) Üst Yönetim veya hedef ülke sorumlusu ekler. İlk mülakatla talep "Görüşmeler Yapılıyor" olur.' },
+        { title: 'Teklif gönderin', body: 'Yeni teklifte maaş talepten dolu gelir, değiştirebilirsiniz; para birimi talebinkidir ve değiştirilemez. Tutar her ekranda para birimiyle görünür. Aday teklifi kendi portalında kabul veya reddeder.' },
       ],
-      flow: ['Talep dosyası', 'Bağla', 'Sun', 'Görüşme veya teklif'],
+      flow: ['Talep dosyası', 'Bağla ve sun', 'Mülakat', 'Teklif'],
       mock: {
         caption: 'Talep üzerindeki eşleştirme adımlarının şeması.',
         chrome: '/portal/requests/[id]',
         rows: [
-          { label: 'Bağla', value: 'Önerilen aday' },
           { label: 'Sun', value: 'İşverene gösterildi' },
-          { label: 'Sonuç', value: 'Seçildi veya başka sonuç' },
+          { label: 'Karar', value: 'İşveren veya yetkili personel' },
+          { label: 'Teklif', value: 'Talebin para birimiyle' },
         ],
       },
+      example: 'DEMO Adriyatik Otel’in Aşçı talebi 1500 USD’dir. Demo Aday Dört’e verilen teklif $1.500 olarak görünür; para birimi alanı kilitlidir, EUR seçilemez.',
+    },
+    'request-to-offer': {
+      title: 'Talepten teklife uçtan uca',
+      summary: 'Bir talebin işveren formundan kabul edilen teklife kadar izlediği yol, demo kayıtlarıyla.',
+      where: '/employer → Yeni talep → /portal/requests/[id]',
+      steps: [
+        { title: 'İşveren talebi gönderir', body: 'DEMO Balkan Yapı DOO, Yeni talep sekmesinde İnşaat ve yapı → Kalıpçı seçer: 2 kişi, 1300, EUR, konaklama evet, yemek evet. Talep "Yeni Talep" durumuyla gelir.' },
+        { title: 'Personel adayı bağlar', body: 'Talepler → /portal/requests/[id] → Aday eşleştir: Demo Aday İki bağlanır. Talep kendiliğinden "Aday Aranıyor" olur.' },
+        { title: 'Aday sunulur', body: 'Eşleşme sunulur; işveren adayı Adaylar sekmesinde görür. Talep "Adaylar Sunuluyor" olur.' },
+        { title: 'Mülakat', body: 'Mülakat planlanır ve toplantı bağlantısı eklenir. İşveren tarihi ve bağlantıyı Mülakatlar sekmesinde görür; talep "Görüşmeler Yapılıyor" olur.' },
+        { title: 'Teklif', body: 'Teklif formunda maaş 1300 dolu gelir, para birimi EUR ve kilitlidir. Gönderilen teklif adayda ve işverende €1.300 olarak görünür.' },
+        { title: 'Kabul', body: 'Demo Aday İki Teklifler sekmesinde teklifi kabul eder. Teklif "Kabul edildi" olur; aday resmî sürece (evrak, çalışma izni, vize) geçer.' },
+      ],
+      flow: ['Talep', 'Eşleşme', 'Sunum', 'Mülakat', 'Teklif', 'Kabul'],
+      mock: {
+        caption: 'Demo talebin teklif aşamasındaki şeması.',
+        chrome: '/portal/requests/[id]',
+        rows: [
+          { label: 'Talep', value: 'Kalıpçı · 2 kişi · €1.300' },
+          { label: 'Aday', value: 'Demo Aday İki · sunuldu' },
+          { label: 'Teklif', value: 'EUR · kabul edildi' },
+        ],
+      },
+      example: 'Üst Yönetim Genel bakıştaki Demo verisi kartından demo verisi oluşturursa bu talep, eşleşme, mülakat ve bekleyen teklif hazır gelir. Adımları gerçek kayıtlara dokunmadan izleyebilirsiniz.',
+    },
+    'document-request': {
+      title: 'Belge isteme ve onaylama',
+      summary: 'Adayın tüm belgeleri dosyada tek listededir. Personel ister, aday yükler, personel önizleyip onaylar.',
+      where: '/portal → Adaylar → /portal/candidates/[id] → Belgeler',
+      steps: [
+        { title: 'Dosyayı açın', body: 'Adaylar sekmesinden adayın dosyasını açın ve Belgeler bölümüne inin.' },
+        { title: 'Belgeyi isteyin', body: 'Listede olmayan tür için "+ Talep et" seçin (ör. Diploma). Belge "Bekleniyor" olarak eklenir ve adayın Belgeler sekmesinde çıkar. Aynı türde bekleyen bir talep varsa ikinci kez istenemez.' },
+        { title: 'Aday yükler', body: 'Aday dosyayı kendi portalından yükler; durum "Yüklendi" olur.' },
+        { title: 'Önizleyin', body: 'Önizle ile dosyayı açın. PDF burada gösterilemezse yeni sekmede açın veya İndir’i kullanın. Her açılış erişim kaydına yazılır.' },
+        { title: 'Onaylayın veya yeniden isteyin', body: 'Durumu İnceleniyor veya Onaylandı yapın; dosya yokken bu iki durum seçilemez. Uygun değilse "Yeniden istendi" seçin, aday yeni dosya yükler. Belge silmek yalnız Üst Yönetimdedir.' },
+      ],
+      flow: ['+ Talep et', 'Aday yükler', 'Önizle', 'Onayla'],
+      mock: {
+        caption: 'Aday dosyasındaki belge satırının şeması.',
+        chrome: '/portal/candidates/[id]',
+        rows: [
+          { label: 'Tür', value: 'Diploma' },
+          { label: 'Durum', value: 'Bekleniyor → Yüklendi → Onaylandı' },
+          { label: 'İşlem', value: 'Önizle, İndir' },
+        ],
+      },
+      example: 'Demo Aday Bir için "+ Talep et" ile Diploma isteyin. Aday dosyayı yükleyince durum Yüklendi olur; önizleyip Onaylandı seçin. Dosya gelmeden önce Onaylandı listede seçilemez.',
     },
     'employer-request': {
       title: 'İşgücü talebi gönderme',
-      summary: 'Talep işveren portalında başlar. Personel onu Talepler altında görür.',
-      where: '/employer → Talepler',
+      summary: 'Talep işveren portalının Yeni talep sekmesinde başlar. Personel onu Talepler altında görür.',
+      where: '/employer → Yeni talep',
       steps: [
         { title: 'Giriş yapın', body: 'Şirket hesabıyla /employer adresini açın.' },
-        { title: 'Talepler sekmesini açın', body: 'Form bu sekmededir.' },
-        { title: 'İşi yazın', body: 'Tarım, inşaat veya ticaret seçin, sonra pozisyonları. Kişi sayısı, şehir, ücret, süre, deneyim ve dil ekleyin.' },
-        { title: 'Olanakları yanıtlayın', body: 'Konaklama ve yemek için ayrı ayrı evet veya hayır gerekir. İkisi yanıtlanmadan talep kaydedilmez.' },
-        { title: 'Gönderin', body: 'Talep listenizde ve personelin Talepler sekmesinde görünür.' },
+        { title: 'Yeni talep sekmesini açın', body: 'Form bu sekmededir. Gönderdiğiniz talepler Ana sayfada listelenir.' },
+        { title: 'İşi yazın', body: 'Sektörü seçin: İnşaat ve yapı, Tarım ve hayvancılık, Otelcilik ve gıda hizmetleri, İmalat ve sanayi, Tekstil ve hazır giyim, Lojistik ve taşımacılık, Depo ve perakende, Bakım ve sağlık hizmetleri, Temizlik ve güvenlik, Otomotiv ve teknik servis veya Ofis, mühendislik ve dış ticaret. Sonra pozisyonu seçin; kişi sayısı (1–500), şehir, süre, deneyim ve dil ekleyin.' },
+        { title: 'Maaş ve olanaklar', body: 'Aylık net maaşı yalnız rakamla yazın (ör. 1300) ve yanındaki listeden EUR veya USD seçin; tutar 0’dan büyük, en çok 100.000 olmalı. Konaklama ve yemek için ayrı ayrı evet veya hayır seçin.' },
+        { title: 'Gönderin', body: 'Eksik veya hatalı alan varsa altında hata yazar ve imleç o alana gider; düzeltip yeniden gönderin. Talep Ana sayfanızda ve personelin Talepler sekmesinde görünür.' },
       ],
-      flow: ['Talepler', 'Sektör ve koşullar', 'Olanaklar', 'Gönder'],
+      flow: ['Yeni talep', 'Sektör ve pozisyon', 'Maaş ve olanaklar', 'Gönder'],
       mock: {
         caption: 'İşgücü talep formunun şeması.',
-        chrome: '/employer · Talepler',
+        chrome: '/employer · Yeni talep',
         rows: [
-          { label: 'Sektör', value: 'Tarım, inşaat veya ticaret' },
-          { label: 'Pozisyon', value: 'Bir veya birden çok rol' },
+          { label: 'Sektör', value: 'Katalogdaki 11 sektör' },
+          { label: 'Maaş', value: 'Yalnız rakam · EUR veya USD' },
           { label: 'Olanaklar', value: 'Konaklama ve yemek' },
         ],
       },
+      example: 'DEMO Balkan Yapı DOO: İnşaat ve yapı → Kalıpçı, 2 kişi, 1300 EUR, konaklama evet. Maaşa "1300 euro" yazılırsa alanın altında rakam girin uyarısı çıkar; 100.001 yazılırsa sınır uyarısı çıkar.',
     },
     'employer-browse': {
       title: 'Adaylara göz atma',
-      summary: 'Süzgeçler şirketinize gösterilen kişileri daraltır. Satırdaki işlemler görüşme ve seçimdir.',
+      summary: 'Süzgeçler şirketinize sunulan kişileri daraltır. Satırdaki işlemler mülakat isteği ve karardır.',
       where: '/employer → Adaylar',
       steps: [
-        { title: 'Adaylar sekmesini açın', body: 'Sekme /employer üzerindedir.' },
+        { title: 'Adaylar sekmesini açın', body: 'Sekme /employer üzerindedir. Ana sayfadaki aday kartı da buraya götürür.' },
         { title: 'Süzün', body: 'Deneyim, meslek, sektör, ülke, dil veya vardiya kullanın. Tam liste için süzgeçleri temizleyin.' },
-        { title: 'Bir işlem seçin', body: 'Görüşme isteyin veya kişiyi seçildi işaretleyin. Sorumlu eklediyse satırda YouTube videosu görünür.' },
-        { title: 'Takip edin', body: 'Bu kişiler Görüşmeler ve Seçilenler altındadır. Seçimden sonra Süreç, Seyahat ve Çalışanlar devam eder.' },
+        { title: 'Bir işlem seçin', body: 'Mülakat isteyin ya da adayı seçin veya reddedin; kararınız Panova’ya iletilir. Sorumlu eklediyse satırda YouTube videosu görünür.' },
+        { title: 'Takip edin', body: 'Mülakatlar sekmesinde tarih, varsa toplantı bağlantısı ve teklifler (tutar para birimiyle) vardır. Sonra Seçtiğim adaylar, İşlem durumu, Seyahat ve Aktif çalışanlar gelir.' },
       ],
-      flow: ['Süz', 'Görüşme veya seç', 'Görüşmeler', 'Seçilenler'],
+      flow: ['Süz', 'Mülakat veya karar', 'Mülakatlar', 'Seçtiğim adaylar'],
       mock: {
         caption: 'Aday tarayıcısının şeması.',
         chrome: '/employer · Adaylar',
         rows: [
           { label: 'Süzgeçler', value: 'Deneyim, ülke, vardiya' },
           { label: 'Video', value: 'Sorumlu eklediyse' },
-          { label: 'İşlemler', value: 'Görüşme veya seçim' },
+          { label: 'İşlemler', value: 'Mülakat, seç veya reddet' },
         ],
       },
+      example: 'DEMO Balkan Yapı DOO, Kalıpçı talebine sunulan Demo Aday İki için mülakat ister. Mülakat Mülakatlar sekmesinde planlı görünür; toplantı bağlantısı eklenince satırda çıkar.',
     },
     'candidate-register': {
       title: 'Kayıt ve profil',
@@ -520,26 +642,27 @@ const tr: GuidesCopy = {
       where: '/candidate',
       steps: [
         { title: 'Kaydı açın', body: '/candidate üzerinde girişten kayda geçin.' },
-        { title: 'Bilgilerinizi yazın', body: 'Ad, pasaport numarası, telefon, e-posta, meslek ve sektör. En az 8 karakterlik bir şifre seçin.' },
+        { title: 'Bilgilerinizi yazın', body: 'Ad, uyruk, pasaport numarası, telefon, e-posta, meslek ve sektör; uyruk boş bırakılamaz. En az 8 karakterlik bir şifre seçin.' },
         { title: 'E-postayı doğrulayın', body: 'İletiyi açıp onaylayın, sonra aynı adresle giriş yapın. Google’ı yalnızca aynı adres ise kullanın.' },
-        { title: 'Profili ve belgeleri tamamlayın', body: 'Profilde iletişim ve acil durum kişisi vardır. Belgeler; pasaport taraması, sertifika, adli sicil, sağlık raporu ve apostil içindir. YouTube videoları sorumlu ekleyince görünür. Bu bağlantıları siz yapıştırmazsınız.' },
-        { title: 'Teklifleri okuyun', body: 'Panova bir teklif gönderince Teklifler listeler. Destek, ekibe yazdığınız yerdir.' },
+        { title: 'Profili ve belgeleri tamamlayın', body: 'Profilde iletişim ve acil durum kişisi vardır. Belgelerde pasaport, sertifika, adli sicil, sağlık raporu ve apostil yuvaları bulunur; personel CV, diploma veya fotoğraf gibi ek belge isterse o da listede çıkar. "Yeniden istendi" yazan belgeyi yeniden yükleyin. YouTube videolarını sorumlu ekler, siz yapıştırmazsınız.' },
+        { title: 'Teklifleri yanıtlayın', body: 'Teklifler tutarı para birimiyle (€ veya $) gösterir. Bekleyen teklifi kabul veya reddedin; yanıtınız Panova’ya ve işverene görünür. Destek, ekibe yazdığınız yerdir.' },
       ],
-      flow: ['Kayıt', 'E-postayı doğrula', 'Profil ve belgeler', 'Teklifler'],
+      flow: ['Kayıt', 'E-postayı doğrula', 'Profil ve belgeler', 'Teklif yanıtı'],
       mock: {
-        caption: 'Kayıt ve belge yuvalarının şeması.',
+        caption: 'Kayıt ve belge listesinin şeması.',
         chrome: '/candidate',
         rows: [
-          { label: 'Pasaport', value: 'Numaranız' },
-          { label: 'Belgeler', value: 'Beş yükleme yuvası' },
-          { label: 'Teklifler', value: 'Gönderilince' },
+          { label: 'Uyruk', value: 'Zorunlu' },
+          { label: 'Belgeler', value: 'Beş yuva ve istenen belgeler' },
+          { label: 'Teklifler', value: 'Kabul veya ret' },
         ],
       },
+      example: 'Demo Aday Bir’in belgelerinde pasaport ve CV "Bekleniyor"; CV personel tarafından istenmiştir. Aday dosyaları yükleyince durum "Yüklendi" olur, personel onaylayınca "Onaylandı".',
     },
   },
 };
 
-const sq: GuidesCopy = {
+const sq: LegacyGuidesCopy = {
   navLabel: 'Udhëzues',
   hubTitle: 'Udhëzuesit e portalit',
   hubLead: 'Një hartë se cili rol përdor cilin ekran, dhe hapa të shkurtër për punën që lejon kjo llogari.',
@@ -632,7 +755,6 @@ const sq: GuidesCopy = {
       summary: 'Kërkon punëtorë dhe shqyrton njerëzit që paraqet Panova.',
       screens: {
         home: { name: 'Kreu', does: 'Numrat e kërkesave, kandidatëve, intervistave dhe përzgjedhjeve tuaja.' },
-        demands: { name: 'Kërkesat', does: 'Formulari për një kërkesë të re pune, pastaj lista që dërguat.' },
         candidates: { name: 'Kandidatët', does: 'Filtroni njerëzit, kërkoni intervistë ose shënoni dikë të përzgjedhur. Video YouTube shfaqet kur një përgjegjës e ka shtuar.' },
         interviews: { name: 'Intervistat', does: 'Intervistat që kërkuat.' },
         selected: { name: 'Të përzgjedhurit', does: 'Njerëzit që i shënuat të përzgjedhur.' },
@@ -808,7 +930,7 @@ const sq: GuidesCopy = {
   },
 };
 
-const ar: GuidesCopy = {
+const ar: LegacyGuidesCopy = {
   navLabel: 'الأدلة',
   hubTitle: 'أدلة البوابة',
   hubLead: 'خريطة لمن يستخدم كل شاشة، وخطوات قصيرة للعمل المتاح لهذا الحساب.',
@@ -901,7 +1023,6 @@ const ar: GuidesCopy = {
       summary: 'يطلب عمالًا ويراجع الأشخاص الذين تعرضهم بانوفَا.',
       screens: {
         home: { name: 'الرئيسة', does: 'أعداد طلباتكم والمرشحين والمقابلات والاختيارات.' },
-        demands: { name: 'الطلبات', does: 'نموذج طلب عمالة جديد ثم القائمة التي أرسلتموها.' },
         candidates: { name: 'المرشحون', does: 'صفّوا الأشخاص واطلبوا مقابلة أو علّموا شخصًا مختارًا. يظهر فيديو يوتيوب إذا أضافه مسؤول.' },
         interviews: { name: 'المقابلات', does: 'المقابلات التي طلبتموها.' },
         selected: { name: 'المختارون', does: 'الأشخاص الذين علّمتموهم مختارين.' },
@@ -1077,7 +1198,7 @@ const ar: GuidesCopy = {
   },
 };
 
-const mk: GuidesCopy = {
+const mk: LegacyGuidesCopy = {
   navLabel: 'Водичи',
   hubTitle: 'Водичи за порталот',
   hubLead: 'Карта кој улога користи кој екран и кратки чекори за работата што ја дозволува оваа сметка.',
@@ -1170,7 +1291,6 @@ const mk: GuidesCopy = {
       summary: 'Бара работници и ги прегледува луѓето што ги претставува Panova.',
       screens: {
         home: { name: 'Почетна', does: 'Број на вашите барања, кандидати, интервјуа и избори.' },
-        demands: { name: 'Барања', does: 'Образец за ново барање за работна сила, потоа списокот што го испративте.' },
         candidates: { name: 'Кандидати', does: 'Филтрирајте луѓе, побарајте интервју или означете некого како избран. Видео од YouTube се појавува кога одговорник додал едно.' },
         interviews: { name: 'Интервјуа', does: 'Интервјуата што ги побаравте.' },
         selected: { name: 'Избрани', does: 'Луѓето што ги означивте како избрани.' },
@@ -1346,4 +1466,10 @@ const mk: GuidesCopy = {
   },
 };
 
-export const guidesCopy: Record<Language, GuidesCopy> = { tr, en, sq, ar, mk };
+export const guidesCopy: Record<Language, GuidesCopy> = {
+  tr,
+  en: withPendingTr(en, tr),
+  sq: withPendingTr(sq, tr),
+  ar: withPendingTr(ar, tr),
+  mk: withPendingTr(mk, tr),
+};

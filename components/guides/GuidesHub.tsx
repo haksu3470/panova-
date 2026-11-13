@@ -95,6 +95,12 @@ export default function GuidesHub({
                       </li>
                     ))}
                   </ol>
+                  {guide.example ? (
+                    <aside aria-label={copy.exampleLabel} className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+                      <p className="text-[11px] font-bold uppercase tracking-wide text-amber-900">{copy.exampleLabel}</p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-amber-950">{guide.example}</p>
+                    </aside>
+                  ) : null}
                 </div>
                 <div className="space-y-3 lg:col-span-2">
                   <h4 className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{copy.flowLabel}</h4>

@@ -33,6 +33,8 @@ export type GuideArticle = {
   steps: GuideStep[];
   flow: string[];
   mock: { caption: string; chrome: string; rows: { label: string; value: string }[] };
+  /** Short worked example (demo records only, no real people). */
+  example: string;
 };
 
 export type ScreenCopy = { name: string; does: string; limitedDoes?: string };
@@ -54,6 +56,8 @@ export type GuidesCopy = {
   stepsLabel: string;
   whereLabel: string;
   flowLabel: string;
+  /** Heading of the example box on every how-to. */
+  exampleLabel: string;
   loading: string;
   signedOutTitle: string;
   signedOutBody: string;
@@ -124,12 +128,30 @@ export const ROLE_CATALOG: RoleDef[] = [
       { id: 'overview', path: '/portal' },
     ],
   },
+  // finance and limited: tabsForStaffRole gives them overview and tasks only;
+  // the cards list exactly those two screens so the tabs stay the same.
+  {
+    id: 'finance',
+    audiences: ['staff'],
+    screens: [
+      { id: 'overview', path: '/portal' },
+      { id: 'tasks', path: '/portal' },
+    ],
+  },
+  {
+    id: 'limited',
+    audiences: ['staff'],
+    screens: [
+      { id: 'overview', path: '/portal' },
+      { id: 'tasks', path: '/portal' },
+    ],
+  },
   {
     id: 'employer',
     audiences: ['staff', 'employer'],
     screens: [
       { id: 'home', path: '/employer' },
-      { id: 'demands', path: '/employer' },
+      { id: 'newRequest', path: '/employer' },
       { id: 'candidates', path: '/employer' },
       { id: 'interviews', path: '/employer' },
       { id: 'selected', path: '/employer' },
@@ -158,6 +180,8 @@ export const GUIDE_CATALOG: GuideDef[] = [
   { id: 'staff-invite', audiences: ['upper_management'] },
   { id: 'dossier-review', audiences: ['staff'] },
   { id: 'matching-offers', audiences: ['staff'] },
+  { id: 'request-to-offer', audiences: ['staff'] },
+  { id: 'document-request', audiences: ['staff'] },
   { id: 'employer-request', audiences: ['staff', 'employer'] },
   { id: 'employer-browse', audiences: ['staff', 'employer'] },
   { id: 'candidate-register', audiences: ['staff', 'candidate'] },
@@ -169,6 +193,8 @@ export const GUIDE_ROUTES: Record<string, string> = {
   'staff-invite': '/portal',
   'dossier-review': '/portal/candidates/',
   'matching-offers': '/portal/requests/',
+  'request-to-offer': '/portal/requests/',
+  'document-request': '/portal/candidates/',
   'employer-request': '/employer',
   'employer-browse': '/employer',
   'candidate-register': '/candidate',
