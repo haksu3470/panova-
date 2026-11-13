@@ -388,6 +388,7 @@ export interface Translation {
   candStatusErrGeneric?: string;
   docApproveNeedsFile?: string;
   docNoFileWarning?: string;
+  travelNeedsFlightInfo?: string;
   videoIntroductionTitle?: string;
   openDemandFilesBtn?: string;
   taskGroupTarget?: string;
@@ -1088,6 +1089,7 @@ export const translations: Record<Language, Translation> = {
     candStatusErrGeneric: 'Aday durumu değiştirilemedi. Lütfen tekrar deneyin.',
     docApproveNeedsFile: 'Onaylamak için önce dosya yüklenmeli.',
     docNoFileWarning: 'Dosya yok: onaylı sayılmaz. Dosya yükleyin veya durumu değiştirin.',
+    travelNeedsFlightInfo: 'Önce uçuş bilgisi girin.',
     videoIntroductionTitle: 'Video tanıtımı',
     openDemandFilesBtn: 'Dosyaları Aç',
     taskGroupTarget: 'Hedef Ülke Ekibi',
@@ -1775,6 +1777,7 @@ export const translations: Record<Language, Translation> = {
     candStatusErrGeneric: 'The candidate status could not be changed. Please try again.',
     docApproveNeedsFile: 'Upload a file before approving.',
     docNoFileWarning: 'No file: not counted as approved. Upload a file or change the status.',
+    travelNeedsFlightInfo: 'Enter flight details first.',
     videoIntroductionTitle: 'Video introduction',
     openDemandFilesBtn: 'Open Files',
     taskGroupTarget: 'Target Country Team',
@@ -2462,6 +2465,7 @@ export const translations: Record<Language, Translation> = {
     candStatusErrGeneric: 'Statusi i kandidatit nuk u ndryshua. Ju lutemi provoni përsëri.',
     docApproveNeedsFile: 'Ngarkoni një skedar para se ta miratoni.',
     docNoFileWarning: 'Nuk ka skedar: nuk llogaritet si i miratuar. Ngarkoni një skedar ose ndryshoni statusin.',
+    travelNeedsFlightInfo: 'Fillimisht futni të dhënat e fluturimit.',
     videoIntroductionTitle: 'Prezantimi me video',
     openDemandFilesBtn: 'Hap Skedarët',
     taskGroupTarget: 'Ekipi i Vendit të Synuar',
@@ -3292,6 +3296,7 @@ export const translations: Record<Language, Translation> = {
     candStatusErrGeneric: 'تعذّر تغيير حالة المرشح. يُرجى المحاولة مرة أخرى.',
     docApproveNeedsFile: 'يجب رفع ملف قبل الموافقة.',
     docNoFileWarning: 'لا يوجد ملف: لا يُحتسب موافقًا عليه. ارفعوا ملفًا أو غيّروا الحالة.',
+    travelNeedsFlightInfo: 'أدخلوا معلومات الرحلة أولًا.',
     videoIntroductionTitle: 'التعريف بالفيديو',
     openDemandFilesBtn: 'فتح الملفات',
     taskGroupTarget: 'فريق البلد المستهدف',
@@ -3839,6 +3844,7 @@ export const translations: Record<Language, Translation> = {
     candStatusErrGeneric: 'Статусот на кандидатот не можеше да се промени. Обидете се повторно.',
     docApproveNeedsFile: 'Прво прикачете датотека за да одобрите.',
     docNoFileWarning: 'Нема датотека: не се смета за одобрено. Прикачете датотека или променете го статусот.',
+    travelNeedsFlightInfo: 'Прво внесете податоци за летот.',
     videoIntroductionTitle: 'Видео претставување',
     openDemandFilesBtn: 'Отвори досиеја',
     taskGroupTarget: 'Тим за целна земја',

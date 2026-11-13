@@ -208,6 +208,29 @@ export function travelView(row: TravelFields): TravelView {
   return { kind: 'flight', status: status === 'ticketed' || status === 'completed' ? status : null };
 }
 
+/** Travel statuses staff can pick by hand. */
+export const STAFF_TRAVEL_STATUSES = ['planned', 'ticketed', 'completed'] as const;
+export type StaffTravelStatus = (typeof STAFF_TRAVEL_STATUSES)[number];
+
+/**
+ * Staff screens, same rule as travelView: with no flight date, number or
+ * route and travel 'planned' (the column default), the status is shown as
+ * "not entered", never as planned. Display only; the stored value stays.
+ */
+export type StaffTravelDisplay = { kind: 'not_entered' } | { kind: 'status'; status: StaffTravelStatus | null };
+
+export function staffTravelDisplay(row: TravelFields): StaffTravelDisplay {
+  const view = travelView(row);
+  if (view.kind === 'not_entered') return { kind: 'not_entered' };
+  const status = (row.travel_status ?? '').trim();
+  return { kind: 'status', status: (STAFF_TRAVEL_STATUSES as readonly string[]).includes(status) ? (status as StaffTravelStatus) : null };
+}
+
+/** Ticketed and completed need flight details first; planned is always allowed. */
+export function canPickTravelStatus(status: string, row: TravelFields): boolean {
+  return status === 'planned' || hasFlightInfo(row);
+}
+
 const ISO_DAY = /^(\d{4}-\d{2}-\d{2})/;
 
 /** Local calendar day as YYYY-MM-DD. */

@@ -6,7 +6,8 @@ import { writeAudit } from '@/lib/audit';
 import DemoBadge from './DemoBadge';
 import { fill, portalUi } from '@/lib/portal-ui-copy';
 import { useSiteLanguage } from '@/lib/site-language';
-import { OFFICIAL_STEPS } from '@/lib/employerPlacements';
+import { OFFICIAL_STEPS, staffTravelDisplay, toTravelFields } from '@/lib/employerPlacements';
+import { translations } from '@/lib/dictionary';
 
 const STAGES = ['30', '60', '90'];
 
@@ -14,11 +15,14 @@ interface Props {
   candidateId: string;
   /** Called with the new official_process_status after a successful change. */
   onOfficialChange?: (value: string) => void;
+  /** Changes after the page saves the candidate, so the card reads the row again. */
+  refreshKey?: number;
 }
 
-export default function PlacementPanel({ candidateId, onOfficialChange }: Props) {
+export default function PlacementPanel({ candidateId, onOfficialChange, refreshKey = 0 }: Props) {
   const { currentLang } = useSiteLanguage('en');
   const ui = portalUi[currentLang];
+  const t = translations[currentLang] || translations.en;
 
   const [c, setC] = useState<any>(null);
   const [offer, setOffer] = useState<any>(null);
@@ -45,19 +49,24 @@ export default function PlacementPanel({ candidateId, onOfficialChange }: Props)
 
   useEffect(() => {
     load();
-  }, [candidateId]);
+  }, [candidateId, refreshKey]);
 
   if (!c) return null;
   const cur = c.official_process_status || 'not_started';
   const curIdx = OFFICIAL_STEPS.indexOf(cur);
 
-  const travelLabel = c.travel_status === 'planned'
-    ? `✈️ ${ui.travelPlanned}`
-    : c.travel_status === 'ticketed'
-      ? `🎟️ ${ui.travelTicketed}`
-      : c.travel_status === 'completed'
-        ? `✅ ${ui.travelDone}`
-        : (c.travel_status || '—');
+  // Same rule as the candidate card and the employer tabs: no flight details
+  // and travel 'planned' (the column default) reads as not entered.
+  const travel = staffTravelDisplay(toTravelFields(c));
+  const travelLabel = travel.kind === 'not_entered'
+    ? (t.plTravelNotEntered || '—')
+    : travel.status === 'planned'
+      ? `✈️ ${ui.travelPlanned}`
+      : travel.status === 'ticketed'
+        ? `🎟️ ${ui.travelTicketed}`
+        : travel.status === 'completed'
+          ? `✅ ${ui.travelDone}`
+          : (c.travel_status || '—');
 
   const setOfficial = async (value: string) => {
     setBusy(true); setError(''); setMsg('');

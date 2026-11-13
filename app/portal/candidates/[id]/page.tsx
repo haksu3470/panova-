@@ -16,6 +16,7 @@ import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { candidateService } from '@/lib/services/candidateService';
 import { canApproveDocument, defaultDocumentList, isApprovedWithoutFile } from '@/lib/candidateDocuments';
+import { canPickTravelStatus, hasFlightInfo, staffTravelDisplay, toTravelFields } from '@/lib/employerPlacements';
 import { User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Video, Trash2, Upload, Eye, X, Plus, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
@@ -82,6 +83,8 @@ function CandidateDetailPageInner() {
   const [videoUrl3, setVideoUrl3] = useState('');
 
   const [travelStatus, setTravelStatus] = useState('planned');
+  // Bumped after a save so the travel card on the right reads the row again.
+  const [placementRefresh, setPlacementRefresh] = useState(0);
   const [flightDate, setFlightDate] = useState('');
   const [flightNumber, setFlightNumber] = useState('');
   const [departureCity, setDepartureCity] = useState('');
@@ -115,6 +118,18 @@ function CandidateDetailPageInner() {
   const t = translations[currentLang] || translations.en;
   const ui = portalUi[currentLang];
   const isRtl = currentLang === 'ar';
+
+  // Same rule as the candidate's "Your process" card and the employer tabs
+  // (lib/employerPlacements): no flight details means "not entered".
+  const travelFields = toTravelFields({
+    travel_status: travelStatus,
+    flight_date: flightDate,
+    flight_number: flightNumber,
+    departure_city: departureCity,
+    arrival_city: arrivalCity,
+  });
+  const travelDisplay = staffTravelDisplay(travelFields);
+  const flightEntered = hasFlightInfo(travelFields);
   
   useEffect(() => {
     fetchCandidateDetail();
@@ -296,7 +311,6 @@ function CandidateDetailPageInner() {
       // certificate_no / issuing_body are no longer edited here and are not
       // sent, so the stored values stay as they are.
       documents_json: payloadDocumentsJson,
-      travel_status: travelStatus,
       flight_date: flightDate,
       flight_number: flightNumber,
       departure_city: departureCity,
@@ -304,6 +318,12 @@ function CandidateDetailPageInner() {
       pnr_code: pnrCode,
       accommodation_details: accommodationDetails,
     };
+
+    // travel_status is written only when staff changed it (an empty stored
+    // value is shown as 'planned', so that alone is not a change).
+    if (travelStatus !== (candidate?.travel_status || 'planned')) {
+      payload.travel_status = travelStatus;
+    }
 
     if (canEditVideo) {
       try {
@@ -324,6 +344,8 @@ function CandidateDetailPageInner() {
     setSaving(true);
     try {
       await candidateService.updateCandidateDetail(candidateId, payload);
+      setCandidate((prev: Record<string, unknown> | null) => (prev ? { ...prev, ...payload } : prev));
+      setPlacementRefresh((n) => n + 1);
 
       setSaving(false);
       alert(t.savedSuccess);
@@ -540,15 +562,25 @@ function CandidateDetailPageInner() {
                 <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
                   <PlaneTakeoff className="w-5 h-5 text-sky-600" /> {t.travelFlightLogistics}
                 </h3>
-                <select
-                  value={travelStatus}
-                  onChange={(e) => setTravelStatus(e.target.value)}
-                  className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase bg-sky-50 text-sky-900 border-sky-300 outline-none cursor-pointer w-fit"
-                >
-                  <option value="planned">✈️ {t.planned}</option>
-                  <option value="ticketed">🎟️ {t.ticketed}</option>
-                  <option value="completed">✅ {t.completed}</option>
-                </select>
+                <div className="flex flex-col items-start sm:items-end gap-1">
+                  <select
+                    value={travelStatus}
+                    onChange={(e) => {
+                      if (canPickTravelStatus(e.target.value, travelFields)) setTravelStatus(e.target.value);
+                    }}
+                    aria-label={ui.travel}
+                    aria-describedby={flightEntered ? undefined : 'travel-needs-flight-hint'}
+                    className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase bg-sky-50 text-sky-900 border-sky-300 outline-none cursor-pointer w-fit"
+                  >
+                    {/* Shown as "not entered" while there are no flight details (the stored value stays 'planned'). */}
+                    <option value="planned">{travelDisplay.kind === 'not_entered' ? `— ${t.plTravelNotEntered}` : `✈️ ${t.planned}`}</option>
+                    <option value="ticketed" disabled={!canPickTravelStatus('ticketed', travelFields)}>🎟️ {t.ticketed}</option>
+                    <option value="completed" disabled={!canPickTravelStatus('completed', travelFields)}>✅ {t.completed}</option>
+                  </select>
+                  {!flightEntered ? (
+                    <span id="travel-needs-flight-hint" className="text-[11px] font-semibold text-slate-600">{t.travelNeedsFlightInfo}</span>
+                  ) : null}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
@@ -728,8 +760,12 @@ function CandidateDetailPageInner() {
             {showIO && candidate && <InterviewOfferPanel candidate={{ ...candidate, id: candidateId }} onClose={() => setShowIO(false)} />}
             <PlacementPanel
               candidateId={candidateId}
+              refreshKey={placementRefresh}
               onOfficialChange={(value) => {
-                setCandidate((prev: Record<string, unknown> | null) => (prev ? { ...prev, official_process_status: value } : prev));
+                // "Started work" also stores travel_status = completed (PlacementPanel).
+                const travelPatch = value === 'started_work' ? { travel_status: 'completed' } : {};
+                if (value === 'started_work') setTravelStatus('completed');
+                setCandidate((prev: Record<string, unknown> | null) => (prev ? { ...prev, official_process_status: value, ...travelPatch } : prev));
                 refreshStatus();
               }}
             />
