@@ -5,6 +5,7 @@ import DocumentStatusPanel from '@/components/portal/DocumentStatusPanel';
 import CandidateYouTubeEditor from '@/components/portal/CandidateYouTubeEditor';
 import InterviewOfferPanel from '@/components/portal/InterviewOfferPanel';
 import PlacementPanel from '@/components/portal/PlacementPanel';
+import OfficialProcessBadge from '@/components/portal/OfficialProcessBadge';
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -18,7 +19,7 @@ import { normalizeReferralCode } from '@/lib/referralCode';
 import { ReferralCodeChip } from '@/components/portal/ReferralCodeChip';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
-import { candidatePlaceLabel, candidateProfessionLabel } from '@/lib/candidateLabels';
+import { candidateDocumentTitle, candidatePlaceLabel, candidateProfessionLabel } from '@/lib/candidateLabels';
 import {
   YouTubeUrlError,
   canManageCandidateVideo,
@@ -572,7 +573,7 @@ function CandidateDetailPageInner() {
                       <div className="flex items-center gap-3">
                         <FileText className="w-5 h-5 text-indigo-600 shrink-0" />
                         <div>
-                          <div className="font-extrabold text-slate-900">{({ '1': t.docPassportScan, '2': t.docProfessionalCert, '3': t.docCriminalRecord, '4': t.docHealthReport, '5': t.docApostille } as Record<string, string | undefined>)[doc.id] || doc.name}</div>
+                          <div className="font-extrabold text-slate-900">{candidateDocumentTitle(doc, t)}</div>
                           {doc.file_name && <div className="text-[11px] text-slate-600 font-medium truncate max-w-[200px]">{t.file}: {doc.file_name}</div>}
                         </div>
                       </div>
@@ -597,7 +598,7 @@ function CandidateDetailPageInner() {
 
                     <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs">
                       {doc.file_url ? (
-                        <button type="button" onClick={() => setPreviewDoc({ name: doc.name, url: doc.file_url! })} className="text-emerald-800 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer">
+                        <button type="button" onClick={() => setPreviewDoc({ name: candidateDocumentTitle(doc, t), url: doc.file_url! })} className="text-emerald-800 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer">
                           <Eye className="w-3.5 h-3.5" /> {t.preview}
                         </button>
                       ) : <span className="text-muted-foreground font-medium italic">{t.noFileUploaded}</span>}
@@ -681,6 +682,11 @@ function CandidateDetailPageInner() {
                 <option value="visa_processing" className="bg-white text-slate-900">🟣 {t.visaProcessingStatus}</option>
                 <option value="approved" className="bg-white text-slate-900">🟢 {t.approvedStatus}</option>
               </select>
+              <p className="text-xs sm:text-sm font-semibold text-slate-900" aria-live="polite">
+                {t.officialProcessLabel}:{' '}
+                <OfficialProcessBadge status={candidate?.official_process_status} steps={ui.steps} stoppedLabel={t.plProcessStopped || ui.steps.rejected} />
+              </p>
+              <p className="text-[11px] text-slate-600 font-medium">{t.officialProcessHint}</p>
             </div>
 
             <DocumentStatusPanel candidateId={candidateId} />
@@ -692,7 +698,10 @@ function CandidateDetailPageInner() {
               <button onClick={() => setShowIO(true)} className="text-xs font-bold px-4 py-2 rounded-lg bg-amber-800 text-white cursor-pointer hover:bg-amber-900 transition shadow">{ui.docOpen}</button>
             </div>
             {showIO && candidate && <InterviewOfferPanel candidate={{ ...candidate, id: candidateId }} onClose={() => setShowIO(false)} />}
-            <PlacementPanel candidateId={candidateId} />
+            <PlacementPanel
+              candidateId={candidateId}
+              onOfficialChange={(value) => setCandidate((prev: Record<string, unknown> | null) => (prev ? { ...prev, official_process_status: value } : prev))}
+            />
 
             {/* Süreçten Çıkış Paneli */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border border-amber-200 shadow-sm space-y-3">

@@ -13,7 +13,75 @@ import {
   toPlacement,
   toPlacements,
   travelView,
+  acceptedOfferStartDate,
+  officialProcessText,
+  officialProcessView,
+  toTravelFields,
 } from './employerPlacements.ts';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { portalUi } from './portal-ui-copy.ts';
+import { translations } from './dictionary.ts';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+test('the official process view numbers the 8 shared steps and flags a stop', () => {
+  assert.deepEqual(officialProcessView('ready_to_travel'), { kind: 'step', step: 'ready_to_travel', number: 7, total: 8 });
+  assert.deepEqual(officialProcessView(''), { kind: 'step', step: 'not_started', number: 1, total: 8 });
+  assert.deepEqual(officialProcessView(null), { kind: 'step', step: 'not_started', number: 1, total: 8 });
+  assert.deepEqual(officialProcessView('started_work'), { kind: 'step', step: 'started_work', number: 8, total: 8 });
+  assert.deepEqual(officialProcessView('rejected'), { kind: 'stopped' });
+  assert.deepEqual(officialProcessView(' odd '), { kind: 'unknown', raw: 'odd' });
+  const steps = portalUi.tr.steps;
+  assert.equal(officialProcessText('ready_to_travel', steps, 'Süreç durduruldu'), 'Seyahate hazır · 7/8');
+  assert.equal(officialProcessText('rejected', steps, 'Süreç durduruldu'), 'Süreç durduruldu');
+  assert.equal(officialProcessText('odd', steps, 'x'), 'odd');
+});
+
+test('every language labels all 8 steps and the stop; the step list exists once', () => {
+  for (const ui of Object.values(portalUi)) {
+    for (const step of [...OFFICIAL_STEPS, 'rejected']) assert.ok(ui.steps[step]?.trim(), step);
+  }
+  const panel = readFileSync(join(ROOT, 'components/portal/PlacementPanel.tsx'), 'utf8');
+  assert.equal(panel.includes("'documents_collecting'"), false, 'PlacementPanel must import OFFICIAL_STEPS');
+  assert.equal(panel.includes("from '@/lib/employerPlacements'"), true);
+});
+
+test('accepted offer start date: latest accepted offer with a date, else null', () => {
+  assert.equal(acceptedOfferStartDate([]), null);
+  assert.equal(acceptedOfferStartDate(null), null);
+  assert.equal(acceptedOfferStartDate([{ status: 'pending', start_date: '2027-01-01' }]), null);
+  assert.equal(acceptedOfferStartDate([
+    { status: 'accepted', start_date: '2027-02-01', created_at: '2026-10-01' },
+    { status: 'accepted', start_date: '2027-03-01', created_at: '2026-11-01' },
+    { status: 'accepted', start_date: '', created_at: '2026-12-01' },
+  ]), '2027-03-01');
+});
+
+test('the candidate travel view reuses travelView and drops PNR and accommodation', () => {
+  const own = toTravelFields({ id: 'c', travel_status: 'planned', flight_date: null, pnr_code: 'ABC', accommodation_details: 'Otel', passport_number: 'X' });
+  assert.deepEqual(Object.keys(own).sort(), ['arrival_city', 'departure_city', 'flight_date', 'flight_number', 'travel_status']);
+  assert.deepEqual(travelView(own), { kind: 'not_entered' });
+  assert.deepEqual(travelView(toTravelFields({ travel_status: 'ticketed', flight_number: 'TK1' })), { kind: 'flight', status: 'ticketed' });
+  const card = readFileSync(join(ROOT, 'components/candidate/CandidateProcessCard.tsx'), 'utf8');
+  assert.equal(/pnr_code|accommodation_details|\.pnr|accommodation/.test(card.replace(/^\/\/.*$/gm, '')), false);
+  assert.equal(card.includes('travelView('), true);
+  assert.equal(card.includes('OFFICIAL_STEPS'), true);
+});
+
+test('new process texts exist in all five languages', () => {
+  const keys = ['officialProcessLabel', 'officialProcessHint', 'yourProcessTitle', 'processNotStartedYet', 'processStageLabel', 'startDateNotSet', 'processInfoUnavailable', 'travelInfoLabel'] as const;
+  for (const lang of ['tr', 'en', 'sq', 'ar', 'mk'] as const) {
+    for (const key of keys) assert.ok(translations[lang][key]?.trim(), `${lang}.${key}`);
+    assert.notEqual(translations[lang].colVisaStatus, undefined);
+  }
+  assert.equal(translations.tr.colVisaStatus, 'Aday durumu');
+  assert.equal(translations.tr.candidateStatus, 'Aday durumu');
+  assert.equal(translations.en.colVisaStatus, 'Candidate status');
+  assert.notEqual(translations.sq.officialProcessHint, translations.en.officialProcessHint);
+  assert.notEqual(translations.ar.yourProcessTitle, translations.en.yourProcessTitle);
+});
 
 const base = {
   request_id: 'r1', request_position_title: 'Kalıpçı', match_id: 'm1', candidate_id: 'c1',

@@ -6,25 +6,17 @@ import { writeAudit } from '@/lib/audit';
 import DemoBadge from './DemoBadge';
 import { fill, portalUi } from '@/lib/portal-ui-copy';
 import { useSiteLanguage } from '@/lib/site-language';
-
-export const OFFICIAL_STEPS = [
-  'not_started',
-  'documents_collecting',
-  'work_permit_applied',
-  'work_permit_approved',
-  'visa_applied',
-  'visa_approved',
-  'ready_to_travel',
-  'started_work',
-] as const;
+import { OFFICIAL_STEPS } from '@/lib/employerPlacements';
 
 const STAGES = ['30', '60', '90'];
 
 interface Props {
   candidateId: string;
+  /** Called with the new official_process_status after a successful change. */
+  onOfficialChange?: (value: string) => void;
 }
 
-export default function PlacementPanel({ candidateId }: Props) {
+export default function PlacementPanel({ candidateId, onOfficialChange }: Props) {
   const { currentLang } = useSiteLanguage('en');
   const ui = portalUi[currentLang];
 
@@ -76,6 +68,7 @@ export default function PlacementPanel({ candidateId }: Props) {
     else {
       await writeAudit(`${ui.officialTitle}: ${c.full_name} → ${ui.steps[value] || value}`, 'candidate', candidateId, { official_process_status: value });
       setMsg(ui.officialUpdated);
+      onOfficialChange?.(value);
     }
     await load(); setBusy(false);
   };

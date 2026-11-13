@@ -1,4 +1,5 @@
 import type { Language } from './dictionary';
+import { officialProcessText } from './employerPlacements';
 import { offerAmount, offerCurrency } from './offers';
 import { localizeCatalogTitle, professionLabel } from './professions';
 
@@ -69,18 +70,47 @@ function professionCell(value: unknown, lang: Language): string {
   return professionLabel(raw, lang) ?? raw;
 }
 
-export function candidateExportRows(rows: readonly Record<string, unknown>[], lang: Language = 'tr'): Record<string, unknown>[] {
-  return rows.map((row) => ({
-    id: row.id ?? '',
-    full_name: row.full_name ?? '',
-    nationality: row.nationality ?? row.country ?? '',
-    profession: professionCell(row.profession, lang),
-    sector: row.sector ?? '',
-    status: row.status ?? '',
-    email: row.email ?? '',
-    phone: row.phone ?? '',
-    is_demo: row.is_demo === true,
-  }));
+/**
+ * Column names and labels for the two status columns of the candidate export.
+ * "Aday durumu" is job_candidates.status (the staff's assessment);
+ * "Resmî süreç" is official_process_status as "<step> · n/8".
+ */
+export type CandidateExportCopy = {
+  candidateStatus: string;
+  officialProcess: string;
+  statusLabels: Record<string, string>;
+  steps: Record<string, string>;
+  stopped: string;
+};
+
+const DEFAULT_CANDIDATE_EXPORT_COPY: CandidateExportCopy = {
+  candidateStatus: 'candidate_status',
+  officialProcess: 'official_process',
+  statusLabels: {},
+  steps: {},
+  stopped: 'rejected',
+};
+
+export function candidateExportRows(
+  rows: readonly Record<string, unknown>[],
+  lang: Language = 'tr',
+  copy: CandidateExportCopy = DEFAULT_CANDIDATE_EXPORT_COPY,
+): Record<string, unknown>[] {
+  return rows.map((row) => {
+    const status = text(row.status).trim();
+    return {
+      id: row.id ?? '',
+      full_name: row.full_name ?? '',
+      nationality: row.nationality ?? row.country ?? '',
+      profession: professionCell(row.profession, lang),
+      sector: row.sector ?? '',
+      [copy.candidateStatus]: copy.statusLabels[status] || status,
+      [copy.officialProcess]: officialProcessText(text(row.official_process_status), copy.steps, copy.stopped),
+      email: row.email ?? '',
+      phone: row.phone ?? '',
+      is_demo: row.is_demo === true,
+    };
+  });
 }
 
 export function employerExportRows(rows: readonly Record<string, unknown>[]): Record<string, unknown>[] {

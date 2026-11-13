@@ -117,6 +117,37 @@ export function candidateProfessionLabel(
   return professionLabel(raw, lang) ?? raw;
 }
 
+/** The five standard document slots ('1'..'5') and their dictionary keys. */
+const DOCUMENT_TITLE_KEY = {
+  '1': 'docPassportScan',
+  '2': 'docProfessionalCert',
+  '3': 'docCriminalRecord',
+  '4': 'docHealthReport',
+  '5': 'docApostille',
+} as const satisfies Record<string, keyof Translation>;
+
+export type DocumentTitleCopy = Pick<Translation, (typeof DOCUMENT_TITLE_KEY)[keyof typeof DOCUMENT_TITLE_KEY]>;
+
+/**
+ * Document name in the active language, by slot number ('1'..'5'; `slot`
+ * first, then `id`). The stored name is kept for documents added by hand
+ * (any other number), because it was typed in one language only.
+ */
+export function candidateDocumentTitle(
+  doc: { id?: unknown; slot?: unknown; name?: unknown } | null | undefined,
+  t: DocumentTitleCopy,
+): string {
+  const stored = typeof doc?.name === 'string' ? doc.name.trim() : '';
+  for (const value of [doc?.slot, doc?.id]) {
+    const code = value == null ? '' : String(value).trim();
+    if (code in DOCUMENT_TITLE_KEY) {
+      const label = t[DOCUMENT_TITLE_KEY[code as keyof typeof DOCUMENT_TITLE_KEY]];
+      if (typeof label === 'string' && label.trim()) return label;
+    }
+  }
+  return stored;
+}
+
 export function candidatePlaceLabel(
   nationality: string | null | undefined,
   country: string | null | undefined,

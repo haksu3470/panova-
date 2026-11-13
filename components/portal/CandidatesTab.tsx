@@ -9,6 +9,7 @@ import { canonicalNationality, sameNationality } from '@/lib/registrationCountri
 import { candidateExportRows } from '@/lib/exportLists';
 import ListExportBar from './ListExportBar';
 import DeleteRecordButton from './DeleteRecordButton';
+import OfficialProcessBadge from './OfficialProcessBadge';
 import { toLanguage } from '@/lib/europeanCountries';
 import { supabase } from '@/lib/supabase';
 import {
@@ -172,7 +173,18 @@ export default function CandidatesTab({
           <ListExportBar
             filename="candidates"
             title={t.candidatesTab || 'Candidates'}
-            rows={candidateExportRows(filteredCandidates).map((row) => ({
+            rows={candidateExportRows(filteredCandidates, lang, {
+              candidateStatus: t.colVisaStatus || 'candidate_status',
+              officialProcess: t.officialProcessLabel || 'official_process',
+              statusLabels: {
+                pending: t.pendingStatus || 'pending',
+                reviewing: t.reviewingStatus || 'reviewing',
+                visa_processing: t.visaProcessingStatus || 'visa_processing',
+                approved: t.approvedStatus || 'approved',
+              },
+              steps: ui.steps,
+              stopped: t.plProcessStopped || ui.steps.rejected,
+            }).map((row) => ({
               ...row,
               profession: candidateProfessionLabel(String(row.profession ?? ''), '', lang),
             }))}
@@ -397,6 +409,7 @@ export default function CandidatesTab({
                 <th className="p-4">{t.colProfSector}</th>
                 <th className="p-4">🛡️ {t.assigneeText}</th>
                 <th className="p-4">{t.colVisaStatus}</th>
+                <th className="p-4">{t.officialProcessLabel}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -471,6 +484,9 @@ export default function CandidatesTab({
                         <option value="visa_processing" className="text-slate-900 bg-white">🟣 {t.visaProcessingStatus}</option>
                         <option value="approved" className="text-slate-900 bg-white">🟢 {t.approvedStatus}</option>
                       </select>
+                    </td>
+                    <td className="p-4">
+                      <OfficialProcessBadge status={candidate.official_process_status} steps={ui.steps} stoppedLabel={t.plProcessStopped || ui.steps.rejected} />
                     </td>
                   </tr>
                 );

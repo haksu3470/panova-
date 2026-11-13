@@ -10,6 +10,7 @@ import { portalUi } from './portal-ui-copy.ts';
 await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.url);
 
 const {
+  candidateDocumentTitle,
   candidateFilterLabels,
   candidatePassportLabel,
   candidatePlaceLabel,
@@ -110,4 +111,35 @@ test('the candidates tab no longer hardcodes English sector, country, or refresh
   assert.equal(source.includes('candidateSectorLabel'), true);
   assert.equal(source.includes('candidateFilterLabels'), true);
   assert.equal(source.includes('ui.formSectors.map'), true);
+});
+
+test('document names follow the slot number in every language; hand-added documents keep their name', () => {
+  const langs = Object.keys(translations) as Language[];
+  for (const lang of langs) {
+    const t = translations[lang];
+    assert.equal(candidateDocumentTitle({ id: '1', name: 'Pasaport Taraması' }, t), t.docPassportScan, lang);
+    assert.equal(candidateDocumentTitle({ id: '2', name: 'Professional Certificate' }, t), t.docProfessionalCert, lang);
+    assert.equal(candidateDocumentTitle({ id: '3', name: 'Criminal Record' }, t), t.docCriminalRecord, lang);
+    assert.equal(candidateDocumentTitle({ id: '4', name: 'Health Report' }, t), t.docHealthReport, lang);
+    assert.equal(candidateDocumentTitle({ id: '5', name: 'e-Apostille' }, t), t.docApostille, lang);
+    // A table row has a uuid id; the slot number decides.
+    assert.equal(candidateDocumentTitle({ id: '7c9e6679-7425-40de-944b-e07fc1f90ae7', slot: '3', name: 'x' }, t), t.docCriminalRecord, lang);
+    assert.equal(candidateDocumentTitle({ id: 6, name: 'Diploma (elle eklendi)' }, t), 'Diploma (elle eklendi)', lang);
+    assert.equal(candidateDocumentTitle({ id: 'extra-1', name: '  Referans mektubu ' }, t), 'Referans mektubu', lang);
+  }
+  assert.equal(candidateDocumentTitle({ id: '2', name: 'Professional Certificate' }, translations.mk), 'Професионален сертификат');
+  assert.equal(candidateDocumentTitle({ id: 2, name: 'x' }, translations.tr), 'Mesleki Sertifika');
+  assert.equal(candidateDocumentTitle(null, translations.tr), '');
+  assert.equal(candidateDocumentTitle({ id: '9' }, translations.tr), '');
+});
+
+test('the candidate page and the staff page both use the shared document title helper', () => {
+  const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const candidatePage = readFileSync(join(root, 'app/candidate/page.tsx'), 'utf8');
+  const staffPage = readFileSync(join(root, 'app/portal/candidates/[id]/page.tsx'), 'utf8');
+  assert.equal(candidatePage.includes('candidateDocumentTitle('), true);
+  assert.equal(staffPage.includes('candidateDocumentTitle('), true);
+  assert.equal(candidatePage.includes('docTitlesByLang'), false);
+  assert.equal(candidatePage.includes('<strong>{doc.name}</strong>'), false);
+  assert.equal(staffPage.includes("'1': t.docPassportScan"), false);
 });
