@@ -98,18 +98,25 @@ export const EMPTY_EMPLOYER_CANDIDATE_FILTERS: EmployerCandidateFilters = {
   shift: 'any',
 };
 
+// The 11 catalog sectors (lib/professions.ts SECTORS, same order), then the
+// two old codes 'trade' and 'hr', kept only so older rows still show a label.
 const SECTOR_LABEL_KEY: Record<string, keyof Translation> = {
-  agriculture: 'sectorAgriculture',
   construction: 'sectorConstruction',
+  agriculture: 'sectorAgriculture',
+  hospitality: 'sectorHospitality',
+  manufacturing: 'sectorManufacturing',
+  textile: 'sectorTextile',
+  logistics: 'sectorLogistics',
+  warehouse_retail: 'sectorWarehouseRetail',
+  care: 'sectorCare',
+  cleaning_security: 'sectorCleaningSecurity',
+  automotive: 'sectorAutomotive',
+  office_engineering: 'sectorOfficeEngineering',
   trade: 'sectorTrade',
   hr: 'sectorHR',
-  hospitality: 'sectorHospitality',
-  logistics: 'sectorLogistics',
-  manufacturing: 'sectorManufacturing',
-  care: 'sectorCare',
 };
 
-/** Stable sector codes used by candidate and employer filters. */
+/** Stable sector codes used by candidate and employer filters (catalog sectors plus the two old codes). */
 export const SECTOR_FILTER_CODES = Object.keys(SECTOR_LABEL_KEY);
 
 export function normalizeFilterText(value: string | null | undefined): string {

@@ -214,8 +214,10 @@ test('browse mapping drops identity columns and keeps filter fields', () => {
   assert.equal('passport_number' in mapped, false);
   assert.equal('phone' in mapped, false);
   assert.equal('email' in mapped, false);
-  assert.equal(sectorFilterLabel('hospitality', translations.en), 'Tourism & Hospitality');
-  assert.equal(sectorFilterLabel('logistics', translations.mk), 'Логистика');
+  assert.equal(sectorFilterLabel('hospitality', translations.en), 'Hospitality and food services');
+  assert.equal(sectorFilterLabel('logistics', translations.mk), 'Логистика и транспорт');
+  assert.equal(sectorFilterLabel('cleaning_security', translations.tr), 'Temizlik ve güvenlik');
+  assert.equal(sectorFilterLabel('trade', translations.tr), 'Dış Ticaret ve Lojistik');
   assert.equal(sectorFilterLabel('custom-trade', translations.tr), 'custom-trade');
 });
 

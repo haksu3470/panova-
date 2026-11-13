@@ -56,11 +56,13 @@ test('candidate sector labels match the register form, including uppercase codes
     assert.ok(choices.some((item) => item.value === 'hr'));
     assert.ok(choices.some((item) => item.value === 'trade'));
   }
-  assert.equal(candidateSectorLabel('CONSTRUCTION', portalUi.mk, translations.mk), 'Градежништво');
-  assert.equal(candidateSectorLabel('HOSPITALITY', portalUi.tr, translations.tr), 'Turizm ve otelcilik');
-  assert.equal(candidateSectorLabel('HOSPITALITY', portalUi.ar, translations.ar), 'السياحة والفنادق');
-  assert.equal(candidateSectorLabel('CONSTRUCTION', portalUi.sq, translations.sq), 'Ndërtim');
-  assert.equal(candidateSectorLabel('construction', portalUi.en, translations.en), 'Construction');
+  assert.equal(candidateSectorLabel('CONSTRUCTION', portalUi.mk, translations.mk), 'Градежништво и објекти');
+  assert.equal(candidateSectorLabel('Turizm ve otelcilik', portalUi.en, translations.en), 'Hospitality and food services');
+  assert.equal(candidateSectorLabel('textile', portalUi.sq, translations.sq), 'Tekstil dhe konfeksione');
+  assert.equal(candidateSectorLabel('HOSPITALITY', portalUi.tr, translations.tr), 'Otelcilik ve gıda hizmetleri');
+  assert.equal(candidateSectorLabel('HOSPITALITY', portalUi.ar, translations.ar), 'الضيافة والخدمات الغذائية');
+  assert.equal(candidateSectorLabel('CONSTRUCTION', portalUi.sq, translations.sq), 'Ndërtim dhe objekte');
+  assert.equal(candidateSectorLabel('construction', portalUi.en, translations.en), 'Construction and building');
   assert.equal(candidateSectorLabel('hr', portalUi.mk, translations.mk), 'Човечки ресурси');
   assert.equal(candidateSectorLabel('trade', portalUi.en, translations.en), 'Foreign Trade & Logistics');
   assert.equal(candidateSectorLabel('custom workshop', portalUi.mk, translations.mk), 'custom workshop');
