@@ -7,6 +7,7 @@ import InterviewOfferPanel from '@/components/portal/InterviewOfferPanel';
 import PlacementPanel from '@/components/portal/PlacementPanel';
 import OfficialProcessBadge from '@/components/portal/OfficialProcessBadge';
 import CandidateStatusControl from '@/components/portal/CandidateStatusControl';
+import DocumentPreviewModal from '@/components/portal/DocumentPreviewModal';
 import { useStaffRole } from '@/components/portal/useStaffRole';
 import { canUpdateRequestStatus } from '@/lib/staffAccess';
 import type { CandidateStatusErrorKey } from '@/lib/candidateStatusChange';
@@ -17,7 +18,7 @@ import { supabase } from '@/lib/supabase';
 import { candidateService } from '@/lib/services/candidateService';
 import { canApproveDocument, defaultDocumentList, isApprovedWithoutFile } from '@/lib/candidateDocuments';
 import { canPickTravelStatus, hasFlightInfo, staffTravelDisplay, toTravelFields } from '@/lib/employerPlacements';
-import { User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Video, Trash2, Upload, Eye, X, Plus, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert } from 'lucide-react';
+import { User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Video, Trash2, Upload, Eye, Plus, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
 import { portalUi } from '@/lib/portal-ui-copy';
@@ -108,7 +109,8 @@ function CandidateDetailPageInner() {
       .then(({ count }) => setHasTableDocs((count ?? 0) > 0));
   }, [candidateId]);
 
-  const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
+  // file_url may be a private storage reference; DocumentPreviewModal signs it.
+  const [previewDoc, setPreviewDoc] = useState<{ key: string; name: string; fileUrl: string; fileName?: string; documentId?: string } | null>(null);
   const [canEditVideo, setCanEditVideo] = useState(false);
 
   const [notifTitle, setNotifTitle] = useState('');
@@ -667,7 +669,7 @@ function CandidateDetailPageInner() {
 
                     <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs">
                       {doc.file_url ? (
-                        <button type="button" onClick={() => setPreviewDoc({ name: candidateDocumentTitle(doc, t), url: doc.file_url! })} className="text-emerald-800 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer">
+                        <button type="button" onClick={() => setPreviewDoc({ key: `${doc.id}:${Date.now()}`, name: candidateDocumentTitle(doc, t), fileUrl: doc.file_url!, fileName: doc.file_name, documentId: doc.id })} className="text-emerald-800 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer">
                           <Eye className="w-3.5 h-3.5" /> {t.preview}
                         </button>
                       ) : <span className="text-muted-foreground font-medium italic">{t.noFileUploaded}</span>}
@@ -846,17 +848,15 @@ function CandidateDetailPageInner() {
 
       {/* Belge Önizleme Modal */}
       {previewDoc && (
-        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-            <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
-              <h3 className="font-bold text-sm">{previewDoc.name}</h3>
-              <button onClick={() => setPreviewDoc(null)} className="p-1.5 bg-slate-800 rounded-full text-on-dark-muted cursor-pointer hover:bg-slate-700"><X className="w-5 h-5" /></button>
-            </div>
-            <div className="p-4 flex-1 overflow-auto flex justify-center items-center bg-slate-100">
-              <iframe src={previewDoc.url} className="w-full h-[70vh] rounded-xl border bg-white" title={t.preview} />
-            </div>
-          </div>
-        </div>
+        <DocumentPreviewModal
+          key={previewDoc.key}
+          t={t}
+          name={previewDoc.name}
+          fileUrl={previewDoc.fileUrl}
+          fileName={previewDoc.fileName}
+          documentId={previewDoc.documentId}
+          onClose={() => setPreviewDoc(null)}
+        />
       )}
 
     </div>

@@ -389,6 +389,13 @@ export interface Translation {
   docApproveNeedsFile?: string;
   docNoFileWarning?: string;
   travelNeedsFlightInfo?: string;
+  docPreviewFailed?: string;
+  docPreviewErrAccess?: string;
+  docPreviewErrPath?: string;
+  docPreviewErrGeneric?: string;
+  docPreviewUnsupported?: string;
+  docOpenNewTab?: string;
+  docPreviewClose?: string;
   videoIntroductionTitle?: string;
   openDemandFilesBtn?: string;
   taskGroupTarget?: string;
@@ -1090,6 +1097,13 @@ export const translations: Record<Language, Translation> = {
     docApproveNeedsFile: 'Onaylamak için önce dosya yüklenmeli.',
     docNoFileWarning: 'Dosya yok: onaylı sayılmaz. Dosya yükleyin veya durumu değiştirin.',
     travelNeedsFlightInfo: 'Önce uçuş bilgisi girin.',
+    docPreviewFailed: 'Önizleme açılamadı',
+    docPreviewErrAccess: 'Güvenli bağlantı alınamadı: bu belgeyi görme yetkiniz yok ya da dosya bulunamadı.',
+    docPreviewErrPath: 'Dosya adresi geçersiz.',
+    docPreviewErrGeneric: 'Güvenli bağlantı oluşturulamadı. Lütfen tekrar deneyin.',
+    docPreviewUnsupported: 'Bu dosya türü için önizleme desteklenmiyor.',
+    docOpenNewTab: 'Yeni sekmede aç / indir',
+    docPreviewClose: 'Önizlemeyi kapat',
     videoIntroductionTitle: 'Video tanıtımı',
     openDemandFilesBtn: 'Dosyaları Aç',
     taskGroupTarget: 'Hedef Ülke Ekibi',
@@ -1778,6 +1792,13 @@ export const translations: Record<Language, Translation> = {
     docApproveNeedsFile: 'Upload a file before approving.',
     docNoFileWarning: 'No file: not counted as approved. Upload a file or change the status.',
     travelNeedsFlightInfo: 'Enter flight details first.',
+    docPreviewFailed: 'Preview could not be opened',
+    docPreviewErrAccess: 'No secure link: you cannot view this document, or the file was not found.',
+    docPreviewErrPath: 'The file address is not valid.',
+    docPreviewErrGeneric: 'The secure link could not be created. Please try again.',
+    docPreviewUnsupported: 'Preview is not supported for this file type.',
+    docOpenNewTab: 'Open in new tab / download',
+    docPreviewClose: 'Close preview',
     videoIntroductionTitle: 'Video introduction',
     openDemandFilesBtn: 'Open Files',
     taskGroupTarget: 'Target Country Team',
@@ -2466,6 +2487,13 @@ export const translations: Record<Language, Translation> = {
     docApproveNeedsFile: 'Ngarkoni një skedar para se ta miratoni.',
     docNoFileWarning: 'Nuk ka skedar: nuk llogaritet si i miratuar. Ngarkoni një skedar ose ndryshoni statusin.',
     travelNeedsFlightInfo: 'Fillimisht futni të dhënat e fluturimit.',
+    docPreviewFailed: 'Parapamja nuk u hap',
+    docPreviewErrAccess: 'Nuk u mor lidhje e sigurt: nuk keni leje ta shihni këtë dokument ose skedari nuk u gjet.',
+    docPreviewErrPath: 'Adresa e skedarit nuk është e vlefshme.',
+    docPreviewErrGeneric: 'Lidhja e sigurt nuk u krijua. Ju lutemi provoni përsëri.',
+    docPreviewUnsupported: 'Parapamja nuk mbështetet për këtë lloj skedari.',
+    docOpenNewTab: 'Hape në skedë të re / shkarko',
+    docPreviewClose: 'Mbyll parapamjen',
     videoIntroductionTitle: 'Prezantimi me video',
     openDemandFilesBtn: 'Hap Skedarët',
     taskGroupTarget: 'Ekipi i Vendit të Synuar',
@@ -3297,6 +3325,13 @@ export const translations: Record<Language, Translation> = {
     docApproveNeedsFile: 'يجب رفع ملف قبل الموافقة.',
     docNoFileWarning: 'لا يوجد ملف: لا يُحتسب موافقًا عليه. ارفعوا ملفًا أو غيّروا الحالة.',
     travelNeedsFlightInfo: 'أدخلوا معلومات الرحلة أولًا.',
+    docPreviewFailed: 'تعذّر فتح المعاينة',
+    docPreviewErrAccess: 'تعذّر الحصول على رابط آمن: لا تملكون صلاحية عرض هذا المستند أو لم يُعثر على الملف.',
+    docPreviewErrPath: 'عنوان الملف غير صالح.',
+    docPreviewErrGeneric: 'تعذّر إنشاء الرابط الآمن. يُرجى المحاولة مرة أخرى.',
+    docPreviewUnsupported: 'المعاينة غير مدعومة لهذا النوع من الملفات.',
+    docOpenNewTab: 'فتح في علامة تبويب جديدة / تنزيل',
+    docPreviewClose: 'إغلاق المعاينة',
     videoIntroductionTitle: 'التعريف بالفيديو',
     openDemandFilesBtn: 'فتح الملفات',
     taskGroupTarget: 'فريق البلد المستهدف',
@@ -3845,6 +3880,13 @@ export const translations: Record<Language, Translation> = {
     docApproveNeedsFile: 'Прво прикачете датотека за да одобрите.',
     docNoFileWarning: 'Нема датотека: не се смета за одобрено. Прикачете датотека или променете го статусот.',
     travelNeedsFlightInfo: 'Прво внесете податоци за летот.',
+    docPreviewFailed: 'Прегледот не можеше да се отвори',
+    docPreviewErrAccess: 'Не е добиена безбедна врска: немате право да го видите документот или датотеката не е пронајдена.',
+    docPreviewErrPath: 'Адресата на датотеката не е важечка.',
+    docPreviewErrGeneric: 'Безбедната врска не можеше да се создаде. Обидете се повторно.',
+    docPreviewUnsupported: 'Прегледот не е поддржан за овој тип датотека.',
+    docOpenNewTab: 'Отвори во нова картичка / преземи',
+    docPreviewClose: 'Затвори преглед',
     videoIntroductionTitle: 'Видео претставување',
     openDemandFilesBtn: 'Отвори досиеја',
     taskGroupTarget: 'Тим за целна земја',
