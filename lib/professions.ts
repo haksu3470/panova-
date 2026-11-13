@@ -416,6 +416,21 @@ export function catalogTitleKeys(value: string | null | undefined): string[] {
 }
 
 /**
+ * Does the candidate's profession fit the request title? True when one of the
+ * title's catalog keys equals the candidate's catalog key. Otherwise the old
+ * free-text rule: the title's first word appears in the candidate's
+ * profession (any locale label of a stored key).
+ */
+export function positionMatchesProfession(title: string | null | undefined, profession: string | null | undefined): boolean {
+  const rawTitle = (title ?? '').trim();
+  if (!rawTitle) return false;
+  const candidateKey = professionFromCatalogText(profession)?.key;
+  if (candidateKey && catalogTitleKeys(rawTitle).includes(candidateKey)) return true;
+  const firstWord = rawTitle.toLowerCase().split(' ')[0];
+  return professionSearchBlob(profession).toLowerCase().includes(firstWord);
+}
+
+/**
  * Localize each comma-separated part that matches the profession catalog:
  * a key (site_foreman), a label in any locale, or an old request-form label.
  * Free text that does not match stays as entered.

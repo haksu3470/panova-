@@ -15,6 +15,7 @@ import { normalizeDemandStatus } from '@/lib/demandStatus';
 import { statusErrorKey, type StatusErrorKey } from '@/lib/requestStatusChange';
 import { matchResultTone } from '@/lib/status-tone';
 import { candidateProfessionLabel } from '@/lib/candidateLabels';
+import { localizeCatalogTitle } from '@/lib/professions';
 import { translations } from '@/lib/dictionary';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { benefitsAnswered } from '@/lib/workforceRequest';
@@ -138,7 +139,7 @@ function RequestFileInner() {
         <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
             <Link href="/portal" className="text-xs font-bold text-muted-foreground hover:text-slate-800">← {t.returnToPortal || t.returnHome}</Link>
-            <h1 className="text-lg sm:text-2xl font-extrabold text-slate-900">📋 {req.position_title}<DemoBadge show={req.is_demo} /></h1>
+            <h1 className="text-lg sm:text-2xl font-extrabold text-slate-900">📋 {localizeCatalogTitle(req.position_title, currentLang)}<DemoBadge show={req.is_demo} /></h1>
             <div className="text-[11px] text-muted-foreground flex flex-wrap gap-2">
               <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">PNV-REQ-{req.id.substring(0, 6)}</span>
               {req.employer_id ? (
@@ -153,7 +154,7 @@ function RequestFileInner() {
             <DeleteRecordButton
               table="job_requests"
               id={req.id}
-              name={req.position_title || req.id}
+              name={localizeCatalogTitle(req.position_title, currentLang) || req.id}
               isDemo={req.is_demo}
               allowed={upper}
               onDeleted={() => { window.location.href = '/portal'; }}

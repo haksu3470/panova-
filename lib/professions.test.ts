@@ -17,6 +17,7 @@ import {
   professionsForSector,
   catalogTitleKeys,
   foldCatalogText,
+  positionMatchesProfession,
   LEGACY_POSITIONS,
   SECTORS,
   SECTOR_KEYS,
@@ -203,4 +204,14 @@ test('request titles store keys and localize keys, labels and old labels', () =>
   assert.equal(localizeCatalogTitle('Shef kantieri', 'en'), 'Site manager');
   assert.deepEqual(catalogTitleKeys('Kaynakçı, welder, Dış ticaret uzmanı, serbest metin'), ['welder', 'foreign_trade_specialist']);
   assert.deepEqual(catalogTitleKeys(''), []);
+});
+
+test('matching gives the request keys priority and keeps the old free-text rule', () => {
+  assert.equal(positionMatchesProfession('welder, site_manager', 'site_manager'), true);
+  assert.equal(positionMatchesProfession('welder, site_manager', 'Şantiye şefi'), true);
+  assert.equal(positionMatchesProfession('Kalıp ustası', 'carpenter'), true);
+  assert.equal(positionMatchesProfession('cook', 'electrician'), false);
+  assert.equal(positionMatchesProfession('Elektrikçi aranıyor', 'electrician'), true);
+  assert.equal(positionMatchesProfession('', 'electrician'), false);
+  assert.equal(positionMatchesProfession('welder', null), false);
 });

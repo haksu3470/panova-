@@ -40,7 +40,7 @@ import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { RegistrationCountryOptions } from '@/components/site/RegistrationCountryOptions';
 import { candidatePlaceLabel, candidateProfessionLabel } from '@/lib/candidateLabels';
 import { ProfessionField } from '@/components/site/ProfessionField';
-import { professionForSectorChange } from '@/lib/professions';
+import { localizeCatalogTitle, professionForSectorChange } from '@/lib/professions';
 import { homeCopy } from '@/lib/home-copy';
 import { checkCandidateDuplicate, registrationBlock } from '@/lib/duplicateCandidate';
 import { canonicalPassport, canonicalPhone } from '@/lib/loginIdentifier';
@@ -1793,7 +1793,7 @@ export default function CandidateDashboard() {
                 return (
                 <div key={offer.id} className="p-4 bg-white rounded-2xl border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-sm text-slate-900">
                   <div className="space-y-1 min-w-0">
-                    <div className="font-extrabold text-slate-950">{offer.position_title || '—'} — {offer.employer_name || '—'}</div>
+                    <div className="font-extrabold text-slate-950">{localizeCatalogTitle(offer.position_title, currentLang) || '—'} — {offer.employer_name || '—'}</div>
                     <div className="text-xs font-semibold text-slate-800">
                       {offerUi.offerSalary}: {money ? `${money} ${offerUi.offerNetPerMonth}` : offerUi.salaryNotSet}
                       {offer.start_date ? ` · ${offerUi.offerStart}: ${String(offer.start_date).slice(0, 10)}` : ''}

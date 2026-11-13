@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
 import DemoBadge from './DemoBadge';
 import { candidateProfessionLabel } from '@/lib/candidateLabels';
+import { localizeCatalogTitle } from '@/lib/professions';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { OFFER_CURRENCIES, offerCurrency, offerTermsPayload } from '@/lib/offers';
 import { releaseCopy } from '@/lib/release-copy';
@@ -44,7 +45,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
   const [of, setOf] = useState<any>({
     id: null,
     employer_name: request?.employer_name || '',
-    position_title: request?.position_title || candidateProfessionLabel(candidate.profession, '', currentLang),
+    position_title: localizeCatalogTitle(request?.position_title, currentLang) || candidateProfessionLabel(candidate.profession, '', currentLang),
     monthly_net_salary: '',
     currency: 'EUR',
     start_date: '',
@@ -160,7 +161,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
             <h3 className="font-extrabold text-slate-950 text-lg">🤝 {ui.ioTitle}<DemoBadge show={isDemo} /></h3>
             <p className="text-xs font-medium text-slate-700">
               {candidate.full_name}
-              {request ? ` · ${request.position_title} · ${request.employer_name}` : ` · ${ui.ioAllRequests}`}
+              {request ? ` · ${localizeCatalogTitle(request.position_title, currentLang)} · ${request.employer_name}` : ` · ${ui.ioAllRequests}`}
             </p>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg text-slate-700 hover:bg-slate-100" aria-label={ui.close}><X className="w-5 h-5" /></button>

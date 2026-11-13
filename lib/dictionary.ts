@@ -444,6 +444,10 @@ export interface Translation {
   cityPlaceholder?: string;
   durationPlaceholder?: string;
   selectSectorFirst?: string;
+  positionPickPlaceholder?: string;
+  selectedPositionsLabel?: string;
+  noPositionsSelected?: string;
+  removePositionAria?: string;
   providedFacilitiesLabel?: string;
   facilityAccommodation?: string;
   facilityFood?: string;
@@ -1121,6 +1125,10 @@ export const translations: Record<Language, Translation> = {
     cityPlaceholder: 'Örn: Struga',
     durationPlaceholder: 'Örn: 12 ay (sezonluk / tam zamanlı)',
     selectSectorFirst: 'Pozisyonları görmek için önce bir sektör seçin.',
+    positionPickPlaceholder: 'Bu sektörden pozisyon ekleyin',
+    selectedPositionsLabel: 'Seçilen pozisyonlar',
+    noPositionsSelected: 'Henüz pozisyon seçilmedi.',
+    removePositionAria: '{name} pozisyonunu kaldır',
     providedFacilitiesLabel: 'Sağlanan İmkanlar',
     facilityAccommodation: 'Konaklama (Lojman / Daire)',
     facilityFood: 'Yemek (3 Öğün / Yemek Ücreti)',
@@ -1785,6 +1793,10 @@ export const translations: Record<Language, Translation> = {
     cityPlaceholder: 'e.g. Struga',
     durationPlaceholder: 'e.g. 12 months (seasonal / full time)',
     selectSectorFirst: 'Choose a sector to see positions.',
+    positionPickPlaceholder: 'Add a position from this sector',
+    selectedPositionsLabel: 'Selected positions',
+    noPositionsSelected: 'No position selected yet.',
+    removePositionAria: 'Remove {name}',
     providedFacilitiesLabel: 'Provided Facilities',
     facilityAccommodation: 'Accommodation (Housing / Apartment)',
     facilityFood: 'Food (3 Meals / Food Allowance)',
@@ -2449,6 +2461,10 @@ export const translations: Record<Language, Translation> = {
     cityPlaceholder: 'p.sh. Struga',
     durationPlaceholder: 'p.sh. 12 muaj (sezonale / kohë e plotë)',
     selectSectorFirst: 'Zgjidhni një sektor për të parë pozicionet.',
+    positionPickPlaceholder: 'Shtoni një pozicion nga ky sektor',
+    selectedPositionsLabel: 'Pozicionet e zgjedhura',
+    noPositionsSelected: 'Ende nuk është zgjedhur asnjë pozicion.',
+    removePositionAria: 'Hiq {name}',
     providedFacilitiesLabel: 'Kushtet e ofruara',
     facilityAccommodation: 'Akomodimi (strehim / apartament)',
     facilityFood: 'Ushqimi (3 vakte / pagesë ushqimi)',
@@ -2872,6 +2888,10 @@ export const translations: Record<Language, Translation> = {
     cityPlaceholder: 'مثال: ستروغا',
     durationPlaceholder: 'مثال: 12 شهراً (موسمي / دوام كامل)',
     selectSectorFirst: 'اختر قطاعاً لعرض الوظائف.',
+    positionPickPlaceholder: 'أضف وظيفة من هذا القطاع',
+    selectedPositionsLabel: 'الوظائف المختارة',
+    noPositionsSelected: 'لم يتم اختيار أي وظيفة بعد.',
+    removePositionAria: 'إزالة {name}',
     providedFacilitiesLabel: 'المرافق المقدمة',
     facilityAccommodation: 'الإقامة (سكن / شقة)',
     facilityFood: 'الطعام (3 وجبات / بدل طعام)',
@@ -3776,6 +3796,10 @@ export const translations: Record<Language, Translation> = {
     cityPlaceholder: 'на пр. Струга',
     durationPlaceholder: 'на пр. 12 месеци (сезонски / полно работно време)',
     selectSectorFirst: 'Изберете сектор за да ги видите позициите.',
+    positionPickPlaceholder: 'Додадете позиција од овој сектор',
+    selectedPositionsLabel: 'Избрани позиции',
+    noPositionsSelected: 'Сè уште не е избрана позиција.',
+    removePositionAria: 'Отстрани {name}',
     providedFacilitiesLabel: 'Обезбедени услови',
     facilityAccommodation: 'Сместување (дом / стан)',
     facilityFood: 'Храна (3 оброка / додаток за храна)',

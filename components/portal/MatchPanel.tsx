@@ -8,7 +8,7 @@ import DemoBadge from './DemoBadge';
 import InterviewOfferPanel from './InterviewOfferPanel';
 import { candidateProfessionLabel } from '@/lib/candidateLabels';
 import { fill, portalUi } from '@/lib/portal-ui-copy';
-import { professionSearchBlob } from '@/lib/professions';
+import { localizeCatalogTitle, positionMatchesProfession, professionSearchBlob } from '@/lib/professions';
 import { useSiteLanguage } from '@/lib/site-language';
 import { translations } from '@/lib/dictionary';
 import { canDecideForEmployer } from '@/lib/staffAccess';
@@ -80,7 +80,7 @@ export default function MatchPanel({ request, onClose }: Props) {
       .map((c) => {
         let score = 0;
         if (request.sector && c.sector?.toLowerCase() === String(request.sector).toLowerCase()) score += 2;
-        if (request.position_title && professionSearchBlob(c.profession).toLowerCase().includes(String(request.position_title).toLowerCase().split(' ')[0])) score += 2;
+        if (positionMatchesProfession(request.position_title, c.profession)) score += 2;
         if ((c.experience_years ?? 0) >= (request.required_experience_years ?? 0)) score += 1;
         return { ...c, score };
       })
@@ -175,7 +175,7 @@ export default function MatchPanel({ request, onClose }: Props) {
           <div>
             <h3 className="font-extrabold text-slate-900 text-lg">🔗 {ui.matchTitle}</h3>
             <p className="text-xs text-muted-foreground">
-              {request.position_title} · {request.employer_name} · {fill(ui.selectedOf, { selected: selectedCount, total: request.headcount })}
+              {localizeCatalogTitle(request.position_title, currentLang)} · {request.employer_name} · {fill(ui.selectedOf, { selected: selectedCount, total: request.headcount })}
             </p>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg text-slate-700 hover:bg-slate-100" aria-label={ui.close}><X className="w-5 h-5" /></button>

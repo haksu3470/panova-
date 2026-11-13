@@ -9,6 +9,7 @@ import DeleteRecordButton from './DeleteRecordButton';
 import ListExportBar from './ListExportBar';
 import { portalUi } from '@/lib/portal-ui-copy';
 import { offerExportRows, requestExportRows, toCsv } from '@/lib/exportLists';
+import { localizeCatalogTitle } from '@/lib/professions';
 import { displayedRequestSalary } from '@/lib/workforceRequest';
 import { releaseCopy } from '@/lib/release-copy';
 import { normalizeDemandStatus, targetStartIsPast } from '@/lib/demandStatus';
@@ -73,14 +74,14 @@ export default function RequestsTab({
           <ListExportBar
             filename="labour-requests"
             title={t.demandFilesTitle || 'Requests'}
-            rows={requestExportRows(jobRequests)}
+            rows={requestExportRows(jobRequests, currentLang)}
             labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty }}
           />
           <button
             type="button"
             onClick={async () => {
               const { data } = await supabase.from('job_offers').select('id, candidate_id, employer_name, position_title, monthly_net_salary, offer_terms, status, start_date, terms_details, is_demo').order('created_at', { ascending: false });
-              const rows = offerExportRows(data || []);
+              const rows = offerExportRows(data || [], currentLang);
               if (!rows.length) {
                 window.alert(ui.exportEmpty);
                 return;
@@ -113,7 +114,7 @@ export default function RequestsTab({
                   <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
                     {req.sector || 'General Sector'}
                   </span>
-                  <h4 className="font-extrabold text-slate-900 text-base mt-1.5">{req.position_title}<DemoBadge show={req.is_demo} /></h4>
+                  <h4 className="font-extrabold text-slate-900 text-base mt-1.5">{localizeCatalogTitle(req.position_title, currentLang)}<DemoBadge show={req.is_demo} /></h4>
                   <p className="text-xs font-bold text-slate-600 flex items-center gap-1 mt-0.5">
                     <Building2 className="w-3.5 h-3.5 text-muted-foreground" /> {req.employer_name}
                   </p>
@@ -197,7 +198,7 @@ export default function RequestsTab({
               <DeleteRecordButton
                 table="job_requests"
                 id={req.id}
-                name={req.position_title || req.id}
+                name={localizeCatalogTitle(req.position_title, currentLang) || req.id}
                 isDemo={req.is_demo}
                 allowed={isUpperManagement}
                 onDeleted={onChanged}
