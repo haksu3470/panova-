@@ -45,3 +45,9 @@ Bu anahtarlar dört dilde zaten var, ama eski içeriği anlatıyor. Yeni Türkç
 ## 3. Kaldırılan anahtar
 
 - `roles.employer.screens.demands`: işveren portalında "Talepler" sekmesi yok. Dört dilden de silindi; yerini `roles.employer.screens.newRequest` (Yeni talep) aldı ve yukarıdaki listede.
+
+## Rol görünürlüğü (`mapNote`, `unknownRoleNote`)
+
+`mapNote` (Türkçesi değişti) ve yeni `unknownRoleNote` beş dilde yazıldı; geçici Türkçe yok, `GUIDES_PENDING_TRANSLATION` listesine girmedi.
+
+- [ ] en, sq, ar, mk metinlerini ana dili konuşan biri gözden geçirsin.

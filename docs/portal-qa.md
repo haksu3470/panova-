@@ -218,10 +218,24 @@ Automated: `lib/youtube.test.ts`.
 2. Open it again with a session whose email is not confirmed (`?verify=1` is not required; `emailAccessOk` decides).
 3. Sign in on each portal and use the **Guides** control (`guideNavLabel`: Kılavuzlar / Guides / Udhëzues / الأدلة / Водичи). It is on the staff tab bar, the employer tab bar, and the candidate tab bar.
 4. Compare the how-to list for upper management and for a source-country officer. Compare employer and candidate.
+5. **Rol görünürlüğü / Role visibility.** Sign in once with each staff role and check the usage map and the how-to list against this table (same `portalGuideView` rule as the print page):
 
-**Beklenen / Expected:** Signed out: title, body, and three links (`/portal`, `/employer-login`, `/candidate`). Unconfirmed: the verify card, no articles. Unlinked: the unlinked card, no articles. A linked user sees the usage map and the how-tos for that audience. Upper management sees `staff-invite`. Other staff do not. The upper-management card’s Staff screen tells other staff that only upper management can see that tab. Employers see `employer-request` and `employer-browse`, not dossier or staff invite. Candidates see `candidate-register` only. Back returns to `/portal`, `/employer`, `/candidate`, or `/` for a signed-out viewer. Switching language reloads `guidesCopy` for that locale. Screen paths in the map point at `app/.../page.tsx` files.
+   | Session | Role cards | How-tos |
+   | --- | --- | --- |
+   | upper_management | all 8 | all 9 |
+   | source_country | Kaynak ülke only | staff-login, dossier-review, matching-offers, request-to-offer, document-request, candidate-register |
+   | target_country | Hedef ülke only | staff-login, dossier-review, matching-offers, request-to-offer, document-request, employer-request, employer-browse, candidate-register |
+   | field_officer | Saha görevlisi only | staff-login, dossier-review, document-request, candidate-register |
+   | finance, limited | their own card only | staff-login |
+   | unknown `role_level` | none, amber note "personel rolü tanınmadı" | staff-login |
+   | employer | İşveren | employer-request, employer-browse |
+   | candidate | Aday | candidate-register |
 
-**Bilinen engel / Known blocker:** The guides page has no logout control. Sign out from the portal you came from (S11). There is no how-to for logout, forgot password, or the OTP field. `finance` and `limited` are not guide roles; a staff row with one of those `role_level` values is labeled with the generic staff name (`resolvePortalViewer`).
+   No staff session below upper management sees another staff role's card, the employer or candidate card, or `staff-invite`. The map note says that upper management sees all roles and other staff only their own.
+
+**Beklenen / Expected:** Signed out: title, body, and three links (`/portal`, `/employer-login`, `/candidate`). Unconfirmed: the verify card, no articles. Unlinked: the unlinked card, no articles. A linked user sees the usage map and the how-tos for that audience. Upper management sees `staff-invite` and every role card. Other staff see only their own card and do not see `staff-invite` (step 5). Employers see `employer-request` and `employer-browse`, not dossier or staff invite. Candidates see `candidate-register` only. Back returns to `/portal`, `/employer`, `/candidate`, or `/` for a signed-out viewer. Switching language reloads `guidesCopy` for that locale. Screen paths in the map point at `app/.../page.tsx` files.
+
+**Bilinen engel / Known blocker:** The guides page has no logout control. Sign out from the portal you came from (S11). There is no how-to for logout, forgot password, or the OTP field. A staff row whose `role_level` is not a guide role is labeled with the generic staff name (`resolvePortalViewer`) and only sees the sign-in how-to.
 
 Automated: `lib/guides.test.ts`.
 
