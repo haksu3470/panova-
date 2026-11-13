@@ -6,6 +6,10 @@ import CandidateYouTubeEditor from '@/components/portal/CandidateYouTubeEditor';
 import InterviewOfferPanel from '@/components/portal/InterviewOfferPanel';
 import PlacementPanel from '@/components/portal/PlacementPanel';
 import OfficialProcessBadge from '@/components/portal/OfficialProcessBadge';
+import CandidateStatusControl from '@/components/portal/CandidateStatusControl';
+import { useStaffRole } from '@/components/portal/useStaffRole';
+import { canUpdateRequestStatus } from '@/lib/staffAccess';
+import type { CandidateStatusErrorKey } from '@/lib/candidateStatusChange';
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -65,6 +69,8 @@ function CandidateDetailPageInner() {
   const [saving, setSaving] = useState(false);
 
   const [status, setStatus] = useState('pending');
+  const { role: staffRole } = useStaffRole();
+  const mayChangeStatus = canUpdateRequestStatus(staffRole);
   const [candidatePhoto, setCandidatePhoto] = useState('');
   const [candidatePhone, setCandidatePhone] = useState('');
   const [candidateEmail, setCandidateEmail] = useState('');
@@ -246,6 +252,24 @@ function CandidateDetailPageInner() {
     setDocuments(documents.filter(d => d.id !== docId));
   };
 
+  // Upper management only (canUpdateRequestStatus). The RPC checks the role
+  // and the reason; the stored status is read back afterwards.
+  const changeStatus = async (next: string, reason: string): Promise<CandidateStatusErrorKey | null> => {
+    const result = await candidateService.setStatus(candidateId, next, reason);
+    if (result.errorKey) return result.errorKey;
+    await refreshStatus(result.status);
+    return null;
+  };
+
+  // The status follows the official process in the database; read it again.
+  const refreshStatus = async (fallback?: string) => {
+    const { data } = await supabase.from('job_candidates').select('status').eq('id', candidateId).maybeSingle();
+    const next = data?.status || fallback;
+    if (!next) return;
+    setStatus(next);
+    setCandidate((prev: Record<string, unknown> | null) => (prev ? { ...prev, status: next } : prev));
+  };
+
   const handleSaveDetail = async () => {
     let existingMeta = {};
     try {
@@ -263,7 +287,8 @@ function CandidateDetailPageInner() {
     });
 
     const payload: Record<string, unknown> = {
-      status: status,
+      // status is not sent: the database derives it from the official
+      // process; upper management overrides it with changeStatus.
       photo_url: candidatePhoto,
       phone: candidatePhone,
       email: candidateEmail,
@@ -672,16 +697,12 @@ function CandidateDetailPageInner() {
           <div className="lg:col-span-4 space-y-4 sm:space-y-6">
             <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
               <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b border-slate-100 pb-2">{t.candidateStatus}</h3>
-              <select 
-                value={status} 
-                onChange={(e) => setStatus(e.target.value)} 
-                className="w-full p-3 rounded-xl border border-slate-300 text-xs sm:text-sm font-extrabold bg-slate-900 text-white outline-none cursor-pointer shadow-sm"
-              >
-                <option value="pending" className="bg-white text-slate-900">🟡 {t.pendingStatus}</option>
-                <option value="reviewing" className="bg-white text-slate-900">🔵 {t.reviewingStatus}</option>
-                <option value="visa_processing" className="bg-white text-slate-900">🟣 {t.visaProcessingStatus}</option>
-                <option value="approved" className="bg-white text-slate-900">🟢 {t.approvedStatus}</option>
-              </select>
+              <CandidateStatusControl
+                t={t}
+                status={status}
+                canChange={mayChangeStatus}
+                onSubmit={changeStatus}
+              />
               <p className="text-xs sm:text-sm font-semibold text-slate-900" aria-live="polite">
                 {t.officialProcessLabel}:{' '}
                 <OfficialProcessBadge status={candidate?.official_process_status} steps={ui.steps} stoppedLabel={t.plProcessStopped || ui.steps.rejected} />
@@ -700,7 +721,10 @@ function CandidateDetailPageInner() {
             {showIO && candidate && <InterviewOfferPanel candidate={{ ...candidate, id: candidateId }} onClose={() => setShowIO(false)} />}
             <PlacementPanel
               candidateId={candidateId}
-              onOfficialChange={(value) => setCandidate((prev: Record<string, unknown> | null) => (prev ? { ...prev, official_process_status: value } : prev))}
+              onOfficialChange={(value) => {
+                setCandidate((prev: Record<string, unknown> | null) => (prev ? { ...prev, official_process_status: value } : prev));
+                refreshStatus();
+              }}
             />
 
             {/* Süreçten Çıkış Paneli */}

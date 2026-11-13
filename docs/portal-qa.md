@@ -302,6 +302,21 @@ Automated: `lib/referralCode.test.ts`.
 
 Automated: `lib/requestStatusChange.test.ts`, `lib/staffAccess.test.ts`. Database scenario (ends in rollback): `supabase/verification/request_status_scenario.sql`.
 
+## S16. Aday durumu / Candidate status
+
+**Rol / Role:** Upper management, source country, target country, field officer, and the candidate.
+
+**Önkoşul / Preconditions:** The database part is applied: candidate status follows `official_process_status`, the RPC `staff_set_candidate_status` exists, and a direct status change on `job_candidates` is refused with `candidate_status_use_rpc`. A test candidate with no official process.
+
+**Adımlar ve beklenen / Steps and expected:**
+
+1. **Resmî süreçle uyum / Follows the official process.** On `/portal/candidates/[id]`, in the process panel, set the official process step by step. The **Candidate status** badge changes without a page reload: not started → pending; documents collecting, work permit applied, work permit approved → reviewing; visa applied → visa processing only with an accepted offer, otherwise reviewing; visa approved, ready to travel, started work → approved; rejected leaves the status as it was. The **Candidates** list shows the same badge, and the status filter still works.
+2. **Üst Yönetim elle değiştirir / Upper management overrides.** As upper management, press **Change manually** in the list and on the detail card. Pick another status. **Save** stays disabled with no reason, under 5 characters and over 1000 (the counter shows n/1000). With a valid reason the badge changes and the success message shows. Visa processing without an accepted offer is refused with its own message.
+3. **Diğer roller göremez / Other roles cannot.** As source country, target country, or field officer, the status is a badge only, with no **Change manually** button in the list or on the detail card. Saving the candidate file (notes, travel and so on) still works and does not change the status. Calling `staff_set_candidate_status` directly returns `staff_role_not_allowed`.
+4. **Aday değiştiremez / The candidate cannot.** Signed in as the candidate on `/candidate`, the status is shown but cannot be changed. A direct `update job_candidates set status` with a different value is refused with `candidate_status_use_rpc`, and the RPC returns `staff_role_not_allowed`.
+
+Automated: `lib/candidateStatusChange.test.ts` (error code mapping, reason check, five languages, no direct status write in the portal).
+
 ---
 
 ## Boşluk analizi / Gap analysis
