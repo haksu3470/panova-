@@ -10,14 +10,21 @@ import DeleteRecordButton from './DeleteRecordButton';
 import { useStaffRole } from './useStaffRole';
 import { openCandidateDocument } from '@/lib/candidateFiles';
 import { releaseCopy } from '@/lib/release-copy';
+import { translations } from '@/lib/dictionary';
+import { canApproveDocument, documentCounts, isApprovedWithoutFile, type DocumentLike } from '@/lib/candidateDocuments';
 
 const DOC_TYPE_KEYS = ['passport', 'cv', 'certificate', 'diploma', 'criminal_record', 'health_report', 'photo', 'contract', 'apostille', 'other'] as const;
 const STATUS_KEYS = ['pending', 'uploaded', 'reviewing', 'approved', 'rejected', 'rerequested', 'expiring', 'expired'] as const;
 
-/** candidate_documents status tracking for staff. */
-export default function DocumentStatusPanel({ candidateId }: { candidateId: string }) {
+/**
+ * candidate_documents status tracking for staff. When the candidate has no
+ * rows there yet, the page passes the legacy documents_json list so the
+ * count matches the list shown on the left (approved = approved with a file).
+ */
+export default function DocumentStatusPanel({ candidateId, legacyDocs }: { candidateId: string; legacyDocs?: readonly DocumentLike[] }) {
   const { currentLang } = useSiteLanguage('en');
   const ui = portalUi[currentLang];
+  const t = translations[currentLang] || translations.en;
   const { upper } = useStaffRole();
 
   const [docs, setDocs] = useState<any[]>([]);
@@ -54,16 +61,17 @@ export default function DocumentStatusPanel({ candidateId }: { candidateId: stri
     load();
   };
 
-  const approved = docs.filter((d) => d.status === 'approved').length;
+  const counted = docs.length > 0 ? docs : (legacyDocs ?? []);
+  const { total, approved } = documentCounts(counted);
 
   return (
     <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
       <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b border-slate-100 pb-2 flex justify-between items-center gap-2">
         <span className="flex items-center gap-1.5">📄 {ui.docTitle}</span>
-        <span className="text-xs text-slate-600 font-bold">{approved}/{docs.length} {ui.docApproved}</span>
+        <span className="text-xs text-slate-600 font-bold">{approved}/{total} {ui.docApproved}</span>
       </h3>
       {error && <p className="text-xs text-red-600 font-bold">{error}</p>}
-      {docs.length === 0 && <p className="text-xs text-muted-foreground font-medium">{ui.docEmpty}</p>}
+      {counted.length === 0 && <p className="text-xs text-muted-foreground font-medium">{ui.docEmpty}</p>}
 
       {docs.map((d) => (
         <div key={d.id} className="border border-slate-200 rounded-xl p-3 space-y-2 bg-slate-50/50">
@@ -82,11 +90,21 @@ export default function DocumentStatusPanel({ candidateId }: { candidateId: stri
 
           <select
             value={d.status}
-            onChange={(e) => update(d, { status: e.target.value }, statusName(e.target.value))}
+            onChange={(e) => {
+              if (e.target.value === 'approved' && !canApproveDocument(d)) return;
+              update(d, { status: e.target.value }, statusName(e.target.value));
+            }}
             className="w-full text-xs font-bold border border-slate-300 rounded-lg px-2.5 py-2 bg-white text-slate-900 outline-none cursor-pointer"
           >
-            {STATUS_KEYS.map((key) => <option key={key} value={key}>{ui.docStatuses[key]}</option>)}
+            {STATUS_KEYS.map((key) => (
+              <option key={key} value={key} disabled={key === 'approved' && !canApproveDocument(d)}>{ui.docStatuses[key]}</option>
+            ))}
           </select>
+          {isApprovedWithoutFile(d) ? (
+            <p role="status" className="text-[11px] font-bold text-red-700 bg-red-50 border border-red-200 rounded-md px-2 py-0.5">⚠️ {t.docNoFileWarning}</p>
+          ) : !canApproveDocument(d) ? (
+            <p className="text-[11px] font-semibold text-slate-600">{t.docApproveNeedsFile}</p>
+          ) : null}
 
           <label className="block text-[11px] font-bold text-slate-700">
             {releaseCopy[currentLang].docReason}

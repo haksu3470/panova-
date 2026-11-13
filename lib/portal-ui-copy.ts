@@ -41,8 +41,6 @@ export type PortalUi = {
   exampleTerms: string;
   exampleNotifTitle: string;
   exampleMessage: string;
-  certNoPh: string;
-  issuerPh: string;
   docTitle: string;
   docApproved: string;
   docEmpty: string;
@@ -322,8 +320,6 @@ const tr: PortalUi = {
   exampleTerms: 'Konaklama dahil...',
   exampleNotifTitle: 'Örn: Pasaport hakkında',
   exampleMessage: 'Mesajınız...',
-  certNoPh: 'Sertifika no',
-  issuerPh: 'Veren kurum',
   docTitle: 'Belge durumu',
   docApproved: 'onaylı',
   docEmpty: 'Kayıtlı belge yok.',
@@ -577,8 +573,6 @@ const en: PortalUi = {
   exampleTerms: 'Accommodation included...',
   exampleNotifTitle: 'e.g. About the passport',
   exampleMessage: 'Your message...',
-  certNoPh: 'Certificate no.',
-  issuerPh: 'Issuing body',
   docTitle: 'Document status',
   docApproved: 'approved',
   docEmpty: 'No saved documents.',
@@ -832,8 +826,6 @@ const sq: PortalUi = {
   exampleTerms: 'Akomodimi i përfshirë...',
   exampleNotifTitle: 'p.sh. Rreth pasaportës',
   exampleMessage: 'Mesazhi juaj...',
-  certNoPh: 'Nr. i certifikatës',
-  issuerPh: 'Institucioni lëshues',
   docTitle: 'Statusi i dokumenteve',
   docApproved: 'të miratuara',
   docEmpty: 'Nuk ka dokumente të regjistruara.',
@@ -1087,8 +1079,6 @@ const ar: PortalUi = {
   exampleTerms: 'السكن مشمول...',
   exampleNotifTitle: 'مثال: بخصوص جواز السفر',
   exampleMessage: 'رسالتكم...',
-  certNoPh: 'رقم الشهادة',
-  issuerPh: 'الجهة المصدرة',
   docTitle: 'حالة المستندات',
   docApproved: 'معتمدة',
   docEmpty: 'لا توجد مستندات محفوظة.',
@@ -1342,8 +1332,6 @@ const mk: PortalUi = {
   exampleTerms: 'Сместувањето е вклучено...',
   exampleNotifTitle: 'пр. За пасошот',
   exampleMessage: 'Вашата порака...',
-  certNoPh: 'Број на сертификат',
-  issuerPh: 'Издавач',
   docTitle: 'Статус на документи',
   docApproved: 'одобрени',
   docEmpty: 'Нема снимени документи.',

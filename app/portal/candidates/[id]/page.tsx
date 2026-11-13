@@ -15,7 +15,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { candidateService } from '@/lib/services/candidateService';
-import { User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Award, Trash2, Upload, Eye, X, Plus, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert } from 'lucide-react';
+import { canApproveDocument, defaultDocumentList, isApprovedWithoutFile } from '@/lib/candidateDocuments';
+import { User, Save, Camera, Mail, Phone, KeyRound, FileCheck, FileText, Video, Trash2, Upload, Eye, X, Plus, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
 import { portalUi } from '@/lib/portal-ui-copy';
@@ -76,8 +77,6 @@ function CandidateDetailPageInner() {
   const [candidateEmail, setCandidateEmail] = useState('');
   const [internalNotes, setInternalNotes] = useState('');
 
-  const [certificateNo, setCertificateNo] = useState('');
-  const [issuingBody, setIssuingBody] = useState('');
   const [videoUrl1, setVideoUrl1] = useState('');
   const [videoUrl2, setVideoUrl2] = useState('');
   const [videoUrl3, setVideoUrl3] = useState('');
@@ -156,8 +155,6 @@ function CandidateDetailPageInner() {
         setCandidatePhone(data.phone || '');
         setCandidateEmail(data.email || '');
         setInternalNotes(data.notes || '');
-        setCertificateNo(data.certificate_no || '');
-        setIssuingBody(data.issuing_body || '');
         
         setVideoUrl1(data.video_url_1 || data.video_url || '');
         setVideoUrl2(data.video_url_2 || '');
@@ -179,13 +176,15 @@ function CandidateDetailPageInner() {
           }
         } catch (e) {}
 
-        const defaultDocs: CandidateDocument[] = [
-          { id: '1', name: t.docPassportScan || '', status: data.passport_number ? 'approved' : 'pending' },
-          { id: '2', name: t.docProfessionalCert || '', status: 'pending' },
-          { id: '3', name: t.docCriminalRecord || '', status: 'pending' },
-          { id: '4', name: t.docHealthReport || '', status: 'pending' },
-          { id: '5', name: t.docApostille || '', status: 'pending' },
-        ];
+        // Every default document starts as pending. (The passport used to be
+        // marked approved whenever a passport number existed, with no file.)
+        const defaultDocs: CandidateDocument[] = defaultDocumentList([
+          t.docPassportScan || '',
+          t.docProfessionalCert || '',
+          t.docCriminalRecord || '',
+          t.docHealthReport || '',
+          t.docApostille || '',
+        ]);
         
         try {
           const parsed = data.documents_json ? JSON.parse(data.documents_json) : {};
@@ -212,7 +211,8 @@ function CandidateDetailPageInner() {
   };
 
   const handleDocStatusChange = (docId: string, newStatus: CandidateDocument['status']) => {
-    setDocuments(documents.map(doc => doc.id === docId ? { ...doc, status: newStatus } : doc));
+    // A document without a file cannot be approved (the option is disabled too).
+    setDocuments(documents.map(doc => (doc.id === docId && (newStatus !== 'approved' || canApproveDocument(doc)) ? { ...doc, status: newStatus } : doc)));
   };
 
   const handleFileUpload = (docId: string, event: React.ChangeEvent<HTMLInputElement>) => {
@@ -293,8 +293,8 @@ function CandidateDetailPageInner() {
       phone: candidatePhone,
       email: candidateEmail,
       notes: internalNotes,
-      certificate_no: certificateNo,
-      issuing_body: issuingBody,
+      // certificate_no / issuing_body are no longer edited here and are not
+      // sent, so the stored values stay as they are.
       documents_json: payloadDocumentsJson,
       travel_status: travelStatus,
       flight_date: flightDate,
@@ -603,21 +603,33 @@ function CandidateDetailPageInner() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={doc.status}
-                          onChange={(e) => handleDocStatusChange(doc.id, e.target.value as any)}
-                          className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer outline-none bg-amber-100 text-amber-900 border-amber-300"
-                        >
-                          <option value="pending" className="bg-white text-slate-900">🟡 {ui.docStatuses.pending}</option>
-                          <option value="uploaded" className="bg-white text-slate-900">📤 {ui.docStatuses.uploaded}</option>
-                          <option value="reviewing" className="bg-white text-slate-900">🔵 {ui.docStatuses.reviewing}</option>
-                          <option value="approved" className="bg-white text-slate-900">🟢 {ui.docStatuses.approved}</option>
-                          <option value="rejected" className="bg-white text-slate-900">🔴 {ui.docStatuses.rejected}</option>
-                        </select>
-                        <button onClick={() => handleDeleteDocument(doc.id)} className="p-1.5 text-muted-foreground hover:text-red-600 cursor-pointer">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      <div className="flex flex-col items-start sm:items-end gap-1">
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={doc.status}
+                            onChange={(e) => handleDocStatusChange(doc.id, e.target.value as CandidateDocument['status'])}
+                            aria-describedby={canApproveDocument(doc) ? undefined : `doc-approve-hint-${doc.id}`}
+                            className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer outline-none bg-amber-100 text-amber-900 border-amber-300"
+                          >
+                            <option value="pending" className="bg-white text-slate-900">🟡 {ui.docStatuses.pending}</option>
+                            <option value="uploaded" className="bg-white text-slate-900">📤 {ui.docStatuses.uploaded}</option>
+                            <option value="reviewing" className="bg-white text-slate-900">🔵 {ui.docStatuses.reviewing}</option>
+                            <option value="approved" disabled={!canApproveDocument(doc)} className="bg-white text-slate-900">🟢 {ui.docStatuses.approved}</option>
+                            <option value="rejected" className="bg-white text-slate-900">🔴 {ui.docStatuses.rejected}</option>
+                          </select>
+                          <button onClick={() => handleDeleteDocument(doc.id)} className="p-1.5 text-muted-foreground hover:text-red-600 cursor-pointer">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                        {isApprovedWithoutFile(doc) ? (
+                          <span id={`doc-approve-hint-${doc.id}`} role="status" className="text-[11px] font-bold text-red-700 bg-red-50 border border-red-200 rounded-md px-2 py-0.5">
+                            ⚠️ {t.docNoFileWarning}
+                          </span>
+                        ) : !canApproveDocument(doc) ? (
+                          <span id={`doc-approve-hint-${doc.id}`} className="text-[11px] font-semibold text-slate-600">
+                            {t.docApproveNeedsFile}
+                          </span>
+                        ) : null}
                       </div>
                     </div>
 
@@ -652,16 +664,11 @@ function CandidateDetailPageInner() {
             </div>
             )}
 
-            {/* Sertifika ve 3'lü Video Alanı */}
+            {/* Video tanıtımı (3 YouTube videosu) */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-                <Award className="w-5 h-5 text-amber-800" /> {t.professionalEvaluationCertificate}
+                <Video className="w-5 h-5 text-red-700" aria-hidden="true" /> {t.videoIntroductionTitle}
               </h3>
-              <div className="max-w-xl space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs">
-                <span className="block font-bold uppercase text-slate-700">{t.certificateInfo}</span>
-                <input type="text" value={certificateNo} onChange={(e) => setCertificateNo(e.target.value)} placeholder={ui.certNoPh} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-bold text-slate-900 outline-none" />
-                <input type="text" value={issuingBody} onChange={(e) => setIssuingBody(e.target.value)} placeholder={ui.issuerPh} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-bold text-slate-900 outline-none" />
-              </div>
               <CandidateYouTubeEditor
                 canEdit={canEditVideo}
                 slots={[
@@ -710,7 +717,7 @@ function CandidateDetailPageInner() {
               <p className="text-[11px] text-slate-600 font-medium">{t.officialProcessHint}</p>
             </div>
 
-            <DocumentStatusPanel candidateId={candidateId} />
+            <DocumentStatusPanel candidateId={candidateId} legacyDocs={hasTableDocs === false ? documents : undefined} />
             <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm">
               <div>
                 <p className="font-bold text-slate-900 text-sm">🤝 {ui.interviewOfferTitle}</p>
