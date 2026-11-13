@@ -472,6 +472,19 @@ Automated: `lib/demoData.test.ts` (count reading, seed result and "already exist
 
 Automated: `lib/guides-print.test.ts` (upper management all or one role, ?role ignored for others, employer and candidate own role, never more than `/guides`, button label and link, texts in five languages, print CSS and shared session check).
 
+## S26. Sayfa başlıkları / Page headers
+
+**Rol / Role:** Signed out, then upper management, a demo employer and a demo candidate. Shared component: `components/site/PageHeader.tsx` (`PageHeader`, `HeaderActions`).
+
+1. **Sıra / Order.** On `/portal`, `/portal/candidates/{id}`, `/portal/requests/{id}`, `/portal/employers/{id}`, `/employer` and `/candidate` the right-hand group ends with: language switcher, **Ana Sayfaya Dön**, **Çıkış Yap**, same look on every page. Page buttons come first: **Portala Dön** and save (plus match and delete on a request, delete on an employer) on the staff files; **Yönetim paneline dön** on `/employer` opened from the portal; print and back to portal on `/guides`.
+2. **Kullanıcı / User.** The staff name and role badge on `/portal` and the "Yetkili: …" label on `/employer` sit on the left, next to the logo and the title, not in the button group.
+3. **Girişsiz sayfalar / Signed-out pages.** `/portal` and `/candidate` sign-in, `/employer-login`, `/auth/reset-password`, `/kvkk`, `/admin`, `/supplier` and `/guides` show language switcher and **Ana Sayfaya Dön** only (no log out).
+4. **Davranış / Behaviour.** Log out on `/portal` and `/candidate` shows the sign-in screen, on `/employer` it opens `/employer-login`, on a staff file it opens `/portal` signed out. **Ana Sayfaya Dön** opens `/` (on reset-password it also clears the pending recovery).
+5. **Mobil ve RTL / Mobile and RTL.** At 360 px width the buttons wrap to a new row and nothing scrolls sideways. In Arabic the group mirrors and the arrows turn.
+6. **Yazdırma / Print.** `/guides/print` keeps its own toolbar; it is still hidden in the printout (S25).
+
+Automated: `lib/page-headers.test.ts`.
+
 ---
 
 ## Boşluk analizi / Gap analysis

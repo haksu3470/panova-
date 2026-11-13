@@ -20,7 +20,7 @@ import {
   storedVerifyEmail,
 } from '@/lib/emailVerification';
 import { 
-  Lock, ShieldCheck, ArrowLeft, Building2, Users, FileText, 
+  Lock, ShieldCheck, Building2, Users, FileText, 
   UserCheck, CheckSquare, History, ShieldAlert, Key, RefreshCw, Trash2, BookOpen
 } from 'lucide-react';
 import Link from 'next/link';
@@ -29,7 +29,7 @@ import { localizeCatalogTitle } from '@/lib/professions';
 import { Language, translations } from '@/lib/dictionary';
 import { dateLocale, portalUi } from '@/lib/portal-ui-copy';
 import { benefitPhrase, displayedRequestSalary } from '@/lib/workforceRequest';
-import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
+import { HeaderActions, PageHeader } from '@/components/site/PageHeader';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { guideNavLabel } from '@/lib/guides-nav';
@@ -598,18 +598,16 @@ export default function PortalPage() {
   if (!authenticated) {
     return (
       <div className={`min-h-screen bg-slate-50 flex flex-col justify-between ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-        <header className="w-full bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
-            <span className="font-extrabold text-slate-800 text-sm tracking-wide">PANOVA PORTAL</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
-            <Link href="/" className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border border-slate-200">
-              <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" /> {t.returnHome}
-            </Link>
-          </div>
-        </header>
+        <PageHeader
+          variant="bar"
+          start={
+            <>
+              <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
+              <span className="font-extrabold text-slate-800 text-sm tracking-wide">PANOVA PORTAL</span>
+            </>
+          }
+          actions={<HeaderActions lang={currentLang} onLanguageChange={changeLanguage} homeLabel={t.returnHome} />}
+        />
 
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 max-w-md w-full text-center">
@@ -725,7 +723,9 @@ export default function PortalPage() {
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm">
+        <PageHeader
+          start={
+          <>
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
             <div>
@@ -736,8 +736,7 @@ export default function PortalPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
+            <div data-header-user className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
               <UserCheck className="w-4 h-4 text-emerald-700" />
               <div className="text-xs">
                 <span className="font-bold text-slate-900 block">{currentUser?.name}</span>
@@ -757,24 +756,18 @@ export default function PortalPage() {
                 ) : null}
               </div>
             </div>
-
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border"
-            >
-              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
-            </Link>
-
-            <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
-
-            <button
-              onClick={handleLogout}
-              className="bg-red-50 hover:bg-red-100 text-red-700 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
-            >
-              {t.logoutBtn}
-            </button>
-          </div>
-        </div>
+          </>
+          }
+          actions={
+            <HeaderActions
+              lang={currentLang}
+              onLanguageChange={changeLanguage}
+              homeLabel={t.returnHome}
+              logoutLabel={t.logoutBtn}
+              onLogout={handleLogout}
+            />
+          }
+        />
 
         {mfaMode === 'challenge' ? (
           <StaffMfaPanel copy={releaseCopy[currentLang]} blocking onVerified={() => setMfaMode('optional')} />

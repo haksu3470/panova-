@@ -21,6 +21,8 @@ import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { benefitsAnswered } from '@/lib/workforceRequest';
 import { formatSalary, requestCurrency, SALARY_CURRENCIES, SALARY_CURRENCY_SYMBOL, salaryCurrency } from '@/lib/money';
 import { useSiteLanguage } from '@/lib/site-language';
+import { HeaderActions, PageHeader, headerButtonClass, headerPrimaryClass } from '@/components/site/PageHeader';
+import { staffLogoutToPortal } from '@/lib/staffLogout';
 import DeleteRecordButton from '@/components/portal/DeleteRecordButton';
 import { useStaffRole } from '@/components/portal/useStaffRole';
 import { formatCount, toPipelineCounts, type RequestPipelineCounts } from '@/lib/requestPipelineCounts';
@@ -49,7 +51,7 @@ function RequestFileInner() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
-  const { currentLang, isRtl } = useSiteLanguage('tr');
+  const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
   const t = translations[currentLang] || translations.tr;
   const ui = portalUi[currentLang];
   const { upper, role } = useStaffRole();
@@ -137,9 +139,10 @@ function RequestFileInner() {
     <div className={`min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       {showMatch && <MatchPanel request={req} onClose={() => { setShowMatch(false); load(); }} />}
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
-        <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <PageHeader
+          className="border-slate-200"
+          start={
           <div className="space-y-1">
-            <Link href="/portal" className="text-xs font-bold text-muted-foreground hover:text-slate-800">← {t.returnToPortal || t.returnHome}</Link>
             <h1 className="text-lg sm:text-2xl font-extrabold text-slate-900">📋 {localizeCatalogTitle(req.position_title, currentLang)}<DemoBadge show={req.is_demo} /></h1>
             <div className="text-[11px] text-muted-foreground flex flex-wrap gap-2">
               <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">PNV-REQ-{req.id.substring(0, 6)}</span>
@@ -150,19 +153,32 @@ function RequestFileInner() {
               <span className="font-bold text-slate-700">{requestStatusLabel(t, req.status)}</span>
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <button onClick={() => setShowMatch(true)} className="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">🔗 {ui.matchCandidates}</button>
-            <DeleteRecordButton
-              table="job_requests"
-              id={req.id}
-              name={localizeCatalogTitle(req.position_title, currentLang) || req.id}
-              isDemo={req.is_demo}
-              allowed={upper}
-              onDeleted={() => { window.location.href = '/portal'; }}
+          }
+          actions={
+            <HeaderActions
+              lang={currentLang}
+              onLanguageChange={changeLanguage}
+              homeLabel={t.returnHome}
+              logoutLabel={t.logoutBtn}
+              onLogout={staffLogoutToPortal}
+              extra={
+                <>
+                  <Link href="/portal" className={headerButtonClass.light}>← {t.returnToPortal || t.returnHome}</Link>
+                  <button onClick={() => setShowMatch(true)} className="inline-flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2 rounded-xl font-bold text-xs shadow cursor-pointer">🔗 {ui.matchCandidates}</button>
+                  <DeleteRecordButton
+                    table="job_requests"
+                    id={req.id}
+                    name={localizeCatalogTitle(req.position_title, currentLang) || req.id}
+                    isDemo={req.is_demo}
+                    allowed={upper}
+                    onDeleted={() => { window.location.href = '/portal'; }}
+                  />
+                  <button onClick={save} disabled={saving} className={headerPrimaryClass}>{saving ? (t.saving || '...') : t.saveBtn}</button>
+                </>
+              }
             />
-            <button onClick={save} disabled={saving} className="bg-brand-solid hover:bg-brand text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow">{saving ? (t.saving || '...') : t.saveBtn}</button>
-          </div>
-        </div>
+          }
+        />
         {msg && <div className="text-xs font-bold text-slate-700">{msg}</div>}
 
         {countsFailed ? (

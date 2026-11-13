@@ -29,7 +29,8 @@ import { Language, translations } from '@/lib/dictionary';
 import { portalUi } from '@/lib/portal-ui-copy';
 import { normalizeReferralCode } from '@/lib/referralCode';
 import { ReferralCodeChip } from '@/components/portal/ReferralCodeChip';
-import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
+import { HeaderActions, PageHeader, headerButtonClass, headerPrimaryClass } from '@/components/site/PageHeader';
+import { staffLogoutToPortal as handleStaffLogout } from '@/lib/staffLogout';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { candidatePlaceLabel, candidateProfessionLabel } from '@/lib/candidateLabels';
 import {
@@ -376,11 +377,9 @@ function CandidateDetailPageInner() {
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         
         {/* Üst Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-            <Link href="/portal" className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-800 font-bold text-xs w-fit">
-              ← {t.returnToPortal}
-            </Link>
+        <PageHeader
+          className="border-slate-200"
+          start={
             <div className="flex items-center gap-3">
               {candidatePhoto ? (
                 <img src={candidatePhoto} alt="Foto" className="w-12 h-12 rounded-full object-cover border-2 border-emerald-600 shadow shrink-0" />
@@ -409,16 +408,27 @@ function CandidateDetailPageInner() {
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
-
-            <button onClick={handleSaveDetail} disabled={saving} className="bg-brand-solid hover:bg-brand text-white px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow flex items-center gap-2 cursor-pointer w-full sm:w-auto justify-center">
-              <Save className="w-4 h-4" /> {saving ? (t.saving) : (t.saveChanges)}
-            </button>
-          </div>
-        </div>
+          }
+          actions={
+            <HeaderActions
+              lang={currentLang}
+              onLanguageChange={changeLanguage}
+              homeLabel={t.returnHome}
+              logoutLabel={t.logoutBtn}
+              onLogout={handleStaffLogout}
+              extra={
+                <>
+                  <Link href="/portal" className={headerButtonClass.light}>
+                    ← {t.returnToPortal}
+                  </Link>
+                  <button onClick={handleSaveDetail} disabled={saving} className={headerPrimaryClass}>
+                    <Save className="w-4 h-4" /> {saving ? (t.saving) : (t.saveChanges)}
+                  </button>
+                </>
+              }
+            />
+          }
+        />
 
         {/* Kapanış Uyarısı */}
         {isClosed && (
