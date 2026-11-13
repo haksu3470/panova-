@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 import { translations, type Language } from './dictionary.ts';
 import {
   YouTubeUrlError,
@@ -146,4 +149,20 @@ test('new YouTube copy exists in TR, EN, SQ, AR, and MK', () => {
   assert.notEqual(translations.en.youtubeVideoClear, translations.tr.youtubeVideoClear);
   assert.notEqual(translations.sq.youtubeVideoClear, translations.tr.youtubeVideoClear);
   assert.notEqual(translations.mk.youtubeVideoWatch, translations.en.youtubeVideoWatch);
+});
+
+test('video permission migration reads the role from staff_members (current_staff), same roles as the app', () => {
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const sql = readFileSync(path.join(root, 'supabase/migrations/20261116130000_video_role_from_staff_members.sql'), 'utf8');
+  const body = sql.slice(sql.indexOf('create or replace function public.can_manage_candidate_video()'));
+  assert.match(body, /security definer\s+set search_path to ''/);
+  assert.match(body, /from public\.current_staff\(\) me/);
+  assert.equal(/profiles|staff_role/.test(body.slice(0, body.indexOf('$$;'))), false, 'no profiles.staff_role in the new body');
+  const roles = [...body.matchAll(/'([a-z_]+)'/g)].map((m) => m[1]).filter((role) => role.includes('_'));
+  assert.deepEqual(roles.sort(), ['source_country', 'target_country', 'upper_management']);
+  for (const role of roles) assert.equal(canManageCandidateVideo(role), true, role);
+  for (const role of ['field_officer', 'finance', 'limited', '']) assert.equal(canManageCandidateVideo(role), false, role);
+  assert.match(sql, /notify pgrst, 'reload schema'/);
+  const rollback = readFileSync(path.join(root, 'supabase/rollback/20261116130000_video_role_from_staff_members_rollback.sql'), 'utf8');
+  assert.match(rollback, /p\.staff_role in \('upper_management', 'source_country', 'target_country'\)/);
 });
