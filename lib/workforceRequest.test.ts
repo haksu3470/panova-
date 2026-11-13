@@ -58,7 +58,8 @@ const draft = (overrides: Partial<EmployerDemandDraft> = {}): EmployerDemandDraf
   city: 'Struga',
   salaryText: '1200',
   currency: 'EUR',
-  duration: '12 months',
+  duration: '12 ay',
+  startDate: '',
   experience: '1-3',
   language: 'English (intermediate)',
   lodging: 'yes',
@@ -103,6 +104,8 @@ test('answered lodging and meals are stored on the existing boolean columns', ()
     'salary_currency',
     'sector',
     'status',
+    // existing column, null when no start date is picked
+    'target_start_date',
   ]);
 });
 
@@ -151,7 +154,10 @@ const form = (overrides: Partial<DemandFormInput> = {}): DemandFormInput => ({
   headcountText: '5',
   city: 'Struga',
   salaryText: '1200',
-  duration: '12 months',
+  durationUnit: 'ay',
+  durationAmountText: '12',
+  startDate: '',
+  today: '2026-11-14',
   lodging: 'yes',
   meals: 'no',
   ...overrides,
@@ -164,9 +170,10 @@ test('a valid form has no field errors', () => {
 
 test('blank required fields are each reported under their own field', () => {
   const errors = validateDemandForm(form({
-    sector: '', positionTitle: '  ', experience: '', language: '', headcountText: '', city: '   ', salaryText: '', duration: ' ', lodging: '', meals: '',
+    sector: '', positionTitle: '  ', experience: '', language: '', headcountText: '', city: '   ', salaryText: '', durationUnit: '', durationAmountText: '', lodging: '', meals: '',
   }));
-  assert.deepEqual(Object.keys(errors).sort(), [...DEMAND_FIELDS].sort());
+  // the start date is optional (target_start_date accepts null)
+  assert.deepEqual(Object.keys(errors).sort(), DEMAND_FIELDS.filter((f) => f !== 'startDate').sort());
   assert.ok(Object.values(errors).every((e) => e === 'required'));
   assert.equal(firstInvalidDemandField(errors), 'sector');
   assert.equal(firstInvalidDemandField({ salary: 'salary_range', city: 'required' }), 'city');
@@ -204,6 +211,7 @@ test('every field error has a translated message in five languages', () => {
   const cases: [Parameters<typeof demandFieldMessage>[0], Parameters<typeof demandFieldMessage>[1]][] = [
     ...DEMAND_FIELDS.map((f) => [f, 'required'] as [typeof f, 'required']),
     ['headcount', 'headcount_range'], ['salary', 'salary_range'], ['salary', 'salary_number'], ['experience', 'experience_range'], ['company', 'required'],
+    ['duration', 'duration_number'], ['startDate', 'date_past'], ['startDate', 'date_invalid'],
   ];
   for (const lang of LOCALES) {
     for (const [field, error] of cases) {
@@ -230,4 +238,51 @@ test('employer form: messages under fields, aria wiring, focus, submit never dis
   assert.ok(page.includes('demandRuleFromDbError(error)'));
   const submit = formSrc.slice(formSrc.lastIndexOf('<button type="submit"'));
   assert.equal(/disabled/.test(submit.slice(0, submit.indexOf('>'))), false);
+});
+
+test('duration: number + unit, or open-ended; amount 1-999', () => {
+  for (const unit of ['gün', 'hafta', 'ay', 'yıl'] as const) {
+    assert.equal(validateDemandForm(form({ durationUnit: unit, durationAmountText: '1' })).duration, undefined, unit);
+    assert.equal(validateDemandForm(form({ durationUnit: unit, durationAmountText: '999' })).duration, undefined, unit);
+  }
+  assert.equal(validateDemandForm(form({ durationUnit: '', durationAmountText: '12' })).duration, 'required');
+  assert.equal(validateDemandForm(form({ durationUnit: 'ay', durationAmountText: ' ' })).duration, 'required');
+  for (const bad of ['0', '1000', '2.5', '-3', 'abc', '1e2']) {
+    assert.equal(validateDemandForm(form({ durationUnit: 'ay', durationAmountText: bad })).duration, 'duration_number', bad);
+  }
+  // open-ended: the number field is closed and ignored
+  assert.equal(validateDemandForm(form({ durationUnit: 'open', durationAmountText: '' })).duration, undefined);
+  assert.equal(validateDemandForm(form({ durationUnit: 'open', durationAmountText: 'abc' })).duration, undefined);
+  assert.equal(demandFieldMessage('duration', 'duration_number', translations.tr), translations.tr.demandErrDurationNumber);
+  assert.equal(demandFieldMessage('duration', 'required', translations.tr), translations.tr.demandErrDuration);
+});
+
+test('start date: optional, real date, not before today', () => {
+  assert.equal(validateDemandForm(form({ startDate: '' })).startDate, undefined);
+  assert.equal(validateDemandForm(form({ startDate: '2026-11-14' })).startDate, undefined, 'today is allowed');
+  assert.equal(validateDemandForm(form({ startDate: '2027-02-01' })).startDate, undefined);
+  assert.equal(validateDemandForm(form({ startDate: '2026-11-13' })).startDate, 'date_past');
+  assert.equal(validateDemandForm(form({ startDate: '2026-02-30' })).startDate, 'date_invalid');
+  assert.equal(validateDemandForm(form({ startDate: '14.11.2026' })).startDate, 'date_invalid');
+});
+
+test('the insert row carries the canonical duration and the start date (or null)', () => {
+  const built = buildEmployerDemandInsert(draft({ duration: '90 gün', startDate: '2027-01-10' }));
+  assert.ok(built.ok);
+  if (built.ok) {
+    assert.equal(built.row.contract_type, '90 gün');
+    assert.equal(built.row.target_start_date, '2027-01-10');
+  }
+  const noDate = buildEmployerDemandInsert(draft({ duration: 'süresiz', startDate: '' }));
+  assert.ok(noDate.ok && noDate.row.target_start_date === null && noDate.row.contract_type === 'süresiz');
+});
+
+test('employer form: duration picker, open-ended closes the number, date input with min today', () => {
+  const page = readFileSync(join(import.meta.dirname, '..', 'app/employer/page.tsx'), 'utf8');
+  assert.match(page, /id="demand-duration"\s+type="number"/);
+  assert.match(page, /disabled=\{demandDurationUnit === 'open'\}/);
+  for (const unit of ['gün', 'hafta', 'ay', 'yıl', 'open']) assert.ok(page.includes(`<option value="${unit}">`), unit);
+  assert.match(page, /id="demand-start-date"\s+type="date"\s+min=\{localIsoDate\(\)\}/);
+  assert.ok(page.includes('canonicalDuration(demandDurationUnit, demandDurationAmount)'));
+  assert.ok(page.includes('today: localIsoDate()'));
 });

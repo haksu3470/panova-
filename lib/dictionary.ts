@@ -532,6 +532,25 @@ export interface Translation {
   demandErrHeadcount?: string;
   demandErrCity?: string;
   demandErrDuration?: string;
+  durationAmountLabel?: string;
+  durationUnitLabel?: string;
+  durationUnitPlaceholder?: string;
+  durationUnitDay?: string;
+  durationUnitWeek?: string;
+  durationUnitMonth?: string;
+  durationUnitYear?: string;
+  durationOpenEnded?: string;
+  durationOpenShort?: string;
+  durationDayForms?: string;
+  durationWeekForms?: string;
+  durationMonthForms?: string;
+  durationYearForms?: string;
+  demandErrDurationNumber?: string;
+  durationLegacyNote?: string;
+  startDateLabel?: string;
+  startDateHint?: string;
+  demandErrStartDatePast?: string;
+  demandErrStartDateInvalid?: string;
   demandErrSalaryRange?: string;
   demandErrExperience?: string;
   demandErrCompanyName?: string;
@@ -1296,6 +1315,25 @@ export const translations: Record<Language, Translation> = {
     demandErrHeadcount: 'Kişi sayısı 1 ile 500 arasında tam sayı olmalıdır.',
     demandErrCity: 'Şehir boş bırakılamaz.',
     demandErrDuration: 'Çalışma süresi boş bırakılamaz.',
+    durationAmountLabel: 'Süre (sayı)',
+    durationUnitLabel: 'Birim',
+    durationUnitPlaceholder: 'Birim seçin',
+    durationUnitDay: 'Gün',
+    durationUnitWeek: 'Hafta',
+    durationUnitMonth: 'Ay',
+    durationUnitYear: 'Yıl',
+    durationOpenEnded: 'Süresiz / belirsiz süreli',
+    durationOpenShort: 'Süresiz',
+    durationDayForms: 'gün',
+    durationWeekForms: 'hafta',
+    durationMonthForms: 'ay',
+    durationYearForms: 'yıl',
+    demandErrDurationNumber: 'Geçerli bir sayı girin (1-999).',
+    durationLegacyNote: 'Kayıtlı değer (eski serbest metin): {text}. Değiştirmek için yeni bir süre seçin.',
+    startDateLabel: 'İşe başlama tarihi',
+    startDateHint: 'İsteğe bağlı. Bugünden önceki bir tarih seçilemez.',
+    demandErrStartDatePast: 'İşe başlama tarihi bugünden önce olamaz.',
+    demandErrStartDateInvalid: 'Geçerli bir tarih girin.',
     demandErrSalaryRange: 'Aylık net maaş 0\'dan büyük ve en fazla 100.000 olmalıdır.',
     demandErrExperience: 'Tecrübe 0 ile 60 yıl arasında olmalıdır.',
     demandErrCompanyName: 'Şirket adınız eksik. Önce Şirket Bilgileri bölümünden doldurun.',
@@ -2047,6 +2085,25 @@ export const translations: Record<Language, Translation> = {
     demandErrHeadcount: 'Headcount must be a whole number from 1 to 500.',
     demandErrCity: 'City cannot be empty.',
     demandErrDuration: 'Work duration cannot be empty.',
+    durationAmountLabel: 'Duration (number)',
+    durationUnitLabel: 'Unit',
+    durationUnitPlaceholder: 'Choose a unit',
+    durationUnitDay: 'Days',
+    durationUnitWeek: 'Weeks',
+    durationUnitMonth: 'Months',
+    durationUnitYear: 'Years',
+    durationOpenEnded: 'Open-ended / no fixed term',
+    durationOpenShort: 'Open-ended',
+    durationDayForms: 'day|days',
+    durationWeekForms: 'week|weeks',
+    durationMonthForms: 'month|months',
+    durationYearForms: 'year|years',
+    demandErrDurationNumber: 'Enter a valid number (1-999).',
+    durationLegacyNote: 'Stored value (old free text): {text}. Pick a new duration to replace it.',
+    startDateLabel: 'Start date',
+    startDateHint: 'Optional. A date before today cannot be chosen.',
+    demandErrStartDatePast: 'The start date cannot be before today.',
+    demandErrStartDateInvalid: 'Enter a valid date.',
     demandErrSalaryRange: 'Monthly net salary must be more than 0 and at most 100,000.',
     demandErrExperience: 'Experience must be from 0 to 60 years.',
     demandErrCompanyName: 'Your company name is missing. Fill it in under Company Information first.',
@@ -2798,6 +2855,25 @@ export const translations: Record<Language, Translation> = {
     demandErrHeadcount: 'Numri i personave duhet të jetë numër i plotë nga 1 deri në 500.',
     demandErrCity: 'Qyteti nuk mund të jetë bosh.',
     demandErrDuration: 'Kohëzgjatja e punës nuk mund të jetë bosh.',
+    durationAmountLabel: 'Kohëzgjatja (numër)',
+    durationUnitLabel: 'Njësia',
+    durationUnitPlaceholder: 'Zgjidhni njësinë',
+    durationUnitDay: 'Ditë',
+    durationUnitWeek: 'Javë',
+    durationUnitMonth: 'Muaj',
+    durationUnitYear: 'Vite',
+    durationOpenEnded: 'Pa afat / kohë e pacaktuar',
+    durationOpenShort: 'Pa afat',
+    durationDayForms: 'ditë|ditë',
+    durationWeekForms: 'javë|javë',
+    durationMonthForms: 'muaj|muaj',
+    durationYearForms: 'vit|vjet',
+    demandErrDurationNumber: 'Shkruani një numër të vlefshëm (1-999).',
+    durationLegacyNote: 'Vlera e ruajtur (tekst i lirë i vjetër): {text}. Zgjidhni një kohëzgjatje të re për ta zëvendësuar.',
+    startDateLabel: 'Data e fillimit të punës',
+    startDateHint: 'Opsionale. Nuk mund të zgjidhet një datë para ditës së sotme.',
+    demandErrStartDatePast: 'Data e fillimit nuk mund të jetë para ditës së sotme.',
+    demandErrStartDateInvalid: 'Shkruani një datë të vlefshme.',
     demandErrSalaryRange: 'Paga neto mujore duhet të jetë më e madhe se 0 dhe jo më shumë se 100.000.',
     demandErrExperience: 'Përvoja duhet të jetë nga 0 deri në 60 vjet.',
     demandErrCompanyName: 'Mungon emri i kompanisë. Plotësojeni fillimisht te Informacioni i Kompanisë.',
@@ -3275,6 +3351,25 @@ export const translations: Record<Language, Translation> = {
     demandErrHeadcount: 'يجب أن يكون عدد الأشخاص عددًا صحيحًا من 1 إلى 500.',
     demandErrCity: 'لا يمكن ترك المدينة فارغة.',
     demandErrDuration: 'لا يمكن ترك مدة العمل فارغة.',
+    durationAmountLabel: 'المدة (رقم)',
+    durationUnitLabel: 'الوحدة',
+    durationUnitPlaceholder: 'اختر الوحدة',
+    durationUnitDay: 'أيام',
+    durationUnitWeek: 'أسابيع',
+    durationUnitMonth: 'أشهر',
+    durationUnitYear: 'سنوات',
+    durationOpenEnded: 'غير محددة المدة / بلا مدة ثابتة',
+    durationOpenShort: 'غير محددة المدة',
+    durationDayForms: 'يوم|يومان|أيام|يومًا|يوم',
+    durationWeekForms: 'أسبوع|أسبوعان|أسابيع|أسبوعًا|أسبوع',
+    durationMonthForms: 'شهر|شهران|أشهر|شهرًا|شهر',
+    durationYearForms: 'سنة|سنتان|سنوات|سنةً|سنة',
+    demandErrDurationNumber: 'أدخل رقمًا صحيحًا (1-999).',
+    durationLegacyNote: 'القيمة المحفوظة (نص حر قديم): {text}. اختر مدة جديدة لاستبدالها.',
+    startDateLabel: 'تاريخ بدء العمل',
+    startDateHint: 'اختياري. لا يمكن اختيار تاريخ قبل اليوم.',
+    demandErrStartDatePast: 'لا يمكن أن يكون تاريخ البدء قبل اليوم.',
+    demandErrStartDateInvalid: 'أدخل تاريخًا صحيحًا.',
     demandErrSalaryRange: 'يجب أن يكون صافي الراتب الشهري أكبر من 0 ولا يتجاوز 100,000.',
     demandErrExperience: 'يجب أن تكون الخبرة من 0 إلى 60 سنة.',
     demandErrCompanyName: 'اسم شركتكم مفقود. أكملوه أولًا في قسم معلومات الشركة.',
@@ -4299,6 +4394,25 @@ export const translations: Record<Language, Translation> = {
     demandErrHeadcount: 'Бројот на лица мора да биде цел број од 1 до 500.',
     demandErrCity: 'Градот не може да биде празен.',
     demandErrDuration: 'Времетраењето на работата не може да биде празно.',
+    durationAmountLabel: 'Времетраење (број)',
+    durationUnitLabel: 'Единица',
+    durationUnitPlaceholder: 'Изберете единица',
+    durationUnitDay: 'Денови',
+    durationUnitWeek: 'Недели',
+    durationUnitMonth: 'Месеци',
+    durationUnitYear: 'Години',
+    durationOpenEnded: 'Неопределено / без рок',
+    durationOpenShort: 'Неопределено',
+    durationDayForms: 'ден|дена',
+    durationWeekForms: 'недела|недели',
+    durationMonthForms: 'месец|месеци',
+    durationYearForms: 'година|години',
+    demandErrDurationNumber: 'Внесете валиден број (1-999).',
+    durationLegacyNote: 'Зачувана вредност (стар слободен текст): {text}. Изберете ново времетраење за да ја замените.',
+    startDateLabel: 'Датум на почеток на работа',
+    startDateHint: 'Опционално. Не може да се избере датум пред денешниот.',
+    demandErrStartDatePast: 'Датумот на почеток не може да биде пред денешниот.',
+    demandErrStartDateInvalid: 'Внесете валиден датум.',
     demandErrSalaryRange: 'Месечната нето плата мора да биде поголема од 0 и најмногу 100.000.',
     demandErrExperience: 'Искуството мора да биде од 0 до 60 години.',
     demandErrCompanyName: 'Недостасува името на компанијата. Прво пополнете го во Информации за компанијата.',

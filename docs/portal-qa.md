@@ -158,7 +158,7 @@ In-app guide: `matching-offers`.
 **Adımlar / Steps:**
 
 1. Open **Requests** on `/employer`.
-2. Choose a sector (agriculture, construction, or trade), one or more positions, headcount, city, salary text, duration, experience, and language.
+2. Choose a sector (agriculture, construction, or trade), one or more positions, headcount, city, salary text, duration (number + unit or open-ended, S27), an optional start date, experience, and language.
 3. Leave accommodation and meals on the placeholder and submit. Then set only one of them and submit. Then set both to Yes or No, with a salary such as `1200 EUR`, and submit.
 4. Open the new row on the staff **Requests** tab and on `/portal/requests/[id]`. Try to clear accommodation or meals and save.
 
@@ -485,6 +485,19 @@ Automated: `lib/guides-print.test.ts` (upper management all or one role, ?role i
 6. **Yazdırma / Print.** `/guides/print` keeps its own toolbar; it is still hidden in the printout (S25).
 
 Automated: `lib/page-headers.test.ts`.
+
+## S27. Çalışma süresi ve başlama tarihi / Work duration and start date
+
+**Rol / Role:** A demo employer on `/employer` → **Yeni talep**, then staff on `/portal`. Stored text: `job_requests.contract_type` (`lib/contractDuration.ts`), date: `job_requests.target_start_date`. No database change.
+
+1. **Süre / Duration.** The duration is a number field (1-999) and a unit list (Gün, Hafta, Ay, Yıl, Süresiz / belirsiz süreli). Submit with no unit: "Çalışma süresi boş bırakılamaz." under the field. Unit **Ay** with no number: the same message; with `0`, `1000` or `2.5`: "Geçerli bir sayı girin (1-999)." Pick **Süresiz**: the number field is closed and the form is accepted.
+2. **Kayıt / Stored value.** Send `12` + **Ay**: `contract_type` is `12 ay`; `90` + **Gün** gives `90 gün`; **Süresiz** gives `süresiz` (the Turkish unit code, whatever the page language). The `job_requests_contract_type_nonblank` rule never fires from the form.
+3. **Başlama tarihi / Start date.** Optional (the column accepts null; the form sent no date before). The date picker does not offer days before today; a past date typed by hand shows "İşe başlama tarihi bugünden önce olamaz." Today is accepted. With a date the request has `target_start_date`, without one it stays empty.
+4. **Gösterim / Display.** The employer request card, the staff request list, the request detail on `/portal`, the match panel and the offer form show the duration in the page language: TR "12 ay", EN "12 months", SQ "12 muaj", AR "12 شهرًا", MK "12 месеци" (1 ay: "1 month", "1 месец", "1 شهر"). Old free-text values ("Sezonluk", "12 ay (sezonluk / tam zamanlı)") are shown exactly as stored. Demo seed: "1 yıl" is canonical and is translated ("1 year"), "Sezonluk" stays as it is.
+5. **Personel düzenleme / Staff edit.** `/portal/requests/{id}` → request info: the duration uses the same number + unit picker. A canonical value fills the picker. An old free-text value is kept as it is and shown under the picker ("Stored value (old free text): …") until a new duration is picked; Save with an incomplete number shows "Geçerli bir sayı girin (1-999)." and saves nothing.
+6. **Diller / Languages.** Repeat 1 and 4 in EN, SQ, AR, MK: labels, units, open-ended text and messages are translated; Arabic stays right-to-left.
+
+Automated: `lib/contractDuration.test.ts` (parse, canonical text, plural forms per language, old text unchanged), `lib/workforceRequest.test.ts` (validation and the insert row).
 
 ---
 

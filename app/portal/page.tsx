@@ -30,6 +30,7 @@ import { Language, translations } from '@/lib/dictionary';
 import { dateLocale, portalUi } from '@/lib/portal-ui-copy';
 import { benefitPhrase, displayedRequestSalary } from '@/lib/workforceRequest';
 import { HeaderActions, PageHeader } from '@/components/site/PageHeader';
+import { formatContractDuration } from '@/lib/contractDuration';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { guideNavLabel } from '@/lib/guides-nav';
@@ -1240,7 +1241,7 @@ export default function PortalPage() {
                   <div><strong>{t.facilityFood}:</strong> {benefitPhrase({ provided: t.benefitProvided || '', notProvided: t.benefitNotProvided || '', unanswered: t.benefitUnanswered || '' }, selectedDemandDetail.food_provided ?? selectedDemandDetail.food_allowance)}</div>
                   <div><strong>{t.facilityTransport}:</strong> {benefitPhrase({ provided: t.benefitProvided || '', notProvided: t.benefitNotProvided || '', unanswered: t.benefitUnanswered || '' }, selectedDemandDetail.transport_provided ?? selectedDemandDetail.transportation)}</div>
                   <div><strong>Flight Ticket:</strong> {selectedDemandDetail.flight_ticket ? '✅ Employer Covers' : 'Candidate'}</div>
-                  <div><strong>Contract Term:</strong> {selectedDemandDetail.contract_type || selectedDemandDetail.contract_term || '1 Year'}</div>
+                  <div><strong>{t.durationLabel}:</strong> {formatContractDuration(selectedDemandDetail.contract_type || selectedDemandDetail.contract_term, currentLang, t) || '—'}</div>
                 </div>
               </div>
 

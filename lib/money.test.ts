@@ -56,14 +56,14 @@ test('salary field accepts numbers only', () => {
 });
 
 test('request form: numbers only, more than 0 and at most 100000, currency sent', () => {
-  const form = { sector: 's', positionTitle: 'p', experience: '1-3', language: 'l', headcountText: '2', city: 'c', duration: 'd', lodging: 'yes' as const, meals: 'no' as const };
+  const form = { sector: 's', positionTitle: 'p', experience: '1-3', language: 'l', headcountText: '2', city: 'c', durationUnit: 'ay' as const, durationAmountText: '12', startDate: '', today: '2026-11-14', lodging: 'yes' as const, meals: 'no' as const };
   assert.equal(validateDemandForm({ ...form, salaryText: '1550 euro' }).salary, 'salary_number');
   assert.equal(validateDemandForm({ ...form, salaryText: '0' }).salary, 'salary_range');
   assert.equal(validateDemandForm({ ...form, salaryText: '100001' }).salary, 'salary_range');
   assert.equal(validateDemandForm({ ...form, salaryText: '100000' }).salary, undefined);
   const draft = {
     employerId: 'e', employerName: 'E', country: '', positionTitle: 'p', sector: 's', headcount: 2, city: 'c',
-    salaryText: '1400', duration: 'd', experience: '1-3', language: 'l', lodging: 'yes' as const, meals: 'no' as const,
+    salaryText: '1400', duration: '12 ay', startDate: '', experience: '1-3', language: 'l', lodging: 'yes' as const, meals: 'no' as const,
   };
   const usd = buildEmployerDemandInsert({ ...draft, currency: 'USD' });
   assert.ok(usd.ok && usd.row.salary_currency === 'USD' && usd.row.monthly_net_salary === 1400);
