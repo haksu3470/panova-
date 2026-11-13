@@ -333,6 +333,18 @@ Automated: `lib/candidateStatusChange.test.ts` (error code mapping, reason check
 
 Automated: `lib/candidateDocuments.test.ts` (approval rule, counter, default list, five languages, removed keys), `lib/documentPreview.test.ts` (image / PDF / other, direct address vs storage reference), `lib/staffTravelStatus.test.ts` (not entered vs chosen status, disabled choices, save payload).
 
+## S18. Genel Durum kartları / Overview cards
+
+**Rol / Role:** Upper management and field officer (the roles that see **Overview**).
+
+**Adımlar ve beklenen / Steps and expected:**
+
+1. **Personel talepleri kartı / Personnel requests card.** As upper management, open **Overview**. A **Personnel Requests** card shows the number of open requests (every status except completed and cancelled) and "total N" under it. It matches the requests list: with 5 requests, one completed and one cancelled, the card shows 3 and "total 5".
+2. **Kartlar sekmeye gider / Cards open their tab.** Click each card, then do the same with the keyboard (Tab to the card, Enter): **Total candidates** opens **Candidate Pool**, **Personnel Requests** opens **Personnel Requests**, **Active employers** opens **Employers**, **Staff & Roles** opens **Staff & Roles**, **Open issues / support** opens **Issues / Support**. The focused card has a visible ring and a light hover; a screen reader reads the label, the number and "Go to the … tab" in the page language. Numbers and labels are as before.
+3. **Yetkisiz sekme yok / No unauthorised tab.** As field officer (tabs: overview, candidates, tasks, support), **Total candidates** and **Open issues / support** open their tabs. **Personnel Requests** and **Active employers** still show their numbers but are not buttons: no pointer, no focus with Tab, a click does nothing. The **Staff & Roles** card is not shown, as before.
+
+Automated: `lib/portalOverview.test.ts` (open request count, card to tab, role check, five languages).
+
 ---
 
 ## Boşluk analizi / Gap analysis
