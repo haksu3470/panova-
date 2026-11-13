@@ -58,6 +58,9 @@ import { supportBadgeCount, supportThreadCopy, type SupportMessage } from '@/lib
 import { signedCandidateFileUrl, uploadCandidateFile } from '@/lib/candidateFiles';
 import DocumentPreviewModal from '@/components/portal/DocumentPreviewModal';
 import CandidateDocDownloadButton from '@/components/candidate/CandidateDocDownloadButton';
+import CandidatePrintView, { type CandidatePrintTarget } from '@/components/candidate/CandidatePrintView';
+import { documentPrintRows, offerPrint } from '@/lib/candidatePrint';
+import { EXPORT_COLUMN_LABELS } from '@/lib/exportColumns';
 import { validateUpload } from '@/lib/uploads';
 
 
@@ -145,6 +148,19 @@ export default function CandidateDashboard() {
   // Same preview as staff (DocumentPreviewModal): PDFs are shown from a blob: URL,
   // never by framing the storage address (the site CSP blocks that).
   const [previewDoc, setPreviewDoc] = useState<{ key: string; name: string; fileUrl: string; fileName?: string; documentId?: string } | null>(null);
+  // Print / PDF: one offer or the document list, from a print-only sheet
+  // (CandidatePrintView). The rest of the page is print:hidden.
+  const [printTarget, setPrintTarget] = useState<CandidatePrintTarget | null>(null);
+  useEffect(() => {
+    if (!printTarget) return;
+    const done = () => setPrintTarget(null);
+    window.addEventListener('afterprint', done);
+    const timer = window.setTimeout(() => window.print(), 0);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('afterprint', done);
+    };
+  }, [printTarget]);
 
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
@@ -206,6 +222,11 @@ export default function CandidateDashboard() {
       savedSuccess: 'Profil ve acil durum bilgileri veritabanına kaydedildi.',
       docUploaded: 'Belge yüklendi ve veritabanına kaydedildi!',
       offerUpdated: 'İş teklifi durumu güncellendi!',
+      printDocsBtn: 'Belge listesini yazdır',
+      printOfferTitle: 'İş teklifi',
+      printedAt: 'Yazdırma tarihi',
+      printCandidate: 'Aday',
+      printDocColumn: 'Belge',
       supportCreated: 'Destek talebiniz oluşturuldu!',
     },
     en: {
@@ -264,6 +285,11 @@ export default function CandidateDashboard() {
       savedSuccess: 'Profile and emergency details were saved.',
       docUploaded: 'Document uploaded and saved to DB!',
       offerUpdated: 'Job offer status updated.',
+      printDocsBtn: 'Print document list',
+      printOfferTitle: 'Job offer',
+      printedAt: 'Printed on',
+      printCandidate: 'Candidate',
+      printDocColumn: 'Document',
       supportCreated: 'Support ticket created successfully!',
     },
     sq: {
@@ -322,6 +348,11 @@ export default function CandidateDashboard() {
       savedSuccess: 'Të dhënat e profilit dhe të urgjencës u ruajtën.',
       docUploaded: 'Dokumenti u ngarkua dhe u ruajt!',
       offerUpdated: 'Statusi i ofertës së punës u përditësua!',
+      printDocsBtn: 'Printo listën e dokumenteve',
+      printOfferTitle: 'Ofertë pune',
+      printedAt: 'Printuar më',
+      printCandidate: 'Kandidati',
+      printDocColumn: 'Dokumenti',
       supportCreated: 'Kërkesa për mbështetje u krijua me sukses!',
     },
     ar: {
@@ -380,6 +411,11 @@ export default function CandidateDashboard() {
       savedSuccess: 'تم حفظ بيانات الملف الشخصي والطوارئ.',
       docUploaded: 'تم تحميل المستند وحفظه في قاعدة البيانات!',
       offerUpdated: 'تم تحديث حالة عرض العمل!',
+      printDocsBtn: 'طباعة قائمة المستندات',
+      printOfferTitle: 'عرض عمل',
+      printedAt: 'تاريخ الطباعة',
+      printCandidate: 'المرشح',
+      printDocColumn: 'المستند',
       supportCreated: 'تم إنشاء طلب الدعم بنجاح!',
     },
     mk: {
@@ -438,6 +474,11 @@ export default function CandidateDashboard() {
       savedSuccess: 'Профилот и податоците за итни случаи се зачувани.',
       docUploaded: 'Документот е прикачен и зачуван!',
       offerUpdated: 'Статусот на понудата за работа е ажуриран!',
+      printDocsBtn: 'Печати ја листата на документи',
+      printOfferTitle: 'Понуда за работа',
+      printedAt: 'Печатено на',
+      printCandidate: 'Кандидат',
+      printDocColumn: 'Документ',
       supportCreated: 'Барањето за поддршка е успешно создадено!',
     },
   };
@@ -1441,7 +1482,8 @@ export default function CandidateDashboard() {
   };
 
   return (
-    <div className={`min-h-screen bg-slate-50 text-slate-900 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+    <>
+    <div className={`min-h-screen bg-slate-50 text-slate-900 p-3 sm:p-6 lg:p-8 ${printTarget ? 'print:hidden ' : ''}${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         <PageHeader
           className="border-slate-200"
@@ -1752,7 +1794,24 @@ export default function CandidateDashboard() {
         {/* Belgelerim Sekmesi */}
         {activeTab === 'documents' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
-            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">📁 {ct.docsHeader}</h3>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
+              <h3 className="text-lg font-extrabold text-slate-900">📁 {ct.docsHeader}</h3>
+              {candidateDocs.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setPrintTarget({
+                    kind: 'documents',
+                    rows: documentPrintRows(candidateDocs, {
+                      title: (doc) => docTitle(doc),
+                      status: (doc) => portalUi[currentLang].docStatuses[String(doc.status)] || (DONE_STATUSES.includes(String(doc.status)) ? ct.uploadedStatus : ct.pendingStatus),
+                    }),
+                  })}
+                  className="px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 cursor-pointer"
+                >
+                  🖨️ {ct.printDocsBtn}
+                </button>
+              ) : null}
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {candidateDocs.map((doc: any, idx: number) => (
                 <div key={doc.id || idx} className="p-4 bg-slate-50 rounded-2xl border space-y-2">
@@ -1827,6 +1886,20 @@ export default function CandidateDashboard() {
                     ) : null}
                     <div className="text-xs font-bold text-foreground">{offerUi.status}: <span className={`inline-flex rounded-lg px-2 py-0.5 ${offerStatusTone(offer.status)}`}>{statusLabel}</span></div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setPrintTarget({
+                      kind: 'offer',
+                      offer: offerPrint(offer, {
+                        position: () => localizeCatalogTitle(offer.position_title, currentLang) || '',
+                        salary: () => (money ? `${money} ${offerUi.offerNetPerMonth}` : offerUi.salaryNotSet),
+                        status: () => statusLabel,
+                      }),
+                    })}
+                    className="px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 cursor-pointer shrink-0"
+                  >
+                    🖨️ {offerUi.exportPrint}
+                  </button>
                   {offer.status === 'pending' && (
                     <div className="flex gap-2 shrink-0">
                       <button onClick={() => handleUpdateOfferStatus(offer.id, 'accepted')} className="px-3 py-1.5 bg-brand-solid text-white rounded-xl font-bold cursor-pointer">{ct.acceptBtn}</button>
@@ -1880,5 +1953,29 @@ export default function CandidateDashboard() {
         />
       )}
     </div>
+    {printTarget ? (
+      <CandidatePrintView
+        target={printTarget}
+        candidateName={candidate?.full_name || ''}
+        printedAt={new Date().toLocaleDateString(dateLocale[currentLang])}
+        dir={isRtl ? 'rtl' : 'ltr'}
+        labels={{
+          offerTitle: ct.printOfferTitle,
+          documentsTitle: ct.docsHeader,
+          candidate: ct.printCandidate,
+          printedAt: ct.printedAt,
+          position: EXPORT_COLUMN_LABELS[currentLang].position_title,
+          employer: EXPORT_COLUMN_LABELS[currentLang].employer_name,
+          salary: portalUi[currentLang].offerSalary,
+          startDate: portalUi[currentLang].offerStart,
+          terms: portalUi[currentLang].offerTerms,
+          status: portalUi[currentLang].status,
+          document: ct.printDocColumn,
+          fileName: releaseCopy[currentLang].docFile,
+          reviewNote: releaseCopy[currentLang].docReason,
+        }}
+      />
+    ) : null}
+    </>
   );
 }

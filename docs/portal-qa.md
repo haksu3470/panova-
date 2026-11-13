@@ -526,6 +526,18 @@ Automated: `lib/contractDuration.test.ts` (parse, canonical text, plural forms p
 6. **Diller / Languages.** Repeat 1 and 4 in EN, SQ, AR, MK: the window texts and the button label are translated; Arabic stays right-to-left.
 
 Automated: `lib/documentPreview.test.ts` (no `<iframe` on the candidate page, shared preview window, download uses the preview access path, CSP not widened).
+
+## S30. Aday teklif ve belge listesi yazdırma / Candidate offer and document list print
+
+**Rol / Role:** A demo candidate on `/candidate`, in Chrome and Firefox (desktop). Printing happens on the same page (`window.print()`); no new window and no pop-up. Nothing is written to the database or the audit log.
+
+1. **Teklif / Offer.** **Tekliflerim / Offers** → each offer card has **Yazdır / PDF** (EN Print / PDF). The print preview shows only that offer: heading "İş teklifi", candidate name, print date, position, employer, salary, start date, terms, status. It fits on one page (A4, 16 mm margins). Other offers, the accept / reject buttons, the tab bar and the header do not appear.
+2. **Belge listesi / Document list.** **Belgelerim / Documents** → **Belge listesini yazdır** (shown only when there is at least one document). The preview is a table: document type, status, file name, review note (empty cells show "—"). No file, image or PDF content is printed.
+3. **PDF olarak kaydet / Save as PDF.** In the print dialog pick "Save as PDF": the file has the same content as 2 or 1.
+4. **Kapanış / After printing.** Cancel or finish the dialog: the page is unchanged and the same button works again. Pressing **Ctrl+P** without a button prints the page as before (the page is hidden on paper only while a print button's sheet is open).
+5. **Diller / Languages.** Repeat 1 and 2 in EN, SQ, AR, MK: headings and column names are translated; Arabic prints right-to-left.
+
+Automated: `lib/candidatePrint.test.ts` (offer and document whitelists, no file in the print view, the page is `print:hidden`, texts in 5 languages).
 ---
 
 ## Boşluk analizi / Gap analysis
