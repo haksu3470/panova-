@@ -9,6 +9,8 @@ Bu yollar `GUIDES_PENDING_TRANSLATION` listesindedir. `withPendingTr()` diğer d
 Çevirmek için: yolu ilgili dilin bloğuna (`en`, `sq`, `ar`, `mk`) çevrilmiş metinle ekleyin. Dört dilin hepsi bitince yolu `GUIDES_PENDING_TRANSLATION` listesinden ve buradan silin.
 
 - [ ] `exampleLabel`
+- [ ] `stepDoneBy` (adım rol notu, `{roles}` yer tutucusu kalmalı)
+- [ ] `stepOthersNote`
 - [ ] `roleLabels.finance`
 - [ ] `roleLabels.limited`
 - [ ] `roles.finance`
@@ -17,7 +19,9 @@ Bu yollar `GUIDES_PENDING_TRANSLATION` listesindedir. `withPendingTr()` diğer d
 - [ ] `guides.staff-login.example`
 - [ ] `guides.staff-invite.example`
 - [ ] `guides.dossier-review.example`
+- [ ] `guides.dossier-review.steps` (6 adım; adım rolleri için bölüm 5)
 - [ ] `guides.matching-offers.example`
+- [ ] `guides.matching-offers.steps` (7 adım; adım rolleri için bölüm 5)
 - [ ] `guides.employer-request.example`
 - [ ] `guides.employer-browse.example`
 - [ ] `guides.candidate-register.example`
@@ -36,8 +40,8 @@ Bu anahtarlar dört dilde zaten var, ama eski içeriği anlatıyor. Yeni Türkç
 - **roles.employer**: `summary`, `screens.home.does`, `screens.candidates.does`, `screens.interviews.name`, `screens.interviews.does`, `screens.selected.name`, `screens.selected.does`, `screens.process.name`, `screens.process.does`, `screens.travel.name`, `screens.employees.name`, `screens.employees.does`, `screens.support.name`, `screens.company.name`
 - **roles.candidate**: `summary`, `screens.profile.does`, `screens.documents.does`, `screens.offers.does`
 - **guides.staff-login**: `steps[3].body`, `flow[3]`, `mock.rows[2].value`
-- **guides.dossier-review**: `summary`, `steps[1].title`, `steps[1].body`, `steps[2].title`, `steps[2].body`, `steps[3].body`, `flow[1]`, `flow[2]`, `flow[3]`, `mock.caption`, `mock.chrome`, `mock.rows[0].label`, `mock.rows[0].value`, `mock.rows[1].label`, `mock.rows[1].value`, `mock.rows[2].label`, `mock.rows[2].value`
-- **guides.matching-offers**: `title`, `summary`, `steps[1].title`, `steps[1].body`, `steps[2].title`, `steps[2].body`, `steps[3].title`, `steps[3].body`, `flow[1]`, `flow[2]`, `flow[3]`, `mock.rows[0].label`, `mock.rows[0].value`, `mock.rows[1].label`, `mock.rows[1].value`, `mock.rows[2].label`, `mock.rows[2].value`
+- **guides.dossier-review**: `summary`, `flow[1]`, `flow[2]`, `flow[3]`, `mock.caption`, `mock.chrome`, `mock.rows[0].label`, `mock.rows[0].value`, `mock.rows[1].label`, `mock.rows[1].value`, `mock.rows[2].label`, `mock.rows[2].value`
+- **guides.matching-offers**: `title`, `summary`, `flow[1]`, `flow[2]`, `flow[3]`, `mock.rows[0].label`, `mock.rows[0].value`, `mock.rows[1].label`, `mock.rows[1].value`, `mock.rows[2].label`, `mock.rows[2].value`
 - **guides.employer-request**: `summary`, `where`, `steps[1].title`, `steps[1].body`, `steps[2].body`, `steps[3].title`, `steps[3].body`, `steps[4].body`, `flow[0]`, `flow[1]`, `flow[2]`, `mock.chrome`, `mock.rows[0].value`, `mock.rows[1].label`, `mock.rows[1].value`
 - **guides.employer-browse**: `summary`, `steps[0].body`, `steps[2].body`, `steps[3].body`, `flow[1]`, `flow[2]`, `flow[3]`, `mock.rows[2].value`
 - **guides.candidate-register**: `steps[1].body`, `steps[3].body`, `steps[4].title`, `steps[4].body`, `flow[3]`, `mock.caption`, `mock.rows[0].label`, `mock.rows[0].value`, `mock.rows[1].value`, `mock.rows[2].value`
@@ -52,6 +56,13 @@ Bu anahtarlar dört dilde zaten var, ama eski içeriği anlatıyor. Yeni Türkç
 
 - [ ] en, sq, ar, mk metinlerini ana dili konuşan biri gözden geçirsin.
 - Not: `print.coverSubtitle` şirket adını (Panova Group) Latin harfle tutar.
+
+## 5. Adım yetkileri (`GUIDE_STEP_ACTORS`)
+
+Rehber adımlarının hangi rolce yapıldığı `lib/guides-model.ts` içindeki `GUIDE_STEP_ACTORS` listesindedir ve adım sırasına bağlıdır. Bir dilde adım çevirirken adım sayısını ve sırasını Türkçe ile aynı tutun; test (`lib/guides.test.ts`) adım sayısı farklıysa düşer.
+
+- `guides.dossier-review.steps` ve `guides.matching-offers.steps` yeniden yazıldı (durumu elle değiştirme, YouTube, aday bağlama, sunma, işveren adına karar, mülakat ve toplantı bağlantısı ayrı adım oldu). Eski çeviriler (4 adım) şimdilik Türkçe metinle değiştirildi; bölüm 2'deki eski `steps[...]` satırları bu yüzden kaldırıldı.
+- `guides.request-to-offer` (7 adım; "Toplantı bağlantısı" yeni adım) ve `guides.document-request` (6 adım; "Belgeyi silin" yeni adım) zaten bölüm 1'de bütün olarak bekliyor.
 
 ## Rol görünürlüğü (`mapNote`, `unknownRoleNote`)
 

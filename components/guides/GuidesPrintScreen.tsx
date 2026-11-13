@@ -229,13 +229,15 @@ function PrintDocument({
 
           <section className="space-y-2">
             <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{copy.stepsLabel}</h3>
+            {guide.hasOthersSteps ? <p className="text-xs font-semibold text-slate-700">{copy.stepOthersNote}</p> : null}
             <ol className="space-y-2">
               {guide.steps.map((step, index) => (
-                <li key={step.title} className="print-avoid flex gap-3">
+                <li key={step.title} className="print-avoid flex gap-3" data-own={step.own ? 'true' : 'false'}>
                   <span className="w-6 shrink-0 text-sm font-extrabold text-slate-900">{index + 1}.</span>
                   <div>
-                    <p className="text-sm font-extrabold text-slate-900">{step.title}</p>
-                    <p className="text-sm leading-relaxed text-slate-700">{step.body}</p>
+                    <p className={`text-sm font-extrabold ${step.own ? 'text-slate-900' : 'text-slate-700'}`}>{step.title}</p>
+                    {step.body ? <p className="text-sm leading-relaxed text-slate-700">{step.body}</p> : null}
+                    {step.doneBy ? <p className="text-xs font-bold text-slate-700">{step.doneBy}</p> : null}
                   </div>
                 </li>
               ))}
