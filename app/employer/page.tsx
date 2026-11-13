@@ -1185,6 +1185,7 @@ function EmployerPortalInner() {
             t={t}
             steps={ui.steps}
             isRtl={isRtl}
+            lang={currentLang}
           />
         )}
 

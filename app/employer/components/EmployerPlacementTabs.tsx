@@ -5,8 +5,10 @@
 // shown; nothing else is loaded here.
 
 import { Plane } from 'lucide-react';
-import type { Translation } from '@/lib/dictionary';
+import type { Language, Translation } from '@/lib/dictionary';
 import { fill } from '@/lib/portal-ui-copy';
+import { candidateProfessionLabel } from '@/lib/candidateLabels';
+import { localizeCatalogTitle } from '@/lib/professions';
 import {
   dayOf,
   followupState,
@@ -33,6 +35,7 @@ type Props = {
   t: Translation;
   steps: Record<string, string>;
   isRtl: boolean;
+  lang: Language;
 };
 
 const card = 'bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4';
@@ -53,8 +56,9 @@ function stageBadge(stage: PipelineStage | null, t: Translation) {
   return <span className={`shrink-0 px-2.5 py-1 rounded-md text-xs font-bold ${tone}`}>{label}</span>;
 }
 
-function personLine(row: EmployerPlacement) {
-  return [row.profession, row.nationality].filter(Boolean).join(' · ');
+// Catalog key (e.g. cnc_operator) in the active language; free text as entered.
+function personLine(row: EmployerPlacement, lang: Language) {
+  return [candidateProfessionLabel(row.profession, '', lang), row.nationality].filter(Boolean).join(' · ');
 }
 
 function ProgressBar({ row, t, steps }: { row: EmployerPlacement; t: Translation; steps: Record<string, string> }) {
@@ -105,7 +109,7 @@ function followupTone(state: FollowupState) {
       : 'bg-blue-100 text-blue-800';
 }
 
-export default function EmployerPlacementTabs({ tab, rows, load, staffView, t, steps, isRtl }: Props) {
+export default function EmployerPlacementTabs({ tab, rows, load, staffView, t, steps, isRtl, lang }: Props) {
   const title = tab === 'status' ? t.processStatusTitle : tab === 'travel' ? t.travelStartTitle : t.activeEmployeesTitle;
   const shown = tab === 'employees' ? startedEmployees(rows) : rows;
   const empty = tab === 'status' ? t.plNoSelected : tab === 'travel' ? t.plNoTravel : t.plNoEmployees;
@@ -125,7 +129,7 @@ export default function EmployerPlacementTabs({ tab, rows, load, staffView, t, s
       <div className="space-y-5">
         {groupByRequest(shown).map((group) => (
           <section key={group.request_id} className="space-y-2.5">
-            <h4 className="text-sm font-extrabold text-slate-900">{group.title || '—'}</h4>
+            <h4 className="text-sm font-extrabold text-slate-900">{localizeCatalogTitle(group.title, lang) || '—'}</h4>
             <ul className={tab === 'employees' ? 'grid grid-cols-1 md:grid-cols-2 gap-3' : 'space-y-3'}>
               {group.rows.map((row) => {
                 const travel = travelView(row);
@@ -134,7 +138,7 @@ export default function EmployerPlacementTabs({ tab, rows, load, staffView, t, s
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="font-extrabold text-slate-950 break-words">{row.full_name || '—'}</div>
-                        {personLine(row) && <div className="text-xs text-muted-foreground font-semibold">{personLine(row)}</div>}
+                        {personLine(row, lang) && <div className="text-xs text-muted-foreground font-semibold">{personLine(row, lang)}</div>}
                       </div>
                       {tab === 'status' && stageBadge(row.pipeline_stage, t)}
                       {tab === 'travel' && travel.kind === 'flight' && travel.status && (
