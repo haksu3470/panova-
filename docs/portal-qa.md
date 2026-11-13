@@ -394,6 +394,20 @@ Automated: `lib/documentPreview.test.ts` (PDF blob typed `application/pdf` from 
 
 Automated: `lib/workforceRequest.test.ts` (per-field errors, limits 1–500 / 0–100000 / 0–60, first invalid field, database rule to field, five languages, page wiring).
 
+## S22. İşveren özet kartları ve talep silme / Employer summary cards and request delete
+
+**Rol / Role:** Employer on `/employer`. Staff view (`/employer?view=…` as staff) for item 5.
+
+**Adımlar ve beklenen / Steps and expected:**
+
+1. **Kartlar üstte / Cards at the top.** Open `/employer`. The four cards **Open Requests**, **Total Candidates**, **Interviews** and **My Selected Candidates** show right under the tab bar, before the request list, on every tab (also on **New request**, above the form). They are no longer at the bottom. The **PANOVA Operations Summary** box is unchanged.
+2. **Sayılar aynı / Same numbers.** The numbers equal the earlier totals: **Open Requests** does not count completed or cancelled requests; the other three are the sums of the request cards. When the counts cannot be loaded every card shows a dash.
+3. **Tıklanabilir / Clickable.** Click each card, then do the same with the keyboard (Tab to the card, Enter or Space). The focused card has a visible ring. **Open Requests** stays on **Overview** and scrolls smoothly to the request list; focus is on its heading. **Total Candidates** opens **Candidates**, **Interviews** opens **Interviews**, **My Selected Candidates** opens **Selected**; each scrolls to and focuses that section. A screen reader reads e.g. "Open Requests: 2. Go to Your Active Workforce Demand Files" in the page language (check TR, EN, SQ, AR, MK).
+4. **Silme / Delete.** On a request with no presented candidate, interview, selection or offer, **Delete request** shows under its date. Press it: a confirmation asks first; after OK the request disappears. Requests with any of those counts above 0 show no delete button. A request with a match the employer cannot see yet (staff matched but not presented) still shows the button; pressing it leaves the request and shows "This request has a process linked to it and cannot be deleted." under the card. Other errors show "The request could not be deleted. Please try again."
+5. **Personel görünümü / Staff view.** As staff viewing an employer, no delete button shows.
+
+Automated: `lib/employerOverview.test.ts` (card order, targets, numbers from the same totals, placement in the page, aria label in five languages, delete outcome, delete button rule, removed DemandForm / createDemand), `lib/employerDemandDisplay.test.ts`.
+
 ---
 
 ## Boşluk analizi / Gap analysis

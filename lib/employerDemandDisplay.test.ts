@@ -43,7 +43,8 @@ test('the employer home shows request files and the form opens without sample va
   );
   const homeAt = source.indexOf("{activeTab === 'home' &&");
   const formAt = source.indexOf("{activeTab === 'newRequest' &&");
-  const filesAt = source.indexOf('activeDemandFilesTitle');
+  // The list heading (the summary card also names this section in its aria label).
+  const filesAt = source.indexOf('{t.activeDemandFilesTitle} (');
   const formTitleAt = source.indexOf('corporateDemandTitle');
   assert.ok(homeAt >= 0 && formAt > homeAt);
   assert.ok(filesAt > homeAt && filesAt < formAt);
