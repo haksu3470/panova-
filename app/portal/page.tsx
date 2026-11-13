@@ -51,7 +51,9 @@ import ListExportBar from '@/components/portal/ListExportBar';
 import StaffTab from '../../components/portal/StaffTab';
 import TasksTab from '../../components/portal/TasksTab';
 import { employerExportRows, offerExportRows, requestExportRows } from '@/lib/exportLists';
-import { canUpdateRequestStatus, isUpperManagementRole, tabsForStaffRole, type StaffTab as StaffTabId } from '@/lib/staffAccess';
+import { canUpdateRequestStatus, isUpperManagementRole, overviewCardTarget, tabsForStaffRole, type OverviewCard as OverviewCardId, type StaffTab as StaffTabId } from '@/lib/staffAccess';
+import { countOpenRequests } from '@/lib/requestPipelineCounts';
+import OverviewCard from '@/components/portal/OverviewCard';
 import { statusErrorKey, type StatusErrorKey } from '@/lib/requestStatusChange';
 import type { CandidateStatusErrorKey } from '@/lib/candidateStatusChange';
 import { candidateService } from '@/lib/services/candidateService';
@@ -826,41 +828,61 @@ export default function PortalPage() {
 
         {mfaMode !== 'challenge' && activeTab === 'overview' && showTab('overview') && (
           <div className="space-y-6">
-            <div className={`grid grid-cols-1 sm:grid-cols-2 ${isUpperManagement ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
-              <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
-                <div>
-                  <div className="text-muted-foreground text-[11px] sm:text-xs font-bold uppercase">{t.totalCandidatesCard}</div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">{candidates.length}</div>
+            {(() => {
+              // A card opens its tab only when the tab bar above shows that tab
+              // (same showTab check; staff also needs upper management).
+              const canSeeTab = (tab: StaffTabId) => showTab(tab) && (tab !== 'staff' || isUpperManagement);
+              const goTo = (card: OverviewCardId, label: string, value: number) => {
+                const tab = overviewCardTarget(card, canSeeTab);
+                if (!tab) return {};
+                const tabLabel = { candidates: t.candidatesTab, requests: t.requestsTab, employers: t.employersTab, staff: t.staffTab, support: t.supportTab }[card];
+                return {
+                  onOpen: () => setActiveTab(tab),
+                  ariaLabel: `${label}: ${value}. ${(t.overviewGoToTab || '{tab}').replace('{tab}', tabLabel)}`,
+                };
+              };
+              const requestCounts = countOpenRequests(jobRequests);
+              const openTasks = tasks.filter(task => task.status === 'pending').length;
+              return (
+                <div className={`grid grid-cols-1 sm:grid-cols-2 ${isUpperManagement ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-4`}>
+                  <OverviewCard
+                    label={t.totalCandidatesCard}
+                    value={candidates.length}
+                    icon={<Users className="w-9 h-9 sm:w-10 sm:h-10 text-emerald-600 bg-emerald-50 p-2 rounded-xl shrink-0" aria-hidden="true" />}
+                    {...goTo('candidates', t.totalCandidatesCard, candidates.length)}
+                  />
+                  <OverviewCard
+                    label={t.requestsTab}
+                    value={requestCounts.open}
+                    sub={(t.overviewTotalOf || '{n}').replace('{n}', String(requestCounts.total))}
+                    icon={<FileText className="w-9 h-9 sm:w-10 sm:h-10 text-amber-700 bg-amber-50 p-2 rounded-xl shrink-0" aria-hidden="true" />}
+                    {...goTo('requests', t.requestsTab, requestCounts.open)}
+                  />
+                  <OverviewCard
+                    label={t.activeEmployersCard}
+                    value={employers.length}
+                    icon={<Building2 className="w-9 h-9 sm:w-10 sm:h-10 text-blue-600 bg-blue-50 p-2 rounded-xl shrink-0" aria-hidden="true" />}
+                    {...goTo('employers', t.activeEmployersCard, employers.length)}
+                  />
+                  {isUpperManagement && (
+                    <OverviewCard
+                      label={t.staffTab}
+                      value={staffMembers.length}
+                      valueClassName="text-indigo-600"
+                      icon={<UserCheck className="w-9 h-9 sm:w-10 sm:h-10 text-indigo-600 bg-indigo-50 p-2 rounded-xl shrink-0" aria-hidden="true" />}
+                      {...goTo('staff', t.staffTab, staffMembers.length)}
+                    />
+                  )}
+                  <OverviewCard
+                    label={t.openSupportCard}
+                    value={openTasks}
+                    valueClassName="text-emerald-700"
+                    icon={<CheckSquare className="w-9 h-9 sm:w-10 sm:h-10 text-emerald-600 bg-emerald-50 p-2 rounded-xl shrink-0" aria-hidden="true" />}
+                    {...goTo('support', t.openSupportCard, openTasks)}
+                  />
                 </div>
-                <Users className="w-9 h-9 sm:w-10 sm:h-10 text-emerald-600 bg-emerald-50 p-2 rounded-xl" />
-              </div>
-
-              <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
-                <div>
-                  <div className="text-muted-foreground text-[11px] sm:text-xs font-bold uppercase">{t.activeEmployersCard}</div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">{employers.length}</div>
-                </div>
-                <Building2 className="w-9 h-9 sm:w-10 sm:h-10 text-blue-600 bg-blue-50 p-2 rounded-xl" />
-              </div>
-
-              {isUpperManagement && (
-                <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
-                  <div>
-                    <div className="text-muted-foreground text-[11px] sm:text-xs font-bold uppercase">{t.staffTab}</div>
-                    <div className="text-2xl sm:text-3xl font-extrabold text-indigo-600 mt-1">{staffMembers.length}</div>
-                  </div>
-                  <UserCheck className="w-9 h-9 sm:w-10 sm:h-10 text-indigo-600 bg-indigo-50 p-2 rounded-xl" />
-                </div>
-              )}
-
-              <div className="bg-white p-5 sm:p-6 rounded-2xl border shadow-sm flex items-center justify-between">
-                <div>
-                  <div className="text-muted-foreground text-[11px] sm:text-xs font-bold uppercase">{t.openSupportCard}</div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-emerald-700 mt-1">{tasks.filter(t => t.status === 'pending').length}</div>
-                </div>
-                <CheckSquare className="w-9 h-9 sm:w-10 sm:h-10 text-emerald-600 bg-emerald-50 p-2 rounded-xl" />
-              </div>
-            </div>
+              );
+            })()}
 
             {mfaMode === 'optional' ? (
               <StaffMfaPanel

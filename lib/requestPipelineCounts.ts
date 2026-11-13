@@ -100,6 +100,16 @@ export type PipelineTotals = {
 
 const CLOSED_STATUSES = new Set(['completed', 'cancelled']);
 
+/** Completed and cancelled requests are closed; every other status is open. */
+export function isClosedRequestStatus(status: string | null | undefined): boolean {
+  return CLOSED_STATUSES.has(String(status ?? ''));
+}
+
+/** Open and total request counts for the overview card (same rule as the cards above). */
+export function countOpenRequests(requests: ReadonlyArray<{ status?: string | null }>): { open: number; total: number } {
+  return { open: requests.filter((r) => !isClosedRequestStatus(r.status)).length, total: requests.length };
+}
+
 /**
  * Summary cards: totals over the given requests, from the same view rows as
  * the request cards. Null when the view failed or is still loading, so the
@@ -117,7 +127,7 @@ export function sumPipelineCounts(
     const row = index[id];
     if (!row || seen.has(id)) continue;
     seen.add(id);
-    if (!CLOSED_STATUSES.has(String(request.status ?? ''))) totals.open_requests += 1;
+    if (!isClosedRequestStatus(request.status)) totals.open_requests += 1;
     totals.presented += row.presented;
     totals.interviews += row.interviews;
     totals.selected += row.selected;

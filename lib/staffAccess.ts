@@ -37,6 +37,27 @@ export function tabsForStaffRole(role: string | null | undefined): StaffTab[] {
   return PORTAL_TABS.filter((tab) => allowed.has(tab));
 }
 
+/** Overview summary cards and the tab each one opens. */
+export const OVERVIEW_CARD_TABS = {
+  candidates: 'candidates',
+  requests: 'requests',
+  employers: 'employers',
+  staff: 'staff',
+  support: 'support',
+} as const satisfies Record<string, StaffTab>;
+
+export type OverviewCard = keyof typeof OVERVIEW_CARD_TABS;
+
+/**
+ * The tab an overview card opens, or null when the user cannot see that tab
+ * (the card then stays a plain, non-clickable summary). `canSeeTab` is the
+ * page's own tab check, so no new access is granted here.
+ */
+export function overviewCardTarget(card: OverviewCard, canSeeTab: (tab: StaffTab) => boolean): StaffTab | null {
+  const tab = OVERVIEW_CARD_TABS[card];
+  return canSeeTab(tab) ? tab : null;
+}
+
 export function canOpenStaffFile(role: string | null | undefined, route: StaffFileRoute): boolean {
   const id = (role || '').trim().toLowerCase();
   if (id === 'upper_management') return true;
