@@ -23,16 +23,4 @@ export const demandService = {
     if (error) throw error;
     return data;
   },
-
-  // Yeni kurumsal talep oluştur
-  async createDemand(payload: any) {
-    const { data, error } = await supabase
-      .from('job_requests')
-      .insert([payload])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  }
 };
