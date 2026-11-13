@@ -8,8 +8,8 @@ import DemoBadge from './DemoBadge';
 import { candidateProfessionLabel } from '@/lib/candidateLabels';
 import { localizeCatalogTitle } from '@/lib/professions';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
-import { OFFER_CURRENCIES, offerCurrency, offerTermsPayload } from '@/lib/offers';
-import { DEFAULT_SALARY_CURRENCY, formatSalary, offerDefaultsFromRequest, requestCurrency } from '@/lib/money';
+import { offerCurrency, offerTermsPayload } from '@/lib/offers';
+import { DEFAULT_SALARY_CURRENCY, formatSalary, offerDefaultsFromRequest, requestCurrency, SALARY_CURRENCIES } from '@/lib/money';
 import { releaseCopy } from '@/lib/release-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 import { translations } from '@/lib/dictionary';
@@ -254,7 +254,8 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
                 </div>
               ) : (
                 <select value={of.currency || DEFAULT_SALARY_CURRENCY} onChange={(e) => setOf({ ...of, currency: e.target.value })} className={inp} aria-label={ui.offerCurrency}>
-                  {OFFER_CURRENCIES.map((code) => <option key={code} value={code} className="bg-white text-slate-900">{code}</option>)}
+                  {/* EUR / USD only: job_offers_currency_check refuses other codes. */}
+                  {SALARY_CURRENCIES.map((code) => <option key={code} value={code} className="bg-white text-slate-900">{code}</option>)}
                 </select>
               )}
               <input type="date" value={of.start_date} onChange={(e) => setOf({ ...of, start_date: e.target.value })} className={inp} />

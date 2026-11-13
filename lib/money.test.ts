@@ -131,3 +131,14 @@ test('SQL record files exist', () => {
   assert.match(up, /check \(salary_currency in \('EUR', 'USD'\)\)/);
   assert.ok(down.indexOf('drop constraint') < down.indexOf('drop column'));
 });
+
+test('offer currency check: SQL record and the panel only offers EUR / USD', () => {
+  const up = readFileSync(join(ROOT, 'supabase/migrations/20261113191000_job_offers_currency_check.sql'), 'utf8');
+  const down = readFileSync(join(ROOT, 'supabase/rollback/20261113191000_job_offers_currency_check_rollback.sql'), 'utf8');
+  assert.match(up, /job_offers: % kayitta gecersiz para birimi var\. Hicbir sey degistirilmedi\./);
+  assert.match(up, /check \(offer_terms is null or offer_terms ->> 'currency' is null or offer_terms ->> 'currency' in \('EUR', 'USD'\)\)/);
+  assert.match(down, /drop constraint if exists job_offers_currency_check/);
+  const panel = readFileSync(join(ROOT, 'components/portal/InterviewOfferPanel.tsx'), 'utf8');
+  assert.equal(panel.includes('OFFER_CURRENCIES'), false);
+  assert.ok(panel.includes('SALARY_CURRENCIES.map('));
+});
