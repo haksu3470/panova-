@@ -407,6 +407,21 @@ Automated: `lib/workforceRequest.test.ts` (per-field errors, limits 1–500 / 0�
 5. **Personel görünümü / Staff view.** As staff viewing an employer, no delete button shows.
 
 Automated: `lib/employerOverview.test.ts` (card order, targets, numbers from the same totals, placement in the page, aria label in five languages, delete outcome, delete button rule, removed DemandForm / createDemand), `lib/employerDemandDisplay.test.ts`.
+## S23. Maaş para birimi / Salary currency (EUR / USD)
+
+**Rol / Role:** Employer on `/employer`; staff on `/portal`, `/portal/requests/[id]`, `/portal/candidates/[id]`; candidate on `/candidate`. Column: `job_requests.salary_currency` (`supabase/migrations/20261113190000_job_requests_salary_currency.sql`).
+
+**Adımlar ve beklenen / Steps and expected:**
+
+1. **Form: yalnız sayı / Form: numbers only.** On **New request**, the salary field has a currency list next to it with **EUR (€)** selected. Type `1550 euro`: on **Submit** the field shows "Enter the monthly net salary as a number."; `0` or `100001` show the 0–100,000 message. `1400`, `1.400` and `1400,50` are accepted. Switch to **USD**: the placeholder and the hint under the field change from € to $.
+2. **Kayıt / Saved.** Send a request with `1400` and **USD**. In the database `monthly_net_salary` is 1400 and `salary_currency` is `USD`. A request sent without touching the list is `EUR`.
+3. **Gösterim / Display.** The employer request card shows `$1,400` (EN) / `$1.400` (TR) for the USD request and `€1.000` style for the existing EUR requests, never a bare number. The same request shows the same amount and symbol in **Personnel Requests** on `/portal`, in the request detail modal, and under the currency list on `/portal/requests/[id]`. Change the page language: the number format follows it (TR/SQ/MK `1.400`, EN/AR `1,400`). An old request with a free-text salary still shows its text as typed.
+4. **Teklif talepten gelir / Offer from the request.** On `/portal/requests/[id]` open **Manage** → a candidate → offers. **New offer** starts with the request's salary filled in. The currency is shown as fixed ("set by the request, cannot be changed") and is the request's currency (USD for the USD request). Change the salary to 1500 and send: the offer has `monthly_net_salary` 1500 and `offer_terms.currency` `USD`. Editing that offer keeps 1500 and USD.
+5. **Talepsiz teklif / Offer without a request.** From a candidate file (`/portal/candidates/[id]`, no request) the offer currency is EUR: the offer panel's currency list starts at EUR and offers only EUR and USD (the database refuses other codes, `job_offers_currency_check`), and the **Send official job offer** box shows `(€)` and saves `offer_terms.currency` `EUR`.
+6. **Teklif görünümü / Offer views.** The offer list in the panel, the employer **Offers** list and the candidate's offer card all show the amount with its currency (e.g. `$1,500`). Older offers without a stored currency show €.
+7. **Diller / Languages.** Repeat items 1 and 4 in TR, EN, SQ, AR, MK: the hint, the placeholder and the fixed-currency note are translated.
+
+Automated: `lib/money.test.ts` (formatSalary by locale, numbers-only input and limits, currency sent with the request, offer salary and currency from the request, EUR without one, screens use the page locale, five languages, SQL files), `lib/workforceRequest.test.ts`, `lib/offers.test.ts`.
 
 ---
 

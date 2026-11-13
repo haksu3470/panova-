@@ -7,7 +7,7 @@ import MatchPanel from './MatchPanel';
 import DemoBadge from './DemoBadge';
 import DeleteRecordButton from './DeleteRecordButton';
 import ListExportBar from './ListExportBar';
-import { portalUi } from '@/lib/portal-ui-copy';
+import { dateLocale, portalUi } from '@/lib/portal-ui-copy';
 import { offerExportRows, requestExportRows, toCsv } from '@/lib/exportLists';
 import { localizeCatalogTitle } from '@/lib/professions';
 import { displayedRequestSalary } from '@/lib/workforceRequest';
@@ -150,7 +150,7 @@ export default function RequestsTab({
                 <div>📍 {req.city || 'N/A'}, {req.country || 'International'}</div>
                 <div>📅 {t.createdDate}: {req.created_at ? req.created_at.substring(0, 10) : '2026-09'}</div>
                 <div>🎯 {t.colTargetStart}: {req.target_start_date || '2026-10-15'}</div>
-                <div>💰 {t.colSalary}: {displayedRequestSalary(req) || '—'}</div>
+                <div>💰 {t.colSalary}: {displayedRequestSalary(req, dateLocale[currentLang]) || '—'}</div>
                 {targetStartIsPast(req.target_start_date) && !['completed', 'cancelled'].includes(String(req.status || '')) ? (
                   <div className="col-span-2 text-amber-800 font-bold">{releaseCopy[currentLang].pastTarget}</div>
                 ) : null}

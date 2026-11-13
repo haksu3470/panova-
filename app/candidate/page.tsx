@@ -48,7 +48,7 @@ import { canonicalPassport, canonicalPhone } from '@/lib/loginIdentifier';
 import { canonicalNationality } from '@/lib/registrationCountries';
 import { candidateOfferResponse, offerMoney, offerStatusLabel } from '@/lib/offers';
 import { offerStatusTone } from '@/lib/status-tone';
-import { portalUi } from '@/lib/portal-ui-copy';
+import { dateLocale, portalUi } from '@/lib/portal-ui-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { guideNavLabel } from '@/lib/guides-nav';
 import KvkkConsent from '@/components/site/KvkkConsent';
@@ -1792,7 +1792,7 @@ export default function CandidateDashboard() {
             ) : (
               jobOffers.map((offer) => {
                 const offerUi = portalUi[currentLang];
-                const money = offerMoney(offer);
+                const money = offerMoney(offer, dateLocale[currentLang]);
                 const statusLabel = offerStatusLabel(offer.status, offerUi.offerStatus);
                 return (
                 <div key={offer.id} className="p-4 bg-white rounded-2xl border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-sm text-slate-900">

@@ -1236,7 +1236,7 @@ export default function PortalPage() {
               <div className="bg-slate-50 p-4 rounded-2xl border space-y-2">
                 <h4 className="font-extrabold text-slate-900 uppercase text-xs text-emerald-800 border-b pb-1">💼 Working Conditions & Benefits</h4>
                 <div className="grid grid-cols-2 gap-2 text-slate-700">
-                  <div><strong>Salary:</strong> {displayedRequestSalary(selectedDemandDetail) || 'Negotiable'}</div>
+                  <div><strong>Salary:</strong> {displayedRequestSalary(selectedDemandDetail, dateLocale[currentLang]) || 'Negotiable'}</div>
                   <div><strong>Working Hours:</strong> {selectedDemandDetail.working_hours || '40-45 hrs/week'}</div>
                   <div><strong>Weekly Days:</strong> {selectedDemandDetail.weekly_days || '5-6 Days'}</div>
                   <div><strong>Overtime:</strong> {selectedDemandDetail.overtime_policy || 'Standard Legal'}</div>

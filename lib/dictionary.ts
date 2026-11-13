@@ -499,6 +499,9 @@ export interface Translation {
   empRequestDeleteConfirm?: string;
   empRequestHasActivity?: string;
   empRequestDeleteFailed?: string;
+  salaryNumberPlaceholder?: string;
+  salaryNumberHint?: string;
+  offerCurrencyFromRequest?: string;
   demandErrRequired?: string;
   demandErrSector?: string;
   demandErrPosition?: string;
@@ -1236,6 +1239,9 @@ export const translations: Record<Language, Translation> = {
     empRequestDeleteConfirm: 'Bu talep silinsin mi? Bu işlem geri alınamaz.',
     empRequestHasActivity: 'Bu talebe bağlı süreç var, silinemez.',
     empRequestDeleteFailed: 'Talep silinemedi. Lütfen tekrar deneyin.',
+    salaryNumberPlaceholder: 'Örn: 1500 {symbol}',
+    salaryNumberHint: 'Yalnızca rakam girin. Para birimi: {symbol}',
+    offerCurrencyFromRequest: 'talepten gelir, değiştirilemez',
     demandErrRequired: 'Bu alan zorunludur.',
     demandErrSector: 'Bir sektör seçin.',
     demandErrPosition: 'En az bir pozisyon seçin ya da yazın.',
@@ -1960,6 +1966,9 @@ export const translations: Record<Language, Translation> = {
     empRequestDeleteConfirm: 'Delete this request? This cannot be undone.',
     empRequestHasActivity: 'This request has a process linked to it and cannot be deleted.',
     empRequestDeleteFailed: 'The request could not be deleted. Please try again.',
+    salaryNumberPlaceholder: 'E.g. 1500 {symbol}',
+    salaryNumberHint: 'Numbers only. Currency: {symbol}',
+    offerCurrencyFromRequest: 'set by the request, cannot be changed',
     demandErrRequired: 'This field is required.',
     demandErrSector: 'Select a sector.',
     demandErrPosition: 'Select or type at least one position.',
@@ -2684,6 +2693,9 @@ export const translations: Record<Language, Translation> = {
     empRequestDeleteConfirm: 'Të fshihet kjo kërkesë? Ky veprim nuk mund të zhbëhet.',
     empRequestHasActivity: 'Kjo kërkesë ka një proces të lidhur dhe nuk mund të fshihet.',
     empRequestDeleteFailed: 'Kërkesa nuk u fshi. Ju lutemi provoni përsëri.',
+    salaryNumberPlaceholder: 'P.sh. 1500 {symbol}',
+    salaryNumberHint: 'Vetëm numra. Monedha: {symbol}',
+    offerCurrencyFromRequest: 'vjen nga kërkesa, nuk mund të ndryshohet',
     demandErrRequired: 'Kjo fushë është e detyrueshme.',
     demandErrSector: 'Zgjidhni një sektor.',
     demandErrPosition: 'Zgjidhni ose shkruani të paktën një pozicion.',
@@ -3134,6 +3146,9 @@ export const translations: Record<Language, Translation> = {
     empRequestDeleteConfirm: 'هل تريدون حذف هذا الطلب؟ لا يمكن التراجع عن ذلك.',
     empRequestHasActivity: 'هذا الطلب مرتبط بعملية جارية ولا يمكن حذفه.',
     empRequestDeleteFailed: 'تعذّر حذف الطلب. يُرجى المحاولة مرة أخرى.',
+    salaryNumberPlaceholder: 'مثال: 1500 {symbol}',
+    salaryNumberHint: 'أرقام فقط. العملة: {symbol}',
+    offerCurrencyFromRequest: 'محددة من الطلب ولا يمكن تغييرها',
     demandErrRequired: 'هذا الحقل مطلوب.',
     demandErrSector: 'اختر قطاعًا.',
     demandErrPosition: 'اختر وظيفة واحدة على الأقل أو اكتبها.',
@@ -4131,6 +4146,9 @@ export const translations: Record<Language, Translation> = {
     empRequestDeleteConfirm: 'Да се избрише ова барање? Ова не може да се врати.',
     empRequestHasActivity: 'Ова барање има поврзан процес и не може да се избрише.',
     empRequestDeleteFailed: 'Барањето не можеше да се избрише. Обидете се повторно.',
+    salaryNumberPlaceholder: 'На пр.: 1500 {symbol}',
+    salaryNumberHint: 'Само бројки. Валута: {symbol}',
+    offerCurrencyFromRequest: 'од барањето, не може да се менува',
     demandErrRequired: 'Ова поле е задолжително.',
     demandErrSector: 'Изберете сектор.',
     demandErrPosition: 'Изберете или напишете барем една позиција.',

@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { isStaff, signOut } from '@/lib/auth';
 import { EmployerWriteError, staffViewEmployerId, toEmployerProfileView, type EmployerRow } from '@/lib/employerProfile';
 import { offerMoney, offerStatusLabel } from '@/lib/offers';
+import { DEFAULT_SALARY_CURRENCY, SALARY_CURRENCIES, SALARY_CURRENCY_SYMBOL, salaryCurrency, type SalaryCurrency } from '@/lib/money';
 import { employerService } from '@/lib/services/employerService';
 import { 
   Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, 
@@ -200,6 +201,7 @@ function EmployerPortalInner() {
   const [demandHeadcount, setDemandHeadcount] = useState('');
   const [demandCity, setDemandCity] = useState('');
   const [demandSalary, setDemandSalary] = useState('');
+  const [demandCurrency, setDemandCurrency] = useState<SalaryCurrency>(DEFAULT_SALARY_CURRENCY);
   const [demandDuration, setDemandDuration] = useState('');
   const [demandExperience, setDemandExperience] = useState('');
   const [demandLanguageReq, setDemandLanguageReq] = useState('');
@@ -452,6 +454,7 @@ function EmployerPortalInner() {
     setDemandHeadcount('');
     setDemandCity('');
     setDemandSalary('');
+    setDemandCurrency(DEFAULT_SALARY_CURRENCY);
     setDemandDuration('');
     setDemandExperience('');
     setDemandLanguageReq('');
@@ -498,6 +501,7 @@ function EmployerPortalInner() {
       headcount,
       city: demandCity,
       salaryText: demandSalary,
+      currency: demandCurrency,
       duration: demandDuration,
       experience: demandExperience,
       language: optionLabel(ui.languageOptions, demandLanguageReq),
@@ -706,6 +710,7 @@ function EmployerPortalInner() {
     headcount?: number;
     salary?: string | null;
     monthly_net_salary?: number | string | null;
+    salary_currency?: string | null;
   }) => {
     const metrics = getDemandMetrics(dem);
     const title = localizeCatalogTitle(dem.position_title, currentLang) || '—';
@@ -718,7 +723,7 @@ function EmployerPortalInner() {
               <span className="text-xs font-extrabold bg-status-ok-bg text-status-ok px-2.5 py-1 rounded-lg">{metrics.headcount} {t.peopleUnit}</span>
             </div>
             <h3 className="font-extrabold text-foreground text-base">{title}</h3>
-            <p className="text-xs text-muted-foreground">📍 {dem.city || '—'} | 💰 {displayedRequestSalary(dem) || '—'}</p>
+            <p className="text-xs text-muted-foreground">📍 {dem.city || '—'} | 💰 {displayedRequestSalary(dem, dateLocale[currentLang]) || '—'}</p>
             <p className="text-xs text-muted-foreground">{t.facilityAccommodation}: {benefitText(dem.accommodation_provided)} · {t.facilityFood}: {benefitText(dem.food_provided)}</p>
           </div>
           <div className="text-end">
@@ -1090,7 +1095,34 @@ function EmployerPortalInner() {
                   </div>
                   <div>
                     <label htmlFor="demand-salary" className="block text-xs font-bold uppercase text-foreground mb-1">{t.salaryOfferLabel} *</label>
-                    <input id="demand-salary" type="text" inputMode="decimal" required aria-required="true" {...demandAria('salary')} placeholder={t.salaryPlaceholder} value={demandSalary} onChange={(e) => { setDemandSalary(e.target.value); clearDemandField('salary'); }} className={`w-full px-3 py-2.5 rounded-xl border ${demandFieldClass('salary')} text-xs font-semibold bg-card text-foreground`} />
+                    {/* Numbers only; the currency has its own list (EUR by default). */}
+                    <div className="flex gap-2">
+                      <input
+                        id="demand-salary"
+                        type="text"
+                        inputMode="decimal"
+                        required
+                        aria-required="true"
+                        {...demandAria('salary')}
+                        aria-describedby={['demand-salary-hint', demandFieldErrors.salary ? demandErrorId('salary') : ''].filter(Boolean).join(' ')}
+                        placeholder={fill(t.salaryNumberPlaceholder || '', { symbol: SALARY_CURRENCY_SYMBOL[demandCurrency] })}
+                        value={demandSalary}
+                        onChange={(e) => { setDemandSalary(e.target.value); clearDemandField('salary'); }}
+                        className={`min-w-0 flex-1 px-3 py-2.5 rounded-xl border ${demandFieldClass('salary')} text-xs font-semibold bg-card text-foreground`}
+                      />
+                      <select
+                        id="demand-salary-currency"
+                        aria-label={ui.offerCurrency}
+                        value={demandCurrency}
+                        onChange={(e) => setDemandCurrency(salaryCurrency(e.target.value))}
+                        className="w-20 shrink-0 px-2 py-2.5 rounded-xl border border-line text-xs font-bold bg-card text-foreground cursor-pointer"
+                      >
+                        {SALARY_CURRENCIES.map((code) => <option key={code} value={code}>{code} ({SALARY_CURRENCY_SYMBOL[code]})</option>)}
+                      </select>
+                    </div>
+                    <p id="demand-salary-hint" className="mt-1 text-[11px] font-medium text-muted-foreground">
+                      {fill(t.salaryNumberHint || '', { symbol: SALARY_CURRENCY_SYMBOL[demandCurrency] })}
+                    </p>
                     {demandFieldNote('salary')}
                   </div>
                   <div>
@@ -1275,7 +1307,7 @@ function EmployerPortalInner() {
                 <div key={offer.id} className="p-3 bg-slate-50 rounded-xl border text-sm text-slate-900">
                   <div className="font-extrabold">{releaseCopy[currentLang].offerCandidate}: {offer.candidate_name || '—'} — {localizeCatalogTitle(offer.position_title, currentLang) || '—'}</div>
                   <div className="text-xs font-semibold text-slate-800">
-                    {ui.offerSalary}: {offerMoney(offer) || ui.salaryNotSet} · {ui.status}: {offerStatusLabel(offer.status, ui.offerStatus)}
+                    {ui.offerSalary}: {offerMoney(offer, dateLocale[currentLang]) || ui.salaryNotSet} · {ui.status}: {offerStatusLabel(offer.status, ui.offerStatus)}
                   </div>
                 </div>
               ))}

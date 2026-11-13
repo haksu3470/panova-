@@ -19,6 +19,7 @@ import { localizeCatalogTitle } from '@/lib/professions';
 import { translations } from '@/lib/dictionary';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { benefitsAnswered } from '@/lib/workforceRequest';
+import { formatSalary, requestCurrency, SALARY_CURRENCIES, SALARY_CURRENCY_SYMBOL, salaryCurrency } from '@/lib/money';
 import { useSiteLanguage } from '@/lib/site-language';
 import DeleteRecordButton from '@/components/portal/DeleteRecordButton';
 import { useStaffRole } from '@/components/portal/useStaffRole';
@@ -89,7 +90,7 @@ function RequestFileInner() {
     setSaving(true); setMsg('');
     // status, closed_reason and closed_at are never saved from here: they
     // change only through staff_set_request_status (below) or automatically.
-    const keys = [...TEXT_FIELDS.map((f) => f[0]), ...BOOL_FIELDS, 'special_requirements'];
+    const keys = [...TEXT_FIELDS.map((f) => f[0]), ...BOOL_FIELDS, 'special_requirements', 'salary_currency'];
     const changes: Record<string, any> = {};
     for (const k of keys) {
       let v = form[k];
@@ -194,6 +195,20 @@ function RequestFileInner() {
             {TEXT_FIELDS.map(([key, type]) => (
               <Field key={key} label={ui.requestFields[key] || key} type={type} value={form[key] == null ? '' : String(form[key]).substring(0, type === 'date' ? 10 : undefined)} onChange={(v) => setForm({ ...form, [key]: v })} />
             ))}
+            {/* job_requests.salary_currency: EUR (default) or USD; offers copy it. */}
+            <label className="block text-xs font-bold text-slate-600 space-y-1">
+              <span>{ui.offerCurrency}</span>
+              <select
+                value={requestCurrency(form)}
+                onChange={(e) => setForm({ ...form, salary_currency: salaryCurrency(e.target.value) })}
+                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-bold text-slate-900 bg-white"
+              >
+                {SALARY_CURRENCIES.map((code) => <option key={code} value={code}>{code} ({SALARY_CURRENCY_SYMBOL[code]})</option>)}
+              </select>
+              {form.monthly_net_salary != null && String(form.monthly_net_salary).trim() !== '' ? (
+                <span className="block text-[11px] font-semibold text-slate-600">{formatSalary(form.monthly_net_salary, requestCurrency(form), dateLocale[currentLang])}</span>
+              ) : null}
+            </label>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {(['accommodation_provided', 'food_provided'] as const).map((key) => (
