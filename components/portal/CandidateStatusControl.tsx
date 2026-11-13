@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import type { Translation } from '@/lib/dictionary';
 import {
   CANDIDATE_STATUS_KEYS,
   candidateReasonErrorKey,
   candidateStatusLabel,
+  isReasonErrorKey,
   normalizeCandidateStatus,
   type CandidateStatusErrorKey,
 } from '@/lib/candidateStatusChange';
@@ -24,6 +25,10 @@ interface Props {
 /**
  * Candidate status as a read-only badge. The database derives it from the
  * official process; upper management may override it with a reason.
+ *
+ * Save is never disabled because of the reason: pressing it with an invalid
+ * reason sends nothing, shows a written message under the field and moves
+ * focus there. It is disabled only while the request is running.
  */
 export default function CandidateStatusControl({ t, status, canChange, onSubmit, compact = false }: Props) {
   const current = normalizeCandidateStatus(status);
@@ -31,8 +36,15 @@ export default function CandidateStatusControl({ t, status, canChange, onSubmit,
   const [target, setTarget] = useState<string>(current);
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
+  // RPC errors (role, visa offer, ...) show above the buttons; reason errors
+  // show under the reason field and stay until the reason becomes valid.
   const [errorKey, setErrorKey] = useState<CandidateStatusErrorKey | null>(null);
+  const [reasonError, setReasonError] = useState<CandidateStatusErrorKey | null>(null);
   const [done, setDone] = useState(false);
+  const reasonRef = useRef<HTMLTextAreaElement>(null);
+  const baseId = useId();
+  const hintId = `${baseId}-hint`;
+  const reasonErrorId = `${baseId}-reason-error`;
 
   const check = checkStatusReason(reason);
   const len = reasonLength(reason);
@@ -42,6 +54,7 @@ export default function CandidateStatusControl({ t, status, canChange, onSubmit,
     setTarget(current);
     setReason('');
     setErrorKey(null);
+    setReasonError(null);
     setDone(false);
     setOpen(true);
   };
@@ -50,18 +63,38 @@ export default function CandidateStatusControl({ t, status, canChange, onSubmit,
     setOpen(false);
     setReason('');
     setErrorKey(null);
+    setReasonError(null);
+  };
+
+  const showReasonError = (key: CandidateStatusErrorKey) => {
+    setReasonError(key);
+    reasonRef.current?.focus();
+  };
+
+  const changeReason = (value: string) => {
+    setReason(value);
+    setErrorKey(null);
+    // Once shown, the message stays (following the rule broken) until valid.
+    if (reasonError) setReasonError(candidateReasonErrorKey(checkStatusReason(value)));
   };
 
   const submit = async () => {
+    if (busy) return;
     const localError = candidateReasonErrorKey(check);
     if (localError) {
-      setErrorKey(localError);
+      setErrorKey(null);
+      showReasonError(localError);
       return;
     }
     setBusy(true);
     setErrorKey(null);
+    setReasonError(null);
     const result = await onSubmit(target, reason.trim());
     setBusy(false);
+    if (result && isReasonErrorKey(result)) {
+      showReasonError(result);
+      return;
+    }
     if (result) {
       setErrorKey(result);
       return;
@@ -107,18 +140,23 @@ export default function CandidateStatusControl({ t, status, canChange, onSubmit,
           <label className="block text-[11px] font-bold text-slate-700 space-y-1">
             <span>{t.statusReasonLabel} *</span>
             <textarea
+              ref={reasonRef}
               rows={compact ? 2 : 3}
               value={reason}
               maxLength={STATUS_REASON_MAX + 50}
-              onChange={(e) => { setReason(e.target.value); setErrorKey(null); }}
+              onChange={(e) => changeReason(e.target.value)}
               disabled={busy}
-              required
-              aria-invalid={check !== 'ok'}
-              className={`w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-slate-900 ${text}`}
+              aria-required="true"
+              aria-invalid={reasonError ? 'true' : 'false'}
+              aria-describedby={reasonError ? `${reasonErrorId} ${hintId}` : hintId}
+              className={`w-full rounded-lg border bg-white px-2.5 py-2 text-slate-900 ${reasonError ? 'border-red-600 ring-1 ring-red-600' : 'border-slate-300'} ${text}`}
             />
           </label>
+          {reasonError ? (
+            <p id={reasonErrorId} role="alert" className="text-[11px] font-bold text-red-700">{t[reasonError]}</p>
+          ) : null}
           <div className="flex items-center justify-between gap-2 text-[10px] text-slate-600">
-            <span>{t.statusReasonHint}</span>
+            <span id={hintId}>{t.statusReasonHint}</span>
             <span className={check === 'too_long' ? 'font-bold text-red-700' : ''}>{len}/{STATUS_REASON_MAX}</span>
           </div>
           {errorKey ? <p role="alert" className="text-[11px] font-bold text-red-700">{t[errorKey]}</p> : null}
@@ -126,8 +164,9 @@ export default function CandidateStatusControl({ t, status, canChange, onSubmit,
             <button
               type="button"
               onClick={submit}
-              disabled={busy || check !== 'ok'}
-              className="flex-1 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white disabled:bg-slate-600 disabled:cursor-not-allowed cursor-pointer"
+              disabled={busy}
+              aria-busy={busy}
+              className="flex-1 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white disabled:bg-slate-600 disabled:cursor-wait cursor-pointer"
             >
               {busy ? (t.saving || '...') : t.saveBtn}
             </button>
