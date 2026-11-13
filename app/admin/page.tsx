@@ -2,7 +2,7 @@
 
 import AuthGuard from '@/components/auth/AuthGuard';
 import { AuthFooter } from '@/components/site/AuthFooter';
-import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
+import { HeaderActions, PageHeader } from '@/components/site/PageHeader';
 
 import React, { useState } from 'react';
 import { translations } from '@/lib/dictionary';
@@ -58,8 +58,12 @@ function AdminDashboardPageInner() {
 
   return (
     <div className={`min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      <header className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-3">
+      <PageHeader
+        variant="dark-bar"
+        actions={<HeaderActions lang={lang} onLanguageChange={changeLanguage} homeLabel={t.returnHome || a.home} tone="dark" />}
+      >
+        {/* bg repeats the dark header so the contrast check sees the real background */}
+        <div className="flex items-center gap-3 bg-slate-800">
           <img src="/logo.png" alt="" width={1051} height={725} className="h-12 w-auto rounded-xl bg-white object-contain shrink-0" />
           <div>
             <p className="text-sm font-black tracking-tight text-white leading-none">PANOVA</p>
@@ -67,17 +71,7 @@ function AdminDashboardPageInner() {
             <p className="text-[11px] text-on-dark-muted">{company.brandName} &bull; {a.sub}</p>
           </div>
         </div>
-
-        <div className="flex items-center gap-3">
-          <LanguageSwitcher currentLang={lang} onChange={changeLanguage} tone="dark" />
-          <button
-            onClick={() => window.location.href = '/'}
-            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-on-dark font-bold rounded-xl text-xs transition cursor-pointer"
-          >
-            {t.returnHome || a.home}
-          </button>
-        </div>
-      </header>
+      </PageHeader>
 
       {/* Navigasyon Sekmeleri */}
       <nav className="bg-slate-800/60 border-b border-slate-700/60 px-6 py-3 overflow-x-auto">

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { company } from '@/lib/company';
 import { SiteFooter } from '@/components/home/HomeSections';
-import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
+import { HeaderActions, PageHeader } from '@/components/site/PageHeader';
 import { homeCopy } from '@/lib/home-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 
@@ -14,18 +14,16 @@ export default function KvkkView() {
 
   return (
     <div className={`min-h-screen bg-slate-50 text-slate-900 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      <header className="bg-white border-b border-slate-200">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
+      <PageHeader
+        variant="bar"
+        start={
           <Link href="/" className="inline-flex items-center gap-2 font-black tracking-tight text-slate-900">
             <img src="/logo.png" alt="" width={1051} height={725} className="h-9 w-auto object-contain" />
             PANOVA
           </Link>
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
-            <Link href="/" className="text-sm font-semibold text-brand">{k.home}</Link>
-          </div>
-        </div>
-      </header>
+        }
+        actions={<HeaderActions lang={currentLang} onLanguageChange={changeLanguage} homeLabel={k.home} />}
+      />
       <main className="max-w-3xl mx-auto px-4 py-10 space-y-6 text-sm leading-relaxed text-slate-700">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">{k.title}</h1>

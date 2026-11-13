@@ -10,8 +10,7 @@ import { offerMoney, offerStatusLabel } from '@/lib/offers';
 import { DEFAULT_SALARY_CURRENCY, SALARY_CURRENCIES, SALARY_CURRENCY_SYMBOL, salaryCurrency, type SalaryCurrency } from '@/lib/money';
 import { employerService } from '@/lib/services/employerService';
 import { 
-  Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, 
-  Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, ShieldCheck, HeartHandshake, UploadCloud, Check, Video, Star, CheckCircle2, BookOpen, X
+  Building2, Users, FileText, Plus, CheckCircle, Clock, Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, ShieldCheck, HeartHandshake, UploadCloud, Check, Video, Star, CheckCircle2, BookOpen, X
 } from 'lucide-react';
 import OverviewCard from '@/components/portal/OverviewCard';
 import {
@@ -42,7 +41,7 @@ import {
   type DemandFieldErrors,
   type YesNo,
 } from '@/lib/workforceRequest';
-import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
+import { HeaderActions, PageHeader } from '@/components/site/PageHeader';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
 import EmployerCandidateBrowser from './components/EmployerCandidateBrowser';
@@ -793,7 +792,9 @@ function EmployerPortalInner() {
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         
         {/* ÜST HEADER */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm">
+        <PageHeader
+          start={
+          <>
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
             <div className="border-l pl-3 border-slate-200">
@@ -809,8 +810,19 @@ function EmployerPortalInner() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            {typeof window !== 'undefined' && JSON.parse(localStorage.getItem('panova_employer_user') || '{}')?.isAdminImpersonation && (
+            <div data-header-user className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl text-xs">
+              <span className="font-bold text-slate-950">{fill(ui.authorized, { name: editContactPerson || employerProfile?.contactPerson || '' })}</span>
+            </div>
+          </>
+          }
+          actions={
+            <HeaderActions
+              lang={currentLang}
+              onLanguageChange={changeLanguage}
+              homeLabel={t.returnHome}
+              logoutLabel={t.logout}
+              onLogout={handleLogout}
+              extra={typeof window !== 'undefined' && JSON.parse(localStorage.getItem('panova_employer_user') || '{}')?.isAdminImpersonation && (
               <button
                 onClick={() => {
                   // Staff impersonation return. Keep the Supabase session so /portal
@@ -823,29 +835,10 @@ function EmployerPortalInner() {
               >
                 ← {ui.returnToAdmin}
               </button>
-            )}
-
-            <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl text-xs">
-              <span className="font-bold text-slate-950">{fill(ui.authorized, { name: editContactPerson || employerProfile?.contactPerson || '' })}</span>
-            </div>
-
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border"
-            >
-              <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
-            </Link>
-
-            <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
-
-            <button
-              onClick={handleLogout}
-              className="bg-red-50 hover:bg-red-100 text-red-700 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
-            >
-              {t.logout}
-            </button>
-          </div>
-        </div>
+              )}
+            />
+          }
+        />
 
         {employerProfile?.complianceStatus === 'pending' ? (
           <p className="text-sm font-bold text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">{releaseCopy[currentLang].employerPending}</p>

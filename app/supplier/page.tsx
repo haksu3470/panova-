@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft, CheckCircle2, UserPlus, Send, Building } from 'lucide-react';
-import Link from 'next/link';
+import { CheckCircle2, UserPlus, Send, Building } from 'lucide-react';
 import { Language, translations } from '@/lib/dictionary';
-import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
+import { HeaderActions, PageHeader } from '@/components/site/PageHeader';
 import { ProfessionField } from '@/components/site/ProfessionField';
 import { fill, homeCopy } from '@/lib/home-copy';
 import { professionForSectorChange } from '@/lib/professions';
@@ -80,13 +79,12 @@ export default function SupplierCandidateRegister() {
       <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
         
         {/* Üst Bar */}
-        <div className="flex items-center justify-between">
-          <Link href="/" className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-on-dark-muted hover:text-on-dark transition">
-            <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t.returnHome}
-          </Link>
-
-          <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} tone="dark" />
-        </div>
+        <PageHeader
+          variant="plain"
+          // eslint-disable-next-line @next/next/no-img-element -- same plain logo as the other page headers
+          start={<img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto rounded-xl bg-white object-contain shrink-0" />}
+          actions={<HeaderActions lang={currentLang} onLanguageChange={changeLanguage} homeLabel={t.returnHome} tone="dark" />}
+        />
 
         <div className="bg-slate-800 p-4 sm:p-8 rounded-3xl border border-slate-700 shadow-2xl">
           <div className="flex items-center gap-3 mb-6">

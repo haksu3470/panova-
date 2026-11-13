@@ -17,10 +17,9 @@ import {
   rememberVerifyEmail,
   storedVerifyEmail,
 } from '@/lib/emailVerification';
-import { ArrowLeft, Building2, ShieldCheck } from 'lucide-react';
-import Link from 'next/link';
+import { Building2, ShieldCheck } from 'lucide-react';
 import { Language, translations } from '@/lib/dictionary';
-import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
+import { HeaderActions, PageHeader } from '@/components/site/PageHeader';
 import { homeCopy } from '@/lib/home-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { AuthFooter } from '@/components/site/AuthFooter';
@@ -216,21 +215,17 @@ export default function EmployerLoginPage() {
 
   return (
     <div className={`min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      <header className="max-w-7xl w-full mx-auto p-4 md:p-6 flex items-center justify-between border-b border-slate-200 bg-white shadow-sm">
-        <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
-          <div className="text-lg font-black text-slate-900 tracking-tight">PANOVA PORTAL</div>
-        </div>
-        <div className="flex items-center gap-3">
-          <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
-          <Link
-            href="/"
-            className="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition border border-slate-200 shadow-sm"
-          >
-            {t.returnHome}
-          </Link>
-        </div>
-      </header>
+      <PageHeader
+        variant="bar"
+        className="max-w-7xl mx-auto md:p-6"
+        start={
+          <>
+            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
+            <div className="text-lg font-black text-slate-900 tracking-tight">PANOVA PORTAL</div>
+          </>
+        }
+        actions={<HeaderActions lang={currentLang} onLanguageChange={changeLanguage} homeLabel={t.returnHome} />}
+      />
 
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-8 border border-slate-200 w-full">

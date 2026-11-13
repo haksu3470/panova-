@@ -30,13 +30,13 @@ import {
   storedVerifyEmail,
 } from '@/lib/emailVerification';
 import { 
-  User, CheckCircle2, LogOut, Lock, Camera, 
+  User, CheckCircle2, Lock, Camera, 
   FileText, Eye, X, Briefcase, Calendar, 
-  Plane, ArrowLeft, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, ShieldAlert, ShieldCheck, AlertCircle, BookOpen
+  Plane, Bell, Check, PlaneTakeoff, Ticket, MapPin, Building, UserPlus, LogIn, ShieldAlert, ShieldCheck, AlertCircle, BookOpen
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations, type Translation } from '@/lib/dictionary';
-import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
+import { HeaderActions, PageHeader } from '@/components/site/PageHeader';
 import { RegistrationCountryOptions } from '@/components/site/RegistrationCountryOptions';
 import { candidateDocumentTitle, candidatePlaceLabel, candidateProfessionLabel } from '@/lib/candidateLabels';
 import CandidateProcessCard from '@/components/candidate/CandidateProcessCard';
@@ -1121,21 +1121,24 @@ export default function CandidateDashboard() {
     alert([emailNote, photoNote].filter(Boolean).join('\n') || ct.savedSuccess);
   };
 
+  const changeCandidateLanguage = (lang: Language) => {
+    setCurrentLang(lang);
+    writeStoredLanguage(lang);
+  };
+
   if (!authenticated || !candidate) {
     return (
       <div className={`min-h-screen bg-slate-50 flex flex-col justify-between ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-        <header className="w-full bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
-            <span className="font-extrabold text-slate-800 text-sm tracking-wide">PANOVA PORTAL</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher currentLang={currentLang} onChange={(lang) => { setCurrentLang(lang); writeStoredLanguage(lang); }} />
-            <Link href="/" className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border border-slate-200">
-              <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" /> {t.returnHome}
-            </Link>
-          </div>
-        </header>
+        <PageHeader
+          variant="bar"
+          start={
+            <>
+              <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
+              <span className="font-extrabold text-slate-800 text-sm tracking-wide">PANOVA PORTAL</span>
+            </>
+          }
+          actions={<HeaderActions lang={currentLang} onLanguageChange={changeCandidateLanguage} homeLabel={t.returnHome} />}
+        />
 
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 max-w-md w-full">
@@ -1436,7 +1439,9 @@ export default function CandidateDashboard() {
   return (
     <div className={`min-h-screen bg-slate-50 text-slate-900 p-3 sm:p-6 lg:p-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm">
+        <PageHeader
+          className="border-slate-200"
+          start={
           <div className="flex items-center gap-3 sm:gap-4">
             {photoPreview || (newPhoto.startsWith('data:') ? newPhoto : '') ? (
               <img src={photoPreview || newPhoto} alt="Profil" className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border shadow" />
@@ -1455,19 +1460,17 @@ export default function CandidateDashboard() {
               </div>
             </div>
           </div>
-
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <LanguageSwitcher currentLang={currentLang} onChange={(lang) => { setCurrentLang(lang); writeStoredLanguage(lang); }} />
-
-            <Link href="/" className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border">
-              <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" /> {t.returnHome}
-            </Link>
-
-            <button onClick={handleLogout} className="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-700 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer">
-              <LogOut className="w-3.5 h-3.5" /> {t.logout}
-            </button>
-          </div>
-        </div>
+          }
+          actions={
+            <HeaderActions
+              lang={currentLang}
+              onLanguageChange={changeCandidateLanguage}
+              homeLabel={t.returnHome}
+              logoutLabel={t.logout}
+              onLogout={handleLogout}
+            />
+          }
+        />
 
         {/* Navigasyon Sekmeleri */}
         <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">

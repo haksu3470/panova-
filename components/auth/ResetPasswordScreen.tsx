@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { User } from '@supabase/supabase-js';
 import Link from 'next/link';
-import { ArrowLeft, Lock } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { VerificationCodeField } from '@/components/auth/VerificationCodeField';
 import { AuthFooter } from '@/components/site/AuthFooter';
-import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
+import { HeaderActions, PageHeader } from '@/components/site/PageHeader';
 import { translations } from '@/lib/dictionary';
 import { EMAIL_OTP_LENGTH } from '@/lib/emailConfirmation';
 import { completePasswordReset, verifyRecoveryProof } from '@/lib/passwordResetActions';
@@ -143,18 +143,23 @@ export default function ResetPasswordScreen({ audience }: { audience: ResetAudie
 
   return (
     <div className={`min-h-screen bg-slate-50 flex flex-col justify-between ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      <header className="w-full bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
-          <span className="font-extrabold text-slate-800 text-sm tracking-wide">PANOVA PORTAL</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
-          <Link href="/" onClick={() => clearRecoveryPending()} className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition border border-slate-200">
-            <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" /> {t.returnHome}
-          </Link>
-        </div>
-      </header>
+      <PageHeader
+        variant="bar"
+        start={
+          <>
+            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
+            <span className="font-extrabold text-slate-800 text-sm tracking-wide">PANOVA PORTAL</span>
+          </>
+        }
+        actions={
+          <HeaderActions
+            lang={currentLang}
+            onLanguageChange={changeLanguage}
+            homeLabel={t.returnHome}
+            onHomeClick={() => clearRecoveryPending()}
+          />
+        }
+      />
 
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 max-w-md w-full">
