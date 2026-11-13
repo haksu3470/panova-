@@ -24,6 +24,7 @@ import { useSiteLanguage } from '@/lib/site-language';
 import { HeaderActions, PageHeader, headerButtonClass, headerPrimaryClass } from '@/components/site/PageHeader';
 import { staffLogoutToPortal } from '@/lib/staffLogout';
 import DeleteRecordButton from '@/components/portal/DeleteRecordButton';
+import ContractDurationField from '@/components/portal/ContractDurationField';
 import { useStaffRole } from '@/components/portal/useStaffRole';
 import { formatCount, toPipelineCounts, type RequestPipelineCounts } from '@/lib/requestPipelineCounts';
 
@@ -51,6 +52,8 @@ function RequestFileInner() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
+  // contract_type picker holds an incomplete duration (number missing or out of 1-999).
+  const [durationInvalid, setDurationInvalid] = useState(false);
   const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
   const t = translations[currentLang] || translations.tr;
   const ui = portalUi[currentLang];
@@ -89,6 +92,7 @@ function RequestFileInner() {
     if (benefitGap === 'both') { setMsg(t.lodgingAndMealsRequired || ''); return; }
     if (benefitGap === 'lodging') { setMsg(t.lodgingRequired || ''); return; }
     if (benefitGap === 'meals') { setMsg(t.mealsRequired || ''); return; }
+    if (durationInvalid) { setMsg(t.demandErrDurationNumber || ''); return; }
     setSaving(true); setMsg('');
     // status, closed_reason and closed_at are never saved from here: they
     // change only through staff_set_request_status (below) or automatically.
@@ -208,7 +212,15 @@ function RequestFileInner() {
 
         <Card title={ui.requestInfo}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {TEXT_FIELDS.map(([key, type]) => (
+            {TEXT_FIELDS.map(([key, type]) => key === 'contract_type' ? (
+              <ContractDurationField
+                key={`${key}-${req.id}`}
+                label={ui.requestFields[key] || key}
+                value={req.contract_type}
+                t={t}
+                onChange={(next, valid) => { setForm((prev) => ({ ...prev, contract_type: next })); setDurationInvalid(!valid); }}
+              />
+            ) : (
               <Field key={key} label={ui.requestFields[key] || key} type={type} value={form[key] == null ? '' : String(form[key]).substring(0, type === 'date' ? 10 : undefined)} onChange={(v) => setForm({ ...form, [key]: v })} />
             ))}
             {/* job_requests.salary_currency: EUR (default) or USD; offers copy it. */}

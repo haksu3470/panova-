@@ -41,6 +41,14 @@ import {
   type DemandFieldErrors,
   type YesNo,
 } from '@/lib/workforceRequest';
+import {
+  DURATION_AMOUNT_MAX,
+  DURATION_AMOUNT_MIN,
+  canonicalDuration,
+  formatContractDuration,
+  localIsoDate,
+  type DurationUnitChoice,
+} from '@/lib/contractDuration';
 import { HeaderActions, PageHeader } from '@/components/site/PageHeader';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
 import { EuropeanCountryOptions } from '@/components/site/EuropeanCountryOptions';
@@ -201,7 +209,10 @@ function EmployerPortalInner() {
   const [demandCity, setDemandCity] = useState('');
   const [demandSalary, setDemandSalary] = useState('');
   const [demandCurrency, setDemandCurrency] = useState<SalaryCurrency>(DEFAULT_SALARY_CURRENCY);
-  const [demandDuration, setDemandDuration] = useState('');
+  // Duration: number + unit (or open-ended), stored as canonical text in contract_type.
+  const [demandDurationAmount, setDemandDurationAmount] = useState('');
+  const [demandDurationUnit, setDemandDurationUnit] = useState<DurationUnitChoice>('');
+  const [demandStartDate, setDemandStartDate] = useState('');
   const [demandExperience, setDemandExperience] = useState('');
   const [demandLanguageReq, setDemandLanguageReq] = useState('');
   const [demandAccommodation, setDemandAccommodation] = useState<YesNo>('');
@@ -400,7 +411,8 @@ function EmployerPortalInner() {
     headcount: 'demand-headcount',
     city: 'demand-city',
     salary: 'demand-salary',
-    duration: 'demand-duration',
+    duration: demandDurationUnit && demandDurationUnit !== 'open' ? 'demand-duration' : 'demand-duration-unit',
+    startDate: 'demand-start-date',
     lodging: 'demand-lodging',
     meals: 'demand-meals',
   };
@@ -454,7 +466,9 @@ function EmployerPortalInner() {
     setDemandCity('');
     setDemandSalary('');
     setDemandCurrency(DEFAULT_SALARY_CURRENCY);
-    setDemandDuration('');
+    setDemandDurationAmount('');
+    setDemandDurationUnit('');
+    setDemandStartDate('');
     setDemandExperience('');
     setDemandLanguageReq('');
     setDemandAccommodation('');
@@ -477,7 +491,10 @@ function EmployerPortalInner() {
       headcountText: demandHeadcount,
       city: demandCity,
       salaryText: demandSalary,
-      duration: demandDuration,
+      durationUnit: demandDurationUnit,
+      durationAmountText: demandDurationAmount,
+      startDate: demandStartDate,
+      today: localIsoDate(),
       lodging: demandAccommodation,
       meals: demandFood,
     });
@@ -501,7 +518,8 @@ function EmployerPortalInner() {
       city: demandCity,
       salaryText: demandSalary,
       currency: demandCurrency,
-      duration: demandDuration,
+      duration: canonicalDuration(demandDurationUnit, demandDurationAmount) || '',
+      startDate: demandStartDate,
       experience: demandExperience,
       language: optionLabel(ui.languageOptions, demandLanguageReq),
       lodging: demandAccommodation,
@@ -710,6 +728,8 @@ function EmployerPortalInner() {
     salary?: string | null;
     monthly_net_salary?: number | string | null;
     salary_currency?: string | null;
+    contract_type?: string | null;
+    target_start_date?: string | null;
   }) => {
     const metrics = getDemandMetrics(dem);
     const title = localizeCatalogTitle(dem.position_title, currentLang) || '—';
@@ -723,6 +743,13 @@ function EmployerPortalInner() {
             </div>
             <h3 className="font-extrabold text-foreground text-base">{title}</h3>
             <p className="text-xs text-muted-foreground">📍 {dem.city || '—'} | 💰 {displayedRequestSalary(dem, dateLocale[currentLang]) || '—'}</p>
+            {dem.contract_type || dem.target_start_date ? (
+              <p className="text-xs text-muted-foreground">
+                {dem.contract_type ? <>⏳ {t.durationLabel}: {formatContractDuration(dem.contract_type, currentLang, t)}</> : null}
+                {dem.contract_type && dem.target_start_date ? ' | ' : null}
+                {dem.target_start_date ? <>📅 {t.startDateLabel}: {dem.target_start_date}</> : null}
+              </p>
+            ) : null}
             <p className="text-xs text-muted-foreground">{t.facilityAccommodation}: {benefitText(dem.accommodation_provided)} · {t.facilityFood}: {benefitText(dem.food_provided)}</p>
           </div>
           <div className="text-end">
@@ -1118,10 +1145,59 @@ function EmployerPortalInner() {
                     </p>
                     {demandFieldNote('salary')}
                   </div>
-                  <div>
-                    <label htmlFor="demand-duration" className="block text-xs font-bold uppercase text-foreground mb-1">{t.durationLabel} *</label>
-                    <input id="demand-duration" type="text" required aria-required="true" {...demandAria('duration')} placeholder={t.durationPlaceholder} value={demandDuration} onChange={(e) => { setDemandDuration(e.target.value); clearDemandField('duration'); }} className={`w-full px-3 py-2.5 rounded-xl border ${demandFieldClass('duration')} text-xs font-semibold bg-card text-foreground`} />
+                  <fieldset>
+                    <legend className="block text-xs font-bold uppercase text-foreground mb-1">{t.durationLabel} *</legend>
+                    {/* Number (1-999) + unit, or open-ended (the number field is then closed). */}
+                    <div className="flex flex-wrap gap-2">
+                      <input
+                        id="demand-duration"
+                        type="number"
+                        inputMode="numeric"
+                        min={DURATION_AMOUNT_MIN}
+                        max={DURATION_AMOUNT_MAX}
+                        step={1}
+                        aria-label={t.durationAmountLabel}
+                        aria-required={demandDurationUnit !== 'open'}
+                        {...demandAria('duration')}
+                        disabled={demandDurationUnit === 'open'}
+                        value={demandDurationUnit === 'open' ? '' : demandDurationAmount}
+                        onChange={(e) => { setDemandDurationAmount(e.target.value); clearDemandField('duration'); }}
+                        className={`w-24 min-w-0 px-3 py-2.5 rounded-xl border ${demandFieldClass('duration')} text-xs font-semibold bg-card text-foreground disabled:cursor-not-allowed disabled:bg-slate-100`}
+                      />
+                      <select
+                        id="demand-duration-unit"
+                        required
+                        aria-required="true"
+                        aria-label={t.durationUnitLabel}
+                        {...demandAria('duration')}
+                        value={demandDurationUnit}
+                        onChange={(e) => { setDemandDurationUnit(e.target.value as DurationUnitChoice); clearDemandField('duration'); }}
+                        className={`min-w-0 flex-1 px-3 py-2.5 rounded-xl border ${demandFieldClass('duration')} text-xs font-semibold bg-card text-foreground cursor-pointer`}
+                      >
+                        <option value="">{t.durationUnitPlaceholder}</option>
+                        <option value="gün">{t.durationUnitDay}</option>
+                        <option value="hafta">{t.durationUnitWeek}</option>
+                        <option value="ay">{t.durationUnitMonth}</option>
+                        <option value="yıl">{t.durationUnitYear}</option>
+                        <option value="open">{t.durationOpenEnded}</option>
+                      </select>
+                    </div>
                     {demandFieldNote('duration')}
+                  </fieldset>
+                  <div>
+                    <label htmlFor="demand-start-date" className="block text-xs font-bold uppercase text-foreground mb-1">{t.startDateLabel}</label>
+                    <input
+                      id="demand-start-date"
+                      type="date"
+                      min={localIsoDate()}
+                      {...demandAria('startDate')}
+                      aria-describedby={['demand-start-date-hint', demandFieldErrors.startDate ? demandErrorId('startDate') : ''].filter(Boolean).join(' ')}
+                      value={demandStartDate}
+                      onChange={(e) => { setDemandStartDate(e.target.value); clearDemandField('startDate'); }}
+                      className={`w-full px-3 py-2.5 rounded-xl border ${demandFieldClass('startDate')} text-xs font-semibold bg-card text-foreground`}
+                    />
+                    <p id="demand-start-date-hint" className="mt-1 text-[11px] font-medium text-muted-foreground">{t.startDateHint}</p>
+                    {demandFieldNote('startDate')}
                   </div>
                 </div>
 

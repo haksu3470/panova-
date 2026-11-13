@@ -13,6 +13,7 @@ import { DEFAULT_SALARY_CURRENCY, formatSalary, offerDefaultsFromRequest, reques
 import { releaseCopy } from '@/lib/release-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 import { translations } from '@/lib/dictionary';
+import { formatContractDuration } from '@/lib/contractDuration';
 import { normalizeMeetingUrl, toDateTimeLocalInput } from '@/lib/interviewMeeting';
 import { canEditMeetingUrl } from '@/lib/staffAccess';
 import { useStaffRole } from './useStaffRole';
@@ -243,6 +244,9 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
           ))}
           <div className="border border-slate-200 rounded-xl p-3 bg-slate-50 space-y-2">
             <p className="text-xs font-bold text-slate-900">{of.id ? ui.ioEditOffer : ui.ioNewOffer}</p>
+            {request?.contract_type ? (
+              <p className="text-[11px] font-medium text-slate-700">⏳ {t.durationLabel}: {formatContractDuration(request.contract_type, currentLang, t)}</p>
+            ) : null}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <input placeholder={`${ui.ioCompany} *`} value={of.employer_name} onChange={(e) => setOf({ ...of, employer_name: e.target.value })} className={inp} />
               <input placeholder={ui.ioPosition} value={of.position_title} onChange={(e) => setOf({ ...of, position_title: e.target.value })} className={inp} />

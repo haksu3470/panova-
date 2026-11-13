@@ -1,4 +1,5 @@
 import { formatSalary, parseSalaryInput, salaryCurrency, type SalaryCurrency } from './money';
+import { canonicalDuration, isIsoDate, parseContractDuration, parseDurationAmount, type DurationUnitChoice } from './contractDuration';
 
 export type YesNo = '' | 'yes' | 'no';
 
@@ -15,7 +16,10 @@ export type EmployerDemandDraft = {
   salaryText: string;
   /** EUR (default) or USD, from the list next to the salary field. */
   currency: SalaryCurrency;
+  /** Canonical duration (canonicalDuration): "12 ay", "90 gün", "süresiz". */
   duration: string;
+  /** YYYY-MM-DD from the date input, or '' (target_start_date accepts null). */
+  startDate: string;
   experience: string;
   language: string;
   lodging: YesNo;
@@ -33,6 +37,7 @@ export type EmployerDemandRow = {
   monthly_net_salary: number;
   salary_currency: SalaryCurrency;
   contract_type: string;
+  target_start_date: string | null;
   required_experience_years: number;
   required_language: string;
   accommodation_provided: boolean;
@@ -128,6 +133,7 @@ export function buildEmployerDemandInsert(
       monthly_net_salary: salary,
       salary_currency: salaryCurrency(draft.currency),
       contract_type: draft.duration.trim(),
+      target_start_date: isIsoDate(String(draft.startDate ?? '').trim()) ? String(draft.startDate).trim() : null,
       required_experience_years: experienceYearsFromChoice(draft.experience),
       required_language: draft.language.trim(),
       accommodation_provided: lodging,
@@ -145,7 +151,7 @@ export const EXPERIENCE_MAX_YEARS = 60;
 
 /** Form fields, in the order they appear (the first invalid one gets focus). */
 export const DEMAND_FIELDS = [
-  'sector', 'position', 'experience', 'language', 'headcount', 'city', 'salary', 'duration', 'lodging', 'meals',
+  'sector', 'position', 'experience', 'language', 'headcount', 'city', 'salary', 'duration', 'startDate', 'lodging', 'meals',
 ] as const;
 export type DemandField = (typeof DEMAND_FIELDS)[number];
 
@@ -155,7 +161,10 @@ export type DemandFieldError =
   | 'headcount_range'
   | 'salary_number'
   | 'salary_range'
-  | 'experience_range';
+  | 'experience_range'
+  | 'duration_number'
+  | 'date_invalid'
+  | 'date_past';
 
 export type DemandFieldErrors = Partial<Record<DemandField, DemandFieldError>>;
 
@@ -168,7 +177,14 @@ export type DemandFormInput = {
   headcountText: string;
   city: string;
   salaryText: string;
-  duration: string;
+  /** Unit list: gün / hafta / ay / yıl, 'open' (no end date) or '' (not chosen). */
+  durationUnit: DurationUnitChoice;
+  /** As typed: whole number from 1 to 999 (ignored when durationUnit is 'open'). */
+  durationAmountText: string;
+  /** YYYY-MM-DD or '' (optional). */
+  startDate: string;
+  /** Today as YYYY-MM-DD (localIsoDate()); a start date before it is refused. */
+  today: string;
   lodging: YesNo;
   meals: YesNo;
 };
@@ -205,7 +221,19 @@ export function validateDemandForm(input: DemandFormInput): DemandFieldErrors {
     if (salary == null || salary > SALARY_MAX) errors.salary = 'salary_range';
   }
 
-  if (blank(input.duration)) errors.duration = 'required';
+  if (!input.durationUnit) errors.duration = 'required';
+  else if (input.durationUnit !== 'open') {
+    if (blank(input.durationAmountText)) errors.duration = 'required';
+    else if (parseDurationAmount(input.durationAmountText) == null) errors.duration = 'duration_number';
+    else if (!parseContractDuration(canonicalDuration(input.durationUnit, input.durationAmountText))) errors.duration = 'duration_number';
+  }
+
+  const start = String(input.startDate ?? '').trim();
+  if (start) {
+    if (!isIsoDate(start)) errors.startDate = 'date_invalid';
+    else if (isIsoDate(input.today) && start < input.today) errors.startDate = 'date_past';
+  }
+
   if (input.lodging !== 'yes' && input.lodging !== 'no') errors.lodging = 'required';
   if (input.meals !== 'yes' && input.meals !== 'no') errors.meals = 'required';
   return errors;
@@ -247,7 +275,8 @@ export function demandRuleFromDbError(
 
 type DemandCopyKey =
   | 'demandErrRequired' | 'demandErrSector' | 'demandErrPosition' | 'demandErrHeadcount' | 'demandErrCity'
-  | 'demandErrDuration' | 'demandErrSalaryRange' | 'demandErrExperience' | 'demandErrCompanyName'
+  | 'demandErrDuration' | 'demandErrDurationNumber' | 'demandErrStartDateInvalid' | 'demandErrStartDatePast'
+  | 'demandErrSalaryRange' | 'demandErrExperience' | 'demandErrCompanyName'
   | 'salaryAmountRequired' | 'lodgingRequired' | 'mealsRequired';
 
 /** The message shown under a field (dictionary keys above). */
@@ -262,7 +291,8 @@ export function demandFieldMessage(
       case 'position': return 'demandErrPosition';
       case 'headcount': return 'demandErrHeadcount';
       case 'city': return 'demandErrCity';
-      case 'duration': return 'demandErrDuration';
+      case 'duration': return error === 'duration_number' ? 'demandErrDurationNumber' : 'demandErrDuration';
+      case 'startDate': return error === 'date_past' ? 'demandErrStartDatePast' : 'demandErrStartDateInvalid';
       case 'company': return 'demandErrCompanyName';
       case 'lodging': return 'lodgingRequired';
       case 'meals': return 'mealsRequired';

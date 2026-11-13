@@ -11,6 +11,7 @@ import { dateLocale, portalUi } from '@/lib/portal-ui-copy';
 import { offerExportRows, requestExportRows, toCsv } from '@/lib/exportLists';
 import { localizeCatalogTitle } from '@/lib/professions';
 import { displayedRequestSalary } from '@/lib/workforceRequest';
+import { formatContractDuration } from '@/lib/contractDuration';
 import { releaseCopy } from '@/lib/release-copy';
 import { normalizeDemandStatus, targetStartIsPast } from '@/lib/demandStatus';
 import type { StatusErrorKey } from '@/lib/requestStatusChange';
@@ -151,6 +152,7 @@ export default function RequestsTab({
                 <div>📅 {t.createdDate}: {req.created_at ? req.created_at.substring(0, 10) : '2026-09'}</div>
                 <div>🎯 {t.colTargetStart}: {req.target_start_date || '2026-10-15'}</div>
                 <div>💰 {t.colSalary}: {displayedRequestSalary(req, dateLocale[currentLang]) || '—'}</div>
+                {req.contract_type ? <div>⏳ {t.durationLabel}: {formatContractDuration(req.contract_type, currentLang, t)}</div> : null}
                 {targetStartIsPast(req.target_start_date) && !['completed', 'cancelled'].includes(String(req.status || '')) ? (
                   <div className="col-span-2 text-amber-800 font-bold">{releaseCopy[currentLang].pastTarget}</div>
                 ) : null}

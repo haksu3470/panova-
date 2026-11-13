@@ -12,6 +12,7 @@ import { localizeCatalogTitle, positionMatchesProfession, professionSearchBlob }
 import { useSiteLanguage } from '@/lib/site-language';
 import { translations } from '@/lib/dictionary';
 import { canDecideForEmployer } from '@/lib/staffAccess';
+import { formatContractDuration } from '@/lib/contractDuration';
 import { isValidStaffDecisionReason, type EmployerDecision } from '@/lib/employerCandidateFilters';
 import { useStaffRole } from './useStaffRole';
 
@@ -176,6 +177,7 @@ export default function MatchPanel({ request, onClose }: Props) {
             <h3 className="font-extrabold text-slate-900 text-lg">🔗 {ui.matchTitle}</h3>
             <p className="text-xs text-muted-foreground">
               {localizeCatalogTitle(request.position_title, currentLang)} · {request.employer_name} · {fill(ui.selectedOf, { selected: selectedCount, total: request.headcount })}
+              {request.contract_type ? <> · ⏳ {formatContractDuration(request.contract_type, currentLang, t)}</> : null}
             </p>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg text-slate-700 hover:bg-slate-100" aria-label={ui.close}><X className="w-5 h-5" /></button>
