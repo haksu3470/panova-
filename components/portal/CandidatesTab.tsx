@@ -194,7 +194,7 @@ export default function CandidatesTab({
               ...row,
               profession: candidateProfessionLabel(String(row.profession ?? ''), '', lang),
             }))}
-            labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty }}
+            labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty, popupBlocked: ui.exportPopupBlocked }}
           />
           <button
             type="button"

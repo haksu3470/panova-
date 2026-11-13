@@ -49,8 +49,8 @@ export function toExcelHtml(title: string, rows: readonly Record<string, unknown
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(title)}</title></head><body><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></body></html>`;
 }
 
-export function toPrintHtml(title: string, rows: readonly Record<string, unknown>[]): string {
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
+export function toPrintHtml(title: string, rows: readonly Record<string, unknown>[], dir: 'ltr' | 'rtl' = 'ltr'): string {
+  return `<!DOCTYPE html><html dir="${dir}"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
 <style>
   body { font-family: Arial, sans-serif; color: #0f172a; margin: 24px; }
   h1 { font-size: 18px; }

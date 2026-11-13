@@ -76,7 +76,7 @@ export default function RequestsTab({
             filename="labour-requests"
             title={t.demandFilesTitle || 'Requests'}
             rows={requestExportRows(jobRequests, currentLang)}
-            labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty }}
+            labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty, popupBlocked: ui.exportPopupBlocked }}
           />
           <button
             type="button"

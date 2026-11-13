@@ -1045,7 +1045,7 @@ export default function PortalPage() {
                 filename="employers"
                 title={t.employersTab || 'Employers'}
                 rows={employerExportRows(employers)}
-                labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty }}
+                labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty, popupBlocked: ui.exportPopupBlocked }}
               />
             </div>
             {employers.length === 0 ? (
