@@ -94,6 +94,18 @@ export function canEditMeetingUrl(role: string | null | undefined): boolean {
 }
 
 /**
+ * Roles that may create or change interviews and job offers. The database
+ * (staff_insert_* / staff_update_* on interviews and job_offers, role from
+ * current_staff()) enforces the same list; this only hides the
+ * "Interview and offer" button from field officers, finance and limited.
+ */
+export const INTERVIEW_OFFER_ROLES = ['upper_management', 'source_country', 'target_country'] as const;
+
+export function canWriteInterviewOffer(role: string | null | undefined): boolean {
+  return (INTERVIEW_OFFER_ROLES as readonly string[]).includes((role || '').trim().toLowerCase());
+}
+
+/**
  * Roles that may change a request's status by hand. The database
  * (staff_set_request_status -> is_portal_manager) enforces the same set:
  * profiles.staff_role or staff_members.role_level = 'upper_management'.

@@ -11,7 +11,7 @@ import OfficialProcessBadge from '@/components/portal/OfficialProcessBadge';
 import CandidateStatusControl from '@/components/portal/CandidateStatusControl';
 import DocumentPreviewModal from '@/components/portal/DocumentPreviewModal';
 import { useStaffRole } from '@/components/portal/useStaffRole';
-import { canUpdateRequestStatus } from '@/lib/staffAccess';
+import { canUpdateRequestStatus, canWriteInterviewOffer } from '@/lib/staffAccess';
 import type { CandidateStatusErrorKey } from '@/lib/candidateStatusChange';
 
 import { useState, useEffect } from 'react';
@@ -71,6 +71,8 @@ function CandidateDetailPageInner() {
   const [status, setStatus] = useState('pending');
   const { role: staffRole, upper: isUpperStaff } = useStaffRole();
   const mayChangeStatus = canUpdateRequestStatus(staffRole);
+  // Field officer, finance, limited: no interview / offer writes (database rule).
+  const mayWriteInterviewOffer = canWriteInterviewOffer(staffRole);
   const [candidatePhoto, setCandidatePhoto] = useState('');
   const [candidatePhone, setCandidatePhone] = useState('');
   const [candidateEmail, setCandidateEmail] = useState('');
@@ -623,14 +625,16 @@ function CandidateDetailPageInner() {
             </div>
 
             <DocumentStatusPanel candidateId={candidateId} items={docItems} rows={docs.rows} reload={docs.reload} t={t} ui={ui} />
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm">
-              <div>
-                <p className="font-bold text-slate-900 text-sm">🤝 {ui.interviewOfferTitle}</p>
-                <p className="text-xs text-slate-600 font-medium">{ui.interviewOfferHint}</p>
+            {mayWriteInterviewOffer ? (
+              <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm">
+                <div>
+                  <p className="font-bold text-slate-900 text-sm">🤝 {ui.interviewOfferTitle}</p>
+                  <p className="text-xs text-slate-600 font-medium">{ui.interviewOfferHint}</p>
+                </div>
+                <button onClick={() => setShowIO(true)} className="text-xs font-bold px-4 py-2 rounded-lg bg-amber-800 text-white cursor-pointer hover:bg-amber-900 transition shadow">{ui.docOpen}</button>
               </div>
-              <button onClick={() => setShowIO(true)} className="text-xs font-bold px-4 py-2 rounded-lg bg-amber-800 text-white cursor-pointer hover:bg-amber-900 transition shadow">{ui.docOpen}</button>
-            </div>
-            {showIO && candidate && <InterviewOfferPanel candidate={{ ...candidate, id: candidateId }} onClose={() => setShowIO(false)} />}
+            ) : null}
+            {mayWriteInterviewOffer && showIO && candidate && <InterviewOfferPanel candidate={{ ...candidate, id: candidateId }} onClose={() => setShowIO(false)} />}
             <PlacementPanel
               candidateId={candidateId}
               refreshKey={placementRefresh}

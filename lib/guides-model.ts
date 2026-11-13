@@ -263,8 +263,10 @@ const FIELD: StepActor = 'field_officer';
  *   readable (staff_can_read_candidate). A target-country officer only reads
  *   candidates already on its country's requests, so new candidates are bound
  *   by upper management or the source-country officer.
- * - present / interview / offer: request_matches update, interviews and
- *   job_offers insert (staff_can_read_candidate; guard_presented_pipeline)
+ * - present: request_matches update (staff_can_read_candidate)
+ * - interview / offer: INTERVIEW_OFFER_ROLES; interviews and job_offers
+ *   insert / update also need the role from current_staff(), so the field
+ *   officer, finance and limited cannot (guard_presented_pipeline as well)
  * - decision for the employer: STAFF_DECISION_ROLES / staff_decide_match
  * - meeting link: MEETING_URL_ROLES / guard_interview_meeting_url
  * - manual candidate status: canUpdateRequestStatus / staff_set_candidate_status

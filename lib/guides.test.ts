@@ -24,6 +24,8 @@ import {
 
 await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.url);
 const {
+  INTERVIEW_OFFER_ROLES,
+  canWriteInterviewOffer,
   MEETING_URL_ROLES,
   STAFF_DECISION_ROLES,
   canOpenStaffFile,
@@ -348,6 +350,11 @@ test('step roles match the permission helpers', () => {
   const checks: [string, number, string[]][] = [
     ['matching-offers', 3, [...STAFF_DECISION_ROLES].sort()],
     ['matching-offers', 5, [...MEETING_URL_ROLES].sort()],
+    // interview and offer: the role list the database checks (not the field officer)
+    ['matching-offers', 4, [...INTERVIEW_OFFER_ROLES].sort()],
+    ['matching-offers', 6, [...INTERVIEW_OFFER_ROLES].sort()],
+    ['request-to-offer', 3, [...INTERVIEW_OFFER_ROLES].sort()],
+    ['request-to-offer', 5, [...INTERVIEW_OFFER_ROLES].sort()],
     ['request-to-offer', 4, [...MEETING_URL_ROLES].sort()],
     ['dossier-review', 2, rolesWhere(canUpdateRequestStatus)],
     ['dossier-review', 5, rolesWhere(canManageCandidateVideo)],
@@ -371,6 +378,22 @@ test('step roles match the permission helpers', () => {
   // binding a new candidate: not the target-country officer (it only reads candidates already on its requests)
   assert.deepEqual(staffActors(GUIDE_STEP_ACTORS['matching-offers'][1]), ['source_country', 'upper_management']);
   assert.deepEqual(staffActors(GUIDE_STEP_ACTORS['request-to-offer'][1]), ['source_country', 'upper_management']);
+});
+
+test('interview and offer writes: field officer, finance and limited are out, in the app and the migration', () => {
+  for (const role of ['upper_management', 'source_country', 'target_country']) assert.equal(canWriteInterviewOffer(role), true, role);
+  for (const role of ['field_officer', 'finance', 'limited', 'staff', '', null]) assert.equal(canWriteInterviewOffer(role), false, String(role));
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const page = readFileSync(path.join(root, 'app/portal/candidates/[id]/page.tsx'), 'utf8');
+  assert.ok(page.includes('canWriteInterviewOffer(staffRole)'));
+  assert.match(page, /\{mayWriteInterviewOffer \? \([\s\S]*?ui\.interviewOfferTitle/);
+  assert.match(page, /mayWriteInterviewOffer && showIO && candidate && <InterviewOfferPanel/);
+  const sql = readFileSync(path.join(root, 'supabase/migrations/20261116120000_interview_offer_write_roles.sql'), 'utf8');
+  const roles = `in (${INTERVIEW_OFFER_ROLES.map((role) => `'${role}'`).join(', ')})`;
+  assert.equal(sql.split(roles).length - 1, 4, 'four with check clauses use the same role list');
+  assert.ok(!/field_officer'\s*[,)]/.test(sql.replace(/--.*$/gm, '')), 'field_officer is not in a role list');
+  const rollback = readFileSync(path.join(root, 'supabase/rollback/20261116120000_interview_offer_write_roles_rollback.sql'), 'utf8');
+  assert.equal(rollback.includes('current_staff'), false);
 });
 
 test('a role does not read the steps it cannot do', () => {
