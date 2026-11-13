@@ -12,6 +12,8 @@ const HOW_TOS = [
   'staff-invite',
   'dossier-review',
   'matching-offers',
+  'request-to-offer',
+  'document-request',
   'employer-request',
   'employer-browse',
   'candidate-register',

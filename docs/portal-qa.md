@@ -27,7 +27,7 @@ Staff dossier: `/portal/candidates/[id]`. Demand file: `/portal/requests/[id]`. 
 
 `/admin` and `/supplier` exist and are staff-gated. Nothing in the portal navigation links to them. See the gap analysis before treating them as product flows.
 
-In-app how-to ids (`GUIDE_CATALOG` in `lib/guides-model.ts`): `staff-login`, `staff-invite`, `dossier-review`, `matching-offers`, `employer-request`, `employer-browse`, `candidate-register`.
+In-app how-to ids (`GUIDE_CATALOG` in `lib/guides-model.ts`): `staff-login`, `staff-invite`, `dossier-review`, `matching-offers`, `request-to-offer`, `document-request`, `employer-request`, `employer-browse`, `candidate-register`. Every how-to has an example box (heading `exampleLabel`) built on the demo records (S24). `request-to-offer` and `document-request` are staff only. Until they are translated, en / sq / ar / mk show the Turkish text of the keys listed in `docs/guides-translation-todo.md`.
 
 ---
 
