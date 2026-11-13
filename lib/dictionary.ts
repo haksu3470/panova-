@@ -329,7 +329,6 @@ export interface Translation {
   preview?: string;
   noFileUploaded?: string;
   uploadFromComputer?: string;
-  newDocNamePlaceholder?: string;
   add?: string;
   workVideoUrl?: string;
   previewPlayVideo?: string;
@@ -388,6 +387,14 @@ export interface Translation {
   candStatusErrGeneric?: string;
   docApproveNeedsFile?: string;
   docNoFileWarning?: string;
+  docNotRequested?: string;
+  docNoFileShort?: string;
+  docNoPermission?: string;
+  docAlreadyRequested?: string;
+  docSaved?: string;
+  docSaveFailed?: string;
+  docUploadedOk?: string;
+  docRequestedOk?: string;
   travelNeedsFlightInfo?: string;
   docPreviewFailed?: string;
   docPreviewErrAccess?: string;
@@ -1042,7 +1049,6 @@ export const translations: Record<Language, Translation> = {
     preview: 'Önizleme',
     noFileUploaded: 'Henüz dosya yüklenmedi',
     uploadFromComputer: 'Bilgisayardan Dosya Yükle',
-    newDocNamePlaceholder: 'Belge Adı / Türü',
     add: 'Ekle',
     workVideoUrl: 'Çalışma / Tanıtım Videosu URL',
     previewPlayVideo: 'Videoyu Oynat & Önizle',
@@ -1099,8 +1105,16 @@ export const translations: Record<Language, Translation> = {
     candStatusErrVisaOffer: 'Vize aşamasına geçmek için adayın kabul edilmiş bir iş teklifi olmalı.',
     candStatusErrNotFound: 'Aday bulunamadı ya da görme yetkiniz yok.',
     candStatusErrGeneric: 'Aday durumu değiştirilemedi. Lütfen tekrar deneyin.',
-    docApproveNeedsFile: 'Onaylamak için önce dosya yüklenmeli.',
+    docApproveNeedsFile: 'İncelemek veya onaylamak için önce dosya yüklenmeli.',
     docNoFileWarning: 'Dosya yok: onaylı sayılmaz. Dosya yükleyin veya durumu değiştirin.',
+    docNotRequested: 'Henüz istenmedi / yüklenmedi',
+    docNoFileShort: 'Dosya yok',
+    docNoPermission: 'Bu adayın belgelerini değiştirme yetkiniz yok.',
+    docAlreadyRequested: 'Bu tür için zaten bekleyen bir talep var.',
+    docSaved: 'Kaydedildi.',
+    docSaveFailed: 'Kaydedilemedi. Lütfen tekrar deneyin.',
+    docUploadedOk: 'Dosya yüklendi.',
+    docRequestedOk: 'Belge talep edildi.',
     travelNeedsFlightInfo: 'Önce uçuş bilgisi girin.',
     docPreviewFailed: 'Önizleme açılamadı',
     docPreviewErrAccess: 'Güvenli bağlantı alınamadı: bu belgeyi görme yetkiniz yok ya da dosya bulunamadı.',
@@ -1742,7 +1756,6 @@ export const translations: Record<Language, Translation> = {
     preview: 'Preview',
     noFileUploaded: 'No files uploaded yet',
     uploadFromComputer: 'Upload File from Computer',
-    newDocNamePlaceholder: 'Document Name / Type',
     add: 'Add',
     workVideoUrl: 'Work / Intro Video URL',
     previewPlayVideo: 'Preview & Play Video',
@@ -1799,8 +1812,16 @@ export const translations: Record<Language, Translation> = {
     candStatusErrVisaOffer: 'Moving to the visa stage needs an accepted job offer for this candidate.',
     candStatusErrNotFound: 'Candidate not found, or you cannot view it.',
     candStatusErrGeneric: 'The candidate status could not be changed. Please try again.',
-    docApproveNeedsFile: 'Upload a file before approving.',
+    docApproveNeedsFile: 'Upload a file before reviewing or approving.',
     docNoFileWarning: 'No file: not counted as approved. Upload a file or change the status.',
+    docNotRequested: 'Not requested / not uploaded yet',
+    docNoFileShort: 'No file',
+    docNoPermission: 'You are not allowed to change this candidate\'s documents.',
+    docAlreadyRequested: 'There is already an open request for this type.',
+    docSaved: 'Saved.',
+    docSaveFailed: 'Could not be saved. Please try again.',
+    docUploadedOk: 'File uploaded.',
+    docRequestedOk: 'Document requested.',
     travelNeedsFlightInfo: 'Enter flight details first.',
     docPreviewFailed: 'Preview could not be opened',
     docPreviewErrAccess: 'No secure link: you cannot view this document, or the file was not found.',
@@ -2442,7 +2463,6 @@ export const translations: Record<Language, Translation> = {
     preview: 'Pamja paraprake',
     noFileUploaded: 'Ende nuk ka skedarë të ngarkuar',
     uploadFromComputer: 'Ngarko Skedar nga Kompjuter',
-    newDocNamePlaceholder: 'Emri / Lloji i Dokumentit',
     add: 'Shto',
     workVideoUrl: 'URL e Videos së Punës / Prezantimit',
     previewPlayVideo: 'Parapamje & Luaj Videon',
@@ -2499,8 +2519,16 @@ export const translations: Record<Language, Translation> = {
     candStatusErrVisaOffer: 'Për të kaluar në fazën e vizës, kandidati duhet të ketë një ofertë pune të pranuar.',
     candStatusErrNotFound: 'Kandidati nuk u gjet ose nuk keni leje ta shihni.',
     candStatusErrGeneric: 'Statusi i kandidatit nuk u ndryshua. Ju lutemi provoni përsëri.',
-    docApproveNeedsFile: 'Ngarkoni një skedar para se ta miratoni.',
+    docApproveNeedsFile: 'Ngarkoni një skedar para se ta shqyrtoni ose ta miratoni.',
     docNoFileWarning: 'Nuk ka skedar: nuk llogaritet si i miratuar. Ngarkoni një skedar ose ndryshoni statusin.',
+    docNotRequested: 'Ende nuk është kërkuar / ngarkuar',
+    docNoFileShort: 'Pa skedar',
+    docNoPermission: 'Nuk keni leje të ndryshoni dokumentet e këtij kandidati.',
+    docAlreadyRequested: 'Për këtë lloj ka tashmë një kërkesë në pritje.',
+    docSaved: 'U ruajt.',
+    docSaveFailed: 'Nuk u ruajt. Ju lutemi provoni përsëri.',
+    docUploadedOk: 'Skedari u ngarkua.',
+    docRequestedOk: 'Dokumenti u kërkua.',
     travelNeedsFlightInfo: 'Fillimisht futni të dhënat e fluturimit.',
     docPreviewFailed: 'Parapamja nuk u hap',
     docPreviewErrAccess: 'Nuk u mor lidhje e sigurt: nuk keni leje ta shihni këtë dokument ose skedari nuk u gjet.',
@@ -3285,7 +3313,6 @@ export const translations: Record<Language, Translation> = {
     preview: 'معاينة',
     noFileUploaded: 'لم يتم رفع أي ملفات بعد',
     uploadFromComputer: 'رفع ملف من الكمبيوتر',
-    newDocNamePlaceholder: 'اسم / نوع المستند',
     add: 'إضافة',
     workVideoUrl: 'رابط فيديو العمل / التعريف',
     previewPlayVideo: 'معاينة وتشغيل الفيديو',
@@ -3342,8 +3369,16 @@ export const translations: Record<Language, Translation> = {
     candStatusErrVisaOffer: 'للانتقال إلى مرحلة التأشيرة يجب أن يكون لدى المرشح عرض عمل مقبول.',
     candStatusErrNotFound: 'لم يُعثر على المرشح أو لا تملكون صلاحية عرضه.',
     candStatusErrGeneric: 'تعذّر تغيير حالة المرشح. يُرجى المحاولة مرة أخرى.',
-    docApproveNeedsFile: 'يجب رفع ملف قبل الموافقة.',
+    docApproveNeedsFile: 'يجب رفع ملف قبل المراجعة أو الموافقة.',
     docNoFileWarning: 'لا يوجد ملف: لا يُحتسب موافقًا عليه. ارفعوا ملفًا أو غيّروا الحالة.',
+    docNotRequested: 'لم يُطلب / لم يُرفع بعد',
+    docNoFileShort: 'لا يوجد ملف',
+    docNoPermission: 'لا تملكون صلاحية تعديل مستندات هذا المرشح.',
+    docAlreadyRequested: 'يوجد بالفعل طلب قيد الانتظار لهذا النوع.',
+    docSaved: 'تم الحفظ.',
+    docSaveFailed: 'تعذّر الحفظ. يُرجى المحاولة مرة أخرى.',
+    docUploadedOk: 'تم رفع الملف.',
+    docRequestedOk: 'تم طلب المستند.',
     travelNeedsFlightInfo: 'أدخلوا معلومات الرحلة أولًا.',
     docPreviewFailed: 'تعذّر فتح المعاينة',
     docPreviewErrAccess: 'تعذّر الحصول على رابط آمن: لا تملكون صلاحية عرض هذا المستند أو لم يُعثر على الملف.',
@@ -3845,7 +3880,6 @@ export const translations: Record<Language, Translation> = {
     preview: 'Преглед',
     noFileUploaded: 'Сè уште нема прикачени датотеки',
     uploadFromComputer: 'Прикачи датотека од компјутер',
-    newDocNamePlaceholder: 'Име / вид на документ',
     add: 'Додај',
     workVideoUrl: 'URL на видео за работа / претставување',
     previewPlayVideo: 'Прегледај и пушти видео',
@@ -3902,8 +3936,16 @@ export const translations: Record<Language, Translation> = {
     candStatusErrVisaOffer: 'За премин во фазата за виза, кандидатот мора да има прифатена понуда за работа.',
     candStatusErrNotFound: 'Кандидатот не е пронајден или немате право да го видите.',
     candStatusErrGeneric: 'Статусот на кандидатот не можеше да се промени. Обидете се повторно.',
-    docApproveNeedsFile: 'Прво прикачете датотека за да одобрите.',
+    docApproveNeedsFile: 'Прво прикачете датотека за да прегледате или одобрите.',
     docNoFileWarning: 'Нема датотека: не се смета за одобрено. Прикачете датотека или променете го статусот.',
+    docNotRequested: 'Сè уште не е побарано / прикачено',
+    docNoFileShort: 'Нема датотека',
+    docNoPermission: 'Немате право да ги менувате документите на овој кандидат.',
+    docAlreadyRequested: 'Веќе постои барање во тек за овој тип.',
+    docSaved: 'Зачувано.',
+    docSaveFailed: 'Не можеше да се зачува. Обидете се повторно.',
+    docUploadedOk: 'Датотеката е прикачена.',
+    docRequestedOk: 'Документот е побаран.',
     travelNeedsFlightInfo: 'Прво внесете податоци за летот.',
     docPreviewFailed: 'Прегледот не можеше да се отвори',
     docPreviewErrAccess: 'Не е добиена безбедна врска: немате право да го видите документот или датотеката не е пронајдена.',
