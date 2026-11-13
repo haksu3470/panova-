@@ -318,6 +318,17 @@ Automated: `lib/requestStatusChange.test.ts`, `lib/staffAccess.test.ts`. Databas
 
 Automated: `lib/candidateStatusChange.test.ts` (error code mapping, reason check, five languages, no direct status write in the portal).
 
+## S17. Aday belgeleri ve video / Candidate documents and video
+
+**Rol / Role:** Staff on `/portal/candidates/[id]`.
+
+**Adımlar ve beklenen / Steps and expected:**
+
+1. **Dosyasız belge onaylanamaz / No approval without a file.** Open `/portal/candidates/[id]` for a candidate with no rows in `candidate_documents`. In **Document tracking**, every default document (passport included) starts as pending, even when a passport number exists. For a document with no file, **Approved** cannot be picked in the list and "Upload a file before approving" shows under it. Upload a file: **Approved** can be picked. A document saved earlier as approved with no file shows the red "No file" warning. The **Document status** card counts all documents as the total and only approved documents with a file as approved (for example 0/5 with one approved row that has no file). The same rule applies to the `candidate_documents` rows in that card.
+2. **Sertifika kutuları yok, video alanları çalışır / No certificate boxes; videos work.** On the same page the section is titled **Video introduction** with a video icon. There are no certificate number or issuing body boxes. The three YouTube fields behave as before: staff allowed to manage candidate videos can edit and save them, everyone else sees them read-only. Saving the page leaves `certificate_no` and `issuing_body` as they were in the database.
+
+Automated: `lib/candidateDocuments.test.ts` (approval rule, counter, default list, five languages, removed keys).
+
 ---
 
 ## Boşluk analizi / Gap analysis

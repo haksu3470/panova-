@@ -274,7 +274,6 @@ export interface Translation {
   certificateno?: string;
   issuingbody?: string;
 
-  certificateInfo?: string;
   candidateStatus?: string;
   employerCompanyName?: string;
   sendNotification?: string;
@@ -332,7 +331,6 @@ export interface Translation {
   uploadFromComputer?: string;
   newDocNamePlaceholder?: string;
   add?: string;
-  professionalEvaluationCertificate?: string;
   workVideoUrl?: string;
   previewPlayVideo?: string;
   internalNotesAdminOnly?: string;
@@ -388,6 +386,9 @@ export interface Translation {
   candStatusErrVisaOffer?: string;
   candStatusErrNotFound?: string;
   candStatusErrGeneric?: string;
+  docApproveNeedsFile?: string;
+  docNoFileWarning?: string;
+  videoIntroductionTitle?: string;
   openDemandFilesBtn?: string;
   taskGroupTarget?: string;
   taskGroupField?: string;
@@ -973,7 +974,6 @@ export const translations: Record<Language, Translation> = {
     certificateno: 'Sertifika No',
     issuingbody: 'Veren Kurum',
 
-    certificateInfo: 'Sertifika Bilgisi',
     candidateStatus: 'Aday durumu',
     employerCompanyName: 'İşveren Şirket Adı',
     sendNotification: 'Bildirim Gönder',
@@ -1031,7 +1031,6 @@ export const translations: Record<Language, Translation> = {
     uploadFromComputer: 'Bilgisayardan Dosya Yükle',
     newDocNamePlaceholder: 'Belge Adı / Türü',
     add: 'Ekle',
-    professionalEvaluationCertificate: 'Mesleki Değerlendirme Sertifikası',
     workVideoUrl: 'Çalışma / Tanıtım Videosu URL',
     previewPlayVideo: 'Videoyu Oynat & Önizle',
     internalNotesAdminOnly: 'Dahili Notlar (Yalnızca Admin)',
@@ -1087,6 +1086,9 @@ export const translations: Record<Language, Translation> = {
     candStatusErrVisaOffer: 'Vize aşamasına geçmek için adayın kabul edilmiş bir iş teklifi olmalı.',
     candStatusErrNotFound: 'Aday bulunamadı ya da görme yetkiniz yok.',
     candStatusErrGeneric: 'Aday durumu değiştirilemedi. Lütfen tekrar deneyin.',
+    docApproveNeedsFile: 'Onaylamak için önce dosya yüklenmeli.',
+    docNoFileWarning: 'Dosya yok: onaylı sayılmaz. Dosya yükleyin veya durumu değiştirin.',
+    videoIntroductionTitle: 'Video tanıtımı',
     openDemandFilesBtn: 'Dosyaları Aç',
     taskGroupTarget: 'Hedef Ülke Ekibi',
     taskGroupField: 'Saha Ekibi',
@@ -1659,7 +1661,6 @@ export const translations: Record<Language, Translation> = {
     certificateno: 'Certificate No',
     issuingbody: 'Issuing Body',
 
-    certificateInfo: 'Certificate Info',
     candidateStatus: 'Candidate status',
     employerCompanyName: 'Employer Company Name',
     sendNotification: 'Send Notification',
@@ -1717,7 +1718,6 @@ export const translations: Record<Language, Translation> = {
     uploadFromComputer: 'Upload File from Computer',
     newDocNamePlaceholder: 'Document Name / Type',
     add: 'Add',
-    professionalEvaluationCertificate: 'Professional Evaluation Certificate',
     workVideoUrl: 'Work / Intro Video URL',
     previewPlayVideo: 'Preview & Play Video',
     internalNotesAdminOnly: 'Internal Notes (Admin Only)',
@@ -1773,6 +1773,9 @@ export const translations: Record<Language, Translation> = {
     candStatusErrVisaOffer: 'Moving to the visa stage needs an accepted job offer for this candidate.',
     candStatusErrNotFound: 'Candidate not found, or you cannot view it.',
     candStatusErrGeneric: 'The candidate status could not be changed. Please try again.',
+    docApproveNeedsFile: 'Upload a file before approving.',
+    docNoFileWarning: 'No file: not counted as approved. Upload a file or change the status.',
+    videoIntroductionTitle: 'Video introduction',
     openDemandFilesBtn: 'Open Files',
     taskGroupTarget: 'Target Country Team',
     taskGroupField: 'Field Team',
@@ -2345,7 +2348,6 @@ export const translations: Record<Language, Translation> = {
     certificateno: 'Nr. Certifikatës',
     issuingbody: 'Institucioni Lëshues',
 
-    certificateInfo: 'Informacioni i Certifikatos',
     candidateStatus: 'Statusi i kandidatit',
     employerCompanyName: 'Emri i Kompanisë Punëdhënëse',
     sendNotification: 'Dërgo Njoftim',
@@ -2403,7 +2405,6 @@ export const translations: Record<Language, Translation> = {
     uploadFromComputer: 'Ngarko Skedar nga Kompjuter',
     newDocNamePlaceholder: 'Emri / Lloji i Dokumentit',
     add: 'Shto',
-    professionalEvaluationCertificate: 'Certifikata e Vlerësimit Profesional',
     workVideoUrl: 'URL e Videos së Punës / Prezantimit',
     previewPlayVideo: 'Parapamje & Luaj Videon',
     internalNotesAdminOnly: 'Shënime të Brendshme (Vetëm për Admin)',
@@ -2459,6 +2460,9 @@ export const translations: Record<Language, Translation> = {
     candStatusErrVisaOffer: 'Për të kaluar në fazën e vizës, kandidati duhet të ketë një ofertë pune të pranuar.',
     candStatusErrNotFound: 'Kandidati nuk u gjet ose nuk keni leje ta shihni.',
     candStatusErrGeneric: 'Statusi i kandidatit nuk u ndryshua. Ju lutemi provoni përsëri.',
+    docApproveNeedsFile: 'Ngarkoni një skedar para se ta miratoni.',
+    docNoFileWarning: 'Nuk ka skedar: nuk llogaritet si i miratuar. Ngarkoni një skedar ose ndryshoni statusin.',
+    videoIntroductionTitle: 'Prezantimi me video',
     openDemandFilesBtn: 'Hap Skedarët',
     taskGroupTarget: 'Ekipi i Vendit të Synuar',
     taskGroupField: 'Ekipi i Fushës',
@@ -3176,7 +3180,6 @@ export const translations: Record<Language, Translation> = {
     reviewing: 'قيد المراجعة',
     certificateno: 'رقم الشهادة',
     issuingbody: 'جهة الإصدار',
-    certificateInfo: 'معلومات الشهادة',
     candidateStatus: 'حالة المرشح',
     employerCompanyName: 'اسم شركة صاحب العمل',
     sendNotification: 'إرسال إشعار',
@@ -3232,7 +3235,6 @@ export const translations: Record<Language, Translation> = {
     uploadFromComputer: 'رفع ملف من الكمبيوتر',
     newDocNamePlaceholder: 'اسم / نوع المستند',
     add: 'إضافة',
-    professionalEvaluationCertificate: 'شهادة التقييم المهني',
     workVideoUrl: 'رابط فيديو العمل / التعريف',
     previewPlayVideo: 'معاينة وتشغيل الفيديو',
     internalNotesAdminOnly: 'ملاحظات داخلية (للإدارة فقط)',
@@ -3288,6 +3290,9 @@ export const translations: Record<Language, Translation> = {
     candStatusErrVisaOffer: 'للانتقال إلى مرحلة التأشيرة يجب أن يكون لدى المرشح عرض عمل مقبول.',
     candStatusErrNotFound: 'لم يُعثر على المرشح أو لا تملكون صلاحية عرضه.',
     candStatusErrGeneric: 'تعذّر تغيير حالة المرشح. يُرجى المحاولة مرة أخرى.',
+    docApproveNeedsFile: 'يجب رفع ملف قبل الموافقة.',
+    docNoFileWarning: 'لا يوجد ملف: لا يُحتسب موافقًا عليه. ارفعوا ملفًا أو غيّروا الحالة.',
+    videoIntroductionTitle: 'التعريف بالفيديو',
     openDemandFilesBtn: 'فتح الملفات',
     taskGroupTarget: 'فريق البلد المستهدف',
     taskGroupField: 'الفريق الميداني',
@@ -3722,7 +3727,6 @@ export const translations: Record<Language, Translation> = {
     reviewing: 'Во проверка',
     certificateno: 'Број на сертификат',
     issuingbody: 'Издавач',
-    certificateInfo: 'Информации за сертификат',
     candidateStatus: 'Статус на кандидатот',
     employerCompanyName: 'Име на компанијата работодавач',
     sendNotification: 'Испрати известување',
@@ -3778,7 +3782,6 @@ export const translations: Record<Language, Translation> = {
     uploadFromComputer: 'Прикачи датотека од компјутер',
     newDocNamePlaceholder: 'Име / вид на документ',
     add: 'Додај',
-    professionalEvaluationCertificate: 'Сертификат за професионална оценка',
     workVideoUrl: 'URL на видео за работа / претставување',
     previewPlayVideo: 'Прегледај и пушти видео',
     internalNotesAdminOnly: 'Внатрешни белешки (само за администратор)',
@@ -3834,6 +3837,9 @@ export const translations: Record<Language, Translation> = {
     candStatusErrVisaOffer: 'За премин во фазата за виза, кандидатот мора да има прифатена понуда за работа.',
     candStatusErrNotFound: 'Кандидатот не е пронајден или немате право да го видите.',
     candStatusErrGeneric: 'Статусот на кандидатот не можеше да се промени. Обидете се повторно.',
+    docApproveNeedsFile: 'Прво прикачете датотека за да одобрите.',
+    docNoFileWarning: 'Нема датотека: не се смета за одобрено. Прикачете датотека или променете го статусот.',
+    videoIntroductionTitle: 'Видео претставување',
     openDemandFilesBtn: 'Отвори досиеја',
     taskGroupTarget: 'Тим за целна земја',
     taskGroupField: 'Теренски тим',
