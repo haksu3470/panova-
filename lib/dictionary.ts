@@ -494,6 +494,11 @@ export interface Translation {
   lodgingAndMealsRequired?: string;
   salaryAmountRequired?: string;
   demandSaveFailed?: string;
+  empCardGoTo?: string;
+  empRequestDelete?: string;
+  empRequestDeleteConfirm?: string;
+  empRequestHasActivity?: string;
+  empRequestDeleteFailed?: string;
   demandErrRequired?: string;
   demandErrSector?: string;
   demandErrPosition?: string;
@@ -1226,6 +1231,11 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'Konaklama ve yemek seçimi zorunludur.',
     salaryAmountRequired: 'Aylık net maaşı sayı olarak girin.',
     demandSaveFailed: 'Talep kaydedilemedi. Lütfen tekrar deneyin.',
+    empCardGoTo: '{label}: {value}. {section} bölümüne git',
+    empRequestDelete: 'Talebi sil',
+    empRequestDeleteConfirm: 'Bu talep silinsin mi? Bu işlem geri alınamaz.',
+    empRequestHasActivity: 'Bu talebe bağlı süreç var, silinemez.',
+    empRequestDeleteFailed: 'Talep silinemedi. Lütfen tekrar deneyin.',
     demandErrRequired: 'Bu alan zorunludur.',
     demandErrSector: 'Bir sektör seçin.',
     demandErrPosition: 'En az bir pozisyon seçin ya da yazın.',
@@ -1945,6 +1955,11 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'Choose whether accommodation and meals are provided.',
     salaryAmountRequired: 'Enter the monthly net salary as a number.',
     demandSaveFailed: 'The request could not be saved. Please try again.',
+    empCardGoTo: '{label}: {value}. Go to {section}',
+    empRequestDelete: 'Delete request',
+    empRequestDeleteConfirm: 'Delete this request? This cannot be undone.',
+    empRequestHasActivity: 'This request has a process linked to it and cannot be deleted.',
+    empRequestDeleteFailed: 'The request could not be deleted. Please try again.',
     demandErrRequired: 'This field is required.',
     demandErrSector: 'Select a sector.',
     demandErrPosition: 'Select or type at least one position.',
@@ -2664,6 +2679,11 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'Zgjidhni nëse ofrohen akomodimi dhe ushqimi.',
     salaryAmountRequired: 'Shkruani pagën neto mujore si numër.',
     demandSaveFailed: 'Kërkesa nuk u ruajt. Ju lutemi provoni përsëri.',
+    empCardGoTo: '{label}: {value}. Shko te {section}',
+    empRequestDelete: 'Fshi kërkesën',
+    empRequestDeleteConfirm: 'Të fshihet kjo kërkesë? Ky veprim nuk mund të zhbëhet.',
+    empRequestHasActivity: 'Kjo kërkesë ka një proces të lidhur dhe nuk mund të fshihet.',
+    empRequestDeleteFailed: 'Kërkesa nuk u fshi. Ju lutemi provoni përsëri.',
     demandErrRequired: 'Kjo fushë është e detyrueshme.',
     demandErrSector: 'Zgjidhni një sektor.',
     demandErrPosition: 'Zgjidhni ose shkruani të paktën një pozicion.',
@@ -3109,6 +3129,11 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'حدد ما إذا كانت الإقامة والوجبات متوفرة.',
     salaryAmountRequired: 'أدخل صافي الراتب الشهري كرقم.',
     demandSaveFailed: 'تعذر حفظ الطلب. يرجى المحاولة مرة أخرى.',
+    empCardGoTo: '{label}: {value}. الانتقال إلى {section}',
+    empRequestDelete: 'حذف الطلب',
+    empRequestDeleteConfirm: 'هل تريدون حذف هذا الطلب؟ لا يمكن التراجع عن ذلك.',
+    empRequestHasActivity: 'هذا الطلب مرتبط بعملية جارية ولا يمكن حذفه.',
+    empRequestDeleteFailed: 'تعذّر حذف الطلب. يُرجى المحاولة مرة أخرى.',
     demandErrRequired: 'هذا الحقل مطلوب.',
     demandErrSector: 'اختر قطاعًا.',
     demandErrPosition: 'اختر وظيفة واحدة على الأقل أو اكتبها.',
@@ -4101,6 +4126,11 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'Изберете дали се обезбедуваат сместување и храна.',
     salaryAmountRequired: 'Внесете ја месечната нето плата како број.',
     demandSaveFailed: 'Барањето не е зачувано. Обидете се повторно.',
+    empCardGoTo: '{label}: {value}. Оди до {section}',
+    empRequestDelete: 'Избриши барање',
+    empRequestDeleteConfirm: 'Да се избрише ова барање? Ова не може да се врати.',
+    empRequestHasActivity: 'Ова барање има поврзан процес и не може да се избрише.',
+    empRequestDeleteFailed: 'Барањето не можеше да се избрише. Обидете се повторно.',
     demandErrRequired: 'Ова поле е задолжително.',
     demandErrSector: 'Изберете сектор.',
     demandErrPosition: 'Изберете или напишете барем една позиција.',

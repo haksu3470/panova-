@@ -2,7 +2,7 @@
 
 import AuthGuard from '@/components/auth/AuthGuard';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { isStaff, signOut } from '@/lib/auth';
 import { EmployerWriteError, staffViewEmployerId, toEmployerProfileView, type EmployerRow } from '@/lib/employerProfile';
@@ -12,6 +12,16 @@ import {
   Building2, Users, FileText, Plus, CheckCircle, Clock, ArrowLeft, 
   Trash2, Send, AlertCircle, CheckSquare, Briefcase, MapPin, Calendar, DollarSign, Download, ShieldCheck, HeartHandshake, UploadCloud, Check, Video, Star, CheckCircle2, BookOpen, X
 } from 'lucide-react';
+import OverviewCard from '@/components/portal/OverviewCard';
+import {
+  canOfferRequestDelete,
+  EMPLOYER_CARD_TARGETS,
+  EMPLOYER_OVERVIEW_CARDS,
+  employerCardAriaLabel,
+  employerCardValue,
+  requestDeleteOutcome,
+  type EmployerOverviewCard,
+} from '@/lib/employerOverview';
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
 import { demandStatusLabel } from '@/lib/demandStatus';
@@ -202,6 +212,24 @@ function EmployerPortalInner() {
 
   const [supportSubject, setSupportSubject] = useState('');
   const [supportMessage, setSupportMessage] = useState('');
+
+  /** Section a summary card asked for; scrolled to and focused once its tab is shown. */
+  // n grows on every click, so clicking the same card twice scrolls again; a
+  // jump is handled once (later tab changes do not scroll back to it).
+  const [cardJump, setCardJump] = useState<{ anchor: string; n: number } | null>(null);
+  const handledJump = useRef(0);
+  useEffect(() => {
+    if (!cardJump || cardJump.n === handledJump.current) return;
+    const el = document.getElementById(cardJump.anchor);
+    if (!el) return;
+    handledJump.current = cardJump.n;
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    el.focus({ preventScroll: true });
+  }, [cardJump, activeTab]);
+
+  /** Per request: delete in progress, or the message after a refused/failed delete. */
+  const [deletingRequestId, setDeletingRequestId] = useState<string | null>(null);
+  const [requestDeleteMsg, setRequestDeleteMsg] = useState<{ id: string; text: string } | null>(null);
 
   const fetchEmployerData = useCallback(async () => {
     if (!employerProfile?.id) return;
@@ -589,6 +617,54 @@ function EmployerPortalInner() {
   // the management screens). The matched count is staff-only and not shown here.
   const pipelineTotals = sumPipelineCounts(pipelineCounts, jobDemands);
 
+  // Summary cards: same totals as before, now at the top and clickable.
+  const cardLabel: Record<EmployerOverviewCard, string> = {
+    openRequests: t.openRequestsCard || '',
+    candidates: t.totalCandidatesCard || '',
+    interviews: t.empTabInterviews || '',
+    selected: t.empTabSelected || '',
+  };
+  const cardSection: Record<EmployerOverviewCard, string> = {
+    openRequests: t.activeDemandFilesTitle || '',
+    candidates: t.candidatesTab || '',
+    interviews: t.empTabInterviews || '',
+    selected: t.empTabSelected || '',
+  };
+  const cardStyle: Record<EmployerOverviewCard, { value: string; icon: React.ReactNode }> = {
+    openRequests: { value: 'text-emerald-700', icon: <FileText className="w-9 h-9 sm:w-10 sm:h-10 text-emerald-700 bg-emerald-50 p-2 rounded-xl shrink-0" aria-hidden="true" /> },
+    candidates: { value: 'text-blue-700', icon: <Users className="w-9 h-9 sm:w-10 sm:h-10 text-blue-700 bg-blue-50 p-2 rounded-xl shrink-0" aria-hidden="true" /> },
+    interviews: { value: 'text-amber-700', icon: <Video className="w-9 h-9 sm:w-10 sm:h-10 text-amber-700 bg-amber-50 p-2 rounded-xl shrink-0" aria-hidden="true" /> },
+    selected: { value: 'text-purple-700', icon: <Star className="w-9 h-9 sm:w-10 sm:h-10 text-purple-700 bg-purple-50 p-2 rounded-xl shrink-0" aria-hidden="true" /> },
+  };
+  const openCard = (card: EmployerOverviewCard) => {
+    const target = EMPLOYER_CARD_TARGETS[card];
+    setActiveTab(target.tab);
+    setCardJump((prev) => ({ anchor: target.anchor, n: (prev?.n ?? 0) + 1 }));
+  };
+
+  /**
+   * Employer deletes their own request. RLS (emp_requests_delete) allows it
+   * only while the request has no match, interview or offer; otherwise 0 rows
+   * come back and the request stays.
+   */
+  const handleDeleteRequest = async (requestId: string) => {
+    if (!window.confirm(t.empRequestDeleteConfirm || '')) return;
+    setDeletingRequestId(requestId);
+    setRequestDeleteMsg(null);
+    const { data, error } = await supabase.from('job_requests').delete().eq('id', requestId).select('id');
+    setDeletingRequestId(null);
+    const outcome = requestDeleteOutcome({ error, data });
+    if (outcome === 'deleted') {
+      fetchEmployerData();
+      return;
+    }
+    if (error) console.error('job request delete failed', error.code || error.message);
+    setRequestDeleteMsg({
+      id: requestId,
+      text: (outcome === 'has_activity' ? t.empRequestHasActivity : t.empRequestDeleteFailed) || '',
+    });
+  };
+
   // A dash replaces any count the view did not return.
   const getDemandMetrics = (demand: { id?: string; headcount?: unknown }) => {
     const c = pipelineCountsFor(pipelineCounts, demand.id, demand.headcount);
@@ -619,6 +695,7 @@ function EmployerPortalInner() {
 
   const renderDemandCard = (dem: {
     id?: string;
+    employer_id?: string | null;
     sector?: string;
     position_title?: string;
     city?: string;
@@ -647,8 +724,23 @@ function EmployerPortalInner() {
           <div className="text-end">
             <span className="font-bold text-status-ok bg-status-ok-bg px-3 py-1.5 rounded-xl text-xs">{t.statusLabel}: {requestStatusText(dem.status)}</span>
             <div className="text-[11px] text-muted-foreground mt-1">📅 {dem.created_at ? String(dem.created_at).substring(0, 10) : '—'}</div>
+            {/* Only the employer's own request with no activity, never in staff view. */}
+            {dem.id && !staffView && dem.employer_id === employerProfile?.id && canOfferRequestDelete(pipelineCountsFor(pipelineCounts, dem.id)) ? (
+              <button
+                type="button"
+                onClick={() => handleDeleteRequest(String(dem.id))}
+                disabled={deletingRequestId === dem.id}
+                aria-label={`${t.empRequestDelete}: ${title}`}
+                className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-red-700 hover:text-red-800 underline cursor-pointer disabled:cursor-wait"
+              >
+                <Trash2 className="w-3.5 h-3.5" aria-hidden="true" /> {t.empRequestDelete}
+              </button>
+            ) : null}
           </div>
         </div>
+        {requestDeleteMsg && requestDeleteMsg.id === dem.id ? (
+          <p role="alert" className="text-xs font-bold text-status-bad bg-status-bad-bg border border-status-bad rounded-xl px-3 py-2">{requestDeleteMsg.text}</p>
+        ) : null}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 bg-slate-50 p-3 rounded-xl border border-line text-center text-xs">
           <div className="bg-card p-2 rounded-lg border border-line">
             <div className="text-[9px] font-bold text-muted-foreground uppercase">{t.demandRequested}</div>
@@ -799,12 +891,31 @@ function EmployerPortalInner() {
           </div>
         </div>
 
+        {/* Summary cards, on every tab: totals of the same request_pipeline_counts
+            rows as the request cards (a dash when unknown). Each opens its section. */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {EMPLOYER_OVERVIEW_CARDS.map((card) => {
+            const value = formatCount(employerCardValue(card, pipelineTotals));
+            return (
+              <OverviewCard
+                key={card}
+                label={cardLabel[card]}
+                value={value}
+                valueClassName={cardStyle[card].value}
+                icon={cardStyle[card].icon}
+                onOpen={() => openCard(card)}
+                ariaLabel={employerCardAriaLabel(t.empCardGoTo, cardLabel[card], value, cardSection[card])}
+              />
+            );
+          })}
+        </div>
+
         {/* 1. ANA SAYFA */}
         {activeTab === 'home' && (
           <div className="space-y-6">
             <section className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h2 className="font-extrabold text-foreground text-base">{t.activeDemandFilesTitle} ({jobDemands.length})</h2>
+                <h2 id="employer-requests-heading" tabIndex={-1} className="font-extrabold text-foreground text-base scroll-mt-4 outline-none focus-visible:ring-2 focus-visible:ring-brand-solid rounded">{t.activeDemandFilesTitle} ({jobDemands.length})</h2>
                 {jobDemands.length > 0 ? (
                   <button
                     type="button"
@@ -835,27 +946,6 @@ function EmployerPortalInner() {
                 </div>
               )}
             </section>
-
-            {/* Summary cards: totals of the same request_pipeline_counts rows as
-                the request cards above; a dash when those counts are unknown. */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-muted-foreground uppercase">{t.openRequestsCard}</span>
-                <div className="text-2xl font-black text-emerald-700">{formatCount(pipelineTotals?.open_requests)}</div>
-              </div>
-              <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-muted-foreground uppercase">{t.totalCandidatesCard}</span>
-                <div className="text-2xl font-black text-blue-700">{formatCount(pipelineTotals?.presented)}</div>
-              </div>
-              <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-muted-foreground uppercase">{t.empTabInterviews}</span>
-                <div className="text-2xl font-black text-amber-600">{formatCount(pipelineTotals?.interviews)}</div>
-              </div>
-              <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-1">
-                <span className="text-xs font-bold text-muted-foreground uppercase">{t.empTabSelected}</span>
-                <div className="text-2xl font-black text-purple-700">{formatCount(pipelineTotals?.selected)}</div>
-              </div>
-            </div>
 
             <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
               <h3 className="font-extrabold text-foreground text-base border-b border-line pb-3">{t.portalSummaryTitle}</h3>
@@ -1066,6 +1156,7 @@ function EmployerPortalInner() {
 
         {/* 3. ADAYLAR */}
         {activeTab === 'candidates' && (
+          <section id="employer-candidates-section" tabIndex={-1} aria-label={t.candidatesTitle || t.candidatesTab} className="scroll-mt-4 outline-none focus-visible:ring-2 focus-visible:ring-brand-solid rounded-2xl">
           <EmployerCandidateBrowser
             candidates={candidates as EmployerCandidate[]}
             labels={{
@@ -1125,13 +1216,14 @@ function EmployerPortalInner() {
             onConfirm={handleConfirmDecision}
             busyMatchId={decidingMatchId}
           />
+          </section>
         )}
 
         {/* 4. GÖRÜŞMELER (DİNAMİK ÇEVİRİ DESTEKLİ) */}
         {activeTab === 'interviews' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="text-base sm:text-lg font-extrabold text-slate-950 flex items-center gap-2">
+              <h3 id="employer-interviews-heading" tabIndex={-1} className="text-base sm:text-lg font-extrabold text-slate-950 flex items-center gap-2 scroll-mt-4 outline-none focus-visible:ring-2 focus-visible:ring-brand-solid rounded">
                 <Video className="w-5 h-5 text-emerald-700" /> {t.interviewsTitle}
               </h3>
               <span className="bg-amber-50 text-amber-800 text-xs font-bold px-3 py-1 rounded-xl border border-amber-200">
@@ -1195,7 +1287,7 @@ function EmployerPortalInner() {
         {activeTab === 'selected' && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="text-base sm:text-lg font-extrabold text-slate-950 flex items-center gap-2">
+              <h3 id="employer-selected-heading" tabIndex={-1} className="text-base sm:text-lg font-extrabold text-slate-950 flex items-center gap-2 scroll-mt-4 outline-none focus-visible:ring-2 focus-visible:ring-brand-solid rounded">
                 <Star className="w-5 h-5 text-purple-600" /> {t.selectedCandidatesTitle}
               </h3>
               <span className="bg-purple-50 text-purple-800 text-xs font-bold px-3 py-1 rounded-xl border border-purple-200">
