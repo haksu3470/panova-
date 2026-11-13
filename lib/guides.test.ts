@@ -34,6 +34,8 @@ const {
   tabsForStaffRole,
 } = await import('./staffAccess.ts');
 const { canManageCandidateVideo } = await import('./youtube.ts');
+const { translations } = await import('./dictionary.ts');
+const { portalUi } = await import('./portal-ui-copy.ts');
 
 const LOCALES: Language[] = ['tr', 'en', 'sq', 'ar', 'mk'];
 const TURKISH_LETTERS = /[ğışöüĞİŞÖÜ]/;
@@ -240,7 +242,7 @@ test('Turkish guide copy covers the current screens', () => {
   const tr = guidesCopy.tr;
   const employerScreens = Object.values(tr.roles.employer.screens).map((screen) => screen.name);
   assert.deepEqual(employerScreens.includes('Talepler'), false);
-  assert.ok(employerScreens.includes('Yeni talep'));
+  assert.ok(employerScreens.includes('Yeni Talep'));
   assert.match(tr.mapNote, /role göre/);
   assert.match(tr.mapNote, /Demo verisi/);
   assert.match(tr.guides['employer-request'].steps.map((step) => step.body).join(' '), /EUR veya USD[\s\S]*100\.000/);
@@ -486,13 +488,13 @@ test('a role does not read the steps it cannot do', () => {
 test('source and target country: the matching how-to names who does the other steps', () => {
   const source = guideOf(viewerOf('source_country'), 'matching-offers');
   assert.deepEqual(source.steps.map((step) => step.own), [true, true, true, false, true, false, true]);
-  assert.equal(source.steps[3].doneBy, 'Bu adımı Üst yönetim, Hedef ülke sorumlusu yapar.');
+  assert.equal(source.steps[3].doneBy, 'Bu adımı Üst Yönetim, Hedef Ülke Sorumlusu yapar.');
   assert.equal(source.steps[5].body, '');
   assert.equal(source.hasOthersSteps, true);
 
   const target = guideOf(viewerOf('target_country'), 'matching-offers');
   assert.deepEqual(target.steps.map((step) => step.own), [true, false, true, true, true, true, true]);
-  assert.equal(target.steps[1].doneBy, 'Bu adımı Üst yönetim, Kaynak ülke sorumlusu yapar.');
+  assert.equal(target.steps[1].doneBy, 'Bu adımı Üst Yönetim, Kaynak Ülke Sorumlusu yapar.');
 
   const flow = guideOf(viewerOf('source_country'), 'request-to-offer');
   assert.equal(flow.steps[0].doneBy, 'Bu adımı İşveren yapar.');
@@ -526,4 +528,71 @@ test('print uses the same step rule; a role print shows that role\'s steps', () 
     assert.ok(source.includes('{step.doneBy}') && source.includes('{copy.stepOthersNote}'), file);
   }
   for (const lang of LOCALES) assert.ok(guidesCopy[lang].stepDoneBy.includes('{roles}'), lang);
+});
+
+// ---- Turkish guide names the screens exactly as the Turkish portal does ----
+
+function stringLeaves(value: unknown): string[] {
+  if (typeof value === 'string') return [value];
+  if (Array.isArray(value)) return value.flatMap(stringLeaves);
+  if (value && typeof value === 'object') return Object.values(value).flatMap(stringLeaves);
+  return [];
+}
+/** Every Turkish text of the portal UI (tab, button, status and message labels). */
+const PORTAL_TR = new Set([...stringLeaves(translations.tr), ...stringLeaves(portalUi.tr)].map((text) => text.trim()));
+/** Role cards that describe a file page, not a tab; their names are not on a tab bar. */
+const FILE_SCREENS = new Set(['source_country.dossier', 'target_country.request', 'target_country.employer', 'field_officer.dossier']);
+const guideTextTr = () => [
+  guidesCopy.tr.mapNote,
+  ...stringLeaves(guidesCopy.tr.roles),
+  ...stringLeaves(guidesCopy.tr.guides),
+];
+
+test('Turkish role cards use the Turkish portal tab names', () => {
+  for (const [roleId, role] of Object.entries(guidesCopy.tr.roles)) {
+    for (const [screenId, screen] of Object.entries(role.screens)) {
+      if (FILE_SCREENS.has(`${roleId}.${screenId}`)) continue;
+      assert.ok(PORTAL_TR.has(screen.name), `${roleId}.${screenId}: "${screen.name}" is not a portal label`);
+    }
+  }
+});
+
+test('Turkish guide text: every "<name> sekmesi" is a portal tab name', () => {
+  const mention = /([\p{Lu}][\p{L}]*(?: (?:& )?[\p{Lu}][\p{L}()0-9/]*)*) sekme(?:si|sinde|sini|sinden|sindeki|nizde)\b/gu;
+  const found: string[] = [];
+  for (const text of guideTextTr()) {
+    for (const match of text.matchAll(mention)) {
+      const words = match[1].split(' ');
+      // a sentence may start right before the name ("Girişte Aday Havuzu sekmesi"): match the longest portal label at the end
+      const label = words.map((_, index) => words.slice(index).join(' ')).find((candidate) => PORTAL_TR.has(candidate));
+      assert.ok(label, `"${match[0]}" names no portal tab`);
+      found.push(label!);
+    }
+  }
+  for (const tab of ['Aday Havuzu', 'Personel Talepleri', 'Ekip & Yetkiler', 'Genel Durum', 'Yeni Talep', 'Mülakatlar', 'Ana Sayfa', 'Belgelerim', 'İş Tekliflerim']) {
+    assert.ok(found.includes(tab), `guide mentions the ${tab} tab`);
+  }
+  // the old short names are gone
+  for (const text of guideTextTr()) {
+    assert.equal(/(^|[^\p{L}])(Adaylar|Talepler|Personel|Genel bakış|Belgeler|Teklifler|Ana sayfa|Yeni talep|Profil) sekme/u.test(text), false, text);
+  }
+});
+
+test('Turkish guide text: quoted button, status and message names exist in the portal', () => {
+  // quoted text that is not a portal label: a guide title, a typed demo name and a wrong input
+  const NOT_LABELS = new Set(['Personel olarak giriş', 'Demo Personel', '1300 euro']);
+  const quoted = guideTextTr().flatMap((text) => [...text.matchAll(/"([^"]+)"/g)].map((match) => match[1]));
+  assert.ok(quoted.length >= 15, 'the guide quotes the screen labels it names');
+  for (const label of quoted) {
+    if (NOT_LABELS.has(label)) continue;
+    assert.ok(PORTAL_TR.has(label), `"${label}" is not a portal label`);
+  }
+});
+
+test('Turkish staff role names match the portal badge and role list', () => {
+  const t = translations.tr;
+  assert.equal(guidesCopy.tr.roleLabels.upper_management, t.roleUpperManagement);
+  assert.equal(guidesCopy.tr.roleLabels.source_country, t.roleSourceCountry);
+  assert.equal(guidesCopy.tr.roleLabels.target_country, t.roleTargetCountry);
+  assert.equal(guidesCopy.tr.roleLabels.field_officer, t.roleFieldOfficer);
 });
