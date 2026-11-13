@@ -78,7 +78,7 @@ export default function GuidesHub({
                 <h3 className="text-base font-extrabold text-slate-900">{guide.title}</h3>
                 <p className="text-sm text-slate-600">{guide.summary}</p>
                 <p className="text-xs font-bold text-muted-foreground">
-                  {copy.whereLabel}: <span className="font-mono font-semibold text-slate-800">{guide.where}</span>
+                  {copy.whereLabel}: <span className="font-mono font-semibold text-slate-800" dir="ltr">{guide.where}</span>
                 </p>
               </div>
 
