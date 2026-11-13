@@ -76,7 +76,16 @@ import {
   type PipelineCountsIndex,
 } from '@/lib/requestPipelineCounts';
 import { formatInterviewTime, joinableMeetingUrl } from '@/lib/interviewMeeting';
-import { toPlacements, type EmployerPlacement } from '@/lib/employerPlacements';
+import { officialProcessText, startedEmployees, toPlacements, type EmployerPlacement } from '@/lib/employerPlacements';
+import ListExportBar from '@/components/portal/ListExportBar';
+import { EXPORT_COLUMN_LABELS } from '@/lib/exportColumns';
+import {
+  employerEmployeeRows,
+  employerOfferRows,
+  employerRequestRows,
+  employerSelectedRows,
+  type EmployerExportCopy,
+} from '@/lib/employerExport';
 import EmployerPlacementTabs, { type PlacementsLoad } from './components/EmployerPlacementTabs';
 
 const SECTOR_ICON: Record<string, string> = {
@@ -714,6 +723,26 @@ function EmployerPortalInner() {
     cancelled: t.stageCancelled,
   });
 
+  // Exports: whitelisted rows (lib/employerExport.ts) from the lists this page
+  // already loaded. No audit row: audit_logs only accepts staff inserts.
+  const exportCopy: EmployerExportCopy = {
+    requestStatus: (status) => requestStatusText(status),
+    offerStatus: (status) => offerStatusLabel(status, ui.offerStatus),
+    duration: (value) => formatContractDuration(value, currentLang, t),
+    officialProcess: (status) => officialProcessText(status, ui.steps, t.plProcessStopped || ui.steps.rejected),
+  };
+  const exportBar = (filename: string, title: string | undefined, rows: Record<string, unknown>[]) => (
+    <ListExportBar
+      filename={filename}
+      title={title || filename}
+      rows={rows}
+      audit={false}
+      columnLabels={EXPORT_COLUMN_LABELS[currentLang]}
+      dir={isRtl ? 'rtl' : 'ltr'}
+      labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty, popupBlocked: ui.exportPopupBlocked }}
+    />
+  );
+
   const renderDemandCard = (dem: {
     id?: string;
     employer_id?: string | null;
@@ -951,6 +980,7 @@ function EmployerPortalInner() {
                   </button>
                 ) : null}
               </div>
+              {jobDemands.length > 0 ? exportBar('my-requests', t.activeDemandFilesTitle, employerRequestRows(jobDemands, currentLang, exportCopy)) : null}
               {jobDemands.length === 0 ? (
                 <div className="bg-card rounded-2xl border border-line p-8 text-center space-y-4">
                   <p className="text-sm font-semibold text-foreground">{t.empNoRequests}</p>
@@ -1372,6 +1402,7 @@ function EmployerPortalInner() {
             </div>
             <div className="border-t pt-4 space-y-2">
               <h4 className="text-sm font-extrabold text-slate-950">{ui.ioJobOffers} ({employerOffers.length})</h4>
+              {employerOffers.length > 0 ? exportBar('my-offers', ui.ioJobOffers, employerOfferRows(employerOffers, currentLang, exportCopy)) : null}
               {employerOffers.map((offer) => (
                 <div key={offer.id} className="p-3 bg-slate-50 rounded-xl border text-sm text-slate-900">
                   <div className="font-extrabold">{releaseCopy[currentLang].offerCandidate}: {offer.candidate_name || '—'} — {localizeCatalogTitle(offer.position_title, currentLang) || '—'}</div>
@@ -1399,6 +1430,7 @@ function EmployerPortalInner() {
             <p className="text-xs text-slate-600 bg-slate-50 p-3.5 rounded-xl border">
               {t.selectedCandidatesDesc}
             </p>
+            {selectedCandidates.length > 0 ? exportBar('selected-candidates', t.selectedCandidatesTitle, employerSelectedRows(selectedCandidates, currentLang)) : null}
 
             {selectedCandidates.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground text-xs">{t.empNoSelected}</div>
@@ -1463,6 +1495,11 @@ function EmployerPortalInner() {
         )}
 
         {/* 6-8. İŞLEM DURUMU, SEYAHAT, AKTİF ÇALIŞANLAR (employer_placements) */}
+        {activeTab === 'employees' && placementsLoad === 'ready' && startedEmployees(placements).length > 0 ? (
+          <div className="flex justify-end">
+            {exportBar('active-employees', t.employeesTab, employerEmployeeRows(startedEmployees(placements), currentLang, exportCopy))}
+          </div>
+        ) : null}
         {(activeTab === 'status' || activeTab === 'travel' || activeTab === 'employees') && (
           <EmployerPlacementTabs
             tab={activeTab}

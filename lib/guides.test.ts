@@ -4,7 +4,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import type { Language } from './dictionary.ts';
-import { GUIDES_PENDING_TRANSLATION, guidesCopy, isPendingTranslation } from './guides-copy.ts';
+import { guidesCopy } from './guides-copy.ts';
 import { guideNavLabel } from './guides-nav.ts';
 import { register } from 'node:module';
 import {
@@ -49,9 +49,17 @@ function leafKeys(value: unknown, prefix = ''): string[] {
   return [prefix];
 }
 
-/** Every string leaf with its path, minus the Turkish text still waiting for translation. */
+/**
+ * Demo record names exactly as the demo seed stores them (they appear on screen
+ * in Turkish in every language), so they are the known exceptions in the
+ * language checks below.
+ */
+const DEMO_NAMES = ['DEMO Balkan Yapı DOO', 'DEMO Adriyatik Otel', 'Demo Aday Bir', 'Demo Aday İki', 'Demo Aday Dört'];
+const withoutDemoNames = (text: string) => DEMO_NAMES.reduce((out, name) => out.split(name).join(''), text);
+
+/** Every string leaf with its path. */
 function translatedLeaves(value: unknown, prefix = ''): [string, string][] {
-  if (typeof value === 'string') return isPendingTranslation(prefix) ? [] : [[prefix, value]];
+  if (typeof value === 'string') return [[prefix, value]];
   if (Array.isArray(value)) return value.flatMap((item, index) => translatedLeaves(item, `${prefix}[${index}]`));
   if (value && typeof value === 'object') {
     return Object.entries(value).flatMap(([key, child]) => translatedLeaves(child, prefix ? `${prefix}.${key}` : key));
@@ -88,11 +96,51 @@ test('guide copy has the same keys in every locale and matches the catalog', () 
   }
 });
 
-test('non-Turkish guide copy does not use Turkish letters (except pending translations)', () => {
+test('non-Turkish guide copy does not use Turkish letters (except demo record names)', () => {
   for (const lang of LOCALES) {
     if (lang === 'tr') continue;
     for (const [where, value] of translatedLeaves(guidesCopy[lang])) {
-      assert.equal(TURKISH_LETTERS.test(value), false, `${lang}.${where}: ${value}`);
+      assert.equal(TURKISH_LETTERS.test(withoutDemoNames(value)), false, `${lang}.${where}: ${value}`);
+    }
+  }
+});
+
+// Turkish words that do not occur in en / sq / ar / mk text; a leftover Turkish sentence trips one.
+const TURKISH_WORDS = /(^|[^\p{L}])(ve|veya|bir|için|ile|olarak|sekmesi|sekmesinde|talep|aday|adayı|işveren|personel|seçin|açın|yazın|yalnız|görünür)(?=$|[^\p{L}])/iu;
+// Leaves that may read the same as Turkish: paths, codes, product and demo names.
+const SAME_AS_TURKISH = /^(\/[A-Za-z0-9[\]/._ -]*|Diploma|Video|E-posta|PDF|YouTube|Google|Panova Group)$/;
+
+test('no Turkish sentence is left in the en, sq, ar and mk guides', () => {
+  const tr = new Map(translatedLeaves(guidesCopy.tr));
+  for (const lang of LOCALES) {
+    if (lang === 'tr') continue;
+    for (const [where, value] of translatedLeaves(guidesCopy[lang])) {
+      const text = withoutDemoNames(value);
+      assert.equal(TURKISH_WORDS.test(text), false, `${lang}.${where}: ${value}`);
+      if (tr.get(where) === value && !PATH_ONLY.test(value)) {
+        assert.match(value, SAME_AS_TURKISH, `${lang}.${where} is still the Turkish text`);
+      }
+    }
+  }
+});
+
+test('every guide has the same number of steps, flow items and frame rows as Turkish', () => {
+  for (const lang of LOCALES) {
+    for (const [id, source] of Object.entries(guidesCopy.tr.guides)) {
+      const article = guidesCopy[lang].guides[id];
+      assert.equal(article.steps.length, source.steps.length, `${lang} ${id} steps`);
+      assert.equal(article.flow.length, source.flow.length, `${lang} ${id} flow`);
+      assert.equal(article.mock.rows.length, source.mock.rows.length, `${lang} ${id} rows`);
+      assert.equal(article.where.split(' → ')[0], source.where.split(' → ')[0], `${lang} ${id} where`);
+    }
+  }
+});
+
+test('codes, money and paths survive translation', () => {
+  for (const lang of LOCALES) {
+    const all = JSON.stringify(guidesCopy[lang]);
+    for (const code of ['/portal/requests/[id]', '/portal/candidates/[id]', '/employer', '/candidate', 'EUR', 'USD', '€', '$', '1300', '{roles}', 'http/https', '30/60/90']) {
+      assert.ok(all.includes(code), `${lang} ${code}`);
     }
   }
 });
@@ -164,16 +212,17 @@ test('guides stay inside the signed-in role', () => {
   assert.equal(guidesHome(null), '/');
 });
 
-test('pending translations show the Turkish text and are listed in the todo file', () => {
+test('no temporary Turkish fallback is left; the todo file waits for native review', () => {
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const source = readFileSync(path.join(root, 'lib/guides-copy.ts'), 'utf8');
+  assert.equal(/withPendingTr|GUIDES_PENDING_TRANSLATION|LegacyGuidesCopy|isPendingTranslation/.test(source), false);
   const todo = readFileSync(path.join(root, 'docs/guides-translation-todo.md'), 'utf8');
-  for (const entry of GUIDES_PENDING_TRANSLATION) {
-    assert.ok(todo.includes(`\`${entry}\``), `todo lists ${entry}`);
-    const pick = (lang: Language) => entry.split('.').reduce<unknown>((v, key) => (v as Record<string, unknown>)[key], guidesCopy[lang]);
-    for (const lang of LOCALES) assert.deepEqual(pick(lang), pick('tr'), `${lang} ${entry}`);
+  assert.match(todo, /tamamlandı/i);
+  assert.equal(/- \[ \] `/.test(todo), false, 'no open translation item');
+  for (const lang of ['en', 'sq', 'ar', 'mk'] as const) {
+    assert.notDeepEqual(guidesCopy[lang].guides['request-to-offer'], guidesCopy.tr.guides['request-to-offer'], lang);
+    assert.notEqual(guidesCopy[lang].stepDoneBy, guidesCopy.tr.stepDoneBy, lang);
   }
-  assert.equal(isPendingTranslation('guides.request-to-offer.steps[0].body'), true);
-  assert.equal(isPendingTranslation('guides.staff-login.title'), false);
 });
 
 test('every how-to has an example and the box heading comes from the copy', () => {

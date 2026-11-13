@@ -526,6 +526,23 @@ Automated: `lib/contractDuration.test.ts` (parse, canonical text, plural forms p
 6. **Diller / Languages.** Repeat 1 and 4 in EN, SQ, AR, MK: the window texts and the button label are translated; Arabic stays right-to-left.
 
 Automated: `lib/documentPreview.test.ts` (no `<iframe` on the candidate page, shared preview window, download uses the preview access path, CSP not widened).
+## S29. İşveren dışa aktarma / Employer export (CSV, Excel, Print / PDF)
+
+**Rol / Role:** A demo employer on `/employer` with requests, selected candidates, an accepted offer and a started employee (demo data from S24). Rows come from the lists the page already loaded (`lib/employerExport.ts`); no new query, no SQL, no audit row.
+
+1. **Dört liste / Four lists.** Each list shows **CSV indir**, **Excel indir** and **Yazdır / PDF** when it has rows: **Ana sayfa** (requests), **Mülakatlar** → Teklifler (offers), **Seçtiğim adaylar**, **Aktif çalışanlar**. An empty list shows no bar.
+2. **Sütunlar / Columns.** Headings are in the page language (TR "Pozisyon", EN "Position", SQ "Pozicioni", AR "الوظيفة", MK "Позиција").
+   - Requests: position, headcount, city, country, monthly net salary, currency, work duration, target start, status, created.
+   - Selected: full name, profession, nationality, city, experience, languages, position, decision date.
+   - Employees: full name, profession, nationality, position, official process, flight date, departure city, arrival city, start date.
+   - Offers: candidate, position, monthly net salary, currency, start date, terms, status.
+3. **Yasak alanlar / Never exported.** No file contains a phone, e-mail, passport, document, internal note (`panova_notes`, `internal_notes`), referral code, flight number, 30/60/90-day follow-up note, video link or record id.
+4. **Yazdır / Print.** **Yazdır / PDF** opens a new window with a table and the print dialog; "Save as PDF" gives a PDF. In Arabic the table is right-to-left. With pop-ups blocked: "Yazdırma penceresi engellendi…" and nothing else happens.
+5. **Excel.** The `.xls` file opens in Excel (Excel may warn that the format and extension differ; choose Yes). A value starting with `=`, `+`, `-` or `@` stays text.
+6. **Denetim yok / No audit row.** After an employer export, `audit_logs` has no new "Dışa aktarma" row and the browser console shows no audit error. A staff export (Adaylar, Talepler, İşverenler on `/portal`) still writes one, unchanged.
+7. **Personel yazdırma / Staff print.** On `/portal` → Adaylar, Talepler or İşverenler, **Yazdır / PDF** now opens the print window (before, nothing happened).
+
+Automated: `lib/employerExport.test.ts` (whitelists, forbidden fields and values, no audit, five-language headings), `lib/exportShared.test.ts` (print window without noopener, audit option).
 
 ## S30. Aday teklif ve belge listesi yazdırma / Candidate offer and document list print
 
@@ -538,6 +555,7 @@ Automated: `lib/documentPreview.test.ts` (no `<iframe` on the candidate page, sh
 5. **Diller / Languages.** Repeat 1 and 2 in EN, SQ, AR, MK: headings and column names are translated; Arabic prints right-to-left.
 
 Automated: `lib/candidatePrint.test.ts` (offer and document whitelists, no file in the print view, the page is `print:hidden`, texts in 5 languages).
+
 ---
 
 ## Boşluk analizi / Gap analysis
