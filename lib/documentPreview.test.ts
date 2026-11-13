@@ -5,16 +5,22 @@ import test from 'node:test';
 import {
   contentLength,
   dataUrlByteSize,
+  downloadFileName,
+  downloadHref,
   isDirectFileUrl,
   isDocumentRowId,
   looksLikePdf,
   objectUrlHolder,
+  openInTabDownloadAttr,
   PDF_INLINE_MAX_BYTES,
+  PDF_MIME,
+  pdfBlobFromBytes,
   previewKind,
   previewStrategy,
   storageRefFor,
 } from './documentPreview.ts';
 import { translations } from './dictionary.ts';
+import { contentSecurityPolicy } from './securityHeaders.ts';
 
 const ROOT = join(import.meta.dirname, '..');
 const LANGS = ['tr', 'en', 'sq', 'ar', 'mk'] as const;
@@ -106,7 +112,7 @@ test('the preview component frames PDFs only from its own blob URL and logs acce
   assert.ok(modal.includes('holder.clear()'));
   const pdfAt = modal.indexOf('candidatePdfBlob(');
   assert.ok(pdfAt > modal.indexOf('candidatePreviewUrl('), 'access is logged before the PDF is fetched');
-  assert.ok(files.includes("type: 'application/pdf'"));
+  assert.ok(files.includes('pdfBlobFromBytes(bytes)'));
   assert.ok(files.includes("rpc('log_document_access'"));
 });
 
@@ -117,15 +123,55 @@ test('staff page never puts the stored address straight into the frame', () => {
   assert.ok(page.includes('<DocumentPreviewModal'));
   assert.ok(modal.includes('candidatePreviewUrl('));
   assert.ok(modal.includes('<img src={view.url}'));
-  assert.ok(modal.includes('<iframe src={view.url}'));
+  assert.ok(modal.includes('<object data={view.url} type="application/pdf"'));
 });
 
 test('preview texts exist in five languages and are translated', () => {
-  const keys = ['docPreviewFailed', 'docPreviewErrFetch', 'docPreviewErrNotPdf', 'docPreviewTooLarge', 'docPreviewErrAccess', 'docPreviewErrPath', 'docPreviewErrGeneric', 'docPreviewUnsupported', 'docOpenNewTab', 'docPreviewClose', 'plLoading'] as const;
+  const keys = ['docPreviewFailed', 'docPreviewErrFetch', 'docPreviewErrNotPdf', 'docPreviewTooLarge', 'docPreviewErrAccess', 'docPreviewErrPath', 'docPreviewErrGeneric', 'docPreviewUnsupported', 'docOpenNewTab', 'docDownload', 'docPreviewPdfFallback', 'docPreviewClose', 'plLoading'] as const;
   for (const lang of LANGS) {
     for (const key of keys) {
       assert.ok(translations[lang][key]?.trim(), `${lang}.${key}`);
       if (lang !== 'en') assert.notEqual(translations[lang][key], translations.en[key], `${lang}.${key}`);
     }
   }
+});
+
+test('PDF blob is rebuilt from the bytes as application/pdf, even from octet-stream', async () => {
+  const bytes = new TextEncoder().encode('%PDF-1.7\n%test');
+  const stored = new Blob([bytes], { type: 'application/octet-stream' });
+  const blob = pdfBlobFromBytes(new Uint8Array(await stored.arrayBuffer()));
+  assert.equal(PDF_MIME, 'application/pdf');
+  assert.equal(blob.type, 'application/pdf');
+  assert.equal(blob.size, bytes.length);
+  assert.deepEqual(new Uint8Array(await blob.arrayBuffer()), bytes);
+  assert.equal(pdfBlobFromBytes(bytes.buffer as ArrayBuffer).type, 'application/pdf');
+  assert.equal(looksLikePdf(new Uint8Array(await blob.slice(0, 5).arrayBuffer())), true);
+});
+
+test('open in a new tab never downloads; download is a separate link', () => {
+  assert.equal(openInTabDownloadAttr('blob:https://panova/1', 'p.pdf'), undefined);
+  assert.equal(openInTabDownloadAttr('https://x.supabase.co/storage/v1/object/sign/candidate-files/a.jpg?token=t', 'a.jpg'), undefined);
+  assert.equal(openInTabDownloadAttr('data:application/pdf;base64,AA', 'p.pdf'), 'p.pdf');
+  const signed = 'https://x.supabase.co/storage/v1/object/sign/candidate-files/c1/passport/1.pdf?token=abc';
+  assert.equal(downloadHref(signed, 'pasaport taraması.pdf'), `${signed}&download=${encodeURIComponent('pasaport taraması.pdf')}`);
+  assert.equal(downloadHref(`${signed}&download=`, 'x.pdf'), `${signed}&download=`);
+  assert.equal(downloadHref('blob:https://panova/1', 'p.pdf'), 'blob:https://panova/1');
+  assert.equal(downloadFileName('scan.PDF', 'Pasaport', 'pdf'), 'scan.PDF');
+  assert.equal(downloadFileName(null, 'Pasaport Taraması', 'pdf'), 'Pasaport Taraması.pdf');
+  assert.equal(downloadFileName('', '', 'image'), 'document');
+
+  const modal = readFileSync(join(ROOT, 'components/portal/DocumentPreviewModal.tsx'), 'utf8');
+  assert.equal(/sandbox=/.test(modal), false, 'no sandbox on the PDF frame');
+  assert.equal(/download=\{downloadFor|download=\{fileName \|\| name/.test(modal), false);
+  assert.ok(modal.includes('t.docPreviewPdfFallback'), 'fallback with links instead of an empty frame');
+  assert.ok(modal.includes('{t.docDownload}'));
+});
+
+test('site CSP lets the page show its own blob: PDF, and nothing else is loosened', () => {
+  const csp = contentSecurityPolicy();
+  const directive = (name: string) => csp.split('; ').find((d) => d.startsWith(`${name} `)) ?? '';
+  assert.equal(directive('object-src'), 'object-src blob:');
+  assert.match(directive('frame-src'), /^frame-src 'self' blob: /);
+  assert.doesNotMatch(csp, /(frame|object)-src[^;]*(\*|data:|https?:(?!\/\/)|'unsafe)/);
+  assert.match(csp, /frame-ancestors 'none'/);
 });

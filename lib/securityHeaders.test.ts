@@ -11,7 +11,7 @@ test('security headers frame-bust, type-sniff, and keep the integrations the sit
 
   const csp = contentSecurityPolicy();
   assert.match(csp, /frame-ancestors 'none'/);
-  assert.match(csp, /object-src 'none'/);
+  assert.match(csp, /object-src blob:;/); // staff PDF preview only (lib/documentPreview.test.ts)
   assert.match(csp, /https:\/\/\*\.supabase\.co/);
   assert.match(csp, /wss:\/\/\*\.supabase\.co/);
   assert.match(csp, /https:\/\/accounts\.google\.com/);
