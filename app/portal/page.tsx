@@ -53,6 +53,8 @@ import TasksTab from '../../components/portal/TasksTab';
 import { employerExportRows, offerExportRows, requestExportRows } from '@/lib/exportLists';
 import { canUpdateRequestStatus, isUpperManagementRole, tabsForStaffRole, type StaffTab as StaffTabId } from '@/lib/staffAccess';
 import { statusErrorKey, type StatusErrorKey } from '@/lib/requestStatusChange';
+import type { CandidateStatusErrorKey } from '@/lib/candidateStatusChange';
+import { candidateService } from '@/lib/services/candidateService';
 
 export default function PortalPage() {
   const [currentLang, setCurrentLang] = useState<Language>('en');
@@ -399,14 +401,17 @@ export default function PortalPage() {
     setCurrentUser(null);
   };
 
-  const updateCandidateStatus = async (id: string, newStatus: string) => {
-    const { error } = await supabase.from('job_candidates').update({ status: newStatus }).eq('id', id);
-    if (error) {
-      alert(error.message.includes('visa_requires_accepted_offer') ? releaseCopy[currentLang].visaNeedsOffer : error.message);
-      return;
-    }
-    setCandidates(candidates.map(c => c.id === id ? { ...c, status: newStatus } : c));
-    logAudit(`${ui.candidateWord} → ${newStatus}`, currentUser?.name);
+  // Candidate status follows the official process (set by the database).
+  // Upper management may override it with a reason through the RPC; then the
+  // row is read back so the list shows what the database stored.
+  const updateCandidateStatus = async (id: string, newStatus: string, reason: string): Promise<CandidateStatusErrorKey | null> => {
+    const result = await candidateService.setStatus(id, newStatus, reason);
+    if (result.errorKey) return result.errorKey;
+    const { data: row } = await supabase.from('job_candidates').select('*').eq('id', id).maybeSingle();
+    const patch = row || { status: result.status };
+    setCandidates((rows) => rows.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+    logAudit(`${ui.candidateWord} → ${result.status}`, currentUser?.name);
+    return null;
   };
 
   // Manual status change, upper management only. The RPC checks the role and
@@ -911,6 +916,7 @@ export default function PortalPage() {
             fetchAllData={fetchAllData}
             updateCandidateAssignee={updateCandidateAssignee}
             updateCandidateStatus={updateCandidateStatus}
+            canChangeStatus={canUpdateRequestStatus(userRole)}
             logAudit={logAudit}
             currentUser={currentUser}
             isUpperManagement={isUpperManagement}

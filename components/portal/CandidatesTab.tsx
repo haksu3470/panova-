@@ -10,6 +10,8 @@ import { candidateExportRows } from '@/lib/exportLists';
 import ListExportBar from './ListExportBar';
 import DeleteRecordButton from './DeleteRecordButton';
 import OfficialProcessBadge from './OfficialProcessBadge';
+import CandidateStatusControl from './CandidateStatusControl';
+import type { CandidateStatusErrorKey } from '@/lib/candidateStatusChange';
 import { toLanguage } from '@/lib/europeanCountries';
 import { supabase } from '@/lib/supabase';
 import {
@@ -39,7 +41,10 @@ interface CandidatesTabProps {
   t: any;
   fetchAllData: () => void;
   updateCandidateAssignee: (id: string, assignee: string) => void;
-  updateCandidateStatus: (id: string, status: string) => void;
+  /** staff_set_candidate_status (upper management, with a reason); error key or null. */
+  updateCandidateStatus: (id: string, status: string, reason: string) => Promise<CandidateStatusErrorKey | null>;
+  /** canUpdateRequestStatus(role): shows "Change manually"; others see a badge only. */
+  canChangeStatus?: boolean;
   logAudit: (action: string, performer?: string) => void;
   currentUser: any;
   isUpperManagement: boolean;
@@ -66,6 +71,7 @@ export default function CandidatesTab({
   logAudit,
   currentUser,
   isUpperManagement,
+  canChangeStatus = false,
 }: CandidatesTabProps) {
   const lang = toLanguage(currentLang);
   const ui = portalUi[lang];
@@ -473,17 +479,13 @@ export default function CandidatesTab({
                       </select>
                     </td>
                     <td className="p-4">
-                      <select
-                        value={candidate.status || 'pending'}
-                        onChange={(e) => updateCandidateStatus(candidate.id, e.target.value)}
-                        aria-label={t.colVisaStatus}
-                        className="px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer bg-slate-50 text-slate-900"
-                      >
-                        <option value="pending" className="text-slate-900 bg-white">🟡 {t.pendingStatus}</option>
-                        <option value="reviewing" className="text-slate-900 bg-white">🔵 {t.reviewingStatus}</option>
-                        <option value="visa_processing" className="text-slate-900 bg-white">🟣 {t.visaProcessingStatus}</option>
-                        <option value="approved" className="text-slate-900 bg-white">🟢 {t.approvedStatus}</option>
-                      </select>
+                      <CandidateStatusControl
+                        t={t}
+                        status={candidate.status}
+                        canChange={canChangeStatus}
+                        compact
+                        onSubmit={(status, reason) => updateCandidateStatus(candidate.id, status, reason)}
+                      />
                     </td>
                     <td className="p-4">
                       <OfficialProcessBadge status={candidate.official_process_status} steps={ui.steps} stoppedLabel={t.plProcessStopped || ui.steps.rejected} />
