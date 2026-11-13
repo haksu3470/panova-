@@ -31,7 +31,6 @@ export type HomeCopy = {
   trustEyebrow: string;
   trustTitle: string;
   trust: CopyPair[];
-  partnersNote: string;
   faqEyebrow: string;
   faqTitle: string;
   faqs: { q: string; a: string }[];
@@ -117,7 +116,7 @@ export const homeCopy: Record<Language, HomeCopy> = {
     stats: [
       { value: '3', label: 'Ülkede faaliyet' },
       { value: '4', label: 'Grup şirketi' },
-      { value: '8+', label: 'Ana sektör' },
+      { value: '8', label: 'Uzmanlaştığımız ana sektör' },
       { value: '30/60/90', label: 'Gün işe uyum takibi' },
     ],
     employersEyebrow: 'İşverenler için',
@@ -163,7 +162,6 @@ export const homeCopy: Record<Language, HomeCopy> = {
       { title: 'Çok dilli iletişim', desc: 'Türkçe, İngilizce, Arnavutça, Arapça ve Makedonca destek.' },
       { title: 'Şeffaf süreç', desc: 'İşveren ve aday her adımı portaldan anlık izler.' },
     ],
-    partnersNote: 'Referans işverenler ve iş ortakları — logolar izinleri alındıktan sonra burada yer alacaktır.',
     faqEyebrow: 'SSS',
     faqTitle: 'Sık sorulan sorular',
     faqs: [
@@ -282,7 +280,7 @@ export const homeCopy: Record<Language, HomeCopy> = {
     stats: [
       { value: '3', label: 'Countries' },
       { value: '4', label: 'Group companies' },
-      { value: '8+', label: 'Core sectors' },
+      { value: '8', label: 'Core sectors we specialise in' },
       { value: '30/60/90', label: 'Day onboarding follow-up' },
     ],
     employersEyebrow: 'For employers',
@@ -328,7 +326,6 @@ export const homeCopy: Record<Language, HomeCopy> = {
       { title: 'Multilingual contact', desc: 'Turkish, English, Albanian, Arabic and Macedonian.' },
       { title: 'A clear process', desc: 'Employers and candidates follow every step in the portal.' },
     ],
-    partnersNote: 'Reference employers and partners — logos will appear here once permission is granted.',
     faqEyebrow: 'FAQ',
     faqTitle: 'Frequently asked questions',
     faqs: [
@@ -447,7 +444,7 @@ export const homeCopy: Record<Language, HomeCopy> = {
     stats: [
       { value: '3', label: 'Vende ku veprojmë' },
       { value: '4', label: 'Kompani të grupit' },
-      { value: '8+', label: 'Sektorë kryesorë' },
+      { value: '8', label: 'Sektorë kryesorë të specializimit' },
       { value: '30/60/90', label: 'Ditë ndjekjeje në punë' },
     ],
     employersEyebrow: 'Për punëdhënësit',
@@ -493,7 +490,6 @@ export const homeCopy: Record<Language, HomeCopy> = {
       { title: 'Komunikim shumëgjuhësh', desc: 'Turqisht, anglisht, shqip, arabisht dhe maqedonisht.' },
       { title: 'Proces i qartë', desc: 'Punëdhënësi dhe kandidati ndjekin çdo hap në portal.' },
     ],
-    partnersNote: 'Punëdhënës dhe partnerë referencë — logot do të vendosen këtu pasi të merret leja.',
     faqEyebrow: 'Pyetje',
     faqTitle: 'Pyetjet e shpeshta',
     faqs: [
@@ -612,7 +608,7 @@ export const homeCopy: Record<Language, HomeCopy> = {
     stats: [
       { value: '3', label: 'بلدان النشاط' },
       { value: '4', label: 'شركات المجموعة' },
-      { value: '8+', label: 'قطاعات رئيسية' },
+      { value: '8', label: 'قطاعات رئيسية نتخصص فيها' },
       { value: '30/60/90', label: 'يوم متابعة بعد الالتحاق' },
     ],
     employersEyebrow: 'لأصحاب العمل',
@@ -658,7 +654,6 @@ export const homeCopy: Record<Language, HomeCopy> = {
       { title: 'تواصل بعدة لغات', desc: 'التركية والإنجليزية والألبانية والعربية والمقدونية.' },
       { title: 'عملية شفافة', desc: 'يتابع صاحب العمل والمرشح كل خطوة من البوابة.' },
     ],
-    partnersNote: 'أصحاب العمل والشركاء المرجعيون — ستظهر الشعارات هنا بعد الحصول على الإذن.',
     faqEyebrow: 'الأسئلة',
     faqTitle: 'الأسئلة الشائعة',
     faqs: [
@@ -792,8 +787,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
         label: 'Компании од групата',
       },
       {
-        value: '8+',
-        label: 'Клучни сектори',
+        value: '8',
+        label: 'Клучни сектори на специјализација',
       },
       {
         value: '30/60/90',
@@ -897,7 +892,6 @@ export const homeCopy: Record<Language, HomeCopy> = {
         desc: 'Работодавачот и кандидатот ја следат секоја фаза во порталот.',
       },
     ],
-    partnersNote: 'Референтни работодавачи и партнери — логоата ќе се појават тука откако ќе се добие дозвола.',
     faqEyebrow: 'ЧПП',
     faqTitle: 'Често поставувани прашања',
     faqs: [

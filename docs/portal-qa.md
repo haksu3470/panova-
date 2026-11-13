@@ -560,6 +560,22 @@ Automated: `lib/candidatePrint.test.ts` (offer and document whitelists, no file 
 
 ---
 
+## S31. Ana sayfa / Home page
+
+**Rol / Role:** Signed out, on `/`. Chrome and Firefox on desktop, and a phone (or DevTools at 360 px width).
+
+1. **Masaüstü / Desktop.** The header shows the logo, one language switcher and one **Giriş** button. The hero has a soft green gradient, the three-country line drawing (Arnavutluk, Kuzey Makedonya, Türkiye) and the **İşleyiş** card (Talep → Aday → Mülakat → İşe başlama). Section backgrounds alternate light and dark. Cards lift a little on hover. The numbers in the stats bar count up once when they come into view; the sectors stat reads **8 · Uzmanlaştığımız ana sektör** and its link jumps to the sector cards. Each sector card has an icon, one sentence and three example positions. The 5 steps sit on a horizontal line and appear one after another while scrolling. The **Neden güvenilir?** block has 6 cards (registry, KVKK, clear process, 30/60/90, skills, languages). No "Referans işverenler" / logo note appears. FAQ items show a chevron (no "+") that turns when opened.
+2. **Adres tekrarı / Addresses.** Full addresses and phones appear only in the contact card next to the form. **Kurumsal** shows the registry facts and an **İletişim bilgileri** link to the form. The footer shows the brand, the registry name, the countries, the e-mail and the same link.
+3. **Telefon / Phone.** No horizontal page scroll. The header fits on one line (logo, language, **Giriş**). The section links under the hero are one row that scrolls sideways inside itself. The timeline is vertical. Sector and trust cards are one column.
+4. **Arapça / Arabic (RTL).** Switch to AR: the page is right-to-left, arrows point left, the sign-in menu opens inside the screen (aligned to the button's left edge), the timeline line sits on the right on phones. The drawing stays left-to-right (Albania on the left, Türkiye on the right) with Arabic country names.
+5. **Azaltılmış hareket / Reduced motion.** Turn on "reduce motion" (Windows: Settings → Accessibility → Visual effects → Animation effects off; macOS: Reduce motion; or DevTools → Rendering → `prefers-reduced-motion: reduce`) and reload. Everything is visible at once: no fade-in, no counting (final numbers shown), no moving route line, no card lift.
+6. **Giriş menüsü klavye / Sign-in menu by keyboard.** Tab to **Giriş**. Enter, Space or ↓ opens it and focuses **Aday**; ↑ opens it on **Personel**. ↓ / ↑ / Home / End move between **Aday**, **İşveren**, **Personel**. Enter opens `/candidate`, `/employer-login` or `/portal`. Escape closes and focus returns to **Giriş**; Tab closes it. A click outside closes it. With a screen reader (NVDA / VoiceOver) the button is announced as a menu button with its expanded state and the three items as menu items.
+7. **Diller / Languages.** Repeat 1 in EN, SQ, MK: the new texts (menu, hero card, stats, sector cards, trust block) are translated.
+
+Automated: `lib/home-page.test.ts` (three sign-in links, one language switcher, no logo placeholder text, new texts in 5 languages, catalog example positions, opt-in motion CSS), `lib/contrast.test.ts`.
+
+---
+
 ## Boşluk analizi / Gap analysis
 
 Only items checked in this repository. Hosted database policies that were never committed here are called out as absent from the migrations, not as a measured production failure.
