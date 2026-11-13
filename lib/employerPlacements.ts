@@ -134,11 +134,63 @@ export function isProcessStopped(status: string | null | undefined): boolean {
   return (status ?? '').trim() === 'rejected';
 }
 
+/**
+ * Read-only view of job_candidates.official_process_status on the 8-step
+ * list: the step and its number (1..8), 'stopped' for 'rejected', or the raw
+ * value when it is not one of the steps. Empty means step 1 (not started).
+ */
+export type OfficialProcessView =
+  | { kind: 'step'; step: OfficialStep; number: number; total: number }
+  | { kind: 'stopped' }
+  | { kind: 'unknown'; raw: string };
+
+export function officialProcessView(status: string | null | undefined): OfficialProcessView {
+  if (isProcessStopped(status)) return { kind: 'stopped' };
+  const idx = officialStepIndex(status);
+  if (idx < 0) return { kind: 'unknown', raw: (status ?? '').trim() };
+  return { kind: 'step', step: OFFICIAL_STEPS[idx], number: idx + 1, total: OFFICIAL_STEPS.length };
+}
+
+/** "Seyahate hazır · 7/8"; stopped -> the stopped label; unknown -> the stored value. */
+export function officialProcessText(
+  status: string | null | undefined,
+  steps: Record<string, string>,
+  stoppedLabel: string,
+): string {
+  const view = officialProcessView(status);
+  if (view.kind === 'stopped') return stoppedLabel;
+  if (view.kind === 'unknown') return view.raw;
+  return `${steps[view.step] || view.step} · ${view.number}/${view.total}`;
+}
+
+/** start_date of the latest accepted offer, or null. */
+export function acceptedOfferStartDate(offers: readonly Record<string, unknown>[] | null | undefined): string | null {
+  const accepted = (offers ?? [])
+    .filter((o) => o && o.status === 'accepted' && text(o.start_date))
+    .sort((a, b) => String(b.created_at ?? '').localeCompare(String(a.created_at ?? '')));
+  return accepted.length ? text(accepted[0].start_date) : null;
+}
+
 export function startedEmployees(rows: EmployerPlacement[]): EmployerPlacement[] {
   return rows.filter((r) => r.pipeline_stage === 'started');
 }
 
-export function hasFlightInfo(row: EmployerPlacement): boolean {
+/** The travel fields travelView reads (an employer placement or the candidate's own row). */
+export type TravelFields = Pick<EmployerPlacement, 'travel_status' | 'flight_date' | 'flight_number' | 'departure_city' | 'arrival_city'>;
+
+/** Only the travel fields of a row; every other column is dropped. */
+export function toTravelFields(value: unknown): TravelFields {
+  const row = (value && typeof value === 'object' ? value : {}) as Record<string, unknown>;
+  return {
+    travel_status: text(row.travel_status),
+    flight_date: text(row.flight_date),
+    flight_number: text(row.flight_number),
+    departure_city: text(row.departure_city),
+    arrival_city: text(row.arrival_city),
+  };
+}
+
+export function hasFlightInfo(row: TravelFields): boolean {
   return Boolean(row.flight_date || row.flight_number || row.departure_city || row.arrival_city);
 }
 
@@ -150,7 +202,7 @@ export type TravelView =
  * No flight fields and travel 'planned' (the column default) or empty:
  * nothing was entered yet, so 'planned' is never shown as a status.
  */
-export function travelView(row: EmployerPlacement): TravelView {
+export function travelView(row: TravelFields): TravelView {
   const status = (row.travel_status ?? '').trim();
   if (!hasFlightInfo(row) && (status === '' || status === 'planned')) return { kind: 'not_entered' };
   return { kind: 'flight', status: status === 'ticketed' || status === 'completed' ? status : null };

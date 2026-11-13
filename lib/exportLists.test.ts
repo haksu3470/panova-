@@ -42,3 +42,21 @@ test('exports translate catalog keys and keep free text', () => {
   assert.equal(candidates[0].profession, 'Раководител на градилиште');
   assert.equal(candidates[1].profession, 'Kendi mesleği');
 });
+
+test('candidate export names the status column "Aday durumu" and adds the official process', () => {
+  const rows = candidateExportRows([
+    { id: 'a', status: 'reviewing', official_process_status: 'ready_to_travel' },
+    { id: 'b', status: 'approved', official_process_status: 'rejected' },
+  ], 'tr', {
+    candidateStatus: 'Aday durumu',
+    officialProcess: 'Resmî süreç',
+    statusLabels: { reviewing: 'İnceleniyor', approved: 'Onaylandı' },
+    steps: { ready_to_travel: 'Seyahate hazır' },
+    stopped: 'Süreç durduruldu',
+  });
+  assert.equal('status' in rows[0], false);
+  assert.equal(rows[0]['Aday durumu'], 'İnceleniyor');
+  assert.equal(rows[0]['Resmî süreç'], 'Seyahate hazır · 7/8');
+  assert.equal(rows[1]['Resmî süreç'], 'Süreç durduruldu');
+  assert.ok(toCsv(rows).startsWith('id,full_name,nationality,profession,sector,Aday durumu,Resmî süreç,'));
+});

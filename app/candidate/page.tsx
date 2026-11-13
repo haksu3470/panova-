@@ -38,7 +38,8 @@ import Link from 'next/link';
 import { Language, translations, type Translation } from '@/lib/dictionary';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { RegistrationCountryOptions } from '@/components/site/RegistrationCountryOptions';
-import { candidatePlaceLabel, candidateProfessionLabel } from '@/lib/candidateLabels';
+import { candidateDocumentTitle, candidatePlaceLabel, candidateProfessionLabel } from '@/lib/candidateLabels';
+import CandidateProcessCard from '@/components/candidate/CandidateProcessCard';
 import { ProfessionField } from '@/components/site/ProfessionField';
 import { localizeCatalogTitle, professionForSectorChange } from '@/lib/professions';
 import { homeCopy } from '@/lib/home-copy';
@@ -143,14 +144,6 @@ export default function CandidateDashboard() {
 
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
-
-  const docTitlesByLang: Record<Language, string[]> = {
-    tr: ['Pasaport Taraması', 'Mesleki Sertifika / İzin Belgesi', 'Adli Sicil Kaydı (Sabıka Kaydı)', 'Sağlık Raporu / Akciğer Grafisi', 'e-Apostil / Dışişleri Bakanlığı Tasdiki'],
-    en: ['Passport Scan', 'Professional Certificate / Permit', 'Criminal Record', 'Health Report / X-Ray', 'e-Apostille / MoFA Legalization'],
-    sq: ['Skanimi i Pasaportës', 'Certifikata Profesionale / Leja', 'Dëshmi Penaliteti', 'Raporti Shëndetësor / Rrezet X', 'e-Apostille / Legalizimi i Ministrisë së Jashtme'],
-    ar: ['مسح جواز السفر', 'الشهادة المهنية / التصريح', 'السجل الجنائي', 'التقرير الطبي / الأشعة', 'أبوستيل الكتروني / تصديق وزارة الخارجية'],
-    mk: ['Скен на пасош', 'Професионален сертификат / дозвола', 'Уверение за неосудуваност', 'Здравствен извештај / рендген', 'е-апостил / легализација од Министерството за надворешни работи'],
-  };
 
   const candidateTexts: Record<Language, any> = {
     tr: {
@@ -1414,7 +1407,7 @@ export default function CandidateDashboard() {
   if (docRows.length > 0) {
     candidateDocs = defaultDocs.map((d, i) => {
       const row = docRows.find((r) => r.doc_type === DOC_SLOT_TYPES[i]);
-      return row ? { ...d, id: row.id, status: row.status, file_url: row.file_url, notes: row.notes, review_note: row.review_note } : d;
+      return row ? { ...d, slot: d.id, id: row.id, status: row.status, file_url: row.file_url, notes: row.notes, review_note: row.review_note } : d;
     });
   } else {
     try {
@@ -1426,7 +1419,7 @@ export default function CandidateDashboard() {
     } catch (e) {}
   }
 
-  const currentLangTitles = docTitlesByLang[currentLang] || docTitlesByLang.tr;
+  const docTitle = (doc: { id?: unknown; slot?: unknown; name?: unknown }) => candidateDocumentTitle(doc, t);
 
   const missingDocs = candidateDocs.filter((d: any) => !DONE_STATUSES.includes(d.status));
   const missingProfileFields = [];
@@ -1676,6 +1669,17 @@ export default function CandidateDashboard() {
 
         {/* GENEL BAKIŞ (ÖZET) */}
         {activeTab === 'overview' && (
+          <CandidateProcessCard
+            candidate={candidate}
+            offers={jobOffers}
+            loading={!candidate}
+            t={t}
+            steps={portalUi[currentLang].steps}
+            lang={currentLang}
+            isRtl={isRtl}
+          />
+        )}
+        {activeTab === 'overview' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-6">
             <div className="border-b pb-4 flex justify-between items-center">
               <div>
@@ -1722,7 +1726,7 @@ export default function CandidateDashboard() {
                     {missingDocs.map((doc: any, i: number) => (
                       <li key={i} className="flex items-center gap-1.5 bg-red-50 p-2 rounded-xl border border-red-200">
                         <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        <span><strong>{doc.name}</strong> {ct.notUploaded}</span>
+                        <span><strong>{docTitle(doc)}</strong> {ct.notUploaded}</span>
                       </li>
                     ))}
                   </ul>
@@ -1746,7 +1750,7 @@ export default function CandidateDashboard() {
               {candidateDocs.map((doc: any, idx: number) => (
                 <div key={doc.id || idx} className="p-4 bg-slate-50 rounded-2xl border space-y-2">
                   <div className="flex justify-between items-center font-bold text-slate-900 text-xs">
-                    <span>{currentLangTitles[idx] || doc.name}</span>
+                    <span>{docTitle(doc)}</span>
                     <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${doc.status === 'rejected' ? 'bg-red-100 text-red-800' : DONE_STATUSES.includes(doc.status) ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
                       {portalUi[currentLang].docStatuses[doc.status] || (DONE_STATUSES.includes(doc.status) ? ct.uploadedStatus : ct.pendingStatus)}
                     </span>
@@ -1765,7 +1769,7 @@ export default function CandidateDashboard() {
                       <button 
                         onClick={async () => {
                           const url = doc.id ? await openCandidateDocument(doc.id, doc.file_url) : await signedCandidateFileUrl(doc.file_url);
-                          if (url) setPreviewDoc({ name: currentLangTitles[idx] || doc.name, url });
+                          if (url) setPreviewDoc({ name: docTitle(doc), url });
                         }}
                         className="px-3 py-1.5 bg-emerald-100 text-brand font-bold rounded-xl text-xs hover:bg-emerald-200 transition shrink-0 cursor-pointer"
                       >
