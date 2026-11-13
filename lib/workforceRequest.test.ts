@@ -1,9 +1,14 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { register } from 'node:module';
 import test from 'node:test';
 import { translations, type Language } from './dictionary.ts';
-import {
+import type { DemandFormInput, EmployerDemandDraft } from './workforceRequest.ts';
+
+// workforceRequest imports ./money without an extension (as Next expects).
+await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.url);
+const {
   benefitPhrase,
   benefitsAnswered,
   buildEmployerDemandInsert,
@@ -15,9 +20,7 @@ import {
   JOB_REQUEST_RULES,
   parseMonthlyNetSalary,
   validateDemandForm,
-  type DemandFormInput,
-  type EmployerDemandDraft,
-} from './workforceRequest.ts';
+} = await import('./workforceRequest.ts');
 
 const LOCALES: Language[] = ['tr', 'en', 'sq', 'ar', 'mk'];
 const COPY_KEYS = [
@@ -53,7 +56,8 @@ const draft = (overrides: Partial<EmployerDemandDraft> = {}): EmployerDemandDraf
   sector: 'agriculture',
   headcount: 5,
   city: 'Struga',
-  salaryText: '1200 EUR',
+  salaryText: '1200',
+  currency: 'EUR',
   duration: '12 months',
   experience: '1-3',
   language: 'English (intermediate)',
@@ -96,6 +100,7 @@ test('answered lodging and meals are stored on the existing boolean columns', ()
     'position_title',
     'required_experience_years',
     'required_language',
+    'salary_currency',
     'sector',
     'status',
   ]);
@@ -145,7 +150,7 @@ const form = (overrides: Partial<DemandFormInput> = {}): DemandFormInput => ({
   language: 'english_basic',
   headcountText: '5',
   city: 'Struga',
-  salaryText: '1200 EUR',
+  salaryText: '1200',
   duration: '12 months',
   lodging: 'yes',
   meals: 'no',
@@ -173,7 +178,7 @@ test('headcount: whole number from 1 to 500', () => {
 });
 
 test('salary: more than 0 and at most 100000', () => {
-  for (const ok of ['1', '100000', '100.000', '1.200,50 EUR']) assert.equal(validateDemandForm(form({ salaryText: ok })).salary, undefined, ok);
+  for (const ok of ['1', '100000', '100.000', '1.200,50']) assert.equal(validateDemandForm(form({ salaryText: ok })).salary, undefined, ok);
   for (const bad of ['0', '100000.01', '150.000', '250000']) assert.equal(validateDemandForm(form({ salaryText: bad })).salary, 'salary_range', bad);
   assert.equal(validateDemandForm(form({ salaryText: 'negotiable' })).salary, 'salary_number');
 });

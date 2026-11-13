@@ -4,6 +4,8 @@ import AuthGuard from '@/components/auth/AuthGuard';
 import DocumentStatusPanel from '@/components/portal/DocumentStatusPanel';
 import CandidateYouTubeEditor from '@/components/portal/CandidateYouTubeEditor';
 import InterviewOfferPanel from '@/components/portal/InterviewOfferPanel';
+import { offerTermsPayload } from '@/lib/offers';
+import { DEFAULT_SALARY_CURRENCY, SALARY_CURRENCY_SYMBOL } from '@/lib/money';
 import PlacementPanel from '@/components/portal/PlacementPanel';
 import OfficialProcessBadge from '@/components/portal/OfficialProcessBadge';
 import CandidateStatusControl from '@/components/portal/CandidateStatusControl';
@@ -299,6 +301,8 @@ function CandidateDetailPageInner() {
         employer_name: offerEmployer,
         position_title: candidateProfessionLabel(candidate.profession, ui.general, currentLang),
         monthly_net_salary: Number(offerSalary),
+        // Not tied to a request (no request_id): the currency is EUR.
+        offer_terms: offerTermsPayload(DEFAULT_SALARY_CURRENCY),
         start_date: offerDate,
         terms_details: offerTerms,
         status: 'pending',
@@ -662,7 +666,7 @@ function CandidateDetailPageInner() {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.monthlyNetSalary} (€)</label>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.monthlyNetSalary} ({SALARY_CURRENCY_SYMBOL[DEFAULT_SALARY_CURRENCY]})</label>
                     <input type="number" value={offerSalary} onChange={(e) => setOfferSalary(e.target.value)} placeholder="1200" className="w-full px-3 py-2.5 rounded-xl border border-slate-300 outline-none bg-white font-medium text-slate-900" />
                   </div>
                   <div>

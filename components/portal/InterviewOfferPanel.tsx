@@ -9,6 +9,7 @@ import { candidateProfessionLabel } from '@/lib/candidateLabels';
 import { localizeCatalogTitle } from '@/lib/professions';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { OFFER_CURRENCIES, offerCurrency, offerTermsPayload } from '@/lib/offers';
+import { DEFAULT_SALARY_CURRENCY, formatSalary, offerDefaultsFromRequest, requestCurrency } from '@/lib/money';
 import { releaseCopy } from '@/lib/release-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 import { translations } from '@/lib/dictionary';
@@ -46,8 +47,9 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
     id: null,
     employer_name: request?.employer_name || '',
     position_title: localizeCatalogTitle(request?.position_title, currentLang) || candidateProfessionLabel(candidate.profession, '', currentLang),
-    monthly_net_salary: '',
-    currency: 'EUR',
+    // Salary and currency from the request (salary may be negotiated; the
+    // currency follows the request and cannot be changed). No request: EUR.
+    ...offerDefaultsFromRequest(request),
     start_date: '',
     terms_details: '',
     status: 'pending',
@@ -120,11 +122,14 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
   const saveOffer = async () => {
     if (request?.id && match && !match.presented_at) return setError(releaseCopy[currentLang].mustPresent);
     if (!of.employer_name || !of.monthly_net_salary) return setError(ui.ioOfferRequired);
+    const salary = Number(of.monthly_net_salary);
+    if (!Number.isFinite(salary) || salary <= 0) return setError(ui.ioOfferRequired);
     const row = {
       employer_name: of.employer_name,
       position_title: of.position_title || null,
-      monthly_net_salary: Number(of.monthly_net_salary),
-      offer_terms: offerTermsPayload(of.currency, of.offer_terms),
+      monthly_net_salary: salary,
+      // offer_terms.currency comes from the request, never a fixed EUR.
+      offer_terms: offerTermsPayload(request ? requestCurrency(request) : of.currency || DEFAULT_SALARY_CURRENCY, of.offer_terms),
       start_date: of.start_date || null,
       terms_details: of.terms_details || null,
       status: of.status,
@@ -138,7 +143,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
       `${of.id ? ui.ioEditOffer : ui.ioNewOffer}: ${candidate.full_name} · ${row.monthly_net_salary}`,
       'job_offer'
     );
-    if (ok) setOf({ ...of, id: null, monthly_net_salary: '', start_date: '', terms_details: '', status: 'pending' });
+    if (ok) setOf({ ...of, id: null, ...offerDefaultsFromRequest(request), offer_terms: undefined, start_date: '', terms_details: '', status: 'pending' });
   };
 
   const inp = [
@@ -227,11 +232,11 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
         <section className="space-y-2">
           <h4 className="text-xs font-bold uppercase tracking-wide text-slate-800">{ui.ioJobOffers} ({offers.length})</h4>
           {offers.map((o) => (
-            <button key={o.id} disabled={offerLocked(o)} onClick={() => setOf({ id: o.id, employer_name: o.employer_name || '', position_title: o.position_title || '', monthly_net_salary: o.monthly_net_salary ?? '', currency: offerCurrency(o) || 'EUR', offer_terms: o.offer_terms, start_date: o.start_date || '', terms_details: o.terms_details || '', status: o.status || 'pending' })}
+            <button key={o.id} disabled={offerLocked(o)} onClick={() => setOf({ id: o.id, employer_name: o.employer_name || '', position_title: o.position_title || '', ...offerDefaultsFromRequest(request, o), offer_terms: o.offer_terms, start_date: o.start_date || '', terms_details: o.terms_details || '', status: o.status || 'pending' })}
               className={`w-full text-start border border-slate-200 bg-white rounded-xl p-3 hover:bg-slate-50 disabled:cursor-default ${of.id === o.id ? 'ring-2 ring-emerald-500' : ''}`}>
               <p className="text-sm font-bold text-slate-950">{o.employer_name} · {o.position_title}<DemoBadge show={o.is_demo} /></p>
               <p className="text-[11px] font-medium text-slate-700">
-                {fill(ui.ioNetLine, { amount: o.monthly_net_salary, date: o.start_date || '—' })} · {ui.offerStatus[o.status] || o.status}
+                {fill(ui.ioNetLine, { amount: formatSalary(o.monthly_net_salary, offerCurrency(o) || DEFAULT_SALARY_CURRENCY, dateLocale[currentLang]) || '—', date: o.start_date || '—' })} · {ui.offerStatus[o.status] || o.status}
                 {o.responded_at ? ` (${String(o.responded_at).substring(0, 10)})` : ''}
               </p>
             </button>
@@ -242,9 +247,16 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
               <input placeholder={`${ui.ioCompany} *`} value={of.employer_name} onChange={(e) => setOf({ ...of, employer_name: e.target.value })} className={inp} />
               <input placeholder={ui.ioPosition} value={of.position_title} onChange={(e) => setOf({ ...of, position_title: e.target.value })} className={inp} />
               <input type="number" inputMode="decimal" placeholder={`${ui.ioNetSalary} *`} value={of.monthly_net_salary} onChange={(e) => setOf({ ...of, monthly_net_salary: e.target.value })} className={inp} />
-              <select value={of.currency || 'EUR'} onChange={(e) => setOf({ ...of, currency: e.target.value })} className={inp} aria-label={ui.offerCurrency}>
-                {OFFER_CURRENCIES.map((code) => <option key={code} value={code} className="bg-white text-slate-900">{code}</option>)}
-              </select>
+              {request ? (
+                // Fixed to the request currency (job_requests.salary_currency).
+                <div className="w-full rounded-xl border border-slate-300 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-900" aria-label={ui.offerCurrency} role="note">
+                  {ui.offerCurrency}: <strong>{of.currency}</strong> · {t.offerCurrencyFromRequest}
+                </div>
+              ) : (
+                <select value={of.currency || DEFAULT_SALARY_CURRENCY} onChange={(e) => setOf({ ...of, currency: e.target.value })} className={inp} aria-label={ui.offerCurrency}>
+                  {OFFER_CURRENCIES.map((code) => <option key={code} value={code} className="bg-white text-slate-900">{code}</option>)}
+                </select>
+              )}
               <input type="date" value={of.start_date} onChange={(e) => setOf({ ...of, start_date: e.target.value })} className={inp} />
             </div>
             <textarea rows={3} placeholder={ui.ioTerms} value={of.terms_details} onChange={(e) => setOf({ ...of, terms_details: e.target.value })} className={inp} />

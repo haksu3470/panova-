@@ -1,3 +1,5 @@
+import { DEFAULT_SALARY_CURRENCY, formatSalary } from './money';
+
 export const OFFER_CURRENCIES = ['EUR', 'USD', 'GBP', 'MKD', 'TRY', 'ALL', 'BAM'] as const;
 
 export type OfferCurrency = (typeof OFFER_CURRENCIES)[number];
@@ -32,11 +34,20 @@ export function offerAmount(offer: OfferLike): string {
   return String(value);
 }
 
-/** Amount plus currency code. Empty when the offer has no salary figure. */
-export function offerMoney(offer: OfferLike): string {
+/**
+ * Amount with its currency. With a page locale ('tr-TR', 'en-GB', …) it is
+ * formatted like every other salary (formatSalary: "€1.400", "$1,400"); an
+ * offer with no stored currency is EUR. Without a locale: "1000 EUR" (exports).
+ * Empty when the offer has no salary figure.
+ */
+export function offerMoney(offer: OfferLike, locale?: string): string {
   const amount = offerAmount(offer);
   if (!amount) return '';
   const currency = offerCurrency(offer);
+  if (locale) {
+    const formatted = formatSalary(amount, currency || DEFAULT_SALARY_CURRENCY, locale);
+    if (formatted) return formatted;
+  }
   return currency ? `${amount} ${currency}` : amount;
 }
 

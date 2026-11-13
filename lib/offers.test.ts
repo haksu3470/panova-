@@ -1,13 +1,16 @@
 import assert from 'node:assert/strict';
+import { register } from 'node:module';
 import test from 'node:test';
-import {
+
+await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.url);
+const {
   candidateOfferResponse,
   offerAmount,
   offerCurrency,
   offerMoney,
   offerStatusLabel,
   offerTermsPayload,
-} from './offers.ts';
+} = await import('./offers.ts');
 
 test('offer cards read the stored salary, not an empty salary column', () => {
   const offer = {

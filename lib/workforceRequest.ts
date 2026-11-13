@@ -1,3 +1,5 @@
+import { formatSalary, parseSalaryInput, salaryCurrency, type SalaryCurrency } from './money';
+
 export type YesNo = '' | 'yes' | 'no';
 
 export type DemandBlock = 'position' | 'lodging' | 'meals' | 'both' | 'salary';
@@ -11,6 +13,8 @@ export type EmployerDemandDraft = {
   headcount: number;
   city: string;
   salaryText: string;
+  /** EUR (default) or USD, from the list next to the salary field. */
+  currency: SalaryCurrency;
   duration: string;
   experience: string;
   language: string;
@@ -27,6 +31,7 @@ export type EmployerDemandRow = {
   city: string;
   country: string | null;
   monthly_net_salary: number;
+  salary_currency: SalaryCurrency;
   contract_type: string;
   required_experience_years: number;
   required_language: string;
@@ -101,7 +106,8 @@ export function buildEmployerDemandInsert(
   const meals = yesNoToBoolean(draft.meals);
   const benefit = benefitsAnswered(lodging, meals);
   if (benefit) return { ok: false, error: benefit };
-  const salary = parseMonthlyNetSalary(draft.salaryText);
+  // Numbers only (no "1550 euro"); the currency comes from its own list.
+  const salary = parseSalaryInput(draft.salaryText);
   if (salary == null) return { ok: false, error: 'salary' };
   if (lodging == null || meals == null) return { ok: false, error: 'both' };
 
@@ -120,6 +126,7 @@ export function buildEmployerDemandInsert(
       city: draft.city.trim(),
       country: draft.country.trim() || null,
       monthly_net_salary: salary,
+      salary_currency: salaryCurrency(draft.currency),
       contract_type: draft.duration.trim(),
       required_experience_years: experienceYearsFromChoice(draft.experience),
       required_language: draft.language.trim(),
@@ -192,10 +199,10 @@ export function validateDemandForm(input: DemandFormInput): DemandFieldErrors {
   if (blank(input.city)) errors.city = 'required';
 
   if (blank(input.salaryText)) errors.salary = 'required';
+  else if (!/^\d[\d\s.,]*$/.test(input.salaryText.trim())) errors.salary = 'salary_number';
   else {
-    const salary = parseMonthlyNetSalary(input.salaryText);
-    if (salary == null) errors.salary = /\d/.test(input.salaryText) ? 'salary_range' : 'salary_number';
-    else if (salary > SALARY_MAX) errors.salary = 'salary_range';
+    const salary = parseSalaryInput(input.salaryText);
+    if (salary == null || salary > SALARY_MAX) errors.salary = 'salary_range';
   }
 
   if (blank(input.duration)) errors.duration = 'required';
@@ -276,13 +283,24 @@ export function benefitPhrase(
   return labels.unanswered;
 }
 
+/**
+ * The request salary as shown on cards and lists. An old free-text `salary`
+ * is shown as typed; otherwise monthly_net_salary with the request currency
+ * (salary_currency, EUR when missing), formatted for the page locale.
+ * Without a locale the bare number is returned (exports).
+ */
 export function displayedRequestSalary(row: {
   salary?: string | null;
   monthly_net_salary?: number | string | null;
-}): string {
+  salary_currency?: string | null;
+}, locale?: string): string {
   const text = typeof row.salary === 'string' ? row.salary.trim() : '';
   if (text) return text;
   if (row.monthly_net_salary != null && String(row.monthly_net_salary).trim() !== '') {
+    if (locale) {
+      const formatted = formatSalary(row.monthly_net_salary, salaryCurrency(row.salary_currency), locale);
+      if (formatted) return formatted;
+    }
     return String(row.monthly_net_salary);
   }
   return '';

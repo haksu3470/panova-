@@ -494,6 +494,9 @@ export interface Translation {
   lodgingAndMealsRequired?: string;
   salaryAmountRequired?: string;
   demandSaveFailed?: string;
+  salaryNumberPlaceholder?: string;
+  salaryNumberHint?: string;
+  offerCurrencyFromRequest?: string;
   demandErrRequired?: string;
   demandErrSector?: string;
   demandErrPosition?: string;
@@ -1226,6 +1229,9 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'Konaklama ve yemek seçimi zorunludur.',
     salaryAmountRequired: 'Aylık net maaşı sayı olarak girin.',
     demandSaveFailed: 'Talep kaydedilemedi. Lütfen tekrar deneyin.',
+    salaryNumberPlaceholder: 'Örn: 1500 {symbol}',
+    salaryNumberHint: 'Yalnızca rakam girin. Para birimi: {symbol}',
+    offerCurrencyFromRequest: 'talepten gelir, değiştirilemez',
     demandErrRequired: 'Bu alan zorunludur.',
     demandErrSector: 'Bir sektör seçin.',
     demandErrPosition: 'En az bir pozisyon seçin ya da yazın.',
@@ -1945,6 +1951,9 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'Choose whether accommodation and meals are provided.',
     salaryAmountRequired: 'Enter the monthly net salary as a number.',
     demandSaveFailed: 'The request could not be saved. Please try again.',
+    salaryNumberPlaceholder: 'E.g. 1500 {symbol}',
+    salaryNumberHint: 'Numbers only. Currency: {symbol}',
+    offerCurrencyFromRequest: 'set by the request, cannot be changed',
     demandErrRequired: 'This field is required.',
     demandErrSector: 'Select a sector.',
     demandErrPosition: 'Select or type at least one position.',
@@ -2664,6 +2673,9 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'Zgjidhni nëse ofrohen akomodimi dhe ushqimi.',
     salaryAmountRequired: 'Shkruani pagën neto mujore si numër.',
     demandSaveFailed: 'Kërkesa nuk u ruajt. Ju lutemi provoni përsëri.',
+    salaryNumberPlaceholder: 'P.sh. 1500 {symbol}',
+    salaryNumberHint: 'Vetëm numra. Monedha: {symbol}',
+    offerCurrencyFromRequest: 'vjen nga kërkesa, nuk mund të ndryshohet',
     demandErrRequired: 'Kjo fushë është e detyrueshme.',
     demandErrSector: 'Zgjidhni një sektor.',
     demandErrPosition: 'Zgjidhni ose shkruani të paktën një pozicion.',
@@ -3109,6 +3121,9 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'حدد ما إذا كانت الإقامة والوجبات متوفرة.',
     salaryAmountRequired: 'أدخل صافي الراتب الشهري كرقم.',
     demandSaveFailed: 'تعذر حفظ الطلب. يرجى المحاولة مرة أخرى.',
+    salaryNumberPlaceholder: 'مثال: 1500 {symbol}',
+    salaryNumberHint: 'أرقام فقط. العملة: {symbol}',
+    offerCurrencyFromRequest: 'محددة من الطلب ولا يمكن تغييرها',
     demandErrRequired: 'هذا الحقل مطلوب.',
     demandErrSector: 'اختر قطاعًا.',
     demandErrPosition: 'اختر وظيفة واحدة على الأقل أو اكتبها.',
@@ -4101,6 +4116,9 @@ export const translations: Record<Language, Translation> = {
     lodgingAndMealsRequired: 'Изберете дали се обезбедуваат сместување и храна.',
     salaryAmountRequired: 'Внесете ја месечната нето плата како број.',
     demandSaveFailed: 'Барањето не е зачувано. Обидете се повторно.',
+    salaryNumberPlaceholder: 'На пр.: 1500 {symbol}',
+    salaryNumberHint: 'Само бројки. Валута: {symbol}',
+    offerCurrencyFromRequest: 'од барањето, не може да се менува',
     demandErrRequired: 'Ова поле е задолжително.',
     demandErrSector: 'Изберете сектор.',
     demandErrPosition: 'Изберете или напишете барем една позиција.',
