@@ -1,59 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen } from 'lucide-react';
+import { ArrowLeft, BookOpen, Printer } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
-import { resolvePortalViewer } from '@/lib/guides-access';
 import { guidesCopy } from '@/lib/guides-copy';
-import { guidesHome, type GuidesCopy, type PortalViewer } from '@/lib/guides-model';
-import { supabase } from '@/lib/supabase';
-import { emailAccessOk, storedVerifyEmail } from '@/lib/emailVerification';
+import { guidesHome, guidesPrintHref, printButtonLabel, type GuidesCopy } from '@/lib/guides-model';
 import { useSiteLanguage } from '@/lib/site-language';
 import GuidesHub from '@/components/guides/GuidesHub';
-
-type Gate = 'loading' | 'out' | 'verify' | 'ready';
+import { useGuidesViewer } from '@/components/guides/useGuidesViewer';
 
 export default function GuidesScreen() {
   const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
   const copy = guidesCopy[currentLang];
-  const [gate, setGate] = useState<Gate>('loading');
-  const [viewer, setViewer] = useState<PortalViewer | null>(null);
-
-  useEffect(() => {
-    let alive = true;
-    const check = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        if (!data.session) {
-          if (!alive) return;
-          setViewer(null);
-          setGate(storedVerifyEmail() ? 'verify' : 'out');
-          return;
-        }
-        if (!(await emailAccessOk())) {
-          if (alive) setGate('verify');
-          return;
-        }
-        const next = await resolvePortalViewer(data.session.user.id);
-        if (!alive) return;
-        setViewer(next);
-        setGate('ready');
-      } catch {
-        if (!alive) return;
-        setViewer(null);
-        setGate('out');
-      }
-    };
-    check();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => {
-      check();
-    });
-    return () => {
-      alive = false;
-      sub.subscription.unsubscribe();
-    };
-  }, []);
+  const { gate, viewer } = useGuidesViewer();
+  const canPrint = gate === 'ready' && !!viewer && viewer.kind !== 'unlinked';
 
   const backHref = guidesHome(gate === 'ready' ? viewer : null);
   const backLabel = viewer?.kind === 'employer'
@@ -79,6 +39,16 @@ export default function GuidesScreen() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            {canPrint && viewer && (
+              <Link
+                href={guidesPrintHref(viewer)}
+                title={copy.print.printButton}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-brand-solid px-3.5 py-2 text-xs font-bold text-white hover:bg-brand"
+              >
+                <Printer className="h-4 w-4" aria-hidden />
+                {copy.print.printButton}: {printButtonLabel(copy, viewer)}
+              </Link>
+            )}
             <Link href={backHref} className="inline-flex items-center gap-1.5 rounded-xl border bg-slate-100 px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200">
               <ArrowLeft className="h-4 w-4 rtl:rotate-180" aria-hidden />
               {backLabel}

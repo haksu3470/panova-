@@ -440,6 +440,24 @@ Automated: `lib/money.test.ts` (formatSalary by locale, numbers-only input and l
 
 Automated: `lib/demoData.test.ts` (count reading, seed result and "already exists", untouched tables, permission error, recursive file listing and stop on a storage error, files before the RPC, upper-management gate, five languages).
 
+## S25. Kılavuz yazdırma / PDF / Guides print and PDF
+
+**Rol / Role:** Upper management, one other staff role (e.g. source-country), a demo employer and a demo candidate account. Use demo records only. Page: `/guides/print`, opened from **Yazdır / PDF** on `/guides`. No PDF is made on the server: the browser's print dialog saves it.
+
+**Adımlar ve beklenen / Steps and expected:**
+
+1. **Düğme / Button.** On `/guides` the header shows **Yazdır / PDF: Tüm roller** for upper management and **Yazdır / PDF: Kendi kılavuzum** for every other signed-in account. Signed out, unverified or unlinked: no button.
+2. **Üst Yönetim / Upper management.** Click the button. `/guides/print` shows a toolbar (back link, **Yazdır / PDF**, **Rol** select, language switcher), then the cover: `Portal kılavuzları`, "Panova Group Kullanım Kılavuzu", language, creation date, session role, scope "Tüm roller". Then the table of contents, every role card and every how-to, `staff-invite` included.
+3. **Tek rol / One role.** Pick **İşveren** in **Rol**. The address becomes `/guides/print?role=employer`; only the employer card and the employer how-tos (request, browse) remain, scope shows the role. Pick **Tüm roller** again: everything is back. Open `/guides/print?role=nope` by hand: the full set is shown.
+4. **PDF kaydet / Save as PDF (upper management).** Click **Yazdır / PDF**, choose **PDF olarak kaydet** / **Save as PDF** as the destination, A4, and save. In the PDF: the toolbar, buttons and language switcher are not there; the cover is page 1, the table of contents starts a new page and every role and every how-to starts on a new page; screen cards and the **Örnek** boxes are not split across pages and the example boxes are printed with a border; text is black on white; the footer shows "Sayfa N" (Chrome, Edge; a browser without @page margin boxes simply has no number).
+5. **Diğer personel / Other staff.** As source-country with `?role=upper_management` in the address: still only the source-country card and the staff how-tos, no `staff-invite`.
+6. **İşveren / Employer.** Sign in with the demo employer, open `/guides` → **Yazdır / PDF: Kendi kılavuzum**. Only the employer card and the two employer how-tos; `?role=candidate` changes nothing. Save as PDF as in step 4.
+7. **Aday / Candidate.** Sign in with the demo candidate. Only the candidate card and the registration how-to; save as PDF as in step 4.
+8. **Oturumsuz / Signed out.** In a private window open `/guides/print`: it goes to `/guides` and shows the sign-in card there.
+9. **Dil ve yön / Language and direction.** Switch to EN, SQ, AR, MK on the print page and print again. Toolbar, cover and headings follow the language. In Arabic the page and the PDF run right to left, arrows in the flow point left. New how-to texts that are still pending translation print in Turkish (see `docs/guides-translation-todo.md`).
+
+Automated: `lib/guides-print.test.ts` (upper management all or one role, ?role ignored for others, employer and candidate own role, never more than `/guides`, button label and link, texts in five languages, print CSS and shared session check).
+
 ---
 
 ## Boşluk analizi / Gap analysis
