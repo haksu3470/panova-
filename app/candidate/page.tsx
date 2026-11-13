@@ -55,7 +55,9 @@ import KvkkConsent from '@/components/site/KvkkConsent';
 import { kvkkMetadata } from '@/lib/kvkk';
 import { releaseCopy } from '@/lib/release-copy';
 import { supportBadgeCount, supportThreadCopy, type SupportMessage } from '@/lib/supportTickets';
-import { openCandidateDocument, signedCandidateFileUrl, uploadCandidateFile } from '@/lib/candidateFiles';
+import { signedCandidateFileUrl, uploadCandidateFile } from '@/lib/candidateFiles';
+import DocumentPreviewModal from '@/components/portal/DocumentPreviewModal';
+import CandidateDocDownloadButton from '@/components/candidate/CandidateDocDownloadButton';
 import { validateUpload } from '@/lib/uploads';
 
 
@@ -140,7 +142,9 @@ export default function CandidateDashboard() {
   const [supportMsg, setSupportMsg] = useState('');
   const [supportSending, setSupportSending] = useState(false);
 
-  const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
+  // Same preview as staff (DocumentPreviewModal): PDFs are shown from a blob: URL,
+  // never by framing the storage address (the site CSP blocks that).
+  const [previewDoc, setPreviewDoc] = useState<{ key: string; name: string; fileUrl: string; fileName?: string; documentId?: string } | null>(null);
 
   const t = translations[currentLang] || translations.tr;
   const isRtl = currentLang === 'ar';
@@ -1770,14 +1774,27 @@ export default function CandidateDashboard() {
                     />
                     {doc.file_url && (
                       <button 
-                        onClick={async () => {
-                          const url = doc.id ? await openCandidateDocument(doc.id, doc.file_url) : await signedCandidateFileUrl(doc.file_url);
-                          if (url) setPreviewDoc({ name: docTitle(doc), url });
-                        }}
+                        onClick={() => setPreviewDoc({
+                          key: `${doc.id || idx}:${Date.now()}`,
+                          name: docTitle(doc),
+                          fileUrl: doc.file_url,
+                          fileName: doc.notes || undefined,
+                          documentId: doc.id || undefined,
+                        })}
                         className="px-3 py-1.5 bg-emerald-100 text-brand font-bold rounded-xl text-xs hover:bg-emerald-200 transition shrink-0 cursor-pointer"
                       >
                         {ct.previewDocBtn}
                       </button>
+                    )}
+                    {doc.file_url && (
+                      <CandidateDocDownloadButton
+                        fileUrl={doc.file_url}
+                        fileName={doc.notes}
+                        title={docTitle(doc)}
+                        documentId={doc.id}
+                        label={t.docDownload}
+                        failedText={t.docPreviewFailed}
+                      />
                     )}
                   </div>
                 </div>
@@ -1852,26 +1869,15 @@ export default function CandidateDashboard() {
 
       {/* Belge Önizleme Modalı */}
       {previewDoc && (
-        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 z-50">
-          <div className="bg-white rounded-3xl p-6 max-w-3xl w-full shadow-2xl border space-y-4 max-h-[90vh] flex flex-col">
-            <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="font-bold text-slate-900 text-sm">📁 {ct.docPreviewTitle}: {previewDoc.name}</h3>
-              <button onClick={() => setPreviewDoc(null)} className="text-muted-foreground hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
-            </div>
-            <div className="flex-1 bg-slate-100 rounded-2xl p-4 flex items-center justify-center overflow-auto">
-              {previewDoc.url.startsWith('data:image') || /\.(jpe?g|png)(\?|$)/i.test(previewDoc.url) ? (
-                <img src={previewDoc.url} alt={previewDoc.name} className="max-h-[60vh] object-contain rounded-xl shadow" />
-              ) : (
-                <iframe src={previewDoc.url} className="w-full h-[60vh] rounded-xl border bg-white" title={previewDoc.name} />
-              )}
-            </div>
-            <div className="flex justify-end">
-              <button onClick={() => setPreviewDoc(null)} className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-xl text-xs cursor-pointer">
-                {ct.closeModal}
-              </button>
-            </div>
-          </div>
-        </div>
+        <DocumentPreviewModal
+          key={previewDoc.key}
+          t={t}
+          name={`${ct.docPreviewTitle}: ${previewDoc.name}`}
+          fileUrl={previewDoc.fileUrl}
+          fileName={previewDoc.fileName}
+          documentId={previewDoc.documentId}
+          onClose={() => setPreviewDoc(null)}
+        />
       )}
     </div>
   );

@@ -514,6 +514,18 @@ Automated: `lib/page-headers.test.ts`.
 
 Automated: `lib/contractDuration.test.ts` (parse, canonical text, plural forms per language, old text unchanged), `lib/workforceRequest.test.ts` (validation and the insert row).
 
+## S28. Aday belge önizleme ve indirme / Candidate document preview and download
+
+**Rol / Role:** A demo candidate on `/candidate` → **Belgelerim / Documents**, in Chrome (desktop) and on a phone. The candidate page uses the same preview window as staff (`components/portal/DocumentPreviewModal.tsx`, S20). The site CSP is unchanged.
+
+1. **PDF.** On a document with an uploaded PDF press **Önizle / Preview**. After the loading text the PDF shows inside the window from a `blob:` address. There is no "Bu içerik engellenmiştir / This content is blocked" page and no `Refused to frame` error in the console. The header has **Yeni sekmede aç / Open in new tab** and **İndir / Download**.
+2. **JPEG.** Preview a JPG or PNG document: the image fits inside the window; the two header links work.
+3. **Yedek / Fallback.** On a browser without a PDF viewer (Chrome on Android, or "Download PDFs" turned on) the window shows "The PDF cannot be shown here…" with **Open in new tab** and **Download**, never an empty frame.
+4. **İndir düğmesi / Download button.** Each document card with a file has **İndir** (EN Download, SQ Shkarko, AR تنزيل, MK Преземи) next to **Önizle**. It saves the candidate's own file under its original name (or the document title). A card without a file has neither button.
+5. **Erişim / Access.** Preview and download go through the same path as before (`log_document_access`, then a short signed URL from the private `candidate-files` bucket), so access is logged as before. Another candidate's file cannot be opened (storage rule `can_access_candidate_file`), and employers still have no document access.
+6. **Diller / Languages.** Repeat 1 and 4 in EN, SQ, AR, MK: the window texts and the button label are translated; Arabic stays right-to-left.
+
+Automated: `lib/documentPreview.test.ts` (no `<iframe` on the candidate page, shared preview window, download uses the preview access path, CSP not widened).
 ---
 
 ## Boşluk analizi / Gap analysis

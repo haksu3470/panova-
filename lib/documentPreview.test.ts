@@ -126,6 +126,22 @@ test('staff page never puts the stored address straight into the frame', () => {
   assert.ok(modal.includes('<object data={view.url} type="application/pdf"'));
 });
 
+test('candidate page uses the same preview: no frame on the stored address, own-file download', () => {
+  const page = readFileSync(join(ROOT, 'app/candidate/page.tsx'), 'utf8');
+  assert.equal(page.includes('<iframe src={previewDoc'), false);
+  assert.equal(/<iframe\b/.test(page), false, 'no iframe at all on the candidate page');
+  assert.ok(page.includes('<DocumentPreviewModal'));
+  assert.match(page, /documentId=\{previewDoc\.documentId\}/);
+  // download: same access path as the preview (log + signed URL), label from the dictionary
+  const button = readFileSync(join(ROOT, 'components/candidate/CandidateDocDownloadButton.tsx'), 'utf8');
+  assert.ok(button.includes('candidatePreviewUrl('));
+  assert.ok(button.includes('downloadHref('));
+  assert.match(page, /<CandidateDocDownloadButton[\s\S]*?label=\{t\.docDownload\}/);
+  // the site CSP was not widened for this
+  const csp = readFileSync(join(ROOT, 'lib/securityHeaders.ts'), 'utf8');
+  assert.equal(/frame-src[^;"]*supabase/.test(csp), false);
+});
+
 test('preview texts exist in five languages and are translated', () => {
   const keys = ['docPreviewFailed', 'docPreviewErrFetch', 'docPreviewErrNotPdf', 'docPreviewTooLarge', 'docPreviewErrAccess', 'docPreviewErrPath', 'docPreviewErrGeneric', 'docPreviewUnsupported', 'docOpenNewTab', 'docDownload', 'docPreviewPdfFallback', 'docPreviewClose', 'plLoading'] as const;
   for (const lang of LANGS) {
