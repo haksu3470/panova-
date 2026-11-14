@@ -59,6 +59,46 @@ body {
   }
 }
 
+/*
+  Home page motion (components/home/HomeMotion.tsx). Nothing is hidden unless
+  JS adds .home-motion to the page root, which it does only when the visitor
+  allows motion, so server HTML and reduced-motion visitors see a static page.
+*/
+.home-motion .home-reveal {
+  transition: opacity 500ms ease-out, transform 500ms ease-out;
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.home-motion .home-reveal:not([data-visible]) {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.home-route {
+  stroke-dasharray: 6 6;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .home-motion .home-route {
+    animation: home-route-dash 2.4s linear infinite;
+  }
+}
+@keyframes home-route-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-reveal,
+  .home-route {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+/* FAQ: the chevron replaces the browser's own disclosure marker. */
+.home-summary::-webkit-details-marker {
+  display: none;
+}
+
 :root {
   --panova-green: #7cb342;
   --panova-dark-green: #2e7d32;

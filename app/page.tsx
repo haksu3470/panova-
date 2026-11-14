@@ -1,12 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import { Users, Globe2, Sprout, HardHat, Building2, CheckCircle2, Lock, Send, User, LogIn } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Users, Globe2, Sprout, HardHat, Building2, CheckCircle2, Send, User } from 'lucide-react';
 import Link from 'next/link';
 import { StatsBar, AudienceSections, TrustSections, CompanyAbout, SiteFooter } from '@/components/home/HomeSections';
+import { HeroVisual } from '@/components/home/HeroVisual';
+import { LoginMenu } from '@/components/home/LoginMenu';
+import { useHomeMotion } from '@/components/home/HomeMotion';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { translations } from '@/lib/dictionary';
+import { EUROPEAN_COUNTRIES } from '@/lib/europeanCountries';
 import { fill, homeCopy } from '@/lib/home-copy';
+import { homeExtraCopy } from '@/lib/home-extra-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 import { company as registry } from '@/lib/company';
 import KvkkConsent from '@/components/site/KvkkConsent';
@@ -30,6 +35,10 @@ export default function HomePage() {
   const t = translations[currentLang] || translations.tr;
   const company = t.companies[selectedCompanyKey];
   const h = homeCopy[currentLang];
+  const x = homeExtraCopy[currentLang];
+  const albania = EUROPEAN_COUNTRIES.find((country) => country.code === 'AL')?.names[currentLang] ?? 'Albania';
+  const rootRef = useRef<HTMLDivElement>(null);
+  useHomeMotion(rootRef, [currentLang, selectedCompanyKey]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,102 +76,81 @@ export default function HomePage() {
   };
 
   return (
-    <div className={`min-h-screen bg-slate-50 text-slate-900 font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Top Navbar (Mobil Uyumlu Esnek Yapı) */}
+    <div ref={rootRef} className={`min-h-screen bg-slate-50 text-slate-900 font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* Top bar: logo, one language switcher, one sign-in menu */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-auto sm:h-20 py-3 sm:py-0 flex flex-col sm:flex-row items-center justify-between gap-3">
-          
-          {/* Logo */}
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
-            <div className="flex items-center space-x-3 rtl:space-x-reverse min-w-0">
-              <img
-                src="/logo.png"
-                alt="PANOVA"
-                width={1051}
-                height={725}
-                className="h-12 sm:h-14 w-auto object-contain shrink-0"
-              />
-              <div className="min-w-0">
-                <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 block leading-none">PANOVA</span>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate max-w-[140px] sm:max-w-none block">{company.name}</span>
-              </div>
-            </div>
-            <div className="sm:hidden">
-              <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <img
+              src="/logo.png"
+              alt="PANOVA"
+              width={1051}
+              height={725}
+              className="h-10 sm:h-14 w-auto object-contain shrink-0"
+            />
+            <div className="min-w-0">
+              <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 block leading-none">PANOVA</span>
+              <span className="hidden sm:block text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">{company.name}</span>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3 w-full sm:w-auto">
-            <div className="hidden sm:block">
-              <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
-            </div>
-
-            {/* Şirket Seçimine Göre Dinamik Butonlar */}
-            {selectedCompanyKey === 'hr' ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/candidate"
-                  className="inline-flex items-center gap-1.5 bg-brand-solid text-white px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-brand transition shadow-md z-10 cursor-pointer"
-                >
-                  <LogIn className="w-3.5 h-3.5" /> {t.candidatePortalBtn || 'Aday Portalı & Giriş'}
-                </Link>
-
-                <Link
-                  href="/employer-login"
-                  className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-800 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-200 transition border border-slate-200 z-10 cursor-pointer"
-                >
-                  <Building2 className="w-3.5 h-3.5" /> {t.employerPortal}
-                </Link>
-              </div>
-            ) : (
+          <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0">
+            <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
+            {selectedCompanyKey !== 'hr' ? (
               <a
                 href="#contact-form"
-                className="inline-flex items-center gap-1.5 bg-brand-solid text-white px-3.5 py-2.5 rounded-xl text-xs font-bold hover:bg-brand transition shadow-md z-10 cursor-pointer"
+                className="hidden sm:inline-flex items-center gap-1.5 bg-slate-900 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 transition shadow-sm cursor-pointer"
               >
-                <Send className="w-3.5 h-3.5" /> {h.ctaQuote}
+                <Send aria-hidden className="w-3.5 h-3.5" /> {h.ctaQuote}
               </a>
-            )}
-
-            <Link
-              href="/portal"
-              className="inline-flex items-center gap-1.5 bg-slate-900 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 transition shadow-sm z-10 cursor-pointer"
-            >
-              <Lock className="w-3.5 h-3.5" /> {t.portalLogin}
-            </Link>
+            ) : null}
+            <LoginMenu labels={x.login} />
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="bg-slate-900 text-white py-14 sm:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,125,50,0.45),transparent_60%)]" />
-        <div className="max-w-5xl mx-auto relative z-10 text-center">
-          <span className="text-emerald-400 font-bold text-xs uppercase tracking-widest bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-800/50 inline-block mb-4">
-            {company.name}
-          </span>
-          <h1 className="text-3xl sm:text-6xl font-black mb-4 sm:mb-6 tracking-tight leading-tight">{company.tagline}</h1>
-          <p className="text-on-dark-muted text-sm sm:text-xl max-w-2xl mx-auto leading-relaxed">{company.desc}</p>
-          <p className="text-emerald-200 text-xs sm:text-sm mt-4 font-semibold">
-            {registry.presence.map((place, i) => `${h.about.countries[i]} (${place.city})`).join(' · ')}
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-3 mt-8">
-            <Link href="/employer-login" className="inline-flex justify-center items-center gap-2 bg-brand-solid hover:bg-brand px-6 py-3.5 rounded-xl font-bold text-sm">
-              <Building2 className="w-4 h-4" /> {h.ctaHire}
-            </Link>
-            <Link href="/candidate" className="inline-flex justify-center items-center gap-2 bg-white text-slate-900 hover:bg-slate-100 px-6 py-3.5 rounded-xl font-bold text-sm">
-              <User className="w-4 h-4" /> {h.ctaJob}
-            </Link>
+      {/* Hero: soft brand gradient, text and the three-country drawing */}
+      <section className="bg-slate-900 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950 text-white py-12 sm:py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,125,50,0.4),transparent_60%),radial-gradient(circle_at_bottom_left,rgba(124,179,66,0.16),transparent_55%)]" />
+        <div className="max-w-7xl mx-auto relative z-10 grid gap-10 lg:grid-cols-2 lg:items-center">
+          <div className="text-center lg:text-start">
+            <span className="text-emerald-300 font-bold text-xs uppercase tracking-widest bg-emerald-950 px-3 py-1 rounded-full border border-emerald-800 inline-block mb-4">
+              {company.name}
+            </span>
+            <h1 className="text-3xl sm:text-5xl font-black mb-4 sm:mb-6 tracking-tight leading-tight">{company.tagline}</h1>
+            <p className="text-on-dark-muted text-sm sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed">{company.desc}</p>
+            <p className="text-emerald-200 text-xs sm:text-sm mt-4 font-semibold">
+              {registry.presence.map((place, i) => `${h.about.countries[i]} (${place.city})`).join(' · ')}
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3 mt-8">
+              <Link href="/employer-login" className="inline-flex justify-center items-center gap-2 bg-brand-solid hover:bg-brand px-6 py-3.5 rounded-xl font-bold text-sm text-on-dark">
+                <Building2 aria-hidden className="w-4 h-4" /> {h.ctaHire}
+              </Link>
+              <Link href="/candidate" className="inline-flex justify-center items-center gap-2 bg-white text-slate-900 hover:bg-slate-100 px-6 py-3.5 rounded-xl font-bold text-sm">
+                <User aria-hidden className="w-4 h-4" /> {h.ctaJob}
+              </Link>
+            </div>
           </div>
-          <nav className="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-8 text-xs sm:text-sm text-on-dark-muted font-semibold">
-            <a href="#isverenler" className="hover:text-white">{h.nav.employers}</a>
-            <a href="#adaylar" className="hover:text-white">{h.nav.candidates}</a>
-            <a href="#sektorler" className="hover:text-white">{h.nav.sectors}</a>
-            <a href="#nasil-calisir" className="hover:text-white">{h.nav.how}</a>
-            <a href="#grup" className="hover:text-white">{h.nav.group}</a>
-            <a href="#kurumsal" className="hover:text-white">{h.nav.about}</a>
-            <a href="#sss" className="hover:text-white">{h.nav.faq}</a>
-          </nav>
+          <HeroVisual
+            countries={[albania, h.about.countries[2], h.about.countries[1]]}
+            mapLabel={x.hero.mapLabel}
+            flowTitle={x.hero.flowTitle}
+            flow={x.hero.flow}
+          />
         </div>
+        {/* Section links: one scrolling row on phones, wrapped from sm */}
+        <nav aria-label={x.sectionsNav} className="max-w-7xl mx-auto relative z-10 mt-10">
+          <ul className="flex flex-nowrap sm:flex-wrap sm:justify-center gap-x-5 gap-y-2 overflow-x-auto pb-2 text-xs sm:text-sm text-on-dark-muted font-semibold whitespace-nowrap">
+            <li><a href="#isverenler" className="hover:text-white">{h.nav.employers}</a></li>
+            <li><a href="#adaylar" className="hover:text-white">{h.nav.candidates}</a></li>
+            <li><a href="#sektorler" className="hover:text-white">{h.nav.sectors}</a></li>
+            <li><a href="#nasil-calisir" className="hover:text-white">{h.nav.how}</a></li>
+            <li><a href="#grup" className="hover:text-white">{h.nav.group}</a></li>
+            <li><a href="#guven" className="hover:text-white">{x.trustTitle}</a></li>
+            <li><a href="#kurumsal" className="hover:text-white">{h.nav.about}</a></li>
+            <li><a href="#sss" className="hover:text-white">{h.nav.faq}</a></li>
+          </ul>
+        </nav>
       </section>
       <StatsBar lang={currentLang} />
       <AudienceSections lang={currentLang} />
