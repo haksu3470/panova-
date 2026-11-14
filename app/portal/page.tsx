@@ -49,6 +49,7 @@ import { writeAudit } from '@/lib/audit';
 import DemoBadge from '@/components/portal/DemoBadge';
 import DeleteRecordButton from '@/components/portal/DeleteRecordButton';
 import ListExportBar from '@/components/portal/ListExportBar';
+import ScrollTable from '@/components/portal/ScrollTable';
 import StaffTab from '../../components/portal/StaffTab';
 import TasksTab from '../../components/portal/TasksTab';
 import { employerExportRows, offerExportRows, requestExportRows } from '@/lib/exportLists';
@@ -1012,8 +1013,8 @@ export default function PortalPage() {
             </h3>
             <p className="text-xs text-muted-foreground">{t.auditLogSub}</p>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm text-slate-600">
+            <ScrollTable stickyFirstColumn>
+              <table className="w-full text-left rtl:text-right text-xs sm:text-sm text-slate-600 [&_td:first-child]:min-w-[10rem] [&_td:last-child]:whitespace-nowrap">
                 <thead className="bg-slate-50 text-slate-700 font-bold border-b">
                   <tr>
                     <th className="p-4">{t.colAction}</th>
@@ -1034,7 +1035,7 @@ export default function PortalPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollTable>
           </div>
         )}
 
