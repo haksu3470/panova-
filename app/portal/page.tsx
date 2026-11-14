@@ -47,7 +47,7 @@ import { isSourceCountryOfficer, normalizeReferralCode } from '@/lib/referralCod
 import RequestsTab from '../../components/portal/RequestsTab';
 import { writeAudit } from '@/lib/audit';
 import DemoBadge from '@/components/portal/DemoBadge';
-import DeleteRecordButton from '@/components/portal/DeleteRecordButton';
+import DeleteRecordButton, { DELETE_ROW_CLASS } from '@/components/portal/DeleteRecordButton';
 import ListExportBar from '@/components/portal/ListExportBar';
 import ScrollTable from '@/components/portal/ScrollTable';
 import StaffTab from '../../components/portal/StaffTab';
@@ -1077,14 +1077,6 @@ export default function PortalPage() {
                       >
                         {ui.viewEmployerPortal}
                       </button>
-                      <DeleteRecordButton
-                        table="employers"
-                        id={emp.id}
-                        name={emp.company_name || emp.id}
-                        isDemo={emp.is_demo}
-                        allowed={isUpperManagement}
-                        onDeleted={fetchAllData}
-                      />
                       {isUpperManagement && emp.compliance_status === 'pending' ? (
                         <button type="button" className="px-3 py-1.5 bg-amber-800 text-on-dark rounded-xl text-xs font-bold" onClick={async () => {
                           const { error } = await supabase.from('employers').update({ compliance_status: 'approved' }).eq('id', emp.id);
@@ -1110,6 +1102,18 @@ export default function PortalPage() {
                         auth_user_id: result.linked ? (result.authUserId || row.auth_user_id) : row.auth_user_id,
                       } : row))}
                     />
+                    {isUpperManagement ? (
+                      <div data-delete-row className={DELETE_ROW_CLASS}>
+                        <DeleteRecordButton
+                          table="employers"
+                          id={emp.id}
+                          name={emp.company_name || emp.id}
+                          isDemo={emp.is_demo}
+                          allowed={isUpperManagement}
+                          onDeleted={fetchAllData}
+                        />
+                      </div>
+                    ) : null}
                   </div>
                 ))}
               </div>

@@ -2,6 +2,7 @@
 
 import { UserPlus, Trash2, Key } from 'lucide-react';
 import DemoBadge from './DemoBadge';
+import { DELETE_BUTTON_CLASS, DELETE_ROW_CLASS } from './DeleteRecordButton';
 import { ReferralCodeChip } from './ReferralCodeChip';
 import { isSourceCountryOfficer, normalizeReferralCode } from '@/lib/referralCode';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
@@ -109,7 +110,6 @@ export default function StaffTab({
                   <h4 className="min-w-0 font-extrabold text-slate-900 text-sm [overflow-wrap:anywhere]">{staff.name}<DemoBadge show={staff.is_demo} /></h4>
                   <div className="flex shrink-0 items-center gap-1">
                     <button onClick={() => setEditingStaff(staff)} className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-[11px] font-bold transition cursor-pointer">{ui.edit}</button>
-                    <button onClick={() => handleDeleteStaff(staff.id)} className="p-1 text-muted-foreground hover:text-red-600 transition cursor-pointer"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </div>
                 <p dir="ltr" className="text-xs text-muted-foreground [overflow-wrap:anywhere] rtl:text-right">{staff.email}</p>
@@ -163,6 +163,11 @@ export default function StaffTab({
                   <option value="target_country" className="text-slate-900 bg-white">🏢 {t.roleTargetCountry}</option>
                   <option value="field_officer" className="text-slate-900 bg-white">✈️ {t.roleFieldOfficer}</option>
                 </select>
+              </div>
+              <div data-delete-row className={DELETE_ROW_CLASS}>
+                <button type="button" onClick={() => handleDeleteStaff(staff.id)} className={DELETE_BUTTON_CLASS}>
+                  <Trash2 aria-hidden className="w-3.5 h-3.5" /> {ui.deleteRecord}
+                </button>
               </div>
             </div>
           ))}

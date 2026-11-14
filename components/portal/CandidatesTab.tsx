@@ -9,7 +9,7 @@ import { canonicalNationality, sameNationality } from '@/lib/registrationCountri
 import { candidateExportRows } from '@/lib/exportLists';
 import ListExportBar from './ListExportBar';
 import ScrollTable from './ScrollTable';
-import DeleteRecordButton from './DeleteRecordButton';
+import DeleteRecordButton, { DELETE_ROW_CLASS } from './DeleteRecordButton';
 import OfficialProcessBadge from './OfficialProcessBadge';
 import CandidateStatusControl from './CandidateStatusControl';
 import type { CandidateStatusErrorKey } from '@/lib/candidateStatusChange';
@@ -499,7 +499,6 @@ export default function CandidatesTab({
                       <dt className="text-[11px] font-bold text-muted-foreground">{ui.referralCode}</dt>
                       <dd className="flex flex-wrap items-center gap-1">
                         {code ? <span dir="ltr" className="font-mono font-bold text-slate-800">{code}</span> : <span className="text-muted-foreground">{ui.referralCodeEmpty}</span>}
-                        {deleteButton(candidate, code)}
                       </dd>
                     </div>
                     <div className="min-w-0">
@@ -522,6 +521,9 @@ export default function CandidatesTab({
                     {ui.openCandidateFile}
                     <ChevronRight aria-hidden className="h-3.5 w-3.5 rtl:rotate-180" />
                   </Link>
+                  {isUpperManagement ? (
+                    <div data-delete-row className={DELETE_ROW_CLASS}>{deleteButton(candidate, code)}</div>
+                  ) : null}
                 </li>
               );
             })}
