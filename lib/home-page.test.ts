@@ -179,13 +179,31 @@ test('every map label sits under the lowest edge of its own area', async () => {
     assert.ok(point.labelY > bottom, `${city}: labelY ${point.labelY} must be below the area bottom ${bottom}`);
     const labelTop = point.labelY - map.LABEL_ASCENT;
     assert.ok(labelTop - bottom >= map.LABEL_CLEARANCE - 0.01, `${city}: label top must be ${map.LABEL_CLEARANCE} under the area`);
-    assert.ok(point.labelY + map.LABEL_DESCENT <= map.MAP_HEIGHT - map.LABEL_EDGE, `${city}: label leaves the drawing`);
+    assert.ok(point.labelY + map.LABEL_DESCENT <= map.MAP_TOP + map.MAP_HEIGHT - map.LABEL_EDGE, `${city}: label leaves the drawing`);
   }
   // the component draws from this module, not from its own numbers
   const visual = read('components/home/HeroVisual.tsx');
   assert.match(visual, /from '@\/lib\/hero-map'/);
   assert.match(visual, /y=\{point\.labelY\}/);
-  assert.match(visual, /viewBox=\{`0 0 \$\{MAP_WIDTH\} \$\{MAP_HEIGHT\}`\}/);
+  assert.match(visual, /viewBox=\{`0 \$\{MAP_TOP\} \$\{MAP_WIDTH\} \$\{MAP_HEIGHT\}`\}/);
+  assert.match(visual, /<rect x="0" y=\{MAP_TOP\} width=\{MAP_WIDTH\} height=\{MAP_HEIGHT\}/);
+});
+
+test('the map viewBox is cut to the drawing and the labels are readable on phones', async () => {
+  const map = await import('./hero-map');
+  const points = Object.values(map.HERO_MAP_POINTS);
+  const top = Math.min(...points.flatMap((p) => map.sampleArea(p.area).map((q) => q.y)), ...map.sampleRoute([...points].sort((a, b) => a.x - b.x)).map((q) => q.y));
+  const bottom = Math.max(...points.map((p) => p.labelY + map.LABEL_DESCENT));
+  // no more than the padding (plus rounding) above and below the drawing
+  assert.ok(top - map.MAP_TOP <= map.MAP_PADDING + 1, `empty band above: ${top - map.MAP_TOP}`);
+  assert.ok(map.MAP_TOP + map.MAP_HEIGHT - bottom <= map.MAP_PADDING + 1, `empty band below: ${map.MAP_TOP + map.MAP_HEIGHT - bottom}`);
+  assert.ok(map.MAP_HEIGHT < 140, `viewBox height ${map.MAP_HEIGHT}`);
+  // at 360px the drawing is about 290px wide (page, card and figure padding)
+  assert.ok(map.LABEL_FONT_SIZE * (290 / map.MAP_WIDTH) >= 11.5, 'phone label renders at about 12px');
+  const visual = read('components/home/HeroVisual.tsx');
+  assert.match(visual, /fontSize=\{LABEL_FONT_SIZE\}/);
+  assert.match(visual, /className="sm:\[font-size:12px\]"/);
+  assert.equal(map.LABEL_FONT_SIZE_WIDE, 12, 'keep the CSS class above in step');
 });
 
 test('map labels stay inside the frame and clear of areas, points, route and each other in every language', async () => {
@@ -197,17 +215,7 @@ test('map labels stay inside the frame and clear of areas, points, route and eac
   const cities = company.presence.map((place) => place.city);
   const points = cities.map((city) => map.HERO_MAP_POINTS[city]).sort((a, b) => a.x - b.x);
   // the route, sampled along its arcs
-  const route: { x: number; y: number }[] = [];
-  points.forEach((point, index) => {
-    if (index === 0) return;
-    const prev = points[index - 1];
-    const control = { x: (prev.x + point.x) / 2, y: Math.min(prev.y, point.y) - 34 };
-    for (let s = 0; s <= 32; s += 1) {
-      const t = s / 32;
-      const u = 1 - t;
-      route.push({ x: u * u * prev.x + 2 * u * t * control.x + t * t * point.x, y: u * u * prev.y + 2 * u * t * control.y + t * t * point.y });
-    }
-  });
+  const route = map.sampleRoute(points);
   for (const lang of LANGS) {
     const boxes = cities.map((city, i) => {
       const point = map.HERO_MAP_POINTS[city];
@@ -236,15 +244,38 @@ test('map labels stay inside the frame and clear of areas, points, route and eac
   }
 });
 
-test('the how-it-works steps spread over the card: one row from sm, 2x2 on phones, arrows only between steps', () => {
+test('how-it-works card: numbered steps with a sentence, joined by a dashed line', () => {
   const visual = read('components/home/HeroVisual.tsx');
-  assert.match(visual, /<ol className="[^"]*grid grid-cols-2[^"]*sm:grid-cols-4/);
-  assert.match(visual, /<li key=\{step\} className="[^"]*flex-col items-center[^"]*text-center/);
-  // arrows: hidden on phones, centred in the gap, flipped in RTL, never after the last step
-  assert.match(visual, /index < flow\.length - 1 \? \(/);
-  const arrow = /<span aria-hidden className="([^"]*)">\s*<ArrowRight/.exec(visual)?.[1].split(' ') ?? [];
-  for (const cls of ['absolute', 'hidden', 'sm:flex', '-end-2', 'w-0', 'justify-center']) assert.ok(arrow.includes(cls), `arrow wrapper needs ${cls}`);
-  assert.match(visual, /<ArrowRight aria-hidden className="[^"]*rtl:rotate-180/);
+  // one column on phones, four from sm; each step: number, icon + title, one sentence
+  assert.match(visual, /<ol className="[^"]*grid grid-cols-1[^"]*sm:grid-cols-4/);
+  assert.match(visual, /<li key=\{step\} className="[^"]*flex[^"]*sm:flex-col sm:items-center[^"]*sm:text-center/);
+  assert.match(visual, /rounded-full bg-brand-solid[^"]*text-white[^"]*">\s*\{index \+ 1\}/);
+  assert.match(visual, /\{flowDesc\[index\]\}/);
+  // the line: none after the last step; vertical on phones, horizontal through the circle centres from sm.
+  // start/end are logical, so the line follows the page direction in Arabic.
+  assert.match(visual, /\{last \? null : \(/);
+  const cls = (name: string) => new RegExp(`data-connector="${name}" className="([^"]*)"`).exec(visual)?.[1].split(' ') ?? [];
+  for (const c of ['absolute', 'border-dashed', 'border-s-2', 'sm:hidden', 'start-[calc(1rem-1px)]']) assert.ok(cls('vertical').includes(c), `vertical line needs ${c}`);
+  for (const c of ['absolute', 'hidden', 'sm:block', 'border-dashed', 'border-t-2', 'top-[calc(1rem-1px)]', 'start-[calc(50%+1.25rem)]', 'end-[calc(-50%+0.75rem)]']) assert.ok(cls('horizontal').includes(c), `horizontal line needs ${c}`);
+  assert.equal(/\b(left|right)-/.test(visual.slice(visual.indexOf('<ol'))), false, 'no physical left/right in the steps');
+  // light green card with a top stripe, title kept
+  assert.match(visual, /border-t-4 border-t-brand-solid bg-emerald-50 p-4/);
+  assert.match(visual, /\{flowTitle\}/);
+  // no animation in the card, so reduced motion has nothing to stop
+  assert.equal(/animate-|transition/.test(visual.slice(visual.indexOf('<ol'))), false);
+});
+
+test('how-it-works sentences are filled in five languages and match the steps', () => {
+  for (const lang of LANGS) {
+    const hero = homeExtraCopy[lang].hero;
+    assert.equal(hero.flowDesc.length, hero.flow.length, lang);
+    for (const sentence of hero.flowDesc) {
+      assert.ok(sentence.trim().length > 8, `${lang} sentence is empty`);
+      assert.ok(sentence.length <= 48, `${lang} "${sentence}" is longer than one short line`);
+    }
+  }
+  assert.deepEqual(homeExtraCopy.tr.hero.flowDesc, ['İşveren ihtiyacını iletir.', 'Uygun adaylar sunulur.', 'Görüşme yapılır, teklif hazırlanır.', 'Seyahat ve uyum takibi.']);
+  assert.match(read('app/page.tsx'), /flowDesc=\{x\.hero\.flowDesc\}/);
 });
 
 test('the clear-process card has a second sentence in five languages', () => {

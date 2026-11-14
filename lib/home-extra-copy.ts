@@ -15,6 +15,8 @@ export type HomeExtraCopy = {
     mapLabel: string;
     flowTitle: string;
     flow: [string, string, string, string];
+    /** One sentence per flow step (from the "5 steps" timeline in lib/home-copy.ts). */
+    flowDesc: [string, string, string, string];
   };
   statsHeading: string;
   sectionsNav: string;
@@ -50,6 +52,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
       mapLabel: 'Kuzey Makedonya, Türkiye ve Bangladeş’i birbirine bağlayan şematik hat çizimi',
       flowTitle: 'İşleyiş',
       flow: ['Talep', 'Aday', 'Mülakat', 'İşe başlama'],
+      flowDesc: ['İşveren ihtiyacını iletir.', 'Uygun adaylar sunulur.', 'Görüşme yapılır, teklif hazırlanır.', 'Seyahat ve uyum takibi.'],
     },
     statsHeading: 'Rakamlarla Panova',
     sectionsNav: 'Sayfa bölümleri',
@@ -78,6 +81,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
       mapLabel: 'Schematic line drawing linking North Macedonia, Türkiye and Bangladesh',
       flowTitle: 'How it works',
       flow: ['Request', 'Candidate', 'Interview', 'Start of work'],
+      flowDesc: ['The employer sends its needs.', 'Suitable candidates are presented.', 'Interview held, offer prepared.', 'Travel and onboarding follow-up.'],
     },
     statsHeading: 'Panova in numbers',
     sectionsNav: 'Page sections',
@@ -106,6 +110,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
       mapLabel: 'Vizatim skematik me vija i lidhjes Maqedonia e Veriut – Turqia – Bangladesh',
       flowTitle: 'Si funksionon',
       flow: ['Kërkesa', 'Kandidati', 'Intervista', 'Fillimi i punës'],
+      flowDesc: ['Punëdhënësi dërgon nevojat.', 'Paraqiten kandidatët e përshtatshëm.', 'Bëhet intervista, përgatitet oferta.', 'Udhëtimi dhe ndjekja e përshtatjes.'],
     },
     statsHeading: 'Panova në shifra',
     sectionsNav: 'Pjesët e faqes',
@@ -134,6 +139,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
       mapLabel: 'رسم تخطيطي بالخطوط يربط مقدونيا الشمالية وتركيا وبنغلاديش',
       flowTitle: 'كيف نعمل',
       flow: ['الطلب', 'المرشح', 'المقابلة', 'بدء العمل'],
+      flowDesc: ['يرسل صاحب العمل احتياجاته.', 'يُقدَّم المرشحون المناسبون.', 'تُجرى المقابلة ويُعدّ العرض.', 'السفر ومتابعة التأقلم.'],
     },
     statsHeading: 'بانوفا بالأرقام',
     sectionsNav: 'أقسام الصفحة',
@@ -162,6 +168,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
       mapLabel: 'Шематски цртеж со линии што ги поврзува Северна Македонија, Турција и Бангладеш',
       flowTitle: 'Како работи',
       flow: ['Барање', 'Кандидат', 'Интервју', 'Почеток на работа'],
+      flowDesc: ['Работодавачот ги испраќа потребите.', 'Се претставуваат соодветни кандидати.', 'Интервју, па се подготвува понуда.', 'Патување и следење на прилагодувањето.'],
     },
     statsHeading: 'Panova во бројки',
     sectionsNav: 'Делови на страницата',
