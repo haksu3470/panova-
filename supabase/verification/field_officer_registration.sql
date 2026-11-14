@@ -33,6 +33,11 @@
 -- Editor as postgres, AFTER the migration. Accounts are chosen by role, never
 -- by name or e-mail. Test rows use example.invalid addresses.
 -- Impersonation: request.jwt.claims + set local role.
+-- Every test candidate has its own placeholder phone (+000 0000 00NN, not a
+-- real number): job_candidates.phone is NOT NULL on the live database.
+-- When b1, e1 or e2 fails, the KALDI line also shows, measured as the same
+-- user: is_staff(), staff_can_insert_candidate(), current_staff().role_level
+-- and staff_members.is_active, so the reason for an RLS refusal is visible.
 
 do $$
 declare
@@ -54,6 +59,7 @@ declare
   v_own1 uuid; v_own2 uuid; v_other uuid; v_doc uuid;
   v_reg uuid; v_code text; v_krec uuid; v_kver text; v_status text; v_assignee uuid;
   v_bool boolean;
+  v_diag text;
 begin
   -- 0. Migration applied, nothing widened --------------------------------------
   v_ok := exists (select 1 from information_schema.columns
@@ -144,8 +150,8 @@ begin
     insert into public.staff_members (id, name, email, role_level, is_active)
     values (gen_random_uuid(), 'TEST saha B', 'test-saha-b@example.invalid', 'field_officer', true)
     returning id into v_b_staff;
-    insert into public.job_candidates (full_name, nationality, email, profession, sector, status, registered_by, referral_code)
-    values ('TEST aday B', 'Testland', 'test-aday-b@example.invalid', 'TEST', 'construction', 'pending', v_b_staff, v_src_code)
+    insert into public.job_candidates (full_name, nationality, email, phone, profession, sector, status, registered_by, referral_code)
+    values ('TEST aday B', 'Testland', 'test-aday-b@example.invalid', '+000 0000 0001', 'TEST', 'construction', 'pending', v_b_staff, v_src_code)
     returning id into v_other;
   exception when others then
     v_b_staff := null; v_other := null;
@@ -162,10 +168,10 @@ begin
     v_err := null;
     begin
       set local role authenticated;
-      insert into public.job_candidates (full_name, nationality, email, profession, sector, status,
+      insert into public.job_candidates (full_name, nationality, email, phone, profession, sector, status,
                                          registered_by, referral_code, kvkk_recorded_by, kvkk_accepted_at, kvkk_version,
                                          assigned_to)
-      values ('TEST aday A1', 'Testland', 'test-aday-a1@example.invalid', 'TEST', 'construction', 'approved',
+      values ('TEST aday A1', 'Testland', 'test-aday-a1@example.invalid', '+000 0000 0002', 'TEST', 'construction', 'approved',
               v_b_staff, 'PVZZZZZZ', v_b_staff, now(), 'sahte', v_b_staff)
       returning id, registered_by, referral_code, kvkk_recorded_by, kvkk_version, status, assigned_to
         into v_own1, v_reg, v_code, v_krec, v_kver, v_status, v_assignee;
@@ -176,15 +182,32 @@ begin
     reset role;
     v_ok := v_err is null and v_reg = v_a_staff and v_code = v_a_code and v_krec = v_a_staff
         and v_kver = v_kvkk and v_status = 'pending' and v_assignee is null;
-    v_lines := v_lines || format(E'\n[%s] b1 saha kaydı: kaydeden=kendisi, kod=kendi kodu, KVKK kaydeden=kendisi, sürüm=%s, statü=%s, sorumlu boş %s',
-      case when v_ok then 'GEÇTİ' else 'KALDI' end, coalesce(v_kver, '-'), coalesce(v_status, '-'), coalesce('(' || v_err || ')', ''));
+    -- Why RLS / the trigger refused it, measured as the same user.
+    v_diag := null;
+    if not v_ok then
+      begin
+        set local role authenticated;
+        v_diag := format(' [tanı: is_staff=%s, staff_can_insert_candidate=%s, current_staff.role_level=%s',
+          coalesce(public.is_staff()::text, 'null'),
+          coalesce(public.staff_can_insert_candidate()::text, 'null'),
+          coalesce((select me.role_level from public.current_staff() me limit 1), 'null'));
+        reset role;
+      exception when others then
+        v_diag := ' [tanı alınamadı: ' || sqlerrm;
+      end;
+      reset role;
+      v_diag := v_diag || format(', staff_members.is_active=%s]',
+        coalesce((select sm.is_active::text from public.staff_members sm where sm.id = v_a_staff), 'satır yok'));
+    end if;
+    v_lines := v_lines || format(E'\n[%s] b1 saha kaydı: kaydeden=kendisi, kod=kendi kodu, KVKK kaydeden=kendisi, sürüm=%s, statü=%s, sorumlu boş %s%s',
+      case when v_ok then 'GEÇTİ' else 'KALDI' end, coalesce(v_kver, '-'), coalesce(v_status, '-'), coalesce('(' || v_err || ')', ''), coalesce(v_diag, ''));
 
     -- b2. Without consent
     v_err := null;
     begin
       set local role authenticated;
-      insert into public.job_candidates (full_name, nationality, email, profession, sector, status, kvkk_recorded_by, kvkk_version)
-      values ('TEST aday A2', 'Testland', 'test-aday-a2@example.invalid', 'TEST', 'construction', 'pending', v_b_staff, 'sahte')
+      insert into public.job_candidates (full_name, nationality, email, phone, profession, sector, status, kvkk_recorded_by, kvkk_version)
+      values ('TEST aday A2', 'Testland', 'test-aday-a2@example.invalid', '+000 0000 0003', 'TEST', 'construction', 'pending', v_b_staff, 'sahte')
       returning id, registered_by, kvkk_recorded_by, kvkk_version into v_own2, v_reg, v_krec, v_kver;
       reset role;
     exception when others then
@@ -307,8 +330,8 @@ begin
     v_err := null; v_reg := null; v_code := 'x';
     begin
       set local role authenticated;
-      insert into public.job_candidates (full_name, nationality, email, profession, sector, status, registered_by)
-      values ('TEST aday UM', 'Testland', 'test-aday-um@example.invalid', 'TEST', 'construction', 'pending', v_b_staff)
+      insert into public.job_candidates (full_name, nationality, email, phone, profession, sector, status, registered_by)
+      values ('TEST aday UM', 'Testland', 'test-aday-um@example.invalid', '+000 0000 0004', 'TEST', 'construction', 'pending', v_b_staff)
       returning registered_by, referral_code into v_reg, v_code;
       reset role;
     exception when others then
@@ -320,8 +343,8 @@ begin
     if coalesce(v_a_code, v_src_code) is not null then
       begin
         set local role authenticated;
-        insert into public.job_candidates (full_name, nationality, email, profession, sector, status, referral_code)
-        values ('TEST aday UM2', 'Testland', 'test-aday-um2@example.invalid', 'TEST', 'construction', 'pending', coalesce(v_a_code, v_src_code))
+        insert into public.job_candidates (full_name, nationality, email, phone, profession, sector, status, referral_code)
+        values ('TEST aday UM2', 'Testland', 'test-aday-um2@example.invalid', '+000 0000 0005', 'TEST', 'construction', 'pending', coalesce(v_a_code, v_src_code))
         returning referral_code into v_code;
         reset role;
         v_ok := v_ok and v_code = coalesce(v_a_code, v_src_code);
@@ -333,16 +356,33 @@ begin
     -- a made-up code is refused
     begin
       set local role authenticated;
-      insert into public.job_candidates (full_name, nationality, email, profession, sector, status, referral_code)
-      values ('TEST aday UM3', 'Testland', 'test-aday-um3@example.invalid', 'TEST', 'construction', 'pending', 'PVZZZZZZ');
+      insert into public.job_candidates (full_name, nationality, email, phone, profession, sector, status, referral_code)
+      values ('TEST aday UM3', 'Testland', 'test-aday-um3@example.invalid', '+000 0000 0006', 'TEST', 'construction', 'pending', 'PVZZZZZZ');
       reset role;
       v_ok := false;
     exception when others then
       v_ok := v_ok and sqlerrm like '%unknown_supervisor_code%';
     end;
     reset role;
-    v_lines := v_lines || format(E'\n[%s] e1 Üst Yönetim: kaydeden=kendisi; mevcut kaynak ülke/saha kodu seçilebiliyor, uydurma kod ret %s',
-      case when v_ok then 'GEÇTİ' else 'KALDI' end, coalesce('(' || v_err || ')', ''));
+    -- Why RLS / the trigger refused it, measured as the same user.
+    v_diag := null;
+    if not v_ok then
+      begin
+        set local role authenticated;
+        v_diag := format(' [tanı: is_staff=%s, staff_can_insert_candidate=%s, current_staff.role_level=%s',
+          coalesce(public.is_staff()::text, 'null'),
+          coalesce(public.staff_can_insert_candidate()::text, 'null'),
+          coalesce((select me.role_level from public.current_staff() me limit 1), 'null'));
+        reset role;
+      exception when others then
+        v_diag := ' [tanı alınamadı: ' || sqlerrm;
+      end;
+      reset role;
+      v_diag := v_diag || format(', staff_members.is_active=%s]',
+        coalesce((select sm.is_active::text from public.staff_members sm where sm.id = v_um_staff), 'satır yok'));
+    end if;
+    v_lines := v_lines || format(E'\n[%s] e1 Üst Yönetim: kaydeden=kendisi; mevcut kaynak ülke/saha kodu seçilebiliyor, uydurma kod ret %s%s',
+      case when v_ok then 'GEÇTİ' else 'KALDI' end, coalesce('(' || v_err || ')', ''), coalesce(v_diag, ''));
   end if;
 
   -- e2. Source country
@@ -354,8 +394,8 @@ begin
     v_err := null; v_reg := null; v_code := null;
     begin
       set local role authenticated;
-      insert into public.job_candidates (full_name, nationality, email, profession, sector, status, registered_by)
-      values ('TEST aday KÜ', 'Testland', 'test-aday-src@example.invalid', 'TEST', 'construction', 'pending', v_b_staff)
+      insert into public.job_candidates (full_name, nationality, email, phone, profession, sector, status, registered_by)
+      values ('TEST aday KÜ', 'Testland', 'test-aday-src@example.invalid', '+000 0000 0007', 'TEST', 'construction', 'pending', v_b_staff)
       returning registered_by, referral_code into v_reg, v_code;
       reset role;
     exception when others then
@@ -363,8 +403,25 @@ begin
     end;
     reset role;
     v_ok := v_err is null and v_reg = v_src_staff and v_code = v_src_code;
-    v_lines := v_lines || format(E'\n[%s] e2 kaynak ülke: kaydeden=kendisi, kod=kendi kodu %s',
-      case when v_ok then 'GEÇTİ' else 'KALDI' end, coalesce('(' || v_err || ')', ''));
+    -- Why RLS / the trigger refused it, measured as the same user.
+    v_diag := null;
+    if not v_ok then
+      begin
+        set local role authenticated;
+        v_diag := format(' [tanı: is_staff=%s, staff_can_insert_candidate=%s, current_staff.role_level=%s',
+          coalesce(public.is_staff()::text, 'null'),
+          coalesce(public.staff_can_insert_candidate()::text, 'null'),
+          coalesce((select me.role_level from public.current_staff() me limit 1), 'null'));
+        reset role;
+      exception when others then
+        v_diag := ' [tanı alınamadı: ' || sqlerrm;
+      end;
+      reset role;
+      v_diag := v_diag || format(', staff_members.is_active=%s]',
+        coalesce((select sm.is_active::text from public.staff_members sm where sm.id = v_src_staff), 'satır yok'));
+    end if;
+    v_lines := v_lines || format(E'\n[%s] e2 kaynak ülke: kaydeden=kendisi, kod=kendi kodu %s%s',
+      case when v_ok then 'GEÇTİ' else 'KALDI' end, coalesce('(' || v_err || ')', ''), coalesce(v_diag, ''));
   end if;
 
   -- f1. Candidate account
@@ -376,8 +433,8 @@ begin
     v_err := null;
     begin
       set local role authenticated;
-      insert into public.job_candidates (full_name, nationality, email, profession, sector, status, registered_by, kvkk_recorded_by)
-      values ('TEST aday self', 'Testland', 'test-aday-self@example.invalid', 'TEST', 'construction', 'pending', v_b_staff, v_b_staff);
+      insert into public.job_candidates (full_name, nationality, email, phone, profession, sector, status, registered_by, kvkk_recorded_by)
+      values ('TEST aday self', 'Testland', 'test-aday-self@example.invalid', '+000 0000 0008', 'TEST', 'construction', 'pending', v_b_staff, v_b_staff);
       reset role;
       select registered_by, kvkk_recorded_by into v_reg, v_krec
       from public.job_candidates where email = 'test-aday-self@example.invalid';
@@ -398,8 +455,8 @@ begin
   v_err := null; v_reg := null; v_krec := null;
   begin
     set local role anon;
-    insert into public.job_candidates (full_name, nationality, email, profession, sector, status, registered_by, kvkk_recorded_by)
-    values ('TEST aday anon', 'Testland', 'test-aday-anon@example.invalid', 'TEST', 'construction', 'pending', v_b_staff, v_b_staff);
+    insert into public.job_candidates (full_name, nationality, email, phone, profession, sector, status, registered_by, kvkk_recorded_by)
+    values ('TEST aday anon', 'Testland', 'test-aday-anon@example.invalid', '+000 0000 0009', 'TEST', 'construction', 'pending', v_b_staff, v_b_staff);
     reset role;
     select registered_by, kvkk_recorded_by into v_reg, v_krec
     from public.job_candidates where email = 'test-aday-anon@example.invalid';
