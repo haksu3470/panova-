@@ -1,4 +1,5 @@
-import { classifyCandidateLinkError, type CandidateLinkFailure } from '@/lib/emailConfirmation';
+import { linkCandidateAccount } from '@/lib/candidateLink';
+import { type CandidateLinkFailure } from '@/lib/emailConfirmation';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -49,11 +50,32 @@ export type CandidateLinkResult =
   | { ok: true; id: string }
   | { ok: false; failure: CandidateLinkFailure };
 
-/** Aday portalı: auth kullanıcısını job_candidates kaydına bağlar. */
+/**
+ * Aday portalı: auth kullanıcısını job_candidates kaydına bağlar.
+ * Zaten bağlı hesapta RPC çağrılmaz (lib/candidateLink.ts); yalnızca satırı
+ * olmayan hesapta link_my_candidate çalışır.
+ */
 export async function linkMyCandidate(): Promise<CandidateLinkResult> {
-  const { data, error } = await supabase.rpc('link_my_candidate');
-  if (error || !data) return { ok: false, failure: classifyCandidateLinkError(error?.message) };
-  return { ok: true, id: data as string };
+  const result = await linkCandidateAccount({
+    findOwnCandidateId: async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      const uid = auth.user?.id;
+      if (!uid) return null;
+      const { data, error } = await supabase
+        .from('job_candidates')
+        .select('id')
+        .eq('auth_user_id', uid)
+        .limit(1)
+        .maybeSingle();
+      if (error || !data?.id) return null;
+      return String(data.id);
+    },
+    callLinkRpc: async () => {
+      const { data, error } = await supabase.rpc('link_my_candidate');
+      return { data, error };
+    },
+  });
+  return result.ok ? { ok: true, id: result.id } : result;
 }
 
 /** İşveren portalı: auth kullanıcısını employers kaydına bağlar, işveren id döner. */

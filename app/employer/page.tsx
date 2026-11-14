@@ -1,6 +1,7 @@
 'use client';
 
 import AuthGuard from '@/components/auth/AuthGuard';
+import { FilePicker } from '@/components/site/FilePicker';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -1594,12 +1595,9 @@ function EmployerPortalInner() {
 
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">{t.uploadLogoLabel}</label>
-                <input 
-                  type="file" 
-                  accept="image/*"
-                  onChange={handleLogoFileChange}
-                  className="w-full px-3.5 py-2.5 rounded-xl border bg-slate-50 text-slate-700 font-semibold cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" 
-                />
+                <div className="flex w-full px-3.5 py-2.5 rounded-xl border bg-slate-50">
+                  <FilePicker lang={currentLang} accept="image/*" onChange={handleLogoFileChange} label={t.uploadLogoLabel} />
+                </div>
               </div>
 
               {editCompanyLogo && (

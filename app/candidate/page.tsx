@@ -2,6 +2,7 @@
 
 import OAuthButtons from '@/components/auth/OAuthButtons';
 import { AuthFooter } from '@/components/site/AuthFooter';
+import { FilePicker } from '@/components/site/FilePicker';
 import CandidateYouTube from '@/components/candidate/CandidateYouTube';
 import { SupportRequestList } from '@/components/candidate/SupportRequestList';
 
@@ -1498,8 +1499,8 @@ export default function CandidateDashboard() {
             )}
             <div>
               <h1 className="text-base sm:text-xl font-extrabold text-slate-900 truncate max-w-[200px] sm:max-w-none">{candidate.full_name}</h1>
-              <div className="flex items-center gap-2 text-[11px] sm:text-xs text-muted-foreground">
-                <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">PNV-CAND-{candidate.id.substring(0, 6)}</span>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] sm:text-xs text-muted-foreground">
+                <span dir="ltr" className="font-mono whitespace-nowrap bg-slate-100 px-1.5 py-0.5 rounded">PNV-CAND-{candidate.id.substring(0, 6)}</span>
                 <span>{t.passportLabel}: {candidate.passport_number || 'N/A'}</span>
                 <span>{t.professionLabel}: {candidateProfessionLabel(candidate.profession, portalUi[currentLang].unspecified, currentLang)}</span>
                 <span>{t.nationalityCol}: {candidatePlaceLabel(candidate.nationality, '', currentLang, portalUi[currentLang].unspecified)}</span>
@@ -1519,7 +1520,7 @@ export default function CandidateDashboard() {
         />
 
         {/* Navigasyon Sekmeleri */}
-        <div className="flex items-center gap-2 border-b pb-3 overflow-x-auto whitespace-nowrap text-xs font-bold scrollbar-none">
+        <div className="flex flex-wrap items-center gap-2 border-b pb-3 text-xs font-bold">
           <button onClick={() => setActiveTab('overview')} className={`px-3.5 py-2 rounded-xl cursor-pointer transition shrink-0 ${activeTab === 'overview' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overview}
           </button>
@@ -1557,7 +1558,7 @@ export default function CandidateDashboard() {
                 <div className="space-y-1 text-center sm:text-left">
                   <label className="block font-extrabold text-slate-900 uppercase">{ct.photoLabel}</label>
                   <p className="text-muted-foreground text-[11px]">{ct.photoDesc}</p>
-                  <input type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" onChange={handlePhotoUpload} className="block w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-brand hover:file:bg-emerald-100 cursor-pointer mt-1" />
+                  <div className="mt-1 flex"><FilePicker lang={currentLang} accept="image/jpeg,image/png,.jpg,.jpeg,.png" onChange={handlePhotoUpload} label={ct.photoLabel} /></div>
                 </div>
               </div>
 
@@ -1825,11 +1826,11 @@ export default function CandidateDashboard() {
                   {doc.review_note ? <p className="text-[11px] text-slate-800">{releaseCopy[currentLang].docReason}: {doc.review_note}</p> : null}
                   
                   <div className="flex items-center gap-2">
-                    <input 
-                      type="file"
+                    <FilePicker
+                      lang={currentLang}
                       accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png"
                       onChange={(e) => handleDocUpload(idx, e)}
-                      className="block w-full text-xs text-muted-foreground file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-brand hover:file:bg-emerald-100 cursor-pointer"
+                      label={docTitle(doc)}
                     />
                     {doc.file_url && (
                       <button 

@@ -202,6 +202,12 @@ export type PortalUi = {
   exportEmpty: string;
   /** Print / PDF: the browser blocked the print window. */
   exportPopupBlocked: string;
+  /** Shown instead of a raw RLS / Postgres error when a write is refused. */
+  permissionDenied: string;
+  /** Heading of the internal notes card on the staff candidate file. */
+  internalNotesStaff: string;
+  /** Under that heading: who sees and writes the notes. */
+  internalNotesHint: string;
   offersExport: string;
   deleteRecord: string;
   deleteConfirmTitle: string;
@@ -444,6 +450,9 @@ const tr: PortalUi = {
   exportPrint: 'Yazdır / PDF',
   exportEmpty: 'Dışa aktarılacak kayıt yok.',
   exportPopupBlocked: 'Yazdırma penceresi engellendi. Bu site için açılır pencerelere izin verip yeniden deneyin.',
+  permissionDenied: 'Bu işlem için yetkiniz yok.',
+  internalNotesStaff: 'Dahili notlar (personel)',
+  internalNotesHint: 'Adayın dosyasını açabilen personel görür ve yazabilir. Aday portalında gösterilmez.',
   offersExport: 'Teklifleri dışa aktar',
   deleteRecord: 'Sil',
   deleteConfirmTitle: 'Kayıt silinsin mi?',
@@ -698,6 +707,9 @@ const en: PortalUi = {
   exportPrint: 'Print / PDF',
   exportEmpty: 'Nothing to export.',
   exportPopupBlocked: 'The print window was blocked. Allow pop-ups for this site and try again.',
+  permissionDenied: 'You do not have permission for this action.',
+  internalNotesStaff: 'Internal notes (staff)',
+  internalNotesHint: 'Staff who can open this candidate file can read and edit them. They are not shown in the candidate portal.',
   offersExport: 'Export offers',
   deleteRecord: 'Delete',
   deleteConfirmTitle: 'Delete this record?',
@@ -952,6 +964,9 @@ const sq: PortalUi = {
   exportPrint: 'Printo / PDF',
   exportEmpty: 'Nuk ka të dhëna për eksport.',
   exportPopupBlocked: 'Dritarja e printimit u bllokua. Lejoni dritaret pop-up për këtë faqe dhe provoni përsëri.',
+  permissionDenied: 'Nuk keni leje për këtë veprim.',
+  internalNotesStaff: 'Shënime të brendshme (stafi)',
+  internalNotesHint: 'I sheh dhe i shkruan stafi që mund ta hapë dosjen e kandidatit. Nuk shfaqen në portalin e kandidatit.',
   offersExport: 'Eksporto ofertat',
   deleteRecord: 'Fshi',
   deleteConfirmTitle: 'Të fshihet ky regjistrim?',
@@ -1206,6 +1221,9 @@ const ar: PortalUi = {
   exportPrint: 'طباعة / PDF',
   exportEmpty: 'لا توجد سجلات للتصدير.',
   exportPopupBlocked: 'تم حظر نافذة الطباعة. اسمح بالنوافذ المنبثقة لهذا الموقع ثم حاول مرة أخرى.',
+  permissionDenied: 'ليست لديك صلاحية لهذا الإجراء.',
+  internalNotesStaff: 'ملاحظات داخلية (للموظفين)',
+  internalNotesHint: 'يراها ويكتبها الموظفون الذين يمكنهم فتح ملف المرشح. لا تظهر في بوابة المرشح.',
   offersExport: 'تصدير العروض',
   deleteRecord: 'حذف',
   deleteConfirmTitle: 'حذف هذا السجل؟',
@@ -1460,6 +1478,9 @@ const mk: PortalUi = {
   exportPrint: 'Печати / PDF',
   exportEmpty: 'Нема записи за извоз.',
   exportPopupBlocked: 'Прозорецот за печатење е блокиран. Дозволете скокачки прозорци за оваа страница и обидете се повторно.',
+  permissionDenied: 'Немате дозвола за ова дејство.',
+  internalNotesStaff: 'Внатрешни белешки (персонал)',
+  internalNotesHint: 'Ги гледа и ги пишува персоналот што може да го отвори досието на кандидатот. Не се прикажуваат во порталот за кандидати.',
   offersExport: 'Извези понуди',
   deleteRecord: 'Избриши',
   deleteConfirmTitle: 'Да се избрише овој запис?',

@@ -47,3 +47,16 @@ Değişmeyenler (önceki çeviri duruyor): `navLabel`, `hubTitle`, `hubLead`, `m
 ## Kaldırılan anahtar
 
 - `roles.employer.screens.demands`: işveren portalında "Talepler" sekmesi yok; yerini `roles.employer.screens.newRequest` (Yeni talep) aldı.
+
+## Düzeltme: "Belge Takip Mekanizması" (2026-11-14)
+
+Personel aday dosyasındaki belge bölümünün portaldaki adı `documentTrackingMechanism` (lib/dictionary.ts). en/sq/ar/mk kılavuzları bu bölümü "Documents / Dokumentet / المستندات / Документи" diye anıyordu; `dossier-review` akışında ve `document-request` rehberinin `where` ve ilk adımında sözlükteki adla değiştirildi:
+
+- en: Document Tracking Mechanism
+- sq: Mekanizmi i Gjurmimit të Dokumenteve
+- ar: آلية تتبع المستندات
+- mk: Механизам за следење на документи
+
+Adayın kendi portalındaki "Belgelerim" sekmesi (Documents, Dokumentet, المستندات, Документи) ayrı bir ekran; o adlar değişmedi.
+
+`/guides/print` sayfasının belge başlığı (sekme, yazdırma penceresi, PDF adı) artık seçili dilde `print.coverSubtitle`.

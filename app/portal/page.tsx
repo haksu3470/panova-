@@ -52,7 +52,7 @@ import ListExportBar from '@/components/portal/ListExportBar';
 import StaffTab from '../../components/portal/StaffTab';
 import TasksTab from '../../components/portal/TasksTab';
 import { employerExportRows, offerExportRows, requestExportRows } from '@/lib/exportLists';
-import { canUpdateRequestStatus, isUpperManagementRole, overviewCardTarget, tabsForStaffRole, type OverviewCard as OverviewCardId, type StaffTab as StaffTabId } from '@/lib/staffAccess';
+import { canAssignCandidate, canUpdateRequestStatus, isPermissionError, isUpperManagementRole, overviewCardTarget, tabsForStaffRole, type OverviewCard as OverviewCardId, type StaffTab as StaffTabId } from '@/lib/staffAccess';
 import { countOpenRequests } from '@/lib/requestPipelineCounts';
 import OverviewCard from '@/components/portal/OverviewCard';
 import DemoDataCard from '@/components/portal/DemoDataCard';
@@ -444,7 +444,7 @@ export default function PortalPage() {
   const updateCandidateAssignee = async (id: string, assignee: string) => {
     const { error } = await supabase.from('job_candidates').update({ assigned_to: assignee || null }).eq('id', id);
     if (error) {
-      alert(error.message);
+      alert(isPermissionError(error) ? ui.permissionDenied : `${ui.errorPrefix} ${error.message}`);
       return;
     }
     setCandidates(candidates.map(c => c.id === id ? { ...c, assigned_to: assignee } : c));
@@ -936,6 +936,7 @@ export default function PortalPage() {
             updateCandidateAssignee={updateCandidateAssignee}
             updateCandidateStatus={updateCandidateStatus}
             canChangeStatus={canUpdateRequestStatus(userRole)}
+            canAssign={canAssignCandidate(userRole)}
             logAudit={logAudit}
             currentUser={currentUser}
             isUpperManagement={isUpperManagement}
