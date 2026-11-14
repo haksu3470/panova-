@@ -1044,7 +1044,9 @@ export default function PortalPage() {
               <ListExportBar
                 filename="employers"
                 title={t.employersTab || 'Employers'}
-                rows={employerExportRows(employers)}
+                rows={employerExportRows(employers, currentLang)}
+                lang={currentLang}
+                dir={isRtl ? 'rtl' : 'ltr'}
                 labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty, popupBlocked: ui.exportPopupBlocked }}
               />
             </div>

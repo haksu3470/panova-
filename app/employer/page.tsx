@@ -78,7 +78,6 @@ import {
 import { formatInterviewTime, joinableMeetingUrl } from '@/lib/interviewMeeting';
 import { officialProcessText, startedEmployees, toPlacements, type EmployerPlacement } from '@/lib/employerPlacements';
 import ListExportBar from '@/components/portal/ListExportBar';
-import { EXPORT_COLUMN_LABELS } from '@/lib/exportColumns';
 import {
   employerEmployeeRows,
   employerOfferRows,
@@ -737,7 +736,7 @@ function EmployerPortalInner() {
       title={title || filename}
       rows={rows}
       audit={false}
-      columnLabels={EXPORT_COLUMN_LABELS[currentLang]}
+      lang={currentLang}
       dir={isRtl ? 'rtl' : 'ltr'}
       labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty, popupBlocked: ui.exportPopupBlocked }}
     />

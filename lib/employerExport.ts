@@ -1,4 +1,5 @@
 import type { Language } from './dictionary';
+import { exportAmount, exportCountry, exportDate } from './exportLists';
 import { requestCurrency } from './money';
 import { offerAmount, offerCurrency } from './offers';
 import { localizeCatalogTitle, professionLabel } from './professions';
@@ -52,8 +53,9 @@ function text(value: unknown): string {
   return typeof value === 'string' ? value : value == null ? '' : String(value);
 }
 
-function day(value: unknown): string {
-  return text(value).slice(0, 10);
+/** A calendar day in the export language (lib/exportLists.ts exportDate). */
+function day(value: unknown, lang: Language): string {
+  return exportDate(value, lang);
 }
 
 function profession(value: unknown, lang: Language): string {
@@ -67,13 +69,13 @@ export function employerRequestRows(rows: readonly Row[], lang: Language, copy: 
     position_title: localizeCatalogTitle(text(row.position_title), lang),
     headcount: row.headcount ?? '',
     city: text(row.city),
-    country: text(row.country),
-    monthly_net_salary: offerAmount(row),
+    country: exportCountry(row.country, lang),
+    monthly_net_salary: exportAmount(offerAmount(row), lang),
     currency: requestCurrency(row),
     contract_type: copy.duration(text(row.contract_type)),
-    target_start_date: day(row.target_start_date),
+    target_start_date: day(row.target_start_date, lang),
     status: copy.requestStatus(text(row.status)),
-    created_at: day(row.created_at),
+    created_at: day(row.created_at, lang),
   }));
 }
 
@@ -82,12 +84,12 @@ export function employerSelectedRows(rows: readonly Row[], lang: Language): Row[
   return rows.map((row) => ({
     full_name: text(row.full_name),
     profession: profession(row.profession, lang),
-    nationality: text(row.nationality),
+    nationality: exportCountry(row.nationality, lang),
     city: text(row.city),
     experience_years: row.experience_years ?? '',
     language_skills: text(row.language_skills),
     position_title: localizeCatalogTitle(text(row.request_position_title), lang),
-    decided_at: day(row.decided_at),
+    decided_at: day(row.decided_at, lang),
   }));
 }
 
@@ -100,13 +102,13 @@ export function employerEmployeeRows(rows: readonly Row[], lang: Language, copy:
   return rows.map((row) => ({
     full_name: text(row.full_name),
     profession: profession(row.profession, lang),
-    nationality: text(row.nationality),
+    nationality: exportCountry(row.nationality, lang),
     position_title: localizeCatalogTitle(text(row.request_position_title), lang),
     official_process_status: copy.officialProcess(text(row.official_process_status)),
-    flight_date: day(row.flight_date),
+    flight_date: day(row.flight_date, lang),
     departure_city: text(row.departure_city),
     arrival_city: text(row.arrival_city),
-    start_date: day(row.start_date),
+    start_date: day(row.start_date, lang),
   }));
 }
 
@@ -115,9 +117,9 @@ export function employerOfferRows(rows: readonly Row[], lang: Language, copy: Em
   return rows.map((row) => ({
     candidate_name: text(row.candidate_name),
     position_title: localizeCatalogTitle(text(row.position_title), lang),
-    monthly_net_salary: offerAmount(row),
+    monthly_net_salary: exportAmount(offerAmount(row), lang),
     currency: offerCurrency(row),
-    start_date: day(row.start_date),
+    start_date: day(row.start_date, lang),
     terms_details: text(row.terms_details),
     status: copy.offerStatus(text(row.status)),
   }));

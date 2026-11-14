@@ -6,9 +6,10 @@ import Link from 'next/link';
 import MatchPanel from './MatchPanel';
 import DemoBadge from './DemoBadge';
 import DeleteRecordButton from './DeleteRecordButton';
-import ListExportBar from './ListExportBar';
+import ListExportBar, { downloadTextFile } from './ListExportBar';
 import { dateLocale, portalUi } from '@/lib/portal-ui-copy';
 import { offerExportRows, requestExportRows, toCsv } from '@/lib/exportLists';
+import { EXPORT_COLUMN_LABELS } from '@/lib/exportColumns';
 import { localizeCatalogTitle } from '@/lib/professions';
 import { displayedRequestSalary } from '@/lib/workforceRequest';
 import { formatContractDuration } from '@/lib/contractDuration';
@@ -76,6 +77,8 @@ export default function RequestsTab({
             filename="labour-requests"
             title={t.demandFilesTitle || 'Requests'}
             rows={requestExportRows(jobRequests, currentLang)}
+            lang={currentLang}
+            dir={currentLang === 'ar' ? 'rtl' : 'ltr'}
             labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty, popupBlocked: ui.exportPopupBlocked }}
           />
           <button
@@ -87,13 +90,7 @@ export default function RequestsTab({
                 window.alert(ui.exportEmpty);
                 return;
               }
-              const file = new Blob([`\uFEFF${toCsv(rows)}`], { type: 'text/csv;charset=utf-8' });
-              const url = URL.createObjectURL(file);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = 'offers.csv';
-              link.click();
-              URL.revokeObjectURL(url);
+              downloadTextFile('offers.csv', toCsv(rows, { labels: EXPORT_COLUMN_LABELS[currentLang] }), 'text/csv;charset=utf-8');
             }}
             className="px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 cursor-pointer"
           >

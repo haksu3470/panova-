@@ -6,7 +6,13 @@
  * into the window (that was why "Print / PDF" did nothing). Instead the link
  * back to this page is cut by hand (opener = null) right after opening.
  * The blank window inherits this page's CSP; the print HTML only uses an
- * inline <style>, which style-src 'unsafe-inline' already allows.
+ * inline <style>, which style-src 'unsafe-inline' already allows. No script
+ * is written into the window: the close-on-afterprint listener is attached
+ * from here.
+ *
+ * The window closes itself once the print dialog is finished or cancelled
+ * ("afterprint"). Its title is the list name and date (set by the caller), so
+ * that is what the dialog and a saved PDF show.
  *
  * Returns false when the browser blocked the window (pop-up blocker).
  */
@@ -23,6 +29,7 @@ export function printHtmlInNewWindow(html: string, open: OpenWindow = (url, targ
   popup.document.open();
   popup.document.write(html);
   popup.document.close();
+  popup.addEventListener('afterprint', () => popup.close(), { once: true });
   popup.focus();
   popup.print();
   return true;
