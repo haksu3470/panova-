@@ -101,6 +101,34 @@ test('the sectors stat counts the sectors listed on the page', () => {
   }
 });
 
+test('the hero map shows the office countries from lib/company.ts', async () => {
+  const { company } = await import('./company');
+  const visual = read('components/home/HeroVisual.tsx');
+  const pointCities = [...visual.matchAll(/^  (\w+): \{$/gm)].map((match) => match[1]).sort();
+  const officeCities = company.presence.map((place) => place.city).sort();
+  assert.deepEqual(pointCities, officeCities, 'HERO_MAP_POINTS must have exactly the office cities');
+
+  // the page feeds the drawing from company.presence and the matching country names
+  const page = read('app/page.tsx');
+  assert.match(page, /registry\.presence\.map\(\(place, i\) => \(\{ city: place\.city, country: h\.about\.countries\[i\] \}\)\)/);
+  assert.match(page, /places=\{heroPlaces\}/);
+  assert.equal(page.includes('EUROPEAN_COUNTRIES'), false);
+  company.presence.forEach((place, i) => assert.equal(homeCopy.tr.about.countries[i], place.country));
+  for (const lang of LANGS) {
+    assert.equal(homeCopy[lang].about.countries.length, company.presence.length);
+    for (const name of homeCopy[lang].about.countries) {
+      assert.ok(homeExtraCopy[lang].hero.mapLabel.includes(name), `${lang}.hero.mapLabel should name ${name}`);
+    }
+  }
+});
+
+test('Albania is not on the home map', () => {
+  const albania = /Arnavutluk|Albania|Shqipëri|ألبانيا|Албанија/;
+  for (const file of ['components/home/HeroVisual.tsx', 'lib/home-extra-copy.ts', 'app/page.tsx']) {
+    assert.equal(albania.test(read(file)), false, file);
+  }
+});
+
 test('motion is opt-in and reduced motion stays static', () => {
   const css = read('app/globals.css');
   assert.match(css, /\.home-motion \.home-reveal:not\(\[data-visible\]\)/);

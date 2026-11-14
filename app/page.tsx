@@ -9,7 +9,6 @@ import { LoginMenu } from '@/components/home/LoginMenu';
 import { useHomeMotion } from '@/components/home/HomeMotion';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { translations } from '@/lib/dictionary';
-import { EUROPEAN_COUNTRIES } from '@/lib/europeanCountries';
 import { fill, homeCopy } from '@/lib/home-copy';
 import { homeExtraCopy } from '@/lib/home-extra-copy';
 import { useSiteLanguage } from '@/lib/site-language';
@@ -36,7 +35,8 @@ export default function HomePage() {
   const company = t.companies[selectedCompanyKey];
   const h = homeCopy[currentLang];
   const x = homeExtraCopy[currentLang];
-  const albania = EUROPEAN_COUNTRIES.find((country) => country.code === 'AL')?.names[currentLang] ?? 'Albania';
+  // Office countries (company.presence) in the page language, for the hero drawing.
+  const heroPlaces = registry.presence.map((place, i) => ({ city: place.city, country: h.about.countries[i] }));
   const rootRef = useRef<HTMLDivElement>(null);
   useHomeMotion(rootRef, [currentLang, selectedCompanyKey]);
 
@@ -132,7 +132,7 @@ export default function HomePage() {
             </div>
           </div>
           <HeroVisual
-            countries={[albania, h.about.countries[2], h.about.countries[1]]}
+            places={heroPlaces}
             mapLabel={x.hero.mapLabel}
             flowTitle={x.hero.flowTitle}
             flow={x.hero.flow}

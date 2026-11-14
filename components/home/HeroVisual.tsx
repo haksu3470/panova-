@@ -6,26 +6,67 @@ import { ArrowRight, Briefcase, ClipboardList, MessagesSquare, UserCheck } from 
 const FLOW_ICONS = [ClipboardList, UserCheck, MessagesSquare, Briefcase];
 
 /**
- * Inline line drawing of the three countries (no image file) and the small
- * "how it works" card. The route animates only when motion is allowed
- * (.home-route in app/globals.css).
+ * Where each office city sits on the schematic drawing (viewBox 340 x 200),
+ * west to east: North Macedonia, Türkiye, Bangladesh. Keys are the cities in
+ * company.presence (lib/company.ts); lib/home-page.test.ts keeps them in step.
+ * Not to scale: the drawing only shows the three countries and the link
+ * between them.
+ */
+export const HERO_MAP_POINTS: Readonly<Record<string, { x: number; y: number; labelY: number; area: string }>> = {
+  Struga: {
+    x: 52, y: 92, labelY: 136,
+    area: 'M30 80 C34 66 60 62 72 72 C80 82 76 100 64 108 C50 114 34 108 30 96 C28 90 28 86 30 80 Z',
+  },
+  Sivas: {
+    x: 160, y: 104, labelY: 62,
+    area: 'M104 96 C112 80 160 74 200 80 C222 84 230 98 222 112 C212 126 170 132 136 128 C112 124 98 110 104 96 Z',
+  },
+  Dhaka: {
+    x: 292, y: 118, labelY: 168,
+    area: 'M272 96 C284 86 306 88 314 100 C320 112 316 132 304 142 C292 148 278 140 274 128 C268 118 266 104 272 96 Z',
+  },
+};
+
+export type HeroPlace = { city: string; country: string };
+
+/**
+ * Inline line drawing of the office countries (no image file) and the small
+ * "how it works" card. Labels are country names only; the dashed route stands
+ * for the Struga / Sivas / Dhaka link. The route animates only when motion is
+ * allowed (.home-route in app/globals.css).
  */
 export function HeroVisual({
-  countries,
+  places,
   mapLabel,
   flowTitle,
   flow,
 }: {
-  /** [Albania, North Macedonia, Türkiye] in the page language. */
-  countries: [string, string, string];
+  /** company.presence with country names in the page language. */
+  places: readonly HeroPlace[];
   mapLabel: string;
   flowTitle: string;
   flow: readonly string[];
 }) {
   const dots = `home-dots-${useId().replace(/:/g, '')}`;
-  const [albania, northMacedonia, turkiye] = countries;
+  const points = places
+    .flatMap((place) => {
+      const point = HERO_MAP_POINTS[place.city];
+      return point ? [{ ...point, label: place.country, city: place.city }] : [];
+    })
+    .sort((a, b) => a.x - b.x);
+  const route = points.length > 1
+    ? points.map((point, index) => {
+      if (index === 0) return `M${point.x} ${point.y}`;
+      const previous = points[index - 1];
+      const midX = (previous.x + point.x) / 2;
+      const liftY = Math.min(previous.y, point.y) - 34;
+      return `Q ${midX} ${liftY} ${point.x} ${point.y}`;
+    }).join(' ')
+    : '';
+
   return (
     <div className="grid gap-4">
+      {/* The drawing keeps west-to-east order in Arabic too. */}
       <figure dir="ltr" className="rounded-3xl border border-slate-700 bg-slate-900 p-4 shadow-xl">
         <svg viewBox="0 0 340 200" role="img" aria-label={mapLabel} className="h-auto w-full">
           <defs>
@@ -34,21 +75,24 @@ export function HeroVisual({
             </pattern>
           </defs>
           <rect x="0" y="0" width="340" height="200" rx="18" fill={`url(#${dots})`} />
-          {/* country areas: schematic outlines, not to scale */}
-          <path d="M44 92 C40 110 46 140 58 158 C68 150 74 128 72 108 C70 96 58 86 44 92 Z" fill="#7cb342" fillOpacity="0.16" stroke="#7cb342" strokeOpacity="0.7" strokeWidth="1.5" />
-          <path d="M78 70 C96 60 128 62 142 74 C146 90 136 104 116 108 C98 110 82 102 76 90 C74 82 74 76 78 70 Z" fill="#7cb342" fillOpacity="0.16" stroke="#7cb342" strokeOpacity="0.7" strokeWidth="1.5" />
-          <path d="M196 104 C214 84 262 80 296 88 C318 94 326 110 316 126 C300 144 254 150 220 144 C200 140 188 120 196 104 Z" fill="#7cb342" fillOpacity="0.16" stroke="#7cb342" strokeOpacity="0.7" strokeWidth="1.5" />
-          {/* route between the three */}
-          <path className="home-route" d="M58 124 Q 80 96 108 86 Q 180 40 256 116" fill="none" stroke="#7cb342" strokeWidth="2.5" strokeLinecap="round" />
-          {[
-            { x: 58, y: 124, label: albania, ly: 180 },
-            { x: 108, y: 86, label: northMacedonia, ly: 52 },
-            { x: 256, y: 116, label: turkiye, ly: 172 },
-          ].map((point) => (
-            <g key={point.label}>
+          {points.map((point) => (
+            <path key={`area-${point.city}`} d={point.area} fill="#7cb342" fillOpacity="0.16" stroke="#7cb342" strokeOpacity="0.7" strokeWidth="1.5" />
+          ))}
+          {route ? (
+            <path className="home-route" d={route} fill="none" stroke="#7cb342" strokeWidth="2.5" strokeLinecap="round" />
+          ) : null}
+          {points.map((point) => (
+            <g key={point.city}>
               <circle cx={point.x} cy={point.y} r="9" fill="#7cb342" fillOpacity="0.25" />
               <circle cx={point.x} cy={point.y} r="4.5" fill="#f8fafc" stroke="#2e7d32" strokeWidth="2" />
-              <text x={point.x} y={point.ly} textAnchor="middle" fill="#f8fafc" fontSize="12" fontWeight="700">
+              <text
+                x={Math.min(Math.max(point.x, 64), 276)}
+                y={point.labelY}
+                textAnchor="middle"
+                fill="#f8fafc"
+                fontSize="11"
+                fontWeight="700"
+              >
                 {point.label}
               </text>
             </g>

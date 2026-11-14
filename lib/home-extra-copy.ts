@@ -11,7 +11,7 @@ import type { Language } from '@/lib/dictionary';
 export type HomeExtraCopy = {
   login: { label: string; candidate: string; employer: string; staff: string };
   hero: {
-    /** Accessible name of the line drawing of the three countries. */
+    /** Accessible name of the line drawing of the office countries (company.presence). */
     mapLabel: string;
     flowTitle: string;
     flow: [string, string, string, string];
@@ -45,7 +45,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
   tr: {
     login: { label: 'Giriş', candidate: 'Aday', employer: 'İşveren', staff: 'Personel' },
     hero: {
-      mapLabel: 'Türkiye, Kuzey Makedonya ve Arnavutluk’u gösteren şematik hat çizimi',
+      mapLabel: 'Kuzey Makedonya, Türkiye ve Bangladeş’i birbirine bağlayan şematik hat çizimi',
       flowTitle: 'İşleyiş',
       flow: ['Talep', 'Aday', 'Mülakat', 'İşe başlama'],
     },
@@ -72,7 +72,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
   en: {
     login: { label: 'Sign in', candidate: 'Candidate', employer: 'Employer', staff: 'Staff' },
     hero: {
-      mapLabel: 'Schematic line drawing of Türkiye, North Macedonia and Albania',
+      mapLabel: 'Schematic line drawing linking North Macedonia, Türkiye and Bangladesh',
       flowTitle: 'How it works',
       flow: ['Request', 'Candidate', 'Interview', 'Start of work'],
     },
@@ -99,7 +99,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
   sq: {
     login: { label: 'Hyrja', candidate: 'Kandidat', employer: 'Punëdhënës', staff: 'Staf' },
     hero: {
-      mapLabel: 'Vizatim skematik me vija i Turqisë, Maqedonisë së Veriut dhe Shqipërisë',
+      mapLabel: 'Vizatim skematik me vija i lidhjes Maqedonia e Veriut – Turqia – Bangladesh',
       flowTitle: 'Si funksionon',
       flow: ['Kërkesa', 'Kandidati', 'Intervista', 'Fillimi i punës'],
     },
@@ -126,7 +126,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
   ar: {
     login: { label: 'تسجيل الدخول', candidate: 'المرشح', employer: 'صاحب العمل', staff: 'الموظفون' },
     hero: {
-      mapLabel: 'رسم تخطيطي بالخطوط لتركيا ومقدونيا الشمالية وألبانيا',
+      mapLabel: 'رسم تخطيطي بالخطوط يربط مقدونيا الشمالية وتركيا وبنغلاديش',
       flowTitle: 'كيف نعمل',
       flow: ['الطلب', 'المرشح', 'المقابلة', 'بدء العمل'],
     },
@@ -153,7 +153,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
   mk: {
     login: { label: 'Најава', candidate: 'Кандидат', employer: 'Работодавач', staff: 'Персонал' },
     hero: {
-      mapLabel: 'Шематски цртеж со линии на Турција, Северна Македонија и Албанија',
+      mapLabel: 'Шематски цртеж со линии што ги поврзува Северна Македонија, Турција и Бангладеш',
       flowTitle: 'Како работи',
       flow: ['Барање', 'Кандидат', 'Интервју', 'Почеток на работа'],
     },
