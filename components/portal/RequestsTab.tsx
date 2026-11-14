@@ -5,7 +5,7 @@ import { Building2, FileText, Link2 } from 'lucide-react';
 import Link from 'next/link';
 import MatchPanel from './MatchPanel';
 import DemoBadge from './DemoBadge';
-import DeleteRecordButton from './DeleteRecordButton';
+import DeleteRecordButton, { DELETE_ROW_CLASS } from './DeleteRecordButton';
 import ListExportBar, { downloadTextFile } from './ListExportBar';
 import { dateLocale, portalUi } from '@/lib/portal-ui-copy';
 import { offerExportRows, requestExportRows, toCsv } from '@/lib/exportLists';
@@ -194,14 +194,6 @@ export default function RequestsTab({
               >
                 📂 {ui.requestInfo}
               </Link>
-              <DeleteRecordButton
-                table="job_requests"
-                id={req.id}
-                name={localizeCatalogTitle(req.position_title, currentLang) || req.id}
-                isDemo={req.is_demo}
-                allowed={isUpperManagement}
-                onDeleted={onChanged}
-              />
               <button
                 onClick={() => setSelectedDemandDetail(req)}
                 className="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-xl text-xs font-bold transition shadow cursor-pointer flex items-center justify-center gap-1.5"
@@ -209,6 +201,18 @@ export default function RequestsTab({
                 <FileText className="w-4 h-4" /> {t.openDemandFilesBtn}
               </button>
             </div>
+            {isUpperManagement ? (
+              <div data-delete-row className={DELETE_ROW_CLASS}>
+                <DeleteRecordButton
+                  table="job_requests"
+                  id={req.id}
+                  name={localizeCatalogTitle(req.position_title, currentLang) || req.id}
+                  isDemo={req.is_demo}
+                  allowed={isUpperManagement}
+                  onDeleted={onChanged}
+                />
+              </div>
+            ) : null}
           </div>
         ))}
       </div>
