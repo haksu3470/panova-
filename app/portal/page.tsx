@@ -43,7 +43,7 @@ import { taskIsOverdue } from '@/lib/demandStatus';
 // Modüler Bileşenlerimiz (Kök dizindeki components klasörüne göre göreceli yol)
 import CandidatesTab from '../../components/portal/CandidatesTab';
 import { ReferralCodeChip } from '../../components/portal/ReferralCodeChip';
-import { isSourceCountryOfficer, normalizeReferralCode } from '@/lib/referralCode';
+import { isCodeIssuingRole, normalizeReferralCode } from '@/lib/referralCode';
 import RequestsTab from '../../components/portal/RequestsTab';
 import { writeAudit } from '@/lib/audit';
 import DemoBadge from '@/components/portal/DemoBadge';
@@ -746,7 +746,7 @@ export default function PortalPage() {
                 <span className="text-[10px] text-emerald-800 uppercase font-semibold">
                   {getRoleDisplayName(currentUser?.role_level)}
                 </span>
-                {isSourceCountryOfficer(currentUser?.role_level) && normalizeReferralCode(currentUser?.referral_code) ? (
+                {isCodeIssuingRole(currentUser?.role_level) && normalizeReferralCode(currentUser?.referral_code) ? (
                   <span className="mt-1 block normal-case">
                     <ReferralCodeChip
                       code={normalizeReferralCode(currentUser.referral_code) as string}

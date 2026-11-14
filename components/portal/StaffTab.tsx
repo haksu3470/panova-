@@ -4,7 +4,7 @@ import { UserPlus, Trash2, Key } from 'lucide-react';
 import DemoBadge from './DemoBadge';
 import { DELETE_BUTTON_CLASS, DELETE_ROW_CLASS } from './DeleteRecordButton';
 import { ReferralCodeChip } from './ReferralCodeChip';
-import { isSourceCountryOfficer, normalizeReferralCode } from '@/lib/referralCode';
+import { isCodeIssuingRole, isSourceCountryOfficer, normalizeReferralCode } from '@/lib/referralCode';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 import { releaseCopy } from '@/lib/release-copy';
@@ -113,7 +113,7 @@ export default function StaffTab({
                   </div>
                 </div>
                 <p dir="ltr" className="text-xs text-muted-foreground [overflow-wrap:anywhere] rtl:text-right">{staff.email}</p>
-                {isSourceCountryOfficer(staff.role_level) && normalizeReferralCode(staff.referral_code) ? (
+                {isCodeIssuingRole(staff.role_level) && normalizeReferralCode(staff.referral_code) ? (
                   <div className="space-y-1">
                     <ReferralCodeChip
                       code={normalizeReferralCode(staff.referral_code) as string}
