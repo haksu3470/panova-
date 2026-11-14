@@ -30,14 +30,14 @@ function cell(value: unknown): string {
   return String(value);
 }
 
-/** "+90 545 364 49 30", "-1", "(0212) 555-12-12": digits with phone punctuation only. */
+/** "+90 500 000 00 00", "-1", "(0212) 555-12-12": digits with phone punctuation only. */
 const PHONE_LIKE = /^[+-][\d\s().-]*\d[\d\s().-]*$/;
 
 /**
  * Spreadsheet apps run a cell that starts with = + - @ (or a tab / CR) as a
  * formula. Those cells get a leading quote so they stay text. A value that
  * starts with + or - but is only a phone number or a plain number is safe and
- * stays as written, so "+389 70 385 792" is not shown as "'+389…".
+ * stays as written, so "+389 00 000 000" is not shown as "'+389…".
  */
 export function neutralizeSpreadsheetFormula(value: unknown): string {
   const text = cell(value);
@@ -129,11 +129,11 @@ export function toPrintHtml(title: string, rows: readonly Row[], dir: 'ltr' | 'r
   html, body { margin: 0; }
   body { font-family: Arial, sans-serif; color: #0f172a; padding: 0 12mm; }
   h1 { font-size: 16px; margin: 12mm 0 4mm; }
-  table { border-collapse: collapse; width: 100%; max-width: 100%; table-layout: auto; font-size: 10px; }
+  table { border-collapse: collapse; width: 100%; max-width: 100%; table-layout: auto; font-size: 12px; line-height: 1.35; }
   thead { display: table-header-group; }
   tfoot { display: table-footer-group; }
-  th, td { border: 1px solid #cbd5e1; padding: 4px 6px; text-align: start; vertical-align: top; overflow-wrap: anywhere; word-break: break-word; white-space: normal; }
-  th { background: #f1f5f9; }
+  th, td { border: 1px solid #cbd5e1; padding: 5px 7px; text-align: start; vertical-align: top; overflow-wrap: break-word; word-break: normal; hyphens: auto; white-space: normal; }
+  th { background: #f1f5f9; font-weight: 600; }
   tr { break-inside: avoid; page-break-inside: avoid; }
   .spacer td { border: 0; padding: 0; height: 8mm; background: none; }
   @media screen { body { padding: 0 24px; } h1 { margin-top: 24px; } .spacer { display: none; } }

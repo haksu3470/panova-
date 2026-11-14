@@ -54,7 +54,9 @@ test('print never adds a quote; landscape, repeated headings, wrapped cells', ()
   assert.equal(html.includes("'+90"), false);
   assert.match(html, /@page \{ size: A4 landscape; margin: 0; \}/);
   assert.match(html, /thead \{ display: table-header-group; \}/);
-  assert.match(html, /overflow-wrap: anywhere/);
+  // long cells wrap between words; a word longer than its column still breaks
+  assert.match(html, /overflow-wrap: break-word; word-break: normal;/);
+  assert.match(html, /font-size: 12px;/);
   assert.match(html, /<title>Talepler · 14\.11\.2026<\/title>/);
   assert.match(html, /<th>Telefon<\/th>/);
 });

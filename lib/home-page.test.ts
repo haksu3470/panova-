@@ -103,8 +103,8 @@ test('the sectors stat counts the sectors listed on the page', () => {
 
 test('the hero map shows the office countries from lib/company.ts', async () => {
   const { company } = await import('./company');
-  const visual = read('components/home/HeroVisual.tsx');
-  const pointCities = [...visual.matchAll(/^  (\w+): \{$/gm)].map((match) => match[1]).sort();
+  const { HERO_MAP_POINTS } = await import('./hero-map');
+  const pointCities = Object.keys(HERO_MAP_POINTS).sort();
   const officeCities = company.presence.map((place) => place.city).sort();
   assert.deepEqual(pointCities, officeCities, 'HERO_MAP_POINTS must have exactly the office cities');
 
@@ -124,7 +124,7 @@ test('the hero map shows the office countries from lib/company.ts', async () => 
 
 test('Albania is not on the home map', () => {
   const albania = /Arnavutluk|Albania|Shqipëri|ألبانيا|Албанија/;
-  for (const file of ['components/home/HeroVisual.tsx', 'lib/home-extra-copy.ts', 'app/page.tsx']) {
+  for (const file of ['components/home/HeroVisual.tsx', 'lib/hero-map.ts', 'lib/home-extra-copy.ts', 'app/page.tsx']) {
     assert.equal(albania.test(read(file)), false, file);
   }
 });
@@ -171,13 +171,80 @@ test('stats cards fit on phones and the page never scrolls sideways', () => {
   assert.match(read('app/page.tsx'), /min-h-screen overflow-x-clip/);
 });
 
-test('every map label sits the same distance under its own point', () => {
+test('every map label sits under the lowest edge of its own area', async () => {
+  const map = await import('./hero-map');
+  for (const [city, point] of Object.entries(map.HERO_MAP_POINTS)) {
+    const outline = map.sampleArea(point.area);
+    const bottom = Math.max(...outline.map((p) => p.y));
+    assert.ok(point.labelY > bottom, `${city}: labelY ${point.labelY} must be below the area bottom ${bottom}`);
+    const labelTop = point.labelY - map.LABEL_ASCENT;
+    assert.ok(labelTop - bottom >= map.LABEL_CLEARANCE - 0.01, `${city}: label top must be ${map.LABEL_CLEARANCE} under the area`);
+    assert.ok(point.labelY + map.LABEL_DESCENT <= map.MAP_HEIGHT - map.LABEL_EDGE, `${city}: label leaves the drawing`);
+  }
+  // the component draws from this module, not from its own numbers
   const visual = read('components/home/HeroVisual.tsx');
-  const gap = Number(/export const LABEL_GAP = (\d+);/.exec(visual)?.[1]);
-  assert.ok(gap > 0);
-  const points = [...visual.matchAll(/x: (\d+), y: (\d+), labelY: (\d+),/g)];
-  assert.equal(points.length, 3);
-  for (const [, , y, labelY] of points) assert.equal(Number(labelY) - Number(y), gap);
+  assert.match(visual, /from '@\/lib\/hero-map'/);
+  assert.match(visual, /y=\{point\.labelY\}/);
+  assert.match(visual, /viewBox=\{`0 0 \$\{MAP_WIDTH\} \$\{MAP_HEIGHT\}`\}/);
+});
+
+test('map labels stay inside the frame and clear of areas, points, route and each other in every language', async () => {
+  const map = await import('./hero-map');
+  const { company } = await import('./company');
+  type Box = { left: number; right: number; top: number; bottom: number };
+  const inside = (p: { x: number; y: number }, box: Box) => p.x >= box.left && p.x <= box.right && p.y >= box.top && p.y <= box.bottom;
+  const overlap = (a: Box, b: Box) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+  const cities = company.presence.map((place) => place.city);
+  const points = cities.map((city) => map.HERO_MAP_POINTS[city]).sort((a, b) => a.x - b.x);
+  // the route, sampled along its arcs
+  const route: { x: number; y: number }[] = [];
+  points.forEach((point, index) => {
+    if (index === 0) return;
+    const prev = points[index - 1];
+    const control = { x: (prev.x + point.x) / 2, y: Math.min(prev.y, point.y) - 34 };
+    for (let s = 0; s <= 32; s += 1) {
+      const t = s / 32;
+      const u = 1 - t;
+      route.push({ x: u * u * prev.x + 2 * u * t * control.x + t * t * point.x, y: u * u * prev.y + 2 * u * t * control.y + t * t * point.y });
+    }
+  });
+  for (const lang of LANGS) {
+    const boxes = cities.map((city, i) => {
+      const point = map.HERO_MAP_POINTS[city];
+      const label = homeCopy[lang].about.countries[i];
+      const width = map.estimateLabelWidth(label);
+      const x = map.labelX(point.x, label);
+      const box = { left: x - width / 2, right: x + width / 2, top: point.labelY - map.LABEL_ASCENT, bottom: point.labelY + map.LABEL_DESCENT };
+      assert.ok(box.left >= map.LABEL_EDGE - 0.01 && box.right <= map.MAP_WIDTH - map.LABEL_EDGE + 0.01, `${lang} ${label} leaves the drawing`);
+      assert.ok(Math.abs(x - point.x) < width / 2, `${lang} ${label} is no longer under its point`);
+      return { city, label, box };
+    });
+    for (const { label, box } of boxes) {
+      for (const city of cities) {
+        const point = map.HERO_MAP_POINTS[city];
+        const outline = map.sampleArea(point.area);
+        assert.equal(outline.some((p) => inside(p, box)), false, `${lang} ${label} touches the ${city} area`);
+        assert.equal(inside({ x: point.x, y: point.y }, { left: box.left - 9, right: box.right + 9, top: box.top - 9, bottom: box.bottom + 9 }), false, `${lang} ${label} touches the ${city} point`);
+      }
+      assert.equal(route.some((p) => inside(p, box)), false, `${lang} ${label} touches the route`);
+    }
+    for (let a = 0; a < boxes.length; a += 1) {
+      for (let b = a + 1; b < boxes.length; b += 1) {
+        assert.equal(overlap(boxes[a].box, boxes[b].box), false, `${lang}: ${boxes[a].label} and ${boxes[b].label} overlap`);
+      }
+    }
+  }
+});
+
+test('the how-it-works steps spread over the card: one row from sm, 2x2 on phones, arrows only between steps', () => {
+  const visual = read('components/home/HeroVisual.tsx');
+  assert.match(visual, /<ol className="[^"]*grid grid-cols-2[^"]*sm:grid-cols-4/);
+  assert.match(visual, /<li key=\{step\} className="[^"]*flex-col items-center[^"]*text-center/);
+  // arrows: hidden on phones, centred in the gap, flipped in RTL, never after the last step
+  assert.match(visual, /index < flow\.length - 1 \? \(/);
+  const arrow = /<span aria-hidden className="([^"]*)">\s*<ArrowRight/.exec(visual)?.[1].split(' ') ?? [];
+  for (const cls of ['absolute', 'hidden', 'sm:flex', '-end-2', 'w-0', 'justify-center']) assert.ok(arrow.includes(cls), `arrow wrapper needs ${cls}`);
+  assert.match(visual, /<ArrowRight aria-hidden className="[^"]*rtl:rotate-180/);
 });
 
 test('the clear-process card has a second sentence in five languages', () => {
