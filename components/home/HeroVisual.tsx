@@ -10,19 +10,21 @@ const FLOW_ICONS = [ClipboardList, UserCheck, MessagesSquare, Briefcase];
  * west to east: North Macedonia, Türkiye, Bangladesh. Keys are the cities in
  * company.presence (lib/company.ts); lib/home-page.test.ts keeps them in step.
  * Not to scale: the drawing only shows the three countries and the link
- * between them.
+ * between them. labelY is always y + LABEL_GAP: each name sits just under its
+ * own point (the route arcs above the points, so nothing crosses a label).
  */
+export const LABEL_GAP = 22;
 export const HERO_MAP_POINTS: Readonly<Record<string, { x: number; y: number; labelY: number; area: string }>> = {
   Struga: {
-    x: 52, y: 92, labelY: 136,
+    x: 52, y: 92, labelY: 114,
     area: 'M30 80 C34 66 60 62 72 72 C80 82 76 100 64 108 C50 114 34 108 30 96 C28 90 28 86 30 80 Z',
   },
   Sivas: {
-    x: 160, y: 104, labelY: 62,
+    x: 160, y: 104, labelY: 126,
     area: 'M104 96 C112 80 160 74 200 80 C222 84 230 98 222 112 C212 126 170 132 136 128 C112 124 98 110 104 96 Z',
   },
   Dhaka: {
-    x: 292, y: 118, labelY: 168,
+    x: 292, y: 118, labelY: 140,
     area: 'M272 96 C284 86 306 88 314 100 C320 112 316 132 304 142 C292 148 278 140 274 128 C268 118 266 104 272 96 Z',
   },
 };
@@ -86,7 +88,7 @@ export function HeroVisual({
               <circle cx={point.x} cy={point.y} r="9" fill="#7cb342" fillOpacity="0.25" />
               <circle cx={point.x} cy={point.y} r="4.5" fill="#f8fafc" stroke="#2e7d32" strokeWidth="2" />
               <text
-                x={Math.min(Math.max(point.x, 64), 276)}
+                x={Math.min(Math.max(point.x, 66), 274)}
                 y={point.labelY}
                 textAnchor="middle"
                 fill="#f8fafc"

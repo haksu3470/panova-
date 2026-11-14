@@ -26,6 +26,8 @@ export type HomeExtraCopy = {
   /** {shortName}, {embs}, {vkn} come from lib/company.ts. */
   registryDesc: string;
   kvkkTitle: string;
+  /** Second sentence of the "clear process" card (only facts the portal shows). */
+  processDetail: string;
   contactInfo: string;
 };
 
@@ -67,6 +69,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
     registryTitle: 'Resmî şirket kaydı',
     registryDesc: 'Sicil: {shortName}, EMBS {embs}. Türkiye ofisi: VKN {vkn}.',
     kvkkTitle: 'KVKK ve veri güvenliği',
+    processDetail: 'Talep durumu aday sunumu, mülakat ve seçimle kendiliğinden ilerler; resmî süreç sekiz adımda gösterilir.',
     contactInfo: 'İletişim bilgileri',
   },
   en: {
@@ -94,6 +97,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
     registryTitle: 'Official company registration',
     registryDesc: 'Registry: {shortName}, EMBS {embs}. Türkiye office: VAT ID {vkn}.',
     kvkkTitle: 'KVKK and data security',
+    processDetail: 'The request status moves on by itself as candidates are presented, interviewed and selected; the official process is shown in eight steps.',
     contactInfo: 'Contact details',
   },
   sq: {
@@ -121,6 +125,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
     registryTitle: 'Regjistrim zyrtar i kompanisë',
     registryDesc: 'Regjistri: {shortName}, EMBS {embs}. Zyra e Turqisë: Nr. i TVSH-së {vkn}.',
     kvkkTitle: 'KVKK dhe siguria e të dhënave',
+    processDetail: 'Statusi i kërkesës ecën vetë me paraqitjen, intervistën dhe zgjedhjen e kandidatëve; procesi zyrtar shfaqet në tetë hapa.',
     contactInfo: 'Të dhënat e kontaktit',
   },
   ar: {
@@ -148,6 +153,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
     registryTitle: 'تسجيل رسمي للشركة',
     registryDesc: 'السجل: {shortName}، EMBS {embs}. مكتب تركيا: رقم ضريبة القيمة المضافة {vkn}.',
     kvkkTitle: 'KVKK وأمان البيانات',
+    processDetail: 'تتقدّم حالة الطلب تلقائيًا مع تقديم المرشحين ومقابلتهم واختيارهم، وتُعرض الإجراءات الرسمية في ثماني خطوات.',
     contactInfo: 'بيانات الاتصال',
   },
   mk: {
@@ -175,6 +181,7 @@ export const homeExtraCopy: Record<Language, HomeExtraCopy> = {
     registryTitle: 'Официјална регистрација на компанијата',
     registryDesc: 'Регистар: {shortName}, ЕМБС {embs}. Канцеларија во Турција: ДДВ број {vkn}.',
     kvkkTitle: 'KVKK и безбедност на податоците',
+    processDetail: 'Статусот на барањето напредува сам со претставување, интервју и избор на кандидатите; официјалната постапка се прикажува во осум чекори.',
     contactInfo: 'Податоци за контакт',
   },
 };

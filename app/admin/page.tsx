@@ -35,8 +35,8 @@ function AdminDashboardPageInner() {
 
   // Örnek Veri Setleri (Admin Merkezi)
   const [employers] = useState([
-    { id: 1, name: 'AKAY EĞİTİM', contact: 'Hüseyin Aksu', phone: '+38970385792', country: 'North Macedonia', activeDemands: 2, responsible: 'Ahmet Uzman' },
-    { id: 2, name: 'PANOVA TARIM DOO', contact: 'Mehmet Çitil', phone: '+389 75 818 697', country: 'North Macedonia', activeDemands: 1, responsible: 'Zeynep Kaya' },
+    { id: 1, name: 'AKAY EĞİTİM', contact: 'Hüseyin Aksu', phone: company.phones[0].display, country: 'North Macedonia', activeDemands: 2, responsible: 'Ahmet Uzman' },
+    { id: 2, name: 'PANOVA TARIM DOO', contact: 'Mehmet Çitil', phone: company.phones[1].display, country: 'North Macedonia', activeDemands: 1, responsible: 'Zeynep Kaya' },
   ]);
 
   const [demandsList] = useState([

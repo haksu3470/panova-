@@ -76,7 +76,7 @@ export default function HomePage() {
   };
 
   return (
-    <div ref={rootRef} className={`min-h-screen bg-slate-50 text-slate-900 font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+    <div ref={rootRef} className={`min-h-screen overflow-x-clip bg-slate-50 text-slate-900 font-sans ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Top bar: logo, one language switcher, one sign-in menu */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
@@ -117,7 +117,7 @@ export default function HomePage() {
             <span className="text-emerald-300 font-bold text-xs uppercase tracking-widest bg-emerald-950 px-3 py-1 rounded-full border border-emerald-800 inline-block mb-4">
               {company.name}
             </span>
-            <h1 className="text-3xl sm:text-5xl font-black mb-4 sm:mb-6 tracking-tight leading-tight">{company.tagline}</h1>
+            <h1 className="text-3xl sm:text-5xl font-black mb-4 sm:mb-6 tracking-tight leading-tight break-words hyphens-auto">{company.tagline}</h1>
             <p className="text-on-dark-muted text-sm sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed">{company.desc}</p>
             <p className="text-emerald-200 text-xs sm:text-sm mt-4 font-semibold">
               {registry.presence.map((place, i) => `${h.about.countries[i]} (${place.city})`).join(' · ')}
