@@ -324,9 +324,9 @@ export type InviteMailCopy = {
 
 export const inviteMailCopy: Record<EmailLocale, InviteMailCopy> = {
   tr: {
-    subject: 'PANOVA Yönetim Portalı davetiniz',
+    subject: 'PANOVA Personel Portalı davetiniz',
     preheader: 'Portala bu e-posta adresiyle girin.',
-    title: 'Yönetim portalına davet',
+    title: 'Personel portalına davet',
     hello: 'Merhaba {name},',
     role: 'Panova ekibine {role} rolüyle eklendiniz.',
     body: 'Hesabınızı etkinleştirmek için bağlantıya gidin ve bu e-posta adresiyle ({email}) Google ile giriş yapın veya e-posta ve şifre ile kayıt olun. Google dışı hesaplar, portala girmeden önce e-postadaki doğrulamayı tamamlar.',
@@ -334,9 +334,9 @@ export const inviteMailCopy: Record<EmailLocale, InviteMailCopy> = {
     ignore: 'Bu daveti beklemiyorsanız e-postayı yok sayabilirsiniz.',
   },
   en: {
-    subject: 'Your invitation to the Panova management portal',
+    subject: 'Your invitation to the Panova staff portal',
     preheader: 'Sign in to the portal with this email address.',
-    title: 'Invitation to the management portal',
+    title: 'Invitation to the staff portal',
     hello: 'Hello {name},',
     role: 'You have been added to the Panova team as {role}.',
     body: 'To activate your account, open the link and sign in with Google, or register with this email address ({email}) and a password. Accounts that do not use Google sign-in must finish the email verification before the portal opens.',
@@ -344,9 +344,9 @@ export const inviteMailCopy: Record<EmailLocale, InviteMailCopy> = {
     ignore: 'If you were not expecting this invitation, you can ignore this email.',
   },
   sq: {
-    subject: 'Ftesa juaj për portalin e menaxhimit Panova',
+    subject: 'Ftesa juaj për portalin e stafit Panova',
     preheader: 'Hyni në portal me këtë adresë e-maili.',
-    title: 'Ftesë për portalin e menaxhimit',
+    title: 'Ftesë për portalin e stafit',
     hello: 'Përshëndetje {name},',
     role: 'Ju u shtuat në ekipin Panova me rolin {role}.',
     body: 'Për ta aktivizuar llogarinë, hapni lidhjen dhe hyni me Google ose regjistrohuni me këtë adresë e-maili ({email}) dhe një fjalëkalim. Llogaritë që nuk hyjnë me Google duhet të përfundojnë verifikimin e e-mailit para se të hapet portali.',
@@ -354,9 +354,9 @@ export const inviteMailCopy: Record<EmailLocale, InviteMailCopy> = {
     ignore: 'Nëse nuk e prisnit këtë ftesë, mund ta shpërfillni këtë e-mail.',
   },
   ar: {
-    subject: 'دعوتك إلى بوابة إدارة Panova',
+    subject: 'دعوتك إلى بوابة موظفي Panova',
     preheader: 'ادخل إلى البوابة بهذا البريد.',
-    title: 'دعوة إلى بوابة الإدارة',
+    title: 'دعوة إلى بوابة الموظفين',
     hello: 'مرحبًا {name}،',
     role: 'أُضيفت إلى فريق Panova بدور {role}.',
     body: 'لتفعيل الحساب، افتح الرابط وادخل عبر Google أو سجّل بهذا البريد ({email}) وكلمة مرور. الحسابات التي لا تستخدم Google تكمل التحقق من البريد قبل فتح البوابة.',
@@ -364,9 +364,9 @@ export const inviteMailCopy: Record<EmailLocale, InviteMailCopy> = {
     ignore: 'إذا لم تكن تتوقع هذه الدعوة، يمكنك تجاهل الرسالة.',
   },
   mk: {
-    subject: 'Покана за порталот за управување на Panova',
+    subject: 'Покана за порталот за персонал на Panova',
     preheader: 'Најавете се на порталот со оваа е-пошта.',
-    title: 'Покана за порталот за управување',
+    title: 'Покана за порталот за персонал',
     hello: 'Здраво {name},',
     role: 'Додадени сте во тимот на Panova со улога {role}.',
     body: 'За да ја активирате сметката, отворете ја врската и најавете се со Google или регистрирајте се со оваа е-пошта ({email}) и лозинка. Сметките што не користат Google ја завршуваат потврдата на е-поштата пред да се отвори порталот.',

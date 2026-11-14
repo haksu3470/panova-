@@ -493,7 +493,7 @@ const tr: PortalUi = {
   linkedRecord: 'Bağlı kayıt (opsiyonel)', noneOption: 'Yok', selectOption: 'Seçin…',
   linkCandidate: 'Aday', linkRequest: 'Talep', linkEmployer: 'İşveren',
   cancelPrompt: 'İptal nedenini yazın:', cancelReasonLabel: 'İptal nedeni:',
-  returnToAdmin: 'Yönetim paneline dön', authorized: 'Yetkili: {name}',
+  returnToAdmin: 'Personel paneline dön', authorized: 'Yetkili: {name}',
   languageOptions: [
     { value: 'none', label: 'Gerekli değil / temel' },
     { value: 'en-mid', label: 'İngilizce (orta seviye)' },
