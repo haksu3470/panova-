@@ -28,7 +28,7 @@ import { ProfessionField } from '@/components/site/ProfessionField';
 import { professionForSectorChange, professionSearchBlob } from '@/lib/professions';
 import { fill, portalUi } from '@/lib/portal-ui-copy';
 import {
-  isSourceCountryOfficer,
+  isCodeIssuingRole,
   matchesReferralCodeFilter,
   normalizeReferralCode,
   referralFilterCodes,
@@ -93,8 +93,9 @@ export default function CandidatesTab({
   const [draft, setDraft] = useState(emptyDraft);
   const [saving, setSaving] = useState(false);
 
-  const isSourceOfficer = isSourceCountryOfficer(currentUser?.role_level);
-  const ownCode = isSourceOfficer ? normalizeReferralCode(currentUser?.referral_code) : null;
+  // Source-country officers and field officers register under their own code.
+  const isCodeIssuer = isCodeIssuingRole(currentUser?.role_level);
+  const ownCode = isCodeIssuer ? normalizeReferralCode(currentUser?.referral_code) : null;
   const assignableCodes = supervisorReferralCodes(staffMembers);
   const filterCodes = isUpperManagement ? referralFilterCodes(staffMembers, candidates) : [];
 
@@ -153,7 +154,7 @@ export default function CandidatesTab({
       sector: draft.sector,
       status: 'pending',
     };
-    if (!isSourceOfficer && isUpperManagement && draft.referralCode) {
+    if (!isCodeIssuer && isUpperManagement && draft.referralCode) {
       payload.referral_code = draft.referralCode;
     }
 
@@ -170,7 +171,7 @@ export default function CandidatesTab({
     fetchAllData();
   };
 
-  const registerHint = isSourceOfficer
+  const registerHint = isCodeIssuer
     ? (ownCode ? fill(ui.registerCandidateHint, { code: ownCode }) : ui.referralCodeAutoAttach)
     : ui.registerCandidateOpenHint;
   const allShownSelected = selectedIds.length > 0 && selectedIds.length === filteredCandidates.length;
@@ -327,7 +328,7 @@ export default function CandidatesTab({
               ))}
             </select>
           </label>
-          {isSourceOfficer && (
+          {isCodeIssuer && (
             <label className="block text-xs font-bold text-slate-700 sm:col-span-2">
               {ui.referralCode}
               <input
@@ -339,7 +340,7 @@ export default function CandidatesTab({
               <span className="mt-1 block text-[11px] font-medium text-muted-foreground">{ui.referralCodeImmutable}</span>
             </label>
           )}
-          {!isSourceOfficer && isUpperManagement && (
+          {!isCodeIssuer && isUpperManagement && (
             <label className="block text-xs font-bold text-slate-700 sm:col-span-2">
               {ui.referralCode}
               <select

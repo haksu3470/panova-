@@ -1,5 +1,8 @@
-/** Referral codes belong only to source-country officers. */
 export const SOURCE_COUNTRY_ROLE = 'source_country';
+export const FIELD_OFFICER_ROLE = 'field_officer';
+
+/** Roles the database gives a referral code (assign_supervisor_referral_code). */
+export const CODE_ISSUING_ROLES: readonly string[] = [SOURCE_COUNTRY_ROLE, FIELD_OFFICER_ROLE];
 
 export type ReferralCodeFilter = 'all' | 'none' | (string & {});
 
@@ -14,6 +17,11 @@ type CandidateCodeRow = {
 
 export function isSourceCountryOfficer(role: string | null | undefined): boolean {
   return (role?.toLowerCase() ?? '') === SOURCE_COUNTRY_ROLE;
+}
+
+/** Source-country officers and field officers hold a referral code. */
+export function isCodeIssuingRole(role: string | null | undefined): boolean {
+  return CODE_ISSUING_ROLES.includes(role?.toLowerCase() ?? '');
 }
 
 /** Blank and whitespace-only codes are open registration. */
@@ -40,18 +48,18 @@ export function canManagerDeleteOpenCandidate(
   return isManager && normalizeReferralCode(code) === null;
 }
 
-/** Codes a manager may attach while registering. Current source-country officers only. */
+/** Codes a manager may attach while registering: current source-country officers and field officers. */
 export function supervisorReferralCodes(staff: StaffCodeRow[]): string[] {
   const codes = new Set<string>();
   for (const member of staff) {
-    if (!isSourceCountryOfficer(member.role_level)) continue;
+    if (!isCodeIssuingRole(member.role_level)) continue;
     const code = normalizeReferralCode(member.referral_code);
     if (code) codes.add(code);
   }
   return [...codes].sort();
 }
 
-/** Filter options: live source-country codes plus any code already stored on a candidate. */
+/** Filter options: live officer codes plus any code already stored on a candidate. */
 export function referralFilterCodes(staff: StaffCodeRow[], candidates: CandidateCodeRow[]): string[] {
   const codes = new Set<string>(supervisorReferralCodes(staff));
   for (const candidate of candidates) {
