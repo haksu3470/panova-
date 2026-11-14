@@ -58,10 +58,11 @@ In-app guide: `staff-invite`.
 
 **Adımlar / Steps:**
 
-1. Open `/portal`. The sign-in field is an email (`type="email"`), labeled as username and email.
+1. Open `/portal`. The card title reads **Personel Girişi** with the subtitle **Panova ekibi için yönetim paneli** (en Staff Login, sq Hyrje për stafin, ar دخول الموظفين, mk Најава за персонал; check each language from the switcher). The sign-in field is an email (`type="email"`), labeled as username and email.
 2. Sign in with password, or Google, using the invited address.
 3. If the mailbox is not confirmed, the verify screen opens (`EmailVerifyNotice`). Paste the numeric code (6–10 digits) or the confirm URL, or use the link in the message. Resend waits 30 seconds.
-4. Sign out from the portal header, then sign in again with an address that was never invited.
+4. After sign-in the header reads **Personel Paneli** (en Staff Panel, sq Paneli i stafit, ar لوحة الموظفين, mk Панел за персонал). `/candidate` says **Aday Girişi** and `/employer-login` says **İşveren Girişi**, matching the home sign-in menu.
+5. Sign out from the portal header, then sign in again with an address that was never invited.
 
 **Beklenen / Expected:** A confirmed, invited address reaches Overview. An unconfirmed password sign-in stays on the verify screen and does not open the tabs. An address with no invite is signed out and sees `staffNotInvited`. Google accounts that Supabase already treats as proved skip the extra mailbox check (`isGoogleProvedUser`).
 
@@ -494,7 +495,7 @@ Automated: `lib/guides-print.test.ts` (upper management all or one role, ?role i
 
 **Rol / Role:** Signed out, then upper management, a demo employer and a demo candidate. Shared component: `components/site/PageHeader.tsx` (`PageHeader`, `HeaderActions`).
 
-1. **Sıra / Order.** On `/portal`, `/portal/candidates/{id}`, `/portal/requests/{id}`, `/portal/employers/{id}`, `/employer` and `/candidate` the right-hand group ends with: language switcher, **Ana Sayfaya Dön**, **Çıkış Yap**, same look on every page. Page buttons come first: **Portala Dön** and save (plus match and delete on a request, delete on an employer) on the staff files; **Yönetim paneline dön** on `/employer` opened from the portal; print and back to portal on `/guides`.
+1. **Sıra / Order.** On `/portal`, `/portal/candidates/{id}`, `/portal/requests/{id}`, `/portal/employers/{id}`, `/employer` and `/candidate` the right-hand group ends with: language switcher, **Ana Sayfaya Dön**, **Çıkış Yap**, same look on every page. Page buttons come first: **Portala Dön** and save (plus match and delete on a request, delete on an employer) on the staff files; **Personel paneline dön** on `/employer` opened from the portal; print and back to portal on `/guides`.
 2. **Kullanıcı / User.** The staff name and role badge on `/portal` and the "Yetkili: …" label on `/employer` sit on the left, next to the logo and the title, not in the button group.
 3. **Girişsiz sayfalar / Signed-out pages.** `/portal` and `/candidate` sign-in, `/employer-login`, `/auth/reset-password`, `/kvkk`, `/admin` and `/supplier` show language switcher and **Ana Sayfaya Dön** only (no log out). `/guides` adds **Çıkış Yap** once signed in.
 4. **Davranış / Behaviour.** Log out on `/portal` and `/candidate` shows the sign-in screen, on `/employer` it opens `/employer-login`, on a staff file it opens `/portal` signed out. **Ana Sayfaya Dön** opens `/` (on reset-password it also clears the pending recovery).
