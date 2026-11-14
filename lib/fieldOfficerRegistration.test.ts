@@ -175,6 +175,37 @@ test('verification covers a-f, keeps nothing and uses no real addresses', () => 
   }
 });
 
+test('verification: every test candidate has its own placeholder phone', () => {
+  const body = code(read(VERIFICATION));
+  const inserts = body.match(/insert into public\.job_candidates \([\s\S]*?;/g) ?? [];
+  assert.equal(inserts.length, 9);
+  const phones = inserts.map((stmt) => {
+    assert.match(stmt, /email, phone, profession/, 'phone column');
+    const phone = /@example\.invalid', '([^']+)', 'TEST'/.exec(stmt)?.[1];
+    assert.ok(phone, 'phone value right after the e-mail');
+    assert.match(phone, /^\+000 0000 \d{4}$/, 'placeholder, not a real number');
+    return phone;
+  });
+  assert.equal(new Set(phones).size, phones.length, 'each test row has a different phone');
+});
+
+test('verification: a failed b1 / e1 / e2 shows why the insert was refused', () => {
+  const body = code(read(VERIFICATION));
+  for (const [step, staffVar] of [['b1', 'v_a_staff'], ['e1', 'v_um_staff'], ['e2', 'v_src_staff']]) {
+    // the result line is the last mention (a YAPILAMADI line for a missing account comes first)
+    const line = body.lastIndexOf(`] ${step} `);
+    const block = body.slice(body.lastIndexOf('v_diag := null;', line), line);
+    assert.ok(block.includes('if not v_ok then'), `${step}: only on failure`);
+    assert.ok(block.includes('set local role authenticated;'), `${step}: measured as the same user`);
+    for (const probe of ['public.is_staff()', 'public.staff_can_insert_candidate()', 'from public.current_staff() me', `where sm.id = ${staffVar}`, 'sm.is_active']) {
+      assert.ok(block.includes(probe), `${step}: ${probe}`);
+    }
+    // end of the format(...) statement; the e1 text itself contains a ';'
+    const tail = body.slice(line, body.indexOf('));', line) + 3);
+    assert.ok(tail.includes("coalesce(v_diag, '')"), `${step}: written on the result line`);
+  }
+});
+
 test('portal: field officers register under their own code; warnings stay source-country only', () => {
   const tab = read('components/portal/CandidatesTab.tsx');
   assert.match(tab, /const isCodeIssuer = isCodeIssuingRole\(currentUser\?\.role_level\);/);
