@@ -61,3 +61,23 @@ test('request, staff and candidate cards: delete is the last row of the card', (
   assert.ok(cards.indexOf('ui.openCandidateFile') < cards.indexOf('data-delete-row'), 'delete comes after "open file"');
   assert.match(afterDeleteRow(cards, 'deleteButton(candidate, code)'), ONLY_CLOSING);
 });
+
+test('desktop candidate table: delete is the last column, not in the referral-code cell', () => {
+  const candidates = read('components/portal/CandidatesTab.tsx');
+  const table = candidates.slice(candidates.indexOf('<ScrollTable>'), candidates.indexOf('</ScrollTable>'));
+  assert.equal((table.match(/deleteButton\(candidate, code\)/g) || []).length, 1, 'one delete button per row');
+  // header: last cell after "official process", no visible text, named for screen readers, end-aligned
+  const head = table.slice(table.indexOf('<thead'), table.indexOf('</thead>'));
+  const ths = head.match(/<th\b/g) || [];
+  assert.ok(head.lastIndexOf('{t.officialProcessLabel}') < head.lastIndexOf('<th'), 'delete heading comes after official process');
+  assert.match(head, /\{isUpperManagement \? <th className="p-4 text-end"><span className="sr-only">\{ui\.deleteRecord\}<\/span><\/th> : null\}\s*<\/tr>/);
+  assert.ok(ths.length >= 9);
+  // row: the referral-code cell holds only the code; delete is the last cell, end-aligned (left in RTL)
+  const body = table.slice(table.indexOf('<tbody'));
+  const codeCell = body.slice(body.indexOf('ui.referralCodeEmpty') - 300, body.indexOf('</td>', body.indexOf('ui.referralCodeEmpty')));
+  assert.equal(codeCell.includes('deleteButton'), false, 'delete left the referral-code cell');
+  assert.match(body, /<OfficialProcessBadge [^>]*\/>\s*<\/td>\s*\{isUpperManagement \? <td className="p-4 text-end" data-delete-cell>\{deleteButton\(candidate, code\)\}<\/td> : null\}\s*<\/tr>/);
+  // same small secondary button, same permission and dialog
+  assert.match(candidates, /allowed=\{isUpperManagement\}/);
+  assert.match(read('components/portal/DeleteRecordButton.tsx'), /className=\{DELETE_BUTTON_CLASS\}/);
+});

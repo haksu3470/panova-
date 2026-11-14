@@ -550,6 +550,8 @@ export default function CandidatesTab({
                 <th className="p-4">🛡️ {t.assigneeText}</th>
                 <th className="p-4">{t.colVisaStatus}</th>
                 <th className="p-4">{t.officialProcessLabel}</th>
+                {/* delete column: no visible heading, named for screen readers */}
+                {isUpperManagement ? <th className="p-4 text-end"><span className="sr-only">{ui.deleteRecord}</span></th> : null}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -578,7 +580,6 @@ export default function CandidatesTab({
                       ) : (
                         <span className="text-muted-foreground">{ui.referralCodeEmpty}</span>
                       )}
-                      {deleteButton(candidate, code)}
                     </td>
                     <td className="p-4">
                       <div>{candidatePassportLabel(candidate.passport_number || candidate.passport_no, ui.unspecified)}</div>
@@ -593,6 +594,7 @@ export default function CandidatesTab({
                     <td className="p-4">
                       <OfficialProcessBadge status={candidate.official_process_status} steps={ui.steps} stoppedLabel={t.plProcessStopped || ui.steps.rejected} />
                     </td>
+                    {isUpperManagement ? <td className="p-4 text-end" data-delete-cell>{deleteButton(candidate, code)}</td> : null}
                   </tr>
                 );
               })}
