@@ -4,9 +4,39 @@ import type { Language } from './dictionary';
  * Column headings for exported lists (CSV, Excel, print), in five languages.
  * Row builders in lib/exportLists.ts use these keys; labelExportColumns()
  * swaps a key for its heading. A key without a heading is kept as it is.
+ * Internal fields (EXPORT_HIDDEN_COLUMNS) never reach a file or a printout.
  */
-export const EXPORT_COLUMNS = [
+
+/**
+ * Fields that are dropped from every export (CSV, Excel, print), staff and
+ * employer alike, whatever the row builder passes. lib/exportShared.test.ts
+ * pins this list.
+ */
+export const EXPORT_HIDDEN_COLUMNS = [
   'id',
+  'is_demo',
+  'candidate_id',
+  'match_id',
+  'request_id',
+  'employer_id',
+  'job_request_id',
+  'auth_user_id',
+  'user_id',
+  'created_by',
+  'assigned_to',
+  'assigned_backup',
+  'referral_code',
+  'internal_notes',
+  'panova_notes',
+] as const;
+
+const HIDDEN = new Set<string>(EXPORT_HIDDEN_COLUMNS);
+
+/** True for a column that may appear in an export. */
+export function isVisibleExportColumn(key: string): boolean {
+  return !HIDDEN.has(key);
+}
+export const EXPORT_COLUMNS = [
   'full_name',
   'candidate_name',
   'nationality',
@@ -36,15 +66,12 @@ export const EXPORT_COLUMNS = [
   'arrival_city',
   'experience_years',
   'language_skills',
-  'candidate_id',
-  'is_demo',
 ] as const;
 
 export type ExportColumn = (typeof EXPORT_COLUMNS)[number];
 
 export const EXPORT_COLUMN_LABELS: Record<Language, Record<ExportColumn, string>> = {
   tr: {
-    id: 'Kayıt no',
     full_name: 'Ad soyad',
     candidate_name: 'Aday',
     nationality: 'Uyruk',
@@ -74,11 +101,8 @@ export const EXPORT_COLUMN_LABELS: Record<Language, Record<ExportColumn, string>
     arrival_city: 'Varış şehri',
     experience_years: 'Deneyim (yıl)',
     language_skills: 'Diller',
-    candidate_id: 'Aday no',
-    is_demo: 'Demo',
   },
   en: {
-    id: 'Record ID',
     full_name: 'Full name',
     candidate_name: 'Candidate',
     nationality: 'Nationality',
@@ -108,11 +132,8 @@ export const EXPORT_COLUMN_LABELS: Record<Language, Record<ExportColumn, string>
     arrival_city: 'Arrival city',
     experience_years: 'Experience (years)',
     language_skills: 'Languages',
-    candidate_id: 'Candidate ID',
-    is_demo: 'Demo',
   },
   sq: {
-    id: 'Nr. i regjistrimit',
     full_name: 'Emri dhe mbiemri',
     candidate_name: 'Kandidati',
     nationality: 'Shtetësia',
@@ -142,11 +163,8 @@ export const EXPORT_COLUMN_LABELS: Record<Language, Record<ExportColumn, string>
     arrival_city: 'Qyteti i mbërritjes',
     experience_years: 'Përvoja (vite)',
     language_skills: 'Gjuhët',
-    candidate_id: 'Nr. i kandidatit',
-    is_demo: 'Demo',
   },
   ar: {
-    id: 'رقم السجل',
     full_name: 'الاسم الكامل',
     candidate_name: 'المرشح',
     nationality: 'الجنسية',
@@ -176,11 +194,8 @@ export const EXPORT_COLUMN_LABELS: Record<Language, Record<ExportColumn, string>
     arrival_city: 'مدينة الوصول',
     experience_years: 'الخبرة (سنوات)',
     language_skills: 'اللغات',
-    candidate_id: 'رقم المرشح',
-    is_demo: 'تجريبي',
   },
   mk: {
-    id: 'Број на запис',
     full_name: 'Име и презиме',
     candidate_name: 'Кандидат',
     nationality: 'Државјанство',
@@ -210,14 +225,14 @@ export const EXPORT_COLUMN_LABELS: Record<Language, Record<ExportColumn, string>
     arrival_city: 'Град на пристигнување',
     experience_years: 'Искуство (години)',
     language_skills: 'Јазици',
-    candidate_id: 'Број на кандидат',
-    is_demo: 'Демо',
   },
 };
 
-/** Rows with each key found in `labels` renamed to its heading; other keys and all values stay. */
+/** Rows with each key found in `labels` renamed to its heading; other keys and all values stay. Hidden columns are dropped. */
 export function renameColumns(rows: readonly Record<string, unknown>[], labels: Record<string, string>): Record<string, unknown>[] {
-  return rows.map((row) => Object.fromEntries(Object.entries(row).map(([key, value]) => [labels[key] || key, value])));
+  return rows.map((row) => Object.fromEntries(
+    Object.entries(row).filter(([key]) => isVisibleExportColumn(key)).map(([key, value]) => [labels[key] || key, value]),
+  ));
 }
 
 /** Rows with each known column key replaced by its heading in `lang`. Values are untouched. */

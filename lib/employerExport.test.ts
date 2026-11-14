@@ -76,23 +76,29 @@ test('no forbidden field or value reaches an employer export', () => {
 
 test('employees: flight date, cities and start date in; flight number and follow-ups out', () => {
   const row = outputs.employees[0];
-  assert.equal(row.flight_date, '2026-11-20');
+  assert.equal(row.flight_date, '20.11.2026');
   assert.equal(row.departure_city, 'Dhaka');
   assert.equal(row.arrival_city, 'Skopje');
-  assert.equal(row.start_date, '2026-11-25');
+  assert.equal(row.start_date, '25.11.2026');
   assert.equal(row.official_process_status, 'P:arrived');
   assert.equal('flight_number' in row || 'followups' in row, false);
 });
 
-test('values: labels from the page copy, money with currency, dates as days', () => {
+test('values: labels from the page copy, localized country, number and date, money with currency', () => {
   assert.deepEqual(outputs.requests[0], {
-    position_title: 'Kalıpçı', headcount: 2, city: 'Skopje', country: 'North Macedonia',
-    monthly_net_salary: '1300', currency: 'EUR', contract_type: 'D:12 ay',
-    target_start_date: '2026-12-01', status: 'R:new_request', created_at: '2026-11-10',
+    position_title: 'Kalıpçı', headcount: 2, city: 'Skopje', country: 'Kuzey Makedonya',
+    monthly_net_salary: '1.300', currency: 'EUR', contract_type: 'D:12 ay',
+    target_start_date: '01.12.2026', status: 'R:new_request', created_at: '10.11.2026',
   });
   assert.equal(outputs.offers[0].currency, 'USD');
+  assert.equal(outputs.offers[0].monthly_net_salary, '1.500');
   assert.equal(outputs.offers[0].status, 'O:accepted');
-  assert.equal(outputs.selected[0].decided_at, '2026-11-12');
+  assert.equal(outputs.selected[0].decided_at, '12.11.2026');
+  const english = employerRequestRows([request], 'en', copy)[0];
+  assert.equal(english.country, 'North Macedonia');
+  assert.equal(english.monthly_net_salary, '1,300');
+  assert.equal(english.target_start_date, '01/12/2026');
+  assert.equal(employerRequestRows([request], 'mk', copy)[0].country, 'Северна Македонија');
 });
 
 test('every employer column has a heading in five languages', () => {

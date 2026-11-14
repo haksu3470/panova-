@@ -179,6 +179,8 @@ export default function CandidatesTab({
           <ListExportBar
             filename="candidates"
             title={t.candidatesTab || 'Candidates'}
+            lang={lang}
+            dir={lang === 'ar' ? 'rtl' : 'ltr'}
             rows={candidateExportRows(filteredCandidates, lang, {
               candidateStatus: t.colVisaStatus || 'candidate_status',
               officialProcess: t.officialProcessLabel || 'official_process',
