@@ -40,6 +40,13 @@ import {
   isMissingVideoPermissionRpc,
   youtubeSaveFailure,
 } from '@/lib/youtube';
+import {
+  VIDEO_CHECK_MESSAGE_KEY,
+  checkVideoSlots,
+  requestYouTubeCheck,
+  slotsToCheck,
+  type VideoSlotCheck,
+} from '@/lib/youtubeChannel';
 
 function CandidateDetailPageInner() {
   const params = useParams();
@@ -67,6 +74,9 @@ function CandidateDetailPageInner() {
   const [showIO, setShowIO] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  // Channel check of new video links (/api/youtube-check) before saving.
+  const [checkingVideos, setCheckingVideos] = useState(false);
+  const [videoErrors, setVideoErrors] = useState<Record<string, VideoSlotCheck>>({});
 
   const [status, setStatus] = useState('pending');
   const { role: staffRole, upper: isUpperStaff } = useStaffRole();
@@ -225,6 +235,18 @@ function CandidateDetailPageInner() {
     setCandidate((prev: Record<string, unknown> | null) => (prev ? { ...prev, status: next } : prev));
   };
 
+  const videoCheckMessage = (reason: VideoSlotCheck) =>
+    t[VIDEO_CHECK_MESSAGE_KEY[reason]] || t.youtubeVideoUnavailable || '';
+
+  // Editing a box hides its old channel-check message until the next save.
+  const clearVideoError = (slot: string) =>
+    setVideoErrors((prev) => {
+      if (!(slot in prev)) return prev;
+      const next = { ...prev };
+      delete next[slot];
+      return next;
+    });
+
   const handleSaveDetail = async () => {
     // documents_json also holds closure_meta and profile_meta (emergency
     // contact). Documents now live in candidate_documents: the old `docs`
@@ -259,6 +281,24 @@ function CandidateDetailPageInner() {
     }
 
     if (canEditVideo) {
+      // New links only: a video already saved is not checked again, a blank box is skipped.
+      const toCheck = slotsToCheck([
+        { id: 'candidate-video-1', value: videoUrl1, saved: candidate?.video_url_1 ?? candidate?.video_url },
+        { id: 'candidate-video-2', value: videoUrl2, saved: candidate?.video_url_2 },
+        { id: 'candidate-video-3', value: videoUrl3, saved: candidate?.video_url_3 },
+      ]);
+      setVideoErrors({});
+      if (toCheck.length > 0) {
+        setCheckingVideos(true);
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token ?? '';
+        const failures = await checkVideoSlots(toCheck, (url) => requestYouTubeCheck(url, token));
+        setCheckingVideos(false);
+        if (Object.keys(failures).length > 0) {
+          setVideoErrors(failures);
+          return;
+        }
+      }
       try {
         const videos = candidateVideoWrite({ videoUrl1, videoUrl2, videoUrl3 });
         Object.assign(payload, videos);
@@ -429,8 +469,8 @@ function CandidateDetailPageInner() {
                   <Link href="/portal" className={headerButtonClass.light}>
                     ← {t.returnToPortal}
                   </Link>
-                  <button onClick={handleSaveDetail} disabled={saving} className={headerPrimaryClass}>
-                    <Save className="w-4 h-4" /> {saving ? (t.saving) : (t.saveChanges)}
+                  <button onClick={handleSaveDetail} disabled={saving || checkingVideos} className={headerPrimaryClass}>
+                    <Save className="w-4 h-4" /> {checkingVideos ? (t.youtubeVideoChecking || t.saving) : saving ? (t.saving) : (t.saveChanges)}
                   </button>
                 </>
               }
@@ -584,10 +624,11 @@ function CandidateDetailPageInner() {
               </h3>
               <CandidateYouTubeEditor
                 canEdit={canEditVideo}
+                errors={Object.fromEntries(Object.entries(videoErrors).map(([slot, reason]) => [slot, videoCheckMessage(reason)]))}
                 slots={[
-                  { id: 'candidate-video-1', label: t.video1GenIntro || '', value: videoUrl1, onChange: setVideoUrl1 },
-                  { id: 'candidate-video-2', label: t.video2Skill || '', value: videoUrl2, onChange: setVideoUrl2 },
-                  { id: 'candidate-video-3', label: t.video3Field || '', value: videoUrl3, onChange: setVideoUrl3 },
+                  { id: 'candidate-video-1', label: t.video1GenIntro || '', value: videoUrl1, onChange: (v) => { setVideoUrl1(v); clearVideoError('candidate-video-1'); } },
+                  { id: 'candidate-video-2', label: t.video2Skill || '', value: videoUrl2, onChange: (v) => { setVideoUrl2(v); clearVideoError('candidate-video-2'); } },
+                  { id: 'candidate-video-3', label: t.video3Field || '', value: videoUrl3, onChange: (v) => { setVideoUrl3(v); clearVideoError('candidate-video-3'); } },
                 ]}
                 labels={{
                   title: t.youtubeVideoTitle || t.corporateYouTubeVideos || '',

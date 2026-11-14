@@ -234,7 +234,16 @@ In-app guide: `employer-browse`.
 
 **Bilinen engel / Known blocker:** The database check allows a stored shorts or `youtu.be` URL, while the editor rewrites those to a watch URL on the next supervisor save. Candidates have no way to paste a link, which matches the guide.
 
-Automated: `lib/youtube.test.ts`.
+**Kanal kontrolü / Channel check.** Only videos on the Panova Group Official channel (`https://www.youtube.com/@Panovagroup`, channel id `UCHzIu3R81xP0_GE2XbCQ17w`) are saved. Before **Değişiklikleri Kaydet** the page sends each new, filled link to `POST /api/youtube-check`. The server asks YouTube oEmbed (5 s timeout) and compares the `author_url` handle, ignoring case, with `YOUTUBE_ALLOWED_CHANNEL_HANDLE` (env; default `panovagroup`). Blank boxes and videos already saved are not checked. While it runs the button is disabled and reads **Kontrol ediliyor…**. Any failure blocks the save and shows its text under that box. Check:
+
+1. An **unlisted** video on the Panova channel: saved.
+2. A video from another channel: not saved; under the box "Bu video Panova Group Official kanalında değil. Videoyu önce Panova kanalına yükletin."
+3. A **private** or **deleted** video (or YouTube unreachable): not saved; under the box "Video doğrulanamadı. Video özel/silinmiş olabilir veya YouTube'a ulaşılamadı; biraz sonra tekrar deneyin."
+4. As a field officer, call `/api/youtube-check` with your session: 403. Without a session: 401.
+
+**Kabul edilen risk / Accepted risk:** The check runs in the app and the API route only. The database trigger cannot call YouTube, so a supervisor writing `video_url_*` straight through the Supabase API or the table skips the channel check (the role check in `guard_candidate_youtube_video` still applies). Videos saved before this check are not re-checked.
+
+Automated: `lib/youtube.test.ts`, `lib/youtubeChannel.test.ts`.
 
 ## S10. Kılavuz merkezi / Guides hub
 

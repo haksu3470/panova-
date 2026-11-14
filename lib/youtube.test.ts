@@ -141,7 +141,7 @@ test('new YouTube copy exists in TR, EN, SQ, AR, and MK', () => {
     assert.match(String(translations[lang].youtubeVideoInvalid), /youtu\.be/);
     assert.match(String(translations[lang].youtubeVideoInvalid), /shorts/);
     assert.match(String(translations[lang].youtubeVideoInvalid), /embed/);
-    assert.match(String(translations[lang].youtubeVideoSupervisorNote), /panova@panovagroup\.org/);
+    assert.match(String(translations[lang].youtubeVideoSupervisorNote), /youtube\.com\/@Panovagroup/);
   }
 
   assert.match(String(translations.ar.youtubeVideoEmpty), arabic);

@@ -181,6 +181,9 @@ export interface Translation {
   youtubeVideoOpen?: string;
   youtubeVideoClear?: string;
   youtubeVideoInvalid?: string;
+  youtubeVideoWrongChannel?: string;
+  youtubeVideoUnavailable?: string;
+  youtubeVideoChecking?: string;
   youtubeVideoSupervisorNote?: string;
   youtubeVideoReadOnly?: string;
   youtubeVideoLabel?: string;
@@ -875,7 +878,10 @@ export const translations: Record<Language, Translation> = {
     youtubeVideoOpen: 'Video bağlantısını aç',
     youtubeVideoClear: 'Temizle',
     youtubeVideoInvalid: 'Geçerli bir YouTube bağlantısı girin: youtube.com/watch, youtu.be, shorts veya embed.',
-    youtubeVideoSupervisorNote: 'Yalnızca bölge ve ülke sorumluları bu videoyu değiştirebilir. Bağlantı Panova YouTube kanalından olmalıdır (panova@panovagroup.org).',
+    youtubeVideoWrongChannel: 'Bu video Panova Group Official kanalında değil. Videoyu önce Panova kanalına yükletin.',
+    youtubeVideoUnavailable: 'Video doğrulanamadı. Video özel/silinmiş olabilir veya YouTube\'a ulaşılamadı; biraz sonra tekrar deneyin.',
+    youtubeVideoChecking: 'Kontrol ediliyor…',
+    youtubeVideoSupervisorNote: 'Yalnızca bölge ve ülke sorumluları bu videoyu değiştirebilir. Bağlantı Panova YouTube kanalından olmalıdır (Panova Group Official, youtube.com/@Panovagroup).',
     youtubeVideoReadOnly: 'Bu videoyu yalnızca bölge ve ülke sorumluları düzenleyebilir.',
     youtubeVideoLabel: 'YouTube video bağlantısı',
     companies: {
@@ -1649,7 +1655,10 @@ export const translations: Record<Language, Translation> = {
     youtubeVideoOpen: 'Open the video link',
     youtubeVideoClear: 'Clear',
     youtubeVideoInvalid: 'Enter a valid YouTube link: youtube.com/watch, youtu.be, shorts, or embed.',
-    youtubeVideoSupervisorNote: 'Only region and country supervisors can change this video. Use a link from the Panova YouTube channel (panova@panovagroup.org).',
+    youtubeVideoWrongChannel: 'This video is not on the Panova Group Official channel. Have the video uploaded to the Panova channel first.',
+    youtubeVideoUnavailable: 'The video could not be verified. It may be private or deleted, or YouTube could not be reached; try again shortly.',
+    youtubeVideoChecking: 'Checking…',
+    youtubeVideoSupervisorNote: 'Only region and country supervisors can change this video. Use a link from the Panova YouTube channel (Panova Group Official, youtube.com/@Panovagroup).',
     youtubeVideoReadOnly: 'Only region and country supervisors can edit this video.',
     youtubeVideoLabel: 'YouTube video link',
     companies: {
@@ -2424,7 +2433,10 @@ export const translations: Record<Language, Translation> = {
     youtubeVideoOpen: 'Hap lidhjen e videos',
     youtubeVideoClear: 'Pastro',
     youtubeVideoInvalid: 'Vendosni një lidhje të vlefshme YouTube: youtube.com/watch, youtu.be, shorts ose embed.',
-    youtubeVideoSupervisorNote: 'Vetëm mbikëqyrësit e rajonit dhe të vendit mund ta ndryshojnë këtë video. Përdorni një lidhje nga kanali YouTube i Panova (panova@panovagroup.org).',
+    youtubeVideoWrongChannel: 'Kjo video nuk është në kanalin Panova Group Official. Fillimisht ngarkojeni videon në kanalin e Panova.',
+    youtubeVideoUnavailable: 'Videoja nuk mund të verifikohej. Mund të jetë private ose e fshirë, ose YouTube nuk u arrit; provoni përsëri pas pak.',
+    youtubeVideoChecking: 'Po kontrollohet…',
+    youtubeVideoSupervisorNote: 'Vetëm mbikëqyrësit e rajonit dhe të vendit mund ta ndryshojnë këtë video. Përdorni një lidhje nga kanali YouTube i Panova (Panova Group Official, youtube.com/@Panovagroup).',
     youtubeVideoReadOnly: 'Këtë video mund ta ndryshojnë vetëm mbikëqyrësit e rajonit dhe të vendit.',
     youtubeVideoLabel: 'Lidhja e videos në YouTube',
     companies: {
@@ -3197,7 +3209,10 @@ export const translations: Record<Language, Translation> = {
     youtubeVideoOpen: 'افتح رابط الفيديو',
     youtubeVideoClear: 'مسح',
     youtubeVideoInvalid: 'أدخل رابط يوتيوب صالحاً: youtube.com/watch أو youtu.be أو shorts أو embed.',
-    youtubeVideoSupervisorNote: 'يمكن لمشرفي المنطقة والبلد فقط تغيير هذا الفيديو. استخدم رابطاً من قناة يوتيوب بانوفا (panova@panovagroup.org).',
+    youtubeVideoWrongChannel: 'هذا الفيديو ليس على قناة Panova Group Official. ارفع الفيديو أولاً على قناة بانوفا.',
+    youtubeVideoUnavailable: 'تعذر التحقق من الفيديو. قد يكون خاصاً أو محذوفاً، أو تعذر الوصول إلى يوتيوب؛ حاول مرة أخرى بعد قليل.',
+    youtubeVideoChecking: 'جارٍ التحقق…',
+    youtubeVideoSupervisorNote: 'يمكن لمشرفي المنطقة والبلد فقط تغيير هذا الفيديو. استخدم رابطاً من قناة يوتيوب بانوفا (Panova Group Official, youtube.com/@Panovagroup).',
     youtubeVideoReadOnly: 'يمكن لمشرفي المنطقة والبلد فقط تعديل هذا الفيديو.',
     youtubeVideoLabel: 'رابط فيديو يوتيوب',
     companies: {
@@ -3961,7 +3976,10 @@ export const translations: Record<Language, Translation> = {
     youtubeVideoOpen: 'Отвори го линкот на видеото',
     youtubeVideoClear: 'Избриши',
     youtubeVideoInvalid: 'Внесете валиден YouTube линк: youtube.com/watch, youtu.be, shorts или embed.',
-    youtubeVideoSupervisorNote: 'Само регионалните и државните одговорни можат да го менуваат ова видео. Користете линк од YouTube каналот на Panova (panova@panovagroup.org).',
+    youtubeVideoWrongChannel: 'Ова видео не е на каналот Panova Group Official. Прво поставете го видеото на каналот на Panova.',
+    youtubeVideoUnavailable: 'Видеото не можеше да се провери. Можеби е приватно или избришано, или YouTube не е достапен; обидете се повторно наскоро.',
+    youtubeVideoChecking: 'Се проверува…',
+    youtubeVideoSupervisorNote: 'Само регионалните и државните одговорни можат да го менуваат ова видео. Користете линк од YouTube каналот на Panova (Panova Group Official, youtube.com/@Panovagroup).',
     youtubeVideoReadOnly: 'Ова видео можат да го уредуваат само регионалните и државните одговорни.',
     youtubeVideoLabel: 'Линк до YouTube видео',
     companies: {

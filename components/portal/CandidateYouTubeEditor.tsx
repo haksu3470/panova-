@@ -13,6 +13,8 @@ export type YouTubeSlot = {
 type Props = {
   slots: YouTubeSlot[];
   canEdit: boolean;
+  /** Channel check result by slot id (set by the page before saving). */
+  errors?: Record<string, string>;
   labels: CandidateYouTubeLabels & {
     field: string;
     clear: string;
@@ -28,7 +30,7 @@ type Props = {
   };
 };
 
-export default function CandidateYouTubeEditor({ slots, canEdit, labels, preview }: Props) {
+export default function CandidateYouTubeEditor({ slots, canEdit, errors = {}, labels, preview }: Props) {
   if (!canEdit) {
     return (
       <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -48,7 +50,8 @@ export default function CandidateYouTubeEditor({ slots, canEdit, labels, preview
       {slots.map((slot) => {
         const trimmed = slot.value.trim();
         const invalid = trimmed.length > 0 && !parseYouTubeVideoId(trimmed);
-        const describedBy = invalid ? `${slot.id}-error` : undefined;
+        const message = invalid ? labels.invalid : errors[slot.id] || '';
+        const describedBy = message ? `${slot.id}-error` : undefined;
         return (
           <div key={slot.id} className="space-y-1">
             <label htmlFor={slot.id} className="block text-[11px] font-bold text-slate-700">
@@ -62,7 +65,7 @@ export default function CandidateYouTubeEditor({ slots, canEdit, labels, preview
                 value={slot.value}
                 onChange={(event) => slot.onChange(event.target.value)}
                 placeholder={YOUTUBE_URL_PLACEHOLDER}
-                aria-invalid={invalid}
+                aria-invalid={Boolean(message)}
                 aria-describedby={describedBy}
                 className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-900 outline-none"
               />
@@ -76,9 +79,9 @@ export default function CandidateYouTubeEditor({ slots, canEdit, labels, preview
                 {labels.clear}
               </button>
             </div>
-            {invalid && (
-              <p id={`${slot.id}-error`} className="text-[11px] font-medium text-red-700">
-                {labels.invalid}
+            {message && (
+              <p id={`${slot.id}-error`} role="alert" className="text-[11px] font-medium text-red-700">
+                {message}
               </p>
             )}
           </div>

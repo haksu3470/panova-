@@ -1,9 +1,17 @@
 /**
  * Candidate profile videos are links on the Panova YouTube channel
- * (panova@panovagroup.org). The portal stores a watch, youtu.be, shorts,
- * or embed URL. Playback uses the video id only, so the embed never
- * follows an arbitrary address.
+ * "Panova Group Official" (https://www.youtube.com/@Panovagroup, channel id
+ * UCHzIu3R81xP0_GE2XbCQ17w). Videos are uploaded there as unlisted. The
+ * portal stores a watch, youtu.be, shorts, or embed URL. Playback uses the
+ * video id only, so the embed never follows an arbitrary address.
+ * Before a new link is saved, /api/youtube-check asks YouTube oEmbed which
+ * channel owns it (lib/youtubeChannel.ts).
  */
+
+/** Channel handle (without @, lower case) that candidate videos must come from. */
+export const YOUTUBE_ALLOWED_CHANNEL_HANDLE = 'panovagroup';
+export const YOUTUBE_CHANNEL_URL = 'https://www.youtube.com/@Panovagroup';
+export const YOUTUBE_CHANNEL_ID = 'UCHzIu3R81xP0_GE2XbCQ17w';
 
 const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
 
