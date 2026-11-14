@@ -136,6 +136,7 @@ export default function HomePage() {
             mapLabel={x.hero.mapLabel}
             flowTitle={x.hero.flowTitle}
             flow={x.hero.flow}
+            flowDesc={x.hero.flowDesc}
           />
         </div>
         {/* Section links: one scrolling row on phones, wrapped from sm */}
