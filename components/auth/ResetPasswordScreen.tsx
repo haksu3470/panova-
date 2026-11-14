@@ -9,6 +9,7 @@ import { AuthFooter } from '@/components/site/AuthFooter';
 import { HeaderActions, PageHeader } from '@/components/site/PageHeader';
 import { translations } from '@/lib/dictionary';
 import { EMAIL_OTP_LENGTH } from '@/lib/emailConfirmation';
+import { passwordErrorMessage } from '@/lib/passwordError';
 import { completePasswordReset, verifyRecoveryProof } from '@/lib/passwordResetActions';
 import {
   clearRecoveryPending,
@@ -126,7 +127,7 @@ export default function ResetPasswordScreen({ audience }: { audience: ResetAudie
     const result = await completePasswordReset(password);
     setBusy(false);
     if (result !== 'ok') {
-      setInfo(t.resetPasswordFail || '');
+      setInfo(passwordErrorMessage(result.error, t));
       return;
     }
     clearRecoveryPending();

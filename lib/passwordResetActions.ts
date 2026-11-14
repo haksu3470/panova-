@@ -1,5 +1,6 @@
 import { recordEmailProof } from '@/lib/emailVerification';
 import { normalizeEmail } from '@/lib/emailAddress';
+import { passwordErrorKind, type PasswordErrorKind } from '@/lib/passwordError';
 import {
   isUnknownUserResetError,
   markRecoveryPending,
@@ -34,9 +35,9 @@ export async function verifyRecoveryProof(email: string, raw: string): Promise<'
   return 'ok';
 }
 
-export async function completePasswordReset(password: string): Promise<'ok' | 'failed'> {
+export async function completePasswordReset(password: string): Promise<'ok' | { error: PasswordErrorKind }> {
   const { error } = await supabase.auth.updateUser({ password });
-  if (error) return 'failed';
+  if (error) return { error: passwordErrorKind(error) };
   await recordEmailProof();
   return 'ok';
 }
