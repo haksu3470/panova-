@@ -116,3 +116,75 @@ export const REQUEST_STATUS_ROLES = ['upper_management'] as const;
 export function canUpdateRequestStatus(role: string | null | undefined): boolean {
   return (REQUEST_STATUS_ROLES as readonly string[]).includes((role || '').trim().toLowerCase());
 }
+
+/**
+ * Who may pick the candidate's responsible staff member (job_candidates.assigned_to).
+ * The database lets any staff member who can read the candidate update the
+ * row (staff_update_candidates); the portal keeps the choice with the
+ * managers and the country officers, and shows it read-only to field officers.
+ */
+export const CANDIDATE_ASSIGN_ROLES = ['upper_management', 'source_country', 'target_country'] as const;
+
+export function canAssignCandidate(role: string | null | undefined): boolean {
+  return (CANDIDATE_ASSIGN_ROLES as readonly string[]).includes((role || '').trim().toLowerCase());
+}
+
+/** Controls on the staff candidate file (app/portal/candidates/[id]). */
+export const CANDIDATE_FILE_CONTROLS = [
+  'profileContact',
+  'travel',
+  'documentsUpload',
+  'documentsDelete',
+  'internalNotes',
+  'closure',
+  'statusOverride',
+  'interviewOffer',
+  'jobOfferForm',
+  'notification',
+  'assignee',
+] as const;
+
+export type CandidateFileControl = (typeof CANDIDATE_FILE_CONTROLS)[number];
+export type ControlAccess = 'edit' | 'read' | 'hidden';
+
+/**
+ * What each role sees on the candidate file. Mirrors the database:
+ * - job_candidates update (contact, travel, notes, closure, assignee):
+ *   any staff member who can read the candidate (staff_update_candidates);
+ *   the assignee is read-only for field officers by portal rule.
+ * - candidate_documents insert / update: same scope; delete: upper management.
+ * - status override: staff_set_candidate_status, upper management.
+ * - interviews / job_offers insert and update: INTERVIEW_OFFER_ROLES.
+ * - candidate_notifications: any staff member who can read the candidate.
+ * Finance and limited roles cannot open the file (canOpenStaffFile).
+ */
+export function candidateFileAccess(role: string | null | undefined): Record<CandidateFileControl, ControlAccess> {
+  const id = (role || '').trim().toLowerCase();
+  const opens = canOpenStaffFile(id, 'dossier');
+  const scoped: ControlAccess = opens ? 'edit' : 'hidden';
+  const offers: ControlAccess = opens && canWriteInterviewOffer(id) ? 'edit' : 'hidden';
+  return {
+    profileContact: scoped,
+    travel: scoped,
+    documentsUpload: scoped,
+    documentsDelete: opens && isUpperManagementRole(id) ? 'edit' : 'hidden',
+    internalNotes: scoped,
+    closure: scoped,
+    statusOverride: opens ? (canUpdateRequestStatus(id) ? 'edit' : 'read') : 'hidden',
+    interviewOffer: offers,
+    jobOfferForm: offers,
+    notification: scoped,
+    assignee: opens ? (canAssignCandidate(id) ? 'edit' : 'read') : 'hidden',
+  };
+}
+
+/**
+ * True for a write refused by row-level security or a grant (Postgres 42501,
+ * "new row violates row-level security policy", "permission denied"). The
+ * portal then shows its own short, translated message instead of the raw one.
+ */
+export function isPermissionError(error: { code?: string | null; message?: string | null } | null | undefined): boolean {
+  if (!error) return false;
+  if (error.code === '42501') return true;
+  return /row-level security|permission denied|not allowed|forbidden|42501/i.test(error.message || '');
+}

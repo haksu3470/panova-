@@ -45,6 +45,8 @@ interface CandidatesTabProps {
   updateCandidateStatus: (id: string, status: string, reason: string) => Promise<CandidateStatusErrorKey | null>;
   /** canUpdateRequestStatus(role): shows "Change manually"; others see a badge only. */
   canChangeStatus?: boolean;
+  /** canAssignCandidate(role): field officers see the responsible person read-only. */
+  canAssign?: boolean;
   logAudit: (action: string, performer?: string) => void;
   currentUser: any;
   isUpperManagement: boolean;
@@ -72,6 +74,7 @@ export default function CandidatesTab({
   currentUser,
   isUpperManagement,
   canChangeStatus = false,
+  canAssign = false,
 }: CandidatesTabProps) {
   const lang = toLanguage(currentLang);
   const ui = portalUi[lang];
@@ -468,6 +471,7 @@ export default function CandidatesTab({
                       <div className="text-[11px] text-muted-foreground">{candidateSectorLabel(candidate.sector, ui, t)}</div>
                     </td>
                     <td className="p-4">
+                      {canAssign ? (
                       <select
                         value={candidate.assigned_to || ''}
                         onChange={(e) => updateCandidateAssignee(candidate.id, e.target.value)}
@@ -479,6 +483,11 @@ export default function CandidatesTab({
                           <option key={staff.id} value={staff.id} className="text-slate-900 bg-white">{staff.name}</option>
                         ))}
                       </select>
+                      ) : (
+                        <span className="text-xs font-bold text-slate-800" aria-label={t.assigneeText}>
+                          {staffMembers.find((staff) => staff.id === candidate.assigned_to)?.name || '—'}
+                        </span>
+                      )}
                     </td>
                     <td className="p-4">
                       <CandidateStatusControl

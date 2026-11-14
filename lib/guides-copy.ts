@@ -211,7 +211,7 @@ const en: GuidesCopy = {
         { title: 'Review and save', body: 'Check the profile, official process and travel, then save.' },
         { title: 'Manage the YouTube link', body: 'Save, change or delete the YouTube link in the video field on the file. Roles that do not do this step watch the videos and cannot edit them.' },
       ],
-      flow: ['Candidate Pool', 'Open the file', 'Documents', 'Save'],
+      flow: ['Candidate Pool', 'Open the file', 'Document Tracking Mechanism', 'Save'],
       mock: {
         caption: 'Outline of the status and document rows on a candidate file.',
         chrome: '/portal/candidates/[id]',
@@ -276,9 +276,9 @@ const en: GuidesCopy = {
     'document-request': {
       title: 'Ask for and approve a document',
       summary: 'All of a candidate’s documents are in one list on the file. Staff ask, the candidate uploads, staff preview and approve.',
-      where: '/portal → Candidate Pool → /portal/candidates/[id] → Documents',
+      where: '/portal → Candidate Pool → /portal/candidates/[id] → Document Tracking Mechanism',
       steps: [
-        { title: 'Open the file', body: 'Open the candidate’s file from the Candidate Pool tab and scroll down to Documents.' },
+        { title: 'Open the file', body: 'Open the candidate’s file from the Candidate Pool tab and scroll down to Document Tracking Mechanism.' },
         { title: 'Ask for the document', body: 'For a type that is not on the list choose "+ Request" (for example Diploma). The document is added as "Waiting" and appears on the candidate’s Documents tab. If a request of the same type is still waiting, it cannot be asked for twice.' },
         { title: 'The candidate uploads', body: 'The candidate uploads the file in their own portal; the status becomes "Uploaded".' },
         { title: 'Preview', body: 'Open the file with Preview. If a PDF cannot be shown there, open it in a new tab or use Download. Every opening is written to the access log.' },
@@ -945,7 +945,7 @@ const sq: GuidesCopy = {
         { title: 'Shqyrtoni dhe ruani', body: 'Kontrolloni profilin, procesin zyrtar dhe udhëtimin, pastaj ruani.' },
         { title: 'Menaxhoni lidhjen YouTube', body: 'Në fushën e videos në dosje ruani, ndryshoni ose fshini lidhjen YouTube. Rolet që nuk e bëjnë këtë hap i shohin videot, por nuk i ndryshojnë.' },
       ],
-      flow: ['Grupi i Kandidatëve', 'Hap dosjen', 'Dokumentet', 'Ruaj'],
+      flow: ['Grupi i Kandidatëve', 'Hap dosjen', 'Mekanizmi i Gjurmimit të Dokumenteve', 'Ruaj'],
       mock: {
         caption: 'Skica e rreshtave të statusit dhe dokumenteve në dosjen e kandidatit.',
         chrome: '/portal/candidates/[id]',
@@ -1010,9 +1010,9 @@ const sq: GuidesCopy = {
     'document-request': {
       title: 'Kërkimi dhe miratimi i dokumentit',
       summary: 'Të gjitha dokumentet e kandidatit janë në një listë në dosje. Stafi kërkon, kandidati ngarkon, stafi e shikon dhe e miraton.',
-      where: '/portal → Grupi i Kandidatëve → /portal/candidates/[id] → Dokumentet',
+      where: '/portal → Grupi i Kandidatëve → /portal/candidates/[id] → Mekanizmi i Gjurmimit të Dokumenteve',
       steps: [
-        { title: 'Hapni dosjen', body: 'Hapni dosjen e kandidatit nga skeda Grupi i Kandidatëve dhe zbritni te pjesa Dokumentet.' },
+        { title: 'Hapni dosjen', body: 'Hapni dosjen e kandidatit nga skeda Grupi i Kandidatëve dhe zbritni te pjesa Mekanizmi i Gjurmimit të Dokumenteve.' },
         { title: 'Kërkoni dokumentin', body: 'Për llojin që nuk është në listë zgjidhni "+ Kërko" (p.sh. Diplomë). Dokumenti shtohet si "Në pritje" dhe del në skedën Dokumentet të kandidatit. Nëse ka një kërkesë në pritje të të njëjtit lloj, nuk mund të kërkohet për herë të dytë.' },
         { title: 'Kandidati ngarkon', body: 'Kandidati e ngarkon skedarin nga portali i vet; statusi bëhet "Ngarkuar".' },
         { title: 'Shikoni', body: 'Hapeni skedarin me Parapamje. Nëse PDF-ja nuk mund të shfaqet këtu, hapeni në skedë të re ose përdorni Shkarko. Çdo hapje shkruhet në regjistrin e qasjes.' },
@@ -1312,7 +1312,7 @@ const ar: GuidesCopy = {
         { title: 'راجعوا واحفظوا', body: 'تحقّقوا من الملف الشخصي والإجراءات الرسمية والسفر ثم احفظوا.' },
         { title: 'أديروا رابط يوتيوب', body: 'في حقل الفيديو في الملف احفظوا رابط يوتيوب أو غيّروه أو احذفوه. الأدوار التي لا تقوم بهذه الخطوة تشاهد الفيديوهات ولا تعدّلها.' },
       ],
-      flow: ['قائمة المرشحين', 'افتحوا الملف', 'المستندات', 'احفظوا'],
+      flow: ['قائمة المرشحين', 'افتحوا الملف', 'آلية تتبع المستندات', 'احفظوا'],
       mock: {
         caption: 'مخطط سطري الحالة والمستندات في ملف المرشح.',
         chrome: '/portal/candidates/[id]',
@@ -1377,9 +1377,9 @@ const ar: GuidesCopy = {
     'document-request': {
       title: 'طلب مستند واعتماده',
       summary: 'كل مستندات المرشح في قائمة واحدة في الملف. يطلب الموظفون، ويرفع المرشح، ثم يعاين الموظفون ويعتمدون.',
-      where: '/portal → قائمة المرشحين → /portal/candidates/[id] → المستندات',
+      where: '/portal → قائمة المرشحين → /portal/candidates/[id] → آلية تتبع المستندات',
       steps: [
-        { title: 'افتحوا الملف', body: 'افتحوا ملف المرشح من تبويب قائمة المرشحين وانزلوا إلى قسم المستندات.' },
+        { title: 'افتحوا الملف', body: 'افتحوا ملف المرشح من تبويب قائمة المرشحين وانزلوا إلى قسم آلية تتبع المستندات.' },
         { title: 'اطلبوا المستند', body: 'للنوع غير الموجود في القائمة اختاروا «+ طلب» (مثلًا دبلوم). يُضاف المستند بحالة «بانتظار» ويظهر في تبويب المستندات لدى المرشح. إذا كان هناك طلب معلّق من النوع نفسه فلا يمكن طلبه مرة ثانية.' },
         { title: 'المرشح يرفع الملف', body: 'يرفع المرشح الملف من بوابته؛ وتصبح الحالة «مرفوع».' },
         { title: 'عاينوا', body: 'افتحوا الملف عبر معاينة. إذا تعذّر عرض PDF هنا فافتحوه في علامة تبويب جديدة أو استخدموا تنزيل. كل فتح يُسجَّل في سجل الوصول.' },
@@ -1679,7 +1679,7 @@ const mk: GuidesCopy = {
         { title: 'Прегледајте и зачувајте', body: 'Проверете ги профилот, официјалната постапка и патувањето, па зачувајте.' },
         { title: 'Управувајте со YouTube врската', body: 'Во полето за видео во досието зачувајте, сменете или избришете ја YouTube врската. Улогите што не го прават овој чекор ги гледаат видеата, но не ги менуваат.' },
       ],
-      flow: ['База на кандидати', 'Отвори досие', 'Документи', 'Зачувај'],
+      flow: ['База на кандидати', 'Отвори досие', 'Механизам за следење на документи', 'Зачувај'],
       mock: {
         caption: 'Шема на редовите за статус и документи во досието на кандидатот.',
         chrome: '/portal/candidates/[id]',
@@ -1744,9 +1744,9 @@ const mk: GuidesCopy = {
     'document-request': {
       title: 'Барање и одобрување документ',
       summary: 'Сите документи на кандидатот се во една листа во досието. Персоналот бара, кандидатот прикачува, персоналот прегледува и одобрува.',
-      where: '/portal → База на кандидати → /portal/candidates/[id] → Документи',
+      where: '/portal → База на кандидати → /portal/candidates/[id] → Механизам за следење на документи',
       steps: [
-        { title: 'Отворете го досието', body: 'Отворете го досието на кандидатот од јазичето База на кандидати и слезете до делот Документи.' },
+        { title: 'Отворете го досието', body: 'Отворете го досието на кандидатот од јазичето База на кандидати и слезете до делот Механизам за следење на документи.' },
         { title: 'Побарајте го документот', body: 'За тип што го нема во листата изберете „+ Побарај“ (на пр. Диплома). Документот се додава како „Се чека“ и се појавува во јазичето Документи на кандидатот. Ако има барање на чекање од ист тип, не може да се побара втор пат.' },
         { title: 'Кандидатот прикачува', body: 'Кандидатот ја прикачува датотеката од својот портал; статусот станува „Прикачено“.' },
         { title: 'Прегледајте', body: 'Отворете ја датотеката со Преглед. Ако PDF не може да се прикаже тука, отворете ја во нова картичка или користете Преземи. Секое отворање се запишува во дневникот на пристап.' },

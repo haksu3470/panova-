@@ -68,6 +68,12 @@ export default function GuidesPrintScreen() {
     [copy, gate, viewer, requestedRole],
   );
 
+  // Browser tab, print dialog and the default PDF name follow the page language
+  // (the static metadata title is only the fallback before this runs).
+  useEffect(() => {
+    document.title = copy.print.coverSubtitle;
+  }, [copy]);
+
   const pickRole = (roleId: string) => {
     if (!viewer) return;
     const next = roleId || null;

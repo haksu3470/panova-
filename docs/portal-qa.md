@@ -108,6 +108,14 @@ In-app guide: `candidate-register`.
 
 In-app guide: `candidate-register` (profile and documents steps).
 
+**Telefon ve dil / Phone and language** (Chrome DevTools at 360 px and 419 px, then a real phone; repeat in TR, EN, SQ, AR, MK):
+
+1. **Sekmeler / Tabs.** Ana Sayfa, Profilim, Belgelerim, İş Teklifleri, Destek and Kılavuz are all visible: the strip wraps to a second line instead of running off the right edge (Arabic: off the left edge). No sideways scrolling is needed.
+2. **Dosya seç / Choose file.** On Belgelerim and the profile photo, the button and the empty text are in the page language (EN "Choose file / No file chosen", AR "اختر ملفًا / لم يتم اختيار أي ملف", MK "Избери датотека / Не е избрана датотека"), never the browser's Turkish "Dosya Seç / Dosya seçilmedi". Tab reaches the button (focus ring), Space or Enter opens the file dialog. After picking `a-very-long-passport-scan-file-name-2026.pdf` the name is shown and cut at the end with "…"; hovering shows the full name. Same picker for the company logo on `/employer` → Şirket Profili.
+3. **Dil menüsü / Language menu.** Open the language switcher in the header in Turkish and in Arabic: the whole list is on screen in both, nothing cut at the left or right edge, at 360 px and 419 px. Same on `/`, `/employer`, `/portal` and `/guides`.
+4. **Aday kodu / Candidate code.** In Macedonian at 360 px, `PNV-CAND-xxxxxx` stays on one line; the passport, profession and nationality move to the next line as whole items.
+5. **link_my_candidate.** Sign in as an already linked demo candidate with the browser console open: no `POST …/rpc/link_my_candidate 400` on load, after a reload or after saving the profile (the page reads the own row and does not call the RPC). Then sign up a new demo candidate and confirm the e-mail: the first sign-in still creates and opens the candidate row (one RPC call), and a duplicate phone or passport still shows the fix form.
+
 ## S05. Personel aday dosyası / Staff dossier review
 
 **Rol / Role:** Any staff role. Repeat the video steps as upper management or a source/target officer, then as a field officer.
@@ -125,6 +133,24 @@ In-app guide: `candidate-register` (profile and documents steps).
 **Beklenen / Expected:** The file loads for every staff role. Video editing follows `can_manage_candidate_video` (upper management, source country, target country). A field officer sees the player and the read-only note, with no URL fields. Document status has an empty line when the candidate has no `candidate_documents` rows.
 
 **Bilinen engel / Known blocker:** None for opening the file. Video save failures are covered in S09.
+
+**Rol bazlı kontroller / Controls by role** (`candidateFileAccess` in `lib/staffAccess.ts`; one demo candidate, sign in as each role):
+
+| Kontrol / Control | Üst Yönetim | Kaynak Ülke | Hedef Ülke | Saha | finance / limited |
+| --- | --- | --- | --- | --- | --- |
+| Profile contact, travel, closure, save | edit | edit | edit | edit | no file |
+| Belge Takip Mekanizması: request / upload / approve | edit | edit | edit | edit | no file |
+| Delete a document | edit | — | — | — | no file |
+| Dahili notlar (personel) | edit | edit | edit | edit | no file |
+| Candidate status "change manually" | edit | read | read | read | no file |
+| Mülakat ve teklif card | edit | edit | edit | hidden | no file |
+| Resmî İş Teklifi Gönder form | edit | edit | edit | hidden | no file |
+| Send notification | edit | edit | edit | edit | no file |
+| Responsible person in the Aday Havuzu list | select | select | select | read-only name | no tab |
+
+6. As a field officer (Saha Sorumlusu) the file has no **Resmî İş Teklifi Gönder** card and no **Mülakat ve teklif** card; the responsible person in **Aday Havuzu** is plain text, not a dropdown.
+7. Make a write fail on permission (for example a field officer whose candidate was reassigned while the file is open, then **Kaydet**): the alert says only "Bu işlem için yetkiniz yok." (EN "You do not have permission for this action.", SQ, AR, MK translated), with no "row-level security", "42501" or table name.
+8. The notes card is titled **Dahili notlar (personel)** with the line that staff who can open the file see and edit it and that it is not shown in the candidate portal.
 
 In-app guide: `dossier-review`.
 
@@ -250,6 +276,9 @@ Automated: `lib/youtube.test.ts`.
    `/guides/print` follows the same rule: a staff session prints its own steps the same way, and upper management with `?role=source_country` prints the source-country version; without `?role` every step is in full.
 
 7. **Türkçe ekran adları / Turkish screen names.** In Turkish, open a staff, an employer and a candidate portal next to `/guides`. Each tab, section and button the guide names is written exactly as on screen: staff **Genel Durum**, **Aday Havuzu**, **Personel Talepleri**, **Ekip & Yetkiler**, **İşlem Geçmişi (Audit)**, **Sorunlar / Bildirimler**, file section **Belge Takip Mekanizması**; employer **Ana Sayfa**, **Yeni Talep**, **Aday Havuzu**, **Seçtiğim Adaylar**, **İşlem Durumu**, **Seyahat Bilgilerim**, **Aktif Çalışanlar (30/60/90)**, **Şirket Profili**; candidate **Ana Sayfa**, **Profilim**, **Belgelerim**, **İş Tekliflerim**. Role names match the green badge (**Üst Yönetim**, **Kaynak Ülke Sorumlusu**, **Hedef Ülke Sorumlusu**, **Saha Sorumlusu**).
+
+8. **Belge bölümü adı / Documents section name.** In EN, SQ, AR, MK the dossier and document-request guides name the file section like the portal: **Document Tracking Mechanism**, **Mekanizmi i Gjurmimit të Dokumenteve**, **آلية تتبع المستندات**, **Механизам за следење на документи** (not "Documents"). The candidate's own **Belgelerim** tab keeps its short name.
+9. **Yazdırma başlığı / Print title.** Open `/guides/print` and switch the language: the browser tab, the print dialog and the default PDF file name follow it (TR "Panova Group Kullanım Kılavuzu", EN "Panova Group User Guide", …).
 
 **Beklenen / Expected:** Signed out: title, body, and three links (`/portal`, `/employer-login`, `/candidate`). Unconfirmed: the verify card, no articles. Unlinked: the unlinked card, no articles. A linked user sees the usage map and the how-tos for that audience. Upper management sees `staff-invite` and every role card. Other staff see only their own card and do not see `staff-invite` (step 5). Employers see `employer-request` and `employer-browse`, not dossier or staff invite. Candidates see `candidate-register` only. Signed in, the header shows **Çıkış Yap** after the language switcher and **Ana Sayfaya Dön**; it signs out like `/portal` and the page shows the signed-out card. Back returns to `/portal`, `/employer`, `/candidate`, or `/` for a signed-out viewer. Switching language reloads `guidesCopy` for that locale. Screen paths in the map point at `app/.../page.tsx` files.
 

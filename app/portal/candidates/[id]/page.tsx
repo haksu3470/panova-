@@ -11,7 +11,7 @@ import OfficialProcessBadge from '@/components/portal/OfficialProcessBadge';
 import CandidateStatusControl from '@/components/portal/CandidateStatusControl';
 import DocumentPreviewModal from '@/components/portal/DocumentPreviewModal';
 import { useStaffRole } from '@/components/portal/useStaffRole';
-import { canUpdateRequestStatus, canWriteInterviewOffer } from '@/lib/staffAccess';
+import { canUpdateRequestStatus, canWriteInterviewOffer, candidateFileAccess, isPermissionError } from '@/lib/staffAccess';
 import type { CandidateStatusErrorKey } from '@/lib/candidateStatusChange';
 
 import { useState, useEffect } from 'react';
@@ -73,6 +73,8 @@ function CandidateDetailPageInner() {
   const mayChangeStatus = canUpdateRequestStatus(staffRole);
   // Field officer, finance, limited: no interview / offer writes (database rule).
   const mayWriteInterviewOffer = canWriteInterviewOffer(staffRole);
+  // Role -> control map (lib/staffAccess.ts candidateFileAccess), same rules as the database.
+  const access = candidateFileAccess(staffRole);
   const [candidatePhoto, setCandidatePhoto] = useState('');
   const [candidatePhone, setCandidatePhone] = useState('');
   const [candidateEmail, setCandidateEmail] = useState('');
@@ -282,6 +284,10 @@ function CandidateDetailPageInner() {
       alert(t.savedSuccess);
     } catch (error: any) {
       setSaving(false);
+      if (isPermissionError(error)) {
+        alert(ui.permissionDenied);
+        return;
+      }
       const failure = youtubeSaveFailure(error?.message);
       const detail = failure === 'forbidden'
         ? t.youtubeVideoReadOnly
@@ -320,7 +326,7 @@ function CandidateDetailPageInner() {
       setOfferDate('');
       setOfferTerms('');
     } else {
-      alert(`${ui.errorPrefix} ${error.message}`);
+      alert(isPermissionError(error) ? ui.permissionDenied : `${ui.errorPrefix} ${error.message}`);
     }
   };
 
@@ -362,7 +368,7 @@ function CandidateDetailPageInner() {
       setNotifMessage('');
     } catch (err: any) {
       setNotifSending(false);
-      alert(`${ui.errorPrefix} ${err.message}`);
+      alert(isPermissionError(err) ? ui.permissionDenied : `${ui.errorPrefix} ${err.message}`);
     }
   };
 
@@ -467,9 +473,9 @@ function CandidateDetailPageInner() {
                       {candidate.full_name?.charAt(0)}
                     </div>
                   )}
-                  <label className="absolute -bottom-2 -end-2 bg-brand-solid text-white p-2 rounded-xl cursor-pointer shadow hover:bg-brand transition" title={ui.photoUpload}>
-                    <Camera className="w-4 h-4" />
-                    <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                  <label className="absolute -bottom-2 -end-2 bg-brand-solid text-white p-2 rounded-xl cursor-pointer shadow hover:bg-brand transition focus-within:ring-2 focus-within:ring-brand-solid focus-within:ring-offset-2" title={ui.photoUpload}>
+                    <Camera aria-hidden className="w-4 h-4" />
+                    <input type="file" accept="image/*" onChange={handlePhotoUpload} aria-label={ui.photoUpload} className="sr-only" />
                   </label>
                 </div>
 
@@ -601,8 +607,9 @@ function CandidateDetailPageInner() {
             {/* İç Notlar */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
               <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-blue-600" /> {t.internalNotesAdminOnly}
+                <FileText className="w-5 h-5 text-blue-600" /> {ui.internalNotesStaff}
               </h3>
+              <p className="text-[11px] text-slate-600 font-medium">{ui.internalNotesHint}</p>
               <textarea rows={3} value={internalNotes} onChange={(e) => setInternalNotes(e.target.value)} className="w-full p-4 rounded-xl border border-slate-300 bg-white text-xs outline-none text-slate-900 font-medium scheme-light" />
             </div>
           </div>
@@ -668,7 +675,8 @@ function CandidateDetailPageInner() {
               </button>
             </div>
 
-            {/* Resmi İş Teklifi */}
+            {/* Resmi İş Teklifi: only roles that may write job_offers (INTERVIEW_OFFER_ROLES) */}
+            {access.jobOfferForm === 'edit' ? (
             <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2">
                 <FileSignature className="w-4 h-4 text-brand" /> {t.sendOfficialJobOffer}
@@ -697,6 +705,7 @@ function CandidateDetailPageInner() {
                 </button>
               </div>
             </div>
+            ) : null}
 
             {/* Bildirim Gönder */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
