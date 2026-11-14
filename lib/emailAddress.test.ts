@@ -5,7 +5,7 @@ import { isGmailAddress, isGoogleProvedUser, normalizeEmail } from './emailAddre
 
 test('Türkiye office phone is one E.164 value', () => {
   assert.equal(turkeyOfficePhone, '+905453644930');
-  assert.equal(company.turkey.phone.display, turkeyOfficePhone);
+  assert.equal(company.turkey.phone.display, '+90 545 364 49 30');
   assert.equal(company.turkey.phone.tel, turkeyOfficePhone);
   assert.equal(company.phones[0].display, '+389 70 385 792');
   assert.equal(company.phones[1].display, '+389 75 818 697');

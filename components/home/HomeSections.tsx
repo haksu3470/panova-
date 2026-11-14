@@ -48,18 +48,19 @@ export function StatsBar({ lang }: { lang: Language }) {
   return (
     <section aria-labelledby="home-stats-title" className="bg-white border-b border-slate-200">
       <h2 id="home-stats-title" className="sr-only">{x.statsHeading}</h2>
-      <ul className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      {/* Phones: two columns, icon above the text, so "30/60/90" and long labels (mk, sq) stay inside the card. */}
+      <ul className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-2 lg:grid-cols-4 items-stretch gap-3 sm:gap-6">
         {c.stats.map((s, i) => {
           const Icon = statIcons[i] ?? Globe2;
           return (
-            <li key={s.label} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <li key={s.label} className="flex h-full min-w-0 flex-col items-start gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:gap-3 sm:p-4">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 ring-1 ring-emerald-100">
                 <Icon aria-hidden className="h-5 w-5 text-brand" />
               </span>
-              <div className="min-w-0">
-                <div className="text-2xl sm:text-3xl font-black text-brand tabular-nums"><CountUp value={s.value} /></div>
-                <div className="text-xs sm:text-sm font-semibold text-slate-700">{s.label}</div>
-                {i === 0 ? <div className="text-xs text-muted-foreground mt-0.5">{c.about.countries.join(' · ')}</div> : null}
+              <div className="min-w-0 max-w-full">
+                <div dir="ltr" className="text-[clamp(1.25rem,6vw,1.875rem)] leading-tight font-black text-brand tabular-nums whitespace-nowrap rtl:text-end"><CountUp value={s.value} /></div>
+                <div className="text-xs sm:text-sm font-semibold text-slate-700 break-words hyphens-auto [overflow-wrap:anywhere]">{s.label}</div>
+                {i === 0 ? <div className="text-xs text-muted-foreground mt-0.5 break-words">{c.about.countries.join(' · ')}</div> : null}
                 {i === 2 ? (
                   <a href="#sektorler" className="text-xs font-semibold text-brand underline-offset-2 hover:underline">{x.sectorsStatHint}</a>
                 ) : null}
@@ -187,7 +188,7 @@ export function TrustSections({ lang }: { lang: Language }) {
       link: { href: '#kurumsal', label: c.footer.registry },
     },
     { Icon: ShieldCheck, title: x.kvkkTitle, desc: `${c.candidateItems[2].desc} ${c.trust[1].desc}`, link: { href: '/kvkk', label: c.footer.kvkk } },
-    { Icon: Eye, title: c.trust[3].title, desc: c.trust[3].desc },
+    { Icon: Eye, title: c.trust[3].title, desc: `${c.trust[3].desc} ${x.processDetail}` },
     { Icon: CalendarCheck, title: c.employerServices[5].title, desc: c.employerServices[5].desc },
     { Icon: Award, title: c.trust[0].title, desc: c.trust[0].desc },
     { Icon: Languages, title: c.trust[2].title, desc: c.trust[2].desc },

@@ -139,3 +139,50 @@ test('motion is opt-in and reduced motion stays static', () => {
   assert.match(motion, /aria-hidden="true"/);
   assert.match(motion, /className="sr-only"/);
 });
+
+test('office phones: one source, same spaced international style, tel: without spaces', async () => {
+  const { company, formatPhoneDisplay, turkeyOfficePhone } = await import('./company');
+  assert.equal(formatPhoneDisplay('+905453644930'), '+90 545 364 49 30');
+  assert.equal(formatPhoneDisplay('+38970385792'), '+389 70 385 792');
+  assert.equal(formatPhoneDisplay('+8801805511473'), '+880 1805 511473');
+  assert.equal(formatPhoneDisplay('+4912'), '+4912', 'unknown numbers stay as written');
+  const phones = [...company.phones, company.turkey.phone, company.bangladesh.phone];
+  for (const phone of phones) {
+    assert.match(phone.tel, /^\+\d+$/, phone.tel);
+    assert.match(phone.display, /^\+\d{2,3}( \d+)+$/, phone.display);
+    assert.equal(phone.display.replaceAll(' ', ''), phone.tel);
+  }
+  assert.equal(company.turkey.phone.tel, turkeyOfficePhone);
+  // no screen writes an office number by hand
+  const files = [...sourceFiles('app'), ...sourceFiles('components'), ...sourceFiles('lib')].filter((file) => !file.endsWith('company.ts'));
+  for (const file of files) {
+    const text = read(file);
+    for (const phone of phones) {
+      assert.equal(text.includes(phone.tel) || text.includes(phone.display), false, `${file} hard-codes ${phone.display}`);
+    }
+  }
+});
+
+test('stats cards fit on phones and the page never scrolls sideways', () => {
+  const sections = read('components/home/HomeSections.tsx');
+  assert.match(sections, /flex h-full min-w-0 flex-col items-start gap-2[^"]*sm:flex-row/);
+  assert.match(sections, /text-\[clamp\(1\.25rem,6vw,1\.875rem\)\][^"]*whitespace-nowrap/);
+  assert.match(sections, /\[overflow-wrap:anywhere\]">\{s\.label\}/);
+  assert.match(read('app/page.tsx'), /min-h-screen overflow-x-clip/);
+});
+
+test('every map label sits the same distance under its own point', () => {
+  const visual = read('components/home/HeroVisual.tsx');
+  const gap = Number(/export const LABEL_GAP = (\d+);/.exec(visual)?.[1]);
+  assert.ok(gap > 0);
+  const points = [...visual.matchAll(/x: (\d+), y: (\d+), labelY: (\d+),/g)];
+  assert.equal(points.length, 3);
+  for (const [, , y, labelY] of points) assert.equal(Number(labelY) - Number(y), gap);
+});
+
+test('the clear-process card has a second sentence in five languages', () => {
+  for (const lang of LANGS) {
+    assert.ok(homeExtraCopy[lang].processDetail.trim().length > 40, lang);
+  }
+  assert.match(read('components/home/HomeSections.tsx'), /desc: `\$\{c\.trust\[3\]\.desc\} \$\{x\.processDetail\}`/);
+});
