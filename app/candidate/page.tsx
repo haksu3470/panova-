@@ -1825,7 +1825,8 @@ export default function CandidateDashboard() {
                   {doc.notes ? <p className="text-[11px] text-slate-600">{releaseCopy[currentLang].docFile}: {doc.notes}</p> : null}
                   {doc.review_note ? <p className="text-[11px] text-slate-800">{releaseCopy[currentLang].docReason}: {doc.review_note}</p> : null}
                   
-                  <div className="flex items-center gap-2">
+                  {/* picker on its own row; preview and download wrap below it */}
+                  <div className="flex flex-wrap items-center gap-2" data-row="doc-actions">
                     <FilePicker
                       lang={currentLang}
                       accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png"
