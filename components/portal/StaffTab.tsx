@@ -105,14 +105,14 @@ export default function StaffTab({
           {staffMembers.map((staff) => (
             <div key={staff.id} className="p-4 bg-slate-50 rounded-2xl border space-y-3 flex flex-col justify-between">
               <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-extrabold text-slate-900 text-sm">{staff.name}<DemoBadge show={staff.is_demo} /></h4>
-                  <div className="flex items-center gap-1">
+                <div className="flex items-start justify-between gap-2">
+                  <h4 className="min-w-0 font-extrabold text-slate-900 text-sm [overflow-wrap:anywhere]">{staff.name}<DemoBadge show={staff.is_demo} /></h4>
+                  <div className="flex shrink-0 items-center gap-1">
                     <button onClick={() => setEditingStaff(staff)} className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-[11px] font-bold transition cursor-pointer">{ui.edit}</button>
                     <button onClick={() => handleDeleteStaff(staff.id)} className="p-1 text-muted-foreground hover:text-red-600 transition cursor-pointer"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">{staff.email}</p>
+                <p dir="ltr" className="text-xs text-muted-foreground [overflow-wrap:anywhere] rtl:text-right">{staff.email}</p>
                 {isSourceCountryOfficer(staff.role_level) && normalizeReferralCode(staff.referral_code) ? (
                   <div className="space-y-1">
                     <ReferralCodeChip

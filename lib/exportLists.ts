@@ -30,14 +30,14 @@ function cell(value: unknown): string {
   return String(value);
 }
 
-/** "+90 545 364 49 30", "-1", "(0212) 555-12-12": digits with phone punctuation only. */
+/** "+90 500 000 00 00", "-1", "(0212) 555-12-12": digits with phone punctuation only. */
 const PHONE_LIKE = /^[+-][\d\s().-]*\d[\d\s().-]*$/;
 
 /**
  * Spreadsheet apps run a cell that starts with = + - @ (or a tab / CR) as a
  * formula. Those cells get a leading quote so they stay text. A value that
  * starts with + or - but is only a phone number or a plain number is safe and
- * stays as written, so "+389 70 385 792" is not shown as "'+389…".
+ * stays as written, so "+389 00 000 000" is not shown as "'+389…".
  */
 export function neutralizeSpreadsheetFormula(value: unknown): string {
   const text = cell(value);

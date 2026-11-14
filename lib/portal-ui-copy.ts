@@ -256,6 +256,10 @@ export type PortalUi = {
   taskSaved: string;
   noAuditYet: string;
   employerFile: string;
+  /** Link on a candidate card (phone list) to the candidate file. */
+  openCandidateFile: string;
+  /** Select-all checkbox above the candidate cards. */
+  selectAllShown: string;
   viewEmployerPortal: string;
   linkedRecord: string;
   noneOption: string;
@@ -498,7 +502,7 @@ const tr: PortalUi = {
   candidateListCount: 'Aday listesi ({shown} / {total})',
   refresh: 'Yenile',
   taskSaveFailed: 'Görev kaydedilirken hata oluştu:', taskSaved: 'Görev kaydedildi ve sorumlu personele iletildi.',
-  noAuditYet: 'Henüz kayıt yok.', employerFile: 'İşveren dosyası', viewEmployerPortal: 'İşveren portalını gör',
+  noAuditYet: 'Henüz kayıt yok.', employerFile: 'İşveren dosyası', openCandidateFile: 'Dosyayı aç', selectAllShown: 'Listelenenlerin tümünü seç', viewEmployerPortal: 'İşveren portalını gör',
   linkedRecord: 'Bağlı kayıt (opsiyonel)', noneOption: 'Yok', selectOption: 'Seçin…',
   linkCandidate: 'Aday', linkRequest: 'Talep', linkEmployer: 'İşveren',
   cancelPrompt: 'İptal nedenini yazın:', cancelReasonLabel: 'İptal nedeni:',
@@ -755,7 +759,7 @@ const en: PortalUi = {
   candidateListCount: 'Candidate list ({shown} / {total})',
   refresh: 'Refresh',
   taskSaveFailed: 'The task could not be saved:', taskSaved: 'Task saved and sent to the assignee.',
-  noAuditYet: 'No records yet.', employerFile: 'Employer file', viewEmployerPortal: 'View employer portal',
+  noAuditYet: 'No records yet.', employerFile: 'Employer file', openCandidateFile: 'Open file', selectAllShown: 'Select all listed', viewEmployerPortal: 'View employer portal',
   linkedRecord: 'Linked record (optional)', noneOption: 'None', selectOption: 'Select…',
   linkCandidate: 'Candidate', linkRequest: 'Request', linkEmployer: 'Employer',
   cancelPrompt: 'Enter the cancellation reason:', cancelReasonLabel: 'Cancellation reason:',
@@ -1012,7 +1016,7 @@ const sq: PortalUi = {
   candidateListCount: 'Lista e kandidatëve ({shown} / {total})',
   refresh: 'Rifresko',
   taskSaveFailed: 'Detyra nuk u ruajt:', taskSaved: 'Detyra u ruajt dhe iu dërgua përgjegjësit.',
-  noAuditYet: 'Ende nuk ka regjistrime.', employerFile: 'Dosja e punëdhënësit', viewEmployerPortal: 'Shiko portalin e punëdhënësit',
+  noAuditYet: 'Ende nuk ka regjistrime.', employerFile: 'Dosja e punëdhënësit', openCandidateFile: 'Hap dosjen', selectAllShown: 'Zgjidh të gjithë të listuarit', viewEmployerPortal: 'Shiko portalin e punëdhënësit',
   linkedRecord: 'Regjistrim i lidhur (opsional)', noneOption: 'Asnjë', selectOption: 'Zgjidhni…',
   linkCandidate: 'Kandidati', linkRequest: 'Kërkesa', linkEmployer: 'Punëdhënësi',
   cancelPrompt: 'Shkruani arsyen e anulimit:', cancelReasonLabel: 'Arsyeja e anulimit:',
@@ -1269,7 +1273,7 @@ const ar: PortalUi = {
   candidateListCount: 'قائمة المرشحين ({shown} / {total})',
   refresh: 'تحديث',
   taskSaveFailed: 'تعذر حفظ المهمة:', taskSaved: 'حُفظت المهمة وأُرسلت إلى المسؤول.',
-  noAuditYet: 'لا توجد سجلات بعد.', employerFile: 'ملف صاحب العمل', viewEmployerPortal: 'عرض بوابة صاحب العمل',
+  noAuditYet: 'لا توجد سجلات بعد.', employerFile: 'ملف صاحب العمل', openCandidateFile: 'فتح الملف', selectAllShown: 'تحديد كل المعروضين', viewEmployerPortal: 'عرض بوابة صاحب العمل',
   linkedRecord: 'سجل مرتبط (اختياري)', noneOption: 'لا شيء', selectOption: 'اختيار…',
   linkCandidate: 'المرشح', linkRequest: 'الطلب', linkEmployer: 'صاحب العمل',
   cancelPrompt: 'اكتبوا سبب الإلغاء:', cancelReasonLabel: 'سبب الإلغاء:',
@@ -1526,7 +1530,7 @@ const mk: PortalUi = {
   candidateListCount: 'Листа на кандидати ({shown} / {total})',
   refresh: 'Освежи',
   taskSaveFailed: 'Задачата не е зачувана:', taskSaved: 'Задачата е зачувана и испратена до одговорниот.',
-  noAuditYet: 'Сè уште нема записи.', employerFile: 'Досие на работодавач', viewEmployerPortal: 'Види портал на работодавач',
+  noAuditYet: 'Сè уште нема записи.', employerFile: 'Досие на работодавач', openCandidateFile: 'Отвори досие', selectAllShown: 'Избери ги сите прикажани', viewEmployerPortal: 'Види портал на работодавач',
   linkedRecord: 'Поврзан запис (изборно)', noneOption: 'Нема', selectOption: 'Изберете…',
   linkCandidate: 'Кандидат', linkRequest: 'Барање', linkEmployer: 'Работодавач',
   cancelPrompt: 'Напишете причина за откажување:', cancelReasonLabel: 'Причина за откажување:',

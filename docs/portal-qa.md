@@ -151,6 +151,7 @@ In-app guide: `candidate-register` (profile and documents steps).
 6. As a field officer (Saha Sorumlusu) the file has no **Resmî İş Teklifi Gönder** card and no **Mülakat ve teklif** card; the responsible person in **Aday Havuzu** is plain text, not a dropdown.
 7. Make a write fail on permission (for example a field officer whose candidate was reassigned while the file is open, then **Kaydet**): the alert says only "Bu işlem için yetkiniz yok." (EN "You do not have permission for this action.", SQ, AR, MK translated), with no "row-level security", "42501" or table name.
 8. The notes card is titled **Dahili notlar (personel)** with the line that staff who can open the file see and edit it and that it is not shown in the candidate portal.
+9. **Telefon listesi / Phone list.** On a phone (360–420px), in TR, AR and MK, open **Aday Havuzu**: each candidate is a card (name + DEMO, nationality, profession · sector, passport, referral code, status, official process, responsible person, **Dosyayı aç**); **Listelenenlerin tümünü seç** and each card's checkbox select rows; the long **Aday kaydet** hint is not in the top box but at the top of the opened form; the export buttons wrap. From 640px the table is back unchanged. **Audit** on a phone: the action column stays in place while the table scrolls sideways, with a fade on the far edge. **Ekip & Yetkiler**: a long name or e-mail wraps inside its card. No screen scrolls sideways.
 
 In-app guide: `dossier-review`.
 

@@ -156,7 +156,7 @@ test('the candidate file and the list follow the role map', () => {
   assert.equal(/alert\(error\.message\)/.test(page), false);
   assert.equal((page.match(/ui\.permissionDenied/g) || []).length >= 3, true);
   const list = read('components/portal/CandidatesTab.tsx');
-  assert.match(list, /\{canAssign \? \(/);
+  assert.match(list, /canAssign \? \(/);
   const portal = read('app/portal/page.tsx');
   assert.match(portal, /canAssign=\{canAssignCandidate\(userRole\)\}/);
   assert.match(portal, /isPermissionError\(error\) \? ui\.permissionDenied/);

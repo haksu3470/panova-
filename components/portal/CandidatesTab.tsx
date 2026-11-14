@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, RefreshCw, UserPlus } from 'lucide-react';
+import { ChevronRight, Search, RefreshCw, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import DemoBadge from './DemoBadge';
 import { RegistrationCountryOptions } from '@/components/site/RegistrationCountryOptions';
 import { canonicalNationality, sameNationality } from '@/lib/registrationCountries';
 import { candidateExportRows } from '@/lib/exportLists';
 import ListExportBar from './ListExportBar';
+import ScrollTable from './ScrollTable';
 import DeleteRecordButton from './DeleteRecordButton';
 import OfficialProcessBadge from './OfficialProcessBadge';
 import CandidateStatusControl from './CandidateStatusControl';
@@ -51,6 +52,8 @@ interface CandidatesTabProps {
   currentUser: any;
   isUpperManagement: boolean;
 }
+
+type CandidateRow = CandidatesTabProps['candidates'][number];
 
 const emptyDraft = {
   fullName: '',
@@ -167,16 +170,60 @@ export default function CandidatesTab({
     fetchAllData();
   };
 
+  const registerHint = isSourceOfficer
+    ? (ownCode ? fill(ui.registerCandidateHint, { code: ownCode }) : ui.referralCodeAutoAttach)
+    : ui.registerCandidateOpenHint;
+  const allShownSelected = selectedIds.length > 0 && selectedIds.length === filteredCandidates.length;
+
+  const assigneeControl = (candidate: CandidateRow) => (canAssign ? (
+    <select
+      value={candidate.assigned_to || ''}
+      onChange={(e) => updateCandidateAssignee(candidate.id, e.target.value)}
+      aria-label={t.assigneeText}
+      className="max-w-full px-3 py-1.5 rounded-lg border text-xs font-bold bg-emerald-50 text-emerald-900 cursor-pointer outline-none"
+    >
+      <option value="" className="text-slate-900 bg-white">—</option>
+      {staffMembers.map((staff) => (
+        <option key={staff.id} value={staff.id} className="text-slate-900 bg-white">{staff.name}</option>
+      ))}
+    </select>
+  ) : (
+    <span className="text-xs font-bold text-slate-800" aria-label={t.assigneeText}>
+      {staffMembers.find((staff) => staff.id === candidate.assigned_to)?.name || '—'}
+    </span>
+  ));
+
+  const deleteButton = (candidate: CandidateRow, code: string | null) => (
+    <DeleteRecordButton
+      table="job_candidates"
+      id={candidate.id}
+      name={code ? `${candidate.full_name || candidate.id} (${code})` : (candidate.full_name || candidate.id)}
+      isDemo={candidate.is_demo}
+      allowed={isUpperManagement}
+      onDeleted={() => {
+        setSelectedIds((ids) => ids.filter((id) => id !== candidate.id));
+        fetchAllData();
+      }}
+    />
+  );
+
+  const statusControl = (candidate: CandidateRow) => (
+    <CandidateStatusControl
+      t={t}
+      status={candidate.status}
+      canChange={canChangeStatus}
+      compact
+      onSubmit={(status, reason) => updateCandidateStatus(candidate.id, status, reason)}
+    />
+  );
+
   return (
     <div className="space-y-4">
       <div className="bg-white p-4 rounded-2xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1">
           <h3 className="text-sm font-extrabold text-slate-900">{ui.registerCandidate}</h3>
-          <p className="text-xs text-muted-foreground">
-            {isSourceOfficer
-              ? (ownCode ? fill(ui.registerCandidateHint, { code: ownCode }) : ui.referralCodeAutoAttach)
-              : ui.registerCandidateOpenHint}
-          </p>
+          {/* on phones the hint is shown inside the form when it is opened */}
+          <p className="hidden sm:block text-xs text-muted-foreground">{registerHint}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <ListExportBar
@@ -213,6 +260,7 @@ export default function CandidatesTab({
 
       {showRegister && (
         <form onSubmit={handleRegister} className="bg-white p-4 rounded-2xl border shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <p className="sm:hidden text-xs text-muted-foreground">{registerHint}</p>
           <label className="block text-xs font-bold text-slate-700">
             {t.nameLabel}
             <input
@@ -391,7 +439,7 @@ export default function CandidatesTab({
       </div>
 
       <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between text-xs sm:text-sm font-bold text-slate-900">
+        <div className="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm font-bold text-slate-900">
           <span>{fill(ui.candidateListCount, { shown: filteredCandidates.length, total: candidates.length })}</span>
           <button
             type="button"
@@ -401,14 +449,93 @@ export default function CandidatesTab({
             <RefreshCw className="w-3.5 h-3.5" /> {ui.refresh}
           </button>
         </div>
-        <div className="overflow-x-auto">
+        {/* Phones (<640px): one card per candidate. From sm the table below. */}
+        <div className="sm:hidden">
+          {filteredCandidates.length > 0 ? (
+            <label className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-100 bg-slate-50 text-xs font-bold text-slate-700 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={allShownSelected}
+                onChange={handleSelectAll}
+                className="w-4 h-4 accent-[#2e7d32] cursor-pointer"
+              />
+              {ui.selectAllShown}
+            </label>
+          ) : null}
+          <ul className="divide-y divide-slate-100" data-list="candidate-cards">
+            {filteredCandidates.map((candidate) => {
+              const isSelected = selectedIds.includes(candidate.id);
+              const code = normalizeReferralCode(candidate.referral_code);
+              return (
+                <li key={candidate.id} className={`p-4 space-y-3 text-xs text-slate-600 ${isSelected ? 'bg-emerald-50' : ''}`}>
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleSelectOne(candidate.id)}
+                      aria-label={candidate.full_name || t.colCandidate}
+                      className="mt-0.5 w-4 h-4 shrink-0 accent-[#2e7d32] cursor-pointer"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <Link href={`/portal/candidates/${candidate.id}`} className="text-sm font-bold text-slate-900 hover:text-brand hover:underline [overflow-wrap:anywhere]">
+                        {candidate.full_name}<DemoBadge show={candidate.is_demo} />
+                      </Link>
+                      <div className="mt-0.5 text-[11px] text-muted-foreground">{candidatePlaceLabel(candidate.nationality, candidate.country, lang, ui.unspecified)}</div>
+                    </div>
+                  </div>
+                  <dl className="grid grid-cols-2 gap-x-3 gap-y-2">
+                    <div className="col-span-2 min-w-0">
+                      <dt className="text-[11px] font-bold text-muted-foreground">{t.colProfSector}</dt>
+                      <dd className="font-semibold text-slate-800 [overflow-wrap:anywhere]">
+                        {candidateProfessionLabel(candidate.profession, ui.unspecified, lang)}
+                        <span className="font-normal text-muted-foreground"> · {candidateSectorLabel(candidate.sector, ui, t)}</span>
+                      </dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="text-[11px] font-bold text-muted-foreground">{t.colPassportNat}</dt>
+                      <dd className="[overflow-wrap:anywhere]">{candidatePassportLabel(candidate.passport_number || candidate.passport_no, ui.unspecified)}</dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="text-[11px] font-bold text-muted-foreground">{ui.referralCode}</dt>
+                      <dd className="flex flex-wrap items-center gap-1">
+                        {code ? <span dir="ltr" className="font-mono font-bold text-slate-800">{code}</span> : <span className="text-muted-foreground">{ui.referralCodeEmpty}</span>}
+                        {deleteButton(candidate, code)}
+                      </dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="text-[11px] font-bold text-muted-foreground">{t.colVisaStatus}</dt>
+                      <dd>{statusControl(candidate)}</dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="text-[11px] font-bold text-muted-foreground">{t.officialProcessLabel}</dt>
+                      <dd><OfficialProcessBadge status={candidate.official_process_status} steps={ui.steps} stoppedLabel={t.plProcessStopped || ui.steps.rejected} /></dd>
+                    </div>
+                    <div className="col-span-2 min-w-0">
+                      <dt className="text-[11px] font-bold text-muted-foreground">🛡️ {t.assigneeText}</dt>
+                      <dd>{assigneeControl(candidate)}</dd>
+                    </div>
+                  </dl>
+                  <Link
+                    href={`/portal/candidates/${candidate.id}`}
+                    className="inline-flex items-center gap-1 rounded-xl bg-slate-900 px-3 py-1.5 text-xs font-bold text-white hover:bg-slate-800"
+                  >
+                    {ui.openCandidateFile}
+                    <ChevronRight aria-hidden className="h-3.5 w-3.5 rtl:rotate-180" />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+        <div className="hidden sm:block">
+        <ScrollTable>
           <table className="w-full text-left rtl:text-right text-xs sm:text-sm text-slate-600">
             <thead className="bg-slate-50 text-slate-700 font-bold border-b">
               <tr>
                 <th className="p-4 w-12 text-center">
                   <input
                     type="checkbox"
-                    checked={selectedIds.length > 0 && selectedIds.length === filteredCandidates.length}
+                    checked={allShownSelected}
                     onChange={handleSelectAll}
                     aria-label={t.colCandidate}
                     className="w-4 h-4 accent-[#2e7d32] cursor-pointer"
@@ -427,7 +554,6 @@ export default function CandidatesTab({
               {filteredCandidates.map((candidate) => {
                 const isSelected = selectedIds.includes(candidate.id);
                 const code = normalizeReferralCode(candidate.referral_code);
-                const canDelete = isUpperManagement;
                 return (
                   <tr key={candidate.id} className={`hover:bg-slate-50 ${isSelected ? 'bg-emerald-50' : ''}`}>
                     <td className="p-4 text-center">
@@ -450,17 +576,7 @@ export default function CandidatesTab({
                       ) : (
                         <span className="text-muted-foreground">{ui.referralCodeEmpty}</span>
                       )}
-                      <DeleteRecordButton
-                        table="job_candidates"
-                        id={candidate.id}
-                        name={code ? `${candidate.full_name || candidate.id} (${code})` : (candidate.full_name || candidate.id)}
-                        isDemo={candidate.is_demo}
-                        allowed={canDelete}
-                        onDeleted={() => {
-                          setSelectedIds((ids) => ids.filter((id) => id !== candidate.id));
-                          fetchAllData();
-                        }}
-                      />
+                      {deleteButton(candidate, code)}
                     </td>
                     <td className="p-4">
                       <div>{candidatePassportLabel(candidate.passport_number || candidate.passport_no, ui.unspecified)}</div>
@@ -470,34 +586,8 @@ export default function CandidatesTab({
                       <span className="font-semibold text-slate-800">{candidateProfessionLabel(candidate.profession, ui.unspecified, lang)}</span>
                       <div className="text-[11px] text-muted-foreground">{candidateSectorLabel(candidate.sector, ui, t)}</div>
                     </td>
-                    <td className="p-4">
-                      {canAssign ? (
-                      <select
-                        value={candidate.assigned_to || ''}
-                        onChange={(e) => updateCandidateAssignee(candidate.id, e.target.value)}
-                        aria-label={t.assigneeText}
-                        className="px-3 py-1.5 rounded-lg border text-xs font-bold bg-emerald-50 text-emerald-900 cursor-pointer outline-none"
-                      >
-                        <option value="" className="text-slate-900 bg-white">—</option>
-                        {staffMembers.map((staff) => (
-                          <option key={staff.id} value={staff.id} className="text-slate-900 bg-white">{staff.name}</option>
-                        ))}
-                      </select>
-                      ) : (
-                        <span className="text-xs font-bold text-slate-800" aria-label={t.assigneeText}>
-                          {staffMembers.find((staff) => staff.id === candidate.assigned_to)?.name || '—'}
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-4">
-                      <CandidateStatusControl
-                        t={t}
-                        status={candidate.status}
-                        canChange={canChangeStatus}
-                        compact
-                        onSubmit={(status, reason) => updateCandidateStatus(candidate.id, status, reason)}
-                      />
-                    </td>
+                    <td className="p-4">{assigneeControl(candidate)}</td>
+                    <td className="p-4">{statusControl(candidate)}</td>
                     <td className="p-4">
                       <OfficialProcessBadge status={candidate.official_process_status} steps={ui.steps} stoppedLabel={t.plProcessStopped || ui.steps.rejected} />
                     </td>
@@ -506,6 +596,7 @@ export default function CandidatesTab({
               })}
             </tbody>
           </table>
+        </ScrollTable>
         </div>
       </div>
     </div>
