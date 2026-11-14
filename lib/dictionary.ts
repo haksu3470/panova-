@@ -728,6 +728,10 @@ export interface Translation {
   resetPasswordSaved?: string;
   resetPasswordMismatch?: string;
   resetPasswordFail?: string;
+  passwordSameAsOld?: string;
+  passwordWeak?: string;
+  passwordSessionExpired?: string;
+  passwordRateLimited?: string;
   resetPasswordLinkError?: string;
   resetPasswordGoogle?: string;
   resetPasswordContinue?: string;
@@ -1508,6 +1512,10 @@ export const translations: Record<Language, Translation> = {
     resetPasswordSaved: 'Şifreniz güncellendi. Giriş sayfasına yönlendiriliyorsunuz.',
     resetPasswordMismatch: 'Şifreler eşleşmiyor.',
     resetPasswordFail: 'Şifre güncellenemedi. Bağlantının süresi dolmuş olabilir. Yeni bir e-posta isteyin.',
+    passwordSameAsOld: 'Yeni şifreniz eskisiyle aynı olamaz. Farklı bir şifre seçin.',
+    passwordWeak: 'Şifre çok zayıf. En az 8 karakter, harf ve rakam karışımı kullanın.',
+    passwordSessionExpired: 'Bağlantının süresi dolmuş. Yeni bir e-posta isteyin.',
+    passwordRateLimited: 'Çok fazla deneme yapıldı. Birkaç dakika sonra tekrar deneyin.',
     resetPasswordLinkError: 'Sıfırlama bağlantısı geçersiz veya süresi dolmuş. Yeni bir e-posta isteyin.',
     resetPasswordGoogle: 'Bu hesap Google ile açılıyor ve şifre kullanmıyor. Google düğmesiyle devam edin.',
     resetPasswordContinue: 'Devam et',
@@ -2278,6 +2286,10 @@ export const translations: Record<Language, Translation> = {
     resetPasswordSaved: 'Your password is updated. Taking you to the sign-in page.',
     resetPasswordMismatch: 'The passwords do not match.',
     resetPasswordFail: 'The password could not be updated. The link may have expired. Request a new email.',
+    passwordSameAsOld: 'Your new password cannot be the same as the old one. Choose a different password.',
+    passwordWeak: 'The password is too weak. Use at least 8 characters with a mix of letters and numbers.',
+    passwordSessionExpired: 'The link has expired. Request a new email.',
+    passwordRateLimited: 'Too many attempts. Try again in a few minutes.',
     resetPasswordLinkError: 'This reset link is invalid or has expired. Request a new email.',
     resetPasswordGoogle: 'This account signs in with Google and does not use a password. Continue with the Google button.',
     resetPasswordContinue: 'Continue',
@@ -3048,6 +3060,10 @@ export const translations: Record<Language, Translation> = {
     resetPasswordSaved: 'Fjalëkalimi u përditësua. Po ju çojmë te faqja e hyrjes.',
     resetPasswordMismatch: 'Fjalëkalimet nuk përputhen.',
     resetPasswordFail: 'Fjalëkalimi nuk u përditësua. Lidhja mund të ketë skaduar. Kërkoni një email të ri.',
+    passwordSameAsOld: 'Fjalëkalimi i ri nuk mund të jetë i njëjtë me të vjetrin. Zgjidhni një fjalëkalim tjetër.',
+    passwordWeak: 'Fjalëkalimi është shumë i dobët. Përdorni të paktën 8 karaktere, një përzierje shkronjash dhe numrash.',
+    passwordSessionExpired: 'Lidhja ka skaduar. Kërkoni një email të ri.',
+    passwordRateLimited: 'Shumë përpjekje. Provoni përsëri pas disa minutash.',
     resetPasswordLinkError: 'Lidhja e rivendosjes është e pavlefshme ose ka skaduar. Kërkoni një email të ri.',
     resetPasswordGoogle: 'Kjo llogari hyn me Google dhe nuk përdor fjalëkalim. Vazhdoni me butonin Google.',
     resetPasswordContinue: 'Vazhdo',
@@ -3808,6 +3824,10 @@ export const translations: Record<Language, Translation> = {
     resetPasswordSaved: 'تم تحديث كلمة المرور. ننقلك إلى صفحة تسجيل الدخول.',
     resetPasswordMismatch: 'كلمتا المرور غير متطابقتين.',
     resetPasswordFail: 'تعذر تحديث كلمة المرور. قد تكون صلاحية الرابط انتهت. اطلب رسالة جديدة.',
+    passwordSameAsOld: 'لا يمكن أن تكون كلمة المرور الجديدة مطابقة للقديمة. اختر كلمة مرور مختلفة.',
+    passwordWeak: 'كلمة المرور ضعيفة جدًا. استخدم 8 أحرف على الأقل تجمع بين الحروف والأرقام.',
+    passwordSessionExpired: 'انتهت صلاحية الرابط. اطلب رسالة جديدة.',
+    passwordRateLimited: 'محاولات كثيرة جدًا. حاول مرة أخرى بعد بضع دقائق.',
     resetPasswordLinkError: 'رابط إعادة التعيين غير صالح أو انتهت صلاحيته. اطلب رسالة جديدة.',
     resetPasswordGoogle: 'هذا الحساب يدخل عبر Google ولا يستخدم كلمة مرور. تابع بزر Google.',
     resetPasswordContinue: 'متابعة',
@@ -4583,6 +4603,10 @@ export const translations: Record<Language, Translation> = {
     resetPasswordSaved: 'Лозинката е ажурирана. Ве носиме на страницата за најава.',
     resetPasswordMismatch: 'Лозинките не се совпаѓаат.',
     resetPasswordFail: 'Лозинката не можеше да се ажурира. Врската можеби е истечена. Побарајте нова е-пошта.',
+    passwordSameAsOld: 'Новата лозинка не може да биде иста како старата. Изберете друга лозинка.',
+    passwordWeak: 'Лозинката е премногу слаба. Користете најмалку 8 знаци, мешавина од букви и бројки.',
+    passwordSessionExpired: 'Врската е истечена. Побарајте нова е-пошта.',
+    passwordRateLimited: 'Премногу обиди. Обидете се повторно за неколку минути.',
     resetPasswordLinkError: 'Врската за ресетирање е неважечка или е истечена. Побарајте нова е-пошта.',
     resetPasswordGoogle: 'Оваа сметка се најавува со Google и не користи лозинка. Продолжете со копчето Google.',
     resetPasswordContinue: 'Продолжи',

@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations, type Translation } from '@/lib/dictionary';
+import { passwordErrorKind, passwordErrorMessage, type PasswordErrorKind } from '@/lib/passwordError';
 import { HeaderActions, PageHeader } from '@/components/site/PageHeader';
 import { RegistrationCountryOptions } from '@/components/site/RegistrationCountryOptions';
 import { candidateDocumentTitle, candidatePlaceLabel, candidateProfessionLabel } from '@/lib/candidateLabels';
@@ -1127,10 +1128,10 @@ export default function CandidateDashboard() {
       }
     }
 
-    let passError: any = null;
+    let passError: PasswordErrorKind | null = null;
     if (newPassword && newPassword.length >= 8) {
       const res = await supabase.auth.updateUser({ password: newPassword });
-      passError = res.error;
+      passError = res.error ? passwordErrorKind(res.error) : null;
       if (!passError) setNewPassword('');
     }
 
@@ -1147,8 +1148,9 @@ export default function CandidateDashboard() {
     setUpdatingProfile(false);
 
     if (passError) {
+      // Only the kind is logged: never the password or the raw auth message.
       console.error("Panova HR Log - Şifre Güncelleme Hatası:", passError);
-      alert('Şifre güncellenemedi: ' + passError.message);
+      alert(passwordErrorMessage(passError, t));
     }
 
     const updatedCandidate = { ...candidate, ...persisted };

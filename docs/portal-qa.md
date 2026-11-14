@@ -319,6 +319,7 @@ Automated: `lib/guides.test.ts`.
 3. Repeat from `/portal` sign-in. The reset path is `/auth/reset-password/portal`.
 4. Set a new password shorter than 8 characters, then two that do not match, then a valid pair.
 5. On the forgot-password panel, read the Google note and use the Google button.
+6. Reset again and enter the current password as the new one. Repeat the password change under **Profilim** on `/candidate`. Each failure shows its own reason (`passwordErrorKind`): same as the old password, too weak, link expired, too many attempts. Anything else shows the general message. The raw Auth error text and the password are never shown or logged.
 
 **Beklenen / Expected:** Each panel posts `requestPasswordReset` for that audience. The success text does not reveal whether the mailbox exists. After a valid reset, the app returns to `/candidate`, `/employer-login`, or `/portal`. Short and mismatched passwords are rejected in the browser (`passwordResetIssue`). The Google note says those accounts have no password.
 
