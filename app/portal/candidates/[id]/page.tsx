@@ -410,7 +410,7 @@ function CandidateDetailPageInner() {
                   ) : (
                     <span className="bg-slate-100 text-muted-foreground px-1.5 py-0.5 rounded">{ui.referralCodeNone}</span>
                   )}
-                  <span>📍 {candidate.country || 'N/A'}, {candidate.city || 'N/A'}</span>
+                  {[candidate.country, candidate.city].some(Boolean) ? <span>📍 {[candidate.country, candidate.city].filter(Boolean).join(', ')}</span> : null}
                   <span>💼 {candidateProfessionLabel(candidate.profession, ui.general, currentLang)}</span>
                   <span>🌍 {candidatePlaceLabel(candidate.nationality, candidate.country, currentLang, ui.unspecified)}</span>
                 </div>

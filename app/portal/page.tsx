@@ -52,7 +52,8 @@ import ListExportBar from '@/components/portal/ListExportBar';
 import ScrollTable from '@/components/portal/ScrollTable';
 import StaffTab from '../../components/portal/StaffTab';
 import TasksTab from '../../components/portal/TasksTab';
-import { employerExportRows, offerExportRows, requestExportRows } from '@/lib/exportLists';
+import { employerExportRows, exportCountry, offerExportRows, requestExportRows } from '@/lib/exportLists';
+import { auditActionText, auditEntityLabel } from '@/lib/auditDisplay';
 import { canAssignCandidate, canUpdateRequestStatus, isPermissionError, isUpperManagementRole, overviewCardTarget, tabsForStaffRole, type OverviewCard as OverviewCardId, type StaffTab as StaffTabId } from '@/lib/staffAccess';
 import { countOpenRequests } from '@/lib/requestPipelineCounts';
 import OverviewCard from '@/components/portal/OverviewCard';
@@ -1027,9 +1028,9 @@ export default function PortalPage() {
                   {auditLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50">
                       <td className="p-4 font-bold text-slate-900">
-                        {log.actionKey ? (t as any)[log.actionKey] || log.actionKey : log.action}
+                        {log.actionKey ? (t as any)[log.actionKey] || log.actionKey : auditActionText(log.action, log.entity, currentLang)}
                       </td>
-                      <td className="p-4">{log.performer}{log.entity ? <span className="ml-1 text-[10px] text-muted-foreground">({log.entity})</span> : null}{log.is_demo ? <span className="ml-1 text-[10px] px-1 rounded bg-amber-100 text-amber-700">demo</span> : null}</td>
+                      <td className="p-4 [overflow-wrap:anywhere]">{log.performer}{log.entity ? <span className="ms-1 text-[10px] text-muted-foreground">({auditEntityLabel(log.entity, currentLang)})</span> : null}{log.is_demo ? <span className="ml-1 text-[10px] px-1 rounded bg-amber-100 text-amber-700">demo</span> : null}</td>
                       <td className="p-4 text-[11px] text-muted-foreground">{log.time}</td>
                     </tr>
                   ))}
@@ -1086,7 +1087,7 @@ export default function PortalPage() {
                       ) : null}
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">Contact: <strong>{emp.contact_person}</strong> | Country: {emp.country}</p>
+                    <p className="text-sm text-muted-foreground [overflow-wrap:anywhere]">{ui.employerContact}: <strong>{emp.contact_person || '—'}</strong> | {ui.employerCountry}: {exportCountry(emp.country, currentLang) || '—'}</p>
                     <EmployerLoginInvite
                       compact
                       staff={{ role: userRole, scopeCountry: currentUser?.scope_country }}
