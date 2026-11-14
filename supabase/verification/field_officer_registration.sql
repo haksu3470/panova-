@@ -1,4 +1,5 @@
--- Test for 20261117100000_field_officer_registration.sql (nothing kept).
+-- Test for 20261117100000_field_officer_registration.sql and
+-- 20261117120000_source_officer_select_own_rows.sql (nothing kept).
 --
 --   0   migration applied; staff_can_read_candidate and the UPDATE / DELETE
 --       policies were not widened
@@ -24,7 +25,12 @@
 --   e1  upper management: no code -> registered_by = them, code null; an
 --       officer code (also a field officer's) is accepted; a made-up code is
 --       refused (unknown_supervisor_code)
---   e2  source_country: registered_by = them, their own code
+--   0b  20261117120000 applied: the source-country row check exists and only
+--       the SELECT policy uses it (YAPILAMADI when missing; e2 still runs)
+--   e2  source_country: insert ... returning passes; registered_by = them,
+--       their own code
+--   e3  source_country still does not see a candidate with another code from
+--       another country
 --   f1  a candidate account cannot write registered_by / kvkk_recorded_by
 --   f2  anon cannot write registered_by / kvkk_recorded_by
 --
@@ -56,10 +62,11 @@ declare
   -- test rows
   v_b_staff uuid;
   v_c_staff uuid; v_c_code text; v_c_code2 text;
-  v_own1 uuid; v_own2 uuid; v_other uuid; v_doc uuid;
+  v_own1 uuid; v_own2 uuid; v_other uuid; v_doc uuid; v_foreign uuid;
   v_reg uuid; v_code text; v_krec uuid; v_kver text; v_status text; v_assignee uuid;
   v_bool boolean;
   v_diag text;
+  v_src_rows boolean;
 begin
   -- 0. Migration applied, nothing widened --------------------------------------
   v_ok := exists (select 1 from information_schema.columns
@@ -82,6 +89,26 @@ begin
       and pg_get_functiondef('public.staff_can_read_candidate(uuid)'::regprocedure) not ilike '%registered_by%';
   v_lines := v_lines || format(E'\n[%s] 0 staff_can_read_candidate ve UPDATE/DELETE politikaları genişlemedi (yeni kurallı yazma politikası: %s)',
     case when v_ok then 'GEÇTİ' else 'KALDI' end, v_n);
+
+  -- 0b. Source-country row check (20261117120000) ------------------------------
+  v_src_rows := to_regprocedure('public.source_officer_sees_candidate_row(text,text)') is not null
+    and exists (
+      select 1 from pg_policies
+      where schemaname = 'public' and tablename = 'job_candidates'
+        and policyname = 'staff_select_candidates' and cmd = 'SELECT'
+        and qual ilike '%source_officer_sees_candidate_row%');
+  if not v_src_rows then
+    v_lines := v_lines || E'\n[YAPILAMADI] 0b 20261117120000_source_officer_select_own_rows.sql uygulanmamış: e2 yine çalışır ama insert ... returning reddi beklenir';
+  else
+    select count(*) into v_n from pg_policies
+    where cmd <> 'SELECT'
+      and (coalesce(qual, '') ilike '%source_officer_sees_candidate_row%'
+           or coalesce(with_check, '') ilike '%source_officer_sees_candidate_row%');
+    v_ok := v_n = 0
+      and pg_get_functiondef('public.staff_can_read_candidate(uuid)'::regprocedure) not ilike '%source_officer_sees_candidate_row%';
+    v_lines := v_lines || format(E'\n[%s] 0b kaynak ülke satır kontrolü yalnız SELECT politikasında (başka politikada: %s)',
+      case when v_ok then 'GEÇTİ' else 'KALDI' end, v_n);
+  end if;
 
   -- a1. Every active field officer has a valid, unique code --------------------
   select count(*) into v_n from public.staff_members
@@ -156,6 +183,16 @@ begin
   exception when others then
     v_b_staff := null; v_other := null;
     v_lines := v_lines || format(E'\n[YAPILAMADI] c3/d2 test görevlisi B / adayı oluşturulamadı (%s)', sqlerrm);
+  end;
+
+  -- For e3: another code (the field officer's, or none) and a country no officer covers.
+  begin
+    insert into public.job_candidates (full_name, nationality, email, phone, profession, sector, status, referral_code)
+    values ('TEST aday yabancı', 'Testland Yabancı', 'test-aday-foreign@example.invalid', '+000 0000 0010', 'TEST', 'construction', 'pending', v_a_code)
+    returning id into v_foreign;
+  exception when others then
+    v_foreign := null;
+    v_lines := v_lines || format(E'\n[YAPILAMADI] e3 test adayı oluşturulamadı (%s)', sqlerrm);
   end;
 
   if v_a_uid is null then
@@ -258,8 +295,9 @@ begin
       begin
         set local role authenticated;
         -- the candidate-files INSERT rule, evaluated for B's folder
-        v_bool := public.can_access_candidate_file(v_other::text || '/passport/test.pdf')
-          or (public.is_staff() and public.field_officer_owns_candidate_id(public.candidate_file_owner(v_other::text || '/passport/test.pdf')));
+        -- NULL from either side counts as refused
+        v_bool := coalesce(public.can_access_candidate_file(v_other::text || '/passport/test.pdf'), false)
+          or coalesce(public.is_staff() and public.field_officer_owns_candidate_id(public.candidate_file_owner(v_other::text || '/passport/test.pdf')), false);
         reset role;
       exception when others then
         v_err := sqlerrm;
@@ -420,8 +458,33 @@ begin
       v_diag := v_diag || format(', staff_members.is_active=%s]',
         coalesce((select sm.is_active::text from public.staff_members sm where sm.id = v_src_staff), 'satır yok'));
     end if;
-    v_lines := v_lines || format(E'\n[%s] e2 kaynak ülke: kaydeden=kendisi, kod=kendi kodu %s%s',
-      case when v_ok then 'GEÇTİ' else 'KALDI' end, coalesce('(' || v_err || ')', ''), coalesce(v_diag, ''));
+    v_lines := v_lines || format(E'\n[%s] e2 kaynak ülke: insert ... returning geçti, kaydeden=kendisi, kod=kendi kodu %s%s%s',
+      case when v_ok then 'GEÇTİ' else 'KALDI' end, coalesce('(' || v_err || ')', ''), coalesce(v_diag, ''),
+      case when v_ok or v_src_rows then '' else ' [20261117120000 uygulanmamış]' end);
+
+    -- e3. Another code from another country stays hidden
+    if v_foreign is null then
+      v_lines := v_lines || E'\n[YAPILAMADI] e3 test adayı yok';
+    else
+      v_err := null; v_n := null; v_bool := null;
+      begin
+        set local role authenticated;
+        select count(*) into v_n from public.job_candidates where id = v_foreign;
+        v_bool := coalesce(public.staff_can_read_candidate(v_foreign), false);
+        if v_src_rows then
+          -- dynamic, so the block still parses when the function does not exist yet
+          execute 'select coalesce(public.source_officer_sees_candidate_row($1, $2), false)'
+            into v_ok using v_a_code, 'Testland Yabancı';
+          v_bool := v_bool or v_ok;
+        end if;
+        reset role;
+      exception when others then
+        v_err := sqlerrm;
+      end;
+      reset role;
+      v_lines := v_lines || format(E'\n[%s] e3 kaynak ülke başka kodlu, başka ülkeden adayı görmüyor %s',
+        case when v_err is null and v_n = 0 and v_bool = false then 'GEÇTİ' else 'KALDI' end, coalesce('(' || v_err || ')', ''));
+    end if;
   end if;
 
   -- f1. Candidate account

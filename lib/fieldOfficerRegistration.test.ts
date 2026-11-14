@@ -170,7 +170,7 @@ test('verification covers a-f, keeps nothing and uses no real addresses', () => 
   assert.ok(emails.length > 0);
   for (const email of emails) assert.match(email, /@example\.invalid$/, email);
   assert.equal(/where[^;]*(sm\.email|sm\.name|p\.full_name)\s*=/.test(body), false, 'accounts are picked by role');
-  for (const step of ['0', 'a1', 'a2', 'b1', 'b2', 'c1', 'c2', 'c3', 'd1', 'd2', 'd3', 'e1', 'e2', 'f1', 'f2']) {
+  for (const step of ['0', 'a1', 'a2', 'b1', 'b2', 'c1', 'c2', 'c3', 'd1', 'd2', 'd3', 'e1', 'e2', 'e3', 'f1', 'f2']) {
     assert.ok(body.includes(`] ${step} `), `step ${step}`);
   }
 });
@@ -178,7 +178,7 @@ test('verification covers a-f, keeps nothing and uses no real addresses', () => 
 test('verification: every test candidate has its own placeholder phone', () => {
   const body = code(read(VERIFICATION));
   const inserts = body.match(/insert into public\.job_candidates \([\s\S]*?;/g) ?? [];
-  assert.equal(inserts.length, 9);
+  assert.equal(inserts.length, 10);
   const phones = inserts.map((stmt) => {
     assert.match(stmt, /email, phone, profession/, 'phone column');
     const phone = /@example\.invalid', '([^']+)', 'TEST'/.exec(stmt)?.[1];
