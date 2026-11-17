@@ -4,7 +4,7 @@ import test from 'node:test';
 
 await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.url);
 
-const { staffMfaMode } = await import('./staffMfa.ts');
+const { staffMfaMode, staffMfaRequiredForUser } = await import('./staffMfa.ts');
 
 test('challenges when a verified factor still needs aal2', () => {
   assert.equal(
@@ -39,4 +39,11 @@ test('is optional when not required but already aal2', () => {
     staffMfaMode({ required: false, verified: true, currentLevel: 'aal2' }),
     'optional',
   );
+});
+
+test('org or member flag requires MFA for the user', () => {
+  assert.equal(staffMfaRequiredForUser({ orgRequired: false, memberRequired: false }), false);
+  assert.equal(staffMfaRequiredForUser({ orgRequired: true, memberRequired: false }), true);
+  assert.equal(staffMfaRequiredForUser({ orgRequired: false, memberRequired: true }), true);
+  assert.equal(staffMfaRequiredForUser({ orgRequired: true, memberRequired: true }), true);
 });
