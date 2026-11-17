@@ -211,8 +211,12 @@ test('portal: field officers register under their own code; warnings stay source
   assert.match(tab, /const isCodeIssuer = isCodeIssuingRole\(currentUser\?\.role_level\);/);
   assert.match(tab, /const ownCode = isCodeIssuer \? normalizeReferralCode\(currentUser\?\.referral_code\) : null;/);
   assert.match(tab, /const registerHint = isCodeIssuer\n/);
-  assert.match(tab, /if \(!isCodeIssuer && isUpperManagement && draft\.referralCode\)/);
+  assert.match(tab, /<QuickRegisterForm/);
   assert.equal(tab.includes('isSourceOfficer'), false);
+  const form = read('components/portal/QuickRegisterForm.tsx');
+  assert.match(form, /allowReferralCode: !isCodeIssuer && isUpperManagement/);
+  assert.match(form, /quickRegistrationPayload\(/);
+  assert.match(read('lib/quickRegistration.ts'), /kvkk_accepted_at:/);
   const staff = read('components/portal/StaffTab.tsx');
   assert.match(staff, /isCodeIssuingRole\(staff\.role_level\) && normalizeReferralCode\(staff\.referral_code\) \?/);
   // "missing code" warning stays for source_country until the migration is applied everywhere

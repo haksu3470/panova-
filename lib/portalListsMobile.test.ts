@@ -42,13 +42,27 @@ test('candidate list: cards on phones, the table from sm', () => {
   assert.equal((list.match(/checked=\{allShownSelected\}/g) || []).length, 2, 'select-all on cards and in the table');
 });
 
-test('register box: the long hint is in the box from sm and inside the form on phones', () => {
+test('register box: the long hint is in the box from sm and the quick form opens on phones', () => {
   const list = read('components/portal/CandidatesTab.tsx');
   assert.match(list, /<p className="hidden sm:block text-xs text-muted-foreground">\{registerHint\}<\/p>/);
-  assert.match(list, /<form onSubmit=\{handleRegister\}[^>]*>\s*<p className="sm:hidden text-xs text-muted-foreground">\{registerHint\}<\/p>/);
+  assert.match(list, /\{showRegister && \(\s*<QuickRegisterForm/);
+  const form = read('components/portal/QuickRegisterForm.tsx');
+  assert.match(form, /\{registerHint\}/);
+  assert.match(form, /qr\.step1Title/);
+  assert.match(form, /qr\.kvkkLabel/);
+  assert.match(form, /capture="environment"/);
   // the export buttons and the register button share one wrapping row
   assert.match(list, /<div className="flex flex-wrap items-center gap-2">\s*<ListExportBar/);
   assert.match(read('components/portal/ListExportBar.tsx'), /<div className="flex flex-wrap gap-2">/);
+});
+
+test('quick register copy exists in five languages', () => {
+  for (const lang of LANGS) {
+    const block = portalUi[lang].quickRegister;
+    for (const key of ['step1Title', 'step2Title', 'kvkkRequired', 'takePhoto', 'finish'] as const) {
+      assert.ok(block[key].trim(), `${lang}.quickRegister.${key}`);
+    }
+  }
 });
 
 test('wide tables scroll with an edge fade; the audit table keeps its first column', () => {

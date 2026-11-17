@@ -8,6 +8,8 @@ test('security headers frame-bust, type-sniff, and keep the integrations the sit
   assert.equal(headers['X-Content-Type-Options'], 'nosniff');
   assert.match(headers['Strict-Transport-Security'], /max-age=/);
   assert.equal(headers['Access-Control-Allow-Origin'], undefined);
+  assert.match(headers['Permissions-Policy'], /camera=\(self\)/);
+  assert.match(headers['Permissions-Policy'], /microphone=\(\)/);
 
   const csp = contentSecurityPolicy();
   assert.match(csp, /frame-ancestors 'none'/);
