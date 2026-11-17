@@ -3,7 +3,17 @@ import { canonicalDuration, isIsoDate, parseContractDuration, parseDurationAmoun
 
 export type YesNo = '' | 'yes' | 'no';
 
-export type DemandBlock = 'position' | 'lodging' | 'meals' | 'both' | 'salary';
+export type DemandBlock =
+  | 'position'
+  | 'sector'
+  | 'headcount'
+  | 'city'
+  | 'duration'
+  | 'language'
+  | 'lodging'
+  | 'meals'
+  | 'both'
+  | 'salary';
 
 export type EmployerDemandDraft = {
   employerId: string;
@@ -44,6 +54,12 @@ export type EmployerDemandRow = {
   food_provided: boolean;
   status: 'new_request';
 };
+
+/** Limits shared with the job_requests check rules (20261113180000 / 20261117200000). */
+export const HEADCOUNT_MIN = 1;
+export const HEADCOUNT_MAX = 500;
+export const SALARY_MAX = 100000;
+export const EXPERIENCE_MAX_YEARS = 60;
 
 const EXPERIENCE_YEARS: Record<string, number> = {
   none: 0,
@@ -106,19 +122,31 @@ export function parseMonthlyNetSalary(input: string): number | null {
 export function buildEmployerDemandInsert(
   draft: EmployerDemandDraft,
 ): { ok: true; row: EmployerDemandRow } | { ok: false; error: DemandBlock } {
+  if (!draft.sector.trim()) return { ok: false, error: 'sector' };
   if (!draft.positionTitle.trim()) return { ok: false, error: 'position' };
+  if (!draft.language.trim()) return { ok: false, error: 'language' };
+  if (!draft.city.trim()) return { ok: false, error: 'city' };
+  if (!draft.duration.trim()) return { ok: false, error: 'duration' };
+
+  // Same limits as validateDemandForm / job_requests_headcount_range. Never coerce.
+  const headcount = Number(draft.headcount);
+  if (
+    !Number.isFinite(headcount) ||
+    !Number.isInteger(headcount) ||
+    headcount < HEADCOUNT_MIN ||
+    headcount > HEADCOUNT_MAX
+  ) {
+    return { ok: false, error: 'headcount' };
+  }
+
   const lodging = yesNoToBoolean(draft.lodging);
   const meals = yesNoToBoolean(draft.meals);
   const benefit = benefitsAnswered(lodging, meals);
   if (benefit) return { ok: false, error: benefit };
   // Numbers only (no "1550 euro"); the currency comes from its own list.
   const salary = parseSalaryInput(draft.salaryText);
-  if (salary == null) return { ok: false, error: 'salary' };
+  if (salary == null || salary > SALARY_MAX) return { ok: false, error: 'salary' };
   if (lodging == null || meals == null) return { ok: false, error: 'both' };
-
-  const headcount = Number.isFinite(draft.headcount) && draft.headcount >= 1
-    ? Math.trunc(draft.headcount)
-    : 1;
 
   return {
     ok: true,
@@ -126,7 +154,7 @@ export function buildEmployerDemandInsert(
       employer_id: draft.employerId,
       employer_name: draft.employerName.trim(),
       position_title: draft.positionTitle.trim(),
-      sector: draft.sector,
+      sector: draft.sector.trim(),
       headcount,
       city: draft.city.trim(),
       country: draft.country.trim() || null,
@@ -142,12 +170,6 @@ export function buildEmployerDemandInsert(
     },
   };
 }
-
-/** Limits shared with the job_requests check rules (20261113180000_job_requests_guards.sql). */
-export const HEADCOUNT_MIN = 1;
-export const HEADCOUNT_MAX = 500;
-export const SALARY_MAX = 100000;
-export const EXPERIENCE_MAX_YEARS = 60;
 
 /** Form fields, in the order they appear (the first invalid one gets focus). */
 export const DEMAND_FIELDS = [
@@ -254,6 +276,7 @@ export const JOB_REQUEST_RULES: Record<string, { field: DemandField | 'company';
   job_requests_experience_range: { field: 'experience', error: 'experience_range' },
   job_requests_city_nonblank: { field: 'city', error: 'required' },
   job_requests_contract_type_nonblank: { field: 'duration', error: 'required' },
+  job_requests_required_language_nonblank: { field: 'language', error: 'required' },
 };
 
 /**
