@@ -524,8 +524,23 @@ function EmployerPortalInner() {
     });
     if (!built.ok) {
       // validateDemandForm already covers these; kept as a safety net.
-      const field: DemandField = built.error === 'salary' ? 'salary' : built.error === 'position' ? 'position' : built.error === 'meals' ? 'meals' : 'lodging';
-      showDemandErrors({ [field]: built.error === 'salary' ? 'salary_number' : 'required' });
+      const field: DemandField =
+        built.error === 'both' ? 'lodging'
+          : built.error === 'salary' ? 'salary'
+            : built.error === 'headcount' ? 'headcount'
+              : built.error === 'position' ? 'position'
+                : built.error === 'sector' ? 'sector'
+                  : built.error === 'city' ? 'city'
+                    : built.error === 'duration' ? 'duration'
+                      : built.error === 'language' ? 'language'
+                        : built.error === 'meals' ? 'meals'
+                          : 'lodging';
+      showDemandErrors({
+        [field]:
+          built.error === 'salary' ? 'salary_number'
+            : built.error === 'headcount' ? 'headcount_range'
+              : 'required',
+      });
       return;
     }
     if (!employerProfile?.id) {

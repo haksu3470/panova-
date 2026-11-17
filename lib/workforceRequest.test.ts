@@ -77,6 +77,21 @@ test('a request cannot be built until lodging and meals are answered', () => {
   assert.equal(benefitsAnswered(false, true), null);
 });
 
+test('buildEmployerDemandInsert refuses bad headcount instead of coercing to 1', () => {
+  for (const bad of [0, -3, 0.5, 2.7, 501, Number.NaN]) {
+    assert.equal((buildEmployerDemandInsert(draft({ headcount: bad })) as { error: string }).error, 'headcount', String(bad));
+  }
+  assert.equal(buildEmployerDemandInsert(draft({ headcount: 1 })).ok, true);
+  assert.equal(buildEmployerDemandInsert(draft({ headcount: 500 })).ok, true);
+});
+
+test('buildEmployerDemandInsert refuses blank sector, city, duration, language', () => {
+  assert.equal((buildEmployerDemandInsert(draft({ sector: '  ' })) as { error: string }).error, 'sector');
+  assert.equal((buildEmployerDemandInsert(draft({ city: '' })) as { error: string }).error, 'city');
+  assert.equal((buildEmployerDemandInsert(draft({ duration: ' ' })) as { error: string }).error, 'duration');
+  assert.equal((buildEmployerDemandInsert(draft({ language: '' })) as { error: string }).error, 'language');
+});
+
 test('answered lodging and meals are stored on the existing boolean columns', () => {
   const built = buildEmployerDemandInsert(draft());
   assert.equal(built.ok, true);
@@ -200,7 +215,7 @@ test('database rule refusals map to the field they belong to', () => {
     const error = { code: '23514', message: `new row for relation "job_requests" violates check constraint "${rule}"`, details: null };
     assert.deepEqual(demandRuleFromDbError(error), { ...target, rule }, rule);
   }
-  assert.equal(Object.keys(JOB_REQUEST_RULES).length, 8);
+  assert.equal(Object.keys(JOB_REQUEST_RULES).length, 9);
   assert.equal(demandRuleFromDbError({ code: '23514', message: 'violates check constraint "other_rule"' }), null);
   assert.equal(demandRuleFromDbError({ code: '42501', message: 'request_fields_staff_only' }), null);
   assert.equal(demandRuleFromDbError({ message: 'check_violation', details: 'job_requests_salary_range' })?.field, 'salary');
