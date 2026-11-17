@@ -994,6 +994,7 @@ export default function PortalPage() {
             setEditingStaff={setEditingStaff}
             handleDeleteStaff={handleDeleteStaff}
             onChanged={fetchAllData}
+            onMfaPolicyChanged={refreshMfa}
           />
         )}
 

@@ -12,7 +12,11 @@ Staff portal uses Supabase Auth TOTP. Flag: `app_settings.staff_mfa_required`.
 - `/portal` — blocks tab bar until MFA satisfies
 - `/portal/candidates|requests|employers/*` — `StaffGate` shows the same panel
 
-## Turn off (upper management)
+## Turn on/off (upper management)
+
+In the portal: **Ekip & Yetkiler** → **İki adımlı doğrulama (ekip)** → **Zorunlu** / **Kapalı**.
+
+SQL fallback:
 
 ```sql
 update public.app_settings
