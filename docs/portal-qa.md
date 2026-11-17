@@ -31,6 +31,25 @@ In-app how-to ids (`GUIDE_CATALOG` in `lib/guides-model.ts`): `staff-login`, `st
 
 ---
 
+## S00. Personel MFA / Staff two-step verification
+
+**Rol / Role:** Any staff.
+
+**Önkoşul / Preconditions:** `app_settings.staff_mfa_required = true` (migration `20261117230000`). Authenticator app on the phone. TOTP enabled in Supabase Auth → MFA.
+
+**Adımlar / Steps:**
+1. Sign in on `/portal` with email/password (or OAuth).
+2. Without a factor: the enroll panel blocks the tab bar. Scan the QR (or enter the setup key), enter the 6-digit code, confirm.
+3. Sign out and sign in again: only the code challenge appears; tabs stay hidden until `aal2`.
+4. Open a deep link `/portal/candidates/[id]` while still at `aal1`: `StaffGate` shows the same challenge; after verify the dossier opens.
+5. Upper management can set `staff_mfa_required` back to `false` (see `docs/staff-mfa.md`); Overview then shows an optional MFA card with disable.
+
+**Beklenen / Expected:** No staff UI (tabs or dossier) before enroll/`aal2` while the flag is true. Wrong codes show `mfaFailed`. Employer and candidate portals are unchanged.
+
+**Bilinen engel / Known blocker:** None in-app. Phone MFA (SMS) is not used; TOTP only.
+
+---
+
 ## S01. Personel daveti / Staff invite
 
 **Rol / Role:** Upper management, then the invited person.
