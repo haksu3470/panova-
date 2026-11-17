@@ -18,6 +18,7 @@ import {
   OFFICIAL_STEPS,
   officialStepIndex,
   startedEmployees,
+  travelPlacements,
   travelView,
   type EmployerPlacement,
   type FollowupState,
@@ -111,7 +112,10 @@ function followupTone(state: FollowupState) {
 
 export default function EmployerPlacementTabs({ tab, rows, load, staffView, t, steps, isRtl, lang }: Props) {
   const title = tab === 'status' ? t.processStatusTitle : tab === 'travel' ? t.travelStartTitle : t.activeEmployeesTitle;
-  const shown = tab === 'employees' ? startedEmployees(rows) : rows;
+  const shown =
+    tab === 'employees' ? startedEmployees(rows)
+      : tab === 'travel' ? travelPlacements(rows)
+        : rows;
   const empty = tab === 'status' ? t.plNoSelected : tab === 'travel' ? t.plNoTravel : t.plNoEmployees;
   const arrow = isRtl ? ' ← ' : ' → ';
   const today = isoDay(new Date());

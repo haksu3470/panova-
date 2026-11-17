@@ -12,6 +12,7 @@ import {
   startedEmployees,
   toPlacement,
   toPlacements,
+  travelPlacements,
   travelView,
   acceptedOfferStartDate,
   officialProcessText,
@@ -162,6 +163,16 @@ test('startedEmployees keeps only pipeline_stage started', () => {
     { ...base, match_id: 'c', pipeline_stage: null },
   ]);
   assert.deepEqual(startedEmployees(rows).map((r) => r.match_id), ['a']);
+});
+
+test('travelPlacements: travel_ready, started, or any row with flight fields', () => {
+  const rows = toPlacements([
+    { ...base, match_id: 'a', pipeline_stage: 'in_process' },
+    { ...base, match_id: 'b', pipeline_stage: 'travel_ready' },
+    { ...base, match_id: 'c', pipeline_stage: 'started' },
+    { ...base, match_id: 'd', pipeline_stage: 'in_process', flight_number: 'TK1' },
+  ]);
+  assert.deepEqual(travelPlacements(rows).map((r) => r.match_id), ['b', 'c', 'd']);
 });
 
 test('travelView: planned without flight is "not entered", never a raw planned', () => {

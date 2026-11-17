@@ -194,6 +194,19 @@ export function hasFlightInfo(row: TravelFields): boolean {
   return Boolean(row.flight_date || row.flight_number || row.departure_city || row.arrival_city);
 }
 
+/**
+ * Seyahat Bilgilerim: travel_ready / started, or any selected row that already
+ * has flight fields. Pure "in_process" with no flight stays on İşlem Durumu.
+ */
+export function travelPlacements(rows: EmployerPlacement[]): EmployerPlacement[] {
+  return rows.filter(
+    (r) =>
+      r.pipeline_stage === 'travel_ready' ||
+      r.pipeline_stage === 'started' ||
+      hasFlightInfo(r),
+  );
+}
+
 export type TravelView =
   | { kind: 'not_entered' }
   | { kind: 'flight'; status: 'ticketed' | 'completed' | null };

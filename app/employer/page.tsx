@@ -62,8 +62,6 @@ import { needsEmployerConsent } from '@/lib/employerInvite';
 import { candidateProfessionLabel, candidateSectorLabel } from '@/lib/candidateLabels';
 import {
   canDecideOnMatch,
-  EMPLOYER_CANDIDATE_BROWSE_COLUMNS,
-  isMissingBrowseRpc,
   sectorFilterLabel,
   toEmployerCandidate,
   type EmployerCandidate,
@@ -274,22 +272,12 @@ function EmployerPortalInner() {
     setPipelineCounts(countError ? null : indexPipelineCounts(countRows));
     setCountsFailed(!!countError);
 
+    // Browse is RPC-only. Never fall back to job_candidates (no employer RLS;
+    // a missing-RPC fallback would leak every non-archived candidate).
     const { data: pooled, error: poolError } = await supabase.rpc('employer_browse_candidates');
-    let candData: unknown[] | null = pooled;
-    if (poolError) {
-      if (isMissingBrowseRpc(poolError)) {
-        const { data } = await supabase
-          .from('job_candidates')
-          .select(EMPLOYER_CANDIDATE_BROWSE_COLUMNS)
-          .is('archived_at', null)
-          .order('created_at', { ascending: false });
-        candData = data;
-      } else {
-        console.error('employer candidate browse failed', poolError.code || poolError.message);
-        candData = [];
-      }
-    }
-    const rows = (candData ?? [])
+    if (poolError) console.error('employer candidate browse failed', poolError.code || poolError.message);
+    const browseRows: unknown[] = poolError || !Array.isArray(pooled) ? [] : pooled;
+    const rows = browseRows
       .map((row) => toEmployerCandidate((row ?? {}) as Record<string, unknown>))
       .filter((row) => row.id);
     setCandidates(rows);
