@@ -102,44 +102,49 @@ export default function StaffTab({
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="space-y-4 h-fit">
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3">
-        <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-emerald-700" /> {copy.mfaPolicyTitle}
-        </h3>
-        <p className="text-[11px] text-slate-600 leading-snug">{copy.mfaPolicyHint}</p>
-        <div className="flex flex-wrap gap-2" role="group" aria-label={copy.mfaPolicyTitle}>
-          <button
-            type="button"
-            disabled={mfaBusy || mfaRequired === null}
-            aria-pressed={mfaRequired === true}
-            onClick={() => setMfaPolicy(true)}
-            className={`px-3 py-2 rounded-xl text-xs font-bold transition disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 ${
-              mfaRequired === true
-                ? 'bg-brand-solid text-on-dark shadow'
-                : 'bg-white border text-slate-700 hover:bg-slate-50'
-            }`}
-          >
-            {copy.mfaPolicyOn}
-          </button>
-          <button
-            type="button"
-            disabled={mfaBusy || mfaRequired === null}
-            aria-pressed={mfaRequired === false}
-            onClick={() => setMfaPolicy(false)}
-            className={`px-3 py-2 rounded-xl text-xs font-bold transition disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 ${
-              mfaRequired === false
-                ? 'bg-slate-900 text-white shadow'
-                : 'bg-white border text-slate-700 hover:bg-slate-50'
-            }`}
-          >
-            {copy.mfaPolicyOff}
-          </button>
+    <div className="space-y-6">
+      <section className="bg-emerald-50 border border-emerald-200 p-4 sm:p-5 rounded-2xl shadow-sm space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div className="space-y-1 min-w-0">
+            <h3 className="text-base sm:text-lg font-bold text-emerald-950 flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0" /> {copy.mfaPolicyTitle}
+            </h3>
+            <p className="text-[11px] text-emerald-900/80 leading-snug">{copy.mfaPolicyHint}</p>
+            {mfaMsg ? <p className="text-[11px] font-bold text-emerald-800">{mfaMsg}</p> : null}
+          </div>
+          <div className="flex flex-wrap gap-2 shrink-0" role="group" aria-label={copy.mfaPolicyTitle}>
+            <button
+              type="button"
+              disabled={mfaBusy || mfaRequired === null}
+              aria-pressed={mfaRequired === true}
+              onClick={() => setMfaPolicy(true)}
+              className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 ${
+                mfaRequired === true
+                  ? 'bg-brand-solid text-on-dark shadow'
+                  : 'bg-white border border-emerald-300 text-slate-800 hover:bg-white/80'
+              }`}
+            >
+              {copy.mfaPolicyOn}
+            </button>
+            <button
+              type="button"
+              disabled={mfaBusy || mfaRequired === null}
+              aria-pressed={mfaRequired === false}
+              onClick={() => setMfaPolicy(false)}
+              className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 ${
+                mfaRequired === false
+                  ? 'bg-slate-900 text-white shadow'
+                  : 'bg-white border border-emerald-300 text-slate-800 hover:bg-white/80'
+              }`}
+            >
+              {copy.mfaPolicyOff}
+            </button>
+          </div>
         </div>
-        {mfaMsg ? <p className="text-[11px] font-bold text-emerald-800">{mfaMsg}</p> : null}
-      </div>
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
         <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
           <UserPlus className="w-5 h-5 text-emerald-700" /> {t.addStaffTitle}
         </h3>
@@ -175,7 +180,6 @@ export default function StaffTab({
             {ui.sendInvite}
           </button>
         </form>
-      </div>
       </div>
 
       <div className="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
@@ -253,6 +257,7 @@ export default function StaffTab({
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );
