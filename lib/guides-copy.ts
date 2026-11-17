@@ -71,7 +71,7 @@ const en: GuidesCopy = {
         requests: { name: 'Personnel Requests', does: 'Labor requests and their matching files. The request status moves forward on its own from the records; changing it manually and deleting a request are yours only.' },
         staff: {
           name: 'Staff & Roles',
-          does: 'Invite someone by name and email, choose a role, or delete a staff row.',
+          does: 'Invite someone by name and email, choose a role, or delete a staff row. The green bar "Two-step verification (team)" turns MFA on for everyone; each card has "MFA for this person" with Required or Off. Source country and field officer cards show a system "Referral code".',
           limitedDoes: 'Only Upper Management sees this tab.',
         },
         tasks: { name: 'Tasks', does: 'Follow-up work with an owner, a backup and a due date.' },
@@ -82,9 +82,9 @@ const en: GuidesCopy = {
     },
     source_country: {
       title: 'Source Country Officer',
-      summary: 'Runs the candidate pipeline in the country people are recruited from. The Candidate Pool tab opens at sign-in.',
+      summary: 'Runs the candidate pipeline in the country people are recruited from. The Candidate Pool tab opens at sign-in. The system assigns a Referral code on the staff card; it cannot be typed or changed later.',
       screens: {
-        candidates: { name: 'Candidate Pool', does: 'Filter by sector, status and country; change the assignee on the list. The candidate status follows the official process automatically.' },
+        candidates: { name: 'Candidate Pool', does: 'Filter by sector, status, country and referral code; change the assignee on the list. The candidate status follows the official process automatically. "Register candidate" can attach your referral code.' },
         dossier: { name: 'Candidate file', does: 'Profile, official process, documents and travel. Ask for a missing document with "+ Request", preview or download a file. You can save a YouTube link.' },
         requests: { name: 'Personnel Requests', does: 'Open requests you can match candidates to; the status moves forward on its own.' },
         tasks: { name: 'Tasks', does: 'Work assigned to you, with a backup and a due date.' },
@@ -92,9 +92,9 @@ const en: GuidesCopy = {
     },
     target_country: {
       title: 'Target Country Officer',
-      summary: 'Works with employers in the country where people will be placed. The Candidate Pool tab opens at sign-in.',
+      summary: 'Works with employers in the country where people will be placed. At sign-in the Candidate Pool opens; the bar also has Personnel Requests, Tasks and Employers.',
       screens: {
-        request: { name: 'Request file', does: 'Request terms (salary with its currency), linked candidates, interviews and offers. You can add a meeting link to an interview and enter a Selected / Rejected decision for the employer.' },
+        request: { name: 'Request file', does: 'Opened from the Personnel Requests tab. Request terms (salary with its currency), linked candidates, interviews and offers. You can add a meeting link to an interview and enter a Selected / Rejected decision for the employer.' },
         employer: { name: 'Employer file', does: 'The company record and its requests. You can send a login invitation to an employer in your country.' },
         candidates: { name: 'Candidate Pool', does: 'Files of the people in the placement pipeline. You can save the YouTube link here.' },
         tasks: { name: 'Tasks', does: 'Follow-ups on those placements.' },
@@ -102,12 +102,12 @@ const en: GuidesCopy = {
     },
     field_officer: {
       title: 'Field Officer',
-      summary: 'Documents, travel notes and assigned tasks. Cannot open request or employer files; YouTube links on a file are read-only.',
+      summary: 'Documents, travel notes, assigned tasks and field registration with "Register candidate". The staff card shows a system Referral code. Cannot open request or employer files; YouTube links on a file are read-only.',
       screens: {
         tasks: { name: 'Tasks', does: 'Pending work with your name or your backup.' },
-        dossier: { name: 'Candidate file', does: 'Documents and travel. YouTube links are visible and cannot be edited. Request and employer files are closed to this role.' },
+        dossier: { name: 'Candidate file', does: 'Documents and travel for candidates you registered or were assigned. YouTube links are visible and cannot be edited. Request and employer files are closed to this role.' },
         support: { name: 'Issues / Support', does: 'Candidate messages waiting for a reply.' },
-        overview: { name: 'Overview', does: 'Summary cards; cards for tabs this role does not have cannot be clicked.' },
+        overview: { name: 'Overview', does: 'Summary cards; cards for tabs this role does not have cannot be clicked. Use "Register candidate" for a quick field registration tied to your referral code.' },
       },
     },
     finance: {
@@ -157,37 +157,39 @@ const en: GuidesCopy = {
   guides: {
     'staff-login': {
       title: 'Sign in as staff',
-      summary: 'Use the email on your invitation. A different address does not link to your staff record.',
+      summary: 'Use the email on your invitation. A different address does not link to your staff record. MFA may block the tabs until a code is confirmed.',
       where: '/portal',
       steps: [
         { title: 'Open the staff portal', body: 'Go to /portal.' },
         { title: 'Sign in with the invited email', body: 'Use a password, or Google with that same email. The invitation does not set a password for you.' },
         { title: 'Confirm the email if asked', body: 'Open the message, confirm, then return to /portal. An address that is already confirmed skips this step.' },
+        { title: 'Complete two-step verification if required', body: 'If the organisation or your card requires MFA, set up an authenticator app or enter the 6-digit code. Tabs stay hidden until verification succeeds. If MFA is optional, you can turn it on later from the Overview panel.' },
         { title: 'Check the role badge', body: 'Your role’s first tab opens: Overview for Upper Management, field, finance and limited access; Candidate Pool for source and target country officers. Your name and role are in the green badge.' },
       ],
-      flow: ['Invitation email', '/portal', 'Confirm if asked', 'First tab'],
+      flow: ['Invitation email', '/portal', 'Confirm if asked', 'MFA if required', 'First tab'],
       mock: {
         caption: 'Outline of the staff sign-in screen.',
         chrome: '/portal',
         rows: [
           { label: 'Email', value: 'Address on the invitation' },
           { label: 'Sign in', value: 'Password or Google' },
+          { label: 'Verification', value: 'Code when Required' },
           { label: 'Next', value: 'Your role’s first tab' },
         ],
       },
-      example: 'A source country officer chooses Google with the invited address. Candidate Pool opens instead of Overview; the tab bar has only Candidate Pool, Personnel Requests and Tasks.',
+      example: 'A source country officer chooses Google with the invited address. If MFA is Required on their card, they enter the authenticator code; then Candidate Pool opens instead of Overview.',
     },
     'staff-invite': {
       title: 'Invite a staff member',
-      summary: 'Only Upper Management sees the Staff & Roles tab. You store the person and an email is sent. You do not set a password.',
+      summary: 'Only Upper Management sees the Staff & Roles tab. You store the person and an email is sent. You do not set a password. MFA for the whole team or for one person is set on this same tab.',
       where: '/portal → Staff & Roles',
       steps: [
-        { title: 'Open the Staff & Roles tab', body: 'The tab is on the staff portal bar and is closed to other roles.' },
-        { title: 'Enter the person', body: 'Full name, the email they will sign in with, and a role: Upper Management, source country, target country or field officer.' },
+        { title: 'Open the Staff & Roles tab', body: 'The tab is on the staff portal bar and is closed to other roles. The green "Two-step verification (team)" bar is at the top.' },
+        { title: 'Enter the person', body: 'Full name, the email they will sign in with, and a role: Upper Management, source country, target country or field officer. Source country and field officer receive a system Referral code automatically; it is not typed by hand.' },
         { title: 'Send the invitation', body: 'The person registers or signs in at /portal with exactly this email. The account links when the email matches.' },
-        { title: 'Adjust later', body: 'Change the role on their card, or delete the row to remove the staff record.' },
+        { title: 'Adjust later', body: 'Change the role on their card, set "MFA for this person" to Required or Off, or delete the row. Org-wide Required locks the per-person buttons until the team bar is set to Off.' },
       ],
-      flow: ['Staff & Roles tab', 'Name, email, role', 'Invitation email', 'They sign in'],
+      flow: ['Staff & Roles tab', 'Name, email, role', 'Invitation email', 'Role / MFA on card'],
       mock: {
         caption: 'Outline of the invitation form. There is no password field.',
         chrome: '/portal · Staff & Roles',
@@ -195,9 +197,10 @@ const en: GuidesCopy = {
           { label: 'Name', value: 'Full name' },
           { label: 'Email', value: 'Sign-in address' },
           { label: 'Role', value: 'One of the four roles' },
+          { label: 'Verification', value: 'Team bar or per card' },
         ],
       },
-      example: 'Enter the name "Demo Staff", the person’s sign-in email and the Field Officer role, then send. When the person signs in at /portal with the same address, the badge shows Field Officer; you can change the role later on their card.',
+      example: 'Enter the name "Demo Staff", the person’s sign-in email and the Field Officer role, then send. Their card shows a Referral code and MFA for this person. When they sign in, MFA runs if Required.',
     },
     'dossier-review': {
       title: 'Review a candidate file',
@@ -438,7 +441,7 @@ const tr: GuidesCopy = {
         requests: { name: 'Personel Talepleri', does: 'İşgücü talepleri ve eşleştirme dosyaları. Talep durumu kayıtlarla kendiliğinden ilerler; elle değiştirmek ve talebi silmek yalnız sizdedir.' },
         staff: {
           name: 'Ekip & Yetkiler',
-          does: 'Ad ve e-posta ile davet gönderin, rol seçin veya personel satırını silin.',
+          does: 'Ad ve e-posta ile davet gönderin, rol seçin veya personel satırını silin. Üstteki yeşil "İki adımlı doğrulama (ekip)" çubuğu tüm ekip için MFA’yı açar veya kapatır; her kartta "Bu kişi için MFA" ile "Zorunlu" veya "Kapalı" seçilir. Kaynak ülke ve saha kartlarında sistemin atadığı "Yönlendirme kodu" görünür.',
           limitedDoes: 'Bu sekmeyi yalnızca Üst Yönetim görür.',
         },
         tasks: { name: 'Görevler', does: 'Sahibi, yedeği ve tarihi olan takip işi.' },
@@ -449,9 +452,9 @@ const tr: GuidesCopy = {
     },
     source_country: {
       title: 'Kaynak Ülke Sorumlusu',
-      summary: 'İnsanların alındığı ülkedeki aday hattını yürütür. Girişte Aday Havuzu sekmesi açılır.',
+      summary: 'İnsanların alındığı ülkedeki aday hattını yürütür. Girişte Aday Havuzu sekmesi açılır. Personel kartında sistemin atadığı "Yönlendirme kodu" vardır; elle yazılmaz, sonradan değişmez.',
       screens: {
-        candidates: { name: 'Aday Havuzu', does: 'Sektör, durum ve ülkeye göre süzün; sorumluyu listeden değiştirin. Aday durumu resmî süreçten otomatik gelir.' },
+        candidates: { name: 'Aday Havuzu', does: 'Sektör, durum, ülke ve yönlendirme koduna göre süzün; sorumluyu listeden değiştirin. Aday durumu resmî süreçten otomatik gelir. "Aday kaydet" ile kodunuza bağlı kayıt açabilirsiniz.' },
         dossier: { name: 'Aday dosyası', does: 'Profil, resmî süreç, belgeler ve seyahat. Eksik belgeyi "+ Talep et" ile isteyin, dosyayı önizleyin veya indirin. YouTube bağlantısı kaydedebilirsiniz.' },
         requests: { name: 'Personel Talepleri', does: 'Aday eşleştirebileceğiniz açık talepler; durum kendiliğinden ilerler.' },
         tasks: { name: 'Görevler', does: 'Size atanan iş, yedeği ve tarihiyle.' },
@@ -459,9 +462,9 @@ const tr: GuidesCopy = {
     },
     target_country: {
       title: 'Hedef Ülke Sorumlusu',
-      summary: 'İnsanların yerleştirileceği ülkedeki işverenlerle çalışır. Girişte Aday Havuzu sekmesi açılır.',
+      summary: 'İnsanların yerleştirileceği ülkedeki işverenlerle çalışır. Girişte Aday Havuzu açılır; çubukta ayrıca Personel Talepleri, Görevler ve İşverenler sekmeleri vardır.',
       screens: {
-        request: { name: 'Talep dosyası', does: 'Talep koşulları (maaş para birimiyle), bağlı adaylar, mülakatlar ve teklifler. Mülakata toplantı bağlantısı ekleyebilir, işveren adına seçildi / reddedildi kararı girebilirsiniz.' },
+        request: { name: 'Talep dosyası', does: 'Personel Talepleri sekmesinden açılır. Talep koşulları (maaş para birimiyle), bağlı adaylar, mülakatlar ve teklifler. Mülakata toplantı bağlantısı ekleyebilir, işveren adına seçildi / reddedildi kararı girebilirsiniz.' },
         employer: { name: 'İşveren dosyası', does: 'Şirket kaydı ve bağlı talepler. Kendi ülkenizdeki işverene giriş daveti gönderebilirsiniz.' },
         candidates: { name: 'Aday Havuzu', does: 'Yerleştirme hattındaki kişilerin dosyaları. YouTube bağlantısını burada kaydedebilirsiniz.' },
         tasks: { name: 'Görevler', does: 'Bu yerleştirmelere ait takipler.' },
@@ -469,12 +472,12 @@ const tr: GuidesCopy = {
     },
     field_officer: {
       title: 'Saha Sorumlusu',
-      summary: 'Belgeler, seyahat notları ve atanan görevler. Talep ve işveren dosyalarını açamaz; dosyadaki YouTube bağlantıları salt okunurdur.',
+      summary: 'Belgeler, seyahat notları, atanan görevler ve "Aday kaydet" ile saha kaydı. Kartında sistemin atadığı "Yönlendirme kodu" vardır. Talep ve işveren dosyalarını açamaz; YouTube salt okunurdur.',
       screens: {
         tasks: { name: 'Görevler', does: 'Adınızın veya yedeğinizin olduğu bekleyen iş.' },
-        dossier: { name: 'Aday dosyası', does: 'Belgeler ve seyahat. YouTube bağlantıları görünür, düzenlenemez. Talep ve işveren dosyaları bu role kapalıdır.' },
+        dossier: { name: 'Aday dosyası', does: 'Kayıt ettiğiniz veya size atanan adayların belgeleri ve seyahati. YouTube görünür, düzenlenemez. Talep ve işveren dosyaları bu role kapalıdır.' },
         support: { name: 'Sorunlar / Bildirimler', does: 'Yanıt bekleyen aday iletileri.' },
-        overview: { name: 'Genel Durum', does: 'Özet kartları; bu rolün sekmesi olmayan kartlar tıklanmaz.' },
+        overview: { name: 'Genel Durum', does: 'Özet kartları; bu rolün sekmesi olmayan kartlar tıklanmaz. "Aday kaydet" ile yönlendirme kodunuza bağlı hızlı saha kaydı yapılır.' },
       },
     },
     finance: {
@@ -524,37 +527,39 @@ const tr: GuidesCopy = {
   guides: {
     'staff-login': {
       title: 'Personel olarak giriş',
-      summary: 'Davetteki e-postayı kullanın. Farklı bir adres personel kaydınıza bağlanmaz.',
+      summary: 'Davetteki e-postayı kullanın. Farklı bir adres personel kaydınıza bağlanmaz. MFA zorunluysa sekmeler kod doğrulanana kadar açılmaz.',
       where: '/portal',
       steps: [
         { title: 'Personel portalını açın', body: '/portal adresine gidin.' },
         { title: 'Davetli e-posta ile girin', body: 'Şifre kullanın veya aynı e-posta ile Google’ı seçin. Davet sizin için şifre belirlemez.' },
         { title: 'İstenirse e-postayı doğrulayın', body: 'İletiyi açıp onaylayın, sonra /portal adresine dönün. Adres zaten doğrulanmışsa bu adım atlanır.' },
+        { title: 'Gerekirse iki adımlı doğrulamayı tamamlayın', body: 'Kuruluş veya kartınızda MFA "Zorunlu" ise Authenticator uygulamasını kurun veya 6 haneli kodu girin; sekmeler ancak bundan sonra açılır. Zorunlu değilse Genel Durum’daki panelden isteğe bağlı açabilirsiniz.' },
         { title: 'Rol rozetine bakın', body: 'Rolünüzün ilk sekmesi açılır: Üst Yönetim, saha, finans ve sınırlı erişimde Genel Durum; kaynak ve hedef ülke sorumlusunda Aday Havuzu. Adınız ve rolünüz yeşil rozettedir.' },
       ],
-      flow: ['Davet e-postası', '/portal', 'İstenirse doğrula', 'İlk sekme'],
+      flow: ['Davet e-postası', '/portal', 'İstenirse doğrula', 'Gerekirse MFA', 'İlk sekme'],
       mock: {
         caption: 'Personel giriş ekranının şeması.',
         chrome: '/portal',
         rows: [
           { label: 'E-posta', value: 'Davetteki adres' },
           { label: 'Giriş', value: 'Şifre veya Google' },
+          { label: 'Doğrulama', value: 'Zorunluysa kod' },
           { label: 'Sonra', value: 'Rolünüzün ilk sekmesi' },
         ],
       },
-      example: 'Bir kaynak ülke sorumlusu davetteki adresle Google’ı seçer. Genel Durum yerine Aday Havuzu açılır; sekme çubuğunda yalnız Aday Havuzu, Personel Talepleri ve Görevler vardır.',
+      example: 'Bir kaynak ülke sorumlusu davetteki adresle Google’ı seçer. Kartında MFA "Zorunlu" ise kodu girer; ardından Genel Durum yerine Aday Havuzu açılır.',
     },
     'staff-invite': {
       title: 'Personel davet etme',
-      summary: 'Ekip & Yetkiler sekmesini yalnızca Üst Yönetim görür. Kişiyi kaydedersiniz ve e-posta gider. Şifre belirlemezsiniz.',
+      summary: 'Ekip & Yetkiler sekmesini yalnızca Üst Yönetim görür. Kişiyi kaydedersiniz ve e-posta gider. Şifre belirlemezsiniz. Tüm ekip veya tek kişi için MFA aynı sekmede ayarlanır.',
       where: '/portal → Ekip & Yetkiler',
       steps: [
-        { title: 'Ekip & Yetkiler sekmesini açın', body: 'Sekme personel portalı çubuğundadır ve diğer rollere kapalıdır.' },
-        { title: 'Kişiyi yazın', body: 'Ad soyad, girişte kullanacağı e-posta ve rol: Üst Yönetim, Kaynak Ülke Sorumlusu, Hedef Ülke Sorumlusu veya Saha Sorumlusu.' },
+        { title: 'Ekip & Yetkiler sekmesini açın', body: 'Sekme personel portalı çubuğundadır ve diğer rollere kapalıdır. Üstte yeşil "İki adımlı doğrulama (ekip)" çubuğu vardır.' },
+        { title: 'Kişiyi yazın', body: 'Ad soyad, girişte kullanacağı e-posta ve rol: Üst Yönetim, Kaynak Ülke Sorumlusu, Hedef Ülke Sorumlusu veya Saha Sorumlusu. Kaynak ülke ve saha için sistem "Yönlendirme kodu" atar; kod elle yazılmaz.' },
         { title: 'Daveti gönderin', body: 'Kişi /portal adresinde tam bu e-posta ile kayıt olur veya giriş yapar. E-posta eşleşince hesap bağlanır.' },
-        { title: 'Sonra düzenleyin', body: 'Kartındaki rolü değiştirin veya satırı silerek personel kaydını kaldırın.' },
+        { title: 'Sonra düzenleyin', body: 'Kartındaki rolü değiştirin, "Bu kişi için MFA" ile "Zorunlu" veya "Kapalı" seçin ya da satırı silin. Üst çubuk "Zorunlu" iken kişi düğmeleri kilitlenir; çubuğu "Kapalı" yapınca kartlar yeniden açılır.' },
       ],
-      flow: ['Ekip & Yetkiler sekmesi', 'Ad, e-posta, rol', 'Davet e-postası', 'Giriş yapar'],
+      flow: ['Ekip & Yetkiler sekmesi', 'Ad, e-posta, rol', 'Davet e-postası', 'Rol / MFA kartta'],
       mock: {
         caption: 'Davet formunun şeması. Şifre alanı yoktur.',
         chrome: '/portal · Ekip & Yetkiler',
@@ -562,9 +567,10 @@ const tr: GuidesCopy = {
           { label: 'Ad', value: 'Ad soyad' },
           { label: 'E-posta', value: 'Giriş adresi' },
           { label: 'Rol', value: 'Dört rolden biri' },
+          { label: 'Doğrulama', value: 'Ekip çubuğu veya kart' },
         ],
       },
-      example: '"Demo Personel" adını, kişinin giriş e-postasını ve Saha Sorumlusu rolünü yazıp gönderin. Kişi aynı adresle /portal’a girince rozetinde Saha Sorumlusu yazar; rolü sonra kartından değiştirebilirsiniz.',
+      example: '"Demo Personel" adını, kişinin giriş e-postasını ve Saha Sorumlusu rolünü yazıp gönderin. Kartında "Yönlendirme kodu" ve "Bu kişi için MFA" görünür; Zorunlu ise girişte kod ister.',
     },
     'dossier-review': {
       title: 'Aday dosyasını inceleme',
@@ -805,7 +811,7 @@ const sq: GuidesCopy = {
         requests: { name: 'Kërkesat e Personelit', does: 'Kërkesat për fuqi punëtore dhe dosjet e përputhjes. Statusi i kërkesës përparon vetvetiu sipas regjistrimeve; ndryshimi manual dhe fshirja e kërkesës janë vetëm te ju.' },
         staff: {
           name: 'Stafi & Rolet',
-          does: 'Dërgoni ftesë me emër dhe e-postë, zgjidhni rolin ose fshini rreshtin e stafit.',
+          does: 'Dërgoni ftesë me emër dhe e-postë, zgjidhni rolin ose fshini rreshtin e stafit. Shiriti jeshil "Verifikim me dy hapa (ekipi)" hap MFA për të gjithë; në çdo kartë "MFA për këtë person" me I detyrueshëm ose Fikur. Kartat e vendit burim dhe të fushës tregojnë "Kodi i referimit" të sistemit.',
           limitedDoes: 'Këtë skedë e sheh vetëm Menaxhimi i Lartë.',
         },
         tasks: { name: 'Detyrat', does: 'Punë ndjekjeje me përgjegjës, zëvendës dhe afat.' },
@@ -816,9 +822,9 @@ const sq: GuidesCopy = {
     },
     source_country: {
       title: 'Oficeri i Vendit Burim',
-      summary: 'Drejton rrjedhën e kandidatëve në vendin nga merren njerëzit. Pas hyrjes hapet skeda Grupi i Kandidatëve.',
+      summary: 'Drejton rrjedhën e kandidatëve në vendin nga merren njerëzit. Pas hyrjes hapet skeda Grupi i Kandidatëve. Në kartën e stafit sistemi cakton "Kodi i referimit"; nuk shkruhet me dorë dhe nuk ndryshohet më vonë.',
       screens: {
-        candidates: { name: 'Grupi i Kandidatëve', does: 'Filtroni sipas sektorit, statusit dhe vendit; ndryshoni përgjegjësin nga lista. Statusi i kandidatit vjen automatikisht nga procesi zyrtar.' },
+        candidates: { name: 'Grupi i Kandidatëve', does: 'Filtroni sipas sektorit, statusit, vendit dhe kodit të referimit; ndryshoni përgjegjësin nga lista. Statusi i kandidatit vjen automatikisht nga procesi zyrtar. Me "Regjistro kandidatin" mund të hapni regjistrim të lidhur me kodin tuaj.' },
         dossier: { name: 'Dosja e kandidatit', does: 'Profili, procesi zyrtar, dokumentet dhe udhëtimi. Kërkoni dokumentin që mungon me "+ Kërko", shikoni ose shkarkoni skedarin. Mund të ruani lidhjen YouTube.' },
         requests: { name: 'Kërkesat e Personelit', does: 'Kërkesat e hapura me të cilat mund të përputhni kandidatë; statusi përparon vetvetiu.' },
         tasks: { name: 'Detyrat', does: 'Puna e caktuar për ju, me zëvendësin dhe afatin.' },
@@ -826,9 +832,9 @@ const sq: GuidesCopy = {
     },
     target_country: {
       title: 'Oficeri i Vendit të Synuar',
-      summary: 'Punon me punëdhënësit në vendin ku do të vendosen njerëzit. Pas hyrjes hapet skeda Grupi i Kandidatëve.',
+      summary: 'Punon me punëdhënësit në vendin ku do të vendosen njerëzit. Pas hyrjes hapet Grupi i Kandidatëve; në shirit janë edhe Kërkesat e Personelit, Detyrat dhe Punëdhënësit.',
       screens: {
-        request: { name: 'Dosja e kërkesës', does: 'Kushtet e kërkesës (paga me monedhën), kandidatët e lidhur, intervistat dhe ofertat. Mund t’i shtoni intervistës lidhjen e takimit dhe të vendosni në emër të punëdhënësit vendimin I zgjedhur / I refuzuar.' },
+        request: { name: 'Dosja e kërkesës', does: 'Hapet nga skeda Kërkesat e Personelit. Kushtet e kërkesës (paga me monedhën), kandidatët e lidhur, intervistat dhe ofertat. Mund t’i shtoni intervistës lidhjen e takimit dhe të vendosni në emër të punëdhënësit vendimin I zgjedhur / I refuzuar.' },
         employer: { name: 'Dosja e punëdhënësit', does: 'Regjistrimi i kompanisë dhe kërkesat e lidhura. Mund t’i dërgoni ftesë hyrjeje punëdhënësit në vendin tuaj.' },
         candidates: { name: 'Grupi i Kandidatëve', does: 'Dosjet e njerëzve në rrjedhën e vendosjes. Lidhjen YouTube mund ta ruani këtu.' },
         tasks: { name: 'Detyrat', does: 'Ndjekjet e këtyre vendosjeve.' },
@@ -836,12 +842,12 @@ const sq: GuidesCopy = {
     },
     field_officer: {
       title: 'Oficeri i Fushës',
-      summary: 'Dokumentet, shënimet e udhëtimit dhe detyrat e caktuara. Nuk hap dosjet e kërkesave dhe të punëdhënësve; lidhjet YouTube në dosje janë vetëm për lexim.',
+      summary: 'Dokumentet, shënimet e udhëtimit, detyrat e caktuara dhe regjistrimi në terren me "Regjistro kandidatin". Kartë tregon "Kodi i referimit" të sistemit. Nuk hap dosjet e kërkesave dhe të punëdhënësve; YouTube është vetëm për lexim.',
       screens: {
         tasks: { name: 'Detyrat', does: 'Puna në pritje me emrin tuaj ose të zëvendësit.' },
-        dossier: { name: 'Dosja e kandidatit', does: 'Dokumentet dhe udhëtimi. Lidhjet YouTube duken, por nuk ndryshohen. Dosjet e kërkesave dhe të punëdhënësve janë të mbyllura për këtë rol.' },
+        dossier: { name: 'Dosja e kandidatit', does: 'Dokumentet dhe udhëtimi i kandidatëve që regjistruat ose ju u caktuan. Lidhjet YouTube duken, por nuk ndryshohen. Dosjet e kërkesave dhe të punëdhënësve janë të mbyllura për këtë rol.' },
         support: { name: 'Problemet / Mbështetja', does: 'Mesazhet e kandidatëve që presin përgjigje.' },
-        overview: { name: 'Përmbledhje', does: 'Kartat përmbledhëse; kartat e skedave që ky rol nuk i ka nuk klikohen.' },
+        overview: { name: 'Përmbledhje', does: 'Kartat përmbledhëse; kartat e skedave që ky rol nuk i ka nuk klikohen. Me "Regjistro kandidatin" bëhet regjistrim i shpejtë i lidhur me kodin tuaj të referimit.' },
       },
     },
     finance: {
@@ -891,37 +897,39 @@ const sq: GuidesCopy = {
   guides: {
     'staff-login': {
       title: 'Hyrja si staf',
-      summary: 'Përdorni e-postën e ftesës. Një adresë tjetër nuk lidhet me regjistrimin tuaj të stafit.',
+      summary: 'Përdorni e-postën e ftesës. Një adresë tjetër nuk lidhet me regjistrimin tuaj të stafit. Nëse MFA është e detyrueshme, skedat hapen vetëm pas kodit.',
       where: '/portal',
       steps: [
         { title: 'Hapni portalin e stafit', body: 'Shkoni te /portal.' },
         { title: 'Hyni me e-postën e ftuar', body: 'Përdorni fjalëkalim ose zgjidhni Google me të njëjtën e-postë. Ftesa nuk vendos fjalëkalim për ju.' },
         { title: 'Konfirmoni e-postën nëse kërkohet', body: 'Hapni mesazhin dhe konfirmoni, pastaj kthehuni te /portal. Nëse adresa është konfirmuar më parë, ky hap kapërcehet.' },
+        { title: 'Plotësoni verifikimin me dy hapa nëse kërkohet', body: 'Nëse organizata ose karta juaj e ka MFA I detyrueshëm, konfiguroni aplikacionin authenticator ose vendosni kodin 6-shifror. Skedat qëndrojnë të fshehura derisa verifikimi të ketë sukses. Nëse nuk është i detyrueshëm, mund ta aktivizoni më vonë nga paneli në Përmbledhje.' },
         { title: 'Shikoni distinktivin e rolit', body: 'Hapet skeda e parë e rolit tuaj: Përmbledhje për Menaxhimin e Lartë, fushën, financën dhe qasjen e kufizuar; Grupi i Kandidatëve për oficerët e vendit burim dhe të vendit të synuar. Emri dhe roli juaj janë në distinktivin e gjelbër.' },
       ],
-      flow: ['E-posta e ftesës', '/portal', 'Konfirmo nëse kërkohet', 'Skeda e parë'],
+      flow: ['E-posta e ftesës', '/portal', 'Konfirmo nëse kërkohet', 'MFA nëse kërkohet', 'Skeda e parë'],
       mock: {
         caption: 'Skica e ekranit të hyrjes së stafit.',
         chrome: '/portal',
         rows: [
           { label: 'E-posta', value: 'Adresa në ftesë' },
           { label: 'Hyrja', value: 'Fjalëkalim ose Google' },
+          { label: 'Verifikimi', value: 'Kodi kur është I detyrueshëm' },
           { label: 'Pastaj', value: 'Skeda e parë e rolit tuaj' },
         ],
       },
-      example: 'Një oficer i vendit burim zgjedh Google me adresën e ftesës. Në vend të Përmbledhjes hapet Grupi i Kandidatëve; shiriti i skedave ka vetëm Grupi i Kandidatëve, Kërkesat e Personelit dhe Detyrat.',
+      example: 'Një oficer i vendit burim zgjedh Google me adresën e ftesës. Nëse MFA është I detyrueshëm në kartë, vendos kodin; pastaj hapet Grupi i Kandidatëve.',
     },
     'staff-invite': {
       title: 'Ftesa e stafit',
-      summary: 'Skedën Stafi & Rolet e sheh vetëm Menaxhimi i Lartë. Ju e regjistroni personin dhe dërgohet një e-postë. Fjalëkalimin nuk e vendosni ju.',
+      summary: 'Skedën Stafi & Rolet e sheh vetëm Menaxhimi i Lartë. Ju e regjistroni personin dhe dërgohet një e-postë. Fjalëkalimin nuk e vendosni ju. MFA për ekipin ose për një person rregullohet në të njëjtën skedë.',
       where: '/portal → Stafi & Rolet',
       steps: [
-        { title: 'Hapni skedën Stafi & Rolet', body: 'Skeda është në shiritin e portalit të stafit dhe është e mbyllur për rolet e tjera.' },
-        { title: 'Shkruani personin', body: 'Emri e mbiemri, e-posta me të cilën do të hyjë dhe roli: Menaxhimi i Lartë, vendi burim, vendi i synuar ose oficeri i fushës.' },
+        { title: 'Hapni skedën Stafi & Rolet', body: 'Skeda është në shiritin e portalit të stafit dhe është e mbyllur për rolet e tjera. Lart është shiriti jeshil "Verifikim me dy hapa (ekipi)".' },
+        { title: 'Shkruani personin', body: 'Emri e mbiemri, e-posta me të cilën do të hyjë dhe roli: Menaxhimi i Lartë, vendi burim, vendi i synuar ose oficeri i fushës. Për vendin burim dhe fushën sistemi cakton "Kodi i referimit"; nuk shkruhet me dorë.' },
         { title: 'Dërgoni ftesën', body: 'Personi regjistrohet ose hyn te /portal pikërisht me këtë e-postë. Kur e-posta përputhet, llogaria lidhet.' },
-        { title: 'Ndryshoni më vonë', body: 'Ndryshoni rolin në kartën e tij ose fshini rreshtin për të hequr regjistrimin e stafit.' },
+        { title: 'Ndryshoni më vonë', body: 'Ndryshoni rolin në kartë, vendosni "MFA për këtë person" I detyrueshëm ose Fikur, ose fshini rreshtin. Kur shiriti i ekipit është I detyrueshëm, butonat e personit kyçen.' },
       ],
-      flow: ['Skeda Stafi & Rolet', 'Emri, e-posta, roli', 'E-posta e ftesës', 'Personi hyn'],
+      flow: ['Skeda Stafi & Rolet', 'Emri, e-posta, roli', 'E-posta e ftesës', 'Roli / MFA në kartë'],
       mock: {
         caption: 'Skica e formularit të ftesës. Nuk ka fushë fjalëkalimi.',
         chrome: '/portal · Stafi & Rolet',
@@ -929,9 +937,10 @@ const sq: GuidesCopy = {
           { label: 'Emri', value: 'Emri e mbiemri' },
           { label: 'E-posta', value: 'Adresa e hyrjes' },
           { label: 'Roli', value: 'Një nga katër rolet' },
+          { label: 'Verifikimi', value: 'Shiriti i ekipit ose karta' },
         ],
       },
-      example: 'Shkruani emrin "Staf Demo", e-postën e hyrjes së personit dhe rolin Oficeri i Fushës, pastaj dërgoni. Kur personi hyn te /portal me të njëjtën adresë, distinktivi tregon Oficeri i Fushës; rolin mund ta ndryshoni më vonë nga karta e tij.',
+      example: 'Shkruani emrin "Staf Demo", e-postën e hyrjes dhe rolin Oficeri i Fushës, pastaj dërgoni. Kartë tregon "Kodi i referimit" dhe "MFA për këtë person".',
     },
     'dossier-review': {
       title: 'Shqyrtimi i dosjes së kandidatit',
@@ -1172,7 +1181,7 @@ const ar: GuidesCopy = {
         requests: { name: 'طلبات الموظفين', does: 'طلبات العمالة وملفات المطابقة. حالة الطلب تتقدم تلقائيًا وفق السجلات؛ وتغييرها يدويًا وحذف الطلب لكم وحدكم.' },
         staff: {
           name: 'الموظفون والأدوار',
-          does: 'أرسلوا دعوة بالاسم والبريد الإلكتروني، واختاروا الدور، أو احذفوا صف الموظف.',
+          does: 'أرسلوا دعوة بالاسم والبريد الإلكتروني، واختاروا الدور، أو احذفوا صف الموظف. الشريط الأخضر «التحقق بخطوتين (الفريق)» يفعّل التحقق للجميع؛ وفي كل بطاقة «التحقق بخطوتين لهذا الشخص» مع إلزامي أو متوقف. بطاقات بلد المصدر والميدان تعرض «رمز الإحالة» الذي يعيّنه النظام.',
           limitedDoes: 'هذا التبويب تراه الإدارة العليا فقط.',
         },
         tasks: { name: 'المهام', does: 'عمل متابعة له مسؤول وبديل وتاريخ.' },
@@ -1183,9 +1192,9 @@ const ar: GuidesCopy = {
     },
     source_country: {
       title: 'مسؤول بلد المصدر',
-      summary: 'يدير مسار المرشحين في البلد الذي يُستقدم منه الأشخاص. عند الدخول يُفتح تبويب قائمة المرشحين.',
+      summary: 'يدير مسار المرشحين في البلد الذي يُستقدم منه الأشخاص. عند الدخول يُفتح تبويب قائمة المرشحين. في بطاقة الموظف يعيّن النظام «رمز الإحالة»؛ لا يُكتب يدويًا ولا يُغيَّر لاحقًا.',
       screens: {
-        candidates: { name: 'قائمة المرشحين', does: 'صفّوا حسب القطاع والحالة والبلد، وغيّروا المسؤول من القائمة. حالة المرشح تأتي تلقائيًا من الإجراءات الرسمية.' },
+        candidates: { name: 'قائمة المرشحين', does: 'صفّوا حسب القطاع والحالة والبلد ورمز الإحالة، وغيّروا المسؤول من القائمة. حالة المرشح تأتي تلقائيًا من الإجراءات الرسمية. عبر «تسجيل مرشح» يمكن فتح تسجيل مرتبط برمزكم.' },
         dossier: { name: 'ملف المرشح', does: 'الملف الشخصي والإجراءات الرسمية والمستندات والسفر. اطلبوا المستند الناقص عبر «+ طلب»، وعاينوا الملف أو نزّلوه. يمكنكم حفظ رابط يوتيوب.' },
         requests: { name: 'طلبات الموظفين', does: 'الطلبات المفتوحة التي يمكنكم مطابقة المرشحين معها؛ الحالة تتقدم تلقائيًا.' },
         tasks: { name: 'المهام', does: 'العمل المسند إليكم مع البديل والتاريخ.' },
@@ -1193,9 +1202,9 @@ const ar: GuidesCopy = {
     },
     target_country: {
       title: 'مسؤول البلد المستهدف',
-      summary: 'يعمل مع أصحاب العمل في البلد الذي سيُوظَّف فيه الأشخاص. عند الدخول يُفتح تبويب قائمة المرشحين.',
+      summary: 'يعمل مع أصحاب العمل في البلد الذي سيُوظَّف فيه الأشخاص. عند الدخول تُفتح قائمة المرشحين؛ وفي الشريط أيضًا طلبات الموظفين والمهام وأصحاب العمل.',
       screens: {
-        request: { name: 'ملف الطلب', does: 'شروط الطلب (الراتب مع العملة) والمرشحون المرتبطون والمقابلات والعروض. يمكنكم إضافة رابط اجتماع للمقابلة وإدخال قرار تم الاختيار / مرفوض نيابةً عن صاحب العمل.' },
+        request: { name: 'ملف الطلب', does: 'يُفتح من تبويب طلبات الموظفين. شروط الطلب (الراتب مع العملة) والمرشحون المرتبطون والمقابلات والعروض. يمكنكم إضافة رابط اجتماع للمقابلة وإدخال قرار تم الاختيار / مرفوض نيابةً عن صاحب العمل.' },
         employer: { name: 'ملف صاحب العمل', does: 'سجل الشركة والطلبات المرتبطة. يمكنكم إرسال دعوة دخول إلى صاحب عمل في بلدكم.' },
         candidates: { name: 'قائمة المرشحين', does: 'ملفات الأشخاص في مسار التوظيف. يمكنكم حفظ رابط يوتيوب هنا.' },
         tasks: { name: 'المهام', does: 'متابعات تلك التوظيفات.' },
@@ -1203,12 +1212,12 @@ const ar: GuidesCopy = {
     },
     field_officer: {
       title: 'مسؤول الميدان',
-      summary: 'المستندات وملاحظات السفر والمهام المسندة. لا يفتح ملفات الطلبات وأصحاب العمل؛ وروابط يوتيوب في الملف للقراءة فقط.',
+      summary: 'المستندات وملاحظات السفر والمهام المسندة والتسجيل الميداني عبر «تسجيل مرشح». البطاقة تعرض «رمز الإحالة» من النظام. لا يفتح ملفات الطلبات وأصحاب العمل؛ ويوتيوب للقراءة فقط.',
       screens: {
         tasks: { name: 'المهام', does: 'العمل المعلّق باسمكم أو باسم البديل.' },
-        dossier: { name: 'ملف المرشح', does: 'المستندات والسفر. روابط يوتيوب ظاهرة ولا تُعدَّل. ملفات الطلبات وأصحاب العمل مغلقة أمام هذا الدور.' },
+        dossier: { name: 'ملف المرشح', does: 'مستندات وسفر المرشحين الذين سجّلتموهم أو أُسندوا إليكم. روابط يوتيوب ظاهرة ولا تُعدَّل. ملفات الطلبات وأصحاب العمل مغلقة أمام هذا الدور.' },
         support: { name: 'المشكلات / الدعم', does: 'رسائل المرشحين التي تنتظر ردًا.' },
-        overview: { name: 'نظرة عامة', does: 'بطاقات الملخص؛ البطاقات التي ليس لهذا الدور تبويب لها لا تُنقر.' },
+        overview: { name: 'نظرة عامة', does: 'بطاقات الملخص؛ البطاقات التي ليس لهذا الدور تبويب لها لا تُنقر. استخدموا «تسجيل مرشح» لتسجيل ميداني سريع مرتبط برمز الإحالة.' },
       },
     },
     finance: {
@@ -1258,37 +1267,39 @@ const ar: GuidesCopy = {
   guides: {
     'staff-login': {
       title: 'الدخول كموظف',
-      summary: 'استخدموا البريد الإلكتروني الوارد في الدعوة. العنوان المختلف لا يرتبط بسجل الموظف الخاص بكم.',
+      summary: 'استخدموا البريد الإلكتروني الوارد في الدعوة. العنوان المختلف لا يرتبط بسجل الموظف الخاص بكم. إذا كان التحقق بخطوتين إلزاميًا تبقى التبويبات مغلقة حتى إدخال الرمز.',
       where: '/portal',
       steps: [
         { title: 'افتحوا بوابة الموظفين', body: 'انتقلوا إلى /portal.' },
         { title: 'ادخلوا ببريد الدعوة', body: 'استخدموا كلمة المرور أو اختاروا Google بالبريد نفسه. الدعوة لا تعيّن كلمة مرور لكم.' },
         { title: 'أكّدوا البريد إذا طُلب ذلك', body: 'افتحوا الرسالة وأكّدوا، ثم عودوا إلى /portal. إذا كان العنوان مؤكَّدًا من قبل تُتجاوز هذه الخطوة.' },
+        { title: 'أكملوا التحقق بخطوتين إذا لزم', body: 'إذا كانت المؤسسة أو بطاقتكم تجعل التحقق «إلزامي»، أعدّوا تطبيق المصادقة أو أدخلوا الرمز المكوّن من 6 أرقام. تبقى التبويبات مخفية حتى ينجح التحقق. إن لم يكن إلزاميًا يمكن تفعيله لاحقًا من لوحة نظرة عامة.' },
         { title: 'راجعوا شارة الدور', body: 'يُفتح أول تبويب لدوركم: نظرة عامة للإدارة العليا والميدان والمالية والوصول المحدود؛ وقائمة المرشحين لمسؤولي بلد المصدر والبلد المستهدف. اسمكم ودوركم في الشارة الخضراء.' },
       ],
-      flow: ['بريد الدعوة', '/portal', 'التأكيد إن طُلب', 'أول تبويب'],
+      flow: ['بريد الدعوة', '/portal', 'التأكيد إن طُلب', 'التحقق إن لزم', 'أول تبويب'],
       mock: {
         caption: 'مخطط شاشة دخول الموظفين.',
         chrome: '/portal',
         rows: [
           { label: 'البريد الإلكتروني', value: 'العنوان الوارد في الدعوة' },
           { label: 'الدخول', value: 'كلمة المرور أو Google' },
+          { label: 'التحقق بخطوتين', value: 'الرمز عند الإلزام' },
           { label: 'بعد ذلك', value: 'أول تبويب لدوركم' },
         ],
       },
-      example: 'يختار مسؤول بلد المصدر Google بعنوان الدعوة. تُفتح قائمة المرشحين بدل نظرة عامة؛ وفي شريط التبويبات قائمة المرشحين وطلبات الموظفين والمهام فقط.',
+      example: 'يختار مسؤول بلد المصدر Google بعنوان الدعوة. إذا كان التحقق «إلزامي» على بطاقته يدخل الرمز؛ ثم تُفتح قائمة المرشحين بدل نظرة عامة.',
     },
     'staff-invite': {
       title: 'دعوة موظف',
-      summary: 'تبويب الموظفون والأدوار تراه الإدارة العليا فقط. تسجّلون الشخص ويُرسل بريد إلكتروني. لا تعيّنون كلمة المرور.',
+      summary: 'تبويب الموظفون والأدوار تراه الإدارة العليا فقط. تسجّلون الشخص ويُرسل بريد إلكتروني. لا تعيّنون كلمة المرور. التحقق بخطوتين للفريق أو لشخص واحد يُضبط في التبويب نفسه.',
       where: '/portal → الموظفون والأدوار',
       steps: [
-        { title: 'افتحوا تبويب الموظفون والأدوار', body: 'التبويب في شريط بوابة الموظفين وهو مغلق أمام الأدوار الأخرى.' },
-        { title: 'اكتبوا بيانات الشخص', body: 'الاسم الكامل، والبريد الذي سيدخل به، والدور: الإدارة العليا أو بلد المصدر أو البلد المستهدف أو مسؤول الميدان.' },
+        { title: 'افتحوا تبويب الموظفون والأدوار', body: 'التبويب في شريط بوابة الموظفين وهو مغلق أمام الأدوار الأخرى. في الأعلى الشريط الأخضر «التحقق بخطوتين (الفريق)».' },
+        { title: 'اكتبوا بيانات الشخص', body: 'الاسم الكامل، والبريد الذي سيدخل به، والدور: الإدارة العليا أو بلد المصدر أو البلد المستهدف أو مسؤول الميدان. لبلد المصدر والميدان يعيّن النظام «رمز الإحالة» تلقائيًا؛ لا يُكتب يدويًا.' },
         { title: 'أرسلوا الدعوة', body: 'يسجّل الشخص أو يدخل في /portal بهذا البريد نفسه تمامًا. عند تطابق البريد يُربط الحساب.' },
-        { title: 'عدّلوا لاحقًا', body: 'غيّروا الدور من بطاقته، أو احذفوا الصف لإزالة سجل الموظف.' },
+        { title: 'عدّلوا لاحقًا', body: 'غيّروا الدور من البطاقة، واضبطوا «التحقق بخطوتين لهذا الشخص» على إلزامي أو متوقف، أو احذفوا الصف. عندما يكون شريط الفريق إلزاميًا تُقفل أزرار الشخص.' },
       ],
-      flow: ['تبويب الموظفون والأدوار', 'الاسم والبريد والدور', 'بريد الدعوة', 'يدخل الشخص'],
+      flow: ['تبويب الموظفون والأدوار', 'الاسم والبريد والدور', 'بريد الدعوة', 'الدور / التحقق في البطاقة'],
       mock: {
         caption: 'مخطط نموذج الدعوة. لا يوجد حقل لكلمة المرور.',
         chrome: '/portal · الموظفون والأدوار',
@@ -1296,9 +1307,10 @@ const ar: GuidesCopy = {
           { label: 'الاسم', value: 'الاسم الكامل' },
           { label: 'البريد الإلكتروني', value: 'عنوان الدخول' },
           { label: 'الدور', value: 'أحد الأدوار الأربعة' },
+          { label: 'التحقق بخطوتين', value: 'شريط الفريق أو البطاقة' },
         ],
       },
-      example: 'اكتبوا الاسم «موظف تجريبي» وبريد الدخول الخاص بالشخص ودور مسؤول الميدان، ثم أرسلوا. عندما يدخل الشخص إلى /portal بالعنوان نفسه تظهر في شارته عبارة مسؤول الميدان؛ ويمكنكم تغيير الدور لاحقًا من بطاقته.',
+      example: 'اكتبوا الاسم «موظف تجريبي» وبريد الدخول ودور مسؤول الميدان، ثم أرسلوا. تظهر في البطاقة «رمز الإحالة» و«التحقق بخطوتين لهذا الشخص».',
     },
     'dossier-review': {
       title: 'مراجعة ملف المرشح',
@@ -1539,7 +1551,7 @@ const mk: GuidesCopy = {
         requests: { name: 'Барања за персонал', does: 'Барањата за работна сила и досиејата за поврзување. Статусот на барањето напредува сам според записите; рачното менување и бришењето на барањето се само кај вас.' },
         staff: {
           name: 'Персонал и улоги',
-          does: 'Испратете покана со име и е-пошта, изберете улога или избришете ред од персоналот.',
+          does: 'Испратете покана со име и е-пошта, изберете улога или избришете ред од персоналот. Зелената лента „Проверка во два чекора (тим)“ ја вклучува MFA за сите; на секоја картичка „MFA за оваа личност“ со Задолжително или Исклучено. Картичките за земја на потекло и терен го покажуваат системскиот „Код за упатување“.',
           limitedDoes: 'Ова јазиче го гледа само Врвното раководство.',
         },
         tasks: { name: 'Задачи', does: 'Работа за следење со одговорен, замена и рок.' },
@@ -1550,9 +1562,9 @@ const mk: GuidesCopy = {
     },
     source_country: {
       title: 'Офицер за земја на потекло',
-      summary: 'Ја води линијата на кандидати во земјата од која се регрутираат луѓето. По најавата се отвора јазичето База на кандидати.',
+      summary: 'Ја води линијата на кандидати во земјата од која се регрутираат луѓето. По најавата се отвора јазичето База на кандидати. На картичката системот доделува „Код за упатување“; не се пишува рачно и не се менува подоцна.',
       screens: {
-        candidates: { name: 'База на кандидати', does: 'Филтрирајте по сектор, статус и земја; сменете го одговорниот од листата. Статусот на кандидатот доаѓа автоматски од официјалната постапка.' },
+        candidates: { name: 'База на кандидати', does: 'Филтрирајте по сектор, статус, земја и код за упатување; сменете го одговорниот од листата. Статусот на кандидатот доаѓа автоматски од официјалната постапка. Со „Регистрирај кандидат“ може да отворите запис поврзан со вашиот код.' },
         dossier: { name: 'Досие на кандидат', does: 'Профил, официјална постапка, документи и патување. Документот што недостига побарајте го со „+ Побарај“, прегледајте ја или преземете ја датотеката. Можете да зачувате YouTube врска.' },
         requests: { name: 'Барања за персонал', does: 'Отворените барања со кои можете да поврзете кандидати; статусот напредува сам.' },
         tasks: { name: 'Задачи', does: 'Работата доделена вам, со замената и рокот.' },
@@ -1560,9 +1572,9 @@ const mk: GuidesCopy = {
     },
     target_country: {
       title: 'Офицер за целна земја',
-      summary: 'Работи со работодавачите во земјата каде што ќе бидат вработени луѓето. По најавата се отвора јазичето База на кандидати.',
+      summary: 'Работи со работодавачите во земјата каде што ќе бидат вработени луѓето. По најавата се отвора База на кандидати; во лентата има и Барања за персонал, Задачи и Работодавачи.',
       screens: {
-        request: { name: 'Досие на барање', does: 'Условите на барањето (плата со валута), поврзаните кандидати, интервјуата и понудите. Можете да додадете врска за состанок на интервјуто и да внесете одлука Избран / Одбиен во име на работодавачот.' },
+        request: { name: 'Досие на барање', does: 'Се отвора од јазичето Барања за персонал. Условите на барањето (плата со валута), поврзаните кандидати, интервјуата и понудите. Можете да додадете врска за состанок на интервјуто и да внесете одлука Избран / Одбиен во име на работодавачот.' },
         employer: { name: 'Досие на работодавач', does: 'Записот на компанијата и поврзаните барања. Можете да испратите покана за најава до работодавач во вашата земја.' },
         candidates: { name: 'База на кандидати', does: 'Досиејата на луѓето во линијата за вработување. YouTube врската можете да ја зачувате тука.' },
         tasks: { name: 'Задачи', does: 'Следењата на тие вработувања.' },
@@ -1570,12 +1582,12 @@ const mk: GuidesCopy = {
     },
     field_officer: {
       title: 'Теренски офицер',
-      summary: 'Документи, белешки за патување и доделени задачи. Не може да ги отвора досиејата на барања и работодавачи; YouTube врските во досието се само за читање.',
+      summary: 'Документи, белешки за патување, доделени задачи и теренска регистрација со „Регистрирај кандидат“. Картичката го покажува системскиот „Код за упатување“. Не отвора досиеја на барања и работодавачи; YouTube е само за читање.',
       screens: {
         tasks: { name: 'Задачи', does: 'Работа на чекање со вашето име или со името на замената.' },
-        dossier: { name: 'Досие на кандидат', does: 'Документи и патување. YouTube врските се видливи, но не се менуваат. Досиејата на барања и работодавачи се затворени за оваа улога.' },
+        dossier: { name: 'Досие на кандидат', does: 'Документи и патување на кандидатите што ги регистриравте или ви се доделени. YouTube врските се видливи, но не се менуваат. Досиејата на барања и работодавачи се затворени за оваа улога.' },
         support: { name: 'Проблеми / поддршка', does: 'Пораки од кандидати што чекаат одговор.' },
-        overview: { name: 'Преглед', does: 'Картички со резиме; картичките за јазичиња што оваа улога ги нема не се кликаат.' },
+        overview: { name: 'Преглед', does: 'Картички со резиме; картичките за јазичиња што оваа улога ги нема не се кликаат. Со „Регистрирај кандидат“ се прави брза теренска регистрација поврзана со вашиот код за упатување.' },
       },
     },
     finance: {
@@ -1625,37 +1637,39 @@ const mk: GuidesCopy = {
   guides: {
     'staff-login': {
       title: 'Најава како персонал',
-      summary: 'Користете ја е-поштата од поканата. Друга адреса не се поврзува со вашиот запис во персоналот.',
+      summary: 'Користете ја е-поштата од поканата. Друга адреса не се поврзува со вашиот запис во персоналот. Ако MFA е задолжителна, јазичињата се отвораат дури по кодот.',
       where: '/portal',
       steps: [
         { title: 'Отворете го порталот за персонал', body: 'Одете на /portal.' },
         { title: 'Најавете се со поканетата е-пошта', body: 'Користете лозинка или изберете Google со истата е-пошта. Поканата не поставува лозинка за вас.' },
         { title: 'Потврдете ја е-поштата ако се бара', body: 'Отворете ја пораката и потврдете, потоа вратете се на /portal. Ако адресата е веќе потврдена, овој чекор се прескокнува.' },
+        { title: 'Завршете ја проверката во два чекора ако се бара', body: 'Ако организацијата или вашата картичка ја има MFA како Задолжително, поставете authenticator апликација или внесете го 6-цифрениот код. Јазичињата остануваат скриени до успешна проверка. Ако не е задолжителна, може да ја вклучите подоцна од панелот на Преглед.' },
         { title: 'Погледнете ја ознаката за улога', body: 'Се отвора првото јазиче на вашата улога: Преглед за Врвното раководство, теренот, финансиите и ограничениот пристап; База на кандидати за офицерите за земја на потекло и целна земја. Вашето име и улога се во зелената ознака.' },
       ],
-      flow: ['Е-пошта со покана', '/portal', 'Потврди ако се бара', 'Прво јазиче'],
+      flow: ['Е-пошта со покана', '/portal', 'Потврди ако се бара', 'MFA ако се бара', 'Прво јазиче'],
       mock: {
         caption: 'Шема на екранот за најава на персоналот.',
         chrome: '/portal',
         rows: [
           { label: 'Е-пошта', value: 'Адресата од поканата' },
           { label: 'Најава', value: 'Лозинка или Google' },
+          { label: 'Проверка', value: 'Код кога е Задолжително' },
           { label: 'Потоа', value: 'Првото јазиче на вашата улога' },
         ],
       },
-      example: 'Офицер за земја на потекло избира Google со адресата од поканата. Наместо Преглед се отвора База на кандидати; во лентата со јазичиња има само База на кандидати, Барања за персонал и Задачи.',
+      example: 'Офицер за земја на потекло избира Google со адресата од поканата. Ако MFA е Задолжително на картичката, го внесува кодот; потоа се отвора База на кандидати.',
     },
     'staff-invite': {
       title: 'Покана за персонал',
-      summary: 'Јазичето Персонал и улоги го гледа само Врвното раководство. Го запишувате лицето и се испраќа е-пошта. Лозинка не поставувате вие.',
+      summary: 'Јазичето Персонал и улоги го гледа само Врвното раководство. Го запишувате лицето и се испраќа е-пошта. Лозинка не поставувате вие. MFA за тимот или за едно лице се поставува на истото јазиче.',
       where: '/portal → Персонал и улоги',
       steps: [
-        { title: 'Отворете го јазичето Персонал и улоги', body: 'Јазичето е во лентата на порталот за персонал и е затворено за другите улоги.' },
-        { title: 'Внесете го лицето', body: 'Име и презиме, е-поштата со која ќе се најавува и улогата: Врвно раководство, земја на потекло, целна земја или теренски офицер.' },
+        { title: 'Отворете го јазичето Персонал и улоги', body: 'Јазичето е во лентата на порталот за персонал и е затворено за другите улоги. Горе е зелената лента „Проверка во два чекора (тим)“.' },
+        { title: 'Внесете го лицето', body: 'Име и презиме, е-поштата со која ќе се најавува и улогата: Врвно раководство, земја на потекло, целна земја или теренски офицер. За земја на потекло и терен системот автоматски доделува „Код за упатување“; не се пишува рачно.' },
         { title: 'Испратете ја поканата', body: 'Лицето се регистрира или се најавува на /portal токму со оваа е-пошта. Кога е-поштата се совпаѓа, сметката се поврзува.' },
-        { title: 'Изменете подоцна', body: 'Сменете ја улогата на неговата картичка или избришете го редот за да го отстраните записот од персоналот.' },
+        { title: 'Изменете подоцна', body: 'Сменете ја улогата на картичката, поставете „MFA за оваа личност“ на Задолжително или Исклучено, или избришете го редот. Кога тимската лента е Задолжително, копчињата по лице се заклучуваат.' },
       ],
-      flow: ['Јазиче Персонал и улоги', 'Име, е-пошта, улога', 'Е-пошта со покана', 'Лицето се најавува'],
+      flow: ['Јазиче Персонал и улоги', 'Име, е-пошта, улога', 'Е-пошта со покана', 'Улога / MFA на картичка'],
       mock: {
         caption: 'Шема на образецот за покана. Нема поле за лозинка.',
         chrome: '/portal · Персонал и улоги',
@@ -1663,9 +1677,10 @@ const mk: GuidesCopy = {
           { label: 'Име', value: 'Име и презиме' },
           { label: 'Е-пошта', value: 'Адреса за најава' },
           { label: 'Улога', value: 'Една од четирите улоги' },
+          { label: 'Проверка', value: 'Тимска лента или картичка' },
         ],
       },
-      example: 'Внесете го името „Демо персонал“, е-поштата за најава на лицето и улогата Теренски офицер, па испратете. Кога лицето ќе се најави на /portal со истата адреса, во ознаката пишува Теренски офицер; улогата можете подоцна да ја смените од неговата картичка.',
+      example: 'Внесете го името „Демо персонал“, е-поштата за најава и улогата Теренски офицер, па испратете. На картичката се гледаат „Код за упатување“ и „MFA за оваа личност“.',
     },
     'dossier-review': {
       title: 'Преглед на досието на кандидат',

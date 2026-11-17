@@ -36,6 +36,7 @@ const {
 const { canManageCandidateVideo } = await import('./youtube.ts');
 const { translations } = await import('./dictionary.ts');
 const { portalUi } = await import('./portal-ui-copy.ts');
+const { releaseCopy } = await import('./release-copy.ts');
 
 const LOCALES: Language[] = ['tr', 'en', 'sq', 'ar', 'mk'];
 const TURKISH_LETTERS = /[ğışöüĞİŞÖÜ]/;
@@ -512,7 +513,7 @@ test('source and target country: the matching how-to names who does the other st
   assert.equal(upperView.hasOthersSteps, false);
   assert.equal(upperView.steps.every((step) => step.own && step.body), true);
   // how-tos without step roles stay as written
-  assert.deepEqual(guideOf(viewerOf('source_country'), 'staff-login').steps.map((step) => step.doneBy), [null, null, null, null]);
+  assert.deepEqual(guideOf(viewerOf('source_country'), 'staff-login').steps.map((step) => step.doneBy), [null, null, null, null, null]);
 });
 
 test('print uses the same step rule; a role print shows that role\'s steps', () => {
@@ -539,7 +540,9 @@ function stringLeaves(value: unknown): string[] {
   return [];
 }
 /** Every Turkish text of the portal UI (tab, button, status and message labels). */
-const PORTAL_TR = new Set([...stringLeaves(translations.tr), ...stringLeaves(portalUi.tr)].map((text) => text.trim()));
+const PORTAL_TR = new Set(
+  [...stringLeaves(translations.tr), ...stringLeaves(portalUi.tr), ...stringLeaves(releaseCopy.tr)].map((text) => text.trim()),
+);
 /** Role cards that describe a file page, not a tab; their names are not on a tab bar. */
 const FILE_SCREENS = new Set(['source_country.dossier', 'target_country.request', 'target_country.employer', 'field_officer.dossier']);
 const guideTextTr = () => [
