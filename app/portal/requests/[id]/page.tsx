@@ -15,7 +15,7 @@ import { normalizeDemandStatus } from '@/lib/demandStatus';
 import { statusErrorKey, type StatusErrorKey } from '@/lib/requestStatusChange';
 import { matchResultTone } from '@/lib/status-tone';
 import { candidateProfessionLabel } from '@/lib/candidateLabels';
-import { localizeCatalogTitle } from '@/lib/professions';
+import { localizeCatalogTitle, normalizePositionTitle } from '@/lib/professions';
 import { translations } from '@/lib/dictionary';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { benefitsAnswered } from '@/lib/workforceRequest';
@@ -102,6 +102,7 @@ function RequestFileInner() {
       let v = form[k];
       if (NUMERIC.has(k)) v = v === '' || v == null ? null : Number(v);
       else if (typeof v === 'string') v = v === '' ? null : v;
+      if (k === 'position_title' && typeof v === 'string') v = normalizePositionTitle(v) || null;
       if ((req[k] ?? null) !== (v ?? null)) changes[k] = v;
     }
     if (!Object.keys(changes).length) { setSaving(false); setMsg(ui.noChanges); return; }

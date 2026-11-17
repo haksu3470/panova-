@@ -101,6 +101,7 @@ test('answered lodging and meals are stored on the existing boolean columns', ()
   assert.equal(built.row.monthly_net_salary, 1200);
   assert.equal(built.row.required_experience_years, 1);
   assert.equal(built.row.country, 'North Macedonia');
+  assert.equal(built.row.position_title, 'harvest_worker');
   assert.equal('salary' in built.row, false);
   assert.equal('job_description' in built.row, false);
   assert.deepEqual(Object.keys(built.row).sort(), [
