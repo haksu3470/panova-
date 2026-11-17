@@ -93,6 +93,26 @@ export default function StaffTab({
     onMfaPolicyChanged?.();
   };
 
+  const setMemberMfa = async (staffId: string, next: boolean) => {
+    setMfaMsg('');
+    const { data, error } = await supabase
+      .from('staff_members')
+      .update({ mfa_required: next, updated_at: new Date().toISOString() })
+      .eq('id', staffId)
+      .select('id');
+    if (error || !data?.length) {
+      setMfaMsg(copy.mfaMemberFailed);
+      return;
+    }
+    void writeAudit(
+      next ? 'staff_member_mfa_on' : 'staff_member_mfa_off',
+      'staff_members',
+      staffId,
+    );
+    onChanged?.();
+    onMfaPolicyChanged?.();
+  };
+
   if (!isUpperManagement) {
     return (
       <div className="bg-white p-8 rounded-2xl border text-center text-muted-foreground text-sm">
@@ -248,6 +268,39 @@ export default function StaffTab({
                   <option value="target_country" className="text-slate-900 bg-white">🏢 {t.roleTargetCountry}</option>
                   <option value="field_officer" className="text-slate-900 bg-white">✈️ {t.roleFieldOfficer}</option>
                 </select>
+                <span className="text-[11px] font-bold text-slate-600 block pt-1">
+                  {copy.mfaMemberLabel}
+                </span>
+                <div className="flex flex-wrap gap-2" role="group" aria-label={copy.mfaMemberLabel}>
+                  <button
+                    type="button"
+                    aria-pressed={staff.mfa_required === true || mfaRequired === true}
+                    disabled={mfaRequired === true}
+                    title={mfaRequired === true ? copy.mfaPolicyOn : undefined}
+                    onClick={() => setMemberMfa(staff.id, true)}
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 ${
+                      staff.mfa_required === true || mfaRequired === true
+                        ? 'bg-brand-solid text-on-dark shadow'
+                        : 'bg-white border text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    {copy.mfaMemberOn}
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={staff.mfa_required !== true && mfaRequired !== true}
+                    disabled={mfaRequired === true}
+                    title={mfaRequired === true ? copy.mfaPolicyOn : undefined}
+                    onClick={() => setMemberMfa(staff.id, false)}
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 ${
+                      staff.mfa_required !== true && mfaRequired !== true
+                        ? 'bg-slate-900 text-white shadow'
+                        : 'bg-white border text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    {copy.mfaMemberOff}
+                  </button>
+                </div>
               </div>
               <div data-delete-row className={DELETE_ROW_CLASS}>
                 <button type="button" onClick={() => handleDeleteStaff(staff.id)} className={DELETE_BUTTON_CLASS}>

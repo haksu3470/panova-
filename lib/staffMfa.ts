@@ -23,16 +23,29 @@ export function staffMfaMode(input: {
   return 'optional';
 }
 
+/** Org-wide flag OR this staff row's mfa_required. */
+export function staffMfaRequiredForUser(input: {
+  orgRequired: boolean;
+  memberRequired: boolean;
+}): boolean {
+  return input.orgRequired || input.memberRequired;
+}
+
 export async function loadStaffMfaSnapshot(
   client: SupabaseClient,
 ): Promise<StaffMfaSnapshot> {
   const [level, factors, required] = await Promise.all([
     client.auth.mfa.getAuthenticatorAssuranceLevel(),
     client.auth.mfa.listFactors(),
-    client.rpc('staff_mfa_required'),
+    client.rpc('current_staff_mfa_required'),
   ]);
   const verified = (factors.data?.totp ?? []).some((factor) => factor.status === 'verified');
-  const requiredFlag = required.data === true;
+  // Fallback if migration not applied yet: org-wide RPC only.
+  let requiredFlag = required.data === true;
+  if (required.error) {
+    const legacy = await client.rpc('staff_mfa_required');
+    requiredFlag = legacy.data === true;
+  }
   const currentLevel = level.data?.currentLevel ?? null;
   return {
     mode: staffMfaMode({
