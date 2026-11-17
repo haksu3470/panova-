@@ -393,11 +393,36 @@ for (const legacy of Object.values(LEGACY_POSITIONS)) {
   for (const lang of PROFESSION_LOCALES) remember(legacy.labels[lang], item);
 }
 
+// Short free-text forms seen in demo / old seeds (not full catalog labels).
+const EXTRA_ALIASES: ReadonlyArray<readonly [string, string]> = [
+  ['Kalıpçı', 'carpenter'],
+  ['Depo Görevlisi', 'warehouse_worker'],
+];
+for (const [alias, key] of EXTRA_ALIASES) {
+  const item = BY_KEY.get(key);
+  if (item) remember(alias, item);
+}
+
 /** Key, any locale label, or an old request-form label, so stored text can be shown in the active language. */
 export function professionFromCatalogText(value: string | null | undefined): Profession | undefined {
   const raw = (value ?? '').trim();
   if (!raw || raw === OTHER_PROFESSION) return undefined;
   return BY_CATALOG_TEXT.get(foldCatalogText(raw));
+}
+
+/**
+ * One comma-separated title/profession part → catalog key when known,
+ * otherwise the trimmed free text (custom "Other" stays as typed).
+ */
+export function normalizePositionTitlePart(part: string | null | undefined): string {
+  const raw = (part ?? '').trim();
+  if (!raw || raw === OTHER_PROFESSION) return '';
+  return professionFromCatalogText(raw)?.key || raw;
+}
+
+/** Whole stored title: each part normalized, empty parts dropped, joined with ", ". */
+export function normalizePositionTitle(value: string | null | undefined): string {
+  return catalogTitleParts(value).map(normalizePositionTitlePart).filter(Boolean).join(', ');
 }
 
 /** Split a stored request title into its comma-separated parts. */

@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
 import DemoBadge from './DemoBadge';
 import { candidateProfessionLabel } from '@/lib/candidateLabels';
-import { localizeCatalogTitle } from '@/lib/professions';
+import { localizeCatalogTitle, normalizePositionTitle } from '@/lib/professions';
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { offerCurrency, offerTermsPayload } from '@/lib/offers';
 import { DEFAULT_SALARY_CURRENCY, formatSalary, offerDefaultsFromRequest, requestCurrency, SALARY_CURRENCIES } from '@/lib/money';
@@ -47,7 +47,11 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
   const [of, setOf] = useState<any>({
     id: null,
     employer_name: request?.employer_name || '',
-    position_title: localizeCatalogTitle(request?.position_title, currentLang) || candidateProfessionLabel(candidate.profession, '', currentLang),
+    // Store catalog keys (or free text), never a localized display label.
+    position_title:
+      normalizePositionTitle(request?.position_title)
+      || normalizePositionTitle(candidate.profession)
+      || '',
     // Salary and currency from the request (salary may be negotiated; the
     // currency follows the request and cannot be changed). No request: EUR.
     ...offerDefaultsFromRequest(request),
@@ -127,7 +131,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
     if (!Number.isFinite(salary) || salary <= 0) return setError(ui.ioOfferRequired);
     const row = {
       employer_name: of.employer_name,
-      position_title: of.position_title || null,
+      position_title: normalizePositionTitle(of.position_title) || null,
       monthly_net_salary: salary,
       // offer_terms.currency comes from the request, never a fixed EUR.
       offer_terms: offerTermsPayload(request ? requestCurrency(request) : of.currency || DEFAULT_SALARY_CURRENCY, of.offer_terms),
@@ -235,7 +239,7 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
           {offers.map((o) => (
             <button key={o.id} disabled={offerLocked(o)} onClick={() => setOf({ id: o.id, employer_name: o.employer_name || '', position_title: o.position_title || '', ...offerDefaultsFromRequest(request, o), offer_terms: o.offer_terms, start_date: o.start_date || '', terms_details: o.terms_details || '', status: o.status || 'pending' })}
               className={`w-full text-start border border-slate-200 bg-white rounded-xl p-3 hover:bg-slate-50 disabled:cursor-default ${of.id === o.id ? 'ring-2 ring-emerald-500' : ''}`}>
-              <p className="text-sm font-bold text-slate-950">{o.employer_name} · {o.position_title}<DemoBadge show={o.is_demo} /></p>
+              <p className="text-sm font-bold text-slate-950">{o.employer_name} · {localizeCatalogTitle(o.position_title, currentLang) || o.position_title}<DemoBadge show={o.is_demo} /></p>
               <p className="text-[11px] font-medium text-slate-700">
                 {fill(ui.ioNetLine, { amount: formatSalary(o.monthly_net_salary, offerCurrency(o) || DEFAULT_SALARY_CURRENCY, dateLocale[currentLang]) || '—', date: o.start_date || '—' })} · {ui.offerStatus[o.status] || o.status}
                 {o.responded_at ? ` (${String(o.responded_at).substring(0, 10)})` : ''}

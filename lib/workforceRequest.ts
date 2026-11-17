@@ -1,5 +1,6 @@
 import { formatSalary, parseSalaryInput, salaryCurrency, type SalaryCurrency } from './money';
 import { canonicalDuration, isIsoDate, parseContractDuration, parseDurationAmount, type DurationUnitChoice } from './contractDuration';
+import { normalizePositionTitle } from './professions';
 
 export type YesNo = '' | 'yes' | 'no';
 
@@ -153,7 +154,7 @@ export function buildEmployerDemandInsert(
     row: {
       employer_id: draft.employerId,
       employer_name: draft.employerName.trim(),
-      position_title: draft.positionTitle.trim(),
+      position_title: normalizePositionTitle(draft.positionTitle),
       sector: draft.sector.trim(),
       headcount,
       city: draft.city.trim(),

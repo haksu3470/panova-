@@ -11,6 +11,8 @@ import {
   professionForSectorChange,
   professionInSector,
   localizeCatalogTitle,
+  normalizePositionTitle,
+  normalizePositionTitlePart,
   professionFromCatalogText,
   professionLabel,
   professionSearchBlob,
@@ -107,9 +109,16 @@ test('catalog keys localize and legacy free text stays as entered', () => {
   assert.equal(localizeCatalogTitle('COOK, Electrician', 'sq'), 'Kuzhinier, Elektricist');
   assert.equal(localizeCatalogTitle('cook', 'ar'), 'طبّاخ');
   assert.equal(localizeCatalogTitle('Kalıp ustası', 'en'), 'Carpenter / formwork');
+  assert.equal(localizeCatalogTitle('Kalıpçı', 'en'), 'Carpenter / formwork');
+  assert.equal(localizeCatalogTitle('Depo Görevlisi', 'tr'), 'Depo işçisi');
   assert.equal(localizeCatalogTitle('Kalıp atölyesi', 'en'), 'Kalıp atölyesi');
   assert.equal(localizeCatalogTitle('Elektrikçi, night baker', 'en'), 'Electrician, night baker');
   assert.equal(localizeCatalogTitle('', 'tr'), '');
+  assert.equal(normalizePositionTitlePart('Aşçı'), 'cook');
+  assert.equal(normalizePositionTitlePart('Kalıpçı'), 'carpenter');
+  assert.equal(normalizePositionTitlePart('night baker'), 'night baker');
+  assert.equal(normalizePositionTitle('Aşçı, Kalıpçı, Gece fırıncısı'), 'cook, carpenter, Gece fırıncısı');
+  assert.equal(normalizePositionTitle('cook, electrician'), 'cook, electrician');
   assert.match(professionSearchBlob('welder'), /Kaynakçı/);
   assert.match(professionSearchBlob('welder'), /Welder/);
   assert.equal(professionSearchBlob('Kalıp atölyesi'), 'Kalıp atölyesi');
