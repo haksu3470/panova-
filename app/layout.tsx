@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Sans_Arabic } from "next/font/google";
 import RecoveryRedirect from "@/components/auth/RecoveryRedirect";
 import { company } from "@/lib/company";
+import { SITE_ORIGIN } from "@/lib/siteUrl";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,6 +24,7 @@ const arabic = Noto_Sans_Arabic({
 const description = `Panova Group — Bangladeş, Türkiye ve Kuzey Makedonya. ${company.address}. İletişim: ${company.email}`;
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_ORIGIN),
   title: {
     default: "Panova Group",
     template: "%s | Panova Group",
@@ -33,6 +35,7 @@ export const metadata: Metadata = {
     description,
     siteName: "Panova Group",
     type: "website",
+    url: SITE_ORIGIN,
   },
   twitter: {
     card: "summary",
