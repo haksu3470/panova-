@@ -57,8 +57,9 @@ Signup, magic-link, and password-reset mail is sent by Supabase Auth, not by the
 | `RESEND_WEBHOOK_SECRET` | yes | Signing secret (`whsec_…`) for `/api/webhooks/resend`. Returned once when the webhook is created. |
 | `RESEND_FROM` | yes in production | `Panova <panova@panovagroup.org>`. Forwarding and the homepage contact notification use this when it is an address on `panovagroup.org`; otherwise they fall back to that same mailbox. A `noreply@` address on the verified domain is also fine. Staff invites use this value as-is when it is set. |
 | `SITE_URL` | no | Not read by the app. Canonical site is `https://panovagroup.org`. Webhook URL: `https://panovagroup.org/api/webhooks/resend`. Staff invites use `NEXT_PUBLIC_SITE_URL`. |
+| `CRON_SECRET` | yes in production | Bearer token for `GET /api/cron/supabase-keepalive` (Vercel Cron). Keeps Free Supabase from pausing; see `docs/supabase-keepalive.md`. |
 
-Set the three Resend variables in the Vercel project. Do not commit secrets.
+Set the Resend variables and `CRON_SECRET` in the Vercel project. Do not commit secrets.
 
 ### DNS and webhook (outside this repo)
 
