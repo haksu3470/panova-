@@ -1,6 +1,6 @@
 # Kılavuz çeviri listesi (en, sq, ar, mk)
 
-**Durum: çeviri tamamlandı, ana dili konuşan kişi incelemesi bekliyor.**
+**Durum: çeviri tamamlandı; 2026-11-18 MFA + yönlendirme kodu / Aday kaydet metinleri beş dile işlendi. Ana dili konuşan kişi incelemesi hâlâ bekliyor.**
 
 Kaynak: `lib/guides-copy.ts`. Türkçe metin `tr` bloğundadır; `en`, `sq`, `ar`, `mk` blokları onun çevirisidir. Geçici Türkçe gösterim (`withPendingTr`, `GUIDES_PENDING_TRANSLATION`) kaldırıldı. Kılavuzlar ekranı (`/guides`) ve yazdırma sayfası (`/guides/print`) aynı metni kullanır.
 
