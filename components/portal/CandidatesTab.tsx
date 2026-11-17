@@ -5,16 +5,16 @@ import { ChevronRight, Search, RefreshCw, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import DemoBadge from './DemoBadge';
 import { RegistrationCountryOptions } from '@/components/site/RegistrationCountryOptions';
-import { canonicalNationality, sameNationality } from '@/lib/registrationCountries';
+import { sameNationality } from '@/lib/registrationCountries';
 import { candidateExportRows } from '@/lib/exportLists';
 import ListExportBar from './ListExportBar';
 import ScrollTable from './ScrollTable';
 import DeleteRecordButton, { DELETE_ROW_CLASS } from './DeleteRecordButton';
 import OfficialProcessBadge from './OfficialProcessBadge';
 import CandidateStatusControl from './CandidateStatusControl';
+import QuickRegisterForm from './QuickRegisterForm';
 import type { CandidateStatusErrorKey } from '@/lib/candidateStatusChange';
 import { toLanguage } from '@/lib/europeanCountries';
-import { supabase } from '@/lib/supabase';
 import {
   candidateFilterLabels,
   candidatePassportLabel,
@@ -24,8 +24,7 @@ import {
   candidateSectorLabel,
   sameSector,
 } from '@/lib/candidateLabels';
-import { ProfessionField } from '@/components/site/ProfessionField';
-import { professionForSectorChange, professionSearchBlob } from '@/lib/professions';
+import { professionSearchBlob } from '@/lib/professions';
 import { fill, portalUi } from '@/lib/portal-ui-copy';
 import {
   isCodeIssuingRole,
@@ -55,16 +54,6 @@ interface CandidatesTabProps {
 
 type CandidateRow = CandidatesTabProps['candidates'][number];
 
-const emptyDraft = {
-  fullName: '',
-  nationality: '',
-  phone: '',
-  email: '',
-  profession: '',
-  sector: 'construction',
-  referralCode: '',
-};
-
 export default function CandidatesTab({
   candidates,
   staffMembers,
@@ -90,8 +79,6 @@ export default function CandidatesTab({
   const [codeFilter, setCodeFilter] = useState('all');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showRegister, setShowRegister] = useState(false);
-  const [draft, setDraft] = useState(emptyDraft);
-  const [saving, setSaving] = useState(false);
 
   // Source-country officers and field officers register under their own code.
   const isCodeIssuer = isCodeIssuingRole(currentUser?.role_level);
@@ -131,44 +118,6 @@ export default function CandidatesTab({
     } else {
       setSelectedIds([...selectedIds, id]);
     }
-  };
-
-  const explainWriteError = (message: string) => {
-    if (message.includes('unknown_supervisor_code')) return ui.unknownSupervisorCode;
-    if (message.includes('source_officer_missing_code') || message.includes('staff_members_referral_code_role')) {
-      return ui.sourceOfficerMissingCode;
-    }
-    return message;
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (saving) return;
-    setSaving(true);
-    const payload: Record<string, string | null> = {
-      full_name: draft.fullName.trim(),
-      nationality: canonicalNationality(draft.nationality) || draft.nationality.trim(),
-      phone: draft.phone.trim(),
-      email: draft.email.trim() ? draft.email.trim().toLowerCase() : null,
-      profession: draft.profession.trim(),
-      sector: draft.sector,
-      status: 'pending',
-    };
-    if (!isCodeIssuer && isUpperManagement && draft.referralCode) {
-      payload.referral_code = draft.referralCode;
-    }
-
-    const { error } = await supabase.from('job_candidates').insert(payload).select('id, referral_code').single();
-    setSaving(false);
-    if (error) {
-      alert(`${ui.registerCandidateFailed} ${explainWriteError(error.message)}`);
-      return;
-    }
-    logAudit(ui.registerCandidateSaved, currentUser?.name);
-    setDraft(emptyDraft);
-    setShowRegister(false);
-    alert(ui.registerCandidateSaved);
-    fetchAllData();
   };
 
   const registerHint = isCodeIssuer
@@ -260,111 +209,18 @@ export default function CandidatesTab({
       </div>
 
       {showRegister && (
-        <form onSubmit={handleRegister} className="bg-white p-4 rounded-2xl border shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <p className="sm:hidden text-xs text-muted-foreground">{registerHint}</p>
-          <label className="block text-xs font-bold text-slate-700">
-            {t.nameLabel}
-            <input
-              required
-              value={draft.fullName}
-              onChange={(e) => setDraft({ ...draft, fullName: e.target.value })}
-              className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm font-medium text-slate-900 bg-white outline-none focus:ring-2 focus:ring-[#2e7d32]"
-            />
-          </label>
-          <label className="block text-xs font-bold text-slate-700">
-            {t.nationalityCol}
-            <select
-              required
-              value={draft.nationality}
-              onChange={(e) => setDraft({ ...draft, nationality: e.target.value })}
-              className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm font-medium text-slate-900 bg-white outline-none focus:ring-2 focus:ring-[#2e7d32]"
-            >
-              <option value="">{ui.selectCountry}</option>
-              <RegistrationCountryOptions lang={lang} currentValue={draft.nationality} />
-            </select>
-          </label>
-          <label className="block text-xs font-bold text-slate-700">
-            {t.phoneLabel}
-            <input
-              required
-              value={draft.phone}
-              onChange={(e) => setDraft({ ...draft, phone: e.target.value })}
-              className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm font-medium text-slate-900 bg-white outline-none focus:ring-2 focus:ring-[#2e7d32]"
-            />
-          </label>
-          <label className="block text-xs font-bold text-slate-700">
-            {t.emailLabel}
-            <input
-              type="email"
-              value={draft.email}
-              onChange={(e) => setDraft({ ...draft, email: e.target.value })}
-              className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm font-medium text-slate-900 bg-white outline-none focus:ring-2 focus:ring-[#2e7d32]"
-            />
-          </label>
-          <label className="block text-xs font-bold text-slate-700" htmlFor="staff-profession">
-            {ui.positionLabel}
-            <ProfessionField
-              id="staff-profession"
-              lang={lang}
-              sector={draft.sector}
-              value={draft.profession}
-              required
-              onChange={(profession) => setDraft({ ...draft, profession })}
-              className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm font-medium text-slate-900 bg-white outline-none focus:ring-2 focus:ring-[#2e7d32]"
-            />
-          </label>
-          <label className="block text-xs font-bold text-slate-700">
-            {ui.sectorLabel}
-            <select
-              value={draft.sector}
-              onChange={(e) => {
-                const sector = e.target.value;
-                setDraft({ ...draft, sector, profession: professionForSectorChange(draft.profession, sector) });
-              }}
-              className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm font-semibold text-slate-900 bg-white outline-none focus:ring-2 focus:ring-[#2e7d32]"
-            >
-              {ui.formSectors.map((sector) => (
-                <option key={sector.value} value={sector.value}>{sector.label}</option>
-              ))}
-            </select>
-          </label>
-          {isCodeIssuer && (
-            <label className="block text-xs font-bold text-slate-700 sm:col-span-2">
-              {ui.referralCode}
-              <input
-                readOnly
-                aria-readonly="true"
-                value={ownCode ?? ''}
-                className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm font-mono font-bold text-slate-900 bg-slate-100 outline-none"
-              />
-              <span className="mt-1 block text-[11px] font-medium text-muted-foreground">{ui.referralCodeImmutable}</span>
-            </label>
-          )}
-          {!isCodeIssuer && isUpperManagement && (
-            <label className="block text-xs font-bold text-slate-700 sm:col-span-2">
-              {ui.referralCode}
-              <select
-                value={draft.referralCode}
-                onChange={(e) => setDraft({ ...draft, referralCode: e.target.value })}
-                className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm font-semibold text-slate-900 bg-white outline-none focus:ring-2 focus:ring-[#2e7d32]"
-              >
-                <option value="">{ui.referralCodeNone}</option>
-                {assignableCodes.map((code) => (
-                  <option key={code} value={code}>{code}</option>
-                ))}
-              </select>
-            </label>
-          )}
-          <div className="flex items-end">
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white px-3 py-2.5 rounded-xl text-xs font-bold cursor-pointer disabled:bg-disabled disabled:text-on-dark disabled:opacity-100"
-            >
-              {saving ? t.submitting : ui.registerCandidate}
-            </button>
-          </div>
-        </form>
+        <QuickRegisterForm
+          currentLang={currentLang}
+          t={t}
+          currentUser={currentUser}
+          isUpperManagement={isUpperManagement}
+          assignableCodes={assignableCodes}
+          candidates={candidates}
+          logAudit={logAudit}
+          onSaved={() => {
+            fetchAllData();
+          }}
+        />
       )}
 
       <div className={`bg-white p-4 rounded-2xl border shadow-sm grid grid-cols-1 sm:grid-cols-2 ${isUpperManagement ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-3`}>

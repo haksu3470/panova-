@@ -99,10 +99,9 @@ test('unspecified sentinels localize and typed professions stay as entered', () 
 });
 
 test('the candidates tab no longer hardcodes English sector, country, or refresh labels', () => {
-  const source = readFileSync(
-    join(dirname(fileURLToPath(import.meta.url)), '../components/portal/CandidatesTab.tsx'),
-    'utf8',
-  );
+  const root = dirname(fileURLToPath(import.meta.url));
+  const source = readFileSync(join(root, '../components/portal/CandidatesTab.tsx'), 'utf8');
+  const form = readFileSync(join(root, '../components/portal/QuickRegisterForm.tsx'), 'utf8');
   assert.equal(source.includes('All Sectors'), false);
   assert.equal(source.includes('All Countries'), false);
   assert.equal(source.includes('General HR'), false);
@@ -110,7 +109,7 @@ test('the candidates tab no longer hardcodes English sector, country, or refresh
   assert.equal(source.includes("'N/A'"), false);
   assert.equal(source.includes('candidateSectorLabel'), true);
   assert.equal(source.includes('candidateFilterLabels'), true);
-  assert.equal(source.includes('ui.formSectors.map'), true);
+  assert.equal(form.includes('ui.formSectors.map'), true);
 });
 
 test('document names follow the slot number in every language; hand-added documents keep their name', () => {
