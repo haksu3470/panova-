@@ -39,6 +39,7 @@ import { threadForTicket, type SupportMessage } from '@/lib/supportTickets';
 import StaffMfaPanel from '@/components/portal/StaffMfaPanel';
 import EmployerLoginInvite from '@/components/portal/EmployerLoginInvite';
 import { taskIsOverdue } from '@/lib/demandStatus';
+import { loadStaffMfaSnapshot, type StaffMfaUiMode } from '@/lib/staffMfa';
 
 // Modüler Bileşenlerimiz (Kök dizindeki components klasörüne göre göreceli yol)
 import CandidatesTab from '../../components/portal/CandidatesTab';
@@ -116,27 +117,37 @@ export default function PortalPage() {
   const [newTaskLinkId, setNewTaskLinkId] = useState('');
 
   const [loading, setLoading] = useState(false);
-  const [mfaMode, setMfaMode] = useState<'off' | 'challenge' | 'optional'>('off');
+  const [mfaMode, setMfaMode] = useState<StaffMfaUiMode>('pending');
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [mfaVerified, setMfaVerified] = useState(false);
 
   useEffect(() => {
-    if (!authenticated) return;
+    if (!authenticated) {
+      setMfaMode('pending');
+      return;
+    }
     let alive = true;
+    setMfaMode('pending');
     (async () => {
-      const [level, factors, required] = await Promise.all([
-        supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
-        supabase.auth.mfa.listFactors(),
-        supabase.rpc('staff_mfa_required'),
-      ]);
+      const snap = await loadStaffMfaSnapshot(supabase);
       if (!alive) return;
-      const verified = (factors.data?.totp ?? []).some((factor) => factor.status === 'verified');
-      if (verified && level.data?.currentLevel !== 'aal2') setMfaMode('challenge');
-      else if (required.data === true && !verified) setMfaMode('challenge');
-      else setMfaMode('optional');
+      setMfaRequired(snap.required);
+      setMfaVerified(snap.verified);
+      setMfaMode(snap.mode);
     })();
     return () => {
       alive = false;
     };
   }, [authenticated]);
+
+  const refreshMfa = async () => {
+    const snap = await loadStaffMfaSnapshot(supabase);
+    setMfaRequired(snap.required);
+    setMfaVerified(snap.verified);
+    setMfaMode(snap.mode);
+  };
+
+  const mfaBlocksPortal = mfaMode === 'pending' || mfaMode === 'challenge';
 
   const [newStaffName, setNewStaffName] = useState('');
   const [newStaffEmail, setNewStaffEmail] = useState('');
@@ -773,9 +784,15 @@ export default function PortalPage() {
         />
 
         {mfaMode === 'challenge' ? (
-          <StaffMfaPanel copy={releaseCopy[currentLang]} blocking onVerified={() => setMfaMode('optional')} />
+          <StaffMfaPanel
+            copy={releaseCopy[currentLang]}
+            blocking
+            required={mfaRequired}
+            hasVerifiedFactor={mfaVerified}
+            onVerified={refreshMfa}
+          />
         ) : null}
-        <div className={`flex flex-wrap items-center gap-2 border-b pb-3 text-xs font-bold ${mfaMode === 'challenge' ? 'hidden' : ''}`}>
+        <div className={`flex flex-wrap items-center gap-2 border-b pb-3 text-xs font-bold ${mfaBlocksPortal ? 'hidden' : ''}`}>
           {showTab('overview') && (
           <button onClick={() => setActiveTab('overview')} className={`px-3 py-2 rounded-xl cursor-pointer transition text-start leading-snug whitespace-normal ${activeTab === 'overview' ? 'bg-brand-solid text-white shadow' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
             📊 {t.overviewTab}
@@ -823,7 +840,7 @@ export default function PortalPage() {
           </Link>
         </div>
 
-        {mfaMode !== 'challenge' && activeTab === 'overview' && showTab('overview') && (
+        {!mfaBlocksPortal && activeTab === 'overview' && showTab('overview') && (
           <div className="space-y-6">
             {(() => {
               // A card opens its tab only when the tab bar above shows that tab
@@ -885,7 +902,9 @@ export default function PortalPage() {
               <StaffMfaPanel
                 copy={releaseCopy[currentLang]}
                 blocking={false}
-                onVerified={() => setMfaMode('optional')}
+                required={mfaRequired}
+                hasVerifiedFactor={mfaVerified}
+                onVerified={refreshMfa}
               />
             ) : null}
             <div className="bg-amber-50 border border-amber-200 p-4 sm:p-6 rounded-2xl shadow-sm space-y-3">
@@ -928,7 +947,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {mfaMode !== 'challenge' && activeTab === 'candidates' && showTab('candidates') && (
+        {!mfaBlocksPortal && activeTab === 'candidates' && showTab('candidates') && (
           <CandidatesTab 
             candidates={candidates}
             staffMembers={staffMembers}
@@ -945,7 +964,7 @@ export default function PortalPage() {
           />
         )}
 
-        {mfaMode !== 'challenge' && activeTab === 'requests' && showTab('requests') && (
+        {!mfaBlocksPortal && activeTab === 'requests' && showTab('requests') && (
           <RequestsTab 
             jobRequests={jobRequests}
             t={t}
@@ -957,7 +976,7 @@ export default function PortalPage() {
           />
         )}
 
-        {mfaMode !== 'challenge' && activeTab === 'staff' && showTab('staff') && isUpperManagement && (
+        {!mfaBlocksPortal && activeTab === 'staff' && showTab('staff') && isUpperManagement && (
           <StaffTab 
             staffMembers={staffMembers}
             isUpperManagement={isUpperManagement}
@@ -978,7 +997,7 @@ export default function PortalPage() {
           />
         )}
 
-        {mfaMode !== 'challenge' && activeTab === 'tasks' && showTab('tasks') && (
+        {!mfaBlocksPortal && activeTab === 'tasks' && showTab('tasks') && (
           <TasksTab 
             tasks={tasks}
             staffMembers={staffMembers}
@@ -1007,7 +1026,7 @@ export default function PortalPage() {
           />
         )}
 
-        {mfaMode !== 'challenge' && activeTab === 'audit' && showTab('audit') && (
+        {!mfaBlocksPortal && activeTab === 'audit' && showTab('audit') && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
               <History className="w-5 h-5 text-emerald-700" /> {t.auditLogTitle}
@@ -1040,7 +1059,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {mfaMode !== 'challenge' && activeTab === 'employers' && showTab('employers') && (
+        {!mfaBlocksPortal && activeTab === 'employers' && showTab('employers') && (
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden p-4 sm:p-6 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
               <h3 className="text-base sm:text-lg font-bold text-slate-900">{t.employersTab}</h3>
@@ -1122,7 +1141,7 @@ export default function PortalPage() {
           </div>
         )}
 
-        {mfaMode !== 'challenge' && activeTab === 'support' && showTab('support') && (
+        {!mfaBlocksPortal && activeTab === 'support' && showTab('support') && (
           <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3">{t.supportTab}</h3>
             {supportTickets.length === 0 ? (

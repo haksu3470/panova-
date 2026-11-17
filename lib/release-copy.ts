@@ -31,6 +31,7 @@ export type ReleaseCopy = {
   overdue: string;
   mfaTitle: string;
   mfaOptional: string;
+  mfaSetupRequired: string;
   mfaEnroll: string;
   mfaCode: string;
   mfaConfirm: string;
@@ -83,7 +84,8 @@ const tr: ReleaseCopy = {
   delayDemands: 'Hedef tarihi geçmiş talepler',
   overdue: 'Gecikmiş',
   mfaTitle: 'İki adımlı doğrulama',
-  mfaOptional: 'Personel hesapları için isteğe bağlıdır. Zorunlu tutulduğunda bu ekran girişi tamamlamadan açılmaz.',
+  mfaOptional: 'Personel hesapları için isteğe bağlıdır. Authenticator uygulamasıyla açabilirsiniz.',
+  mfaSetupRequired: 'Personel girişi için iki adımlı doğrulama zorunlu. Authenticator uygulamasıyla kurun, ardından 6 haneli kodu girin.',
   mfaEnroll: 'Doğrulamayı aç',
   mfaCode: 'Uygulamadaki 6 haneli kod',
   mfaConfirm: 'Kodu doğrula',
@@ -136,7 +138,8 @@ const en: ReleaseCopy = {
   delayDemands: 'Demands past their target date',
   overdue: 'Overdue',
   mfaTitle: 'Two-step verification',
-  mfaOptional: 'Optional for staff. When enforcement is turned on, this screen blocks sign-in until it is set up.',
+  mfaOptional: 'Optional for staff. You can turn it on with an authenticator app.',
+  mfaSetupRequired: 'Two-step verification is required for staff. Set it up with an authenticator app, then enter the 6-digit code.',
   mfaEnroll: 'Turn on verification',
   mfaCode: '6-digit code from the app',
   mfaConfirm: 'Confirm code',
@@ -189,7 +192,8 @@ const mk: ReleaseCopy = {
   delayDemands: 'Барања по целниот датум',
   overdue: 'Задоцнето',
   mfaTitle: 'Проверка во два чекора',
-  mfaOptional: 'Изборно за персоналот. Кога ќе се вклучи задолжителноста, влезот чека поставување.',
+  mfaOptional: 'Изборно за персоналот. Може да се вклучи со authenticator апликација.',
+  mfaSetupRequired: 'За влез на персонал е задолжителна проверка во два чекора. Поставете ја со authenticator апликација, потоа внесете го 6-цифрениот код.',
   mfaEnroll: 'Вклучи проверка',
   mfaCode: '6-цифрен код од апликацијата',
   mfaConfirm: 'Потврди го кодот',
@@ -242,7 +246,8 @@ const sq: ReleaseCopy = {
   delayDemands: 'Kërkesa pas datës së synuar',
   overdue: 'Vonuar',
   mfaTitle: 'Verifikim me dy hapa',
-  mfaOptional: 'Opsionale për stafin. Kur bëhet e detyrueshme, hyrja pret konfigurimin.',
+  mfaOptional: 'Opsionale për stafin. Mund ta aktivizoni me një aplikacion authenticator.',
+  mfaSetupRequired: 'Verifikimi me dy hapa është i detyrueshëm për stafin. Konfiguroni me aplikacionin authenticator, pastaj vendosni kodin 6-shifror.',
   mfaEnroll: 'Aktivizo verifikimin',
   mfaCode: 'Kodi 6-shifror nga aplikacioni',
   mfaConfirm: 'Konfirmo kodin',
@@ -295,7 +300,8 @@ const ar: ReleaseCopy = {
   delayDemands: 'طلبات تجاوزت تاريخها المستهدف',
   overdue: 'متأخر',
   mfaTitle: 'التحقق بخطوتين',
-  mfaOptional: 'اختياري لحسابات الموظفين. عند تفعيل الإلزام تتوقف الدخول حتى يكتمل الإعداد.',
+  mfaOptional: 'اختياري لحسابات الموظفين. يمكن تفعيله عبر تطبيق المصادقة.',
+  mfaSetupRequired: 'التحقق بخطوتين إلزامي لدخول الموظفين. أعدّه عبر تطبيق المصادقة ثم أدخل الرمز المكوّن من 6 أرقام.',
   mfaEnroll: 'تفعيل التحقق',
   mfaCode: 'الرمز المكوّن من 6 أرقام',
   mfaConfirm: 'تأكيد الرمز',

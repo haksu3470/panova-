@@ -45,5 +45,5 @@ select count(*) as legacy_data_urls
 from public.candidate_documents
 where file_url like 'data:%';
 
--- MFA stays off until an operator updates the flag:
+-- MFA required for staff (true after 20261117230000):
 select key, value from public.app_settings where key = 'staff_mfa_required';
