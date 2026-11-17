@@ -40,6 +40,12 @@ export type ReleaseCopy = {
   mfaChallenge: string;
   mfaFailed: string;
   mfaSecret: string;
+  mfaPolicyTitle: string;
+  mfaPolicyHint: string;
+  mfaPolicyOn: string;
+  mfaPolicyOff: string;
+  mfaPolicySaved: string;
+  mfaPolicyFailed: string;
   inviteExpired: string;
   inviteCancelled: string;
   inviteCancel: string;
@@ -94,6 +100,12 @@ const tr: ReleaseCopy = {
   mfaChallenge: 'Devam etmek için doğrulama kodunu girin.',
   mfaFailed: 'Kod doğrulanamadı.',
   mfaSecret: 'Kurulum anahtarı',
+  mfaPolicyTitle: 'İki adımlı doğrulama (ekip)',
+  mfaPolicyHint: 'Açıkken tüm personel girişte Authenticator kodu kurmak veya girmek zorundadır. Yalnız üst yönetim değiştirebilir.',
+  mfaPolicyOn: 'Zorunlu',
+  mfaPolicyOff: 'Kapalı',
+  mfaPolicySaved: 'Kayıt güncellendi.',
+  mfaPolicyFailed: 'Ayar kaydedilemedi.',
   inviteExpired: 'Davetin süresi doldu',
   inviteCancelled: 'Davet iptal edildi',
   inviteCancel: 'Daveti iptal et',
@@ -148,6 +160,12 @@ const en: ReleaseCopy = {
   mfaChallenge: 'Enter the verification code to continue.',
   mfaFailed: 'The code could not be verified.',
   mfaSecret: 'Setup key',
+  mfaPolicyTitle: 'Two-step verification (team)',
+  mfaPolicyHint: 'When on, every staff member must set up or enter an authenticator code at sign-in. Only upper management can change this.',
+  mfaPolicyOn: 'Required',
+  mfaPolicyOff: 'Off',
+  mfaPolicySaved: 'Setting saved.',
+  mfaPolicyFailed: 'The setting could not be saved.',
   inviteExpired: 'Invite expired',
   inviteCancelled: 'Invite cancelled',
   inviteCancel: 'Cancel invite',
@@ -202,6 +220,12 @@ const mk: ReleaseCopy = {
   mfaChallenge: 'Внесете го кодот за да продолжите.',
   mfaFailed: 'Кодот не е потврден.',
   mfaSecret: 'Клуч за поставување',
+  mfaPolicyTitle: 'Проверка во два чекора (тим)',
+  mfaPolicyHint: 'Кога е вклучено, секој од персоналот мора да постави или внесе authenticator код при најава. Само горното раководство може да го менува.',
+  mfaPolicyOn: 'Задолжително',
+  mfaPolicyOff: 'Исклучено',
+  mfaPolicySaved: 'Поставката е зачувана.',
+  mfaPolicyFailed: 'Поставката не е зачувана.',
   inviteExpired: 'Поканата е истечена',
   inviteCancelled: 'Поканата е откажана',
   inviteCancel: 'Откажи ја поканата',
@@ -256,6 +280,12 @@ const sq: ReleaseCopy = {
   mfaChallenge: 'Vendosni kodin për të vazhduar.',
   mfaFailed: 'Kodi nuk u verifikua.',
   mfaSecret: 'Çelësi i konfigurimit',
+  mfaPolicyTitle: 'Verifikim me dy hapa (ekipi)',
+  mfaPolicyHint: 'Kur është aktiv, çdo anëtar i stafit duhet të konfigurojë ose të vendosë kodin e authenticator-it në hyrje. Vetëm menaxhimi i lartë mund ta ndryshojë.',
+  mfaPolicyOn: 'I detyrueshëm',
+  mfaPolicyOff: 'Fikur',
+  mfaPolicySaved: 'Cilësimi u ruajt.',
+  mfaPolicyFailed: 'Cilësimi nuk u ruajt.',
   inviteExpired: 'Ftesa ka skaduar',
   inviteCancelled: 'Ftesa u anulua',
   inviteCancel: 'Anulo ftesën',
@@ -310,6 +340,12 @@ const ar: ReleaseCopy = {
   mfaChallenge: 'أدخل رمز التحقق للمتابعة.',
   mfaFailed: 'تعذر التحقق من الرمز.',
   mfaSecret: 'مفتاح الإعداد',
+  mfaPolicyTitle: 'التحقق بخطوتين (الفريق)',
+  mfaPolicyHint: 'عند التفعيل يجب على كل موظف إعداد أو إدخال رمز تطبيق المصادقة عند الدخول. يمكن للإدارة العليا فقط تغيير ذلك.',
+  mfaPolicyOn: 'إلزامي',
+  mfaPolicyOff: 'متوقف',
+  mfaPolicySaved: 'تم حفظ الإعداد.',
+  mfaPolicyFailed: 'تعذر حفظ الإعداد.',
   inviteExpired: 'انتهت صلاحية الدعوة',
   inviteCancelled: 'أُلغيت الدعوة',
   inviteCancel: 'إلغاء الدعوة',

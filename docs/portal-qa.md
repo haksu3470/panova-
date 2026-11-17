@@ -42,7 +42,7 @@ In-app how-to ids (`GUIDE_CATALOG` in `lib/guides-model.ts`): `staff-login`, `st
 2. Without a factor: the enroll panel blocks the tab bar. Scan the QR (or enter the setup key), enter the 6-digit code, confirm.
 3. Sign out and sign in again: only the code challenge appears; tabs stay hidden until `aal2`.
 4. Open a deep link `/portal/candidates/[id]` while still at `aal1`: `StaffGate` shows the same challenge; after verify the dossier opens.
-5. Upper management can set `staff_mfa_required` back to `false` (see `docs/staff-mfa.md`); Overview then shows an optional MFA card with disable.
+5. As upper management on **Ekip & Yetkiler**, use **İki adımlı doğrulama (ekip)** → **Kapalı** / **Zorunlu**. Other roles do not see the staff tab. After **Kapalı**, Overview can show the optional MFA card with disable; after **Zorunlu**, staff without a factor are blocked again at the next session check.
 
 **Beklenen / Expected:** No staff UI (tabs or dossier) before enroll/`aal2` while the flag is true. Wrong codes show `mfaFailed`. Employer and candidate portals are unchanged.
 

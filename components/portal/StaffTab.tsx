@@ -1,6 +1,7 @@
 'use client';
 
-import { UserPlus, Trash2, Key } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { UserPlus, Trash2, ShieldCheck } from 'lucide-react';
 import DemoBadge from './DemoBadge';
 import { DELETE_BUTTON_CLASS, DELETE_ROW_CLASS } from './DeleteRecordButton';
 import { ReferralCodeChip } from './ReferralCodeChip';
@@ -9,6 +10,7 @@ import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 import { releaseCopy } from '@/lib/release-copy';
 import { supabase } from '@/lib/supabase';
+import { writeAudit } from '@/lib/audit';
 
 interface StaffTabProps {
   staffMembers: any[];
@@ -27,6 +29,7 @@ interface StaffTabProps {
   setEditingStaff: (staff: any) => void;
   handleDeleteStaff: (staffId: string) => void;
   onChanged?: () => void;
+  onMfaPolicyChanged?: () => void;
 }
 
 export default function StaffTab({
@@ -46,9 +49,50 @@ export default function StaffTab({
   setEditingStaff,
   handleDeleteStaff,
   onChanged,
+  onMfaPolicyChanged,
 }: StaffTabProps) {
   const { currentLang } = useSiteLanguage('en');
   const ui = portalUi[currentLang];
+  const copy = releaseCopy[currentLang];
+  const [mfaRequired, setMfaRequired] = useState<boolean | null>(null);
+  const [mfaBusy, setMfaBusy] = useState(false);
+  const [mfaMsg, setMfaMsg] = useState('');
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const { data } = await supabase.rpc('staff_mfa_required');
+      if (alive) setMfaRequired(data === true);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const setMfaPolicy = async (next: boolean) => {
+    if (mfaBusy || mfaRequired === next) return;
+    setMfaBusy(true);
+    setMfaMsg('');
+    const { data, error } = await supabase
+      .from('app_settings')
+      .update({ value: next, updated_at: new Date().toISOString() })
+      .eq('key', 'staff_mfa_required')
+      .select('key');
+    setMfaBusy(false);
+    if (error || !data?.length) {
+      setMfaMsg(copy.mfaPolicyFailed);
+      return;
+    }
+    setMfaRequired(next);
+    setMfaMsg(copy.mfaPolicySaved);
+    void writeAudit(
+      next ? 'staff_mfa_required_on' : 'staff_mfa_required_off',
+      'app_settings',
+      'staff_mfa_required',
+    );
+    onMfaPolicyChanged?.();
+  };
+
   if (!isUpperManagement) {
     return (
       <div className="bg-white p-8 rounded-2xl border text-center text-muted-foreground text-sm">
@@ -59,7 +103,43 @@ export default function StaffTab({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4 h-fit">
+      <div className="space-y-4 h-fit">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-3">
+        <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+          <ShieldCheck className="w-5 h-5 text-emerald-700" /> {copy.mfaPolicyTitle}
+        </h3>
+        <p className="text-[11px] text-slate-600 leading-snug">{copy.mfaPolicyHint}</p>
+        <div className="flex flex-wrap gap-2" role="group" aria-label={copy.mfaPolicyTitle}>
+          <button
+            type="button"
+            disabled={mfaBusy || mfaRequired === null}
+            aria-pressed={mfaRequired === true}
+            onClick={() => setMfaPolicy(true)}
+            className={`px-3 py-2 rounded-xl text-xs font-bold transition disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 ${
+              mfaRequired === true
+                ? 'bg-brand-solid text-on-dark shadow'
+                : 'bg-white border text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            {copy.mfaPolicyOn}
+          </button>
+          <button
+            type="button"
+            disabled={mfaBusy || mfaRequired === null}
+            aria-pressed={mfaRequired === false}
+            onClick={() => setMfaPolicy(false)}
+            className={`px-3 py-2 rounded-xl text-xs font-bold transition disabled:bg-disabled disabled:text-on-dark disabled:opacity-100 ${
+              mfaRequired === false
+                ? 'bg-slate-900 text-white shadow'
+                : 'bg-white border text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            {copy.mfaPolicyOff}
+          </button>
+        </div>
+        {mfaMsg ? <p className="text-[11px] font-bold text-emerald-800">{mfaMsg}</p> : null}
+      </div>
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
         <h3 className="text-base sm:text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
           <UserPlus className="w-5 h-5 text-emerald-700" /> {t.addStaffTitle}
         </h3>
@@ -95,6 +175,7 @@ export default function StaffTab({
             {ui.sendInvite}
           </button>
         </form>
+      </div>
       </div>
 
       <div className="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
