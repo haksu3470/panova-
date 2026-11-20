@@ -5,7 +5,7 @@ import { isGoogleProvedUser } from '@/lib/emailAddress';
 import { parseVerificationInput, type OtpType } from '@/lib/emailConfirmation';
 import type { EmailLocale } from '@/lib/email/email-copy';
 import { emailLocale } from '@/lib/email/email-copy';
-import { authErrorMeansExistingAccount, checkCandidateDuplicate, confirmedSignupObfuscated } from '@/lib/duplicateCandidate';
+import { authErrorMeansExistingAccount, confirmedSignupObfuscated } from '@/lib/duplicateCandidate';
 
 export type VerifyChannel = 'signup' | 'otp';
 
@@ -144,8 +144,6 @@ export async function resendVerification(email: string, redirectPath: string, lo
   const emailRedirectTo = redirectUrl(redirectPath);
   const target = email.trim().toLowerCase();
   const lang = emailLocale(locale);
-  const existing = await checkCandidateDuplicate({ email: target, passport: '', phone: '' });
-  if (existing.ok && existing.flags.email) return { ok: false, code: 'exists' };
   const signup = await supabase.auth.resend({
     type: 'signup',
     email: target,

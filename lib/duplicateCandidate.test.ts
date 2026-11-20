@@ -88,12 +88,11 @@ test('the account-exists copy is present in TR, EN, MK, SQ, and AR', () => {
   }
 });
 
-test('candidate registration checks duplicates before signUp and does not open OTP for an existing account', () => {
+test('candidate registration uses Auth for email clashes and does not probe the staff duplicate API', () => {
   const page = readFileSync(new URL('../app/candidate/page.tsx', import.meta.url), 'utf8');
   const signup = page.slice(page.indexOf('const handleCandidateSignup'), page.indexOf('const saveCandidateFix'));
-  const checkAt = signup.indexOf('checkCandidateDuplicate');
-  const signAt = signup.indexOf('beginPasswordSignup');
-  assert.ok(checkAt >= 0 && signAt > checkAt);
+  assert.equal(signup.includes('checkCandidateDuplicate'), false);
+  assert.match(signup, /beginPasswordSignup/);
   assert.match(signup, /status === 'exists'/);
   assert.match(signup, /showDuplicate\('email'\)/);
   assert.equal(signup.includes('showVerify(result.email)'), true);
@@ -102,9 +101,20 @@ test('candidate registration checks duplicates before signUp and does not open O
 
   const route = readFileSync(new URL('../app/api/candidates/check-duplicate/route.ts', import.meta.url), 'utf8');
   assert.match(route, /candidate_duplicate_flags/);
+  assert.match(route, /is_staff/);
+  assert.match(route, /Authorization/);
   assert.match(route, /email: flags\.email, passport: flags\.passport, phone: flags\.phone/);
   assert.equal(route.includes('.select('), false);
   assert.equal(route.includes('serviceKey'), true);
+
+  const sendMail = readFileSync(new URL('../app/api/send-email/route.ts', import.meta.url), 'utf8');
+  assert.match(sendMail, /is_staff/);
+  assert.match(sendMail, /Authorization/);
+  assert.match(sendMail, /status: 401/);
+
+  const supabaseClient = readFileSync(new URL('../lib/supabase.ts', import.meta.url), 'utf8');
+  assert.equal(supabaseClient.includes('eyJ'), false);
+  assert.equal(supabaseClient.includes('vptcihlhkzfmwxpaituf'), false);
 
   const login = readFileSync(new URL('../app/api/auth/candidate-login/route.ts', import.meta.url), 'utf8');
   assert.match(login, /resolve_candidate_login_email/);

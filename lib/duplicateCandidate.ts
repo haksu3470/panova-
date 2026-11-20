@@ -2,7 +2,7 @@
  * Duplicate registration signals.
  * Supabase signUp on a confirmed email returns a user with identities: [] and sends nothing.
  * An "already registered" error is the same fact when confirmations are off.
- * The check-duplicate route may return only the three booleans below.
+ * The staff-only check-duplicate route may return only the three booleans below.
  */
 
 import { passportKey, phoneKey } from './loginIdentifier';
@@ -63,14 +63,25 @@ export function flagsFor(input: { email?: string; passport?: string; phone?: str
   };
 }
 
-export async function checkCandidateDuplicate(input: { email: string; passport: string; phone: string }): Promise<
+/**
+ * Staff-only: needs a signed-in access token. Public signup must not call this;
+ * it relies on Auth / unique constraints instead of enumerating PII.
+ */
+export async function checkCandidateDuplicate(
+  input: { email: string; passport: string; phone: string },
+  accessToken: string,
+): Promise<
   | { ok: true; flags: DuplicateFlags }
   | { ok: false }
 > {
+  if (!accessToken.trim()) return { ok: false };
   try {
     const response = await fetch('/api/candidates/check-duplicate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
       body: JSON.stringify({
         email: input.email,
         passport: input.passport,

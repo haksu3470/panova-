@@ -349,9 +349,15 @@ function CandidateDetailPageInner() {
       if (dbError) throw dbError;
 
       if (candidate?.email) {
-        await fetch('/api/send-email', {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const accessToken = sessionData.session?.access_token;
+        if (!accessToken) throw new Error(ui.permissionDenied);
+        const mailRes = await fetch('/api/send-email', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
           body: JSON.stringify({
             email: candidate.email,
             candidateName: candidate.full_name,
@@ -360,6 +366,9 @@ function CandidateDetailPageInner() {
             locale: currentLang,
           }),
         });
+        if (!mailRes.ok && mailRes.status !== 502) {
+          throw new Error(ui.permissionDenied);
+        }
       }
 
       setNotifSending(false);

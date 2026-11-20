@@ -3,12 +3,18 @@ import { captureRecoveryFromWindow } from '@/lib/passwordReset';
 
 captureRecoveryFromWindow();
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vptcihlhkzfmwxpaituf.supabase.co';
-export const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwdGNpaGxoa3pmbXd4cGFpdHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NjE4MDAsImV4cCI6MjEwNDUzNzgwMH0.OGbzz6zi3alp54aRPheUv_S7x9JipH-erKLQlAEL_lA';
+/**
+ * Browser/server Supabase client. URL and anon key come only from env
+ * (Vercel / local). No live project credentials are shipped in source.
+ * Placeholders keep `createClient` happy at build time when env is unset;
+ * they are not a real project and cannot open production data.
+ */
+const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
+export const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
 
-// URL string doğrulaması (build hatasını tamamen engeller)
-export const validUrl = supabaseUrl.startsWith('http') 
-  ? supabaseUrl 
-  : 'https://vptcihlhkzfmwxpaituf.supabase.co';
+export const validUrl = supabaseUrl.startsWith('http') ? supabaseUrl.replace(/\/$/, '') : '';
 
-export const supabase = createClient(validUrl, supabaseAnonKey);
+const clientUrl = validUrl || 'http://127.0.0.1';
+const clientKey = supabaseAnonKey || 'missing-anon-key';
+
+export const supabase = createClient(clientUrl, clientKey);

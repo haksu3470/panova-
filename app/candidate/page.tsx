@@ -45,7 +45,6 @@ import CandidateProcessCard from '@/components/candidate/CandidateProcessCard';
 import { ProfessionField } from '@/components/site/ProfessionField';
 import { localizeCatalogTitle, professionForSectorChange } from '@/lib/professions';
 import { homeCopy } from '@/lib/home-copy';
-import { checkCandidateDuplicate, registrationBlock } from '@/lib/duplicateCandidate';
 import { canonicalPassport, canonicalPhone } from '@/lib/loginIdentifier';
 import { canonicalNationality } from '@/lib/registrationCountries';
 import { candidateOfferResponse, offerMoney, offerStatusLabel } from '@/lib/offers';
@@ -710,16 +709,8 @@ export default function CandidateDashboard() {
       setAuthMode('exists');
     };
     try {
-      const checked = await checkCandidateDuplicate({ email, passport, phone });
-      if (!checked.ok) {
-        alert(t.duplicateCheckFailed);
-        return;
-      }
-      const block = registrationBlock(checked.flags);
-      if (block) {
-        showDuplicate(block);
-        return;
-      }
+      // Public signup must not call the staff-only duplicate API (PII enumeration).
+      // Email clashes come from Auth; passport/phone uniqueness is enforced in the DB.
       const result = await beginPasswordSignup({
         email,
         password: regPassword,

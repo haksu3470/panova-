@@ -1,12 +1,19 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { buildCandidateNoticeEmail, buildTaskNoticeEmail } from '@/lib/email/app-messages';
 import { emailLocale, noticeMailCopy } from '@/lib/email/email-copy';
 import { forwardFromAddress } from '@/lib/email/forward-inbound';
+import { supabaseAnonKey, validUrl } from '@/lib/supabase';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
+  const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') || '';
+  if (!token) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();
@@ -19,6 +26,19 @@ export async function POST(request: Request) {
   const email = String(body.email || '').trim();
   if (!email) {
     return NextResponse.json({ error: copy.missingEmail }, { status: 400 });
+  }
+
+  if (!validUrl || !supabaseAnonKey) {
+    return NextResponse.json({ error: copy.sendFailed }, { status: 503 });
+  }
+
+  const userClient = createClient(validUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data: staff } = await userClient.rpc('is_staff');
+  if (staff !== true) {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 });
   }
 
   const apiKey = process.env.RESEND_API_KEY;

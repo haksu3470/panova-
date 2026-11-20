@@ -1,39 +1,38 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { duplicateFlags, duplicateLookup } from '@/lib/duplicateCandidate';
-import { validUrl } from '@/lib/supabase';
+import { supabaseAnonKey, validUrl } from '@/lib/supabase';
 
 export const runtime = 'nodejs';
-
-const WINDOW_MS = 10 * 60 * 1000;
-const MAX_ATTEMPTS = 20;
-const attempts = new Map<string, number[]>();
-
-function tooMany(ip: string): boolean {
-  const now = Date.now();
-  const recent = (attempts.get(ip) ?? []).filter((at) => now - at < WINDOW_MS);
-  recent.push(now);
-  attempts.set(ip, recent);
-  return recent.length > MAX_ATTEMPTS;
-}
-
-function clientIp(request: Request): string {
-  const forwarded = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
-  return forwarded || 'unknown';
-}
 
 function unavailable() {
   return NextResponse.json({ error: 'unavailable' }, { status: 503 });
 }
 
+/**
+ * Staff-only duplicate probe. Uses the caller's session (is_staff) before the
+ * service-role RPC, so anonymous visitors cannot enumerate candidate PII.
+ */
 export async function POST(request: Request) {
-  if (tooMany(clientIp(request))) {
-    return NextResponse.json({ error: 'unavailable' }, { status: 429 });
+  const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') || '';
+  if (!token) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
   const declaredLength = Number(request.headers.get('content-length') || 0);
   if (Number.isFinite(declaredLength) && declaredLength > 4_000) {
     return NextResponse.json({ error: 'invalid' }, { status: 400 });
+  }
+
+  if (!validUrl || !supabaseAnonKey) return unavailable();
+
+  const userClient = createClient(validUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data: staff } = await userClient.rpc('is_staff');
+  if (staff !== true) {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 });
   }
 
   let body: unknown;
