@@ -33,7 +33,8 @@ test('shared company mailboxes still forward', () => {
   assert.equal(isAddressedToCompany({ received_for: company.email }), true);
 });
 
-test('personal inboxes are not forwarded', () => {
+test('personal inboxes forward under their own +tag', async () => {
+  const { forwardRecipient } = await import('./forward-inbound.ts');
   for (const mailbox of [
     'haksu@panovagroup.org',
     'HAKSU@panovagroup.org',
@@ -43,9 +44,11 @@ test('personal inboxes are not forwarded', () => {
     'Mehmet Çitil <mcitil@panovagroup.org>',
     'haksu+alerts@panovagroup.org',
   ]) {
-    assert.equal(isAddressedToCompany({ to: mailbox }), false, mailbox);
-    assert.equal(skipReason({ from: external, to: mailbox }), 'not-company', mailbox);
+    assert.equal(isAddressedToCompany({ to: mailbox }), true, mailbox);
+    assert.equal(skipReason({ from: external, to: mailbox }), null, mailbox);
   }
+  assert.equal(forwardRecipient({ from: external, to: 'haksu+alerts@panovagroup.org' }), 'huseyinaksu+haksu@gmail.com');
+  assert.equal(forwardRecipient({ from: external, to: 'Mehmet Çitil <mcitil@panovagroup.org>' }), 'istanbulakif@gmail.com');
   assert.equal(isPersonalInbox('haksu@panovagroup.org'), true);
   assert.equal(isPersonalInbox('mcitil@panovagroup.org'), true);
   assert.equal(isSharedCompanyMailbox('haksu@panovagroup.org'), false);
@@ -208,4 +211,27 @@ test('a homepage contact notification from the company domain is forwarded', () 
     text: 'Gövde',
   });
   assert.match(ordinary.text, /^Panova gelen kutusu iletisi/);
+});
+
+test('DMARC reports forward despite Auto-Submitted and go to the +dmarc label', async () => {
+  const { forwardRecipient, isDmarcReport } = await import('./forward-inbound.ts');
+  const google = {
+    from: 'noreply-dmarc-support@google.com',
+    to: company.email,
+    subject: 'Report domain: panovagroup.org Submitter: google.com Report-ID: 1',
+    headers: { 'Auto-Submitted': 'auto-generated' },
+  };
+  assert.equal(isDmarcReport(google), true);
+  assert.equal(skipReason(google), null);
+  assert.equal(forwardRecipient(google), 'huseyinaksu+dmarc@gmail.com');
+  const outlook = { from: 'DMARC Aggregate Report <dmarcreport@microsoft.com>', to: company.email, subject: 'Report Domain: panovagroup.org Submitter: protection.outlook.com Report-ID: x' };
+  assert.equal(forwardRecipient(outlook), 'huseyinaksu+dmarc@gmail.com');
+  assert.equal(skipReason({ from: external, to: company.email, subject: 'Report domain: x', headers: { 'Auto-Submitted': 'auto-replied' } }), 'auto-submitted');
+});
+
+test('ordinary mail goes to a +mailbox label', async () => {
+  const { forwardRecipient } = await import('./forward-inbound.ts');
+  assert.equal(forwardRecipient({ from: external, to: company.email }), 'huseyinaksu+panova@gmail.com');
+  assert.equal(forwardRecipient({ from: external, to: company.turkey.email }), 'huseyinaksu+turkiye@gmail.com');
+  assert.equal(forwardRecipient({ from: external, to: 'someone@else.com' }), 'huseyinaksu@gmail.com');
 });
