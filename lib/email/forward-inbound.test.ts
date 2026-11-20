@@ -48,7 +48,7 @@ test('personal inboxes forward under their own +tag', async () => {
     assert.equal(skipReason({ from: external, to: mailbox }), null, mailbox);
   }
   assert.equal(forwardRecipient({ from: external, to: 'haksu+alerts@panovagroup.org' }), 'huseyinaksu+haksu@gmail.com');
-  assert.equal(forwardRecipient({ from: external, to: 'Mehmet Çitil <mcitil@panovagroup.org>' }), 'huseyinaksu+mcitil@gmail.com');
+  assert.equal(forwardRecipient({ from: external, to: 'Mehmet Çitil <mcitil@panovagroup.org>' }), 'istanbulakif@gmail.com');
   assert.equal(isPersonalInbox('haksu@panovagroup.org'), true);
   assert.equal(isPersonalInbox('mcitil@panovagroup.org'), true);
   assert.equal(isSharedCompanyMailbox('haksu@panovagroup.org'), false);

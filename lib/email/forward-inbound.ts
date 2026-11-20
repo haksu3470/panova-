@@ -45,6 +45,8 @@ export function forwardRecipient(input: {
     ...extractEmails(input.bcc),
   ].find(isForwardedMailbox);
   if (!shared) return FORWARD_TO;
+  const own = PERSONAL_FORWARD_TO[shared.slice(0, shared.lastIndexOf('@')).split('+', 1)[0]];
+  if (own) return own;
   const local = shared.slice(0, shared.lastIndexOf('@')).split('+', 1)[0].replace(/[^a-z0-9._-]/g, '');
   return local ? plus(local) : FORWARD_TO;
 }
@@ -87,11 +89,16 @@ export function forwardFromAddress(): string {
 
 /**
  * Personal Resend Inboxes (Hüseyin, Mehmet Çitil).
- * Also forwarded to FORWARD_TO (Mehmet Çitil agreed on 2026-11-21), each under its own +tag
- * so Gmail files them apart. Set FORWARD_PERSONAL_INBOXES to false to stop.
+ * Forwarded too (Mehmet Çitil agreed on 2026-11-21): haksu@ to FORWARD_TO under its own +tag,
+ * mcitil@ to Mehmet's own address (PERSONAL_FORWARD_TO). Set FORWARD_PERSONAL_INBOXES to false to stop.
  * Plus-tags (haksu+foo@) stay with the same inbox.
  */
 export const FORWARD_PERSONAL_INBOXES = true;
+
+/** Personal inboxes that forward to their owner's own address instead of FORWARD_TO. */
+export const PERSONAL_FORWARD_TO: Readonly<Record<string, string>> = {
+  mcitil: 'istanbulakif@gmail.com',
+};
 
 const PERSONAL_INBOX_LOCAL_PARTS = new Set(['haksu', 'mcitil']);
 
