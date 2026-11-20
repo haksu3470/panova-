@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import {
-  FORWARD_TO,
   MAX_ATTACHMENT_BYTES,
+  forwardRecipient,
   buildForwardContent,
   forwardFromAddress,
   isHomepageContactNotice,
@@ -113,7 +113,7 @@ export async function POST(request: Request) {
   }
 
   const inbound = event.data;
-  // Shared aliases only (panova@, turkiye@, bangladesh@). haksu@ and mcitil@ stay in Resend Inbox.
+  // Shared aliases (panova@, turkiye@, bangladesh@) and the personal inboxes haksu@ and mcitil@.
   if (!isAddressedToCompany(inbound)) {
     return NextResponse.json({ ok: true, skipped: 'not-company' });
   }
@@ -176,7 +176,16 @@ export async function POST(request: Request) {
   const { error: sendError } = await resend.emails.send(
     {
       from: forwardFromAddress(),
-      to: [FORWARD_TO],
+      to: [
+        forwardRecipient({
+          from: email.from,
+          to: email.to,
+          cc: email.cc,
+          bcc: email.bcc,
+          received_for: email.received_for,
+          subject: email.subject,
+        }),
+      ],
       subject: prefixedSubject(email.subject),
       text: content.text,
       html: content.html,

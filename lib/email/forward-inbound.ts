@@ -12,6 +12,43 @@ export const COMPANY_DOMAIN = 'panovagroup.org';
 /** Private destination. Not rendered on the public site. */
 export const FORWARD_TO = 'huseyinaksu@gmail.com';
 
+/**
+ * DMARC aggregate reports (Google, Microsoft and others).
+ * Reporters mark them Auto-Submitted, so they get their own pass through skipReason.
+ */
+export function isDmarcReport(input: { from?: unknown; subject?: unknown }): boolean {
+  const subject = String(input.subject ?? '').replace(/[\r\n]+/g, ' ').trim();
+  if (!/^report domain:/i.test(subject)) return false;
+  return /submitter:/i.test(subject) || extractEmails(input.from).some((f) => f.includes('dmarc'));
+}
+
+/**
+ * Gmail plus-address for a forward, so each kind lands in its own Gmail label:
+ * huseyinaksu+dmarc@, huseyinaksu+panova@, huseyinaksu+turkiye@, huseyinaksu+bangladesh@.
+ * Gmail delivers every +tag to the same inbox.
+ */
+export function forwardRecipient(input: {
+  from?: unknown;
+  to?: unknown;
+  cc?: unknown;
+  bcc?: unknown;
+  received_for?: unknown;
+  subject?: unknown;
+}): string {
+  const at = FORWARD_TO.lastIndexOf('@');
+  const plus = (tag: string) => `${FORWARD_TO.slice(0, at)}+${tag}${FORWARD_TO.slice(at)}`;
+  if (isDmarcReport(input)) return plus('dmarc');
+  const shared = [
+    ...extractEmails(input.received_for),
+    ...extractEmails(input.to),
+    ...extractEmails(input.cc),
+    ...extractEmails(input.bcc),
+  ].find(isForwardedMailbox);
+  if (!shared) return FORWARD_TO;
+  const local = shared.slice(0, shared.lastIndexOf('@')).split('+', 1)[0].replace(/[^a-z0-9._-]/g, '');
+  return local ? plus(local) : FORWARD_TO;
+}
+
 export const SUBJECT_PREFIX = '[Panova]';
 
 /** Skip binaries above this so the forward still sends. */
@@ -50,10 +87,12 @@ export function forwardFromAddress(): string {
 
 /**
  * Personal Resend Inboxes (Hüseyin, Mehmet Çitil).
- * Read in the Resend Inbox UI. Never auto-forward these to FORWARD_TO,
- * even if a recipient rule matches every address on the company domain.
+ * Also forwarded to FORWARD_TO (Mehmet Çitil agreed on 2026-11-21), each under its own +tag
+ * so Gmail files them apart. Set FORWARD_PERSONAL_INBOXES to false to stop.
  * Plus-tags (haksu+foo@) stay with the same inbox.
  */
+export const FORWARD_PERSONAL_INBOXES = true;
+
 const PERSONAL_INBOX_LOCAL_PARTS = new Set(['haksu', 'mcitil']);
 
 /** Every `email` field on lib/company.ts: panova@, turkiye@, bangladesh@, and later shared aliases. */
@@ -105,11 +144,12 @@ export function isSharedCompanyMailbox(email: string): boolean {
   return SHARED_COMPANY_MAILBOXES.has(normalized);
 }
 
-/**
- * True when a shared company mailbox is among the recipients.
- * Personal inboxes are removed first, so mail only to haksu@ or mcitil@
- * does not forward. Mail that also reaches panova@, turkiye@, or bangladesh@ still does.
- */
+/** A shared alias, or a personal inbox while FORWARD_PERSONAL_INBOXES is on. */
+export function isForwardedMailbox(email: string): boolean {
+  return isSharedCompanyMailbox(email) || (FORWARD_PERSONAL_INBOXES && isPersonalInbox(email));
+}
+
+/** True when a forwarded mailbox (shared alias or personal inbox) is among the recipients. */
 export function isAddressedToCompany(input: {
   to?: unknown;
   cc?: unknown;
@@ -121,8 +161,8 @@ export function isAddressedToCompany(input: {
     ...extractEmails(input.cc),
     ...extractEmails(input.bcc),
     ...extractEmails(input.received_for),
-  ].filter((email) => !isPersonalInbox(email));
-  return recipients.some(isSharedCompanyMailbox);
+  ];
+  return recipients.some(isForwardedMailbox);
 }
 
 /** Header values cannot contain CR/LF. */
@@ -201,7 +241,7 @@ export function forwardReplyAddress(input: {
 
 /**
  * Drop mail that would loop, or that was not sent to a shared company mailbox.
- * Personal inboxes return `not-company` (they are not forwarded).
+ * Personal inboxes forward while FORWARD_PERSONAL_INBOXES is on.
  * from-self still treats every panovagroup.org sender as our own mail, except a
  * homepage contact notification (X-Panova-Contact-Form, or a localized contact subject).
  */
@@ -218,7 +258,7 @@ export function skipReason(input: {
 
   const headers = normalizeHeaders(input.headers);
   const auto = (headers['auto-submitted'] || '').trim().toLowerCase();
-  if (auto && auto !== 'no') return 'auto-submitted';
+  if (auto && auto !== 'no' && !isDmarcReport(input)) return 'auto-submitted';
   if (headers['x-panova-forwarded']) return 'already-forwarded';
 
   const froms = extractEmails(input.from);
