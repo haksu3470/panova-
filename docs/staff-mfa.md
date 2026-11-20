@@ -6,7 +6,7 @@ Staff portal uses Supabase Auth TOTP. Flag: `app_settings.staff_mfa_required`.
 | --- | --- |
 | Org `staff_mfa_required = true` | Every staff session must enroll (if needed) and reach `aal2` |
 | Org `false` + person `staff_members.mfa_required = true` | Only that person is forced to MFA |
-| Both false | Optional panel on Overview; enrolled users still challenged to `aal2` |
+| Both false | Optional panel on Overview; leftover enrolled factors do not block login |
 
 Gate RPC: `current_staff_mfa_required()` = org flag **OR** the signed-in staff row’s `mfa_required`.
 

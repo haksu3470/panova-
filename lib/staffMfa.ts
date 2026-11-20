@@ -10,14 +10,18 @@ export type StaffMfaSnapshot = {
   currentLevel: string | null;
 };
 
-/** Pure decision used by portal + StaffGate. */
+/**
+ * Pure decision used by portal + StaffGate.
+ * Challenge only when policy requires MFA. A leftover enrolled TOTP must not
+ * block the portal when team and person toggles are both Off.
+ */
 export function staffMfaMode(input: {
   required: boolean;
   verified: boolean;
   currentLevel: string | null | undefined;
 }): StaffMfaSnapshot['mode'] {
   const level = input.currentLevel ?? 'aal1';
-  if (input.verified && level !== 'aal2') return 'challenge';
+  if (input.required && input.verified && level !== 'aal2') return 'challenge';
   if (input.required && !input.verified) return 'challenge';
   if (input.required) return 'done';
   return 'optional';

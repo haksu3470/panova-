@@ -6,9 +6,16 @@ await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.
 
 const { staffMfaMode, staffMfaRequiredForUser } = await import('./staffMfa.ts');
 
-test('challenges when a verified factor still needs aal2', () => {
+test('does not challenge leftover factors when MFA policy is off', () => {
   assert.equal(
     staffMfaMode({ required: false, verified: true, currentLevel: 'aal1' }),
+    'optional',
+  );
+});
+
+test('challenges when MFA is required and a verified factor still needs aal2', () => {
+  assert.equal(
+    staffMfaMode({ required: true, verified: true, currentLevel: 'aal1' }),
     'challenge',
   );
 });
