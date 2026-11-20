@@ -17,10 +17,12 @@ jobs:
         with:
           node-version: '22'
 
-      # SUPABASE_DB_URL is a repository secret: the Supabase Postgres URI
-      # (Project Settings → Database → Connection string → URI, direct, port 5432).
-      # The anon key is not a substitute. The 2026-11-09 failure was not a missing
-      # secret (the log masks SUPABASE_DB_URL). require("postgres") was not a function.
+      # SUPABASE_DB_URL is a repository secret: Postgres URI from Supabase Connect.
+      # GitHub Actions runners are IPv4-only; the direct host db.*.supabase.co is
+      # IPv6-only, so connect ENETUNREACH fails. The backup script rewrites a
+      # direct URI to the Session pooler using SUPABASE_DB_REGION (session mode,
+      # port 5432). The secret may remain the direct URI or already be the
+      # Session pooler URI. Do not use the anon/service role key.
       - name: Install backup client
         working-directory: scripts/backup
         run: npm install --omit=dev
@@ -29,6 +31,7 @@ jobs:
         working-directory: scripts/backup
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_DB_REGION: eu-central-1
         run: node --experimental-strip-types backup.mjs
 
       - name: Upload backup artifact

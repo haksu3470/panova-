@@ -1,8 +1,15 @@
+import dns from 'node:dns';
+dns.setDefaultResultOrder('ipv4first');
+
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import postgres from 'postgres';
-import { assertBackupDatabaseUrl, resolvePostgresClient } from '../../lib/backupClient.ts';
+import {
+  assertBackupDatabaseUrl,
+  resolvePostgresClient,
+  toIpv4CompatibleDatabaseUrl,
+} from '../../lib/backupClient.ts';
 
 const TABLES = [
   'job_candidates',
@@ -18,6 +25,13 @@ const TABLES = [
 let url;
 try {
   url = assertBackupDatabaseUrl(process.env.SUPABASE_DB_URL);
+  const rewritten = toIpv4CompatibleDatabaseUrl(url);
+  if (rewritten !== url) {
+    console.log(
+      'Rewrote direct db.*.supabase.co host to Session pooler (IPv4) using SUPABASE_DB_REGION.',
+    );
+    url = rewritten;
+  }
 } catch (error) {
   console.error(error instanceof Error ? error.message : error);
   process.exit(1);
