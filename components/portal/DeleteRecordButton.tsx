@@ -34,7 +34,7 @@ export default function DeleteRecordButton({
   allowed: boolean;
   onDeleted?: () => void;
 }) {
-  const { currentLang } = useSiteLanguage('tr');
+  const { currentLang } = useSiteLanguage();
   const ui = portalUi[currentLang];
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);

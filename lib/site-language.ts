@@ -1,24 +1,36 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { Language } from '@/lib/dictionary';
+import type { Language } from './dictionary';
+import { GEO_LANG_COOKIE, isLanguage } from './geoLanguage';
+
+export { isLanguage } from './geoLanguage';
 
 const STORAGE_KEYS = ['panova_lang', 'panova_portal_lang', 'panova_candidate_lang', 'panova_employer_lang'] as const;
 
 /** Same-tab listeners. The native storage event only fires in other documents. */
 export const LANGUAGE_EVENT = 'panova-language';
 
-export function isLanguage(value: string | null): value is Language {
-  return value === 'tr' || value === 'en' || value === 'sq' || value === 'ar' || value === 'mk';
+/** Geo cookie written by middleware (`panova_geo_lang`). */
+export function readGeoLanguage(): Language | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp(`(?:^|; )${GEO_LANG_COOKIE}=(tr|en|sq|ar|mk)(?:;|$)`));
+  return match && isLanguage(match[1]) ? match[1] : null;
 }
 
-/** Shared preference. Older pages stored the choice under different keys; any of them still counts. */
-export function readStoredLanguage(fallback: Language = 'tr'): Language {
+/**
+ * Shared preference. Older pages stored the choice under different keys; any
+ * of them still counts. With no stored choice, use the geo cookie from the
+ * visitor's country; if that is also missing, English.
+ */
+export function readStoredLanguage(fallback: Language = 'en'): Language {
   if (typeof window === 'undefined') return fallback;
   for (const key of STORAGE_KEYS) {
     const value = localStorage.getItem(key);
     if (isLanguage(value)) return value;
   }
+  const geo = readGeoLanguage();
+  if (geo) return geo;
   return fallback;
 }
 
@@ -39,7 +51,7 @@ export function writeStoredLanguage(lang: Language) {
   }
 }
 
-export function useSiteLanguage(fallback: Language = 'tr') {
+export function useSiteLanguage(fallback: Language = 'en') {
   const [currentLang, setCurrentLang] = useState<Language>(fallback);
 
   useEffect(() => {

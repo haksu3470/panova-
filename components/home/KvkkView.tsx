@@ -8,7 +8,7 @@ import { homeCopy } from '@/lib/home-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 
 export default function KvkkView() {
-  const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
+  const { currentLang, changeLanguage, isRtl } = useSiteLanguage();
   const k = homeCopy[currentLang].kvkk;
   const a = homeCopy[currentLang].about;
 

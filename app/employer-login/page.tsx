@@ -40,7 +40,7 @@ export default function EmployerLoginPage() {
 
   useEffect(() => {
     const apply = () => {
-      const next = readStoredLanguage('tr');
+      const next = readStoredLanguage();
       setCurrentLang(next);
       syncDocumentLanguage(next);
     };

@@ -40,7 +40,7 @@ export default function EmployerLoginInvite({
   onSent?: (result: Sent) => void;
   onLocale?: (locale: EmployerInviteLocale) => void;
 }) {
-  const { currentLang } = useSiteLanguage('tr');
+  const { currentLang } = useSiteLanguage();
   const copy = portalUi[currentLang].employerInvite;
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);

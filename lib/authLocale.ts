@@ -1,5 +1,5 @@
 import type { Language } from '@/lib/dictionary';
-import { isLanguage } from '@/lib/site-language';
+import { isLanguage } from '@/lib/geoLanguage';
 import { supabase } from '@/lib/supabase';
 
 /**

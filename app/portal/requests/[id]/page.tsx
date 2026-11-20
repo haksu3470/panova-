@@ -54,7 +54,7 @@ function RequestFileInner() {
   const [msg, setMsg] = useState('');
   // contract_type picker holds an incomplete duration (number missing or out of 1-999).
   const [durationInvalid, setDurationInvalid] = useState(false);
-  const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
+  const { currentLang, changeLanguage, isRtl } = useSiteLanguage();
   const t = translations[currentLang] || translations.tr;
   const ui = portalUi[currentLang];
   const { upper, role } = useStaffRole();

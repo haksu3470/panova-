@@ -75,7 +75,7 @@ export default function CandidateDashboard() {
 
   useEffect(() => {
     const handleStorageChange = () => {
-      const next = readStoredLanguage('tr');
+      const next = readStoredLanguage();
       setCurrentLang(next);
       syncDocumentLanguage(next);
     };
@@ -575,12 +575,12 @@ export default function CandidateDashboard() {
   ) => {
     if (result === 'ok' || result === 'phone' || result === 'passport') return;
     if (result === 'kvkk') {
-      alert(releaseCopy[readStoredLanguage('tr')].kvkkRequired);
+      alert(releaseCopy[readStoredLanguage()].kvkkRequired);
       await signOut('local');
       return;
     }
     if (!announce) return;
-    const lang = readStoredLanguage('tr');
+    const lang = readStoredLanguage();
     alert(explainLinkFailure(result, translations[lang] || translations.tr));
     await signOut('local');
   };

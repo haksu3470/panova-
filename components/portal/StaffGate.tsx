@@ -18,7 +18,7 @@ import { HeaderActions } from '@/components/site/PageHeader';
 export default function StaffGate({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<'loading' | 'ok' | 'noauth' | 'denied' | 'verify' | 'mfa'>('loading');
   const [mfaSnap, setMfaSnap] = useState<StaffMfaSnapshot | null>(null);
-  const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
+  const { currentLang, changeLanguage, isRtl } = useSiteLanguage();
   const g = homeCopy[currentLang].gate;
   const t = translations[currentLang] || translations.tr;
   const mfaCopy = releaseCopy[currentLang];

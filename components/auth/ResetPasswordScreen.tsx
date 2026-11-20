@@ -29,7 +29,7 @@ import { supabase } from '@/lib/supabase';
 type Phase = 'checking' | 'link-error' | 'prove' | 'choose' | 'google' | 'saved';
 
 export default function ResetPasswordScreen({ audience }: { audience: ResetAudience | null }) {
-  const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
+  const { currentLang, changeLanguage, isRtl } = useSiteLanguage();
   const t = translations[currentLang] || translations.tr;
   const [phase, setPhase] = useState<Phase>('checking');
   const [email, setEmail] = useState('');

@@ -1,9 +1,14 @@
 import assert from 'node:assert/strict';
+import { register } from 'node:module';
 import test from 'node:test';
-import { languages, translations, type Language } from './dictionary.ts';
-import { EUROPEAN_COUNTRIES, europeanCountryOptions, toLanguage } from './europeanCountries.ts';
-import { homeCopy } from './home-copy.ts';
-import { isLanguage } from './site-language.ts';
+import type { Language } from './dictionary.ts';
+
+await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.url);
+
+const { languages, translations } = await import('./dictionary.ts');
+const { EUROPEAN_COUNTRIES, europeanCountryOptions, toLanguage } = await import('./europeanCountries.ts');
+const { homeCopy } = await import('./home-copy.ts');
+const { isLanguage } = await import('./geoLanguage.ts');
 
 const LOCALES: Language[] = ['tr', 'en', 'mk', 'sq', 'ar'];
 const CYRILLIC = /[А-Яа-яЃѓЅѕЈјЉљЊњЌќЏџ]/;

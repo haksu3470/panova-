@@ -48,7 +48,7 @@ function printCss(pageLabel: string): string {
 
 export default function GuidesPrintScreen() {
   const router = useRouter();
-  const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
+  const { currentLang, changeLanguage, isRtl } = useSiteLanguage();
   const copy = guidesCopy[currentLang];
   const { gate, viewer } = useGuidesViewer();
   // Nothing that depends on ?role renders before the session check, so reading it here is hydration-safe.

@@ -11,7 +11,7 @@ import { useSiteLanguage } from '@/lib/site-language';
 import { company } from '@/lib/company';
 
 function AdminDashboardPageInner() {
-  const { currentLang: lang, changeLanguage, isRtl } = useSiteLanguage('tr');
+  const { currentLang: lang, changeLanguage, isRtl } = useSiteLanguage();
   const t = translations[lang] || translations.tr;
   const a = homeCopy[lang].admin;
 

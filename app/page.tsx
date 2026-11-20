@@ -17,7 +17,7 @@ import KvkkConsent from '@/components/site/KvkkConsent';
 import { releaseCopy } from '@/lib/release-copy';
 
 export default function HomePage() {
-  const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
+  const { currentLang, changeLanguage, isRtl } = useSiteLanguage();
 
   const [selectedCompanyKey, setSelectedCompanyKey] = useState<'hr' | 'trade' | 'agriculture' | 'construction'>('hr');
   const [submitted, setSubmitted] = useState(false);

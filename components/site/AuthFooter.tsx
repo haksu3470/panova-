@@ -12,7 +12,7 @@ export function AuthFooter({
   tone?: 'light' | 'slate' | 'dark';
   lang?: Language;
 }) {
-  const { currentLang: storedLang } = useSiteLanguage(lang ?? 'tr');
+  const { currentLang: storedLang } = useSiteLanguage(lang ?? 'en');
   const currentLang = lang ?? storedLang;
   const a = homeCopy[currentLang].about;
   const cls =

@@ -35,7 +35,7 @@ function EmployerFileInner() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
-  const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
+  const { currentLang, changeLanguage, isRtl } = useSiteLanguage();
   const t = translations[currentLang] || translations.tr;
   const ui = portalUi[currentLang];
   const { upper } = useStaffRole();

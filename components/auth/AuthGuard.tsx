@@ -16,7 +16,7 @@ type Role = 'staff' | 'employer';
  */
 export default function AuthGuard({ role, children }: { role: Role; children: ReactNode }) {
   const [state, setState] = useState<'loading' | 'ok' | 'denied'>('loading');
-  const { currentLang } = useSiteLanguage('tr');
+  const { currentLang } = useSiteLanguage();
   const g = homeCopy[currentLang].gate;
   const loginPath = role === 'staff' ? '/portal' : '/employer-login';
 

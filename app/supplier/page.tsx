@@ -16,7 +16,7 @@ export default function SupplierCandidateRegister() {
 
   useEffect(() => {
     const apply = () => {
-      const next = readStoredLanguage('tr');
+      const next = readStoredLanguage();
       setCurrentLang(next);
       syncDocumentLanguage(next);
     };

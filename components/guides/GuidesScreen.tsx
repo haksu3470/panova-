@@ -12,7 +12,7 @@ import GuidesHub from '@/components/guides/GuidesHub';
 import { useGuidesViewer } from '@/components/guides/useGuidesViewer';
 
 export default function GuidesScreen() {
-  const { currentLang, changeLanguage, isRtl } = useSiteLanguage('tr');
+  const { currentLang, changeLanguage, isRtl } = useSiteLanguage();
   const copy = guidesCopy[currentLang];
   const { gate, viewer } = useGuidesViewer();
   const canPrint = gate === 'ready' && !!viewer && viewer.kind !== 'unlinked';

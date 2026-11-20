@@ -9,7 +9,7 @@ import { useStaffRole } from './useStaffRole';
 
 export default function StaffRoleGate({ route, children }: { route: StaffFileRoute; children: ReactNode }) {
   const { role, ready } = useStaffRole();
-  const { currentLang, isRtl } = useSiteLanguage('tr');
+  const { currentLang, isRtl } = useSiteLanguage();
   const ui = portalUi[currentLang];
 
   if (!ready) {
