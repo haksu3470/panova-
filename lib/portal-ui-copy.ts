@@ -309,7 +309,8 @@ export type PortalUi = {
   demoHarvestLead: string;
   sectorFallback: string;
   /** Staff quick registration (CandidatesTab, phone first). */
-  quickRegister: Record<'step1Title' | 'step2Title' | 'step2Hint' | 'emailOptional' | 'passportOptional' | 'birthYearOptional' | 'birthYearInvalid' | 'passportInvalid' | 'kvkkLabel' | 'kvkkRequired' | 'duplicatePhone' | 'duplicatePassport' | 'duplicateHint' | 'duplicateContinue' | 'duplicateBlocked' | 'savedNotice' | 'docPassport' | 'docCertificate' | 'takePhoto' | 'chooseFile' | 'fileTypes' | 'preparing' | 'uploaded' | 'retry' | 'uploadFailed' | 'uploadType' | 'uploadSize' | 'skipForNow' | 'finish' | 'finishedNotice' | 'openFile', string>;
+  /** Step 2 labels come from dictionary documentTypeTitle (same as Belge Takip). */
+  quickRegister: Record<'step1Title' | 'step2Title' | 'step2Hint' | 'emailOptional' | 'passportOptional' | 'birthYearOptional' | 'birthYearInvalid' | 'passportInvalid' | 'kvkkLabel' | 'kvkkRequired' | 'duplicatePhone' | 'duplicatePassport' | 'duplicateHint' | 'duplicateContinue' | 'duplicateBlocked' | 'savedNotice' | 'takePhoto' | 'chooseFile' | 'fileTypes' | 'preparing' | 'uploaded' | 'retry' | 'uploadFailed' | 'uploadType' | 'uploadSize' | 'skipForNow' | 'finish' | 'finishedNotice' | 'openFile', string>;
 };
 
 const tr: PortalUi = {
@@ -585,8 +586,6 @@ const tr: PortalUi = {
     duplicateContinue: 'Yine de kaydet',
     duplicateBlocked: 'Bu telefon veya pasaport numarası başka bir aday kaydında kullanılıyor; sistem ikinci kaydı kabul etmedi. Bilgileri kontrol edin.',
     savedNotice: 'Aday kaydedildi: {name}',
-    docPassport: 'Pasaport',
-    docCertificate: 'Özgeçmiş / Sertifika',
     takePhoto: 'Fotoğraf çek',
     chooseFile: 'Dosya seç',
     fileTypes: 'PDF, JPEG veya PNG; en çok 8 MB.',
@@ -876,8 +875,6 @@ const en: PortalUi = {
     duplicateContinue: 'Register anyway',
     duplicateBlocked: 'This phone or passport number is already used by another candidate; the system refused a second record. Check the details.',
     savedNotice: 'Candidate registered: {name}',
-    docPassport: 'Passport',
-    docCertificate: 'CV / Certificate',
     takePhoto: 'Take photo',
     chooseFile: 'Choose file',
     fileTypes: 'PDF, JPEG or PNG; up to 8 MB.',
@@ -1167,8 +1164,6 @@ const sq: PortalUi = {
     duplicateContinue: 'Regjistro gjithsesi',
     duplicateBlocked: 'Ky telefon ose numër pasaporte përdoret nga një kandidat tjetër; sistemi nuk e pranoi regjistrimin e dytë. Kontrolloni të dhënat.',
     savedNotice: 'Kandidati u regjistrua: {name}',
-    docPassport: 'Pasaporta',
-    docCertificate: 'CV / Certifikatë',
     takePhoto: 'Bëj foto',
     chooseFile: 'Zgjidh skedarin',
     fileTypes: 'PDF, JPEG ose PNG; deri në 8 MB.',
@@ -1458,8 +1453,6 @@ const ar: PortalUi = {
     duplicateContinue: 'سجّل على أي حال',
     duplicateBlocked: 'رقم الهاتف أو جواز السفر مستخدم لدى مرشح آخر؛ رفض النظام السجل الثاني. تحقق من البيانات.',
     savedNotice: 'تم تسجيل المرشح: {name}',
-    docPassport: 'جواز السفر',
-    docCertificate: 'السيرة الذاتية / الشهادة',
     takePhoto: 'التقط صورة',
     chooseFile: 'اختر ملفًا',
     fileTypes: 'PDF أو JPEG أو PNG؛ حتى 8 ميغابايت.',
@@ -1749,8 +1742,6 @@ const mk: PortalUi = {
     duplicateContinue: 'Сепак регистрирај',
     duplicateBlocked: 'Овој телефон или број на пасош веќе го користи друг кандидат; системот го одби вториот запис. Проверете ги податоците.',
     savedNotice: 'Кандидатот е регистриран: {name}',
-    docPassport: 'Пасош',
-    docCertificate: 'CV / Сертификат',
     takePhoto: 'Фотографирај',
     chooseFile: 'Избери датотека',
     fileTypes: 'PDF, JPEG или PNG; до 8 MB.',

@@ -13,6 +13,7 @@ import { isCodeIssuingRole, normalizeReferralCode } from '@/lib/referralCode';
 import { supabase } from '@/lib/supabase';
 import { uploadCandidateFile } from '@/lib/candidateFiles';
 import { prepareDocumentFile } from '@/lib/imageDownscale';
+import { documentTypeTitle } from '@/lib/candidateDocuments';
 import {
   QUICK_DOC_TYPES,
   duplicateQueryTerms,
@@ -49,10 +50,11 @@ const emptyDraft = (): QuickDraft => ({
   referralCode: '',
 });
 
-const idleDocs = (): Record<QuickDocType, DocRowState> => ({
-  passport: { status: 'idle' },
-  certificate: { status: 'idle' },
-});
+const idleDocs = (): Record<QuickDocType, DocRowState> =>
+  Object.fromEntries(QUICK_DOC_TYPES.map((type) => [type, { status: 'idle' as const }])) as Record<
+    QuickDocType,
+    DocRowState
+  >;
 
 export default function QuickRegisterForm({
   currentLang,
@@ -65,7 +67,18 @@ export default function QuickRegisterForm({
   logAudit,
 }: {
   currentLang: string;
-  t: { nameLabel: string; nationalityCol: string; phoneLabel: string; emailLabel: string; submitting: string };
+  t: {
+    nameLabel: string;
+    nationalityCol: string;
+    phoneLabel: string;
+    emailLabel: string;
+    submitting: string;
+    docPassportScan?: string;
+    docProfessionalCert?: string;
+    docCriminalRecord?: string;
+    docHealthReport?: string;
+    docApostille?: string;
+  };
   currentUser: { name?: string; role_level?: string; referral_code?: string | null } | null;
   isUpperManagement: boolean;
   assignableCodes: string[];
@@ -237,7 +250,8 @@ export default function QuickRegisterForm({
     onSaved();
   };
 
-  const docLabel = (type: QuickDocType) => (type === 'passport' ? qr.docPassport : qr.docCertificate);
+  // Same titles as Belge Takip Mekanizması (documentTypeTitle / DOC_SLOT_TYPES).
+  const docLabel = (type: QuickDocType) => documentTypeTitle(type, t, ui.docTypes);
 
   const docErrorText = (state: Extract<DocRowState, { status: 'error' }>) => {
     if (state.error === 'type') return qr.uploadType;

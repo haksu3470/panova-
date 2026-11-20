@@ -4,7 +4,9 @@ import test from 'node:test';
 
 await register(new URL('./test-resolve-hook.mjs', import.meta.url), import.meta.url);
 
+const { DOC_SLOT_TYPES } = await import('./candidateDocuments.ts');
 const {
+  QUICK_DOC_TYPES,
   duplicateQueryTerms,
   findVisibleDuplicates,
   isDuplicateInsertError,
@@ -13,6 +15,17 @@ const {
   quickRegistrationProblem,
   withDocState,
 } = await import('./quickRegistration.ts');
+
+test('quick register step 2 uses the five Belge Takip slots', () => {
+  assert.deepEqual([...QUICK_DOC_TYPES], [...DOC_SLOT_TYPES]);
+  assert.deepEqual([...QUICK_DOC_TYPES], [
+    'passport',
+    'certificate',
+    'criminal_record',
+    'health_report',
+    'apostille',
+  ]);
+});
 
 test('quickRegistrationProblem: KVKK required first', () => {
   assert.equal(
@@ -124,10 +137,9 @@ test('isDuplicateInsertError and document helpers', () => {
   assert.equal(row.doc_type, 'passport');
   assert.equal(row.status, 'uploaded');
   assert.equal(row.notes, 'a.jpg');
-  const next = withDocState({ passport: { status: 'idle' }, certificate: { status: 'idle' } }, 'passport', {
-    status: 'done',
-    fileName: 'a.jpg',
-  });
+  const idle = Object.fromEntries(QUICK_DOC_TYPES.map((type) => [type, { status: 'idle' as const }]));
+  const next = withDocState(idle, 'passport', { status: 'done', fileName: 'a.jpg' });
   assert.equal(next.passport.status, 'done');
   assert.equal(next.certificate.status, 'idle');
+  assert.equal(next.criminal_record.status, 'idle');
 });

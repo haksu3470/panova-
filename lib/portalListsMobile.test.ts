@@ -62,7 +62,20 @@ test('quick register copy exists in five languages', () => {
     for (const key of ['step1Title', 'step2Title', 'kvkkRequired', 'takePhoto', 'finish'] as const) {
       assert.ok(block[key].trim(), `${lang}.quickRegister.${key}`);
     }
+    assert.equal('docCertificate' in block, false, `${lang}: no CV/certificate merge label`);
   }
+});
+
+test('quick register form maps the five Belge Takip slots with camera', () => {
+  const form = read('components/portal/QuickRegisterForm.tsx');
+  assert.match(form, /documentTypeTitle/);
+  assert.match(form, /QUICK_DOC_TYPES\.map/);
+  assert.match(form, /capture="environment"/);
+  assert.match(form, /openCamera\(type\)/);
+  const panel = read('components/portal/CandidateDocumentsPanel.tsx');
+  assert.match(panel, /capture="environment"/);
+  assert.match(panel, /openCamera\(item\)/);
+  assert.match(panel, /ui\.quickRegister\.takePhoto/);
 });
 
 test('wide tables scroll with an edge fade; the audit table keeps its first column', () => {

@@ -2,10 +2,14 @@
  * Staff quick registration (phone first): payload, duplicate warning and
  * per-document upload. kvkk_recorded_by, kvkk_version and registered_by are
  * never sent: the database trigger stamp_candidate_referral_code writes them.
+ *
+ * Step 2 uses the same five slots as Belge Takip Mekanizması (DOC_SLOT_TYPES),
+ * each with camera + file pick, so a CV is never labeled as "certificate".
  */
+import { DOC_SLOT_TYPES } from './candidateDocuments';
 import { passportKey, phoneKey } from './loginIdentifier';
 
-export const QUICK_DOC_TYPES = ['passport', 'certificate'] as const;
+export const QUICK_DOC_TYPES = DOC_SLOT_TYPES;
 export type QuickDocType = (typeof QUICK_DOC_TYPES)[number];
 
 export type QuickDraft = {

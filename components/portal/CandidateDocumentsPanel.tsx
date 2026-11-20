@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Eye, FileCheck, FileText, Upload } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Camera, Eye, FileCheck, FileText, Upload } from 'lucide-react';
 import type { Translation } from '@/lib/dictionary';
 import type { PortalUi } from '@/lib/portal-ui-copy';
 import type { ReleaseCopy } from '@/lib/release-copy';
@@ -57,6 +57,8 @@ export default function CandidateDocumentsPanel({
 }: Props) {
   const [busy, setBusy] = useState<string | null>(null);
   const [messages, setMessages] = useState<Record<string, Message>>({});
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const cameraItemRef = useRef<DocumentListItem | null>(null);
 
   const title = (docType: string) => documentTypeTitle(docType, t, ui.docTypes);
   const statusName = (key: string) => ui.docStatuses[key] || key;
@@ -88,8 +90,24 @@ export default function CandidateDocumentsPanel({
     void run(key, () => uploadStaffDocument(candidateId, item.docType, file, rows, `${ui.docTitle} ${title(item.docType)}: ${statusName('uploaded')}`), t.docUploadedOk || '');
   };
 
+  const openCamera = (item: DocumentListItem) => {
+    cameraItemRef.current = item;
+    cameraRef.current?.click();
+  };
+
   return (
     <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <input
+        ref={cameraRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="sr-only"
+        onChange={(e) => {
+          const item = cameraItemRef.current;
+          if (item) upload(item, e);
+        }}
+      />
       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
         <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
           <FileCheck className="w-5 h-5 text-indigo-600" aria-hidden="true" /> {t.documentTrackingMechanism}
@@ -207,6 +225,14 @@ export default function CandidateDocumentsPanel({
                       {ui.docRequest}
                     </button>
                   ) : null}
+                  <button
+                    type="button"
+                    disabled={isBusy}
+                    onClick={() => openCamera(item)}
+                    className={`bg-white hover:bg-slate-100 text-slate-800 px-3 py-1.5 rounded-lg border border-slate-300 font-bold shadow-sm flex items-center gap-1 ${isBusy ? 'cursor-wait bg-slate-100' : 'cursor-pointer'}`}
+                  >
+                    <Camera className="w-3.5 h-3.5 text-indigo-600" aria-hidden="true" /> {ui.quickRegister.takePhoto}
+                  </button>
                   <label className={`bg-white hover:bg-slate-100 text-slate-800 px-3 py-1.5 rounded-lg border border-slate-300 font-bold shadow-sm flex items-center gap-1 ${isBusy ? 'cursor-wait bg-slate-100' : 'cursor-pointer'}`}>
                     <Upload className="w-3.5 h-3.5 text-indigo-600" aria-hidden="true" /> {t.uploadFromComputer}
                     <input type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" disabled={isBusy} onChange={(e) => upload(item, e)} className="sr-only" />
