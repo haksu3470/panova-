@@ -122,7 +122,7 @@ export async function POST(request: Request) {
     html_format: 'cid',
   });
   if (getError || !email) {
-    console.error('Failed to fetch received email', inbound.email_id);
+    console.error('Failed to fetch received email', inbound.email_id, getError?.name, getError?.message);
     return NextResponse.json({ error: 'Failed to fetch email' }, { status: 500 });
   }
 
