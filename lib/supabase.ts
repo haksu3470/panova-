@@ -1,7 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import { captureRecoveryFromWindow } from '@/lib/passwordReset';
+import { dropSessionIfNotRemembered } from '@/lib/remember';
 
 captureRecoveryFromWindow();
+dropSessionIfNotRemembered();
 
 /**
  * Browser/server Supabase client. URL and anon key come only from env

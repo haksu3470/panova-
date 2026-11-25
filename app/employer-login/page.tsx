@@ -326,7 +326,7 @@ export default function EmployerLoginPage() {
                 />
               </div>
 
-              <ForgotPasswordLink label={t.forgotPassword || ''} onClick={() => setAuthMode('forgot')} />
+              <ForgotPasswordLink label={t.forgotPassword || ''} rememberLabel={t.rememberMe} onClick={() => setAuthMode('forgot')} />
 
               <button
                 type="submit"

@@ -702,6 +702,7 @@ export interface Translation {
   fillRequiredFields?: string;
   passwordTooShort?: string;
   forgotPassword?: string;
+  rememberMe?: string;
   forgotPasswordTitle?: string;
   forgotPasswordLead?: string;
   forgotPasswordGoogle?: string;
@@ -1486,6 +1487,7 @@ export const translations: Record<Language, Translation> = {
     fillRequiredFields: 'Lütfen zorunlu alanları doldurun.',
     passwordTooShort: 'Şifre en az 8 karakter olmalıdır.',
     forgotPassword: 'Şifremi unuttum',
+    rememberMe: 'Beni hatırla',
     forgotPasswordTitle: 'Şifrenizi sıfırlayın',
     forgotPasswordLead: 'E-posta adresinizi yazın. Bu adresle bir şifre hesabı varsa sıfırlama bağlantısı göndeririz.',
     forgotPasswordGoogle: 'Google ile giriş yapan hesapların şifresi yoktur. Google düğmesini kullanın.',
@@ -2260,6 +2262,7 @@ export const translations: Record<Language, Translation> = {
     fillRequiredFields: 'Please fill in the required fields.',
     passwordTooShort: 'Password must be at least 8 characters.',
     forgotPassword: 'Forgot password',
+    rememberMe: 'Remember me',
     forgotPasswordTitle: 'Reset your password',
     forgotPasswordLead: 'Enter your email. If a password account exists for it, we will send a reset link.',
     forgotPasswordGoogle: 'Google sign-in accounts do not have a password. Use the Google button.',
@@ -3034,6 +3037,7 @@ export const translations: Record<Language, Translation> = {
     fillRequiredFields: 'Ju lutemi plotësoni fushat e detyrueshme.',
     passwordTooShort: 'Fjalëkalimi duhet të ketë të paktën 8 karaktere.',
     forgotPassword: 'Kam harruar fjalëkalimin',
+    rememberMe: 'Më mbaj mend',
     forgotPasswordTitle: 'Rivendosni fjalëkalimin',
     forgotPasswordLead: 'Shkruani email-in. Nëse ekziston një llogari me fjalëkalim, dërgojmë një lidhje rivendosjeje.',
     forgotPasswordGoogle: 'Llogaritë me Google nuk kanë fjalëkalim. Përdorni butonin Google.',
@@ -3798,6 +3802,7 @@ export const translations: Record<Language, Translation> = {
     fillRequiredFields: 'يرجى ملء الحقول المطلوبة.',
     passwordTooShort: 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.',
     forgotPassword: 'نسيت كلمة المرور',
+    rememberMe: 'تذكرني',
     forgotPasswordTitle: 'إعادة تعيين كلمة المرور',
     forgotPasswordLead: 'أدخل بريدك الإلكتروني. إذا وُجد حساب بكلمة مرور لهذا العنوان، نرسل رابط إعادة التعيين.',
     forgotPasswordGoogle: 'حسابات تسجيل الدخول عبر Google لا تملك كلمة مرور. استخدم زر Google.',
@@ -4577,6 +4582,7 @@ export const translations: Record<Language, Translation> = {
     fillRequiredFields: 'Пополнете ги задолжителните полиња.',
     passwordTooShort: 'Лозинката мора да има најмалку 8 знаци.',
     forgotPassword: 'Ја заборавив лозинката',
+    rememberMe: 'Запомни ме',
     forgotPasswordTitle: 'Ресетирајте ја лозинката',
     forgotPasswordLead: 'Внесете ја е-поштата. Ако постои сметка со лозинка, ќе испратиме врска за ресетирање.',
     forgotPasswordGoogle: 'Сметките со Google немаат лозинка. Користете го копчето Google.',
