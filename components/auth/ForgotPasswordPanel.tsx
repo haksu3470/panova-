@@ -1,16 +1,45 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import OAuthButtons from '@/components/auth/OAuthButtons';
 import { Language, translations } from '@/lib/dictionary';
 import { homeCopy } from '@/lib/home-copy';
 import { requestPasswordReset } from '@/lib/passwordResetActions';
 import { resetReturnPath, type ResetAudience } from '@/lib/passwordReset';
 import Link from 'next/link';
+import { getRemember, setRemember } from '@/lib/remember';
 
-export function ForgotPasswordLink({ label, onClick }: { label: string; onClick: () => void }) {
+export function ForgotPasswordLink({
+  label,
+  onClick,
+  rememberLabel,
+}: {
+  label: string;
+  onClick: () => void;
+  rememberLabel?: string;
+}) {
+  useEffect(() => {
+    // Bu sekmede giriş formu açıldı: buradan açılacak oturum bu sekmeye ait.
+    setRemember(getRemember());
+  }, []);
   return (
-    <div className="flex justify-end">
+    <div className="flex items-center justify-between gap-3">
+      {rememberLabel ? (
+        <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            ref={(el) => {
+              if (el) el.checked = getRemember();
+            }}
+            defaultChecked
+            onChange={(e) => setRemember(e.target.checked)}
+            className="h-4 w-4 accent-[#2e7d32] cursor-pointer"
+          />
+          {rememberLabel}
+        </label>
+      ) : (
+        <span />
+      )}
       <button
         type="button"
         onClick={onClick}
