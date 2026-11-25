@@ -616,7 +616,7 @@ export default function PortalPage() {
           variant="bar"
           start={
             <>
-              <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
+              <Link href="/" aria-label="Ana sayfa" title="Ana sayfa" className="shrink-0 inline-flex"><img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" /></Link>
               <span className="font-extrabold text-slate-800 text-sm tracking-wide">PANOVA PORTAL</span>
             </>
           }
@@ -741,7 +741,7 @@ export default function PortalPage() {
           start={
           <>
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
+            <Link href="/" aria-label="Ana sayfa" title="Ana sayfa" className="shrink-0 inline-flex"><img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" /></Link>
             <div>
               <div className="flex items-center gap-2 text-emerald-700 font-bold text-xs mb-0.5">
                 <ShieldCheck className="w-3.5 h-3.5" /> {t.authSystem}

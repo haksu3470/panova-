@@ -1172,7 +1172,7 @@ export default function CandidateDashboard() {
           variant="bar"
           start={
             <>
-              <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
+              <Link href="/" aria-label="Ana sayfa" title="Ana sayfa" className="shrink-0 inline-flex"><img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" /></Link>
               <span className="font-extrabold text-slate-800 text-sm tracking-wide">PANOVA PORTAL</span>
             </>
           }

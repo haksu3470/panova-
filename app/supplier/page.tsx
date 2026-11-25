@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { CheckCircle2, UserPlus, Send, Building } from 'lucide-react';
@@ -82,7 +83,7 @@ export default function SupplierCandidateRegister() {
         <PageHeader
           variant="plain"
           // eslint-disable-next-line @next/next/no-img-element -- same plain logo as the other page headers
-          start={<img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto rounded-xl bg-white object-contain shrink-0" />}
+          start={<Link href="/" aria-label="Ana sayfa" title="Ana sayfa" className="shrink-0 inline-flex"><img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto rounded-xl bg-white object-contain shrink-0" /></Link>}
           actions={<HeaderActions lang={currentLang} onLanguageChange={changeLanguage} homeLabel={t.returnHome} tone="dark" />}
         />
 
