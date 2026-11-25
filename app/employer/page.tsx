@@ -854,8 +854,8 @@ function EmployerPortalInner() {
         <PageHeader
           start={
           <>
-          <div className="flex items-center gap-3">
-            <Link href="/" aria-label="Ana sayfa" title="Ana sayfa" className="shrink-0 inline-flex"><img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" /></Link>
+          <Link href="/" title="Ana sayfa" className="hover:opacity-90 flex items-center gap-3">
+            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
             <div className="border-l pl-3 border-slate-200">
               <div className="flex items-center gap-2 text-emerald-700 font-bold text-[11px] uppercase tracking-wider mb-0.5">
                 <Building2 className="w-3.5 h-3.5" /> {t.empPortalTitle}
@@ -867,7 +867,7 @@ function EmployerPortalInner() {
                 <h1 className="text-lg sm:text-xl font-extrabold text-slate-900">{editCompanyName || employerProfile?.companyName || ''}</h1>
               </div>
             </div>
-          </div>
+          </Link>
 
             <div data-header-user className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl text-xs">
               <span className="font-bold text-slate-950">{fill(ui.authorized, { name: editContactPerson || employerProfile?.contactPerson || '' })}</span>

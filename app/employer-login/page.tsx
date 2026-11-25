@@ -220,10 +220,10 @@ export default function EmployerLoginPage() {
         variant="bar"
         className="max-w-7xl mx-auto md:p-6"
         start={
-          <>
-            <Link href="/" aria-label="Ana sayfa" title="Ana sayfa" className="shrink-0 inline-flex"><img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" /></Link>
+          <Link href="/" title="Ana sayfa" className="inline-flex items-center gap-3 hover:opacity-90">
+            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
             <div className="text-lg font-black text-slate-900 tracking-tight">PANOVA PORTAL</div>
-          </>
+          </Link>
         }
         actions={<HeaderActions lang={currentLang} onLanguageChange={changeLanguage} homeLabel={t.returnHome} />}
       />

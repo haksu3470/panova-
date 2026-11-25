@@ -64,14 +64,14 @@ function AdminDashboardPageInner() {
         actions={<HeaderActions lang={lang} onLanguageChange={changeLanguage} homeLabel={t.returnHome || a.home} tone="dark" />}
       >
         {/* bg repeats the dark header so the contrast check sees the real background */}
-        <div className="flex items-center gap-3 bg-slate-800">
-          <Link href="/" aria-label="Ana sayfa" title="Ana sayfa" className="shrink-0 inline-flex"><img src="/logo.png" alt="" width={1051} height={725} className="h-12 w-auto rounded-xl bg-white object-contain shrink-0" /></Link>
+        <Link href="/" title="Ana sayfa" className="hover:opacity-90 flex items-center gap-3 bg-slate-800">
+          <img src="/logo.png" alt="" width={1051} height={725} className="h-12 w-auto rounded-xl bg-white object-contain shrink-0" />
           <div>
             <p className="text-sm font-black tracking-tight text-white leading-none">PANOVA</p>
             <h1 className="text-lg font-black tracking-tight text-white mt-1">{a.title}</h1>
             <p className="text-[11px] text-on-dark-muted">{company.brandName} &bull; {a.sub}</p>
           </div>
-        </div>
+        </Link>
       </PageHeader>
 
       {/* Navigasyon Sekmeleri */}
