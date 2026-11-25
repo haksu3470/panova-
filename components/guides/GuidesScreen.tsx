@@ -35,8 +35,8 @@ export default function GuidesScreen() {
       <div className="mx-auto max-w-7xl space-y-4 sm:space-y-6">
         <PageHeader
           start={
-          <div className="flex items-center gap-3">
-            <Link href="/" aria-label="Ana sayfa" title="Ana sayfa" className="shrink-0 inline-flex"><img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto shrink-0 object-contain" /></Link>
+          <Link href="/" title="Ana sayfa" className="hover:opacity-90 flex items-center gap-3">
+            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto shrink-0 object-contain" />
             <div>
               <div className="mb-0.5 flex items-center gap-2 text-xs font-bold text-emerald-700">
                 <BookOpen className="h-3.5 w-3.5" aria-hidden />
@@ -44,7 +44,7 @@ export default function GuidesScreen() {
               </div>
               <h1 className="text-lg font-extrabold text-slate-900 sm:text-xl">{copy.hubTitle}</h1>
             </div>
-          </div>
+          </Link>
           }
           actions={
             <HeaderActions

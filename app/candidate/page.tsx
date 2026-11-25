@@ -1171,10 +1171,10 @@ export default function CandidateDashboard() {
         <PageHeader
           variant="bar"
           start={
-            <>
-              <Link href="/" aria-label="Ana sayfa" title="Ana sayfa" className="shrink-0 inline-flex"><img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" /></Link>
+            <Link href="/" title="Ana sayfa" className="inline-flex items-center gap-3 hover:opacity-90">
+              <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
               <span className="font-extrabold text-slate-800 text-sm tracking-wide">PANOVA PORTAL</span>
-            </>
+            </Link>
           }
           actions={<HeaderActions lang={currentLang} onLanguageChange={changeCandidateLanguage} homeLabel={t.returnHome} />}
         />

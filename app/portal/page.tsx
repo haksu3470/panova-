@@ -615,10 +615,10 @@ export default function PortalPage() {
         <PageHeader
           variant="bar"
           start={
-            <>
-              <Link href="/" aria-label="Ana sayfa" title="Ana sayfa" className="shrink-0 inline-flex"><img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" /></Link>
+            <Link href="/" title="Ana sayfa" className="inline-flex items-center gap-3 hover:opacity-90">
+              <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
               <span className="font-extrabold text-slate-800 text-sm tracking-wide">PANOVA PORTAL</span>
-            </>
+            </Link>
           }
           actions={<HeaderActions lang={currentLang} onLanguageChange={changeLanguage} homeLabel={t.returnHome} />}
         />
@@ -740,15 +740,15 @@ export default function PortalPage() {
         <PageHeader
           start={
           <>
-          <div className="flex items-center gap-3">
-            <Link href="/" aria-label="Ana sayfa" title="Ana sayfa" className="shrink-0 inline-flex"><img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" /></Link>
+          <Link href="/" title="Ana sayfa" className="hover:opacity-90 flex items-center gap-3">
+            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
             <div>
               <div className="flex items-center gap-2 text-emerald-700 font-bold text-xs mb-0.5">
                 <ShieldCheck className="w-3.5 h-3.5" /> {t.authSystem}
               </div>
               <h1 className="text-lg sm:text-xl font-extrabold text-slate-900">{t.mgmtTitle}</h1>
             </div>
-          </div>
+          </Link>
 
             <div data-header-user className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
               <UserCheck className="w-4 h-4 text-emerald-700" />
