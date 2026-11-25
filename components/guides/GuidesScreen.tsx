@@ -36,7 +36,7 @@ export default function GuidesScreen() {
         <PageHeader
           start={
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto shrink-0 object-contain" />
+            <Link href="/" aria-label="Ana sayfa" title="Ana sayfa" className="shrink-0 inline-flex"><img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto shrink-0 object-contain" /></Link>
             <div>
               <div className="mb-0.5 flex items-center gap-2 text-xs font-bold text-emerald-700">
                 <BookOpen className="h-3.5 w-3.5" aria-hidden />

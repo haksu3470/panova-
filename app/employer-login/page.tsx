@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import OAuthButtons from '@/components/auth/OAuthButtons';
 
 import { useState, useEffect } from 'react';
@@ -220,7 +221,7 @@ export default function EmployerLoginPage() {
         className="max-w-7xl mx-auto md:p-6"
         start={
           <>
-            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" />
+            <Link href="/" aria-label="Ana sayfa" title="Ana sayfa" className="shrink-0 inline-flex"><img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto object-contain shrink-0" /></Link>
             <div className="text-lg font-black text-slate-900 tracking-tight">PANOVA PORTAL</div>
           </>
         }

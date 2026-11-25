@@ -299,7 +299,7 @@ export function SiteFooter({ lang }: { lang: Language }) {
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <div>
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="" width={1051} height={725} className="h-12 w-auto rounded-lg bg-white object-contain" />
+            <Link href="/" aria-label="Ana sayfa" title="Ana sayfa" className="shrink-0 inline-flex"><img src="/logo.png" alt="" width={1051} height={725} className="h-12 w-auto rounded-lg bg-white object-contain" /></Link>
             <div className="text-white font-black text-xl">PANOVA</div>
           </div>
           <p className="text-sm text-white mt-3">{company.shortName}</p>
