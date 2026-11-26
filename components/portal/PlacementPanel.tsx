@@ -36,6 +36,8 @@ export default function PlacementPanel({ candidateId, onOfficialChange, refreshK
   const [fu, setFu] = useState<any>(emptyFu);
   const [end, setEnd] = useState({ date: '', reason: '' });
   // Shown inside the box: the panel's own message line sits at the top, out of view.
+  // app_settings.process_metrics_enabled: off hides the box (old screen). Error/missing reads as on.
+  const [metricsOn, setMetricsOn] = useState(false);
   const [endNote, setEndNote] = useState<{ ok: boolean; text: string } | null>(null);
 
   const load = async () => {
@@ -52,6 +54,10 @@ export default function PlacementPanel({ candidateId, onOfficialChange, refreshK
     setOffer(offers.find((x: any) => x.status === 'accepted') || offers[0] || null);
     setFus(f.data || []);
   };
+
+  useEffect(() => {
+    supabase.rpc('process_metrics_enabled').then(({ data }) => setMetricsOn(data !== false));
+  }, []);
 
   useEffect(() => {
     load();
@@ -234,7 +240,7 @@ export default function PlacementPanel({ candidateId, onOfficialChange, refreshK
           {fill(fu.id ? ui.updateFollowup : ui.saveFollowup, { stage: fu.period_stage })}
         </button>
       </div>
-      {(startedWork || c.employment_ended_on) && (
+      {metricsOn && (startedWork || c.employment_ended_on) && (
         <div className={box}>
           <h3 className="font-bold text-slate-900">🚪 {pm.endTitle}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

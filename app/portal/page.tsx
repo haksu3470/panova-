@@ -899,7 +899,7 @@ export default function PortalPage() {
               );
             })()}
 
-            <ProcessMetricsPanel lang={currentLang} />
+            <ProcessMetricsPanel lang={currentLang} canManage={isUpperManagement} />
 
             {mfaMode === 'optional' ? (
               <StaffMfaPanel

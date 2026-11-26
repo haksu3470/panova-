@@ -35,6 +35,12 @@ interface Labels {
   endSaved: string;
   endNeedBoth: string;
   reasons: Record<EndReason, string>;
+  toggleOn: string;
+  toggleOff: string;
+  toggleHint: string;
+  offNote: string;
+  toggleSaved: string;
+  toggleFailed: string;
 }
 
 export const processMetricsLabels: Record<Language, Labels> = {
@@ -65,6 +71,12 @@ export const processMetricsLabels: Record<Language, Labels> = {
       contract_completed: 'Sözleşme tamamlandı',
       other: 'Diğer',
     },
+    toggleOn: 'Açık',
+    toggleOff: 'Kapalı',
+    toggleHint: 'Kapalıyken metrik kartları ve aday dosyasındaki İşten ayrılma kutusu gizlenir; aşama geçmişi kaydedilmeye devam eder.',
+    offNote: 'Süreç metrikleri kapalı. Ekranlar eski haliyle çalışıyor.',
+    toggleSaved: 'Ayar kaydedildi.',
+    toggleFailed: 'Ayar kaydedilemedi.',
   },
   en: {
     title: 'Process metrics',
@@ -93,6 +105,12 @@ export const processMetricsLabels: Record<Language, Labels> = {
       contract_completed: 'Contract completed',
       other: 'Other',
     },
+    toggleOn: 'On',
+    toggleOff: 'Off',
+    toggleHint: 'When off, the metrics cards and the Employment ended box on the candidate file are hidden; stage history keeps being recorded.',
+    offNote: 'Process metrics are off. Screens work as before.',
+    toggleSaved: 'Setting saved.',
+    toggleFailed: 'Setting could not be saved.',
   },
   sq: {
     title: 'Treguesit e procesit',
@@ -121,6 +139,12 @@ export const processMetricsLabels: Record<Language, Labels> = {
       contract_completed: 'Kontrata përfundoi',
       other: 'Tjetër',
     },
+    toggleOn: 'Aktiv',
+    toggleOff: 'Joaktiv',
+    toggleHint: 'Kur është joaktiv, kartat e treguesve dhe kutia Largimi nga puna fshihen; historiku i fazave vazhdon të regjistrohet.',
+    offNote: 'Treguesit e procesit janë joaktivë. Ekranet punojnë si më parë.',
+    toggleSaved: 'Cilësimi u ruajt.',
+    toggleFailed: 'Cilësimi nuk u ruajt.',
   },
   ar: {
     title: 'مؤشرات العملية',
@@ -149,6 +173,12 @@ export const processMetricsLabels: Record<Language, Labels> = {
       contract_completed: 'اكتمل العقد',
       other: 'أخرى',
     },
+    toggleOn: 'مفعّل',
+    toggleOff: 'معطّل',
+    toggleHint: 'عند التعطيل تُخفى بطاقات المؤشرات ومربع انتهاء العمل في ملف المرشح؛ ويستمر تسجيل سجل المراحل.',
+    offNote: 'مؤشرات العملية معطّلة. تعمل الشاشات كما في السابق.',
+    toggleSaved: 'تم حفظ الإعداد.',
+    toggleFailed: 'تعذّر حفظ الإعداد.',
   },
   mk: {
     title: 'Показатели на процесот',
@@ -177,6 +207,12 @@ export const processMetricsLabels: Record<Language, Labels> = {
       contract_completed: 'Договорот заврши',
       other: 'Друго',
     },
+    toggleOn: 'Вклучено',
+    toggleOff: 'Исклучено',
+    toggleHint: 'Кога е исклучено, картичките со показатели и полето Престанок на работа се скриени; историјата на фазите продолжува да се бележи.',
+    offNote: 'Показателите на процесот се исклучени. Екраните работат како порано.',
+    toggleSaved: 'Поставката е зачувана.',
+    toggleFailed: 'Поставката не може да се зачува.',
   },
 };
 
