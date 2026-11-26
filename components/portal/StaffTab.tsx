@@ -359,6 +359,9 @@ export default function StaffTab({
                     ))}
                   </div>
                 )}
+                {/* Upper management is never a test account (prepare_demo_login refuses it too). */}
+                {!isUpperManagementRole(staff.role_level) && (
+                <>
                 <span className="text-[11px] font-bold text-slate-600 block pt-1">
                   {demoLoginLabels[currentLang].testAccount}
                 </span>
@@ -382,6 +385,8 @@ export default function StaffTab({
                 {staff.is_test_account === true && staff.auth_user_id ? (
                   <DemoLoginButton kind="staff" id={staff.id} lang={currentLang} />
                 ) : null}
+                </>
+                )}
               </div>
               <div data-delete-row className={DELETE_ROW_CLASS}>
                 <button type="button" onClick={() => handleDeleteStaff(staff.id)} className={DELETE_BUTTON_CLASS}>
