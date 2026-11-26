@@ -41,6 +41,13 @@ interface Labels {
   offNote: string;
   toggleSaved: string;
   toggleFailed: string;
+  byAll: string;
+  byCountry: string;
+  byEmployer: string;
+  groupCountry: string;
+  groupEmployer: string;
+  unknown: string;
+  noGroups: string;
 }
 
 export const processMetricsLabels: Record<Language, Labels> = {
@@ -77,6 +84,13 @@ export const processMetricsLabels: Record<Language, Labels> = {
     offNote: 'Süreç metrikleri kapalı. Ekranlar eski haliyle çalışıyor.',
     toggleSaved: 'Ayar kaydedildi.',
     toggleFailed: 'Ayar kaydedilemedi.',
+    byAll: 'Toplam',
+    byCountry: 'Ülkeye göre',
+    byEmployer: 'İşverene göre',
+    groupCountry: 'Ülke',
+    groupEmployer: 'İşveren',
+    unknown: 'Belirtilmemiş',
+    noGroups: 'Henüz kayıtlı aşama değişikliği yok.',
   },
   en: {
     title: 'Process metrics',
@@ -111,6 +125,13 @@ export const processMetricsLabels: Record<Language, Labels> = {
     offNote: 'Process metrics are off. Screens work as before.',
     toggleSaved: 'Setting saved.',
     toggleFailed: 'Setting could not be saved.',
+    byAll: 'Total',
+    byCountry: 'By country',
+    byEmployer: 'By employer',
+    groupCountry: 'Country',
+    groupEmployer: 'Employer',
+    unknown: 'Not specified',
+    noGroups: 'No stage changes recorded yet.',
   },
   sq: {
     title: 'Treguesit e procesit',
@@ -145,6 +166,13 @@ export const processMetricsLabels: Record<Language, Labels> = {
     offNote: 'Treguesit e procesit janë joaktivë. Ekranet punojnë si më parë.',
     toggleSaved: 'Cilësimi u ruajt.',
     toggleFailed: 'Cilësimi nuk u ruajt.',
+    byAll: 'Gjithsej',
+    byCountry: 'Sipas shtetit',
+    byEmployer: 'Sipas punëdhënësit',
+    groupCountry: 'Shteti',
+    groupEmployer: 'Punëdhënësi',
+    unknown: 'E papërcaktuar',
+    noGroups: 'Ende nuk ka ndryshime fazash të regjistruara.',
   },
   ar: {
     title: 'مؤشرات العملية',
@@ -179,6 +207,13 @@ export const processMetricsLabels: Record<Language, Labels> = {
     offNote: 'مؤشرات العملية معطّلة. تعمل الشاشات كما في السابق.',
     toggleSaved: 'تم حفظ الإعداد.',
     toggleFailed: 'تعذّر حفظ الإعداد.',
+    byAll: 'الإجمالي',
+    byCountry: 'حسب الدولة',
+    byEmployer: 'حسب صاحب العمل',
+    groupCountry: 'الدولة',
+    groupEmployer: 'صاحب العمل',
+    unknown: 'غير محدد',
+    noGroups: 'لا توجد تغييرات مراحل مسجلة بعد.',
   },
   mk: {
     title: 'Показатели на процесот',
@@ -213,6 +248,13 @@ export const processMetricsLabels: Record<Language, Labels> = {
     offNote: 'Показателите на процесот се исклучени. Екраните работат како порано.',
     toggleSaved: 'Поставката е зачувана.',
     toggleFailed: 'Поставката не може да се зачува.',
+    byAll: 'Вкупно',
+    byCountry: 'По држава',
+    byEmployer: 'По работодавач',
+    groupCountry: 'Држава',
+    groupEmployer: 'Работодавач',
+    unknown: 'Неодредено',
+    noGroups: 'Сè уште нема забележани промени на фази.',
   },
 };
 
@@ -225,4 +267,23 @@ export function formatMetric(row: ProcessMetricRow | undefined, lang: Language):
   const shown = Number.isInteger(n) ? String(n) : n.toFixed(1);
   if (row.metric === 'days_permit_to_visa_median') return l.days.replace('{n}', shown);
   return lang === 'tr' ? `%${shown}` : `${shown}%`;
+}
+
+/** Rows of public.staff_process_metrics_by(p_by, p_include_demo). */
+export interface GroupedMetricRow extends ProcessMetricRow {
+  group_key: string;
+  group_label: string;
+}
+
+export type MetricGroupBy = 'all' | 'country' | 'employer';
+
+/** One entry per group, its five metrics by key; named groups A–Z, the unknown group ('') last. */
+export function groupMetricRows(rows: readonly GroupedMetricRow[]) {
+  const groups = new Map<string, { key: string; label: string; metrics: Partial<Record<MetricKey, ProcessMetricRow>> }>();
+  for (const row of rows) {
+    const g = groups.get(row.group_key) || { key: row.group_key, label: row.group_label, metrics: {} };
+    if ((METRIC_KEYS as readonly string[]).includes(row.metric)) g.metrics[row.metric as MetricKey] = row;
+    groups.set(row.group_key, g);
+  }
+  return [...groups.values()].sort((a, b) => (a.key === '' ? 1 : b.key === '' ? -1 : a.label.localeCompare(b.label)));
 }

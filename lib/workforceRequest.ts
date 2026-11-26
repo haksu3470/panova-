@@ -1,4 +1,5 @@
 import { formatSalary, parseSalaryInput, salaryCurrency, type SalaryCurrency } from './money';
+import { requestOptionalBenefitColumns, type ExtraBenefitKey } from './benefits';
 import { canonicalDuration, isIsoDate, parseContractDuration, parseDurationAmount, type DurationUnitChoice } from './contractDuration';
 import { normalizePositionTitle } from './professions';
 
@@ -35,6 +36,8 @@ export type EmployerDemandDraft = {
   language: string;
   lodging: YesNo;
   meals: YesNo;
+  /** Optional benefits (lib/benefits.ts); accommodation and meals come from lodging / meals. */
+  benefits?: readonly string[];
 };
 
 export type EmployerDemandRow = {
@@ -53,6 +56,9 @@ export type EmployerDemandRow = {
   required_language: string;
   accommodation_provided: boolean;
   food_provided: boolean;
+  transport_provided: boolean;
+  flight_covered: boolean;
+  extra_benefits: ExtraBenefitKey[];
   status: 'new_request';
 };
 
@@ -167,6 +173,7 @@ export function buildEmployerDemandInsert(
       required_language: draft.language.trim(),
       accommodation_provided: lodging,
       food_provided: meals,
+      ...requestOptionalBenefitColumns(draft.benefits || []),
       status: 'new_request',
     },
   };

@@ -1,5 +1,6 @@
 'use client';
 
+import { EXTRA_BENEFIT_KEYS, benefitLabels } from '@/lib/benefits';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -105,6 +106,9 @@ function RequestFileInner() {
       if (k === 'position_title' && typeof v === 'string') v = normalizePositionTitle(v) || null;
       if ((req[k] ?? null) !== (v ?? null)) changes[k] = v;
     }
+    // An array: compared by content, saved in list order (never null: the column is not null).
+    const extras = EXTRA_BENEFIT_KEYS.filter((x) => (Array.isArray(form.extra_benefits) ? form.extra_benefits : []).includes(x));
+    if (extras.join() !== (Array.isArray(req.extra_benefits) ? req.extra_benefits : []).join()) changes.extra_benefits = extras;
     if (!Object.keys(changes).length) { setSaving(false); setMsg(ui.noChanges); return; }
     const { error } = await supabase.from('job_requests').update(changes).eq('id', id);
     if (error) setMsg(`${ui.errorPrefix} ${error.message}`);
@@ -266,6 +270,19 @@ function RequestFileInner() {
                 <input type="checkbox" className="w-4 h-4" checked={!!form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.checked })} /> {ui.requestBools[key]}
               </label>
             ))}
+            {EXTRA_BENEFIT_KEYS.map((key) => {
+              const extras: string[] = Array.isArray(form.extra_benefits) ? form.extra_benefits : [];
+              return (
+                <label key={key} className="flex items-center gap-2 text-sm font-bold text-slate-700 bg-slate-50 border rounded-xl px-3 py-2">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4"
+                    checked={extras.includes(key)}
+                    onChange={(e) => setForm({ ...form, extra_benefits: e.target.checked ? [...extras, key] : extras.filter((x) => x !== key) })}
+                  /> {benefitLabels[currentLang][key]}
+                </label>
+              );
+            })}
           </div>
           <Field label={ui.specialTerms} textarea value={form.special_requirements || ''} onChange={(v) => setForm({ ...form, special_requirements: v })} />
         </Card>

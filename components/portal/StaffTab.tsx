@@ -11,6 +11,8 @@ import { useSiteLanguage } from '@/lib/site-language';
 import { releaseCopy } from '@/lib/release-copy';
 import { supabase } from '@/lib/supabase';
 import { writeAudit } from '@/lib/audit';
+import { isUpperManagementRole } from '@/lib/staffAccess';
+import { staffViewLabels } from '@/lib/staffView';
 
 interface StaffTabProps {
   staffMembers: any[];
@@ -111,6 +113,21 @@ export default function StaffTab({
     );
     onChanged?.();
     onMfaPolicyChanged?.();
+  };
+
+  const setMemberPortalView = async (staffId: string, next: boolean) => {
+    setMfaMsg('');
+    const { data, error } = await supabase
+      .from('staff_members')
+      .update({ can_view_candidate_portal: next, updated_at: new Date().toISOString() })
+      .eq('id', staffId)
+      .select('id');
+    if (error || !data?.length) {
+      setMfaMsg(staffViewLabels[currentLang].failed);
+      return;
+    }
+    void writeAudit(next ? 'staff_member_portal_view_on' : 'staff_member_portal_view_off', 'staff_members', staffId);
+    onChanged?.();
   };
 
   if (!isUpperManagement) {
@@ -301,6 +318,30 @@ export default function StaffTab({
                     {copy.mfaMemberOff}
                   </button>
                 </div>
+                <span className="text-[11px] font-bold text-slate-600 block pt-1">
+                  {staffViewLabels[currentLang].memberLabel}
+                </span>
+                {isUpperManagementRole(staff.role_level) ? (
+                  <span className="text-[11px] font-semibold text-slate-600 block">{staffViewLabels[currentLang].always}</span>
+                ) : (
+                  <div className="flex flex-wrap gap-2" role="group" aria-label={staffViewLabels[currentLang].memberLabel}>
+                    {([true, false] as const).map((value) => (
+                      <button
+                        key={String(value)}
+                        type="button"
+                        aria-pressed={(staff.can_view_candidate_portal === true) === value}
+                        onClick={() => setMemberPortalView(staff.id, value)}
+                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition ${
+                          (staff.can_view_candidate_portal === true) === value
+                            ? value ? 'bg-brand-solid text-on-dark shadow' : 'bg-slate-900 text-white shadow'
+                            : 'bg-white border text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        {value ? staffViewLabels[currentLang].on : staffViewLabels[currentLang].off}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <div data-delete-row className={DELETE_ROW_CLASS}>
                 <button type="button" onClick={() => handleDeleteStaff(staff.id)} className={DELETE_BUTTON_CLASS}>

@@ -24,7 +24,8 @@ test('the file picker takes a whole row and lets the file name drop under the bu
 
 test('document rows wrap: picker on its own row, preview and download below', () => {
   const page = read('app/candidate/page.tsx');
-  const row = /<div className="flex flex-wrap items-center gap-2" data-row="doc-actions">\s*<FilePicker/;
+  // The picker is still first in the row; staff view (?as=) hides it with {!staffView && (...)}.
+  const row = /<div className="flex flex-wrap items-center gap-2" data-row="doc-actions">\s*(\{!staffView && \(\s*)?<FilePicker/;
   assert.match(page, row);
   const start = page.indexOf('data-row="doc-actions"');
   const block = page.slice(start, page.indexOf('</div>', page.indexOf('CandidateDocDownloadButton', start)));

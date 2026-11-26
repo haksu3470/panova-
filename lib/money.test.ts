@@ -110,7 +110,9 @@ test('every salary screen formats with the page locale', () => {
   assert.ok(read('app/portal/page.tsx').includes('displayedRequestSalary(selectedDemandDetail, dateLocale[currentLang])'));
   assert.ok(read('app/candidate/page.tsx').includes('offerMoney(offer, dateLocale[currentLang])'));
   assert.ok(read('app/portal/requests/[id]/page.tsx').includes("'salary_currency'"));
-  assert.ok(read('app/portal/candidates/[id]/page.tsx').includes('offerTermsPayload(DEFAULT_SALARY_CURRENCY)'));
+  // The candidate file's offer form saves the currency picked next to the salary (EUR / USD).
+  assert.ok(read('components/portal/OfficialOfferForm.tsx').includes('offerTermsPayload(currency,'));
+  assert.ok(read('components/portal/OfficialOfferForm.tsx').includes('SALARY_CURRENCIES.map'));
 });
 
 test('new texts in five languages, translated', () => {

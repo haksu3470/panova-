@@ -111,6 +111,8 @@ test('answered lodging and meals are stored on the existing boolean columns', ()
     'country',
     'employer_id',
     'employer_name',
+    'extra_benefits',
+    'flight_covered',
     'food_provided',
     'headcount',
     'monthly_net_salary',
@@ -122,7 +124,12 @@ test('answered lodging and meals are stored on the existing boolean columns', ()
     'status',
     // existing column, null when no start date is picked
     'target_start_date',
+    'transport_provided',
   ]);
+  // No optional benefits ticked: the existing columns are false, extra_benefits empty.
+  assert.equal(built.row.transport_provided, false);
+  assert.equal(built.row.flight_covered, false);
+  assert.deepEqual(built.row.extra_benefits, []);
 });
 
 test('salary text keeps the amount employers already type', () => {

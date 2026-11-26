@@ -59,6 +59,7 @@ import { canAssignCandidate, canUpdateRequestStatus, isPermissionError, isUpperM
 import { countOpenRequests } from '@/lib/requestPipelineCounts';
 import OverviewCard from '@/components/portal/OverviewCard';
 import ProcessMetricsPanel from '@/components/portal/ProcessMetricsPanel';
+import { benefitLabels, benefitsText, requestBenefits } from '@/lib/benefits';
 import DemoDataCard from '@/components/portal/DemoDataCard';
 import { statusErrorKey, type StatusErrorKey } from '@/lib/requestStatusChange';
 import type { CandidateStatusErrorKey } from '@/lib/candidateStatusChange';
@@ -1272,6 +1273,9 @@ export default function PortalPage() {
                   <div><strong>{t.facilityAccommodation}:</strong> {benefitPhrase({ provided: t.benefitProvided || '', notProvided: t.benefitNotProvided || '', unanswered: t.benefitUnanswered || '' }, selectedDemandDetail.accommodation_provided ?? selectedDemandDetail.accommodation)}</div>
                   <div><strong>{t.facilityFood}:</strong> {benefitPhrase({ provided: t.benefitProvided || '', notProvided: t.benefitNotProvided || '', unanswered: t.benefitUnanswered || '' }, selectedDemandDetail.food_provided ?? selectedDemandDetail.food_allowance)}</div>
                   <div><strong>{t.facilityTransport}:</strong> {benefitPhrase({ provided: t.benefitProvided || '', notProvided: t.benefitNotProvided || '', unanswered: t.benefitUnanswered || '' }, selectedDemandDetail.transport_provided ?? selectedDemandDetail.transportation)}</div>
+                  {requestBenefits(selectedDemandDetail).filter((k) => !['accommodation', 'meals', 'transport'].includes(k)).length > 0 ? (
+                    <div className="sm:col-span-2"><strong>{benefitLabels[currentLang].title}:</strong> {benefitsText(requestBenefits(selectedDemandDetail).filter((k) => !['accommodation', 'meals', 'transport'].includes(k)), currentLang)}</div>
+                  ) : null}
                   <div><strong>Flight Ticket:</strong> {selectedDemandDetail.flight_ticket ? '✅ Employer Covers' : 'Candidate'}</div>
                   <div><strong>{t.durationLabel}:</strong> {formatContractDuration(selectedDemandDetail.contract_type || selectedDemandDetail.contract_term, currentLang, t) || '—'}</div>
                 </div>

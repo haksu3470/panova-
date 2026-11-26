@@ -8,7 +8,8 @@ import { SupportRequestList } from '@/components/candidate/SupportRequestList';
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { linkMyCandidate, signOut, type CandidateLinkResult } from '@/lib/auth';
+import { canViewCandidatePortal, linkMyCandidate, signOut, type CandidateLinkResult } from '@/lib/auth';
+import { staffViewCandidateId, staffViewLabels } from '@/lib/staffView';
 import {
   CandidateProfileError,
   assertCandidatePersisted,
@@ -48,6 +49,8 @@ import { homeCopy } from '@/lib/home-copy';
 import { canonicalPassport, canonicalPhone } from '@/lib/loginIdentifier';
 import { canonicalNationality } from '@/lib/registrationCountries';
 import { candidateOfferResponse, offerMoney, offerStatusLabel } from '@/lib/offers';
+import { benefitLabels, benefitsText, offerBenefits } from '@/lib/benefits';
+import { candidateCanUndoOffer, offerUndoLabels } from '@/lib/offerUndo';
 import { offerStatusTone } from '@/lib/status-tone';
 import { dateLocale, portalUi } from '@/lib/portal-ui-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
@@ -508,6 +511,9 @@ export default function CandidateDashboard() {
     } catch (e) {}
   }, [authenticated]);
 
+  // Staff opened /candidate?as=<id>: read only, never linked or signed out here.
+  const [staffView, setStaffView] = useState(false);
+
   const applyCandidate = (data: any) => {
     setCandidate(data);
     setAuthenticated(true);
@@ -612,7 +618,20 @@ export default function CandidateDashboard() {
           setLoading(false);
           return;
         }
-        if (gate.status === 'ready' && !profileDirty.current) await handleLinkResult(await loadLinkedCandidate(), false);
+        if (gate.status === 'ready' && !profileDirty.current) {
+          const viewAs = staffViewCandidateId(window.location.search);
+          if (viewAs && await canViewCandidatePortal()) {
+            // Staff never go through candidate account linking.
+            const { data: viewed } = await supabase.from('job_candidates').select('*').eq('id', viewAs).maybeSingle();
+            if (!alive) return;
+            if (viewed) {
+              setStaffView(true);
+              applyCandidate(viewed);
+            }
+          } else {
+            await handleLinkResult(await loadLinkedCandidate(), false);
+          }
+        }
         setLoading(false);
       }, 0);
     });
@@ -772,6 +791,10 @@ export default function CandidateDashboard() {
     setAuthMode('login');
   };
 
+  const backToStaffFile = () => {
+    window.location.href = candidate?.id ? `/portal/candidates/${candidate.id}` : '/portal';
+  };
+
   const handleLogout = async () => {
     profileDirty.current = false;
     await signOut();
@@ -829,7 +852,22 @@ export default function CandidateDashboard() {
     if (offers) setJobOffers(offers);
   };
 
+  // Within 48 hours and before the work permit application (lib/offerUndo.ts; enforced by undo_offer_response).
+  const handleUndoOffer = async (offerId: string) => {
+    if (staffView) return;
+    const l = offerUndoLabels[currentLang] || offerUndoLabels.en;
+    if (!window.confirm(l.confirm)) return;
+    const { error } = await supabase.rpc('undo_offer_response', { p_offer_id: offerId });
+    if (error) {
+      alert(`${l.failed} ${error.message}`);
+      return;
+    }
+    setJobOffers(jobOffers.map(o => o.id === offerId ? { ...o, status: 'pending', responded_at: null } : o));
+    alert(l.done);
+  };
+
   const handleUpdateOfferStatus = async (offerId: string, newStatus: 'accepted' | 'rejected') => {
+    if (staffView) return;
     const ui = portalUi[currentLang];
     const { data, error } = await supabase
       .from('job_offers')
@@ -957,6 +995,7 @@ export default function CandidateDashboard() {
   };
 
   const handleDocUpload = async (docIndex: number, event: React.ChangeEvent<HTMLInputElement>) => {
+    if (staffView) return;
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file || !candidate) return;
@@ -1506,8 +1545,8 @@ export default function CandidateDashboard() {
               lang={currentLang}
               onLanguageChange={changeCandidateLanguage}
               homeLabel={t.returnHome}
-              logoutLabel={t.logout}
-              onLogout={handleLogout}
+              logoutLabel={staffView ? portalUi[currentLang].returnToAdmin : t.logout}
+              onLogout={staffView ? backToStaffFile : handleLogout}
             />
           }
         />
@@ -1534,6 +1573,16 @@ export default function CandidateDashboard() {
           </Link>
         </div>
 
+        {staffView ? (
+          <p role="status" className="text-xs font-bold text-amber-900 bg-amber-50 border border-amber-300 rounded-xl px-3 py-2">
+            👁️ {staffViewLabels[currentLang].banner}
+          </p>
+        ) : null}
+
+        {/* Read only for staff: every control inside is disabled, the tabs above still work.
+            Documents and offers sit outside it: viewing, downloading and printing stay open;
+            their uploads and answers are hidden in staff view below. */}
+        <fieldset disabled={staffView} className="min-w-0 m-0 p-0 border-0 space-y-4 sm:space-y-6">
         {/* Profil Sekmesi */}
         {activeTab === 'profile' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-6">
@@ -1785,6 +1834,8 @@ export default function CandidateDashboard() {
           </div>
         )}
 
+        </fieldset>
+
         {/* Belgelerim Sekmesi */}
         {activeTab === 'documents' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
@@ -1820,12 +1871,14 @@ export default function CandidateDashboard() {
                   
                   {/* picker on its own row; preview and download wrap below it */}
                   <div className="flex flex-wrap items-center gap-2" data-row="doc-actions">
-                    <FilePicker
-                      lang={currentLang}
-                      accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleDocUpload(idx, e)}
-                      label={docTitle(doc)}
-                    />
+                    {!staffView && (
+                      <FilePicker
+                        lang={currentLang}
+                        accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleDocUpload(idx, e)}
+                        label={docTitle(doc)}
+                      />
+                    )}
                     {doc.file_url && (
                       <button 
                         onClick={() => setPreviewDoc({
@@ -1868,6 +1921,7 @@ export default function CandidateDashboard() {
                 const offerUi = portalUi[currentLang];
                 const money = offerMoney(offer, dateLocale[currentLang]);
                 const statusLabel = offerStatusLabel(offer.status, offerUi.offerStatus);
+                const perks = benefitsText(offerBenefits(offer), currentLang);
                 return (
                 <div key={offer.id} className="p-4 bg-white rounded-2xl border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-sm text-slate-900">
                   <div className="space-y-1 min-w-0">
@@ -1876,16 +1930,25 @@ export default function CandidateDashboard() {
                       {offerUi.offerSalary}: {money ? `${money} ${offerUi.offerNetPerMonth}` : offerUi.salaryNotSet}
                       {offer.start_date ? ` · ${offerUi.offerStart}: ${String(offer.start_date).slice(0, 10)}` : ''}
                     </div>
+                    {perks ? (
+                      <div className="text-xs text-slate-700">{benefitLabels[currentLang].title}: {perks}</div>
+                    ) : null}
                     {offer.terms_details ? (
                       <div className="text-xs text-slate-700">{offerUi.offerTerms}: {offer.terms_details}</div>
                     ) : null}
                     <div className="text-xs font-bold text-foreground">{offerUi.status}: <span className={`inline-flex rounded-lg px-2 py-0.5 ${offerStatusTone(offer.status)}`}>{statusLabel}</span></div>
+                    {!staffView && candidateCanUndoOffer(offer, candidate?.official_process_status) ? (
+                      <button type="button" onClick={() => handleUndoOffer(offer.id)} className="mt-1 px-3 py-1.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 text-xs font-bold hover:bg-amber-100 cursor-pointer">
+                        ↩️ {offerUndoLabels[currentLang].button}
+                      </button>
+                    ) : null}
                   </div>
                   <button
                     type="button"
                     onClick={() => setPrintTarget({
                       kind: 'offer',
-                      offer: offerPrint(offer, {
+                      // The printed terms carry the ticked benefits too.
+                      offer: offerPrint({ ...offer, terms_details: [perks, offer.terms_details].filter(Boolean).join(' · ') }, {
                         position: () => localizeCatalogTitle(offer.position_title, currentLang) || '',
                         salary: () => (money ? `${money} ${offerUi.offerNetPerMonth}` : offerUi.salaryNotSet),
                         status: () => statusLabel,
@@ -1895,7 +1958,7 @@ export default function CandidateDashboard() {
                   >
                     🖨️ {offerUi.exportPrint}
                   </button>
-                  {offer.status === 'pending' && (
+                  {offer.status === 'pending' && !staffView && (
                     <div className="flex gap-2 shrink-0">
                       <button onClick={() => handleUpdateOfferStatus(offer.id, 'accepted')} className="px-3 py-1.5 bg-brand-solid text-white rounded-xl font-bold cursor-pointer">{ct.acceptBtn}</button>
                       <button onClick={() => handleUpdateOfferStatus(offer.id, 'rejected')} className="px-3 py-1.5 bg-red-600 text-white rounded-xl font-bold cursor-pointer">{ct.rejectBtn}</button>
@@ -1908,6 +1971,7 @@ export default function CandidateDashboard() {
           </div>
         )}
 
+        <fieldset disabled={staffView} className="min-w-0 m-0 p-0 border-0">
         {/* Destek Sekmesi */}
         {activeTab === 'support' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
@@ -1932,6 +1996,7 @@ export default function CandidateDashboard() {
             />
           </div>
         )}
+        </fieldset>
 
       </div>
 

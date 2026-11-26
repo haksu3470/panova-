@@ -1,5 +1,7 @@
--- Scenario for 20261126120000_process_metrics.sql. Run in the SQL editor;
--- everything is rolled back. Acts as the first staff profile (auth.uid()).
+-- Scenario for 20261126120000_process_metrics.sql and 20261126170000_process_metrics_breakdown.sql.
+-- Run in the SQL editor; everything is rolled back (other history rows are
+-- deleted inside the transaction so only this scenario counts).
+-- Acts as the first staff profile (auth.uid()); needs two employers.
 -- Raises an exception on the first wrong value; ends with notice 'process_metrics scenario OK'.
 begin;
 
@@ -8,16 +10,24 @@ select set_config('request.jwt.claims',
 
 do $$
 declare
-  c1 uuid; c2 uuid; c3 uuid;
+  c1 uuid; c2 uuid; c3 uuid; e1 uuid; e2 uuid;
   r record;
   got jsonb := '{}';
+  by_emp jsonb := '{}';
 begin
+  delete from public.candidate_process_history;
+  select id into e1 from public.employers order by company_name limit 1;
+  select id into e2 from public.employers where id <> e1 order by company_name limit 1;
   insert into public.job_candidates (full_name, nationality, phone, sector, profession, is_demo)
     values ('SCENARIO 1', 'Bangladesh', '+88000000001', 'construction', 'welder', true) returning id into c1;
   insert into public.job_candidates (full_name, nationality, phone, sector, profession, is_demo)
     values ('SCENARIO 2', 'Bangladesh', '+88000000002', 'construction', 'welder', true) returning id into c2;
   insert into public.job_candidates (full_name, nationality, phone, sector, profession, is_demo)
     values ('SCENARIO 3', 'Bangladesh', '+88000000003', 'construction', 'welder', true) returning id into c3;
+
+  -- c1 accepted an offer from e1, c3 from e2; c2 has none (unknown group)
+  insert into public.job_offers (candidate_id, employer_name, employer_id, position_title, monthly_net_salary, status, is_demo)
+    values (c1, 'E1', e1, 'welder', 900, 'accepted', true), (c3, 'E2', e2, 'welder', 900, 'accepted', true);
 
   -- c1: permit -> visa applied -> visa approved -> started work
   update public.job_candidates set official_process_status = 'work_permit_applied' where id = c1;
@@ -51,15 +61,19 @@ begin
     got := got || jsonb_build_object(r.metric, jsonb_build_array(r.value, r.sample));
   end loop;
 
-  -- Other demo rows may exist, so only check when this scenario is the whole cohort.
-  if (select count(*) from public.candidate_process_history h
-      where h.candidate_id not in (c1, c2, c3)) = 0 then
-    if got->'days_permit_to_visa_median' <> '[30.0, 1]' then raise exception 'days: %', got; end if;
-    if got->'visa_approval_rate' <> '[50.0, 2]' then raise exception 'visa rate: %', got; end if;
-    if got->'retention_3m' <> '[100.0, 2]' then raise exception 'retention 3m: %', got; end if;
-    if got->'retention_6m' <> '[50.0, 2]' then raise exception 'retention 6m: %', got; end if;
-    if got->'retention_12m' <> '[0.0, 1]' then raise exception 'retention 12m: %', got; end if;
-  end if;
+  if got->'days_permit_to_visa_median' <> '[30.0, 1]' then raise exception 'days: %', got; end if;
+  if got->'visa_approval_rate' <> '[50.0, 2]' then raise exception 'visa rate: %', got; end if;
+  if got->'retention_3m' <> '[100.0, 2]' then raise exception 'retention 3m: %', got; end if;
+  if got->'retention_6m' <> '[50.0, 2]' then raise exception 'retention 6m: %', got; end if;
+  if got->'retention_12m' <> '[0.0, 1]' then raise exception 'retention 12m: %', got; end if;
+
+  -- Per employer: e1 kept c1 at 6 months, e2 lost c3, the unknown group holds c2's visa rejection.
+  for r in select * from public.staff_process_metrics_by('employer', true) b loop
+    by_emp := by_emp || jsonb_build_object(r.group_key || ':' || r.metric, jsonb_build_array(r.value, r.sample));
+  end loop;
+  if by_emp->(e1::text || ':retention_6m') <> '[100.0, 1]' then raise exception 'e1 retention 6m: %', by_emp; end if;
+  if by_emp->(e2::text || ':retention_6m') <> '[0.0, 1]' then raise exception 'e2 retention 6m: %', by_emp; end if;
+  if by_emp->':visa_approval_rate' <> '[0.0, 1]' then raise exception 'unknown visa rate: %', by_emp; end if;
 
   -- Bad end reason is refused.
   begin
