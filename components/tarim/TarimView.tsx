@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle2, Droplets, Sprout, Users, Truck, Milk, Beef, Egg, Handshake, Landmark, PackageCheck, Send, Cpu, MapPinned, GraduationCap, MessageSquareText, HeartHandshake } from 'lucide-react';
+import { CheckCircle2, Droplets, Sprout, Users, Truck, Milk, Beef, Egg, Handshake, Landmark, PackageCheck, Send, Cpu, MapPinned, GraduationCap, MessageSquareText, HeartHandshake, Factory } from 'lucide-react';
 import { SiteFooter } from '@/components/home/HomeSections';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { GroupSwitcher } from '@/components/site/GroupSwitcher';
@@ -15,7 +15,7 @@ const IMG = (name: string) => `/tarim/${name}.jpg`;
 const WHY_ICONS = [Sprout, Droplets, Users, Truck];
 const LIVESTOCK_ICONS = [Milk, Beef, Egg];
 const MODEL_ICONS = [Handshake, Landmark, PackageCheck];
-const TEAM_ICONS = [Cpu, MapPinned, GraduationCap, MessageSquareText];
+const TEAM_ICONS = [Cpu, MapPinned, Factory, GraduationCap, MessageSquareText];
 const PRODUCE = ['kapya-biber-tarlasi', 'kapya-biber-hasat', 'kavun-yakin', 'kavun-kasa', 'kavun-hasat-yigini'];
 const BANGLADESH = ['bangladesh-egitim', 'bangladesh-sera-fide', 'bangladesh-ekim-makinesi', 'bangladesh-silaj-hasadi'];
 
@@ -262,7 +262,7 @@ export default function TarimView() {
               {c.team.pillars.map((p, i) => {
                 const Icon = TEAM_ICONS[i];
                 return (
-                  <div key={p.title} className="rounded-2xl border border-slate-200 bg-stone-50 p-5">
+                  <div key={p.title} className={`rounded-2xl border border-slate-200 bg-stone-50 p-5 ${i === c.team.pillars.length - 1 && c.team.pillars.length % 2 ? 'sm:col-span-2' : ''}`}>
                     <Icon aria-hidden className="mb-3 h-7 w-7 text-brand" />
                     <h3 className="font-bold">{p.title}</h3>
                     <p className="mt-1 text-sm leading-relaxed text-slate-600">{p.text}</p>

@@ -117,7 +117,8 @@ const tr: TarimCopy = {
     pillars: [
       { title: 'Mühendislik bakışı', text: 'Elektronik ve otomasyon sistemleri tasarlayıp üretmiş bir mühendislik geçmişinden geliyoruz. Sulama, havuz ve otomasyon altyapımızı bu titizlikle, ölçerek ve test ederek kurduk.' },
       { title: 'Sahada tecrübe', text: 'Bangladeş\'te makineli tarımı ilk başlatan ekiplerden biriyiz; Afrika\'da bir hastane projesini arsa alımından anahtar teslimine kadar yürüttük. Zor koşullarda iş kurmayı ve ekibi yönetmeyi biliyoruz.' },
-      { title: 'İnsana yatırım', text: 'Eğitim alanında yıllara dayanan bir geçmişimiz var. Çalıştığımız her yerde yerel ekipleri eğitiyor, bilgiyi bırakıyor ve onlarla birlikte büyüyoruz.' },
+      { title: 'Üretim ve ticaret', text: '2008\'de okul öncesi eğitim materyalleri ithalatıyla başladık, ardından kendi üretimimize geçtik: 5.000 m² kapalı fabrika, depo ve showroom, otomasyona öncelik veren bir makine parkı ve Türkiye genelinde toptan ve perakende satış ağı. Eğitici oyuncaklarımızı kendi markamızla geliştiriyoruz.' },
+      { title: 'İnsana yatırım', text: 'Uzun yıllar okul öncesi eğitim kurumu yönettik. Çalıştığımız her yerde yerel ekipleri eğitiyor, bilgiyi bırakıyor ve onlarla birlikte büyüyoruz.' },
       { title: 'Açık iletişim', text: 'Ne yapabileceğimizi ve neyin eksik olduğunu açıkça söyleriz. 2025\'te pazarsız üretimin bedelini ödedik; bu yüzden bugün önce alıcıyı ve taahhüdü netleştiriyoruz.' },
     ],
     closing: 'Kazancımızın bir kısmını, ihtiyaç sahiplerine yönelik sosyal projelere ayırıyoruz.',
@@ -227,7 +228,8 @@ const en: TarimCopy = {
     pillars: [
       { title: 'An engineer\'s eye', text: 'Our background is in designing and building electronics and automation systems. We set up our irrigation, reservoir and automation with the same care: measured and tested.' },
       { title: 'Field experience', text: 'We were among the first teams to start mechanised farming in Bangladesh, and we ran a hospital project in Africa from land purchase to handover. We know how to build and lead a team in hard conditions.' },
-      { title: 'Investing in people', text: 'We have a long background in education. Wherever we work we train local teams, leave the know-how behind and grow together with them.' },
+      { title: 'Manufacturing and trade', text: 'We started in 2008 by importing early-childhood education materials, then moved into our own manufacturing: a 5,000 m² indoor factory, warehouse and showroom, a machine park built around automation, and a wholesale and retail network across Türkiye. We develop educational toys under our own brand.' },
+      { title: 'Investing in people', text: 'For many years we ran an early-childhood education institution. Wherever we work we train local teams, leave the know-how behind and grow together with them.' },
       { title: 'Straight talk', text: 'We say plainly what we can do and what is missing. In 2025 we paid the price of growing without a market; that is why today we secure the buyer and the commitment first.' },
     ],
     closing: 'Part of what we earn goes to social projects for people in need.',
@@ -337,7 +339,8 @@ const mk: TarimCopy = {
     pillars: [
       { title: 'Инженерски пристап', text: 'Доаѓаме од инженерство — дизајн и производство на електронски и автоматизирани системи. Наводнувањето, базенот и автоматизацијата ги поставивме со истата прецизност: измерено и тестирано.' },
       { title: 'Искуство на терен', text: 'Бевме меѓу првите тимови што започнаа механизирано земјоделство во Бангладеш, а во Африка водевме проект за болница од купување на земјиштето до предавање. Знаеме да градиме и да водиме тим во тешки услови.' },
-      { title: 'Вложуваме во луѓето', text: 'Имаме долгогодишно искуство во образованието. Каде и да работиме, ги обучуваме локалните тимови, го оставаме знаењето и растеме заедно со нив.' },
+      { title: 'Производство и трговија', text: 'Во 2008 започнавме со увоз на материјали за предучилишно образование, а потоа преминавме на сопствено производство: 5.000 m² затворена фабрика, магацин и изложбен салон, машински парк насочен кон автоматизација и мрежа за големопродажба и малопродажба низ цела Турција. Развиваме едукативни играчки под сопствен бренд.' },
+      { title: 'Вложуваме во луѓето', text: 'Долги години раководевме со установа за предучилишно образование. Каде и да работиме, ги обучуваме локалните тимови, го оставаме знаењето и растеме заедно со нив.' },
       { title: 'Отворена комуникација', text: 'Јасно кажуваме што можеме и што недостасува. Во 2025 ја плативме цената на производство без пазар; затоа денес прво ги обезбедуваме купувачот и договорот.' },
     ],
     closing: 'Дел од заработката ја издвојуваме за социјални проекти за луѓето во потреба.',
