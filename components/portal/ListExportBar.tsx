@@ -35,6 +35,7 @@ export default function ListExportBar({
   lang,
   audit = true,
   dir = 'ltr',
+  preparedFor,
 }: {
   filename: string;
   title: string;
@@ -43,6 +44,8 @@ export default function ListExportBar({
   lang: Language;
   audit?: boolean;
   dir?: 'ltr' | 'rtl';
+  /** Employer pages: the company the list was printed for (shown under the Panova letterhead). */
+  preparedFor?: string;
 }) {
   const options = { labels: EXPORT_COLUMN_LABELS[lang] as Record<string, string> };
   const dated = () => `${title} · ${new Date().toLocaleDateString(dateLocale[lang])}`;
@@ -67,7 +70,8 @@ export default function ListExportBar({
   };
   const print = () => {
     if (!rows.length) return empty();
-    if (!printHtmlInNewWindow(toPrintHtml(dated(), rows, dir, options))) {
+    const letterhead = { lang, origin: window.location.origin, printedAt: new Date().toLocaleDateString(dateLocale[lang]), preparedFor };
+    if (!printHtmlInNewWindow(toPrintHtml(dated(), rows, dir, options, letterhead))) {
       if (labels.popupBlocked) window.alert(labels.popupBlocked);
       return;
     }

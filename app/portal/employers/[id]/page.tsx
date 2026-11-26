@@ -11,6 +11,7 @@ import { Card, Stat, Field, requestStatusLabel, resultLabel, fmtDate } from '@/c
 import { matchResultTone } from '@/lib/status-tone';
 import DeleteRecordButton from '@/components/portal/DeleteRecordButton';
 import { useStaffRole } from '@/components/portal/useStaffRole';
+import DemoLoginButton from '@/components/portal/DemoLoginButton';
 import { candidateProfessionLabel } from '@/lib/candidateLabels';
 import { localizeCatalogTitle } from '@/lib/professions';
 import { translations } from '@/lib/dictionary';
@@ -146,6 +147,8 @@ function EmployerFileInner() {
             />
           }
         />
+        {/* Upper management: sign in as this demo employer (testing). */}
+        {upper && emp.is_demo ? <DemoLoginButton kind="employer" id={emp.id} lang={currentLang} /> : null}
         {msg && <div className="text-xs font-bold text-slate-700">{msg}</div>}
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
