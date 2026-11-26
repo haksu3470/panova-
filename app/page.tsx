@@ -211,6 +211,11 @@ export default function HomePage() {
               <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 mb-2">{company.name}</h3>
               <p className="text-slate-600 text-xs sm:text-sm mb-6">{company.desc}</p>
 
+              {selectedCompanyKey === 'agriculture' ? (
+                <Link href="/tarim" className="mb-6 inline-flex items-center gap-2 rounded-xl bg-brand-solid px-4 py-2.5 text-sm font-bold text-white hover:bg-brand">
+                  <Sprout aria-hidden className="w-4 h-4" /> {t.companies.agriculture.name} →
+                </Link>
+              ) : null}
               <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">{t.scopeTitle}</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {company.services?.map((srv: string, idx: number) => (
