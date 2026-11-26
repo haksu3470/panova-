@@ -5,6 +5,7 @@ import DocumentStatusPanel from '@/components/portal/DocumentStatusPanel';
 import CandidateYouTubeEditor from '@/components/portal/CandidateYouTubeEditor';
 import InterviewOfferPanel from '@/components/portal/InterviewOfferPanel';
 import OfficialOfferForm from '@/components/portal/OfficialOfferForm';
+import DemoLoginButton from '@/components/portal/DemoLoginButton';
 import { candidatePortalViewHref, staffViewLabels } from '@/lib/staffView';
 import { canViewCandidatePortal } from '@/lib/auth';
 import PlacementPanel from '@/components/portal/PlacementPanel';
@@ -419,6 +420,9 @@ function CandidateDetailPageInner() {
             />
           }
         />
+
+        {/* Upper management: sign in as this demo candidate (testing). */}
+        {isUpperStaff && candidate?.is_demo ? <DemoLoginButton kind="candidate" id={candidateId} lang={currentLang} /> : null}
 
         {/* Kapanış Uyarısı */}
         {isClosed && (
