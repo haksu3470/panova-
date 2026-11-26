@@ -20,9 +20,9 @@ const UNITS: { key: GroupUnit; href: string | null; Icon: LucideIcon }[] = [
 ];
 
 const LABELS: Record<'tr' | 'en' | 'mk', Record<GroupUnit, string> & { soon: string; nav: string; home: string }> = {
-  tr: { hr: 'İnsan Kaynakları', agri: 'Tarım', construction: 'İnşaat', trade: 'Trade', social: 'Sosyal Projeler', soon: 'yakında', nav: 'Panova Group birimleri', home: 'Ana sayfa' },
-  en: { hr: 'Human Resources', agri: 'Agriculture', construction: 'Construction', trade: 'Trade', social: 'Social Projects', soon: 'soon', nav: 'Panova Group units', home: 'Home' },
-  mk: { hr: 'Човечки ресурси', agri: 'Земјоделство', construction: 'Градежништво', trade: 'Трговија', social: 'Социјални проекти', soon: 'наскоро', nav: 'Единици на Panova Group', home: 'Почетна' },
+  tr: { hr: 'İnsan Kaynakları', agri: 'Tarım ve Hayvancılık', construction: 'İnşaat', trade: 'Trade', social: 'Sosyal Projeler', soon: 'yakında', nav: 'Panova Group birimleri', home: 'Ana sayfa' },
+  en: { hr: 'Human Resources', agri: 'Agriculture & Livestock', construction: 'Construction', trade: 'Trade', social: 'Social Projects', soon: 'soon', nav: 'Panova Group units', home: 'Home' },
+  mk: { hr: 'Човечки ресурси', agri: 'Земјоделство и сточарство', construction: 'Градежништво', trade: 'Трговија', social: 'Социјални проекти', soon: 'наскоро', nav: 'Единици на Panova Group', home: 'Почетна' },
 };
 
 export function GroupSwitcher({ active, lang }: { active: GroupUnit; lang: Language }) {
@@ -45,7 +45,7 @@ export function GroupSwitcher({ active, lang }: { active: GroupUnit; lang: Langu
                     <Icon aria-hidden className="h-4 w-4 text-brand" />
                     <span className="whitespace-nowrap">
                       <span className="hidden sm:inline">{name}</span>
-                      <span className="sm:hidden">{key === 'hr' ? 'HR' : name}</span>
+                      <span className="sm:hidden">{key === 'hr' ? 'HR' : key === 'agri' ? name.split(/ (ve|&|и) /)[0] : name}</span>
                     </span>
                   </span>
                 </li>

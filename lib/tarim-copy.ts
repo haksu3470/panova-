@@ -17,6 +17,10 @@ export type TarimCopy = {
   bangladesh: { title: string; lead: string; captions: Record<string, string> };
   livestock: { title: string; lead: string; cards: { title: string; text: string }[] };
   models: { title: string; lead: string; cards: { title: string; text: string }[] };
+  eyebrow: { why: string; infra: string; process: string; produce: string; bangladesh: string; livestock: string; models: string; team: string; contact: string };
+  nav: { why: string; infra: string; process: string; produce: string; models: string; team: string; contact: string };
+  process: { title: string; lead: string; steps: { title: string; text: string }[] };
+  heroCard: { place: string; flowTitle: string; flow: string[] };
   team: { title: string; lead: string; pillars: { title: string; text: string }[]; closing: string };
   contact: {
     title: string; lead: string; product: string; productPh: string; quantity: string; quantityPh: string;
@@ -111,6 +115,19 @@ const tr: TarimCopy = {
       { title: 'Ürün tedariki', text: 'Bölgede alıcı bulamayan üreticinin ürününü (örneğin elma) sizin pazarınıza ulaştırırız.' },
     ],
   },
+  eyebrow: { why: 'Konum', infra: 'Altyapı', process: 'Üretim süreci', produce: 'Saha', bangladesh: 'Uluslararası deneyim', livestock: 'Hayvancılık', models: 'İş birliği', team: 'Ekip', contact: 'İletişim' },
+  nav: { why: 'Neden Makedonya', infra: 'Altyapı', process: 'Süreç', produce: 'Ürünler', models: 'İş birliği', team: 'Biz kimiz', contact: 'Teklif' },
+  process: {
+    title: 'Tohumdan hasada tek elden',
+    lead: 'Fideyi kendimiz üretiyor, makineyle dikiyor, kendi suyumuzla sulayıp hasadı teslim ediyoruz.',
+    steps: [
+      { title: 'Fide üretimi', text: 'Tohumlar makineyle viyole ekilir, seralarda güçlü fideye dönüşür.' },
+      { title: 'Makineli dikim', text: 'Fideler 4 sıralı dikim makinesiyle malçlı tarlaya dikilir.' },
+      { title: 'Damla sulama', text: 'Havuzdaki su filtre istasyonundan geçip damla hatlarla bitkiye ulaşır.' },
+      { title: 'Hasat ve teslim', text: 'Ürün kasalanır, alıcının istediği standartta teslim edilir.' },
+    ],
+  },
+  heroCard: { place: 'Struga ovası, Kuzey Makedonya', flowTitle: 'Sizin için üretim', flow: ['Talep', 'Sözleşme', 'Üretim', 'Teslim'] },
   team: {
     title: 'Biz kimiz?',
     lead: 'Mühendislik geçmişi olan bir ekiple, yıllarını sahada ve insani yardım projelerinde geçirmiş bir ekibin ortak çatısıyız. Farklı yollardan gelip Makedonya\'da buluştuk; ortak noktamız, işi yerinde ve baştan sona kendimiz kurmak.',
@@ -222,6 +239,19 @@ const en: TarimCopy = {
       { title: 'Produce supply', text: 'We bring produce that local growers cannot sell (apples, for example) to your market.' },
     ],
   },
+  eyebrow: { why: 'Location', infra: 'Infrastructure', process: 'Production', produce: 'In the field', bangladesh: 'International experience', livestock: 'Livestock', models: 'Partnership', team: 'Team', contact: 'Contact' },
+  nav: { why: 'Why Macedonia', infra: 'Infrastructure', process: 'Process', produce: 'Produce', models: 'Partnership', team: 'Who we are', contact: 'Quote' },
+  process: {
+    title: 'From seed to harvest, in one hand',
+    lead: 'We raise the seedlings, plant them by machine, irrigate with our own water and deliver the harvest.',
+    steps: [
+      { title: 'Seedlings', text: 'Seeds are sown into trays by machine and grow into strong seedlings in our greenhouses.' },
+      { title: 'Mechanised planting', text: 'A four-row transplanter sets the seedlings into mulched beds.' },
+      { title: 'Drip irrigation', text: 'Reservoir water passes the filter station and reaches each plant through drip lines.' },
+      { title: 'Harvest and delivery', text: 'Produce is crated and delivered to the buyer\'s standard.' },
+    ],
+  },
+  heroCard: { place: 'Struga plain, North Macedonia', flowTitle: 'Grown for you', flow: ['Request', 'Contract', 'Production', 'Delivery'] },
   team: {
     title: 'Who we are',
     lead: 'We bring together an engineering team and a team that has spent years in the field and on humanitarian projects. We came by different roads and met in North Macedonia; what we share is building the work ourselves, on site, from start to finish.',
@@ -333,6 +363,19 @@ const mk: TarimCopy = {
       { title: 'Снабдување со производи', text: 'Производите што локалните производители не можат да ги продадат (на пример, јаболка) ги носиме до вашиот пазар.' },
     ],
   },
+  eyebrow: { why: 'Локација', infra: 'Инфраструктура', process: 'Производство', produce: 'На терен', bangladesh: 'Меѓународно искуство', livestock: 'Сточарство', models: 'Соработка', team: 'Тим', contact: 'Контакт' },
+  nav: { why: 'Зошто Македонија', infra: 'Инфраструктура', process: 'Процес', produce: 'Производи', models: 'Соработка', team: 'Кои сме ние', contact: 'Понуда' },
+  process: {
+    title: 'Од семе до берба, на едно место',
+    lead: 'Сами го произведуваме расадот, го садиме со машина, наводнуваме со сопствена вода и ја испорачуваме бербата.',
+    steps: [
+      { title: 'Расад', text: 'Семето машински се сее во контејнери и во пластениците израснува во силен расад.' },
+      { title: 'Механизирано садење', text: 'Машина за садење во четири реда го сади расадот во малчирани леи.' },
+      { title: 'Наводнување капка по капка', text: 'Водата од базенот минува низ филтер станицата и стигнува до секое растение.' },
+      { title: 'Берба и испорака', text: 'Производот се пакува во гајби и се испорачува според стандардот на купувачот.' },
+    ],
+  },
+  heroCard: { place: 'Струшко поле, Северна Македонија', flowTitle: 'Производство за вас', flow: ['Барање', 'Договор', 'Производство', 'Испорака'] },
   team: {
     title: 'Кои сме ние',
     lead: 'Обединуваме инженерски тим и тим што долги години работел на терен и на хуманитарни проекти. Дојдовме од различни патишта и се сретнавме во Македонија; заедничко ни е тоа што работата ја градиме сами, на лице место, од почеток до крај.',
