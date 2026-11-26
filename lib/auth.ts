@@ -19,6 +19,13 @@ export async function isStaff(): Promise<boolean> {
   return data === true;
 }
 
+/** Upper management, or staff that upper management allowed (staff_members.can_view_candidate_portal). */
+export async function canViewCandidatePortal(): Promise<boolean> {
+  const { data, error } = await supabase.rpc('can_view_candidate_portal');
+  if (error) return false;
+  return data === true;
+}
+
 /**
  * Daveti bağlar veya staff_members.auth_user_id'si bu oturum olan kayıttan
  * profili role=staff yapar. Personel satırı yoksa RPC hata verir ve profil değişmez.

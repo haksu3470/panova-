@@ -6,6 +6,7 @@ import CandidateYouTubeEditor from '@/components/portal/CandidateYouTubeEditor';
 import InterviewOfferPanel from '@/components/portal/InterviewOfferPanel';
 import OfficialOfferForm from '@/components/portal/OfficialOfferForm';
 import { candidatePortalViewHref, staffViewLabels } from '@/lib/staffView';
+import { canViewCandidatePortal } from '@/lib/auth';
 import PlacementPanel from '@/components/portal/PlacementPanel';
 import OfficialProcessBadge from '@/components/portal/OfficialProcessBadge';
 import CandidateStatusControl from '@/components/portal/CandidateStatusControl';
@@ -46,6 +47,9 @@ function CandidateDetailPageInner() {
   const candidateId = params.id as string;
 
   const [currentLang, setCurrentLang] = useState<Language>('en');
+  // Upper management, or staff allowed by them (can_view_candidate_portal).
+  const [portalViewOk, setPortalViewOk] = useState(false);
+  useEffect(() => { canViewCandidatePortal().then(setPortalViewOk); }, []);
 
   useEffect(() => {
     const apply = () => {
@@ -402,9 +406,11 @@ function CandidateDetailPageInner() {
                   <Link href="/portal" className={headerButtonClass.light}>
                     ← {t.returnToPortal}
                   </Link>
-                  <Link href={candidatePortalViewHref(candidateId)} className={headerButtonClass.light}>
-                    👁️ {staffViewLabels[currentLang].open}
-                  </Link>
+                  {portalViewOk && (
+                    <Link href={candidatePortalViewHref(candidateId)} className={headerButtonClass.light}>
+                      👁️ {staffViewLabels[currentLang].open}
+                    </Link>
+                  )}
                   <button onClick={handleSaveDetail} disabled={saving} className={headerPrimaryClass}>
                     <Save className="w-4 h-4" /> {saving ? (t.saving) : (t.saveChanges)}
                   </button>

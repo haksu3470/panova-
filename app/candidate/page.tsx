@@ -8,7 +8,7 @@ import { SupportRequestList } from '@/components/candidate/SupportRequestList';
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { isStaff, linkMyCandidate, signOut, type CandidateLinkResult } from '@/lib/auth';
+import { canViewCandidatePortal, linkMyCandidate, signOut, type CandidateLinkResult } from '@/lib/auth';
 import { staffViewCandidateId, staffViewLabels } from '@/lib/staffView';
 import {
   CandidateProfileError,
@@ -619,7 +619,7 @@ export default function CandidateDashboard() {
         }
         if (gate.status === 'ready' && !profileDirty.current) {
           const viewAs = staffViewCandidateId(window.location.search);
-          if (viewAs && await isStaff()) {
+          if (viewAs && await canViewCandidatePortal()) {
             // Staff never go through candidate account linking.
             const { data: viewed } = await supabase.from('job_candidates').select('*').eq('id', viewAs).maybeSingle();
             if (!alive) return;
@@ -980,6 +980,7 @@ export default function CandidateDashboard() {
   };
 
   const handleDocUpload = async (docIndex: number, event: React.ChangeEvent<HTMLInputElement>) => {
+    if (staffView) return;
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file || !candidate) return;
@@ -1563,7 +1564,9 @@ export default function CandidateDashboard() {
           </p>
         ) : null}
 
-        {/* Read only for staff: every control inside is disabled, the tabs above still work. */}
+        {/* Read only for staff: every control inside is disabled, the tabs above still work.
+            Documents and offers sit outside it: viewing, downloading and printing stay open;
+            their uploads and answers are hidden in staff view below. */}
         <fieldset disabled={staffView} className="min-w-0 m-0 p-0 border-0 space-y-4 sm:space-y-6">
         {/* Profil Sekmesi */}
         {activeTab === 'profile' && (
@@ -1816,6 +1819,8 @@ export default function CandidateDashboard() {
           </div>
         )}
 
+        </fieldset>
+
         {/* Belgelerim Sekmesi */}
         {activeTab === 'documents' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
@@ -1851,12 +1856,14 @@ export default function CandidateDashboard() {
                   
                   {/* picker on its own row; preview and download wrap below it */}
                   <div className="flex flex-wrap items-center gap-2" data-row="doc-actions">
-                    <FilePicker
-                      lang={currentLang}
-                      accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleDocUpload(idx, e)}
-                      label={docTitle(doc)}
-                    />
+                    {!staffView && (
+                      <FilePicker
+                        lang={currentLang}
+                        accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleDocUpload(idx, e)}
+                        label={docTitle(doc)}
+                      />
+                    )}
                     {doc.file_url && (
                       <button 
                         onClick={() => setPreviewDoc({
@@ -1931,7 +1938,7 @@ export default function CandidateDashboard() {
                   >
                     🖨️ {offerUi.exportPrint}
                   </button>
-                  {offer.status === 'pending' && (
+                  {offer.status === 'pending' && !staffView && (
                     <div className="flex gap-2 shrink-0">
                       <button onClick={() => handleUpdateOfferStatus(offer.id, 'accepted')} className="px-3 py-1.5 bg-brand-solid text-white rounded-xl font-bold cursor-pointer">{ct.acceptBtn}</button>
                       <button onClick={() => handleUpdateOfferStatus(offer.id, 'rejected')} className="px-3 py-1.5 bg-red-600 text-white rounded-xl font-bold cursor-pointer">{ct.rejectBtn}</button>
@@ -1944,6 +1951,7 @@ export default function CandidateDashboard() {
           </div>
         )}
 
+        <fieldset disabled={staffView} className="min-w-0 m-0 p-0 border-0">
         {/* Destek Sekmesi */}
         {activeTab === 'support' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
