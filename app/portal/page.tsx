@@ -59,6 +59,7 @@ import { canAssignCandidate, canUpdateRequestStatus, isPermissionError, isUpperM
 import { countOpenRequests } from '@/lib/requestPipelineCounts';
 import OverviewCard from '@/components/portal/OverviewCard';
 import ProcessMetricsPanel from '@/components/portal/ProcessMetricsPanel';
+import AuditExport from '@/components/portal/AuditExport';
 import { benefitLabels, benefitsText, requestBenefits } from '@/lib/benefits';
 import DemoDataCard from '@/components/portal/DemoDataCard';
 import { statusErrorKey, type StatusErrorKey } from '@/lib/requestStatusChange';
@@ -1037,6 +1038,7 @@ export default function PortalPage() {
               <History className="w-5 h-5 text-emerald-700" /> {t.auditLogTitle}
             </h3>
             <p className="text-xs text-muted-foreground">{t.auditLogSub}</p>
+            <AuditExport lang={currentLang} dir={isRtl ? 'rtl' : 'ltr'} />
 
             <ScrollTable stickyFirstColumn>
               <table className="w-full text-left rtl:text-right text-xs sm:text-sm text-slate-600 [&_td:first-child]:min-w-[10rem] [&_td:last-child]:whitespace-nowrap">

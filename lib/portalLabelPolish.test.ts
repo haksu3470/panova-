@@ -40,7 +40,11 @@ test('audit status codes are shown with their labels; unknown codes stay as writ
   assert.equal(auditActionText('Aday → visa_processing', null, 'tr'), 'Aday → Vize İşlemde');
   // unknown codes and plain text are not touched
   assert.equal(auditActionText('Durum: mystery_code -> other_code', 'job_request', 'tr'), 'Durum: mystery_code → other_code');
-  assert.equal(auditActionText('Dışa aktarma: csv', 'export', 'tr'), 'Dışa aktarma: csv');
+  // export actions and settings switches are written as codes; shown as text in the page language
+  assert.equal(auditActionText('Dışa aktarma: csv', 'export', 'tr'), `Dışa aktarma: ${portalUi.tr.exportCsv}`);
+  assert.equal(auditActionText('Dışa aktarma: print', 'export', 'en'), `Export: ${portalUi.en.exportPrint}`);
+  assert.equal(auditActionText('staff_member_test_account_off', 'staff_members', 'tr'), 'Personel test hesabı kaldırıldı');
+  assert.equal(auditActionText('process_metrics_on', 'app_settings', 'mk'), 'Показателите на процесот се вклучени');
   assert.equal(auditActionText('', null, 'tr'), '');
   assert.equal(auditActionText(null, null, 'ar'), '');
   for (const lang of LANGS) {
