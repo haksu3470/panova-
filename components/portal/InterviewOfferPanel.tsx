@@ -10,6 +10,7 @@ import { localizeCatalogTitle, normalizePositionTitle } from '@/lib/professions'
 import { dateLocale, fill, portalUi } from '@/lib/portal-ui-copy';
 import { offerCurrency, offerTermsPayload } from '@/lib/offers';
 import { BENEFIT_KEYS, benefitLabels, offerBenefits, requestBenefits, type BenefitKey } from '@/lib/benefits';
+import { offerUndoLabels } from '@/lib/offerUndo';
 import { DEFAULT_SALARY_CURRENCY, formatSalary, offerDefaultsFromRequest, requestCurrency, SALARY_CURRENCIES } from '@/lib/money';
 import { releaseCopy } from '@/lib/release-copy';
 import { useSiteLanguage } from '@/lib/site-language';
@@ -95,6 +96,18 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
     await load();
     setBusy(false);
     return !runError;
+  };
+
+  // Staff may take an answer back any time; the function checks the role and writes the audit row.
+  const undoAnswer = async (offerId: string) => {
+    const l = offerUndoLabels[currentLang] || offerUndoLabels.en;
+    if (!window.confirm(l.confirm)) return;
+    setBusy(true);
+    setError('');
+    const { error: undoError } = await supabase.rpc('undo_offer_response', { p_offer_id: offerId });
+    if (undoError) setError(`${l.failed} ${undoError.message}`);
+    await load();
+    setBusy(false);
   };
 
   const saveInterview = async () => {
@@ -245,7 +258,8 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
         <section className="space-y-2">
           <h4 className="text-xs font-bold uppercase tracking-wide text-slate-800">{ui.ioJobOffers} ({offers.length})</h4>
           {offers.map((o) => (
-            <button key={o.id} disabled={offerLocked(o)} onClick={() => setOf({ id: o.id, employer_name: o.employer_name || '', position_title: o.position_title || '', ...offerDefaultsFromRequest(request, o), offer_terms: o.offer_terms, benefits: offerBenefits(o), start_date: o.start_date || '', terms_details: o.terms_details || '', status: o.status || 'pending' })}
+            <div key={o.id} className="space-y-1">
+            <button disabled={offerLocked(o)} onClick={() => setOf({ id: o.id, employer_name: o.employer_name || '', position_title: o.position_title || '', ...offerDefaultsFromRequest(request, o), offer_terms: o.offer_terms, benefits: offerBenefits(o), start_date: o.start_date || '', terms_details: o.terms_details || '', status: o.status || 'pending' })}
               className={`w-full text-start border border-slate-200 bg-white rounded-xl p-3 hover:bg-slate-50 disabled:cursor-default ${of.id === o.id ? 'ring-2 ring-emerald-500' : ''}`}>
               <p className="text-sm font-bold text-slate-950">{o.employer_name} · {localizeCatalogTitle(o.position_title, currentLang) || o.position_title}<DemoBadge show={o.is_demo} /></p>
               <p className="text-[11px] font-medium text-slate-700">
@@ -253,6 +267,12 @@ export default function InterviewOfferPanel({ candidate, request, match, onClose
                 {o.responded_at ? ` (${String(o.responded_at).substring(0, 10)})` : ''}
               </p>
             </button>
+            {offerLocked(o) && (
+              <button type="button" disabled={busy} onClick={() => undoAnswer(o.id)} className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 disabled:bg-disabled disabled:text-on-dark disabled:opacity-100">
+                ↩️ {(offerUndoLabels[currentLang] || offerUndoLabels.en).staffButton}
+              </button>
+            )}
+            </div>
           ))}
           <div className="border border-slate-200 rounded-xl p-3 bg-slate-50 space-y-2">
             <p className="text-xs font-bold text-slate-900">{of.id ? ui.ioEditOffer : ui.ioNewOffer}</p>

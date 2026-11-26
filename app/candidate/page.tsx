@@ -50,6 +50,7 @@ import { canonicalPassport, canonicalPhone } from '@/lib/loginIdentifier';
 import { canonicalNationality } from '@/lib/registrationCountries';
 import { candidateOfferResponse, offerMoney, offerStatusLabel } from '@/lib/offers';
 import { benefitLabels, benefitsText, offerBenefits } from '@/lib/benefits';
+import { candidateCanUndoOffer, offerUndoLabels } from '@/lib/offerUndo';
 import { offerStatusTone } from '@/lib/status-tone';
 import { dateLocale, portalUi } from '@/lib/portal-ui-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
@@ -849,6 +850,20 @@ export default function CandidateDashboard() {
       .order('created_at', { ascending: false });
 
     if (offers) setJobOffers(offers);
+  };
+
+  // Within 48 hours and before the work permit application (lib/offerUndo.ts; enforced by undo_offer_response).
+  const handleUndoOffer = async (offerId: string) => {
+    if (staffView) return;
+    const l = offerUndoLabels[currentLang] || offerUndoLabels.en;
+    if (!window.confirm(l.confirm)) return;
+    const { error } = await supabase.rpc('undo_offer_response', { p_offer_id: offerId });
+    if (error) {
+      alert(`${l.failed} ${error.message}`);
+      return;
+    }
+    setJobOffers(jobOffers.map(o => o.id === offerId ? { ...o, status: 'pending', responded_at: null } : o));
+    alert(l.done);
   };
 
   const handleUpdateOfferStatus = async (offerId: string, newStatus: 'accepted' | 'rejected') => {
@@ -1922,6 +1937,11 @@ export default function CandidateDashboard() {
                       <div className="text-xs text-slate-700">{offerUi.offerTerms}: {offer.terms_details}</div>
                     ) : null}
                     <div className="text-xs font-bold text-foreground">{offerUi.status}: <span className={`inline-flex rounded-lg px-2 py-0.5 ${offerStatusTone(offer.status)}`}>{statusLabel}</span></div>
+                    {!staffView && candidateCanUndoOffer(offer, candidate?.official_process_status) ? (
+                      <button type="button" onClick={() => handleUndoOffer(offer.id)} className="mt-1 px-3 py-1.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 text-xs font-bold hover:bg-amber-100 cursor-pointer">
+                        ↩️ {offerUndoLabels[currentLang].button}
+                      </button>
+                    ) : null}
                   </div>
                   <button
                     type="button"
