@@ -129,3 +129,20 @@ test('staff export headings come from the shared labels in five languages', () =
     }
   }
 });
+
+test('print window waits for the letterhead logo before printing', () => {
+  let printed = 0;
+  const handlers: Record<string, () => void> = {};
+  const img = { complete: false, addEventListener: (type: string, fn: () => void) => { handlers[type] = fn; } };
+  const popup = {
+    opener: {},
+    document: { open() {}, write() {}, close() {}, images: [img] },
+    addEventListener() {},
+    focus() {},
+    print() { printed += 1; },
+  };
+  assert.equal(printHtmlInNewWindow('<img src="/logo.png">', () => popup as unknown as Window), true);
+  assert.equal(printed, 0, 'not before the logo loads');
+  handlers.load();
+  assert.equal(printed, 1, 'prints once the logo has loaded');
+});

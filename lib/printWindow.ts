@@ -10,6 +10,9 @@
  * is written into the window: the close-on-afterprint listener is attached
  * from here.
  *
+ * Printing starts once the page's images (the letterhead logo) have loaded,
+ * or after 2 seconds at most.
+ *
  * The window closes itself once the print dialog is finished or cancelled
  * ("afterprint"). Its title is the list name and date (set by the caller), so
  * that is what the dialog and a saved PDF show.
@@ -30,7 +33,25 @@ export function printHtmlInNewWindow(html: string, open: OpenWindow = (url, targ
   popup.document.write(html);
   popup.document.close();
   popup.addEventListener('afterprint', () => popup.close(), { once: true });
-  popup.focus();
-  popup.print();
+  // Wait for images (the letterhead logo) so they are on the printout; give up after 2 s.
+  let printed = false;
+  const go = () => {
+    if (printed) return;
+    printed = true;
+    popup.focus();
+    popup.print();
+  };
+  const pending = Array.from(popup.document.images || []).filter((img) => !img.complete);
+  if (!pending.length) {
+    go();
+  } else {
+    let left = pending.length;
+    const one = () => { left -= 1; if (left <= 0) go(); };
+    for (const img of pending) {
+      img.addEventListener('load', one, { once: true });
+      img.addEventListener('error', one, { once: true });
+    }
+    setTimeout(go, 2000);
+  }
   return true;
 }
