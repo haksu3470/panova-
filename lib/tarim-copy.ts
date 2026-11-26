@@ -17,7 +17,7 @@ export type TarimCopy = {
   bangladesh: { title: string; lead: string; captions: Record<string, string> };
   livestock: { title: string; lead: string; cards: { title: string; text: string }[] };
   models: { title: string; lead: string; cards: { title: string; text: string }[] };
-  team: { title: string; people: { name: string; role: string; text: string }[] };
+  team: { title: string; lead: string; pillars: { title: string; text: string }[]; closing: string };
   contact: {
     title: string; lead: string; product: string; productPh: string; quantity: string; quantityPh: string;
     season: string; seasonPh: string; name: string; email: string; phone: string; notes: string;
@@ -85,7 +85,7 @@ const tr: TarimCopy = {
   },
   bangladesh: {
     title: 'Bangladeş deneyimi',
-    lead: 'Ortağımız Mehmet Çitil, Bangladeş\'e makineli tarımı götüren ilk ekiptendi: yerel çiftçilere makine kullanmayı, tohumdan fide üretmeyi ve ekimi öğrettik.',
+    lead: 'Ekibimiz, Bangladeş\'e makineli tarımı götüren ilk ekiplerdendi: yerel çiftçilere makine kullanmayı, tohumdan fide üretmeyi ve ekimi öğrettik.',
     captions: {
       'bangladesh-egitim': 'Yerel çiftçilerle fide eğitimi',
       'bangladesh-sera-fide': 'Serada fide üretimi',
@@ -113,10 +113,14 @@ const tr: TarimCopy = {
   },
   team: {
     title: 'Biz kimiz?',
-    people: [
-      { name: 'Hüseyin Aksu', role: 'Kurucu ortak · Mühendis', text: 'Hakon Mühendislik\'te mikrodenetleyicili ürünlerin donanımını ve yazılımını tasarladı. Sulama ve otomasyon altyapısı bu mühendislik bakışıyla kuruldu.' },
-      { name: 'Mehmet Çitil', role: 'Kurucu ortak · Saha', text: 'Uzun yıllar yardım kuruluşlarında çalıştı; Bangladeş\'te makineli tarımı başlattı, Somali\'de bir hastane projesini arsadan anahtar teslimine yürüttü.' },
+    lead: 'Mühendislik geçmişi olan bir ekiple, yıllarını sahada ve insani yardım projelerinde geçirmiş bir ekibin ortak çatısıyız. Farklı yollardan gelip Makedonya\'da buluştuk; ortak noktamız, işi yerinde ve baştan sona kendimiz kurmak.',
+    pillars: [
+      { title: 'Mühendislik bakışı', text: 'Elektronik ve otomasyon sistemleri tasarlayıp üretmiş bir mühendislik geçmişinden geliyoruz. Sulama, havuz ve otomasyon altyapımızı bu titizlikle, ölçerek ve test ederek kurduk.' },
+      { title: 'Sahada tecrübe', text: 'Bangladeş\'te makineli tarımı ilk başlatan ekiplerden biriyiz; Afrika\'da bir hastane projesini arsa alımından anahtar teslimine kadar yürüttük. Zor koşullarda iş kurmayı ve ekibi yönetmeyi biliyoruz.' },
+      { title: 'İnsana yatırım', text: 'Eğitim alanında yıllara dayanan bir geçmişimiz var. Çalıştığımız her yerde yerel ekipleri eğitiyor, bilgiyi bırakıyor ve onlarla birlikte büyüyoruz.' },
+      { title: 'Açık iletişim', text: 'Ne yapabileceğimizi ve neyin eksik olduğunu açıkça söyleriz. 2025\'te pazarsız üretimin bedelini ödedik; bu yüzden bugün önce alıcıyı ve taahhüdü netleştiriyoruz.' },
     ],
+    closing: 'Kazancımızın bir kısmını, ihtiyaç sahiplerine yönelik sosyal projelere ayırıyoruz.',
   },
   contact: {
     title: 'Teklif isteyin',
@@ -191,7 +195,7 @@ const en: TarimCopy = {
   },
   bangladesh: {
     title: 'Experience in Bangladesh',
-    lead: 'Our partner Mehmet Çitil was part of the first team to bring mechanised farming to Bangladesh: we taught local farmers to use machinery, raise seedlings from seed and plant them.',
+    lead: 'Our team was among the first to bring mechanised farming to Bangladesh: we taught local farmers to use machinery, raise seedlings from seed and plant them.',
     captions: {
       'bangladesh-egitim': 'Seedling training with local farmers',
       'bangladesh-sera-fide': 'Seedlings in the greenhouse',
@@ -219,10 +223,14 @@ const en: TarimCopy = {
   },
   team: {
     title: 'Who we are',
-    people: [
-      { name: 'Hüseyin Aksu', role: 'Co-founder · Engineer', text: 'Designed the hardware and software of microcontroller products at Hakon Engineering. The irrigation and automation set-up was built with that engineering approach.' },
-      { name: 'Mehmet Çitil', role: 'Co-founder · Field operations', text: 'Worked for many years with aid organisations; started mechanised farming in Bangladesh and ran a hospital project in Somalia from land purchase to handover.' },
+    lead: 'We bring together an engineering team and a team that has spent years in the field and on humanitarian projects. We came by different roads and met in North Macedonia; what we share is building the work ourselves, on site, from start to finish.',
+    pillars: [
+      { title: 'An engineer\'s eye', text: 'Our background is in designing and building electronics and automation systems. We set up our irrigation, reservoir and automation with the same care: measured and tested.' },
+      { title: 'Field experience', text: 'We were among the first teams to start mechanised farming in Bangladesh, and we ran a hospital project in Africa from land purchase to handover. We know how to build and lead a team in hard conditions.' },
+      { title: 'Investing in people', text: 'We have a long background in education. Wherever we work we train local teams, leave the know-how behind and grow together with them.' },
+      { title: 'Straight talk', text: 'We say plainly what we can do and what is missing. In 2025 we paid the price of growing without a market; that is why today we secure the buyer and the commitment first.' },
     ],
+    closing: 'Part of what we earn goes to social projects for people in need.',
   },
   contact: {
     title: 'Request a quote',
@@ -297,7 +305,7 @@ const mk: TarimCopy = {
   },
   bangladesh: {
     title: 'Искуство во Бангладеш',
-    lead: 'Нашиот партнер Мехмет Читил беше дел од првиот тим што донесе механизирано земјоделство во Бангладеш: ги обучивме локалните земјоделци да користат машини, да произведуваат расад од семе и да садат.',
+    lead: 'Нашиот тим беше меѓу првите што донесоа механизирано земјоделство во Бангладеш: ги обучивме локалните земјоделци да користат машини, да произведуваат расад од семе и да садат.',
     captions: {
       'bangladesh-egitim': 'Обука за расад со локални земјоделци',
       'bangladesh-sera-fide': 'Расад во пластеник',
@@ -325,10 +333,14 @@ const mk: TarimCopy = {
   },
   team: {
     title: 'Кои сме ние',
-    people: [
-      { name: 'Хусеин Аксу', role: 'Ко-основач · Инженер', text: 'Во Hakon Engineering ги дизајнираше хардверот и софтверот на производи со микроконтролери. Системот за наводнување и автоматизација е изграден со тој инженерски пристап.' },
-      { name: 'Мехмет Читил', role: 'Ко-основач · Теренски операции', text: 'Долги години работел со хуманитарни организации; започна механизирано земјоделство во Бангладеш и водеше проект за болница во Сомалија од купување на земјиштето до предавање.' },
+    lead: 'Обединуваме инженерски тим и тим што долги години работел на терен и на хуманитарни проекти. Дојдовме од различни патишта и се сретнавме во Македонија; заедничко ни е тоа што работата ја градиме сами, на лице место, од почеток до крај.',
+    pillars: [
+      { title: 'Инженерски пристап', text: 'Доаѓаме од инженерство — дизајн и производство на електронски и автоматизирани системи. Наводнувањето, базенот и автоматизацијата ги поставивме со истата прецизност: измерено и тестирано.' },
+      { title: 'Искуство на терен', text: 'Бевме меѓу првите тимови што започнаа механизирано земјоделство во Бангладеш, а во Африка водевме проект за болница од купување на земјиштето до предавање. Знаеме да градиме и да водиме тим во тешки услови.' },
+      { title: 'Вложуваме во луѓето', text: 'Имаме долгогодишно искуство во образованието. Каде и да работиме, ги обучуваме локалните тимови, го оставаме знаењето и растеме заедно со нив.' },
+      { title: 'Отворена комуникација', text: 'Јасно кажуваме што можеме и што недостасува. Во 2025 ја плативме цената на производство без пазар; затоа денес прво ги обезбедуваме купувачот и договорот.' },
     ],
+    closing: 'Дел од заработката ја издвојуваме за социјални проекти за луѓето во потреба.',
   },
   contact: {
     title: 'Побарајте понуда',

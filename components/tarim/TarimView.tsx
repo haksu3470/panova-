@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle2, Droplets, Sprout, Users, Truck, Milk, Beef, Egg, Handshake, Landmark, PackageCheck, Send } from 'lucide-react';
+import { CheckCircle2, Droplets, Sprout, Users, Truck, Milk, Beef, Egg, Handshake, Landmark, PackageCheck, Send, Cpu, MapPinned, GraduationCap, MessageSquareText, HeartHandshake } from 'lucide-react';
 import { SiteFooter } from '@/components/home/HomeSections';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { GroupSwitcher } from '@/components/site/GroupSwitcher';
@@ -15,6 +15,7 @@ const IMG = (name: string) => `/tarim/${name}.jpg`;
 const WHY_ICONS = [Sprout, Droplets, Users, Truck];
 const LIVESTOCK_ICONS = [Milk, Beef, Egg];
 const MODEL_ICONS = [Handshake, Landmark, PackageCheck];
+const TEAM_ICONS = [Cpu, MapPinned, GraduationCap, MessageSquareText];
 const PRODUCE = ['kapya-biber-tarlasi', 'kapya-biber-hasat', 'kavun-yakin', 'kavun-kasa', 'kavun-hasat-yigini'];
 const BANGLADESH = ['bangladesh-egitim', 'bangladesh-sera-fide', 'bangladesh-ekim-makinesi', 'bangladesh-silaj-hasadi'];
 
@@ -249,15 +250,26 @@ export default function TarimView() {
       {/* Biz kimiz */}
       <section className="bg-white py-14 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-black tracking-tight sm:text-4xl">{c.team.title}</h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            {c.team.people.map((p) => (
-              <div key={p.name} className="rounded-2xl border border-slate-200 bg-stone-50 p-5">
-                <p className="text-lg font-black">{p.name}</p>
-                <p className="text-sm font-semibold text-brand">{p.role}</p>
-                <p className="mt-2 text-sm text-slate-600">{p.text}</p>
-              </div>
-            ))}
+          <div className="grid gap-8 lg:grid-cols-5">
+            <div className="lg:col-span-2">
+              <h2 className="text-2xl font-black tracking-tight sm:text-4xl">{c.team.title}</h2>
+              <p className="mt-3 text-slate-600 sm:text-lg">{c.team.lead}</p>
+              <p className="mt-5 flex items-start gap-2 rounded-2xl bg-emerald-50 p-4 text-sm font-semibold text-emerald-900">
+                <HeartHandshake aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-brand" /> {c.team.closing}
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:col-span-3">
+              {c.team.pillars.map((p, i) => {
+                const Icon = TEAM_ICONS[i];
+                return (
+                  <div key={p.title} className="rounded-2xl border border-slate-200 bg-stone-50 p-5">
+                    <Icon aria-hidden className="mb-3 h-7 w-7 text-brand" />
+                    <h3 className="font-bold">{p.title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-slate-600">{p.text}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
