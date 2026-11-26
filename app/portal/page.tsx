@@ -58,6 +58,7 @@ import { auditActionText, auditEntityLabel } from '@/lib/auditDisplay';
 import { canAssignCandidate, canUpdateRequestStatus, isPermissionError, isUpperManagementRole, overviewCardTarget, tabsForStaffRole, type OverviewCard as OverviewCardId, type StaffTab as StaffTabId } from '@/lib/staffAccess';
 import { countOpenRequests } from '@/lib/requestPipelineCounts';
 import OverviewCard from '@/components/portal/OverviewCard';
+import ProcessMetricsPanel from '@/components/portal/ProcessMetricsPanel';
 import DemoDataCard from '@/components/portal/DemoDataCard';
 import { statusErrorKey, type StatusErrorKey } from '@/lib/requestStatusChange';
 import type { CandidateStatusErrorKey } from '@/lib/candidateStatusChange';
@@ -897,6 +898,8 @@ export default function PortalPage() {
                 </div>
               );
             })()}
+
+            <ProcessMetricsPanel lang={currentLang} />
 
             {mfaMode === 'optional' ? (
               <StaffMfaPanel

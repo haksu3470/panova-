@@ -8,6 +8,7 @@ import { fill, portalUi } from '@/lib/portal-ui-copy';
 import { useSiteLanguage } from '@/lib/site-language';
 import { OFFICIAL_STEPS, staffTravelDisplay, toTravelFields } from '@/lib/employerPlacements';
 import { translations } from '@/lib/dictionary';
+import { END_REASONS, processMetricsLabels } from '@/lib/processMetrics';
 
 const STAGES = ['30', '60', '90'];
 
@@ -23,6 +24,7 @@ export default function PlacementPanel({ candidateId, onOfficialChange, refreshK
   const { currentLang } = useSiteLanguage('en');
   const ui = portalUi[currentLang];
   const t = translations[currentLang] || translations.en;
+  const pm = processMetricsLabels[currentLang] || processMetricsLabels.en;
 
   const [c, setC] = useState<any>(null);
   const [offer, setOffer] = useState<any>(null);
@@ -32,16 +34,18 @@ export default function PlacementPanel({ candidateId, onOfficialChange, refreshK
   const [msg, setMsg] = useState('');
   const emptyFu = { id: null, period_stage: '30', check_date: '', compliance_score: '', salary_compliance: true, accommodation_compliance: true, employer_feedback: '', employee_feedback: '', notes: '' };
   const [fu, setFu] = useState<any>(emptyFu);
+  const [end, setEnd] = useState({ date: '', reason: '' });
 
   const load = async () => {
     const [a, o, f] = await Promise.all([
-      supabase.from('job_candidates').select('id, full_name, is_demo, official_process_status, travel_status, flight_date, flight_number, departure_city, arrival_city, pnr_code, accommodation_details, active_employer_id, active_request_id').eq('id', candidateId).maybeSingle(),
+      supabase.from('job_candidates').select('id, full_name, is_demo, official_process_status, employment_ended_on, employment_end_reason, travel_status, flight_date, flight_number, departure_city, arrival_city, pnr_code, accommodation_details, active_employer_id, active_request_id').eq('id', candidateId).maybeSingle(),
       supabase.from('job_offers').select('*').eq('candidate_id', candidateId).order('created_at', { ascending: false }),
       supabase.from('placement_followups').select('*').eq('candidate_id', candidateId).order('period_stage'),
     ]);
     const err = a.error || o.error || f.error;
     if (err) setError(err.message);
     setC(a.data);
+    setEnd({ date: a.data?.employment_ended_on || '', reason: a.data?.employment_end_reason || '' });
     const offers = o.data || [];
     setOffer(offers.find((x: any) => x.status === 'accepted') || offers[0] || null);
     setFus(f.data || []);
@@ -113,6 +117,23 @@ export default function PlacementPanel({ candidateId, onOfficialChange, refreshK
     else {
       await writeAudit(`${ui.followupTitle} ${fu.period_stage}: ${c.full_name}`, 'placement_followup', candidateId, { stage: fu.period_stage });
       setFu(emptyFu); setMsg(ui.followupSaved);
+    }
+    await load(); setBusy(false);
+  };
+
+  // Both set or both empty (job_candidates_employment_end_check).
+  const saveEnd = async (clear: boolean) => {
+    const date = clear ? '' : end.date;
+    const reason = clear ? '' : end.reason;
+    if (!date !== !reason) return setError(pm.endNeedBoth);
+    setBusy(true); setError(''); setMsg('');
+    const { error: updateError } = await supabase.from('job_candidates')
+      .update({ employment_ended_on: date || null, employment_end_reason: reason || null, updated_at: new Date().toISOString() })
+      .eq('id', candidateId);
+    if (updateError) setError(updateError.message);
+    else {
+      await writeAudit(`${pm.endTitle}: ${c.full_name} → ${reason ? pm.reasons[reason as keyof typeof pm.reasons] : '—'}`, 'candidate', candidateId, { employment_ended_on: date || null, employment_end_reason: reason || null });
+      setMsg(pm.endSaved);
     }
     await load(); setBusy(false);
   };
@@ -211,6 +232,28 @@ export default function PlacementPanel({ candidateId, onOfficialChange, refreshK
           {fill(fu.id ? ui.updateFollowup : ui.saveFollowup, { stage: fu.period_stage })}
         </button>
       </div>
+      {(startedWork || c.employment_ended_on) && (
+        <div className={box}>
+          <h3 className="font-bold text-slate-900">🚪 {pm.endTitle}</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label className="text-xs font-bold text-slate-700 uppercase">{pm.endDate}
+              <input type="date" className={inp} value={end.date} onChange={(e) => setEnd({ ...end, date: e.target.value })} />
+            </label>
+            <label className="text-xs font-bold text-slate-700 uppercase">{pm.endReason}
+              <select className={inp} value={end.reason} onChange={(e) => setEnd({ ...end, reason: e.target.value })}>
+                <option value="">—</option>
+                {END_REASONS.map((r) => <option key={r} value={r}>{pm.reasons[r]}</option>)}
+              </select>
+            </label>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button disabled={busy} onClick={() => saveEnd(false)} className="text-xs font-bold px-4 py-2.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition shadow">{pm.endSave}</button>
+            {c.employment_ended_on && (
+              <button disabled={busy} onClick={() => saveEnd(true)} className="text-xs font-bold px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition">{pm.endClear}</button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
