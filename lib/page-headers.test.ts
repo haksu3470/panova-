@@ -60,7 +60,8 @@ test('signed-in pages pass log out; sign-in pages do not', () => {
   // same logout behaviour as before
   assert.match(source(HEADER_FILES.portal), /onLogout=\{handleLogout\}/);
   assert.match(source(HEADER_FILES.employer), /onLogout=\{handleLogout\}/);
-  assert.match(source(HEADER_FILES.candidate), /onLogout=\{handleLogout\}/);
+  // candidates log out as before; staff viewing a candidate (?as=) go back to the staff file instead
+  assert.match(source(HEADER_FILES.candidate), /onLogout=\{staffView \? backToStaffFile : handleLogout\}/);
   const staffLogout = source('./staffLogout.ts');
   assert.match(staffLogout, /await signOut\(\);\s*window\.location\.href = '\/portal';/);
 });

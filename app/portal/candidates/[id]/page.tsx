@@ -5,6 +5,7 @@ import DocumentStatusPanel from '@/components/portal/DocumentStatusPanel';
 import CandidateYouTubeEditor from '@/components/portal/CandidateYouTubeEditor';
 import InterviewOfferPanel from '@/components/portal/InterviewOfferPanel';
 import OfficialOfferForm from '@/components/portal/OfficialOfferForm';
+import { candidatePortalViewHref, staffViewLabels } from '@/lib/staffView';
 import PlacementPanel from '@/components/portal/PlacementPanel';
 import OfficialProcessBadge from '@/components/portal/OfficialProcessBadge';
 import CandidateStatusControl from '@/components/portal/CandidateStatusControl';
@@ -400,6 +401,9 @@ function CandidateDetailPageInner() {
                 <>
                   <Link href="/portal" className={headerButtonClass.light}>
                     ← {t.returnToPortal}
+                  </Link>
+                  <Link href={candidatePortalViewHref(candidateId)} className={headerButtonClass.light}>
+                    👁️ {staffViewLabels[currentLang].open}
                   </Link>
                   <button onClick={handleSaveDetail} disabled={saving} className={headerPrimaryClass}>
                     <Save className="w-4 h-4" /> {saving ? (t.saving) : (t.saveChanges)}

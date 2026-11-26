@@ -8,7 +8,8 @@ import { SupportRequestList } from '@/components/candidate/SupportRequestList';
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { linkMyCandidate, signOut, type CandidateLinkResult } from '@/lib/auth';
+import { isStaff, linkMyCandidate, signOut, type CandidateLinkResult } from '@/lib/auth';
+import { staffViewCandidateId, staffViewLabels } from '@/lib/staffView';
 import {
   CandidateProfileError,
   assertCandidatePersisted,
@@ -509,6 +510,9 @@ export default function CandidateDashboard() {
     } catch (e) {}
   }, [authenticated]);
 
+  // Staff opened /candidate?as=<id>: read only, never linked or signed out here.
+  const [staffView, setStaffView] = useState(false);
+
   const applyCandidate = (data: any) => {
     setCandidate(data);
     setAuthenticated(true);
@@ -613,7 +617,20 @@ export default function CandidateDashboard() {
           setLoading(false);
           return;
         }
-        if (gate.status === 'ready' && !profileDirty.current) await handleLinkResult(await loadLinkedCandidate(), false);
+        if (gate.status === 'ready' && !profileDirty.current) {
+          const viewAs = staffViewCandidateId(window.location.search);
+          if (viewAs && await isStaff()) {
+            // Staff never go through candidate account linking.
+            const { data: viewed } = await supabase.from('job_candidates').select('*').eq('id', viewAs).maybeSingle();
+            if (!alive) return;
+            if (viewed) {
+              setStaffView(true);
+              applyCandidate(viewed);
+            }
+          } else {
+            await handleLinkResult(await loadLinkedCandidate(), false);
+          }
+        }
         setLoading(false);
       }, 0);
     });
@@ -773,6 +790,10 @@ export default function CandidateDashboard() {
     setAuthMode('login');
   };
 
+  const backToStaffFile = () => {
+    window.location.href = candidate?.id ? `/portal/candidates/${candidate.id}` : '/portal';
+  };
+
   const handleLogout = async () => {
     profileDirty.current = false;
     await signOut();
@@ -831,6 +852,7 @@ export default function CandidateDashboard() {
   };
 
   const handleUpdateOfferStatus = async (offerId: string, newStatus: 'accepted' | 'rejected') => {
+    if (staffView) return;
     const ui = portalUi[currentLang];
     const { data, error } = await supabase
       .from('job_offers')
@@ -1507,8 +1529,8 @@ export default function CandidateDashboard() {
               lang={currentLang}
               onLanguageChange={changeCandidateLanguage}
               homeLabel={t.returnHome}
-              logoutLabel={t.logout}
-              onLogout={handleLogout}
+              logoutLabel={staffView ? portalUi[currentLang].returnToAdmin : t.logout}
+              onLogout={staffView ? backToStaffFile : handleLogout}
             />
           }
         />
@@ -1535,6 +1557,14 @@ export default function CandidateDashboard() {
           </Link>
         </div>
 
+        {staffView ? (
+          <p role="status" className="text-xs font-bold text-amber-900 bg-amber-50 border border-amber-300 rounded-xl px-3 py-2">
+            👁️ {staffViewLabels[currentLang].banner}
+          </p>
+        ) : null}
+
+        {/* Read only for staff: every control inside is disabled, the tabs above still work. */}
+        <fieldset disabled={staffView} className="min-w-0 m-0 p-0 border-0 space-y-4 sm:space-y-6">
         {/* Profil Sekmesi */}
         {activeTab === 'profile' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-6">
@@ -1938,6 +1968,7 @@ export default function CandidateDashboard() {
             />
           </div>
         )}
+        </fieldset>
 
       </div>
 

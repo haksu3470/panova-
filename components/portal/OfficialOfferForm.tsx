@@ -10,6 +10,7 @@ import { offerTermsPayload } from '@/lib/offers';
 import { DEFAULT_SALARY_CURRENCY, SALARY_CURRENCIES, SALARY_CURRENCY_SYMBOL, type SalaryCurrency } from '@/lib/money';
 import { BENEFIT_KEYS, benefitLabels, type BenefitKey } from '@/lib/benefits';
 import { isPermissionError } from '@/lib/staffAccess';
+import { normalizePositionTitle } from '@/lib/professions';
 
 const copy: Record<Language, { visible: string; visibleHint: string; listHint: string }> = {
   tr: {
@@ -97,7 +98,8 @@ export default function OfficialOfferForm({ lang, candidateId, candidateIsDemo, 
       employer_name: linked?.company_name || employerName.trim(),
       employer_id: linked?.id ?? null,
       employer_visible: linked ? visible : true,
-      position_title: position.trim() || defaultPosition,
+      // Catalog key when the text is a known profession (shown in each viewer's language), else the text as typed.
+      position_title: normalizePositionTitle(position) || normalizePositionTitle(defaultPosition) || position.trim(),
       monthly_net_salary: amount,
       // Not tied to a request: the currency is the one picked here.
       offer_terms: offerTermsPayload(currency, benefits.length ? { benefits } : null),
