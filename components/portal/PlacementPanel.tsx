@@ -35,6 +35,8 @@ export default function PlacementPanel({ candidateId, onOfficialChange, refreshK
   const emptyFu = { id: null, period_stage: '30', check_date: '', compliance_score: '', salary_compliance: true, accommodation_compliance: true, employer_feedback: '', employee_feedback: '', notes: '' };
   const [fu, setFu] = useState<any>(emptyFu);
   const [end, setEnd] = useState({ date: '', reason: '' });
+  // Shown inside the box: the panel's own message line sits at the top, out of view.
+  const [endNote, setEndNote] = useState<{ ok: boolean; text: string } | null>(null);
 
   const load = async () => {
     const [a, o, f] = await Promise.all([
@@ -125,15 +127,15 @@ export default function PlacementPanel({ candidateId, onOfficialChange, refreshK
   const saveEnd = async (clear: boolean) => {
     const date = clear ? '' : end.date;
     const reason = clear ? '' : end.reason;
-    if (!date !== !reason) return setError(pm.endNeedBoth);
-    setBusy(true); setError(''); setMsg('');
+    if (!date !== !reason) return setEndNote({ ok: false, text: pm.endNeedBoth });
+    setBusy(true); setError(''); setMsg(''); setEndNote(null);
     const { error: updateError } = await supabase.from('job_candidates')
       .update({ employment_ended_on: date || null, employment_end_reason: reason || null, updated_at: new Date().toISOString() })
       .eq('id', candidateId);
-    if (updateError) setError(updateError.message);
+    if (updateError) setEndNote({ ok: false, text: updateError.message });
     else {
       await writeAudit(`${pm.endTitle}: ${c.full_name} → ${reason ? pm.reasons[reason as keyof typeof pm.reasons] : '—'}`, 'candidate', candidateId, { employment_ended_on: date || null, employment_end_reason: reason || null });
-      setMsg(pm.endSaved);
+      setEndNote({ ok: true, text: pm.endSaved });
     }
     await load(); setBusy(false);
   };
@@ -252,6 +254,7 @@ export default function PlacementPanel({ candidateId, onOfficialChange, refreshK
               <button disabled={busy} onClick={() => saveEnd(true)} className="text-xs font-bold px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition">{pm.endClear}</button>
             )}
           </div>
+          {endNote && <p role="status" className={`text-xs font-bold ${endNote.ok ? 'text-emerald-700' : 'text-red-600'}`}>{endNote.text}</p>}
         </div>
       )}
     </div>

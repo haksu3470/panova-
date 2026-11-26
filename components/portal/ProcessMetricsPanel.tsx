@@ -7,10 +7,19 @@ import type { Language } from '@/lib/dictionary';
 import { METRIC_KEYS, formatMetric, processMetricsLabels, type ProcessMetricRow } from '@/lib/processMetrics';
 import OverviewCard from './OverviewCard';
 
+const DEMO_KEY = 'panova.processMetrics.includeDemo';
+
 /** Staff overview: the five numbers from public.staff_process_metrics. */
 export default function ProcessMetricsPanel({ lang }: { lang: Language }) {
   const l = processMetricsLabels[lang];
-  const [includeDemo, setIncludeDemo] = useState(false);
+  // Remembered per browser: the panel remounts each time the overview tab opens.
+  const [includeDemo, setIncludeDemoState] = useState(() => {
+    try { return typeof window !== 'undefined' && window.localStorage.getItem(DEMO_KEY) === '1'; } catch { return false; }
+  });
+  const setIncludeDemo = (on: boolean) => {
+    setIncludeDemoState(on);
+    try { window.localStorage.setItem(DEMO_KEY, on ? '1' : '0'); } catch { /* storage blocked: keep in memory only */ }
+  };
   const [rows, setRows] = useState<ProcessMetricRow[]>([]);
   const [error, setError] = useState('');
 
