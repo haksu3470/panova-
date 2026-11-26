@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Users, Globe2, Sprout, HardHat, Building2, CheckCircle2, Send, User } from 'lucide-react';
+import { Users, Globe2, Sprout, HardHat, Building2, CheckCircle2, Send, User, HeartHandshake, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { StatsBar, AudienceSections, TrustSections, CompanyAbout, SiteFooter } from '@/components/home/HomeSections';
 import { HeroVisual } from '@/components/home/HeroVisual';
@@ -9,7 +9,7 @@ import { LoginMenu } from '@/components/home/LoginMenu';
 import { useHomeMotion } from '@/components/home/HomeMotion';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
 import { GroupSwitcher } from '@/components/site/GroupSwitcher';
-import { translations } from '@/lib/dictionary';
+import { translations, type Language } from '@/lib/dictionary';
 import { fill, homeCopy } from '@/lib/home-copy';
 import { homeExtraCopy } from '@/lib/home-extra-copy';
 import { useSiteLanguage } from '@/lib/site-language';
@@ -17,10 +17,27 @@ import { company as registry } from '@/lib/company';
 import KvkkConsent from '@/components/site/KvkkConsent';
 import { releaseCopy } from '@/lib/release-copy';
 
+const GROUP_UNITS: { key: 'hr' | 'agriculture' | 'construction' | 'trade' | 'social'; href: string | null; Icon: LucideIcon }[] = [
+  { key: 'hr', href: '/', Icon: Users },
+  { key: 'agriculture', href: '/tarim', Icon: Sprout },
+  { key: 'construction', href: null, Icon: HardHat },
+  { key: 'trade', href: null, Icon: Globe2 },
+  { key: 'social', href: null, Icon: HeartHandshake },
+];
+
+const GROUP_COPY: Record<Language, { title: string; lead: string; here: string; visit: string; soon: string; social: { name: string; tagline: string } }> = {
+  tr: { title: 'Panova Group birimleri', lead: 'Her birimin kendi sayfası var. Hazır olanlara buradan geçebilirsiniz.', here: 'Bu sayfa', visit: 'Sayfaya git', soon: 'Yakında', social: { name: 'Panova Sosyal Projeler', tagline: 'İnsani yardım ve kendini çeviren sürdürülebilir projeler' } },
+  en: { title: 'Panova Group units', lead: 'Each unit has its own page. Go to the ones that are ready from here.', here: 'This page', visit: 'Visit page', soon: 'Coming soon', social: { name: 'Panova Social Projects', tagline: 'Humanitarian aid and self-sustaining projects' } },
+  mk: { title: 'Единици на Panova Group', lead: 'Секоја единица има своја страница. До подготвените можете да одите од тука.', here: 'Оваа страница', visit: 'Отвори страница', soon: 'Наскоро', social: { name: 'Panova Социјални проекти', tagline: 'Хуманитарна помош и одржливи проекти' } },
+  sq: { title: 'Njësitë e Panova Group', lead: 'Çdo njësi ka faqen e vet. Shkoni te ato që janë gati nga këtu.', here: 'Kjo faqe', visit: 'Hap faqen', soon: 'Së shpejti', social: { name: 'Panova Projekte Sociale', tagline: 'Ndihmë humanitare dhe projekte të qëndrueshme' } },
+  ar: { title: 'وحدات مجموعة بانوفا', lead: 'لكل وحدة صفحتها الخاصة. انتقل من هنا إلى الوحدات الجاهزة.', here: 'هذه الصفحة', visit: 'زيارة الصفحة', soon: 'قريبًا', social: { name: 'بانوفا للمشاريع الاجتماعية', tagline: 'مساعدات إنسانية ومشاريع مستدامة' } },
+};
+
 export default function HomePage() {
   const { currentLang, changeLanguage, isRtl } = useSiteLanguage();
 
-  const [selectedCompanyKey, setSelectedCompanyKey] = useState<'hr' | 'trade' | 'agriculture' | 'construction'>('hr');
+  // Ana sayfa HR biriminin sayfası; diğer birimler kendi sayfalarında (üst bant ve grup kartları).
+  const selectedCompanyKey = 'hr' as const;
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [kvkkAccepted, setKvkkAccepted] = useState(false);
@@ -36,10 +53,11 @@ export default function HomePage() {
   const company = t.companies[selectedCompanyKey];
   const h = homeCopy[currentLang];
   const x = homeExtraCopy[currentLang];
+  const u = GROUP_COPY[currentLang];
   // Office countries (company.presence) in the page language, for the hero drawing.
   const heroPlaces = registry.presence.map((place, i) => ({ city: place.city, country: h.about.countries[i] }));
   const rootRef = useRef<HTMLDivElement>(null);
-  useHomeMotion(rootRef, [currentLang, selectedCompanyKey]);
+  useHomeMotion(rootRef, [currentLang]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,14 +103,6 @@ export default function HomePage() {
 
           <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0">
             <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
-            {selectedCompanyKey !== 'hr' ? (
-              <a
-                href="#contact-form"
-                className="hidden sm:inline-flex items-center gap-1.5 bg-slate-900 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 transition shadow-sm cursor-pointer"
-              >
-                <Send aria-hidden className="w-3.5 h-3.5" /> {h.ctaQuote}
-              </a>
-            ) : null}
             <LoginMenu labels={x.login} />
           </div>
         </div>
@@ -149,71 +159,39 @@ export default function HomePage() {
       <main id="grup" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           
-          {/* Company Selector Cards (Mobilde Tek Sütun, Tablet/Masaüstünde İki Sütun) */}
-          <div className="lg:col-span-7 space-y-6">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">{t.selectedCompany}</h2>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => setSelectedCompanyKey('hr')}
-                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition cursor-pointer ${selectedCompanyKey === 'hr' ? 'border-[#2e7d32] bg-emerald-50/50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}`}
-              >
-                <Users className="w-8 h-8 text-brand mb-3" />
-                <div className="font-bold text-slate-900 text-base">{t.companies.hr.name}</div>
-                <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{t.companies.hr.tagline}</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSelectedCompanyKey('trade')}
-                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition cursor-pointer ${selectedCompanyKey === 'trade' ? 'border-[#2e7d32] bg-emerald-50/50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}`}
-              >
-                <Globe2 className="w-8 h-8 text-blue-600 mb-3" />
-                <div className="font-bold text-slate-900 text-base">{t.companies.trade.name}</div>
-                <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{t.companies.trade.tagline}</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSelectedCompanyKey('agriculture')}
-                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition cursor-pointer ${selectedCompanyKey === 'agriculture' ? 'border-[#2e7d32] bg-emerald-50/50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}`}
-              >
-                <Sprout className="w-8 h-8 text-amber-600 mb-3" />
-                <div className="font-bold text-slate-900 text-base">{t.companies.agriculture.name}</div>
-                <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{t.companies.agriculture.tagline}</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSelectedCompanyKey('construction')}
-                className={`p-5 rounded-2xl text-left rtl:text-right border-2 transition cursor-pointer ${selectedCompanyKey === 'construction' ? 'border-[#2e7d32] bg-emerald-50/50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}`}
-              >
-                <HardHat className="w-8 h-8 text-orange-600 mb-3" />
-                <div className="font-bold text-slate-900 text-base">{t.companies.construction.name}</div>
-                <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{t.companies.construction.tagline}</div>
-              </button>
-            </div>
-
-            {/* Scope Box */}
-            <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-sm mt-8">
-              <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 mb-2">{company.name}</h3>
-              <p className="text-slate-600 text-xs sm:text-sm mb-6">{company.desc}</p>
-
-              {selectedCompanyKey === 'agriculture' ? (
-                <Link href="/tarim" className="mb-6 inline-flex items-center gap-2 rounded-xl bg-brand-solid px-4 py-2.5 text-sm font-bold text-white hover:bg-brand">
-                  <Sprout aria-hidden className="w-4 h-4" /> {t.companies.agriculture.name} →
-                </Link>
-              ) : null}
-              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">{t.scopeTitle}</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {company.services?.map((srv: string, idx: number) => (
-                  <div key={idx} className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <CheckCircle2 className="w-4 h-4 text-brand flex-shrink-0" />
-                    <span>{srv}</span>
-                  </div>
-                ))}
-              </div>
+          {/* Grup birimleri: her biri kendi sayfasına gider; hazır olmayanlar "yakında" */}
+          <div className="lg:col-span-7">
+            <span className="font-bold text-xs uppercase tracking-widest text-brand">{h.nav.group}</span>
+            <h2 className="text-2xl sm:text-3xl font-black mt-2 tracking-tight text-slate-900">{u.title}</h2>
+            <p className="text-sm sm:text-base mt-2 text-slate-600">{u.lead}</p>
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {GROUP_UNITS.map(({ key, href, Icon }, i) => {
+                const unit = key === 'social' ? u.social : t.companies[key];
+                const here = key === 'hr';
+                const ready = href !== null;
+                const body = (
+                  <>
+                    <div className="flex items-start justify-between gap-3">
+                      <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${ready ? 'bg-emerald-50 ring-1 ring-emerald-100' : 'bg-slate-100'}`}>
+                        <Icon aria-hidden className={`h-6 w-6 ${ready ? 'text-brand' : 'text-slate-400'}`} />
+                      </span>
+                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${here ? 'bg-emerald-100 text-emerald-800' : ready ? 'bg-slate-900 text-white' : 'border border-dashed border-slate-300 text-slate-500'}`}>
+                        {here ? u.here : ready ? u.visit : u.soon}
+                      </span>
+                    </div>
+                    <h3 className={`mt-4 font-extrabold text-base ${ready ? 'text-slate-900' : 'text-slate-500'}`}>{unit.name}</h3>
+                    <p className={`mt-1 text-sm leading-relaxed ${ready ? 'text-slate-600' : 'text-slate-400'}`}>{unit.tagline}</p>
+                  </>
+                );
+                const cls = `home-reveal block h-full rounded-2xl border p-5 text-start ${i === GROUP_UNITS.length - 1 ? 'sm:col-span-2' : ''}`;
+                return here ? (
+                  <a key={key} href="#isverenler" className={`${cls} border-emerald-300 bg-emerald-50/40`}>{body}</a>
+                ) : ready ? (
+                  <Link key={key} href={href} className={`${cls} border-slate-200 bg-white transition hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0`}>{body}</Link>
+                ) : (
+                  <div key={key} aria-disabled="true" className={`${cls} border-dashed border-slate-300 bg-slate-50/60`}>{body}</div>
+                );
+              })}
             </div>
           </div>
 
