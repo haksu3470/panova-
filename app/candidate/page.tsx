@@ -48,6 +48,7 @@ import { homeCopy } from '@/lib/home-copy';
 import { canonicalPassport, canonicalPhone } from '@/lib/loginIdentifier';
 import { canonicalNationality } from '@/lib/registrationCountries';
 import { candidateOfferResponse, offerMoney, offerStatusLabel } from '@/lib/offers';
+import { benefitLabels, benefitsText, offerBenefits } from '@/lib/benefits';
 import { offerStatusTone } from '@/lib/status-tone';
 import { dateLocale, portalUi } from '@/lib/portal-ui-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
@@ -1868,6 +1869,7 @@ export default function CandidateDashboard() {
                 const offerUi = portalUi[currentLang];
                 const money = offerMoney(offer, dateLocale[currentLang]);
                 const statusLabel = offerStatusLabel(offer.status, offerUi.offerStatus);
+                const perks = benefitsText(offerBenefits(offer), currentLang);
                 return (
                 <div key={offer.id} className="p-4 bg-white rounded-2xl border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-sm text-slate-900">
                   <div className="space-y-1 min-w-0">
@@ -1876,6 +1878,9 @@ export default function CandidateDashboard() {
                       {offerUi.offerSalary}: {money ? `${money} ${offerUi.offerNetPerMonth}` : offerUi.salaryNotSet}
                       {offer.start_date ? ` · ${offerUi.offerStart}: ${String(offer.start_date).slice(0, 10)}` : ''}
                     </div>
+                    {perks ? (
+                      <div className="text-xs text-slate-700">{benefitLabels[currentLang].title}: {perks}</div>
+                    ) : null}
                     {offer.terms_details ? (
                       <div className="text-xs text-slate-700">{offerUi.offerTerms}: {offer.terms_details}</div>
                     ) : null}
@@ -1885,7 +1890,8 @@ export default function CandidateDashboard() {
                     type="button"
                     onClick={() => setPrintTarget({
                       kind: 'offer',
-                      offer: offerPrint(offer, {
+                      // The printed terms carry the ticked benefits too.
+                      offer: offerPrint({ ...offer, terms_details: [perks, offer.terms_details].filter(Boolean).join(' · ') }, {
                         position: () => localizeCatalogTitle(offer.position_title, currentLang) || '',
                         salary: () => (money ? `${money} ${offerUi.offerNetPerMonth}` : offerUi.salaryNotSet),
                         status: () => statusLabel,

@@ -9,6 +9,7 @@ import { useSiteLanguage } from '@/lib/site-language';
 import { OFFICIAL_STEPS, staffTravelDisplay, toTravelFields } from '@/lib/employerPlacements';
 import { translations } from '@/lib/dictionary';
 import { END_REASONS, processMetricsLabels } from '@/lib/processMetrics';
+import { benefitLabels, benefitsText, offerBenefits } from '@/lib/benefits';
 
 const STAGES = ['30', '60', '90'];
 
@@ -186,6 +187,7 @@ export default function PlacementPanel({ candidateId, onOfficialChange, refreshK
           <Info k="PNR" v={c.pnr_code || '—'} />
           <Info k={ui.accommodation} v={c.accommodation_details || '—'} />
           <Info k={ui.employerStart} v={offer ? `${offer.employer_name}${offer.start_date ? ' · ' + offer.start_date : ''} (${offer.status})` : ui.noOffer} />
+          {offer && offerBenefits(offer).length > 0 && <Info k={benefitLabels[currentLang].title} v={benefitsText(offerBenefits(offer), currentLang)} />}
         </div>
         <p className="text-[11px] text-slate-600 font-medium">{ui.editFlightHint}</p>
         {startedWork ? (

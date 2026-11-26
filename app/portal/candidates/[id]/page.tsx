@@ -4,8 +4,7 @@ import AuthGuard from '@/components/auth/AuthGuard';
 import DocumentStatusPanel from '@/components/portal/DocumentStatusPanel';
 import CandidateYouTubeEditor from '@/components/portal/CandidateYouTubeEditor';
 import InterviewOfferPanel from '@/components/portal/InterviewOfferPanel';
-import { offerTermsPayload } from '@/lib/offers';
-import { DEFAULT_SALARY_CURRENCY, SALARY_CURRENCY_SYMBOL } from '@/lib/money';
+import OfficialOfferForm from '@/components/portal/OfficialOfferForm';
 import PlacementPanel from '@/components/portal/PlacementPanel';
 import OfficialProcessBadge from '@/components/portal/OfficialProcessBadge';
 import CandidateStatusControl from '@/components/portal/CandidateStatusControl';
@@ -23,7 +22,7 @@ import CandidateDocumentsPanel, { type DocumentPreviewRequest } from '@/componen
 import { useCandidateDocuments } from '@/components/portal/useCandidateDocuments';
 import { releaseCopy } from '@/lib/release-copy';
 import { canPickTravelStatus, hasFlightInfo, staffTravelDisplay, toTravelFields } from '@/lib/employerPlacements';
-import { User, Save, Camera, Mail, Phone, KeyRound, FileText, Video, Bell, Send, PlaneTakeoff, FileSignature, ShieldAlert } from 'lucide-react';
+import { User, Save, Camera, Mail, Phone, KeyRound, FileText, Video, Bell, Send, PlaneTakeoff, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { Language, translations } from '@/lib/dictionary';
 import { portalUi } from '@/lib/portal-ui-copy';
@@ -97,10 +96,6 @@ function CandidateDetailPageInner() {
   const [closureReason, setClosureReason] = useState('');
   const [isClosed, setIsClosed] = useState(false);
 
-  const [offerEmployer, setOfferEmployer] = useState('');
-  const [offerSalary, setOfferSalary] = useState('');
-  const [offerDate, setOfferDate] = useState('');
-  const [offerTerms, setOfferTerms] = useState('');
 
   // One document list (candidate_documents) for the body section and the
   // summary card on the right.
@@ -295,38 +290,6 @@ function CandidateDetailPageInner() {
           ? t.youtubeVideoInvalid
           : error.message;
       alert(`${ui.errorPrefix} ${detail}`);
-    }
-  };
-
-  const handleSendJobOffer = async () => {
-    if (!offerEmployer || !offerSalary) {
-      alert(t.fillEmployerAndSalary);
-      return;
-    }
-
-    const { error } = await supabase.from('job_offers').insert([
-      {
-        candidate_id: candidateId,
-        employer_name: offerEmployer,
-        position_title: candidateProfessionLabel(candidate.profession, ui.general, currentLang),
-        monthly_net_salary: Number(offerSalary),
-        // Not tied to a request (no request_id): the currency is EUR.
-        offer_terms: offerTermsPayload(DEFAULT_SALARY_CURRENCY),
-        start_date: offerDate,
-        terms_details: offerTerms,
-        status: 'pending',
-        is_demo: !!candidate?.is_demo
-      }
-    ]);
-
-    if (!error) {
-      alert(t.offerSentSuccess);
-      setOfferEmployer('');
-      setOfferSalary('');
-      setOfferDate('');
-      setOfferTerms('');
-    } else {
-      alert(isPermissionError(error) ? ui.permissionDenied : `${ui.errorPrefix} ${error.message}`);
     }
   };
 
@@ -686,34 +649,13 @@ function CandidateDetailPageInner() {
 
             {/* Resmi İş Teklifi: only roles that may write job_offers (INTERVIEW_OFFER_ROLES) */}
             {access.jobOfferForm === 'edit' ? (
-            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2">
-                <FileSignature className="w-4 h-4 text-brand" /> {t.sendOfficialJobOffer}
-              </h3>
-              <div className="space-y-3 text-xs">
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.employerCompanyName}</label>
-                  <input type="text" value={offerEmployer} onChange={(e) => setOfferEmployer(e.target.value)} placeholder={ui.exampleCompany} className="w-full px-3 py-2.5 rounded-xl border border-slate-300 outline-none bg-white font-medium text-slate-900" />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.monthlyNetSalary} ({SALARY_CURRENCY_SYMBOL[DEFAULT_SALARY_CURRENCY]})</label>
-                    <input type="number" value={offerSalary} onChange={(e) => setOfferSalary(e.target.value)} placeholder="1200" className="w-full px-3 py-2.5 rounded-xl border border-slate-300 outline-none bg-white font-medium text-slate-900" />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase mb-1">{t.startDate}</label>
-                    <input type="text" value={offerDate} onChange={(e) => setOfferDate(e.target.value)} placeholder="01.11.2026" className="w-full px-3 py-2.5 rounded-xl border border-slate-300 outline-none bg-white font-medium text-slate-900" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">{t.termsConditions}</label>
-                  <textarea rows={2} value={offerTerms} onChange={(e) => setOfferTerms(e.target.value)} placeholder={ui.exampleTerms} className="w-full px-3 py-2.5 rounded-xl border border-slate-300 outline-none bg-white font-medium text-slate-900" />
-                </div>
-                <button type="button" onClick={handleSendJobOffer} className="w-full bg-brand-solid hover:bg-brand text-white py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow">
-                  <Send className="w-3.5 h-3.5" /> {t.sendOfferToCandidate}
-                </button>
-              </div>
-            </div>
+              <OfficialOfferForm
+                lang={currentLang}
+                candidateId={candidateId}
+                candidateIsDemo={!!candidate?.is_demo}
+                candidateName={candidate?.full_name || ''}
+                defaultPosition={candidateProfessionLabel(candidate.profession, ui.general, currentLang)}
+              />
             ) : null}
 
             {/* Bildirim Gönder */}

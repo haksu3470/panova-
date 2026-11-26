@@ -8,6 +8,10 @@ import { supabase } from '@/lib/supabase';
 import { isStaff, signOut } from '@/lib/auth';
 import { EmployerWriteError, staffViewEmployerId, toEmployerProfileView, type EmployerRow } from '@/lib/employerProfile';
 import { offerMoney, offerStatusLabel } from '@/lib/offers';
+import { BENEFIT_KEYS, benefitLabels, benefitsText, offerBenefits, requestBenefits, type BenefitKey } from '@/lib/benefits';
+
+// Accommodation and meals are their own required yes/no questions.
+const OPTIONAL_REQUEST_BENEFITS = BENEFIT_KEYS.filter((k) => k !== 'accommodation' && k !== 'meals');
 import { DEFAULT_SALARY_CURRENCY, SALARY_CURRENCIES, SALARY_CURRENCY_SYMBOL, salaryCurrency, type SalaryCurrency } from '@/lib/money';
 import { employerService } from '@/lib/services/employerService';
 import { 
@@ -224,6 +228,7 @@ function EmployerPortalInner() {
   const [demandLanguageReq, setDemandLanguageReq] = useState('');
   const [demandAccommodation, setDemandAccommodation] = useState<YesNo>('');
   const [demandFood, setDemandFood] = useState<YesNo>('');
+  const [demandBenefits, setDemandBenefits] = useState<BenefitKey[]>([]);
   /** Form-level message: fields to fix, company name missing, or save failed. */
   const [demandError, setDemandError] = useState<'invalid' | 'company' | 'save' | ''>('');
   /** One message per field, shown under that field. */
@@ -470,6 +475,7 @@ function EmployerPortalInner() {
     setDemandLanguageReq('');
     setDemandAccommodation('');
     setDemandFood('');
+    setDemandBenefits([]);
     setDemandError('');
     setDemandFieldErrors({});
   };
@@ -521,6 +527,7 @@ function EmployerPortalInner() {
       language: optionLabel(ui.languageOptions, demandLanguageReq),
       lodging: demandAccommodation,
       meals: demandFood,
+      benefits: demandBenefits,
     });
     if (!built.ok) {
       // validateDemandForm already covers these; kept as a safety net.
@@ -756,6 +763,9 @@ function EmployerPortalInner() {
     created_at?: string;
     accommodation_provided?: unknown;
     food_provided?: unknown;
+    transport_provided?: unknown;
+    flight_covered?: unknown;
+    extra_benefits?: unknown;
     headcount?: number;
     salary?: string | null;
     monthly_net_salary?: number | string | null;
@@ -783,6 +793,10 @@ function EmployerPortalInner() {
               </p>
             ) : null}
             <p className="text-xs text-muted-foreground">{t.facilityAccommodation}: {benefitText(dem.accommodation_provided)} · {t.facilityFood}: {benefitText(dem.food_provided)}</p>
+            {/* Extra benefits only: accommodation and meals are shown above as yes/no. */}
+            {requestBenefits(dem).filter((k) => k !== 'accommodation' && k !== 'meals').length > 0 ? (
+              <p className="text-xs text-muted-foreground">{benefitsText(requestBenefits(dem).filter((k) => k !== 'accommodation' && k !== 'meals'), currentLang)}</p>
+            ) : null}
           </div>
           <div className="text-end">
             <span className="font-bold text-status-ok bg-status-ok-bg px-3 py-1.5 rounded-xl text-xs">{t.statusLabel}: {requestStatusText(dem.status)}</span>
@@ -1274,6 +1288,23 @@ function EmployerPortalInner() {
                   </div>
                 </fieldset>
 
+                <fieldset className="space-y-2">
+                  <legend className="block text-xs font-bold uppercase tracking-wider text-foreground mb-2">{benefitLabels[currentLang].optionalTitle}</legend>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {OPTIONAL_REQUEST_BENEFITS.map((k) => (
+                      <label key={k} className="flex items-center gap-2 text-xs font-semibold text-foreground cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 accent-emerald-700"
+                          checked={demandBenefits.includes(k)}
+                          onChange={(e) => setDemandBenefits((cur) => (e.target.checked ? [...cur, k] : cur.filter((x) => x !== k)))}
+                        />
+                        {benefitLabels[currentLang][k]}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
                 {demandError && (
                   <p role="alert" className="text-xs font-bold text-status-bad bg-status-bad-bg border border-status-bad rounded-xl px-3 py-2">
                     {demandErrorMessage(demandError)}
@@ -1412,6 +1443,9 @@ function EmployerPortalInner() {
                   <div className="text-xs font-semibold text-slate-800">
                     {ui.offerSalary}: {offerMoney(offer, dateLocale[currentLang]) || ui.salaryNotSet} · {ui.status}: {offerStatusLabel(offer.status, ui.offerStatus)}
                   </div>
+                  {offerBenefits(offer).length > 0 && (
+                    <div className="text-xs text-slate-700">{benefitLabels[currentLang].title}: {benefitsText(offerBenefits(offer), currentLang)}</div>
+                  )}
                 </div>
               ))}
             </div>

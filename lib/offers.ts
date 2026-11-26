@@ -7,7 +7,8 @@ export type OfferCurrency = (typeof OFFER_CURRENCIES)[number];
 export type OfferLike = {
   monthly_net_salary?: number | string | null;
   salary?: number | string | null;
-  offer_terms?: { currency?: string | null } | null;
+  // offer_terms also holds benefits (lib/benefits.ts); offerTermsPayload keeps them.
+  offer_terms?: { currency?: string | null; [key: string]: unknown } | null;
   terms_details?: string | null;
   start_date?: string | null;
   status?: string | null;
