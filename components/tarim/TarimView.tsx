@@ -9,7 +9,7 @@ import {
 import { SiteFooter } from '@/components/home/HomeSections';
 import { CountUp, useHomeMotion } from '@/components/home/HomeMotion';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
-import { GroupSwitcher } from '@/components/site/GroupSwitcher';
+import { GroupBrand, GroupStrip } from '@/components/site/GroupSwitcher';
 import KvkkConsent from '@/components/site/KvkkConsent';
 import { company } from '@/lib/company';
 import { releaseCopy } from '@/lib/release-copy';
@@ -105,8 +105,9 @@ export default function TarimView() {
     // Arapça seçiliyken metin İngilizce gösterildiği için yön soldan sağa kalır.
     <div ref={rootRef} dir="ltr" className="min-h-screen overflow-x-clip bg-slate-50 font-sans text-slate-900">
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
+        <GroupStrip active="agri" lang={currentLang} />
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-3 sm:h-20 sm:px-6 lg:px-8">
-          <GroupSwitcher active="agri" lang={currentLang} />
+          <GroupBrand active="agri" lang={currentLang} />
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
             <a href="#teklif" className="hidden items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800 sm:inline-flex">
@@ -195,7 +196,7 @@ export default function TarimView() {
       </section>
 
       {/* Neden Makedonya */}
-      <section id="neden" className="scroll-mt-24 bg-slate-50 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+      <section id="neden" className="scroll-mt-28 sm:scroll-mt-32 bg-slate-50 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <SectionTitle eyebrow={c.eyebrow.why} title={c.why.title} desc={c.why.lead} />
         <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-2 lg:items-center">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -219,7 +220,7 @@ export default function TarimView() {
       </section>
 
       {/* Altyapı */}
-      <section id="altyapi" className="scroll-mt-24 bg-white px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+      <section id="altyapi" className="scroll-mt-28 sm:scroll-mt-32 bg-white px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <SectionTitle eyebrow={c.eyebrow.infra} title={c.infra.title} desc={c.infra.lead} />
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
           {c.infra.items.map((it, i) => (
@@ -237,7 +238,7 @@ export default function TarimView() {
       </section>
 
       {/* Süreç: HR'deki koyu zaman çizelgesi + videolar */}
-      <section id="surec" className="scroll-mt-24 bg-slate-900 px-4 py-16 text-on-dark sm:px-6 sm:py-24 lg:px-8">
+      <section id="surec" className="scroll-mt-28 sm:scroll-mt-32 bg-slate-900 px-4 py-16 text-on-dark sm:px-6 sm:py-24 lg:px-8">
         <SectionTitle eyebrow={c.eyebrow.process} title={c.process.title} desc={c.process.lead} dark />
         <div className="relative mx-auto max-w-6xl">
           <div aria-hidden className="absolute bottom-3 start-[1.125rem] top-3 w-0.5 bg-emerald-700 md:bottom-auto md:end-[12%] md:start-[12%] md:top-[1.125rem] md:h-0.5 md:w-auto" />
@@ -283,7 +284,7 @@ export default function TarimView() {
       </section>
 
       {/* Ürünler */}
-      <section id="urunler" className="scroll-mt-24 bg-slate-50 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+      <section id="urunler" className="scroll-mt-28 sm:scroll-mt-32 bg-slate-50 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <SectionTitle eyebrow={c.eyebrow.produce} title={c.produce.title} desc={c.produce.lead} />
         <div className="mx-auto grid max-w-7xl auto-rows-[160px] grid-cols-2 gap-3 sm:auto-rows-[230px] sm:gap-4 lg:grid-cols-4">
           {PRODUCE.map((name, i) => (
@@ -311,7 +312,7 @@ export default function TarimView() {
       </section>
 
       {/* İş birliği modelleri + hayvancılık */}
-      <section id="is-birligi" className="scroll-mt-24 bg-white px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+      <section id="is-birligi" className="scroll-mt-28 sm:scroll-mt-32 bg-white px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <SectionTitle eyebrow={c.eyebrow.models} title={c.models.title} desc={c.models.lead} />
         <div className="mx-auto grid max-w-7xl gap-4 sm:gap-6 md:grid-cols-3">
           {c.models.cards.map((card, i) => {
@@ -351,7 +352,7 @@ export default function TarimView() {
       </section>
 
       {/* Biz kimiz */}
-      <section id="biz-kimiz" className="scroll-mt-24 bg-slate-50 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+      <section id="biz-kimiz" className="scroll-mt-28 sm:scroll-mt-32 bg-slate-50 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <SectionTitle eyebrow={c.eyebrow.team} title={c.team.title} desc={c.team.lead} />
         <div className="mx-auto grid max-w-7xl gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
           {c.team.pillars.map((p, i) => {
@@ -372,7 +373,7 @@ export default function TarimView() {
       </section>
 
       {/* Teklif formu: HR'deki iletişim kartı düzeni */}
-      <section id="teklif" className="scroll-mt-24 bg-white px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+      <section id="teklif" className="scroll-mt-28 sm:scroll-mt-32 bg-white px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-5">
             <span className="text-xs font-bold uppercase tracking-widest text-brand">{c.eyebrow.contact}</span>
