@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { CheckCircle2, Droplets, Sprout, Users, Truck, Milk, Beef, Egg, Handshake, Landmark, PackageCheck, Send } from 'lucide-react';
 import { SiteFooter } from '@/components/home/HomeSections';
 import { LanguageSwitcher } from '@/components/site/LanguageSwitcher';
+import { GroupSwitcher } from '@/components/site/GroupSwitcher';
 import KvkkConsent from '@/components/site/KvkkConsent';
 import { company } from '@/lib/company';
 import { releaseCopy } from '@/lib/release-copy';
@@ -82,13 +82,7 @@ export default function TarimView() {
     <div className="min-h-screen overflow-x-clip bg-stone-50 text-slate-900" dir={dir}>
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-3 sm:h-20 sm:px-6 lg:px-8">
-          <Link href="/" title="Ana sayfa" className="flex min-w-0 items-center gap-3 hover:opacity-90">
-            <img src="/logo.png" alt="PANOVA" width={1051} height={725} className="h-10 w-auto shrink-0 object-contain sm:h-14" />
-            <span className="min-w-0">
-              <span className="block text-lg font-extrabold leading-none tracking-tight sm:text-xl">PANOVA</span>
-              <span className="hidden truncate text-[11px] font-bold text-muted-foreground sm:block">{c.groupNav.agri}</span>
-            </span>
-          </Link>
+          <GroupSwitcher active="agri" lang={currentLang} />
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <LanguageSwitcher currentLang={currentLang} onChange={changeLanguage} />
             <a href="#teklif" className="hidden items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-2.5 text-xs font-bold text-white hover:bg-slate-800 sm:inline-flex">
@@ -96,20 +90,6 @@ export default function TarimView() {
             </a>
           </div>
         </div>
-        {/* Grup bölümleri: Tarım bu sayfa; diğerleri hazırlanıyor */}
-        <nav aria-label="Panova Group" className="border-t border-slate-100">
-          <ul className="mx-auto flex max-w-7xl flex-nowrap gap-1 overflow-x-auto whitespace-nowrap px-3 py-1.5 text-xs font-semibold sm:px-6 sm:text-sm lg:px-8">
-            <li><Link href="/" className="block rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100">{c.groupNav.hr}</Link></li>
-            <li><span aria-current="page" className="block rounded-lg bg-emerald-50 px-3 py-2 text-emerald-800">{c.groupNav.agri}</span></li>
-            {[c.groupNav.construction, c.groupNav.trade, c.groupNav.social].map((name) => (
-              <li key={name}>
-                <span className="block cursor-default px-3 py-2 text-slate-400">
-                  {name} <span className="text-[10px] font-normal">· {c.groupNav.soon}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </nav>
       </header>
 
       {/* Kapak */}
