@@ -749,6 +749,7 @@ function EmployerPortalInner() {
       audit={false}
       lang={currentLang}
       dir={isRtl ? 'rtl' : 'ltr'}
+      preparedFor={employerProfile?.companyName || undefined}
       labels={{ csv: ui.exportCsv, excel: ui.exportExcel, print: ui.exportPrint, empty: ui.exportEmpty, popupBlocked: ui.exportPopupBlocked }}
     />
   );

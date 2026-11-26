@@ -72,7 +72,9 @@ test('ListExportBar: audit is optional (staff default on), print uses the shared
   const bar = readFileSync(join(ROOT, 'components/portal/ListExportBar.tsx'), 'utf8');
   assert.match(bar, /audit = true/);
   assert.match(bar, /if \(!audit\) return;/);
-  assert.ok(bar.includes('printHtmlInNewWindow(toPrintHtml(dated(), rows, dir, options))'));
+  // the print carries the Panova letterhead (lib/printLetterhead.ts), in the printing user's language
+  assert.ok(bar.includes('printHtmlInNewWindow(toPrintHtml(dated(), rows, dir, options, letterhead))'));
+  assert.ok(bar.includes('const letterhead = { lang, origin: window.location.origin'));
   assert.ok(bar.includes('EXPORT_COLUMN_LABELS[lang]'), 'headings always come from the shared column labels');
   assert.equal(bar.includes('columnLabels'), false);
   assert.equal(bar.includes('noopener'), false);

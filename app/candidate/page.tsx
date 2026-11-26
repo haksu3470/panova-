@@ -51,6 +51,7 @@ import { canonicalNationality } from '@/lib/registrationCountries';
 import { candidateOfferResponse, offerMoney, offerStatusLabel } from '@/lib/offers';
 import { benefitLabels, benefitsText, offerBenefits } from '@/lib/benefits';
 import { candidateCanUndoOffer, offerUndoLabels } from '@/lib/offerUndo';
+import { printDocNo, printLabels } from '@/lib/printLetterhead';
 import { offerStatusTone } from '@/lib/status-tone';
 import { dateLocale, portalUi } from '@/lib/portal-ui-copy';
 import { readStoredLanguage, syncDocumentLanguage, writeStoredLanguage } from '@/lib/site-language';
@@ -1850,6 +1851,9 @@ export default function CandidateDashboard() {
                       title: (doc) => docTitle(doc),
                       status: (doc) => portalUi[currentLang].docStatuses[String(doc.status)] || (DONE_STATUSES.includes(String(doc.status)) ? ct.uploadedStatus : ct.pendingStatus),
                     }),
+                    docNo: printDocNo('BLG', candidate?.id),
+                    // Asked each time: signature fields only when needed.
+                    signature: window.confirm(printLabels[currentLang].askSignature),
                   })}
                   className="px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 cursor-pointer"
                 >
@@ -1947,12 +1951,16 @@ export default function CandidateDashboard() {
                     type="button"
                     onClick={() => setPrintTarget({
                       kind: 'offer',
-                      // The printed terms carry the ticked benefits too.
-                      offer: offerPrint({ ...offer, terms_details: [perks, offer.terms_details].filter(Boolean).join(' · ') }, {
+                      offer: offerPrint(offer, {
                         position: () => localizeCatalogTitle(offer.position_title, currentLang) || '',
                         salary: () => (money ? `${money} ${offerUi.offerNetPerMonth}` : offerUi.salaryNotSet),
                         status: () => statusLabel,
                       }),
+                      // Ticked benefits as a list; terms_details stays the free-text note.
+                      benefits: offerBenefits(offer).map((k) => benefitLabels[currentLang][k]),
+                      docNo: printDocNo('TKL', offer.id),
+                      // Asked each time: signature fields only when needed.
+                      signature: window.confirm(printLabels[currentLang].askSignature),
                     })}
                     className="px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 cursor-pointer shrink-0"
                   >
@@ -2018,6 +2026,8 @@ export default function CandidateDashboard() {
         target={printTarget}
         candidateName={candidate?.full_name || ''}
         printedAt={new Date().toLocaleDateString(dateLocale[currentLang])}
+        printedBy={staffView ? printLabels[currentLang].staffView : candidate?.full_name || ''}
+        lang={currentLang}
         dir={isRtl ? 'rtl' : 'ltr'}
         labels={{
           offerTitle: ct.printOfferTitle,

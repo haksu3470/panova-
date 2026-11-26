@@ -1,4 +1,5 @@
 import { translations, type Language } from './dictionary';
+import { LETTERHEAD_CSS, letterheadHtml, printFooterHtml, type LetterheadInput } from './printLetterhead';
 import { demandStatusLabel } from './demandStatus';
 import { officialProcessText } from './employerPlacements';
 import { EUROPEAN_COUNTRIES } from './europeanCountries';
@@ -117,7 +118,14 @@ export function toExcelHtml(title: string, rows: readonly Row[], options?: Expor
  * footer (the blank window's "about:blank" address); the page margin is
  * rebuilt with body padding and the repeated spacer rows.
  */
-export function toPrintHtml(title: string, rows: readonly Row[], dir: 'ltr' | 'rtl' = 'ltr', options?: ExportTableOptions): string {
+export function toPrintHtml(
+  title: string,
+  rows: readonly Row[],
+  dir: 'ltr' | 'rtl' = 'ltr',
+  options?: ExportTableOptions,
+  /** Panova letterhead and footer (lib/printLetterhead.ts); without it the plain heading. */
+  letterhead?: Omit<LetterheadInput, 'title'>,
+): string {
   const keys = visibleKeys(rows);
   const span = Math.max(1, keys.length);
   const head = keys.map((key) => `<th>${escapeHtml(heading(key, options))}</th>`).join('');
@@ -136,8 +144,10 @@ export function toPrintHtml(title: string, rows: readonly Row[], dir: 'ltr' | 'r
   th { background: #f1f5f9; font-weight: 600; }
   tr { break-inside: avoid; page-break-inside: avoid; }
   .spacer td { border: 0; padding: 0; height: 8mm; background: none; }
-  @media screen { body { padding: 0 24px; } h1 { margin-top: 24px; } .spacer { display: none; } }
-</style></head><body><h1>${escapeHtml(title)}</h1><table><thead><tr class="spacer"><td colspan="${span}"></td></tr><tr>${head}</tr></thead><tfoot><tr class="spacer"><td colspan="${span}"></td></tr></tfoot><tbody>${body}</tbody></table></body></html>`;
+  .pl-head { margin-top: 10mm; }
+  @media screen { body { padding: 0 24px; } h1 { margin-top: 24px; } .pl-head { margin-top: 24px; } .spacer { display: none; } }
+${letterhead ? LETTERHEAD_CSS : ''}
+</style></head><body>${letterhead ? letterheadHtml({ ...letterhead, title }) : `<h1>${escapeHtml(title)}</h1>`}<table><thead><tr class="spacer"><td colspan="${span}"></td></tr><tr>${head}</tr></thead><tfoot><tr class="spacer"><td colspan="${span}"></td></tr></tfoot><tbody>${body}</tbody></table>${letterhead ? printFooterHtml(letterhead.lang) : ''}</body></html>`;
 }
 
 function text(value: unknown): string {
