@@ -183,7 +183,7 @@ function EmployerPortalInner() {
           if (!consent.error && needsEmployerConsent(consent.data)) setNeedsConsent(true);
         }
       } catch (err) {
-        console.error('Veri çekme hatası:', err);
+        console.error('Veri çekme hatası:', (err as { code?: string })?.code || 'error');
         if (cancelled) return;
         setEmployerProfile(null);
         setProfileErrorCode(err instanceof EmployerWriteError ? err.code : 'write_failed');
@@ -374,7 +374,7 @@ function EmployerPortalInner() {
       rememberEmployer(saved);
       alert(t.profileUpdatedSuccess || '');
     } catch (err) {
-      console.error('Servis Güncelleme Hatası:', err);
+      console.error('Servis Güncelleme Hatası:', (err as { code?: string })?.code || 'error');
       const code = err instanceof EmployerWriteError ? err.code : 'write_failed';
       const detail = err instanceof Error ? err.message : '';
       setProfileErrorCode(code);
@@ -562,7 +562,7 @@ function EmployerPortalInner() {
 
     const { error } = await supabase.from('job_requests').insert([built.row]);
     if (error) {
-      console.error('job request insert failed', error);
+      console.error('job request insert failed', error.code);
       // A database rule refusal (23514, job_requests_* rule) is shown under its field.
       const rule = demandRuleFromDbError(error);
       if (rule?.field === 'company') setDemandError('company');

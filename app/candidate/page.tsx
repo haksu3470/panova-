@@ -1189,7 +1189,7 @@ export default function CandidateDashboard() {
     const meta = await supabase.auth.updateUser({
       data: candidateAuthMetadata({ ...registration, email: persisted.email || candidate.email || newEmail }),
     });
-    if (meta.error) console.error("Panova HR Log - Kimlik metadata güncellenemedi:", meta.error);
+    if (meta.error) console.error("Panova HR Log - Kimlik metadata güncellenemedi:", meta.error.code || meta.error.name);
     await linkMyCandidate();
 
     setUpdatingProfile(false);

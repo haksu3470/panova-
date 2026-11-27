@@ -29,7 +29,7 @@ export async function GET(request: Request) {
   if (error) {
     console.error('supabase keepalive failed', error.code || error.message);
     return NextResponse.json(
-      { ok: false, error: error.code || error.message },
+      { ok: false, error: error.code || 'query_failed' },
       { status: 502 },
     );
   }

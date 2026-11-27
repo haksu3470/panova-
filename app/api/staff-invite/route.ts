@@ -33,7 +33,8 @@ export async function POST(request: Request) {
       : /Invalid email/.test(error.message) ? 'Geçersiz e-posta adresi.'
       : /Invalid staff_role/.test(error.message) ? 'Geçersiz rol.'
       : /source_officer_code_missing|referral_code_role/.test(error.message) ? 'Kaynak ülke sorumlusu için yönlendirme kodu atanamadı. Daveti yeniden deneyin.'
-      : 'Davet kaydedilemedi: ' + error.message;
+      : 'Davet kaydedilemedi.';
+    if (msg === 'Davet kaydedilemedi.') console.error('invite_staff failed', error.code || 'rpc');
     return NextResponse.json({ error: msg }, { status: 403 });
   }
 
@@ -58,9 +59,10 @@ export async function POST(request: Request) {
     if (sendErr) throw new Error(sendErr.message);
     return NextResponse.json({ success: true, emailSent: true, staff });
   } catch (e: any) {
+    console.error('staff invite email failed', e?.name || 'error');
     return NextResponse.json({
       success: true, emailSent: false, staff,
-      warning: `Personel kaydı oluşturuldu ancak davet e-postası gönderilemedi (${e.message}). Personele ${PORTAL_URL} adresini kendiniz iletin.`,
+      warning: `Personel kaydı oluşturuldu ancak davet e-postası gönderilemedi. Personele ${PORTAL_URL} adresini kendiniz iletin.`,
     });
   }
 }
