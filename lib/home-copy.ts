@@ -36,9 +36,8 @@ export type HomeCopy = {
   faqs: { q: string; a: string }[];
   bandTitle: string;
   bandDesc: string;
-  getQuote: string;
   footer: {
-    employers: string; services: string; employerLogin: string; quote: string;
+    employers: string; services: string; employerLogin: string;
     candidates: string; apply: string; sectors: string; faq: string;
     corporate: string; registry: string; how: string; staffPortal: string; kvkk: string;
     rights: string; taxNo: string;
@@ -172,9 +171,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
     ],
     bandTitle: 'Ekibinizi birlikte kuralım',
     bandDesc: 'Personel ihtiyacınızı iletin, uzman ekibimiz 1 iş günü içinde dönüş yapsın.',
-    getQuote: 'Teklif al',
     footer: {
-      employers: 'İşverenler', services: 'Hizmetler', employerLogin: 'İşveren girişi', quote: 'Teklif al',
+      employers: 'İşverenler', services: 'Hizmetler', employerLogin: 'İşveren girişi',
       candidates: 'Adaylar', apply: 'Başvuru & giriş', sectors: 'Sektörler', faq: 'SSS',
       corporate: 'Kurumsal', registry: 'Sicil bilgileri', how: 'Nasıl çalışır', staffPortal: 'Personel portalı',
       kvkk: 'KVKK Aydınlatma Metni', rights: 'Tüm hakları saklıdır.', taxNo: 'Vergi no',
@@ -336,9 +334,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
     ],
     bandTitle: 'Let us build your team',
     bandDesc: 'Send your staffing need and our team will reply within one business day.',
-    getQuote: 'Get a quote',
     footer: {
-      employers: 'Employers', services: 'Services', employerLogin: 'Employer sign-in', quote: 'Get a quote',
+      employers: 'Employers', services: 'Services', employerLogin: 'Employer sign-in',
       candidates: 'Candidates', apply: 'Apply & sign in', sectors: 'Sectors', faq: 'FAQ',
       corporate: 'Company', registry: 'Registry details', how: 'How it works', staffPortal: 'Staff portal',
       kvkk: 'Privacy notice', rights: 'All rights reserved.', taxNo: 'Tax no',
@@ -500,9 +497,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
     ],
     bandTitle: 'Ta ndërtojmë ekipin tuaj',
     bandDesc: 'Dërgoni nevojën për personel dhe ekipi ynë përgjigjet brenda 1 dite pune.',
-    getQuote: 'Merr ofertë',
     footer: {
-      employers: 'Punëdhënësit', services: 'Shërbimet', employerLogin: 'Hyrja e punëdhënësit', quote: 'Merr ofertë',
+      employers: 'Punëdhënësit', services: 'Shërbimet', employerLogin: 'Hyrja e punëdhënësit',
       candidates: 'Kandidatët', apply: 'Aplikim & hyrje', sectors: 'Sektorët', faq: 'Pyetje',
       corporate: 'Kompania', registry: 'Të dhënat e regjistrit', how: 'Si funksionon', staffPortal: 'Portali i personelit',
       kvkk: 'Njoftimi i privatësisë', rights: 'Të gjitha të drejtat e rezervuara.', taxNo: 'Nr. tatimor',
@@ -664,9 +660,8 @@ export const homeCopy: Record<Language, HomeCopy> = {
     ],
     bandTitle: 'لنبنِ فريقكم معاً',
     bandDesc: 'أرسلوا احتياجكم من الموظفين ويرد فريقنا خلال يوم عمل واحد.',
-    getQuote: 'اطلب عرضاً',
     footer: {
-      employers: 'أصحاب العمل', services: 'الخدمات', employerLogin: 'دخول أصحاب العمل', quote: 'اطلب عرضاً',
+      employers: 'أصحاب العمل', services: 'الخدمات', employerLogin: 'دخول أصحاب العمل',
       candidates: 'المرشحون', apply: 'التقديم والدخول', sectors: 'القطاعات', faq: 'الأسئلة',
       corporate: 'الشركة', registry: 'بيانات السجل', how: 'كيف نعمل', staffPortal: 'بوابة الموظفين',
       kvkk: 'إشعار الخصوصية', rights: 'جميع الحقوق محفوظة.', taxNo: 'الرقم الضريبي',
@@ -914,12 +909,10 @@ export const homeCopy: Record<Language, HomeCopy> = {
     ],
     bandTitle: 'Да го изградиме вашиот тим',
     bandDesc: 'Испратете ја потребата за персонал и нашиот тим ќе одговори во рок од еден работен ден.',
-    getQuote: 'Побарај понуда',
     footer: {
       employers: 'Работодавачи',
       services: 'Услуги',
       employerLogin: 'Најава на работодавач',
-      quote: 'Побарај понуда',
       candidates: 'Кандидати',
       apply: 'Пријава и најава',
       sectors: 'Сектори',

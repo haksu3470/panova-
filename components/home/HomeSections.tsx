@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
 import {
-  Users, Building2, ShieldCheck, FileCheck2, Plane, ClipboardCheck, Search, Handshake,
+  Users, Building2, ShieldCheck, FileCheck2, Plane, ClipboardCheck, Search,
   HardHat, Sprout, Factory, Truck, Hotel, Stethoscope, Wrench, ShoppingBag,
   Award, Globe2, ArrowRight, Briefcase, GraduationCap, HeartHandshake,
   Layers, CalendarCheck, Landmark, Eye, Languages, ChevronDown, Mail,
@@ -237,7 +237,6 @@ export function TrustSections({ lang }: { lang: Language }) {
             <p className="text-on-dark-muted mt-2 text-sm sm:text-base">{c.bandDesc}</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <a href="#contact-form" className="inline-flex justify-center items-center gap-2 bg-brand-solid px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-brand"><Handshake aria-hidden className="w-4 h-4" /> {c.getQuote}</a>
             <Link href="/candidate" className="inline-flex justify-center items-center gap-2 bg-white text-slate-900 px-6 py-3.5 rounded-xl font-bold text-sm">{c.ctaJob}</Link>
           </div>
         </div>
@@ -316,7 +315,6 @@ export function SiteFooter({ lang }: { lang: Language }) {
           <ul className="space-y-2 text-sm">
             <li><Link href="/#isverenler" className="hover:text-white">{f.services}</Link></li>
             <li><Link href="/employer-login" className="hover:text-white">{f.employerLogin}</Link></li>
-            <li><Link href="/#contact-form" className="hover:text-white">{f.quote}</Link></li>
           </ul>
         </div>
         <div>
