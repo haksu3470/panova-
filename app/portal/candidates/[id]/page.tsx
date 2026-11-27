@@ -328,8 +328,7 @@ function CandidateDetailPageInner() {
             Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
-            email: candidate.email,
-            candidateName: candidate.full_name,
+            candidateId,
             subject: notifTitle,
             message: notifMessage,
             locale: currentLang,
