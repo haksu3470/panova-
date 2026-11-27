@@ -31,7 +31,8 @@ test('storage: a file is read only by its own candidate or scoped staff, never a
 
 test('download address: log_document_access refuses anyone but the owner and scoped staff', () => {
   const fn = last(/create or replace function public\.log_document_access[\s\S]*?\$\$;/g);
-  assert.match(fn, /v_candidate = public\.my_candidate_id\(\)\s+or \(public\.is_staff\(\) and public\.staff_can_read_candidate\(v_candidate\)\)/);
+  // coalesce(..., false): for a non-candidate my_candidate_id() is null, and plpgsql skips an IF whose test is null.
+  assert.match(fn, /if not coalesce\(\s+v_candidate = public\.my_candidate_id\(\)\s+or \(public\.is_staff\(\) and public\.staff_can_read_candidate\(v_candidate\)\),\s+false\s+\) then/);
   assert.match(fn, /raise exception 'forbidden'/);
   assert.equal(/employer/i.test(fn), false);
 });
