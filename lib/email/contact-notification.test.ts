@@ -178,3 +178,17 @@ test('contact posts are limited to this site', () => {
   assert.equal(contactOriginAllowed('https://evil.example', 'panovagroup.org'), false);
   assert.equal(contactOriginAllowed('not a url', 'panovagroup.org'), false);
 });
+
+test('a throttled insert is a 429 and sends no mail', async () => {
+  let sends = 0;
+  const result = await acceptContactSubmission(validBody, {
+    createId: () => id,
+    insert: async () => ({ error: 'contact_rate_limited' }),
+    send: async () => {
+      sends += 1;
+      return { errorName: null };
+    },
+  });
+  assert.deepEqual(result, { ok: false, status: 429 });
+  assert.equal(sends, 0);
+});

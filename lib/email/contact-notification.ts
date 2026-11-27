@@ -160,7 +160,7 @@ export async function acceptContactSubmission(
     createId?: () => string;
     now?: () => Date;
   },
-): Promise<{ ok: true; id: string; emailSent: boolean } | { ok: false; status: 400 | 500 }> {
+): Promise<{ ok: true; id: string; emailSent: boolean } | { ok: false; status: 400 | 429 | 500 }> {
   const parsed = parseContactSubmission(body);
   if (!parsed.ok) return { ok: false, status: 400 };
 
@@ -179,6 +179,8 @@ export async function acceptContactSubmission(
     kvkk_version: KVKK_VERSION,
   });
   if (inserted.error) {
+    // contact_submission_throttle (DB trigger): same e-mail or too many forms in the last hour.
+    if (inserted.error.includes('contact_rate_limited')) return { ok: false, status: 429 };
     console.error('Contact form insert failed');
     return { ok: false, status: 500 };
   }

@@ -80,7 +80,8 @@ export async function POST(request: Request) {
       send: sendContactNotification,
     });
     if (!result.ok) {
-      const error = result.status === 400 ? 'Invalid request' : 'Could not save the message';
+      const error = result.status === 400 ? 'Invalid request'
+        : result.status === 429 ? 'Too many requests' : 'Could not save the message';
       return NextResponse.json({ error }, { status: result.status });
     }
     return NextResponse.json({ ok: true });
