@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { isEmailNotConfirmedMessage } from '@/lib/emailVerification';
@@ -23,6 +24,25 @@ function clientIp(request: Request): string {
   return forwarded || 'unknown';
 }
 
+const MAX_PER_IDENTIFIER = 10;
+
+/** DB counter shared by all instances; the key is hashed so no e-mail, phone or IP is stored. */
+async function dbAllowed(key: string, max: number): Promise<boolean> {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) return true;
+  const admin = createClient(validUrl, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data, error } = await admin.rpc('login_attempt_allowed', {
+    p_key: createHash('sha256').update(key).digest('hex'),
+    p_max: max,
+    p_window_seconds: WINDOW_MS / 1000,
+  });
+  // Fail open: the in-memory limit above still applies if the DB call fails.
+  if (error) return true;
+  return data !== false;
+}
+
 function anonClient() {
   return createClient(validUrl, supabaseAnonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -35,7 +55,8 @@ function invalid() {
 }
 
 export async function POST(request: Request) {
-  if (tooMany(clientIp(request))) {
+  const ip = clientIp(request);
+  if (tooMany(ip) || !(await dbAllowed(`ip:${ip}`, MAX_ATTEMPTS))) {
     return NextResponse.json({ ok: false, error: 'invalid_credentials' }, { status: 429 });
   }
 
@@ -49,6 +70,9 @@ export async function POST(request: Request) {
   const password = typeof raw.password === 'string' ? raw.password : '';
   const classified = classifyLoginIdentifier(typeof raw.identifier === 'string' ? raw.identifier : '');
   if (!classified || password.length < 8) return invalid();
+  if (!(await dbAllowed(`id:${classified.kind}:${classified.key}`, MAX_PER_IDENTIFIER))) {
+    return NextResponse.json({ ok: false, error: 'invalid_credentials' }, { status: 429 });
+  }
 
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (classified.kind !== 'email' && !serviceKey) {
