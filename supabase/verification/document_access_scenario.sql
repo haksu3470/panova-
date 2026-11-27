@@ -85,6 +85,16 @@ begin
       reset role;
       perform pg_temp.rec('2', 'Aday kendi dosyasını depoda görür', n = 1, path);
     end if;
+    begin
+      perform pg_temp.as_user(pg_temp.v('a_uid'));
+      err := public.log_document_access(doc::uuid);
+      reset role;
+      ok := err is not null;
+    exception when others then
+      reset role;
+      ok := false; err := sqlerrm;
+    end;
+    perform pg_temp.rec('2b', 'Aday kendi belgesinin indirme adresini alır', ok, coalesce(err, 'boş'));
   end if;
 
   -- B and E: no row, no file, no download address for A's document
