@@ -96,6 +96,12 @@ export default function EmployerLoginPage() {
       alert(releaseCopy[currentLang].kvkkRequired);
       return false;
     }
+    // Tekil index (aynı firma adı / e-posta) yeni işveren satırını reddetti.
+    if (linked.error?.message?.includes('Employer already registered')) {
+      await signOut();
+      alert(releaseCopy[currentLang].employerCompanyTaken);
+      return null;
+    }
     const employerId = (linked.data as string | null) ?? null;
     if (!employerId) return false;
     const consent = await supabase.from('employers').select('invited_at, kvkk_accepted_at').eq('id', employerId).maybeSingle();
@@ -159,7 +165,7 @@ export default function EmployerLoginPage() {
         return;
       }
       const opened = await openEmployer(email);
-      if (!opened) {
+      if (opened === false) {
         await signOut();
         alert(t.employerRecordMissing);
       }
@@ -179,10 +185,22 @@ export default function EmployerLoginPage() {
       alert(releaseCopy[currentLang].kvkkRequired);
       return;
     }
+    const email = regEmail.trim().toLowerCase();
+    // Ön kontrol; fonksiyon yoksa veya hata verirse kayda devam (son kontrol veritabanındaki tekil index).
+    const conflict = await supabase.rpc('employer_signup_conflict', { p_email: email, p_company: regCompanyName });
+    if (!conflict.error && conflict.data === 'email') {
+      alert(releaseCopy[currentLang].employerEmailTaken);
+      setLoginEmail(email);
+      setAuthMode('signin');
+      return;
+    }
+    if (!conflict.error && conflict.data === 'company') {
+      alert(releaseCopy[currentLang].employerCompanyTaken);
+      return;
+    }
     const consent = kvkkMetadata();
     sessionStorage.setItem('panova_kvkk', JSON.stringify(consent));
     const resume = pauseEmailGateListener();
-    const email = regEmail.trim().toLowerCase();
     try {
       const result = await beginPasswordSignup({
         email,
@@ -278,7 +296,7 @@ export default function EmployerLoginPage() {
                 redirectPath="/employer-login"
                 onVerified={async () => {
                   const opened = await openEmployer(verifyEmail);
-                  if (!opened) alert(t.employerVerifiedUnlinked);
+                  if (opened === false) alert(t.employerVerifiedUnlinked);
                 }}
                 onSignIn={() => { setLoginEmail(verifyEmail); setAuthMode('signin'); }}
                 onResetPassword={() => { setLoginEmail(verifyEmail); setAuthMode('forgot'); }}
