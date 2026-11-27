@@ -792,7 +792,11 @@ export default function PortalPage() {
             blocking
             required={mfaRequired}
             hasVerifiedFactor={mfaVerified}
-            onVerified={refreshMfa}
+            onVerified={async () => {
+              await refreshMfa();
+              // Data loaded at aal1 came back empty under RLS; reload with the aal2 session.
+              fetchAllData();
+            }}
           />
         ) : null}
         <div className={`flex flex-wrap items-center gap-2 border-b pb-3 text-xs font-bold ${mfaBlocksPortal ? 'hidden' : ''}`}>
