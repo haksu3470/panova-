@@ -170,7 +170,7 @@ function CandidateDetailPageInner() {
         setCandidatePhoto(data.photo_url || '');
         setCandidatePhone(data.phone || '');
         setCandidateEmail(data.email || '');
-        setInternalNotes(data.notes || '');
+        setInternalNotes(await candidateService.getStaffNotes(candidateId));
         
         setVideoUrl1(data.video_url_1 || data.video_url || '');
         setVideoUrl2(data.video_url_2 || '');
@@ -241,7 +241,6 @@ function CandidateDetailPageInner() {
       photo_url: candidatePhoto,
       phone: candidatePhone,
       email: candidateEmail,
-      notes: internalNotes,
       // certificate_no / issuing_body are no longer edited here and are not
       // sent, so the stored values stay as they are.
       documents_json: payloadDocumentsJson,
@@ -278,6 +277,7 @@ function CandidateDetailPageInner() {
     setSaving(true);
     try {
       await candidateService.updateCandidateDetail(candidateId, payload);
+      await candidateService.saveStaffNotes(candidateId, internalNotes);
       setCandidate((prev: Record<string, unknown> | null) => (prev ? { ...prev, ...payload } : prev));
       setPlacementRefresh((n) => n + 1);
 

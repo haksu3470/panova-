@@ -53,6 +53,24 @@ export const candidateService = {
   },
 
   // Aday detaylarını (profil, belgeler, lojistik vb.) kaydet
+  /** Staff-only notes live in their own table so the candidate's own row never carries them. */
+  async getStaffNotes(id: string) {
+    const { data, error } = await supabase
+      .from('candidate_staff_notes')
+      .select('notes')
+      .eq('candidate_id', id)
+      .maybeSingle();
+    if (error) throw error;
+    return data?.notes ?? '';
+  },
+
+  async saveStaffNotes(id: string, notes: string) {
+    const { error } = await supabase
+      .from('candidate_staff_notes')
+      .upsert({ candidate_id: id, notes, updated_at: new Date().toISOString() });
+    if (error) throw error;
+  },
+
   async updateCandidateDetail(id: string, payload: any) {
     const { error } = await supabase
       .from('job_candidates')
