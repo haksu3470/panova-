@@ -41,16 +41,10 @@ async function syncLinkedStaff(): Promise<boolean> {
  * Personel oturumu:
  * 1. syncLinkedStaff — daveti bağlar veya role'ü ezilmiş profili onarır.
  * 2. isStaff — profil zaten personel (bağlı satır yeniden yazılamasa da).
- * 3. claim_first_staff — yalnızca sistemde hiç personel yokken ilk yöneticiyi açar.
+ * (claim_first_staff kurulum içindi; 27.11.2026'da istemciye kapatıldı.)
  */
-export async function ensureStaff(fullName?: string): Promise<boolean> {
+export async function ensureStaff(): Promise<boolean> {
   if (await syncLinkedStaff()) return true;
-  if (await isStaff()) return true;
-  const { error } = await supabase.rpc('claim_first_staff', {
-    p_full_name: fullName || 'Yönetici',
-    p_staff_role: 'upper_management',
-  });
-  if (error) return false;
   return isStaff();
 }
 

@@ -270,7 +270,7 @@ export default function PortalPage() {
     audit = announce,
     revokeOnFailure = false,
   ) => {
-    const staffOk = await ensureStaff(fullName || email || undefined);
+    const staffOk = await ensureStaff();
     if (!staffOk) {
       // signOut is global for this browser. Only an explicit portal login,
       // or OAuth that this tab started, may revoke. A candidate signed in
