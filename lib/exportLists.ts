@@ -1,5 +1,5 @@
 import { translations, type Language } from './dictionary';
-import { LETTERHEAD_CSS, letterheadHtml, printFooterHtml, type LetterheadInput } from './printLetterhead';
+import { LETTERHEAD_CSS, letterheadHtml, printFooterHtml, printPageCss, type LetterheadInput } from './printLetterhead';
 import { demandStatusLabel } from './demandStatus';
 import { officialProcessText } from './employerPlacements';
 import { EUROPEAN_COUNTRIES } from './europeanCountries';
@@ -127,27 +127,24 @@ export function toPrintHtml(
   letterhead?: Omit<LetterheadInput, 'title'>,
 ): string {
   const keys = visibleKeys(rows);
-  const span = Math.max(1, keys.length);
   const head = keys.map((key) => `<th>${escapeHtml(heading(key, options))}</th>`).join('');
   const body = rows.map((row) => `<tr>${keys.map((key) => `<td>${escapeHtml(row[key])}</td>`).join('')}</tr>`).join('');
   return `<!DOCTYPE html><html dir="${dir}"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
 <style>
-  @page { size: A4 landscape; margin: 0; }
+  ${printPageCss('A4 landscape')}
   * { box-sizing: border-box; }
   html, body { margin: 0; }
-  body { font-family: Arial, sans-serif; color: #0f172a; padding: 0 12mm; }
-  h1 { font-size: 16px; margin: 12mm 0 4mm; }
+  body { font-family: Arial, sans-serif; color: #0f172a; }
+  h1 { font-size: 16px; margin: 0 0 4mm; }
   table { border-collapse: collapse; width: 100%; max-width: 100%; table-layout: auto; font-size: 12px; line-height: 1.35; }
   thead { display: table-header-group; }
   tfoot { display: table-footer-group; }
   th, td { border: 1px solid #cbd5e1; padding: 5px 7px; text-align: start; vertical-align: top; overflow-wrap: break-word; word-break: normal; hyphens: auto; white-space: normal; }
   th { background: #f1f5f9; font-weight: 600; }
   tr { break-inside: avoid; page-break-inside: avoid; }
-  .spacer td { border: 0; padding: 0; height: 8mm; background: none; }
-  .pl-head { margin-top: 10mm; }
-  @media screen { body { padding: 0 24px; } h1 { margin-top: 24px; } .pl-head { margin-top: 24px; } .spacer { display: none; } }
+  @media screen { body { padding: 0 24px; } h1 { margin-top: 24px; } .pl-head { margin-top: 24px; } }
 ${letterhead ? LETTERHEAD_CSS : ''}
-</style></head><body>${letterhead ? letterheadHtml({ ...letterhead, title }) : `<h1>${escapeHtml(title)}</h1>`}<table><thead><tr class="spacer"><td colspan="${span}"></td></tr><tr>${head}</tr></thead><tfoot><tr class="spacer"><td colspan="${span}"></td></tr></tfoot><tbody>${body}</tbody></table>${letterhead ? printFooterHtml(letterhead.lang) : ''}</body></html>`;
+</style></head><body>${letterhead ? letterheadHtml({ ...letterhead, title }) : `<h1>${escapeHtml(title)}</h1>`}<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>${letterhead ? printFooterHtml(letterhead.lang) : ''}</body></html>`;
 }
 
 function text(value: unknown): string {

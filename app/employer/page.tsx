@@ -85,7 +85,7 @@ import {
   employerEmployeeRows,
   employerOfferRows,
   employerRequestRows,
-  employerSelectedRows,
+  employerSelectedRows, employerProposedRows,
   type EmployerExportCopy,
 } from '@/lib/employerExport';
 import EmployerPlacementTabs, { type PlacementsLoad } from './components/EmployerPlacementTabs';
@@ -1381,6 +1381,10 @@ function EmployerPortalInner() {
             onReject={handleRejectCandidate}
             onConfirm={handleConfirmDecision}
             busyMatchId={decidingMatchId}
+            renderExport={(rows) => exportBar('proposed-candidates', t.candidatesTitle, employerProposedRows(rows, currentLang, {
+              sector: (sector) => sectorFilterLabel(sector, t),
+              decision: (row) => (row.employer_decision === 'selected' ? t.selectedBtn : row.employer_decision === 'rejected' ? t.rejectedBtn : '') || '',
+            }))}
           />
           </section>
         )}

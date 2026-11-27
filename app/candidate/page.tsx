@@ -64,7 +64,9 @@ import { signedCandidateFileUrl, uploadCandidateFile } from '@/lib/candidateFile
 import DocumentPreviewModal from '@/components/portal/DocumentPreviewModal';
 import CandidateDocDownloadButton from '@/components/candidate/CandidateDocDownloadButton';
 import CandidatePrintView, { type CandidatePrintTarget } from '@/components/candidate/CandidatePrintView';
-import { documentPrintRows, offerPrint } from '@/lib/candidatePrint';
+import { documentPrintRows, offerPrint, profilePrintFields } from '@/lib/candidatePrint';
+import { prefersPdfShare, sheetToPdf, usePdfShareMode } from '@/lib/pdfExport';
+import { exportCountry, exportSector } from '@/lib/exportLists';
 import { EXPORT_COLUMN_LABELS } from '@/lib/exportColumns';
 import { validateUpload } from '@/lib/uploads';
 
@@ -156,15 +158,29 @@ export default function CandidateDashboard() {
   // Print / PDF: one offer or the document list, from a print-only sheet
   // (CandidatePrintView). The rest of the page is print:hidden.
   const [printTarget, setPrintTarget] = useState<CandidatePrintTarget | null>(null);
+  // Phones and tablets: the same sheet as a PDF to save or share (lib/pdfExport.ts), not the print dialog.
+  const pdfMode = usePdfShareMode();
   useEffect(() => {
     if (!printTarget) return;
     const done = () => setPrintTarget(null);
+    if (prefersPdfShare()) {
+      const sheet = document.querySelector<HTMLElement>('.candidate-print');
+      const title = sheet?.querySelector('.pl-title')?.textContent || 'Panova';
+      const name = `panova-${printTarget.kind}-${printTarget.docNo || 'pdf'}`.toLowerCase();
+      if (!sheet) { done(); return; }
+      sheetToPdf(sheet, name, title)
+        .catch((error) => { console.error('[pdf-export]', error); window.alert(printLabels[currentLang].pdfFailed); })
+        .finally(done);
+      return;
+    }
     window.addEventListener('afterprint', done);
     const timer = window.setTimeout(() => window.print(), 0);
     return () => {
       window.clearTimeout(timer);
       window.removeEventListener('afterprint', done);
     };
+    // currentLang only picks the error text; a language change must not reprint.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [printTarget]);
 
   const t = translations[currentLang] || translations.tr;
@@ -1587,7 +1603,48 @@ export default function CandidateDashboard() {
         {/* Profil Sekmesi */}
         {activeTab === 'profile' && (
           <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-6">
-            <h3 className="text-lg font-extrabold text-slate-900 border-b pb-3">👤 {ct.profileHeader}</h3>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
+              <h3 className="text-lg font-extrabold text-slate-900">👤 {ct.profileHeader}</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  const plain = (label: string | undefined) => String(label || '').replace(/\s*\([^)]*\)\s*$/, '');
+                  setPrintTarget({
+                    kind: 'profile',
+                    fields: profilePrintFields(
+                      candidate,
+                      { name: newEmergencyName, relation: newEmergencyRelation, phone: newEmergencyPhone },
+                      {
+                        full_name: plain(t.nameLabel),
+                        passport_number: plain(t.passportLabel),
+                        phone: plain(ct.phoneLabel),
+                        email: plain(ct.emailLabel),
+                        profession: plain(t.professionLabel),
+                        sector: plain(t.sectorLabel),
+                        nationality: plain(t.nationalityCol),
+                        emergency_name: plain(ct.emergName),
+                        emergency_relation: plain(ct.emergRel),
+                        emergency_phone: plain(ct.emergPhone),
+                      },
+                      {
+                        profession: (value) => candidateProfessionLabel(value, portalUi[currentLang].unspecified, currentLang),
+                        sector: (value) => exportSector(value, currentLang),
+                        nationality: (value) => exportCountry(value, currentLang),
+                      },
+                    ),
+                    rows: documentPrintRows(candidateDocs, {
+                      title: (doc) => docTitle(doc),
+                      status: (doc) => portalUi[currentLang].docStatuses[String(doc.status)] || (DONE_STATUSES.includes(String(doc.status)) ? ct.uploadedStatus : ct.pendingStatus),
+                    }),
+                    docNo: printDocNo('PRF', candidate?.id),
+                    signature: false,
+                  });
+                }}
+                className="px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 cursor-pointer"
+              >
+                {pdfMode ? '📄' : '🖨️'} {pdfMode ? printLabels[currentLang].pdfShare : printLabels[currentLang].profileTitle}
+              </button>
+            </div>
             
             <form onSubmit={handleUpdateProfile} onChange={() => { profileDirty.current = true; }} autoComplete="off" className="space-y-4 text-xs">
               <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border">
@@ -1857,7 +1914,7 @@ export default function CandidateDashboard() {
                   })}
                   className="px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 cursor-pointer"
                 >
-                  🖨️ {ct.printDocsBtn}
+                  {pdfMode ? `📄 ${printLabels[currentLang].pdfShare}` : `🖨️ ${ct.printDocsBtn}`}
                 </button>
               ) : null}
             </div>
@@ -1964,7 +2021,7 @@ export default function CandidateDashboard() {
                     })}
                     className="px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 cursor-pointer shrink-0"
                   >
-                    🖨️ {offerUi.exportPrint}
+                    {pdfMode ? `📄 ${printLabels[currentLang].pdfShare}` : `🖨️ ${offerUi.exportPrint}`}
                   </button>
                   {offer.status === 'pending' && !staffView && (
                     <div className="flex gap-2 shrink-0">

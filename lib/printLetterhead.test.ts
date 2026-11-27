@@ -39,5 +39,6 @@ test('list print: letterhead and footer only when asked, plain heading otherwise
   assert.ok(plain.includes('<h1>T</h1>') && !plain.includes('class="pl-head"') && !plain.includes('class="pl-foot"'));
   const branded = toPrintHtml('T', rows, 'ltr', undefined, { lang: 'en', origin: 'https://panovagroup.org', printedAt: '1/1/2026', preparedFor: 'X' });
   assert.ok(branded.includes('class="pl-head"') && branded.includes('class="pl-foot"') && branded.includes('Prepared for'));
-  assert.match(branded, /@page \{ size: A4 landscape; margin: 0; \}/, 'browser header and footer stay off');
+  assert.match(branded, /@bottom-left \{ content: "panova@panovagroup\.org · \+389 70 385 792 · panovagroup\.org"/, 'contact line in every page margin');
+  assert.ok(branded.includes('panova@panovagroup.org · +389 70 385 792 · panovagroup.org</span></footer>'), 'contact line in the closing footer');
 });
