@@ -21,6 +21,7 @@ export const EMPLOYER_EXPORT_COLUMNS = {
     'position_title', 'headcount', 'city', 'country', 'monthly_net_salary', 'currency',
     'contract_type', 'target_start_date', 'status', 'created_at',
   ],
+  proposed: ['full_name', 'profession', 'sector', 'nationality', 'city', 'experience_years', 'language_skills', 'position_title', 'status'],
   selected: ['full_name', 'profession', 'nationality', 'city', 'experience_years', 'language_skills', 'position_title', 'decided_at'],
   employees: [
     'full_name', 'profession', 'nationality', 'position_title', 'official_process_status',
@@ -76,6 +77,30 @@ export function employerRequestRows(rows: readonly Row[], lang: Language, copy: 
     target_start_date: day(row.target_start_date, lang),
     status: copy.requestStatus(text(row.status)),
     created_at: day(row.created_at, lang),
+  }));
+}
+
+/**
+ * "Candidates" tab: the candidates Panova presented for the employer's own
+ * requests (employer_browse_candidates(), which already leaves out passport,
+ * phone and e-mail). Rows as filtered and sorted on screen; status is the
+ * employer's own decision on that match.
+ */
+export function employerProposedRows(
+  rows: readonly Row[],
+  lang: Language,
+  copy: { sector: (sector: string) => string; decision: (row: Row) => string },
+): Row[] {
+  return rows.map((row) => ({
+    full_name: text(row.full_name),
+    profession: profession(row.profession, lang),
+    sector: row.sector ? copy.sector(text(row.sector)) : '',
+    nationality: exportCountry(row.nationality, lang),
+    city: text(row.city),
+    experience_years: row.experience_years ?? '',
+    language_skills: text(row.language_skills),
+    position_title: localizeCatalogTitle(text(row.request_position_title), lang),
+    status: copy.decision(row),
   }));
 }
 

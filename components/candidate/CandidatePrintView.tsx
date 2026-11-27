@@ -2,7 +2,7 @@
 
 import type { DocumentPrintRow, OfferPrint } from '@/lib/candidatePrint';
 import type { Language } from '@/lib/dictionary';
-import { LETTERHEAD_CSS, letterheadHtml, printFooterHtml, printLabels, signatureHtml } from '@/lib/printLetterhead';
+import { LETTERHEAD_CSS, letterheadHtml, printFooterHtml, printLabels, printPageCss, signatureHtml } from '@/lib/printLetterhead';
 
 /**
  * signature: the person printing was asked (window.confirm) whether to add
@@ -11,7 +11,9 @@ import { LETTERHEAD_CSS, letterheadHtml, printFooterHtml, printLabels, signature
  */
 export type CandidatePrintTarget =
   | { kind: 'offer'; offer: OfferPrint; benefits: string[]; docNo: string; signature: boolean }
-  | { kind: 'documents'; rows: DocumentPrintRow[]; docNo: string; signature: boolean };
+  | { kind: 'documents'; rows: DocumentPrintRow[]; docNo: string; signature: boolean }
+  /** The candidate's own profile (label, value) and document list; see lib/candidatePrint.ts profilePrintFields. */
+  | { kind: 'profile'; fields: (readonly [string, string])[]; rows: DocumentPrintRow[]; docNo: string; signature: boolean };
 
 export type CandidatePrintLabels = {
   offerTitle: string;
@@ -33,10 +35,10 @@ export type CandidatePrintLabels = {
  * Print-only sheet for the candidate page. It is hidden on screen
  * (hidden print:block) and the rest of the page is print:hidden, so the tab
  * bar, buttons and other sections are never printed. It carries the Panova
- * letterhead and footer (lib/printLetterhead.ts). @page margin 0 keeps the
- * browser from printing its own header and footer (date, page address); the
- * margin is the sheet's padding. The document list prints type, status, file
- * name and review note, never the files themselves.
+ * letterhead and footer (lib/printLetterhead.ts). printPageCss puts the
+ * contact line and "page / pages" in every page's bottom margin. On phones the
+ * same sheet becomes a PDF to save or share (lib/pdfExport.ts). The document
+ * list prints type, status, file name and review note, never the files.
  */
 export default function CandidatePrintView({
   target,
@@ -56,7 +58,7 @@ export default function CandidatePrintView({
   dir: 'ltr' | 'rtl';
 }) {
   const pl = printLabels[lang] || printLabels.en;
-  const title = target.kind === 'offer' ? labels.offerTitle : labels.documentsTitle;
+  const title = target.kind === 'offer' ? labels.offerTitle : target.kind === 'profile' ? pl.profileTitle : labels.documentsTitle;
   const head = letterheadHtml({
     lang,
     origin: typeof window !== 'undefined' ? window.location.origin : '',
@@ -65,10 +67,31 @@ export default function CandidatePrintView({
     printedAt,
     printedBy,
   });
+  const docsTable = (rows: DocumentPrintRow[]) => (
+    <table className="w-full border-collapse text-xs">
+      <thead>
+        <tr>
+          {[labels.document, labels.status, labels.fileName, labels.reviewNote].map((col) => (
+            <th key={col} className="border border-slate-400 px-2 py-1 text-start bg-slate-100">{col}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row, index) => (
+          <tr key={`${row.title}-${index}`}>
+            <td className="border border-slate-400 px-2 py-1 align-top">{row.title}</td>
+            <td className="border border-slate-400 px-2 py-1 align-top">{row.status}</td>
+            <td className="border border-slate-400 px-2 py-1 align-top">{row.fileName || '—'}</td>
+            <td className="border border-slate-400 px-2 py-1 align-top">{row.reviewNote || '—'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
   const parties = target.kind === 'offer' ? [pl.signCandidate, pl.signEmployer] : [pl.signCandidate, pl.signPanova];
   return (
     <section dir={dir} className="candidate-print hidden print:block bg-white text-black p-0 text-sm">
-      <style>{`@media print { @page { size: A4; margin: 0; } .candidate-print { padding: 14mm 16mm; } .candidate-print tr { break-inside: avoid; } } ${LETTERHEAD_CSS}`}</style>
+      <style>{`@media print { ${printPageCss('A4')} .candidate-print tr { break-inside: avoid; } } ${LETTERHEAD_CSS}`}</style>
       <div dangerouslySetInnerHTML={{ __html: head }} />
       <p className="mb-3 text-xs">{labels.candidate}: <strong>{candidateName || '—'}</strong></p>
       {target.kind === 'offer' ? (
@@ -102,26 +125,25 @@ export default function CandidatePrintView({
             </div>
           ) : null}
         </div>
-      ) : (
-        <table className="w-full border-collapse text-xs">
-          <thead>
-            <tr>
-              {[labels.document, labels.status, labels.fileName, labels.reviewNote].map((col) => (
-                <th key={col} className="border border-slate-400 px-2 py-1 text-start bg-slate-100">{col}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {target.rows.map((row, index) => (
-              <tr key={`${row.title}-${index}`}>
-                <td className="border border-slate-400 px-2 py-1 align-top">{row.title}</td>
-                <td className="border border-slate-400 px-2 py-1 align-top">{row.status}</td>
-                <td className="border border-slate-400 px-2 py-1 align-top">{row.fileName || '—'}</td>
-                <td className="border border-slate-400 px-2 py-1 align-top">{row.reviewNote || '—'}</td>
-              </tr>
+      ) : target.kind === 'profile' ? (
+        <div className="space-y-4">
+          <dl className="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-2">
+            {target.fields.map(([label, value]) => (
+              <div key={label} className="contents">
+                <dt className="font-bold">{label}</dt>
+                <dd>{value || '—'}</dd>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </dl>
+          {target.rows.length > 0 ? (
+            <div>
+              <h2 className="font-bold mb-1">{labels.documentsTitle}</h2>
+              {docsTable(target.rows)}
+            </div>
+          ) : null}
+        </div>
+      ) : (
+        docsTable(target.rows)
       )}
       {target.signature ? <div dangerouslySetInnerHTML={{ __html: signatureHtml(lang, parties) }} /> : null}
       <div dangerouslySetInnerHTML={{ __html: printFooterHtml(lang) }} />

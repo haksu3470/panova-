@@ -28,6 +28,9 @@ export const printLabels: Record<Language, {
   askSignature: string;
   confidential: string;
   staffView: string;
+  pdfShare: string;
+  pdfFailed: string;
+  profileTitle: string;
 }> = {
   tr: {
     taxId: 'Vergi No',
@@ -47,6 +50,9 @@ export const printLabels: Record<Language, {
     askSignature: 'Çıktıya imza alanı eklensin mi?\n\nTamam: imza alanıyla · İptal: imza alanı olmadan',
     confidential: 'Bu belge kişisel veri içerir. Yalnızca ilgili işlem için kullanılmalı ve üçüncü kişilerle paylaşılmamalıdır.',
     staffView: 'Panova personeli',
+    pdfShare: 'PDF indir / paylaş',
+    pdfFailed: 'PDF oluşturulamadı. Lütfen tekrar deneyin.',
+    profileTitle: 'Profil özeti',
   },
   en: {
     taxId: 'Tax ID',
@@ -66,6 +72,9 @@ export const printLabels: Record<Language, {
     askSignature: 'Add signature fields to the printout?\n\nOK: with signature fields · Cancel: without',
     confidential: 'This document contains personal data. Use it only for the related process and do not share it with third parties.',
     staffView: 'Panova staff',
+    pdfShare: 'Download / share PDF',
+    pdfFailed: 'The PDF could not be created. Please try again.',
+    profileTitle: 'Profile summary',
   },
   sq: {
     taxId: 'Nr. tatimor',
@@ -85,6 +94,9 @@ export const printLabels: Record<Language, {
     askSignature: 'Të shtohen fushat e nënshkrimit në printim?\n\nOK: me nënshkrim · Anulo: pa nënshkrim',
     confidential: 'Ky dokument përmban të dhëna personale. Përdoreni vetëm për procesin përkatës dhe mos e ndani me palë të treta.',
     staffView: 'Stafi i Panova',
+    pdfShare: 'Shkarko / ndaj PDF',
+    pdfFailed: 'PDF nuk u krijua. Ju lutemi provoni përsëri.',
+    profileTitle: 'Përmbledhja e profilit',
   },
   ar: {
     taxId: 'الرقم الضريبي',
@@ -104,6 +116,9 @@ export const printLabels: Record<Language, {
     askSignature: 'هل تريد إضافة حقول التوقيع إلى المطبوع؟\n\nموافق: مع التوقيع · إلغاء: بدون توقيع',
     confidential: 'يحتوي هذا المستند على بيانات شخصية. استخدمه فقط للإجراء المعني ولا تشاركه مع أطراف ثالثة.',
     staffView: 'موظفو Panova',
+    pdfShare: 'تنزيل / مشاركة PDF',
+    pdfFailed: 'تعذّر إنشاء ملف PDF. حاول مرة أخرى.',
+    profileTitle: 'ملخص الملف الشخصي',
   },
   mk: {
     taxId: 'ЕДБ',
@@ -123,6 +138,9 @@ export const printLabels: Record<Language, {
     askSignature: 'Да се додадат полиња за потпис во печатењето?\n\nОК: со потпис · Откажи: без потпис',
     confidential: 'Овој документ содржи лични податоци. Користете го само за соодветниот процес и не го споделувајте со трети лица.',
     staffView: 'Персонал на Panova',
+    pdfShare: 'Преземи / сподели PDF',
+    pdfFailed: 'PDF не може да се создаде. Обидете се повторно.',
+    profileTitle: 'Резиме на профилот',
   },
 };
 
@@ -196,7 +214,21 @@ export function signatureHtml(lang: Language, parties: readonly string[]): strin
   return `<section class="pl-sign" style="--pl-cols:${Math.max(1, parties.length)}">${boxes}</section>`;
 }
 
+/** Contact line in every footer and on every printed / PDF page: e-mail · phone · site. */
+export const PRINT_CONTACT_LINE = [company.email, company.phones[0]?.display, 'panovagroup.org'].filter(Boolean).join(' · ');
+
+/**
+ * @page rule for every printout: real margins with the contact line and
+ * "page / pages" in the bottom margin boxes on every page. Browsers that
+ * support margin boxes (Chrome/Edge 131+, Firefox) then leave out their own
+ * header and footer (date, page address); older ones still print the sheet.
+ */
+export function printPageCss(size: 'A4' | 'A4 landscape'): string {
+  const box = 'font-family: Arial, sans-serif; font-size: 8pt; color: #475569;';
+  return `@page { size: ${size}; margin: 12mm 12mm 14mm; @bottom-left { content: "${PRINT_CONTACT_LINE}"; ${box} } @bottom-right { content: counter(page) " / " counter(pages); ${box} } }`;
+}
+
 export function printFooterHtml(lang: Language): string {
   const l = printLabels[lang] || printLabels.en;
-  return `<footer class="pl-foot"><span>${escapePrintHtml(l.confidential)}</span><span>${escapePrintHtml(company.brandName)} · panovagroup.org</span></footer>`;
+  return `<footer class="pl-foot"><span>${escapePrintHtml(l.confidential)}</span><span>${escapePrintHtml(company.brandName)} · ${escapePrintHtml(PRINT_CONTACT_LINE)}</span></footer>`;
 }

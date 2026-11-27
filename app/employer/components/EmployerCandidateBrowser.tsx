@@ -1,12 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Check, Search } from 'lucide-react';
 import CandidateYouTube from '@/components/candidate/CandidateYouTube';
 import { candidateProfessionLabel } from '@/lib/candidateLabels';
 import { localizeCatalogTitle } from '@/lib/professions';
 import type { Language } from '@/lib/dictionary';
-import { fill } from '@/lib/portal-ui-copy';
+import { dateLocale, fill } from '@/lib/portal-ui-copy';
+import { nextSort, sortRows, type SortState } from '@/lib/tableSort';
+import SortableTh from '@/components/portal/SortableTh';
 import {
   canDecideOnMatch,
   EMPTY_EMPLOYER_CANDIDATE_FILTERS,
@@ -85,7 +87,11 @@ type Props = {
   onConfirm: (candidate: EmployerCandidate) => void;
   /** Match whose decision is being saved; its buttons are disabled meanwhile. */
   busyMatchId?: string | null;
+  /** Export / PDF bar for the rows on screen (filtered, in the chosen order). */
+  renderExport?: (rows: EmployerCandidate[]) => ReactNode;
 };
+
+type SortKey = 'name' | 'profession' | 'experience' | 'country' | 'language' | 'shift';
 
 function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
   return (
@@ -113,6 +119,7 @@ export default function EmployerCandidateBrowser({
   onReject,
   onConfirm,
   busyMatchId = null,
+  renderExport,
 }: Props) {
   const actions = (candidate: EmployerCandidate) => (
     <CandidateActions
@@ -128,7 +135,7 @@ export default function EmployerCandidateBrowser({
   );
   const [filters, setFilters] = useState<EmployerCandidateFilters>(EMPTY_EMPLOYER_CANDIDATE_FILTERS);
   const active = isEmployerCandidateFilterActive(filters);
-  const filtered = useMemo(() => filterEmployerCandidates(candidates, filters), [candidates, filters]);
+  const [sort, setSort] = useState<SortState<SortKey>>(null);
   const professions = useMemo(
     () => professionFilterOptions(candidates, filters.sector, lang),
     [candidates, filters.sector, lang],
@@ -180,6 +187,19 @@ export default function EmployerCandidateBrowser({
     const country = candidate.nationality || '—';
     return candidate.city ? `${country} · ${candidate.city}` : country;
   };
+
+  const sortValue = (candidate: EmployerCandidate, key: SortKey) => {
+    if (key === 'name') return candidate.full_name;
+    if (key === 'profession') return professionLine(candidate);
+    if (key === 'experience') return candidate.experience_years;
+    if (key === 'country') return countryLine(candidate).replace(/^—$/, '');
+    if (key === 'language') return candidate.language_skills;
+    return candidate.shift_suitable == null ? null : shiftLabel(candidate);
+  };
+  const filtered = sortRows(filterEmployerCandidates(candidates, filters), sort, sortValue, dateLocale[lang]);
+  const sortTh = (key: SortKey, label: string) => (
+    <SortableTh label={label} sortKey={key} sort={sort} onSort={(k) => setSort((current) => nextSort(current, k))} />
+  );
 
   return (
     <div className="space-y-4 bg-white p-4 sm:p-6 rounded-2xl border shadow-sm">
@@ -298,9 +318,12 @@ export default function EmployerCandidateBrowser({
       </div>
 
       {candidates.length > 0 && (
-        <p className="text-xs font-bold text-slate-600" role="status" aria-live="polite">
-          {fill(labels.showing, { shown: filtered.length, total: candidates.length })}
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs font-bold text-slate-600" role="status" aria-live="polite">
+            {fill(labels.showing, { shown: filtered.length, total: candidates.length })}
+          </p>
+          {filtered.length > 0 && renderExport ? renderExport(filtered) : null}
+        </div>
       )}
 
       {filtered.length === 0 ? (
@@ -355,12 +378,12 @@ export default function EmployerCandidateBrowser({
             <table className="w-full text-start text-xs text-slate-700 sm:text-sm">
               <thead className="border-b bg-slate-50 font-bold text-slate-900">
                 <tr>
-                  <th className="p-4 font-bold">{labels.fullName}</th>
-                  <th className="p-4 font-bold">{labels.professionCol}</th>
-                  <th className="p-4 font-bold">{labels.experience}</th>
-                  <th className="p-4 font-bold">{labels.nationality}</th>
-                  <th className="p-4 font-bold">{labels.language}</th>
-                  <th className="p-4 font-bold">{labels.shift}</th>
+                  {sortTh('name', labels.fullName)}
+                  {sortTh('profession', labels.professionCol)}
+                  {sortTh('experience', labels.experience)}
+                  {sortTh('country', labels.nationality)}
+                  {sortTh('language', labels.language)}
+                  {sortTh('shift', labels.shift)}
                   <th className="p-4 font-bold">{labels.videoTitle}</th>
                   <th className="p-4 font-bold">{labels.action}</th>
                 </tr>

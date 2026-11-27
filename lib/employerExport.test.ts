@@ -13,6 +13,7 @@ const {
   employerOfferRows,
   employerRequestRows,
   employerSelectedRows,
+  employerProposedRows,
 } = await import('./employerExport.ts');
 
 const ROOT = join(import.meta.dirname, '..');
@@ -53,6 +54,7 @@ const offer = {
 
 const outputs = {
   requests: employerRequestRows([request], 'tr', copy),
+  proposed: employerProposedRows([selected], 'tr', { sector: (s: string) => `S:${s}`, decision: () => 'Seçildi' }),
   selected: employerSelectedRows([selected], 'tr'),
   employees: employerEmployeeRows([employee], 'tr', copy),
   offers: employerOfferRows([offer], 'tr', copy),

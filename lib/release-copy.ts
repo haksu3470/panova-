@@ -63,6 +63,8 @@ export type ReleaseCopy = {
   mustPresent: string;
   offerCandidate: string;
   passwordMin: string;
+  employerEmailTaken: string;
+  employerCompanyTaken: string;
 };
 
 const tr: ReleaseCopy = {
@@ -127,6 +129,8 @@ const tr: ReleaseCopy = {
   mustPresent: 'Görüşme veya teklif için aday önce sunulmalıdır.',
   offerCandidate: 'Aday',
   passwordMin: 'Şifre en az 8 karakter olmalıdır.',
+  employerEmailTaken: 'Bu e-posta ile kayıtlı bir işveren hesabı zaten var. Giriş yapın veya şifrenizi sıfırlayın.',
+  employerCompanyTaken: 'Bu firma adıyla kayıtlı bir işveren zaten var. Firmanızın hesabına erişmek için bizimle iletişime geçin.',
 };
 
 const en: ReleaseCopy = {
@@ -191,6 +195,8 @@ const en: ReleaseCopy = {
   mustPresent: 'Present the candidate before an interview or an offer.',
   offerCandidate: 'Candidate',
   passwordMin: 'Password must be at least 8 characters.',
+  employerEmailTaken: 'An employer account with this email already exists. Sign in or reset your password.',
+  employerCompanyTaken: 'An employer with this company name is already registered. Contact us to get access to your company account.',
 };
 
 const mk: ReleaseCopy = {
@@ -255,6 +261,8 @@ const mk: ReleaseCopy = {
   mustPresent: 'Кандидатот прво мора да биде претставен.',
   offerCandidate: 'Кандидат',
   passwordMin: 'Лозинката мора да има најмалку 8 знаци.',
+  employerEmailTaken: 'Веќе постои профил на работодавач со оваа е-пошта. Најавете се или ресетирајте ја лозинката.',
+  employerCompanyTaken: 'Веќе е регистриран работодавач со ова име на фирма. Контактирајте нè за пристап до профилот на вашата фирма.',
 };
 
 const sq: ReleaseCopy = {
@@ -319,6 +327,8 @@ const sq: ReleaseCopy = {
   mustPresent: 'Kandidati duhet të prezantohet para intervistës ose ofertës.',
   offerCandidate: 'Kandidati',
   passwordMin: 'Fjalëkalimi duhet të ketë të paktën 8 karaktere.',
+  employerEmailTaken: 'Ekziston tashmë një llogari punëdhënësi me këtë email. Hyni ose rivendosni fjalëkalimin.',
+  employerCompanyTaken: 'Një punëdhënës me këtë emër kompanie është regjistruar tashmë. Na kontaktoni për të marrë qasje në llogarinë e kompanisë suaj.',
 };
 
 const ar: ReleaseCopy = {
@@ -383,6 +393,8 @@ const ar: ReleaseCopy = {
   mustPresent: 'يجب عرض المرشح قبل المقابلة أو العرض.',
   offerCandidate: 'المرشح',
   passwordMin: 'يجب أن تكون كلمة المرور 8 أحرف على الأقل.',
+  employerEmailTaken: 'يوجد بالفعل حساب صاحب عمل بهذا البريد الإلكتروني. سجّل الدخول أو أعد تعيين كلمة المرور.',
+  employerCompanyTaken: 'توجد بالفعل شركة مسجلة بهذا الاسم. تواصل معنا للوصول إلى حساب شركتك.',
 };
 
 export const releaseCopy: Record<Language, ReleaseCopy> = { tr, en, sq, ar, mk };

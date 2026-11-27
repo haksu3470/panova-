@@ -6,6 +6,8 @@ import type { Language } from '@/lib/dictionary';
 import { EXPORT_COLUMN_LABELS, isVisibleExportColumn } from '@/lib/exportColumns';
 import { printHtmlInNewWindow } from '@/lib/printWindow';
 import { dateLocale } from '@/lib/portal-ui-copy';
+import { printLabels } from '@/lib/printLetterhead';
+import { htmlToPdf, usePdfShareMode } from '@/lib/pdfExport';
 
 /** Saves a text file with a UTF-8 BOM (Excel reads ç, ş, Cyrillic and Arabic from it). */
 export function downloadTextFile(filename: string, body: string, mime: string) {
@@ -47,6 +49,7 @@ export default function ListExportBar({
   /** Employer pages: the company the list was printed for (shown under the Panova letterhead). */
   preparedFor?: string;
 }) {
+  const pdfMode = usePdfShareMode();
   const options = { labels: EXPORT_COLUMN_LABELS[lang] as Record<string, string> };
   const dated = () => `${title} · ${new Date().toLocaleDateString(dateLocale[lang])}`;
   const empty = () => window.alert(labels.empty);
@@ -71,6 +74,13 @@ export default function ListExportBar({
   const print = () => {
     if (!rows.length) return empty();
     const letterhead = { lang, origin: window.location.origin, printedAt: new Date().toLocaleDateString(dateLocale[lang]), preparedFor };
+    if (pdfMode) {
+      // Phones: a real PDF file to save or share instead of the print dialog.
+      htmlToPdf(toPrintHtml(dated(), rows, dir, options, letterhead), filename, dated())
+        .then(() => record('pdf'))
+        .catch((error) => { console.error('[pdf-export]', error); window.alert(printLabels[lang].pdfFailed); });
+      return;
+    }
     if (!printHtmlInNewWindow(toPrintHtml(dated(), rows, dir, options, letterhead))) {
       if (labels.popupBlocked) window.alert(labels.popupBlocked);
       return;
@@ -82,7 +92,7 @@ export default function ListExportBar({
     <div className="flex flex-wrap gap-2">
       <button type="button" onClick={csv} className={button}>{labels.csv}</button>
       <button type="button" onClick={excel} className={button}>{labels.excel}</button>
-      <button type="button" onClick={print} className={button}>{labels.print}</button>
+      <button type="button" onClick={print} className={button}>{pdfMode ? printLabels[lang].pdfShare : labels.print}</button>
     </div>
   );
 }

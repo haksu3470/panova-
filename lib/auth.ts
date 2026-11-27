@@ -13,8 +13,9 @@ export async function getSessionUser() {
   return data.session?.user ?? null;
 }
 
+/** Personel kimliği (MFA'dan bağımsız): MFA ekranına ulaşmak için. Veri erişimi DB'de is_staff() ile MFA'ya bağlı. */
 export async function isStaff(): Promise<boolean> {
-  const { data, error } = await supabase.rpc('is_staff');
+  const { data, error } = await supabase.rpc('is_staff_member');
   if (error) return false;
   return data === true;
 }
