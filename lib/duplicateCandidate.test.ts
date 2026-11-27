@@ -111,6 +111,10 @@ test('candidate registration uses Auth for email clashes and does not probe the 
   assert.match(sendMail, /is_staff/);
   assert.match(sendMail, /Authorization/);
   assert.match(sendMail, /status: 401/);
+  // Recipient is resolved under RLS from candidateId, not taken from the request body.
+  assert.match(sendMail, /from\('job_candidates'\)/);
+  assert.equal(sendMail.includes('body.email'), false);
+  assert.match(sendMail, /status: 429/);
 
   const supabaseClient = readFileSync(new URL('../lib/supabase.ts', import.meta.url), 'utf8');
   assert.equal(supabaseClient.includes('eyJ'), false);
