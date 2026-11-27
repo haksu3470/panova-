@@ -52,7 +52,8 @@ test('print never adds a quote; landscape, repeated headings, wrapped cells', ()
   assert.ok(html.includes('<td>+90 545 364 49 30</td>'));
   assert.ok(html.includes('<td>=1+1</td>'), 'print is not a spreadsheet: values as written');
   assert.equal(html.includes("'+90"), false);
-  assert.match(html, /@page \{ size: A4 landscape; margin: 0; \}/);
+  assert.match(html, /@page \{ size: A4 landscape; margin: 12mm 12mm 14mm;/);
+  assert.match(html, /counter\(page\) " \/ " counter\(pages\)/, 'page numbers on every page');
   assert.match(html, /thead \{ display: table-header-group; \}/);
   // long cells wrap between words; a word longer than its column still breaks
   assert.match(html, /overflow-wrap: break-word; word-break: normal;/);
