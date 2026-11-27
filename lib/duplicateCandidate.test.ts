@@ -122,6 +122,9 @@ test('candidate registration uses Auth for email clashes and does not probe the 
 
   const login = readFileSync(new URL('../app/api/auth/candidate-login/route.ts', import.meta.url), 'utf8');
   assert.match(login, /resolve_candidate_login_email/);
+  // Attempts are counted in the DB (shared across instances) with a hashed key.
+  assert.match(login, /login_attempt_allowed/);
+  assert.match(login, /createHash\('sha256'\)/);
   assert.match(login, /candidate login lookup failed/);
   assert.match(login, /status: 503/);
 
